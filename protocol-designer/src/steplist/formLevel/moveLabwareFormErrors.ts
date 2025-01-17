@@ -22,6 +22,7 @@ const getMoveLabwareError = (
     labware == null ||
     newLocation == null ||
     newLocation === 'offDeck' ||
+    newLocation === 'systemLocation' ||
     !getLabwareDefIsStandard(labware?.def)
   )
     return null

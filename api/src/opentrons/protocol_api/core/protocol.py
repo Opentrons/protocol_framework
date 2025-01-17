@@ -132,6 +132,25 @@ class AbstractProtocol(
         ...
 
     @abstractmethod
+    def move_lid(
+        self,
+        source_location: Union[DeckSlotName, StagingSlotName, LabwareCoreType],
+        new_location: Union[
+            DeckSlotName,
+            StagingSlotName,
+            LabwareCoreType,
+            OffDeckType,
+            WasteChute,
+            TrashBin,
+        ],
+        use_gripper: bool,
+        pause_for_manual_move: bool,
+        pick_up_offset: Optional[Tuple[float, float, float]],
+        drop_offset: Optional[Tuple[float, float, float]],
+    ) -> LabwareCoreType | None:
+        ...
+
+    @abstractmethod
     def load_module(
         self,
         model: ModuleModel,

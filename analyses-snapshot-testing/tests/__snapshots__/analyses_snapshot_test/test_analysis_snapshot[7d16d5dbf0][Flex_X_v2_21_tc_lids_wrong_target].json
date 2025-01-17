@@ -1906,22 +1906,809 @@
       "commandType": "loadLabware",
       "completedAt": "TIMESTAMP",
       "createdAt": "TIMESTAMP",
+      "id": "UUID",
+      "key": "48dfe520259476c2688c469837455156",
+      "notes": [],
+      "params": {
+        "displayName": "D2",
+        "loadName": "opentrons_tough_pcr_auto_sealing_lid",
+        "location": {
+          "labwareId": "UUID"
+        },
+        "namespace": "opentrons",
+        "version": 1
+      },
+      "result": {
+        "definition": {
+          "allowedRoles": [
+            "labware",
+            "lid"
+          ],
+          "brand": {
+            "brand": "Opentrons",
+            "brandId": []
+          },
+          "compatibleParentLabware": [
+            "armadillo_96_wellplate_200ul_pcr_full_skirt",
+            "biorad_96_wellplate_200ul_pcr",
+            "opentrons_96_wellplate_200ul_pcr_full_skirt",
+            "opentrons_flex_deck_riser",
+            "opentrons_tough_pcr_auto_sealing_lid",
+            "protocol_engine_lid_stack_object"
+          ],
+          "cornerOffsetFromSlot": {
+            "x": 0,
+            "y": 0,
+            "z": -0.71
+          },
+          "dimensions": {
+            "xDimension": 127.7,
+            "yDimension": 85.48,
+            "zDimension": 12.8
+          },
+          "gripForce": 15.0,
+          "gripHeightFromLabwareBottom": 7.91,
+          "gripperOffsets": {
+            "default": {
+              "dropOffset": {
+                "x": 0,
+                "y": 0.52,
+                "z": -6
+              },
+              "pickUpOffset": {
+                "x": 0,
+                "y": 0,
+                "z": 1.5
+              }
+            },
+            "lidDisposalOffsets": {
+              "dropOffset": {
+                "x": 0,
+                "y": 5.0,
+                "z": 50.0
+              },
+              "pickUpOffset": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              }
+            },
+            "lidOffsets": {
+              "dropOffset": {
+                "x": 0.5,
+                "y": 0,
+                "z": -1
+              },
+              "pickUpOffset": {
+                "x": 0.5,
+                "y": 0,
+                "z": -5
+              }
+            }
+          },
+          "groups": [
+            {
+              "metadata": {},
+              "wells": []
+            }
+          ],
+          "metadata": {
+            "displayCategory": "lid",
+            "displayName": "Opentrons Tough PCR Auto-Sealing Lid",
+            "displayVolumeUnits": "µL",
+            "tags": []
+          },
+          "namespace": "opentrons",
+          "ordering": [],
+          "parameters": {
+            "format": "irregular",
+            "isMagneticModuleCompatible": false,
+            "isTiprack": false,
+            "loadName": "opentrons_tough_pcr_auto_sealing_lid",
+            "quirks": []
+          },
+          "schemaVersion": 3,
+          "stackLimit": 5,
+          "stackingOffsetWithLabware": {
+            "armadillo_96_wellplate_200ul_pcr_full_skirt": {
+              "x": 0,
+              "y": 0,
+              "z": 8.193
+            },
+            "biorad_96_wellplate_200ul_pcr": {
+              "x": 0,
+              "y": 0,
+              "z": 8.08
+            },
+            "default": {
+              "x": 0,
+              "y": 0,
+              "z": 8.193
+            },
+            "opentrons_96_wellplate_200ul_pcr_full_skirt": {
+              "x": 0,
+              "y": 0,
+              "z": 8.193
+            },
+            "opentrons_flex_deck_riser": {
+              "x": 0,
+              "y": 0,
+              "z": 34
+            },
+            "opentrons_tough_pcr_auto_sealing_lid": {
+              "x": 0,
+              "y": 0,
+              "z": 6.492
+            },
+            "protocol_engine_lid_stack_object": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            }
+          },
+          "stackingOffsetWithModule": {
+            "thermocyclerModuleV2": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            }
+          },
+          "version": 1,
+          "wells": {}
+        },
+        "labwareId": "UUID"
+      },
+      "startedAt": "TIMESTAMP",
+      "status": "succeeded"
+    },
+    {
+      "commandType": "loadLabware",
+      "completedAt": "TIMESTAMP",
+      "createdAt": "TIMESTAMP",
+      "id": "UUID",
+      "key": "dbb90de7194277dcb8565653c9e086cf",
+      "notes": [],
+      "params": {
+        "loadName": "opentrons_tough_pcr_auto_sealing_lid",
+        "location": {
+          "labwareId": "UUID"
+        },
+        "namespace": "opentrons",
+        "version": 1
+      },
+      "result": {
+        "definition": {
+          "allowedRoles": [
+            "labware",
+            "lid"
+          ],
+          "brand": {
+            "brand": "Opentrons",
+            "brandId": []
+          },
+          "compatibleParentLabware": [
+            "armadillo_96_wellplate_200ul_pcr_full_skirt",
+            "biorad_96_wellplate_200ul_pcr",
+            "opentrons_96_wellplate_200ul_pcr_full_skirt",
+            "opentrons_flex_deck_riser",
+            "opentrons_tough_pcr_auto_sealing_lid",
+            "protocol_engine_lid_stack_object"
+          ],
+          "cornerOffsetFromSlot": {
+            "x": 0,
+            "y": 0,
+            "z": -0.71
+          },
+          "dimensions": {
+            "xDimension": 127.7,
+            "yDimension": 85.48,
+            "zDimension": 12.8
+          },
+          "gripForce": 15.0,
+          "gripHeightFromLabwareBottom": 7.91,
+          "gripperOffsets": {
+            "default": {
+              "dropOffset": {
+                "x": 0,
+                "y": 0.52,
+                "z": -6
+              },
+              "pickUpOffset": {
+                "x": 0,
+                "y": 0,
+                "z": 1.5
+              }
+            },
+            "lidDisposalOffsets": {
+              "dropOffset": {
+                "x": 0,
+                "y": 5.0,
+                "z": 50.0
+              },
+              "pickUpOffset": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              }
+            },
+            "lidOffsets": {
+              "dropOffset": {
+                "x": 0.5,
+                "y": 0,
+                "z": -1
+              },
+              "pickUpOffset": {
+                "x": 0.5,
+                "y": 0,
+                "z": -5
+              }
+            }
+          },
+          "groups": [
+            {
+              "metadata": {},
+              "wells": []
+            }
+          ],
+          "metadata": {
+            "displayCategory": "lid",
+            "displayName": "Opentrons Tough PCR Auto-Sealing Lid",
+            "displayVolumeUnits": "µL",
+            "tags": []
+          },
+          "namespace": "opentrons",
+          "ordering": [],
+          "parameters": {
+            "format": "irregular",
+            "isMagneticModuleCompatible": false,
+            "isTiprack": false,
+            "loadName": "opentrons_tough_pcr_auto_sealing_lid",
+            "quirks": []
+          },
+          "schemaVersion": 3,
+          "stackLimit": 5,
+          "stackingOffsetWithLabware": {
+            "armadillo_96_wellplate_200ul_pcr_full_skirt": {
+              "x": 0,
+              "y": 0,
+              "z": 8.193
+            },
+            "biorad_96_wellplate_200ul_pcr": {
+              "x": 0,
+              "y": 0,
+              "z": 8.08
+            },
+            "default": {
+              "x": 0,
+              "y": 0,
+              "z": 8.193
+            },
+            "opentrons_96_wellplate_200ul_pcr_full_skirt": {
+              "x": 0,
+              "y": 0,
+              "z": 8.193
+            },
+            "opentrons_flex_deck_riser": {
+              "x": 0,
+              "y": 0,
+              "z": 34
+            },
+            "opentrons_tough_pcr_auto_sealing_lid": {
+              "x": 0,
+              "y": 0,
+              "z": 6.492
+            },
+            "protocol_engine_lid_stack_object": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            }
+          },
+          "stackingOffsetWithModule": {
+            "thermocyclerModuleV2": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            }
+          },
+          "version": 1,
+          "wells": {}
+        },
+        "labwareId": "UUID"
+      },
+      "startedAt": "TIMESTAMP",
+      "status": "succeeded"
+    },
+    {
+      "commandType": "loadLabware",
+      "completedAt": "TIMESTAMP",
+      "createdAt": "TIMESTAMP",
+      "id": "UUID",
+      "key": "a02dfd0c2994ad8f36030bc7d6a9d9b4",
+      "notes": [],
+      "params": {
+        "loadName": "opentrons_tough_pcr_auto_sealing_lid",
+        "location": {
+          "labwareId": "UUID"
+        },
+        "namespace": "opentrons",
+        "version": 1
+      },
+      "result": {
+        "definition": {
+          "allowedRoles": [
+            "labware",
+            "lid"
+          ],
+          "brand": {
+            "brand": "Opentrons",
+            "brandId": []
+          },
+          "compatibleParentLabware": [
+            "armadillo_96_wellplate_200ul_pcr_full_skirt",
+            "biorad_96_wellplate_200ul_pcr",
+            "opentrons_96_wellplate_200ul_pcr_full_skirt",
+            "opentrons_flex_deck_riser",
+            "opentrons_tough_pcr_auto_sealing_lid",
+            "protocol_engine_lid_stack_object"
+          ],
+          "cornerOffsetFromSlot": {
+            "x": 0,
+            "y": 0,
+            "z": -0.71
+          },
+          "dimensions": {
+            "xDimension": 127.7,
+            "yDimension": 85.48,
+            "zDimension": 12.8
+          },
+          "gripForce": 15.0,
+          "gripHeightFromLabwareBottom": 7.91,
+          "gripperOffsets": {
+            "default": {
+              "dropOffset": {
+                "x": 0,
+                "y": 0.52,
+                "z": -6
+              },
+              "pickUpOffset": {
+                "x": 0,
+                "y": 0,
+                "z": 1.5
+              }
+            },
+            "lidDisposalOffsets": {
+              "dropOffset": {
+                "x": 0,
+                "y": 5.0,
+                "z": 50.0
+              },
+              "pickUpOffset": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              }
+            },
+            "lidOffsets": {
+              "dropOffset": {
+                "x": 0.5,
+                "y": 0,
+                "z": -1
+              },
+              "pickUpOffset": {
+                "x": 0.5,
+                "y": 0,
+                "z": -5
+              }
+            }
+          },
+          "groups": [
+            {
+              "metadata": {},
+              "wells": []
+            }
+          ],
+          "metadata": {
+            "displayCategory": "lid",
+            "displayName": "Opentrons Tough PCR Auto-Sealing Lid",
+            "displayVolumeUnits": "µL",
+            "tags": []
+          },
+          "namespace": "opentrons",
+          "ordering": [],
+          "parameters": {
+            "format": "irregular",
+            "isMagneticModuleCompatible": false,
+            "isTiprack": false,
+            "loadName": "opentrons_tough_pcr_auto_sealing_lid",
+            "quirks": []
+          },
+          "schemaVersion": 3,
+          "stackLimit": 5,
+          "stackingOffsetWithLabware": {
+            "armadillo_96_wellplate_200ul_pcr_full_skirt": {
+              "x": 0,
+              "y": 0,
+              "z": 8.193
+            },
+            "biorad_96_wellplate_200ul_pcr": {
+              "x": 0,
+              "y": 0,
+              "z": 8.08
+            },
+            "default": {
+              "x": 0,
+              "y": 0,
+              "z": 8.193
+            },
+            "opentrons_96_wellplate_200ul_pcr_full_skirt": {
+              "x": 0,
+              "y": 0,
+              "z": 8.193
+            },
+            "opentrons_flex_deck_riser": {
+              "x": 0,
+              "y": 0,
+              "z": 34
+            },
+            "opentrons_tough_pcr_auto_sealing_lid": {
+              "x": 0,
+              "y": 0,
+              "z": 6.492
+            },
+            "protocol_engine_lid_stack_object": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            }
+          },
+          "stackingOffsetWithModule": {
+            "thermocyclerModuleV2": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            }
+          },
+          "version": 1,
+          "wells": {}
+        },
+        "labwareId": "UUID"
+      },
+      "startedAt": "TIMESTAMP",
+      "status": "succeeded"
+    },
+    {
+      "commandType": "loadLabware",
+      "completedAt": "TIMESTAMP",
+      "createdAt": "TIMESTAMP",
+      "id": "UUID",
+      "key": "78e449de1478e61a7fcd82e5ceb3d0da",
+      "notes": [],
+      "params": {
+        "loadName": "opentrons_tough_pcr_auto_sealing_lid",
+        "location": {
+          "labwareId": "UUID"
+        },
+        "namespace": "opentrons",
+        "version": 1
+      },
+      "result": {
+        "definition": {
+          "allowedRoles": [
+            "labware",
+            "lid"
+          ],
+          "brand": {
+            "brand": "Opentrons",
+            "brandId": []
+          },
+          "compatibleParentLabware": [
+            "armadillo_96_wellplate_200ul_pcr_full_skirt",
+            "biorad_96_wellplate_200ul_pcr",
+            "opentrons_96_wellplate_200ul_pcr_full_skirt",
+            "opentrons_flex_deck_riser",
+            "opentrons_tough_pcr_auto_sealing_lid",
+            "protocol_engine_lid_stack_object"
+          ],
+          "cornerOffsetFromSlot": {
+            "x": 0,
+            "y": 0,
+            "z": -0.71
+          },
+          "dimensions": {
+            "xDimension": 127.7,
+            "yDimension": 85.48,
+            "zDimension": 12.8
+          },
+          "gripForce": 15.0,
+          "gripHeightFromLabwareBottom": 7.91,
+          "gripperOffsets": {
+            "default": {
+              "dropOffset": {
+                "x": 0,
+                "y": 0.52,
+                "z": -6
+              },
+              "pickUpOffset": {
+                "x": 0,
+                "y": 0,
+                "z": 1.5
+              }
+            },
+            "lidDisposalOffsets": {
+              "dropOffset": {
+                "x": 0,
+                "y": 5.0,
+                "z": 50.0
+              },
+              "pickUpOffset": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              }
+            },
+            "lidOffsets": {
+              "dropOffset": {
+                "x": 0.5,
+                "y": 0,
+                "z": -1
+              },
+              "pickUpOffset": {
+                "x": 0.5,
+                "y": 0,
+                "z": -5
+              }
+            }
+          },
+          "groups": [
+            {
+              "metadata": {},
+              "wells": []
+            }
+          ],
+          "metadata": {
+            "displayCategory": "lid",
+            "displayName": "Opentrons Tough PCR Auto-Sealing Lid",
+            "displayVolumeUnits": "µL",
+            "tags": []
+          },
+          "namespace": "opentrons",
+          "ordering": [],
+          "parameters": {
+            "format": "irregular",
+            "isMagneticModuleCompatible": false,
+            "isTiprack": false,
+            "loadName": "opentrons_tough_pcr_auto_sealing_lid",
+            "quirks": []
+          },
+          "schemaVersion": 3,
+          "stackLimit": 5,
+          "stackingOffsetWithLabware": {
+            "armadillo_96_wellplate_200ul_pcr_full_skirt": {
+              "x": 0,
+              "y": 0,
+              "z": 8.193
+            },
+            "biorad_96_wellplate_200ul_pcr": {
+              "x": 0,
+              "y": 0,
+              "z": 8.08
+            },
+            "default": {
+              "x": 0,
+              "y": 0,
+              "z": 8.193
+            },
+            "opentrons_96_wellplate_200ul_pcr_full_skirt": {
+              "x": 0,
+              "y": 0,
+              "z": 8.193
+            },
+            "opentrons_flex_deck_riser": {
+              "x": 0,
+              "y": 0,
+              "z": 34
+            },
+            "opentrons_tough_pcr_auto_sealing_lid": {
+              "x": 0,
+              "y": 0,
+              "z": 6.492
+            },
+            "protocol_engine_lid_stack_object": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            }
+          },
+          "stackingOffsetWithModule": {
+            "thermocyclerModuleV2": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            }
+          },
+          "version": 1,
+          "wells": {}
+        },
+        "labwareId": "UUID"
+      },
+      "startedAt": "TIMESTAMP",
+      "status": "succeeded"
+    },
+    {
+      "commandType": "loadLabware",
+      "completedAt": "TIMESTAMP",
+      "createdAt": "TIMESTAMP",
+      "id": "UUID",
+      "key": "8b34edfc427771290ae5069fb3e17178",
+      "notes": [],
+      "params": {
+        "loadName": "opentrons_tough_pcr_auto_sealing_lid",
+        "location": {
+          "labwareId": "UUID"
+        },
+        "namespace": "opentrons",
+        "version": 1
+      },
+      "result": {
+        "definition": {
+          "allowedRoles": [
+            "labware",
+            "lid"
+          ],
+          "brand": {
+            "brand": "Opentrons",
+            "brandId": []
+          },
+          "compatibleParentLabware": [
+            "armadillo_96_wellplate_200ul_pcr_full_skirt",
+            "biorad_96_wellplate_200ul_pcr",
+            "opentrons_96_wellplate_200ul_pcr_full_skirt",
+            "opentrons_flex_deck_riser",
+            "opentrons_tough_pcr_auto_sealing_lid",
+            "protocol_engine_lid_stack_object"
+          ],
+          "cornerOffsetFromSlot": {
+            "x": 0,
+            "y": 0,
+            "z": -0.71
+          },
+          "dimensions": {
+            "xDimension": 127.7,
+            "yDimension": 85.48,
+            "zDimension": 12.8
+          },
+          "gripForce": 15.0,
+          "gripHeightFromLabwareBottom": 7.91,
+          "gripperOffsets": {
+            "default": {
+              "dropOffset": {
+                "x": 0,
+                "y": 0.52,
+                "z": -6
+              },
+              "pickUpOffset": {
+                "x": 0,
+                "y": 0,
+                "z": 1.5
+              }
+            },
+            "lidDisposalOffsets": {
+              "dropOffset": {
+                "x": 0,
+                "y": 5.0,
+                "z": 50.0
+              },
+              "pickUpOffset": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              }
+            },
+            "lidOffsets": {
+              "dropOffset": {
+                "x": 0.5,
+                "y": 0,
+                "z": -1
+              },
+              "pickUpOffset": {
+                "x": 0.5,
+                "y": 0,
+                "z": -5
+              }
+            }
+          },
+          "groups": [
+            {
+              "metadata": {},
+              "wells": []
+            }
+          ],
+          "metadata": {
+            "displayCategory": "lid",
+            "displayName": "Opentrons Tough PCR Auto-Sealing Lid",
+            "displayVolumeUnits": "µL",
+            "tags": []
+          },
+          "namespace": "opentrons",
+          "ordering": [],
+          "parameters": {
+            "format": "irregular",
+            "isMagneticModuleCompatible": false,
+            "isTiprack": false,
+            "loadName": "opentrons_tough_pcr_auto_sealing_lid",
+            "quirks": []
+          },
+          "schemaVersion": 3,
+          "stackLimit": 5,
+          "stackingOffsetWithLabware": {
+            "armadillo_96_wellplate_200ul_pcr_full_skirt": {
+              "x": 0,
+              "y": 0,
+              "z": 8.193
+            },
+            "biorad_96_wellplate_200ul_pcr": {
+              "x": 0,
+              "y": 0,
+              "z": 8.08
+            },
+            "default": {
+              "x": 0,
+              "y": 0,
+              "z": 8.193
+            },
+            "opentrons_96_wellplate_200ul_pcr_full_skirt": {
+              "x": 0,
+              "y": 0,
+              "z": 8.193
+            },
+            "opentrons_flex_deck_riser": {
+              "x": 0,
+              "y": 0,
+              "z": 34
+            },
+            "opentrons_tough_pcr_auto_sealing_lid": {
+              "x": 0,
+              "y": 0,
+              "z": 6.492
+            },
+            "protocol_engine_lid_stack_object": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            }
+          },
+          "stackingOffsetWithModule": {
+            "thermocyclerModuleV2": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            }
+          },
+          "version": 1,
+          "wells": {}
+        },
+        "labwareId": "UUID"
+      },
+      "startedAt": "TIMESTAMP",
+      "status": "succeeded"
+    },
+    {
+      "commandType": "moveLabware",
+      "completedAt": "TIMESTAMP",
+      "createdAt": "TIMESTAMP",
       "error": {
         "createdAt": "TIMESTAMP",
-        "detail": "ValueError: Labware Lid opentrons_tough_pcr_auto_sealing_lid may not be loaded on parent labware Opentrons Flex Deck Riser.",
+        "detail": "Labware opentrons_tough_pcr_auto_sealing_lid cannot be loaded onto labware nest_96_wellplate_2ml_deep",
         "errorCode": "4000",
-        "errorInfo": {
-          "args": "('Labware Lid opentrons_tough_pcr_auto_sealing_lid may not be loaded on parent labware Opentrons Flex Deck Riser.',)",
-          "class": "ValueError",
-          "traceback": "  File \"/usr/local/lib/python3.10/site-packages/opentrons/protocol_engine/execution/command_executor.py\", line N, in execute\n    result = await command_impl.execute(\n\n  File \"/usr/local/lib/python3.10/site-packages/opentrons/protocol_engine/commands/load_labware.py\", line N, in execute\n    raise ValueError(\n"
-        },
-        "errorType": "PythonException",
+        "errorInfo": {},
+        "errorType": "LabwareCannotBeStackedError",
         "id": "UUID",
         "isDefined": false,
         "wrappedErrors": []
       },
       "id": "UUID",
-      "key": "48dfe520259476c2688c469837455156",
+      "key": "5b419658c58e3cd2794830de913fb88c",
       "notes": [
         {
           "longMessage": "Handling this command failure with FAIL_RUN.",
@@ -1931,13 +2718,11 @@
         }
       ],
       "params": {
-        "displayName": "D2",
-        "loadName": "opentrons_tough_pcr_auto_sealing_lid",
-        "location": {
+        "labwareId": "UUID",
+        "newLocation": {
           "labwareId": "UUID"
         },
-        "namespace": "opentrons",
-        "version": 1
+        "strategy": "usingGripper"
       },
       "startedAt": "TIMESTAMP",
       "status": "failed"
@@ -1954,7 +2739,7 @@
   "errors": [
     {
       "createdAt": "TIMESTAMP",
-      "detail": "ProtocolCommandFailedError [line 17]: Error 4000 GENERAL_ERROR (ProtocolCommandFailedError): PythonException: ValueError: Labware Lid opentrons_tough_pcr_auto_sealing_lid may not be loaded on parent labware Opentrons Flex Deck Riser.",
+      "detail": "ProtocolCommandFailedError [line 22]: Error 4000 GENERAL_ERROR (ProtocolCommandFailedError): LabwareCannotBeStackedError: Labware opentrons_tough_pcr_auto_sealing_lid cannot be loaded onto labware nest_96_wellplate_2ml_deep",
       "errorCode": "4000",
       "errorInfo": {},
       "errorType": "ExceptionInProtocolError",
@@ -1963,7 +2748,7 @@
       "wrappedErrors": [
         {
           "createdAt": "TIMESTAMP",
-          "detail": "PythonException: ValueError: Labware Lid opentrons_tough_pcr_auto_sealing_lid may not be loaded on parent labware Opentrons Flex Deck Riser.",
+          "detail": "LabwareCannotBeStackedError: Labware opentrons_tough_pcr_auto_sealing_lid cannot be loaded onto labware nest_96_wellplate_2ml_deep",
           "errorCode": "4000",
           "errorInfo": {},
           "errorType": "ProtocolCommandFailedError",
@@ -1972,14 +2757,10 @@
           "wrappedErrors": [
             {
               "createdAt": "TIMESTAMP",
-              "detail": "ValueError: Labware Lid opentrons_tough_pcr_auto_sealing_lid may not be loaded on parent labware Opentrons Flex Deck Riser.",
+              "detail": "Labware opentrons_tough_pcr_auto_sealing_lid cannot be loaded onto labware nest_96_wellplate_2ml_deep",
               "errorCode": "4000",
-              "errorInfo": {
-                "args": "('Labware Lid opentrons_tough_pcr_auto_sealing_lid may not be loaded on parent labware Opentrons Flex Deck Riser.',)",
-                "class": "ValueError",
-                "traceback": "  File \"/usr/local/lib/python3.10/site-packages/opentrons/protocol_engine/execution/command_executor.py\", line N, in execute\n    result = await command_impl.execute(\n\n  File \"/usr/local/lib/python3.10/site-packages/opentrons/protocol_engine/commands/load_labware.py\", line N, in execute\n    raise ValueError(\n"
-              },
-              "errorType": "PythonException",
+              "errorInfo": {},
+              "errorType": "LabwareCannotBeStackedError",
               "id": "UUID",
               "isDefined": false,
               "wrappedErrors": []
@@ -2018,6 +2799,47 @@
       "loadName": "opentrons_flex_deck_riser",
       "location": {
         "slotName": "B2"
+      }
+    },
+    {
+      "definitionUri": "opentrons/opentrons_tough_pcr_auto_sealing_lid/1",
+      "displayName": "D2",
+      "id": "UUID",
+      "loadName": "opentrons_tough_pcr_auto_sealing_lid",
+      "location": {
+        "labwareId": "UUID"
+      }
+    },
+    {
+      "definitionUri": "opentrons/opentrons_tough_pcr_auto_sealing_lid/1",
+      "id": "UUID",
+      "loadName": "opentrons_tough_pcr_auto_sealing_lid",
+      "location": {
+        "labwareId": "UUID"
+      }
+    },
+    {
+      "definitionUri": "opentrons/opentrons_tough_pcr_auto_sealing_lid/1",
+      "id": "UUID",
+      "loadName": "opentrons_tough_pcr_auto_sealing_lid",
+      "location": {
+        "labwareId": "UUID"
+      }
+    },
+    {
+      "definitionUri": "opentrons/opentrons_tough_pcr_auto_sealing_lid/1",
+      "id": "UUID",
+      "loadName": "opentrons_tough_pcr_auto_sealing_lid",
+      "location": {
+        "labwareId": "UUID"
+      }
+    },
+    {
+      "definitionUri": "opentrons/opentrons_tough_pcr_auto_sealing_lid/1",
+      "id": "UUID",
+      "loadName": "opentrons_tough_pcr_auto_sealing_lid",
+      "location": {
+        "labwareId": "UUID"
       }
     }
   ],
