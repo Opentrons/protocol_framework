@@ -59,6 +59,7 @@ import { TemperatureModuleSlideout } from './TemperatureModuleSlideout'
 import { AboutModuleSlideout } from './AboutModuleSlideout'
 import { HeaterShakerModuleData } from './HeaterShakerModuleData'
 import { HeaterShakerSlideout } from './HeaterShakerSlideout'
+import { FlexStackerModuleSlideout } from './FlexStackerModuleSlideout'
 import { TestShakeSlideout } from './TestShakeSlideout'
 import { ModuleWizardFlows } from '/app/organisms/ModuleWizardFlows'
 import { getModulePrepCommands } from '/app/local-resources/modules'
@@ -557,7 +558,12 @@ const ModuleSlideout = (props: ModuleSlideoutProps): JSX.Element => {
       />
     )
   } else {
-    // TODO add flex stacker slideout once it exists
-    return <></>
+    return (
+      <FlexStackerModuleSlideout
+        module={module}
+        onCloseClick={onCloseClick}
+        isExpanded={showSlideout}
+      />
+    )
   }
 }
