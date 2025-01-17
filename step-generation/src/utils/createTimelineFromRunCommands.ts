@@ -9,7 +9,6 @@ import type {
   InvariantContext,
   RobotState,
   RobotStateAndWarnings,
-  TimelineFrame,
 } from '../types'
 
 export type RunCommandTimelineFrame = RobotStateAndWarnings & {
@@ -22,8 +21,7 @@ interface ResultingTimelineFrame {
 }
 export function getResultingTimelineFrameFromRunCommands(
   commands: RunTimeCommand[],
-  invariantContext: InvariantContext,
-  pdInitialRobotState?: TimelineFrame
+  invariantContext: InvariantContext
 ): ResultingTimelineFrame {
   const pipetteLocations = commands.reduce<RobotState['pipettes']>(
     (acc, command) => {
@@ -42,7 +40,7 @@ export function getResultingTimelineFrameFromRunCommands(
 
   const labwareLocations = commands.reduce<RobotState['labware']>(
     (acc, command) => {
-      if (command.commandType === 'loadLabware') {
+      if (command.commandType === 'loadLabware' && command.result != null) {
         let slot
         if (command.params.location === 'offDeck') {
           slot = command.params.location
@@ -57,7 +55,7 @@ export function getResultingTimelineFrameFromRunCommands(
         }
         return {
           ...acc,
-          [command.result?.labwareId ?? command.params.labwareId ?? 'test']: {
+          [command.result.labwareId]: {
             slot: slot,
           },
         }
@@ -68,11 +66,11 @@ export function getResultingTimelineFrameFromRunCommands(
   )
   const moduleLocations = commands.reduce<RobotState['modules']>(
     (acc, command) => {
-      if (command.commandType === 'loadModule') {
+      if (command.commandType === 'loadModule' && command.result != null) {
         const moduleType = getModuleDef2(command.params.model).moduleType
         return {
           ...acc,
-          [command.result?.moduleId ?? command.params.moduleId ?? 'test']: {
+          [command.result.moduleId]: {
             slot: command.params.location.slotName,
             moduleState: MODULE_INITIAL_STATE_BY_TYPE[moduleType],
           },
@@ -82,6 +80,7 @@ export function getResultingTimelineFrameFromRunCommands(
     },
     {}
   )
+
   const initialRobotState = makeInitialRobotState({
     invariantContext,
     labwareLocations,
@@ -93,7 +92,7 @@ export function getResultingTimelineFrameFromRunCommands(
       ...getNextRobotStateAndWarnings(
         commands,
         invariantContext,
-        pdInitialRobotState ?? initialRobotState
+        initialRobotState
       ),
       command: commands[commands.length - 1],
     },

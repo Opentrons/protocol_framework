@@ -39,14 +39,8 @@ import type {
   CompletedProtocolAnalysis,
   LabwareLocation,
   ProtocolAnalysisOutput,
-  RobotType,
-  RunTimeCommand,
 } from '@opentrons/shared-data'
-import type {
-  InvariantContext,
-  ModuleTemporalProperties,
-  TimelineFrame,
-} from '@opentrons/step-generation'
+import type { ModuleTemporalProperties } from '@opentrons/step-generation'
 import type { LabwareOnDeck, Module } from '../..'
 
 export * from './types'
@@ -56,13 +50,7 @@ const SEC_PER_FRAME = 1000
 export const COMMAND_WIDTH_PX = 240
 
 interface ProtocolTimelineScrubberProps {
-  commands: RunTimeCommand[]
   analysis: CompletedProtocolAnalysis | ProtocolAnalysisOutput
-  robotType?: RobotType
-  pdResource?: {
-    pdInvariantContext: InvariantContext
-    pdInitialRobotState: TimelineFrame
-  }
 }
 
 export const DECK_LAYER_BLOCKLIST = [
@@ -78,7 +66,8 @@ export const DECK_LAYER_BLOCKLIST = [
 export function ProtocolTimelineScrubber(
   props: ProtocolTimelineScrubberProps
 ): JSX.Element {
-  const { commands, analysis, robotType = FLEX_ROBOT_TYPE, pdResource } = props
+  const { analysis } = props
+  const { commands, robotType, liquids } = analysis
   const wrapperRef = useRef<HTMLDivElement>(null)
   const commandListRef = useRef<ViewportListRef>(null)
   const [currentCommandIndex, setCurrentCommandIndex] = useState<number>(0)
@@ -90,8 +79,7 @@ export function ProtocolTimelineScrubber(
   )
   const { frame, invariantContext } = getResultingTimelineFrameFromRunCommands(
     currentCommandsSlice,
-    pdResource?.pdInvariantContext ?? invariantContextFromRunCommands,
-    pdResource?.pdInitialRobotState
+    invariantContextFromRunCommands
   )
   const handlePlayPause = (): void => {
     setIsPlaying(!isPlaying)
@@ -113,7 +101,7 @@ export function ProtocolTimelineScrubber(
     }
   }, [isPlaying, commands])
 
-  const robotState = frame.robotState
+  const { robotState } = frame
 
   const [leftPipetteId] = Object.entries(robotState.pipettes).find(
     ([_pipetteId, pipette]) => pipette?.mount === 'left'
@@ -135,7 +123,7 @@ export function ProtocolTimelineScrubber(
     invariantContext.labwareEntities,
     robotState
   )
-  const liquidDisplayColors = analysis.liquids.map(
+  const liquidDisplayColors = liquids.map(
     liquid => liquid.displayColor ?? COLORS.blue50
   )
 
@@ -154,7 +142,7 @@ export function ProtocolTimelineScrubber(
       <Flex gridGap={SPACING.spacing8} flex="1 1 0">
         <Flex height="40vh">
           <BaseDeck
-            robotType={robotType}
+            robotType={robotType ?? FLEX_ROBOT_TYPE}
             deckConfig={getSimplestDeckConfigForProtocol(analysis)}
             modulesOnDeck={map(robotState.modules, (module, moduleId) => {
               const labwareInModuleId =
@@ -303,7 +291,7 @@ export function ProtocolTimelineScrubber(
               currentCommandIndex={currentCommandIndex}
               setCurrentCommandIndex={setCurrentCommandIndex}
               analysis={analysis}
-              robotType={robotType}
+              robotType={robotType ?? FLEX_ROBOT_TYPE}
               allRunDefs={allRunDefs}
             />
           )}

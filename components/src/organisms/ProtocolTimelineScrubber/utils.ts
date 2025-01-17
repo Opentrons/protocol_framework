@@ -13,7 +13,6 @@ import type {
 import type {
   LabwareEntities,
   LocationLiquidState,
-  RunCommandTimelineFrame,
   SingleLabwareLiquidState,
   TimelineFrame,
 } from '@opentrons/step-generation'

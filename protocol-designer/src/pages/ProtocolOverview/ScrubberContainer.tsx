@@ -13,15 +13,18 @@ import {
 } from '../../step-forms/selectors'
 import { getLabwareNicknamesById } from '../../ui/labware/selectors'
 import { selectors as ingredSelectors } from '../../labware-ingred/selectors'
-import { swatchColors } from '../../organisms/DefineLiquidsModal/swatchColors'
 import type {
+  AddressableAreaName,
   CompletedProtocolAnalysis,
+  LabwareLocation,
   Liquid,
+  LoadModuleRunTimeCommand,
   LoadedLabware,
   LoadedModule,
   LoadedPipette,
   RunTimeCommand,
 } from '@opentrons/shared-data'
+import { getLoadCommands } from '../../file-data/selectors/utils'
 
 export function ScrubberContainer(): JSX.Element {
   const robotType = useSelector(getRobotType)
@@ -29,14 +32,65 @@ export function ScrubberContainer(): JSX.Element {
   const robotStateTimeline = useSelector(getRobotStateTimeline)
   const initialRobotState = useSelector(getInitialRobotState)
   const ingredients = useSelector(ingredSelectors.getLiquidGroupsById)
+  const ingredientLocations = useSelector(ingredSelectors.getLiquidsByLabwareId)
   const invariantContext = useSelector(getInvariantContext)
   const initialDeckSetup = useSelector(getInitialDeckSetup)
-  const { pipettes, modules, labware } = initialDeckSetup
 
-  const nonLoadCommands: RunTimeCommand[] = flatMap(
+  const { pipetteEntities, labwareEntities, moduleEntities } = invariantContext
+  const {
+    pipettes,
+    modules,
+    labware,
+    additionalEquipmentOnDeck,
+  } = initialDeckSetup
+
+  const loadCommands = getLoadCommands(
+    initialRobotState,
+    pipetteEntities,
+    moduleEntities,
+    labwareEntities,
+    labwareNickNames,
+    ingredients,
+    ingredientLocations
+  )
+  const nonLoadCommands = flatMap(
     robotStateTimeline.timeline,
     timelineFrame => timelineFrame.commands
   )
+  const runTimeCommands: RunTimeCommand[] = [
+    ...loadCommands,
+    ...nonLoadCommands,
+  ].map(command => {
+    let result
+    if (command.commandType === 'loadModule') {
+      const loadModuleResult: LoadModuleRunTimeCommand['result'] = {
+        moduleId: command.params.moduleId ?? '',
+      }
+      result = loadModuleResult
+    } else if (command.commandType === 'loadLabware') {
+      result = {
+        labwareId: command.params.labwareId,
+        definition: labwareEntities[command.params.labwareId ?? '']?.def,
+      }
+    } else if (command.commandType === 'loadPipette') {
+      result = {
+        pipetteId: command.params.pipetteId,
+      }
+    }
+    // @ts-expect-error: TS angry because not all commands have a result but
+    // results are added to only commands that need them for the scrubber
+    const runTimeCommand: RunTimeCommand = {
+      ...command,
+      id: uuid(),
+      status: 'succeeded',
+      createdAt: '',
+      startedAt: '',
+      completedAt: '',
+      result,
+    }
+    return runTimeCommand
+  })
+
   const loadPipettes: LoadedPipette[] = Object.values(pipettes).map(
     pipette => ({
       id: pipette.id,
@@ -47,24 +101,53 @@ export function ScrubberContainer(): JSX.Element {
   const loadModules: LoadedModule[] = Object.values(modules).map(module => ({
     id: module.id,
     model: module.model,
-    serialNumber: '1', // todo: what is this? seems like we don't need it for command text though,
+    serialNumber: '1', // TODO: why? seems like we don't need it for command text though
     location: {
       slotName: module.slot,
     },
   }))
-  const loadLabware: LoadedLabware[] = Object.values(labware).map(lw => ({
-    id: lw.id,
-    loadName: lw.def.parameters.loadName,
-    definitionUri: lw.labwareDefURI,
-    location: { slotName: lw.slot }, // todo fix this
-    displayName: labwareNickNames[lw.id],
-  }))
+
+  const loadLabware: LoadedLabware[] = Object.values(labware).map(lw => {
+    let location: LabwareLocation = { slotName: lw.slot }
+    if (lw.slot in modules) {
+      location = { moduleId: lw.slot }
+    } else if (
+      labware[lw.slot] != null &&
+      labware[lw.slot].def.allowedRoles?.includes('adapter')
+    ) {
+      location = { labwareId: lw.slot }
+    } else if (lw.slot === 'offDeck') {
+      location = 'offDeck'
+    } else if (
+      Object.values(additionalEquipmentOnDeck).find(
+        ae => ae.location === lw.slot
+      )
+    ) {
+      const inWasteChute = Object.values(additionalEquipmentOnDeck).find(
+        ae => ae.location === lw.slot && ae.name === 'wasteChute'
+      )
+      location = {
+        addressableAreaName: inWasteChute
+          ? 'gripperWasteChute'
+          : (lw.slot as AddressableAreaName),
+      }
+    }
+
+    return {
+      id: lw.id,
+      loadName: lw.def.parameters.loadName,
+      definitionUri: lw.labwareDefURI,
+      location,
+      displayName: labwareNickNames[lw.id],
+    }
+  })
+
   const liquids: Liquid[] = Object.entries(ingredients).map(
     ([liquidId, liquidData]) => ({
       id: liquidId,
       displayName: liquidData.name ?? 'undefined liquid name',
       description: liquidData.description ?? '',
-      displayColor: liquidData.displayColor ?? swatchColors(liquidId),
+      displayColor: liquidData.displayColor,
     })
   )
 
@@ -75,20 +158,10 @@ export function ScrubberContainer(): JSX.Element {
     labware: loadLabware,
     modules: loadModules,
     liquids,
-    commands: nonLoadCommands,
+    commands: runTimeCommands,
     errors: [],
     robotType,
   }
 
-  return (
-    <ProtocolTimelineScrubber
-      commands={nonLoadCommands}
-      analysis={analysis}
-      robotType={robotType}
-      pdResource={{
-        pdInvariantContext: invariantContext,
-        pdInitialRobotState: initialRobotState,
-      }}
-    />
-  )
+  return <ProtocolTimelineScrubber analysis={analysis} />
 }
