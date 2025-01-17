@@ -1,3 +1,4 @@
+import { contains } from 'cypress/types/jquery'
 import { executeUniversalAction, UniversalActions } from './universalActions'
 import { isEnumValue } from './utils'
 
@@ -14,8 +15,10 @@ export enum Actions {
   EnterVolume = 'Enter a valid volume to mix',
   EnterMixReps = 'Enter number of repetions to mix',
   SelectTipHandling = 'Select how/if tips should be picked up for each mix',
-  Aspirate = 'Select aspirate settings',
+  AspirateFlowRate = 'Select aspirate settings',
   Dispense = 'Select dispnse settings',
+  AspWellOrder = 'Open well aspirate well order pop out',
+  EditWellOrder = 'Edit well order selects',
 
 }
 
@@ -23,7 +26,9 @@ export enum Verifications {
   PartOne = 'Verify Part 1, the configuration of mix settings, and check continue button',
   PartTwoAsp = 'Verify Part 2, the configuration of asp settings and check go back and save button',
   PartTwoDisp = 'Verify Part 2, the configuration of disp settings and check go back and save button',
-  WellSelectPopout = 'validate labware image and available wells',
+  WellSelectPopout = 'Verify labware image and available wells',
+  AspWellOrder = 'Verify pop out for well order during aspirate',
+  AspMixTipPos = 'Verify pop out for mix tip position durin aspirate',
 }
 
 export enum Content {
@@ -64,8 +69,18 @@ export enum Content {
   DelayDuration = 'Delay Duration',
   DispFlowRate = "Dispense flow rate",
   Blowout = 'Blowout',
-  TouchTip = 'Touch tip'
-
+  TouchTip = 'Touch tip',
+  TopBottomLeRi = 'Top to bottom, Left to right',
+  EditWellOrder = 'Edit well order',
+  WellOrderDescrip = 'Change how the robot moves from well to well.',
+  PrimaryOrder = 'Primary order',
+  TopToBottom = 'Top to bottom',
+  BottomToTop = 'Bottom to top',
+  LeftToRight = 'Left to right',
+  RightToLeft = 'Right to left',
+  Then = 'then',
+  SecondaryOrder = 'Secondary order',
+  Cancel = 'Cancel',
 }
 
 export enum Locators {
@@ -79,11 +94,11 @@ export enum Locators {
   MixReps = '[name="times"]',
   Aspirate = 'button:contains("Aspirate")',
   Dispense = 'button:contains("Dispense")',
-  // Step1Indicator = 'p:contains("Step 1")',
-  // Step2Indicator = 'p:contains("Step 2")',
-  // FlexOption = 'button:contains("Opentrons Flex")',
-  // OT2Option = 'button:contains("Opentrons OT-2")',
-  // NinetySixChannel = 'div:contains("96-Channel")',
+  AspFlowRateInput = '[name="aspirate_flowRate"]',
+  AspWellOrder = '[class="Flex-sc-1qhp8l7-0 ListButton___StyledFlex-sc-1lmhs3v-0 bToGfF bdMeyp"]',
+  ResetToDefault = 'button:contains("Reset to default")',
+  PrimaryOrderDropdown = 'div[tabindex="0"].sc-bqWxrE jKLbYH iFjNDq',
+  CancelWellOrder = '[class="SecondaryButton-sc-1opt1t9-0 kjpcRL"]',
 }
 
 
@@ -120,12 +135,20 @@ const executeAction = (action: Actions | UniversalActions): void => {
       cy.contains(Content.Never).should('exist').should('be.visible')
       cy.contains(Content.OnceAtStartStep).click()
       break
-    case Actions.Aspirate:
+    case Actions.AspirateFlowRate:
       cy.get(Locators.Aspirate).should('exist').should('be.visible').click()
+      cy.get(Locators.AspFlowRateInput).should('exist')
+      cy.get(Locators.AspFlowRateInput).type('{selectAll}, {backspace}, 100')
+      break
+    case Actions.AspWellOrder:
+      cy.contains(Content.TopBottomLeRi).should('exist').should('be.visible')
+      cy.get(Locators.AspWellOrder).click()
       break
     case Actions.Dispense:
       cy.get(Locators.Dispense).should('exist').should('be.visible').click()
       break
+    // case Actions.FlowRateWarning:
+    //   break
     case Actions.Save:
       cy.get(Locators.Save).should('exist').should('be.visible').click()
       break
@@ -158,36 +181,58 @@ const verifyStep = (verification: Verifications): void => {
       cy.contains(Content.WasteChute).should('exist').should('be.visible')
       cy.get(Locators.Continue).should('exist').should('be.visible')
       break
-      case Verifications.WellSelectPopout:
-        cy.contains(Content.WellSelectTitle).should('exist').should('be.visible')
-        cy.contains(Content.ClickAndDragWellSelect).should('exist').should('be.visible')
-        cy.get(Locators.OneWellReservoirImg).should('exist').should('be.visible')
-        cy.get(Locators.Save).should('exist').should('be.visible')
-        cy.get(Locators.Back).should('exist').should('be.visible')
-        break
-      case Verifications.PartTwoAsp:
-        cy.contains(Content.PartTwo).should('exist').should('be.visible')
-        cy.contains(Content.Mix).should('exist').should('be.visible')
-        cy.get(Locators.Aspirate).should('exist').should('be.visible')
-        cy.contains(Content.AspFlowRate).should('exist').should('be.visible')
-        cy.contains(Content.AspWellOrder).should('exist').should('be.visible')
-        cy.contains(Content.MixTipPosition).should('exist').should('be.visible')
-        cy.contains(Content.AdvancedPipSettings).should('exist').should('be.visible')
-        cy.contains(Content.Delay).should('exist').should('be.visible')
-        cy.get(Locators.Back).should('exist').should('be.visible')
-        cy.get(Locators.Save).should('exist').should('be.visible')
-        break
-      case Verifications.PartTwoDisp:
-        cy.contains(Content.PartTwo).should('exist').should('be.visible')
-        cy.contains(Content.Mix).should('exist').should('be.visible')
-        cy.get(Locators.Dispense).should('exist').should('be.visible')
-        cy.contains(Content.DispFlowRate).should('exist').should('be.visible')
-        cy.contains(Content.AdvancedPipSettings).should('exist').should('be.visible')
-        cy.contains(Content.Delay).should('exist').should('be.visible')
-        cy.contains(Content.Blowout).should('exist').should('be.visible')
-        cy.contains(Content.TouchTip).should('exist').should('be.visible')
-
-        break
+    case Verifications.WellSelectPopout:
+      cy.contains(Content.WellSelectTitle).should('exist').should('be.visible')
+      cy.contains(Content.ClickAndDragWellSelect).should('exist').should('be.visible')
+      cy.get(Locators.OneWellReservoirImg).should('exist').should('be.visible')
+      cy.get(Locators.Save).should('exist').should('be.visible')
+      cy.get(Locators.Back).should('exist').should('be.visible')
+      break
+    case Verifications.PartTwoAsp:
+      cy.contains(Content.PartTwo).should('exist').should('be.visible')
+      cy.contains(Content.Mix).should('exist').should('be.visible')
+      cy.get(Locators.Aspirate).should('exist').should('be.visible')
+      cy.contains(Content.AspFlowRate).should('exist').should('be.visible')
+      cy.contains(Content.AspWellOrder).should('exist').should('be.visible')
+      cy.contains(Content.MixTipPosition).should('exist').should('be.visible')
+      cy.contains(Content.AdvancedPipSettings).should('exist').should('be.visible')
+      cy.contains(Content.Delay).should('exist').should('be.visible')
+      cy.get(Locators.Back).should('exist').should('be.visible')
+      cy.get(Locators.Save).should('exist').should('be.visible')
+      break
+    case Verifications.PartTwoDisp:
+      cy.contains(Content.PartTwo).should('exist').should('be.visible')
+      cy.contains(Content.Mix).should('exist').should('be.visible')
+      cy.get(Locators.Dispense).should('exist').should('be.visible')
+      cy.contains(Content.DispFlowRate).should('exist').should('be.visible')
+      cy.contains(Content.AdvancedPipSettings).should('exist').should('be.visible')
+      cy.contains(Content.Delay).should('exist').should('be.visible')
+      cy.contains(Content.Blowout).should('exist').should('be.visible')
+      cy.contains(Content.TouchTip).should('exist').should('be.visible')
+      break
+    case Verifications.AspWellOrder:
+      cy.contains(Content.EditWellOrder).should('exist').should('be.visible')
+      cy.contains(Content.WellOrderDescrip).should('exist').should('be.visible')
+      cy.contains(Content.PrimaryOrder).should('exist').should('be.visible')
+      cy.contains(Content.TopToBottom).should('exist').should('be.visible').click()
+      cy.contains(Content.BottomToTop).should('exist').should('be.visible')
+      cy.contains(Content.LeftToRight).should('exist').should('be.visible')
+      cy.contains(Content.RightToLeft).should('exist').should('be.visible')
+      cy.contains(Content.BottomToTop).should('exist').should('be.visible').click()
+      cy.contains(Content.Then).should('exist').should('be.visible')
+      cy.contains(Content.SecondaryOrder).should('exist').should('be.visible')
+      cy.contains(Content.LeftToRight).should('exist').should('be.visible').click()
+      cy.contains(Content.RightToLeft).should('exist').should('be.visible').click() 
+      cy.get(Locators.ResetToDefault).click()
+      cy.contains(Content.TopToBottom).should('exist').should('be.visible')
+      cy.contains(Content.LeftToRight).should('exist').should('be.visible')
+      cy.get(Locators.CancelWellOrder).should('exist').should('be.visible')
+      cy.get(Locators.Save).should('exist').should('be.visible')
+      break
+      // case Verifications.MixTipPos:
+      //   break
+      // case Verifications.FlowRateRangeWarning:
+      //   break
     default:
       throw new Error(
         `Unrecognized verification: ${verification as Verifications}`

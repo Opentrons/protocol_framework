@@ -3,7 +3,6 @@ import {
   Actions,
   Verifications,
   runMixSetup,
-  Locators,
 } from '../support/mixSetting'
 import { UniversalActions } from '../support/universalActions'
 import { TestFilePath, getTestFile } from '../support/testFiles'
@@ -44,12 +43,16 @@ describe('Redesigned Mixing Steps - Happy Path', () => {
       UniversalActions.Snapshot,
       Actions.Continue,
       Verifications.PartTwoAsp,
-      Actions.Dispense,
-      Verifications.PartTwoDisp,
+      Actions.AspirateFlowRate,
+      Actions.AspWellOrder,
+      Verifications.AspWellOrder,
+      // Actions.Dispense,
+      // Verifications.PartTwoDisp,
 
     ]
 
     runMixSetup(steps)
+    // cy.contains('Primary order').closest('div')
   });
 });
 
