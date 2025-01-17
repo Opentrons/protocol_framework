@@ -1303,10 +1303,82 @@ def test_touch_tip(
                 ),
                 radius=1.23,
                 speed=7.89,
+                mmFromEdge=None,
             )
         ),
         mock_protocol_core.set_last_location(location=location, mount=Mount.LEFT),
     )
+
+
+def test_touch_tip_with_mm_from_edge(
+    decoy: Decoy,
+    subject: InstrumentCore,
+    mock_engine_client: EngineClient,
+    mock_protocol_core: ProtocolCore,
+) -> None:
+    """It should touch the tip to the edges of the well with mm_from_edge."""
+    location = Location(point=Point(1, 2, 3), labware=None)
+
+    well_core = WellCore(
+        name="my cool well", labware_id="123abc", engine_client=mock_engine_client
+    )
+    subject.touch_tip(
+        location=location,
+        well_core=well_core,
+        radius=1.0,
+        z_offset=4.56,
+        speed=7.89,
+        mm_from_edge=9.87,
+    )
+
+    decoy.verify(
+        pipette_movement_conflict.check_safe_for_pipette_movement(
+            engine_state=mock_engine_client.state,
+            pipette_id="abc123",
+            labware_id="123abc",
+            well_name="my cool well",
+            well_location=WellLocation(
+                origin=WellOrigin.TOP, offset=WellOffset(x=0, y=0, z=4.56)
+            ),
+        ),
+        mock_engine_client.execute_command(
+            cmd.TouchTipParams(
+                pipetteId="abc123",
+                labwareId="123abc",
+                wellName="my cool well",
+                wellLocation=WellLocation(
+                    origin=WellOrigin.TOP, offset=WellOffset(x=0, y=0, z=4.56)
+                ),
+                radius=1.0,
+                speed=7.89,
+                mmFromEdge=9.87,
+            )
+        ),
+        mock_protocol_core.set_last_location(location=location, mount=Mount.LEFT),
+    )
+
+
+def test_touch_tip_raises_with_radius_and_mm_from_edge(
+    decoy: Decoy,
+    subject: InstrumentCore,
+    mock_engine_client: EngineClient,
+    mock_protocol_core: ProtocolCore,
+) -> None:
+    """It should raise if a value of not 1.0 and a mm_from_edge argument is given."""
+    location = Location(point=Point(1, 2, 3), labware=None)
+
+    well_core = WellCore(
+        name="my cool well", labware_id="123abc", engine_client=mock_engine_client
+    )
+    with pytest.raises(ValueError):
+        subject.touch_tip(
+            location=location,
+            well_core=well_core,
+            radius=1.23,
+            z_offset=4.56,
+            speed=7.89,
+            mm_from_edge=9.87,
+        )
 
 
 def test_has_tip(
