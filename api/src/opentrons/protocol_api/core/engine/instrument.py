@@ -403,6 +403,9 @@ class InstrumentCore(AbstractInstrument[WellCore, LabwareCore]):
             speed: Speed for the touch tip movements.
             mm_from_edge: Offset from the edge of the well to move to. Requires a radius of 1.
         """
+        if mm_from_edge is not None and radius != 1.0:
+            raise ValueError("radius must be set to 1.0 if mm_from_edge is provided.")
+
         well_name = well_core.get_name()
         labware_id = well_core.labware_id
 
