@@ -222,7 +222,7 @@ export const moveLiquidFormToArgs = (
     touchTipAfterAspirateOffsetMmFromBottom,
     touchTipAfterDispense,
     touchTipAfterDispenseOffsetMmFromBottom,
-    description: hydratedFormData.description,
+    description: hydratedFormData.stepDetails,
     name: hydratedFormData.stepName,
     //  TODO(jr, 7/26/24): wire up wellNames
     dropTipLocation,

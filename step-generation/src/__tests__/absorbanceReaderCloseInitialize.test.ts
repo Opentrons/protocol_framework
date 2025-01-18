@@ -29,9 +29,11 @@ describe('absorbanceReaderCloseInitialize compound command creator', () => {
   beforeEach(() => {
     absorbanceReaderCloseInitializeArgs = {
       commandCreatorFnName: 'absorbanceReaderInitialize',
-      module: ABSORBANCE_READER_MODULE_ID,
+      moduleId: ABSORBANCE_READER_MODULE_ID,
       mode: 'single',
       wavelengths: [450],
+      name: 'some name',
+      description: 'some descirption',
     }
     invariantContext = {
       ...makeContext(),

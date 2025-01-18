@@ -12,7 +12,6 @@ import { commentFormToArgs } from './commentFormToArgs'
 import { absorbanceReaderFormToArgs } from './absorbanceReaderFormToArgs'
 import type { CommandCreatorArgs } from '@opentrons/step-generation'
 import type {
-  FormData,
   HydratedAbsorbanceReaderFormData,
   HydratedCommentFormData,
   HydratedHeaterShakerFormData,
@@ -21,16 +20,18 @@ import type {
   HydratedMoveLabwareFormData,
   HydratedMoveLiquidFormData,
   HydratedTemperatureFormData,
+  HydratedPauseFormData,
+  HydratedThermocyclerFormData,
+  HydratedFormData,
 } from '../../../form-types'
 // NOTE: this acts as an adapter for the PD defined data shape of the step forms
 // to create arguments that the step generation service is expecting
 // in order to generate command creators
 type StepArgs = CommandCreatorArgs | null
-// cast all fields that have 'castValue' in stepFieldHelperMap
-export const _castForm = (hydratedForm: FormData): any =>
+export const _castForm = (hydratedForm: HydratedFormData): any =>
   mapValues(hydratedForm, (value, name) => castField(name, value))
-// TODO: Ian 2019-01-29 use hydrated form type
-export const stepFormToArgs = (hydratedForm: FormData): StepArgs => {
+
+export const stepFormToArgs = (hydratedForm: HydratedFormData): StepArgs => {
   const castForm = _castForm(hydratedForm)
   switch (castForm.stepType) {
     case 'moveLiquid': {
@@ -41,9 +42,8 @@ export const stepFormToArgs = (hydratedForm: FormData): StepArgs => {
       return moveLiquidFormToArgs(moveLiquidFormData)
     }
 
-    // TODO: Ian 2019-01-29 nest all fields under `fields` (in #2917 ?)
     case 'pause':
-      return pauseFormToArgs(castForm as FormData)
+      return pauseFormToArgs(castForm as HydratedPauseFormData)
 
     case 'mix':
       return mixFormToArgs(castForm as HydratedMixFormDataLegacy)
@@ -55,7 +55,7 @@ export const stepFormToArgs = (hydratedForm: FormData): StepArgs => {
       return temperatureFormToArgs(castForm as HydratedTemperatureFormData)
 
     case 'thermocycler':
-      return thermocyclerFormToArgs(castForm as FormData)
+      return thermocyclerFormToArgs(castForm as HydratedThermocyclerFormData)
 
     case 'heaterShaker':
       return heaterShakerFormToArgs(castForm as HydratedHeaterShakerFormData)

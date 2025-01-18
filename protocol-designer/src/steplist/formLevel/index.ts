@@ -61,7 +61,7 @@ import {
 } from './warnings'
 
 import type { FormWarning, FormWarningType } from './warnings'
-import type { HydratedFormdata, StepType } from '../../form-types'
+import type { HydratedFormData, StepType } from '../../form-types'
 import type { FormError } from './errors'
 export { handleFormChange } from './handleFormChange'
 export { createBlankForm } from './createBlankForm'
@@ -77,7 +77,7 @@ export { getNextDefaultEngageHeight } from './getNextDefaultEngageHeight'
 export { stepFormToArgs } from './stepFormToArgs'
 export type { FormError, FormWarning, FormWarningType }
 interface FormHelpers {
-  getErrors?: (arg: HydratedFormdata) => FormError[]
+  getErrors?: (arg: HydratedFormData) => FormError[]
   getWarnings?: (arg: unknown) => FormWarning[]
 }
 const stepFormHelperMap: Partial<Record<StepType, FormHelpers>> = {
@@ -178,7 +178,7 @@ const stepFormHelperMap: Partial<Record<StepType, FormHelpers>> = {
 }
 export const getFormErrors = (
   stepType: StepType,
-  formData: HydratedFormdata
+  formData: HydratedFormData
 ): FormError[] => {
   const formErrorGetter =
     stepFormHelperMap[stepType] && stepFormHelperMap[stepType]?.getErrors

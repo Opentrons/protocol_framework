@@ -18,7 +18,11 @@ export const absorbanceReaderFormToArgs = (
     referenceWavelength,
     referenceWavelengthActive,
     wavelengths,
+    stepDetails,
+    stepName,
   } = hydratedFormData
+
+  const baseValues = { description: stepDetails, name: stepName }
   const lidAction = lidOpen
     ? 'absorbanceReaderOpenLid'
     : 'absorbanceReaderCloseLid'
@@ -28,26 +32,31 @@ export const absorbanceReaderFormToArgs = (
         (mode === 'single' ? [wavelengths[0]] : wavelengths) ?? // only take first wavelength in single mode
         []
       return {
-        module: moduleId,
+        moduleId,
         commandCreatorFnName: 'absorbanceReaderInitialize',
-        mode,
-        wavelengths: rawWavelengths?.map(wavelength => parseFloat(wavelength)),
+        measureMode: mode,
+        referenceWavelengths: rawWavelengths?.map(wavelength =>
+          parseFloat(wavelength)
+        ),
         ...(mode === 'single' &&
         referenceWavelengthActive &&
         referenceWavelength != null
           ? { referenceWavelength: parseFloat(referenceWavelength) }
           : {}),
+        ...baseValues,
       }
     case ABSORBANCE_READER_READ:
       return {
-        module: moduleId,
+        moduleId,
         commandCreatorFnName: 'absorbanceReaderRead',
-        fileName,
+        fileName: fileName ?? null,
+        ...baseValues,
       }
     case ABSORBANCE_READER_LID:
       return {
-        module: moduleId,
+        moduleId,
         commandCreatorFnName: lidAction,
+        ...baseValues,
       }
     default:
       return null
