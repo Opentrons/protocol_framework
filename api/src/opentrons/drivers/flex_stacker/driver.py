@@ -17,6 +17,7 @@ from .types import (
     MoveParams,
     LimitSwitchStatus,
     LEDColor,
+    StallGuardParams,
 )
 
 
@@ -99,6 +100,15 @@ class FlexStackerDriver(AbstractFlexStackerDriver):
         )
 
     @classmethod
+    def parse_reset_reason(cls, response: str) -> int:
+        """Parse the reset reason"""
+        _RE = re.compile(rf"^{GCODE.GET_RESET_REASON} R:(?P<R>\d)$")
+        match = _RE.match(response)
+        if not match:
+            raise ValueError(f"Incorrect Response for reset reason: {response}")
+        return int(match.group("R"))
+
+    @classmethod
     def parse_limit_switch_status(cls, response: str) -> LimitSwitchStatus:
         """Parse limit switch statuses."""
         field_names = LimitSwitchStatus.get_fields()
@@ -123,7 +133,7 @@ class FlexStackerDriver(AbstractFlexStackerDriver):
     @classmethod
     def parse_door_closed(cls, response: str) -> bool:
         """Parse door closed."""
-        _RE = re.compile(r"^M122 D:(\d)$")
+        _RE = re.compile(rf"^{GCODE.GET_DOOR_SWITCH} D:(\d)$")
         match = _RE.match(response)
         if not match:
             raise ValueError(f"Incorrect Response for door closed: {response}")
@@ -149,6 +159,32 @@ class FlexStackerDriver(AbstractFlexStackerDriver):
             acceleration=float(m.group("A")),
             max_speed_discont=float(m.group("D")),
         )
+
+    @classmethod
+    def parse_stallguard_params(cls, response: str) -> StallGuardParams:
+        """Parse stallguard params."""
+        pattern = r"(?P<M>[X,Z,L]):(?P<E>\d) T:(?P<T>\d+)"
+        _RE = re.compile(f"^{GCODE.GET_STALLGUARD_THRESHOLD} {pattern}$")
+        m = _RE.match(response)
+        if not m:
+            raise ValueError(f"Incorrect Response for stallfguard params: {response}")
+        return StallGuardParams(
+            axis=StackerAxis(m.group("M")),
+            enabled=bool(int(m.group("E"))),
+            threshold=int(m.group("T")),
+        )
+
+    @classmethod
+    def parse_get_motor_register(cls, response: str) -> int:
+        """Parse get register value."""
+        pattern = r"(?P<M>[X,Z,L]):(?P<R>\d+) V:(?P<V>\d+)"
+        _RE = re.compile(f"^{GCODE.GET_MOTOR_DRIVER_REGISTER} {pattern}$")
+        m = _RE.match(response)
+        if not m:
+            raise ValueError(
+                f"Incorrect Response for get motor driver register: {response}"
+            )
+        return int(m.group("V"))
 
     @classmethod
     def append_move_params(
@@ -209,8 +245,13 @@ class FlexStackerDriver(AbstractFlexStackerDriver):
         response = await self._connection.send_command(
             GCODE.DEVICE_INFO.build_command()
         )
-        await self._connection.send_command(GCODE.GET_RESET_REASON.build_command())
-        return self.parse_device_info(response)
+        device_info = self.parse_device_info(response)
+        reason_resp = await self._connection.send_command(
+            GCODE.GET_RESET_REASON.build_command()
+        )
+        reason = self.parse_reset_reason(reason_resp)
+        device_info.rr = reason
+        return device_info
 
     async def set_serial_number(self, sn: str) -> bool:
         """Set Serial Number."""
@@ -257,12 +298,59 @@ class FlexStackerDriver(AbstractFlexStackerDriver):
             raise ValueError(f"Incorrect Response for set ihold current: {resp}")
         return True
 
+    async def set_stallguard_threshold(
+        self, axis: StackerAxis, enable: bool, threshold: int
+    ) -> bool:
+        """Enables and sets the stallguard threshold for the given axis motor."""
+        if not -64 < threshold < 63:
+            raise ValueError(
+                f"Threshold value ({threshold}) should be between -64 and 63."
+            )
+
+        resp = await self._connection.send_command(
+            GCODE.SET_STALLGUARD.build_command()
+            .add_int(axis.name, int(enable))
+            .add_int("T", threshold)
+        )
+        if not re.match(rf"^{GCODE.SET_STALLGUARD}$", resp):
+            raise ValueError(f"Incorrect Response for set stallguard threshold: {resp}")
+        return True
+
+    async def set_motor_driver_register(
+        self, axis: StackerAxis, reg: int, value: int
+    ) -> bool:
+        """Set the register of the given motor axis driver to the given value."""
+        resp = await self._connection.send_command(
+            GCODE.SET_MOTOR_DRIVER_REGISTER.build_command()
+            .add_int(axis.name, reg)
+            .add_element(str(value))
+        )
+        if not re.match(rf"^{GCODE.SET_MOTOR_DRIVER_REGISTER}$", resp):
+            raise ValueError(
+                f"Incorrect Response for set motor driver register: {resp}"
+            )
+        return True
+
+    async def get_motor_driver_register(self, axis: StackerAxis, reg: int) -> int:
+        """Gets the register value of the given motor axis driver."""
+        response = await self._connection.send_command(
+            GCODE.GET_MOTOR_DRIVER_REGISTER.build_command().add_int(axis.name, reg)
+        )
+        return self.parse_get_motor_register(response)
+
     async def get_motion_params(self, axis: StackerAxis) -> MoveParams:
         """Get the motion parameters used by the given axis motor."""
         response = await self._connection.send_command(
             GCODE.GET_MOVE_PARAMS.build_command().add_element(axis.name)
         )
         return self.parse_move_params(response)
+
+    async def get_stallguard_threshold(self, axis: StackerAxis) -> StallGuardParams:
+        """Get the stallguard parameters by the given axis motor."""
+        response = await self._connection.send_command(
+            GCODE.GET_STALLGUARD_THRESHOLD.build_command().add_element(axis.name)
+        )
+        return self.parse_stallguard_params(response)
 
     async def get_limit_switch(self, axis: StackerAxis, direction: Direction) -> bool:
         """Get limit switch status.

@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, Dict
 
 from opentrons.util.async_helpers import ensure_yield
 
@@ -13,6 +13,7 @@ from .types import (
     HardwareRevision,
     MoveParams,
     LimitSwitchStatus,
+    StallGuardParams,
 )
 
 
@@ -24,6 +25,13 @@ class SimulatingDriver(AbstractFlexStackerDriver):
         self._limit_switch_status = LimitSwitchStatus(False, False, False, False, False)
         self._platform_sensor_status = PlatformStatus(False, False)
         self._door_closed = True
+        self._connected = True
+        self._stallgard_threshold = {
+            a: StallGuardParams(a, False, 0) for a in StackerAxis
+        }
+        self._motor_registers: Dict[StackerAxis, Dict[int, int]] = {
+            a: {} for a in StackerAxis
+        }
 
     def set_limit_switch(self, status: LimitSwitchStatus) -> bool:
         self._limit_switch_status = status
@@ -40,17 +48,17 @@ class SimulatingDriver(AbstractFlexStackerDriver):
     @ensure_yield
     async def connect(self) -> None:
         """Connect to stacker."""
-        pass
+        self._connected = True
 
     @ensure_yield
     async def disconnect(self) -> None:
         """Disconnect from stacker."""
-        pass
+        self._connected = False
 
     @ensure_yield
     async def is_connected(self) -> bool:
         """Check connection to stacker."""
-        return True
+        return self._connected
 
     @ensure_yield
     async def get_device_info(self) -> StackerInfo:
@@ -60,6 +68,7 @@ class SimulatingDriver(AbstractFlexStackerDriver):
     @ensure_yield
     async def set_serial_number(self, sn: str) -> bool:
         """Set Serial Number."""
+        self._sn = sn
         return True
 
     async def enable_motors(self, axis: List[StackerAxis]) -> bool:
@@ -73,15 +82,38 @@ class SimulatingDriver(AbstractFlexStackerDriver):
 
     async def set_run_current(self, axis: StackerAxis, current: float) -> bool:
         """Set axis peak run current in amps."""
+
         return True
 
     async def set_ihold_current(self, axis: StackerAxis, current: float) -> bool:
         """Set axis hold current in amps."""
         return True
 
+    async def set_stallguard_threshold(
+        self, axis: StackerAxis, enable: bool, threshold: int
+    ) -> bool:
+        """Enables and sets the stallguard threshold for the given axis motor."""
+        self._stallgard_threshold[axis] = StallGuardParams(axis, enable, threshold)
+        return True
+
+    async def set_motor_driver_register(
+        self, axis: StackerAxis, reg: int, value: int
+    ) -> bool:
+        """Set the register of the given motor axis driver to the given value."""
+        self._motor_registers[axis].update({reg: value})
+        return True
+
+    async def get_motor_driver_register(self, axis: StackerAxis, reg: int) -> int:
+        """Gets the register value of the given motor axis driver."""
+        return self._motor_registers[axis].get(reg, 0)
+
     async def get_motion_params(self, axis: StackerAxis) -> MoveParams:
         """Get the motion parameters used by the given axis motor."""
         return MoveParams(axis, 1, 1, 1)
+
+    async def get_stallguard_threshold(self, axis: StackerAxis) -> StallGuardParams:
+        """Get the stallguard parameters by the given axis motor."""
+        return self._stallgard_threshold[axis]
 
     @ensure_yield
     async def get_limit_switch(self, axis: StackerAxis, direction: Direction) -> bool:
@@ -101,7 +133,7 @@ class SimulatingDriver(AbstractFlexStackerDriver):
 
         :return: True if platform is present, False otherwise
         """
-        return True
+        return self._platform_sensor_status.get(direction)
 
     async def get_platform_status(self) -> PlatformStatus:
         """Get platform status."""

@@ -18,10 +18,14 @@ class GCODE(str, Enum):
     GET_MOVE_PARAMS = "M120"
     GET_PLATFORM_SENSOR = "M121"
     GET_DOOR_SWITCH = "M122"
+    GET_STALLGUARD_THRESHOLD = "M911"
+    GET_MOTOR_DRIVER_REGISTER = "M920"
     SET_LED = "M200"
     SET_SERIAL_NUMBER = "M996"
     SET_RUN_CURRENT = "M906"
     SET_IHOLD_CURRENT = "M907"
+    SET_STALLGUARD = "M910"
+    SET_MOTOR_DRIVER_REGISTER = "M921"
     ENTER_BOOTLOADER = "dfu"
 
     def build_command(self) -> CommandBuilder:
@@ -48,6 +52,7 @@ class StackerInfo:
     fw: str
     hw: HardwareRevision
     sn: str
+    rr: int = 0
 
     def to_dict(self) -> Dict[str, str]:
         """Build command."""
@@ -55,6 +60,7 @@ class StackerInfo:
             "serial": self.sn,
             "version": self.fw,
             "model": self.hw.value,
+            "reset_reason": str(self.rr),
         }
 
 
@@ -162,6 +168,15 @@ class MoveParams:
     def get_fields(cls) -> List[str]:
         """Get parsing fields."""
         return ["M", "V", "A", "D"]
+
+
+@dataclass
+class StallGuardParams:
+    """StallGuard Parameters."""
+
+    axis: StackerAxis
+    enabled: bool
+    threshold: int
 
 
 class MoveResult(str, Enum):

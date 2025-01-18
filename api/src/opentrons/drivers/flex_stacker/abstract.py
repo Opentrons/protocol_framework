@@ -9,6 +9,7 @@ from .types import (
     MoveParams,
     StackerInfo,
     LEDColor,
+    StallGuardParams,
 )
 
 
@@ -51,8 +52,28 @@ class AbstractFlexStackerDriver(Protocol):
         """Set axis hold current in amps."""
         ...
 
+    async def set_stallguard_threshold(
+        self, axis: StackerAxis, enable: bool, threshold: int
+    ) -> bool:
+        """Enables and sets the stallguard threshold for the given axis motor."""
+        ...
+
+    async def set_motor_driver_register(
+        self, axis: StackerAxis, reg: int, value: int
+    ) -> bool:
+        """Set the register of the given motor axis driver to the given value."""
+        ...
+
+    async def get_motor_driver_register(self, axis: StackerAxis, reg: int) -> int:
+        """Gets the register value of the given motor axis driver."""
+        ...
+
     async def get_motion_params(self, axis: StackerAxis) -> MoveParams:
         """Get the motion parameters used by the given axis motor."""
+        ...
+
+    async def get_stallguard_threshold(self, axis: StackerAxis) -> StallGuardParams:
+        """Get the stallguard parameters by the given axis motor."""
         ...
 
     async def get_limit_switch(self, axis: StackerAxis, direction: Direction) -> bool:

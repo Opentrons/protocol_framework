@@ -410,7 +410,7 @@ class FlexStackerReader(Reader):
     async def get_motion_parameters(self) -> None:
         """Get the motion parameters used by the axis motors."""
         self.move_params = {
-            axis: self._driver.get_motion_params(axis) for axis in StackerAxis
+            axis: await self._driver.get_motion_params(axis) for axis in StackerAxis
         }
 
     async def get_platform_sensor_state(self) -> None:
