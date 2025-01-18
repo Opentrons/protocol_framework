@@ -24,6 +24,7 @@ export function getDisabledFieldsMixForm(
   }
 
   if (
+    hydratedForm.labware != null &&
     'isTouchTipAllowed' in hydratedForm.labware &&
     !hydratedForm.labware?.isTouchTipAllowed
   ) {
