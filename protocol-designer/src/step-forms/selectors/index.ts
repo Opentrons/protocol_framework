@@ -587,10 +587,9 @@ export const _hasFieldLevelErrors = (
           return true
         }
       } else {
-        console.log(fieldName, value)
         // TODO: fieldName includes id, stepType, etc... this is weird #3161
         const fieldErrors = getFieldErrors(fieldName as string, value)
-        console.log(fieldErrors)
+
         if (fieldErrors && fieldErrors.length > 0) {
           return true
         }
