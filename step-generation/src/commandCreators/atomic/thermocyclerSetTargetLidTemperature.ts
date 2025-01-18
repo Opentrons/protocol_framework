@@ -6,14 +6,15 @@ export const thermocyclerSetTargetLidTemperature: CommandCreator<TemperaturePara
   invariantContext,
   prevRobotState
 ) => {
+  const { moduleId, celsius } = args
   return {
     commands: [
       {
         commandType: 'thermocycler/setTargetLidTemperature',
         key: uuid(),
         params: {
-          moduleId: args.moduleId,
-          celsius: args.celsius
+          moduleId,
+          celsius,
         },
       },
     ],
