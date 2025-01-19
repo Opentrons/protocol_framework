@@ -257,7 +257,11 @@ class FlexStackerDriver(AbstractFlexStackerDriver):
 
     async def set_serial_number(self, sn: str) -> bool:
         """Set Serial Number."""
-        # TODO: validate the serial number format
+        if not re.match(r"^FST[\w]{1}[\d]{2}[\d]{8}[\d]+$", sn):
+            raise ValueError(
+                f"Invalid serial number: ({sn}) expected format: FSTA1020250119001"
+            )
+
         resp = await self._connection.send_command(
             GCODE.SET_SERIAL_NUMBER.build_command().add_element(sn)
         )

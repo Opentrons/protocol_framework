@@ -98,7 +98,7 @@ async def test_set_serial_number(
     """It should send a set serial number command"""
     connection.send_command.return_value = "M996"
 
-    serial_number = "Something"
+    serial_number = "FSTA1020250119001"
     response = await subject.set_serial_number(serial_number)
     assert response
 
@@ -117,6 +117,13 @@ async def test_set_serial_number(
         serial_number
     )
     connection.send_command.assert_any_call(set_serial_number)
+    connection.reset_mock()
+
+    # Test invalid serial number
+    with pytest.raises(ValueError):
+        response = await subject.set_serial_number("invalid")
+
+    connection.send_command.assert_not_called()
     connection.reset_mock()
 
 
