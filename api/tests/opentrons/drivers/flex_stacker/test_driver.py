@@ -3,7 +3,7 @@ from mock import AsyncMock
 from opentrons.drivers.asyncio.communication.serial_connection import (
     AsyncResponseSerialConnection,
 )
-from opentrons.drivers.flex_stacker.driver import FlexStackerDriver
+from opentrons.drivers.flex_stacker.driver import FS_MOVE_TIMEOUT, FlexStackerDriver
 from opentrons.drivers.flex_stacker import types
 
 
@@ -264,7 +264,7 @@ async def test_move_in_mm(subject: FlexStackerDriver, connection: AsyncMock) -> 
     assert response
 
     move_to = types.GCODE.MOVE_TO.build_command().add_float("X", 10)
-    connection.send_command.assert_any_call(move_to)
+    connection.send_command.assert_any_call(move_to, timeout=FS_MOVE_TIMEOUT)
     connection.reset_mock()
 
 
@@ -281,7 +281,7 @@ async def test_move_to_switch(
     move_to = types.GCODE.MOVE_TO_SWITCH.build_command().add_int(
         axis.name, direction.value
     )
-    connection.send_command.assert_any_call(move_to)
+    connection.send_command.assert_any_call(move_to, timeout=FS_MOVE_TIMEOUT)
     connection.reset_mock()
 
 
@@ -294,7 +294,7 @@ async def test_home_axis(subject: FlexStackerDriver, connection: AsyncMock) -> N
     assert response
 
     move_to = types.GCODE.HOME_AXIS.build_command().add_int(axis.name, direction.value)
-    connection.send_command.assert_any_call(move_to)
+    connection.send_command.assert_any_call(move_to, timeout=FS_MOVE_TIMEOUT)
     connection.reset_mock()
 
 
@@ -305,6 +305,19 @@ async def test_set_led(subject: FlexStackerDriver, connection: AsyncMock) -> Non
     assert response
 
     set_led = types.GCODE.SET_LED.build_command().add_float("P", 1).add_int("C", 1)
+    connection.send_command.assert_any_call(set_led)
+    connection.reset_mock()
+
+    # test setting only external leds
+    response = await subject.set_led(1, types.LEDColor.RED, external=True)
+    assert response
+
+    set_led = (
+        types.GCODE.SET_LED.build_command()
+        .add_float("P", 1)
+        .add_int("C", 1)
+        .add_int("K", 1)
+    )
     connection.send_command.assert_any_call(set_led)
     connection.reset_mock()
 

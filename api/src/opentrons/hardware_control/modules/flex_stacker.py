@@ -18,6 +18,7 @@ from opentrons.drivers.flex_stacker.driver import (
 from opentrons.drivers.flex_stacker.abstract import AbstractFlexStackerDriver
 from opentrons.drivers.flex_stacker.simulator import SimulatingDriver
 from opentrons.hardware_control.execution_manager import ExecutionManager
+from opentrons.hardware_control.modules.errors import FlexStackerStallError
 from opentrons.hardware_control.poller import Reader, Poller
 from opentrons.hardware_control.modules import mod_abc, update
 from opentrons.hardware_control.modules.types import (
@@ -242,9 +243,10 @@ class FlexStacker(mod_abc.AbstractModule):
             motion_params.max_speed = speed or motion_params.max_speed
             motion_params.acceleration = acceleration or motion_params.acceleration
         distance = direction.distance(distance)
-        success = await self._driver.move_in_mm(axis, distance, params=motion_params)
-        # TODO: This can return a stall, handle that here
-        return success == MoveResult.NO_ERROR
+        res = await self._driver.move_in_mm(axis, distance, params=motion_params)
+        if res == MoveResult.STALL_ERROR:
+            raise FlexStackerStallError(self.device_info["serial"], axis)
+        return res == MoveResult.NO_ERROR
 
     async def home_axis(
         self,
@@ -265,7 +267,8 @@ class FlexStacker(mod_abc.AbstractModule):
         success = await self._driver.move_to_limit_switch(
             axis=axis, direction=direction, params=motion_params
         )
-        # TODO: This can return a stall, handle that here
+        if success == MoveResult.STALL_ERROR:
+            raise FlexStackerStallError(self.device_info["serial"], axis)
         return success == MoveResult.NO_ERROR
 
     async def close_latch(

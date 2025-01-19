@@ -117,7 +117,7 @@ class AbstractFlexStackerDriver(Protocol):
         """Move until limit switch is triggered."""
         ...
 
-    async def home_axis(self, axis: StackerAxis, direction: Direction) -> bool:
+    async def home_axis(self, axis: StackerAxis, direction: Direction) -> MoveResult:
         """Home axis."""
         ...
 

@@ -161,9 +161,9 @@ class SimulatingDriver(AbstractFlexStackerDriver):
         """Move until limit switch is triggered."""
         return MoveResult.NO_ERROR
 
-    async def home_axis(self, axis: StackerAxis, direction: Direction) -> bool:
+    async def home_axis(self, axis: StackerAxis, direction: Direction) -> MoveResult:
         """Home axis."""
-        return True
+        return MoveResult.NO_ERROR
 
     async def set_led(
         self, power: float, color: LEDColor | None = None, external: bool | None = None

@@ -2,6 +2,7 @@ import asyncio
 import re
 from typing import List, Optional
 
+from opentrons.drivers.asyncio.communication.errors import MotorStall
 from opentrons.drivers.command_builder import CommandBuilder
 from opentrons.drivers.asyncio.communication import AsyncResponseSerialConnection
 
@@ -22,7 +23,8 @@ from .types import (
 
 
 FS_BAUDRATE = 115200
-DEFAULT_FS_TIMEOUT = 40
+DEFAULT_FS_TIMEOUT = 1
+FS_MOVE_TIMEOUT = 20
 FS_ACK = "OK\n"
 FS_ERROR_KEYWORD = "err"
 FS_ASYNC_ERROR_ACK = "async"
@@ -402,10 +404,14 @@ class FlexStackerDriver(AbstractFlexStackerDriver):
             ),
             params,
         )
-        resp = await self._connection.send_command(command)
-        if not re.match(rf"^{GCODE.MOVE_TO}$", resp):
-            raise ValueError(f"Incorrect Response for move to: {resp}")
-        # TODO: handle STALL_ERROR
+        try:
+            resp = await self._connection.send_command(command, timeout=FS_MOVE_TIMEOUT)
+            if not re.match(rf"^{GCODE.MOVE_TO}$", resp):
+                raise ValueError(f"Incorrect Response for move to: {resp}")
+        except MotorStall:
+            self._connection._serial.reset_input_buffer()
+            self._connection._serial.reset_output_buffer()
+            return MoveResult.STALL_ERROR
         return MoveResult.NO_ERROR
 
     async def move_to_limit_switch(
@@ -416,20 +422,28 @@ class FlexStackerDriver(AbstractFlexStackerDriver):
             GCODE.MOVE_TO_SWITCH.build_command().add_int(axis.name, direction.value),
             params,
         )
-        resp = await self._connection.send_command(command)
-        if not re.match(rf"^{GCODE.MOVE_TO_SWITCH}$", resp):
-            raise ValueError(f"Incorrect Response for move to switch: {resp}")
-        # TODO: handle STALL_ERROR
+        try:
+            resp = await self._connection.send_command(command, timeout=FS_MOVE_TIMEOUT)
+            if not re.match(rf"^{GCODE.MOVE_TO_SWITCH}$", resp):
+                raise ValueError(f"Incorrect Response for move to switch: {resp}")
+        except MotorStall:
+            self._connection._serial.reset_input_buffer()
+            self._connection._serial.reset_output_buffer()
+            return MoveResult.STALL_ERROR
         return MoveResult.NO_ERROR
 
-    async def home_axis(self, axis: StackerAxis, direction: Direction) -> bool:
+    async def home_axis(self, axis: StackerAxis, direction: Direction) -> MoveResult:
         """Home axis."""
-        resp = await self._connection.send_command(
-            GCODE.HOME_AXIS.build_command().add_int(axis.name, direction.value)
-        )
+        command = GCODE.HOME_AXIS.build_command().add_int(axis.name, direction.value)
+        try:
+            resp = await self._connection.send_command(command, timeout=FS_MOVE_TIMEOUT)
+        except MotorStall:
+            self._connection._serial.reset_input_buffer()
+            self._connection._serial.reset_output_buffer()
+            return MoveResult.STALL_ERROR
         if not re.match(rf"^{GCODE.HOME_AXIS}$", resp):
             raise ValueError(f"Incorrect Response for home axis: {resp}")
-        return True
+        return MoveResult.NO_ERROR
 
     async def set_led(
         self, power: float, color: LEDColor | None = None, external: bool | None = None
@@ -447,7 +461,7 @@ class FlexStackerDriver(AbstractFlexStackerDriver):
         if color is not None:
             command.add_int("C", color.value)
         if external is not None:
-            command.add_int("E", external)
+            command.add_int("K", int(external))
         resp = await self._connection.send_command(command)
         if not re.match(rf"^{GCODE.SET_LED}$", resp):
             raise ValueError(f"Incorrect Response for set led: {resp}")
