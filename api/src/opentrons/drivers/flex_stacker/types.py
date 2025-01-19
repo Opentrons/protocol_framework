@@ -89,7 +89,7 @@ class Direction(Enum):
     """Direction."""
 
     RETRACT = 0  # negative
-    EXTENT = 1  # positive
+    EXTEND = 1  # positive
 
     def __str__(self) -> str:
         """Convert to tag for clear logging."""
@@ -97,7 +97,7 @@ class Direction(Enum):
 
     def opposite(self) -> "Direction":
         """Get opposite direction."""
-        return Direction.EXTENT if self == Direction.RETRACT else Direction.RETRACT
+        return Direction.EXTEND if self == Direction.RETRACT else Direction.RETRACT
 
     def distance(self, distance: float) -> float:
         """Get signed distance, where retract direction is negative."""
@@ -122,10 +122,10 @@ class LimitSwitchStatus:
     def get(self, axis: StackerAxis, direction: Direction) -> bool:
         """Get limit switch status."""
         if axis == StackerAxis.X:
-            return self.XE if direction == Direction.EXTENT else self.XR
+            return self.XE if direction == Direction.EXTEND else self.XR
         if axis == StackerAxis.Z:
-            return self.ZE if direction == Direction.EXTENT else self.ZR
-        if direction == Direction.EXTENT:
+            return self.ZE if direction == Direction.EXTEND else self.ZR
+        if direction == Direction.EXTEND:
             raise ValueError("Latch does not have extent limit switch")
         return self.LR
 
@@ -144,7 +144,7 @@ class PlatformStatus:
 
     def get(self, direction: Direction) -> bool:
         """Get platform status."""
-        return self.E if direction == Direction.EXTENT else self.R
+        return self.E if direction == Direction.EXTEND else self.R
 
     def to_dict(self) -> Dict[str, bool]:
         """Dict of the data."""

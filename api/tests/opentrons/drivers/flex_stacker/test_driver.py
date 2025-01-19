@@ -152,7 +152,7 @@ async def test_get_limit_switch(
     """It should send a get limit switch command and return the boolean of one."""
     connection.send_command.return_value = "M119 XE:1 XR:0 ZE:0 ZR:1 LR:1"
     response = await subject.get_limit_switch(
-        types.StackerAxis.X, types.Direction.EXTENT
+        types.StackerAxis.X, types.Direction.EXTEND
     )
     assert response
 
@@ -193,7 +193,7 @@ async def test_get_platform_sensor(
 ) -> None:
     """It should send a get platform sensor command return status of specified sensor."""
     connection.send_command.return_value = "M121 E:1 R:1"
-    response = await subject.get_platform_sensor(types.Direction.EXTENT)
+    response = await subject.get_platform_sensor(types.Direction.EXTEND)
     assert response
 
     platform_sensor = types.GCODE.GET_PLATFORM_SENSOR.build_command()
@@ -274,7 +274,7 @@ async def test_move_to_switch(
     """It should send a move to switch command"""
     connection.send_command.return_value = "G5"
     axis = types.StackerAxis.X
-    direction = types.Direction.EXTENT
+    direction = types.Direction.EXTEND
     response = await subject.move_to_limit_switch(axis, direction)
     assert response
 
@@ -289,7 +289,7 @@ async def test_home_axis(subject: FlexStackerDriver, connection: AsyncMock) -> N
     """It should send a home axis command"""
     connection.send_command.return_value = "G28"
     axis = types.StackerAxis.X
-    direction = types.Direction.EXTENT
+    direction = types.Direction.EXTEND
     response = await subject.home_axis(axis, direction)
     assert response
 
