@@ -96,7 +96,7 @@ class AspirateWhileTrackingImplementation(
         )
         if not ready_to_aspirate:
             raise PipetteNotReadyToAspirateError(
-                "Pipette cannot aspirate in place because of a previous blow out."
+                "Pipette cannot aspirate while tracking because of a previous blow out."
                 " The first aspirate following a blow-out must be from a specific well"
                 " so the plunger can be reset in a known safe position."
             )
