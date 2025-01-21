@@ -180,7 +180,7 @@ class TouchTipProperties:
         ):
             return SharedDataTouchTipParams(
                 zOffset=self._z_offset,
-                mmToEdge=self._mm_to_edge,
+                mmFromEdge=self._mm_to_edge,
                 speed=self._speed,
             )
         else:
@@ -591,7 +591,7 @@ def _build_touch_tip_properties(
 ) -> TouchTipProperties:
     if touch_tip_properties.params is not None:
         z_offset = touch_tip_properties.params.zOffset
-        mm_to_edge = touch_tip_properties.params.mmToEdge
+        mm_to_edge = touch_tip_properties.params.mmFromEdge
         speed = touch_tip_properties.params.speed
     else:
         z_offset = None
