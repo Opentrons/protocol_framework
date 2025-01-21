@@ -244,7 +244,8 @@ export function DeckSetupContainer(props: DeckSetupTabType): JSX.Element {
             width={
               zoomIn.slot != null || tab === 'protocolSteps' ? '100%' : '50%'
             }
-            minWidth={tab === 'protocolSteps' ? 'auto' : '30rem'}
+            // minWidth={tab === 'protocolSteps' ? 'auto' : '30rem'}
+            minWidth={tab === 'protocolSteps' ? '40rem' : '30rem'}
             deckDef={deckDef}
             viewBox={viewBoxAdjusted}
             outline="auto"
