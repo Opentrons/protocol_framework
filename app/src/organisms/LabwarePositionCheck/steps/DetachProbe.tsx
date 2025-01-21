@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import { css } from 'styled-components'
+import styled from 'styled-components'
 import { useSelector } from 'react-redux'
 
 import {
@@ -22,6 +22,21 @@ import detachProbe96 from '/app/assets/videos/pipette-wizard-flows/Pipette_Detac
 import type { DetachProbeStep, LPCStepProps } from '../types'
 import type { State } from '/app/redux/types'
 import type { StepsInfo } from '/app/organisms/LabwarePositionCheck/redux/types'
+
+const StyledVideo = styled.video`
+  padding-top: ${SPACING.spacing4};
+  width: 100%;
+  min-height: 18rem;
+`
+
+const StyledBody = styled(LegacyStyledText)`
+  ${TYPOGRAPHY.pRegular};
+
+  @media ${RESPONSIVENESS.touchscreenMediaQuerySpecs} {
+    font-size: 1.275rem;
+    line-height: 1.75rem;
+  }
+`
 
 export const DetachProbe = ({
   runId,
@@ -64,32 +79,15 @@ export const DetachProbe = ({
       header={i18n.format(t('detach_probe'), 'capitalize')}
       //  todo(jr, 5/30/23): update animations! these are not final for 1, 8 and 96
       rightHandBody={
-        <video css={VIDEO_STYLE} autoPlay={true} loop={true} controls={false}>
+        <StyledVideo autoPlay loop controls={false}>
           <source src={probeVideoSrc} />
-        </video>
+        </StyledVideo>
       }
       bodyText={
-        <LegacyStyledText css={BODY_STYLE}>
-          {i18n.format(t('remove_probe'), 'capitalize')}
-        </LegacyStyledText>
+        <StyledBody>{i18n.format(t('remove_probe'), 'capitalize')}</StyledBody>
       }
       proceedButtonText={t('confirm_detached')}
       proceed={handleProceed}
     />
   )
 }
-
-const VIDEO_STYLE = css`
-  padding-top: ${SPACING.spacing4};
-  width: 100%;
-  min-height: 18rem;
-`
-
-const BODY_STYLE = css`
-  ${TYPOGRAPHY.pRegular};
-
-  @media ${RESPONSIVENESS.touchscreenMediaQuerySpecs} {
-    font-size: 1.275rem;
-    line-height: 1.75rem;
-  }
-`

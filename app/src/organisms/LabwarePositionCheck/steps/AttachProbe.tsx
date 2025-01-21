@@ -1,5 +1,5 @@
 import { Trans, useTranslation } from 'react-i18next'
-import { css } from 'styled-components'
+import styled from 'styled-components'
 import { useSelector } from 'react-redux'
 
 import {
@@ -24,6 +24,21 @@ import attachProbe96 from '/app/assets/videos/pipette-wizard-flows/Pipette_Attac
 import type { AttachProbeStep, LPCStepProps } from '../types'
 import type { State } from '/app/redux/types'
 import type { LPCWizardState } from '/app/redux/protocol-runs'
+
+const StyledVideo = styled.video`
+  padding-top: ${SPACING.spacing4};
+  width: 100%;
+  min-height: 18rem;
+`
+
+const StyledBody = styled(LegacyStyledText)`
+  ${TYPOGRAPHY.pRegular};
+
+  @media ${RESPONSIVENESS.touchscreenMediaQuerySpecs} {
+    font-size: 1.275rem;
+    line-height: 1.75rem;
+  }
+`
 
 export function AttachProbe({
   runId,
@@ -100,12 +115,12 @@ export function AttachProbe({
       <GenericWizardTile
         header={i18n.format(t('attach_probe'), 'capitalize')}
         rightHandBody={
-          <video css={VIDEO_STYLE} autoPlay={true} loop={true} controls={false}>
+          <StyledVideo autoPlay loop controls={false}>
             <source src={probeVideoSrc} />
-          </video>
+          </StyledVideo>
         }
         bodyText={
-          <LegacyStyledText css={BODY_STYLE}>
+          <StyledBody>
             <Trans
               t={t}
               i18nKey={'install_probe'}
@@ -114,7 +129,7 @@ export function AttachProbe({
                 bold: <strong />,
               }}
             />
-          </LegacyStyledText>
+          </StyledBody>
         }
         proceedButtonText={i18n.format(t('shared:continue'), 'capitalize')}
         proceed={handleProceed}
@@ -122,18 +137,3 @@ export function AttachProbe({
     )
   }
 }
-
-const VIDEO_STYLE = css`
-  padding-top: ${SPACING.spacing4};
-  width: 100%;
-  min-height: 18rem;
-`
-
-const BODY_STYLE = css`
-  ${TYPOGRAPHY.pRegular};
-
-  @media ${RESPONSIVENESS.touchscreenMediaQuerySpecs} {
-    font-size: 1.275rem;
-    line-height: 1.75rem;
-  }
-`
