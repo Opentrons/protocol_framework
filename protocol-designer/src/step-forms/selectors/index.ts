@@ -58,7 +58,7 @@ import type {
   HydratedFormData,
   HydratedHeaterShakerFormData,
   HydratedMagnetFormData,
-  HydratedMixFormDataLegacy,
+  HydratedMixFormData,
   HydratedMoveLabwareFormData,
   HydratedMoveLiquidFormData,
   HydratedPauseFormData,
@@ -603,7 +603,7 @@ export const _hasFieldLevelErrors = (
       return getHasFieldErrors(hydratedForm as HydratedThermocyclerFormData)
 
     case 'mix':
-      return getHasFieldErrors(hydratedForm as HydratedMixFormDataLegacy)
+      return getHasFieldErrors(hydratedForm as HydratedMixFormData)
 
     case 'absorbanceReader':
       return getHasFieldErrors(hydratedForm as HydratedAbsorbanceReaderFormData)

@@ -1,9 +1,9 @@
 import { DEST_WELL_BLOWOUT_DESTINATION } from '@opentrons/step-generation'
-import type { HydratedMixFormDataLegacy } from '../../../form-types'
+import type { HydratedMixFormData } from '../../../form-types'
 // NOTE: expects that '_checkbox' fields are implemented so that
 // when checkbox is disabled, its dependent fields are hidden
 export function getDisabledFieldsMixForm(
-  hydratedForm: HydratedMixFormDataLegacy
+  hydratedForm: HydratedMixFormData
 ): Set<string> {
   const disabled: Set<string> = new Set()
 

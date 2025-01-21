@@ -294,7 +294,7 @@ export interface HydratedCommentFormData extends AnnotationFields {
   }
 }
 
-export interface HydratedMixFormDataLegacy extends AnnotationFields {
+export interface HydratedMixFormData extends AnnotationFields {
   aspirate_delay_checkbox: boolean
   blowout_checkbox: boolean
   changeTip: ChangeTipOptions
@@ -449,7 +449,7 @@ export type HydratedFormData =
   | HydratedCommentFormData
   | HydratedHeaterShakerFormData
   | HydratedMagnetFormData
-  | HydratedMixFormDataLegacy
+  | HydratedMixFormData
   | HydratedMoveLabwareFormData
   | HydratedMoveLiquidFormData
   | HydratedPauseFormData

@@ -5,7 +5,7 @@ import { getDisabledFieldsHeaterShaker } from './getDisabledFieldsHeaterShaker'
 import type {
   HydratedFormData,
   HydratedHeaterShakerFormData,
-  HydratedMixFormDataLegacy,
+  HydratedMixFormData,
   HydratedMoveLiquidFormData,
 } from '../../../form-types'
 
@@ -17,7 +17,7 @@ function _getDisabledFields(hydratedForm: HydratedFormData): Set<string> {
       )
 
     case 'mix':
-      return getDisabledFieldsMixForm(hydratedForm as HydratedMixFormDataLegacy)
+      return getDisabledFieldsMixForm(hydratedForm as HydratedMixFormData)
 
     case 'heaterShaker':
       return getDisabledFieldsHeaterShaker(

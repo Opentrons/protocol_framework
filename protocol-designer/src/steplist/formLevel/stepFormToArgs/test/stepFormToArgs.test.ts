@@ -3,7 +3,7 @@ import { _castForm } from '../index'
 import type { LabwareEntity, PipetteEntity } from '@opentrons/step-generation'
 import type {
   HydratedMagnetFormData,
-  HydratedMixFormDataLegacy,
+  HydratedMixFormData,
   HydratedMoveLiquidFormData,
   HydratedPauseFormData,
   HydratedTemperatureFormData,
@@ -70,7 +70,7 @@ describe('form casting', () => {
   })
 
   it('should cast mix form fields', () => {
-    const input: HydratedMixFormDataLegacy = {
+    const input: HydratedMixFormData = {
       id: 'stepId',
       stepType: 'mix',
       stepName: 'mix',

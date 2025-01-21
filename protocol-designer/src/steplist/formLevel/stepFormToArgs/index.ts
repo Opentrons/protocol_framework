@@ -16,7 +16,7 @@ import type {
   HydratedCommentFormData,
   HydratedHeaterShakerFormData,
   HydratedMagnetFormData,
-  HydratedMixFormDataLegacy,
+  HydratedMixFormData,
   HydratedMoveLabwareFormData,
   HydratedMoveLiquidFormData,
   HydratedTemperatureFormData,
@@ -46,7 +46,7 @@ export const stepFormToArgs = (hydratedForm: HydratedFormData): StepArgs => {
       return pauseFormToArgs(castForm as HydratedPauseFormData)
 
     case 'mix':
-      return mixFormToArgs(castForm as HydratedMixFormDataLegacy)
+      return mixFormToArgs(castForm as HydratedMixFormData)
 
     case 'magnet':
       return magnetFormToArgs(castForm as HydratedMagnetFormData)
