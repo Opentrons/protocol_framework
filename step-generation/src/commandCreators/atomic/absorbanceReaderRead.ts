@@ -1,22 +1,17 @@
 import * as errorCreators from '../../errorCreators'
 import { absorbanceReaderStateGetter } from '../../robotStateSelectors'
 import { uuid } from '../../utils'
-import type {
-  AbsorbanceReaderReadArgs,
-  CommandCreator,
-  CommandCreatorError,
-} from '../../types'
+import type { CommandCreator, CommandCreatorError } from '../../types'
+import type { AbsorbanceReaderReadCreateCommand } from '@opentrons/shared-data'
 
-export const absorbanceReaderRead: CommandCreator<AbsorbanceReaderReadArgs> = (
-  args,
-  invariantContext,
-  prevRobotState
-) => {
-  const { module, fileName } = args
+export const absorbanceReaderRead: CommandCreator<
+  AbsorbanceReaderReadCreateCommand['params']
+> = (args, invariantContext, prevRobotState) => {
+  const { moduleId, fileName } = args
   const errors: CommandCreatorError[] = []
   const absorbanceReaderState = absorbanceReaderStateGetter(
     prevRobotState,
-    module
+    moduleId
   )
   if (absorbanceReaderState == null) {
     return {
@@ -36,7 +31,7 @@ export const absorbanceReaderRead: CommandCreator<AbsorbanceReaderReadArgs> = (
             commandType: 'absorbanceReader/read',
             key: uuid(),
             params: {
-              moduleId: module,
+              moduleId,
               ...(fileName != null ? { fileName } : {}),
             },
           },

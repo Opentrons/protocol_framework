@@ -175,19 +175,7 @@ export interface BlowoutFields {
 export interface ChangeTipFields {
   changeTip?: ChangeTipOptions
 }
-export type MixForm = AnnotationFields &
-  BlowoutFields &
-  ChangeTipFields & {
-    id: StepIdType
-    stepType: 'mix'
-    labware?: string
-    pipette?: string
-    times?: string
-    touchTip?: boolean
-    volume?: string
-    wells?: string[]
-  }
-export type PauseForm = AnnotationFields & {
+export type HydratedPauseFormData = AnnotationFields & {
   stepType: 'pause'
   id: StepIdType
   pauseAction?:
@@ -197,11 +185,11 @@ export type PauseForm = AnnotationFields & {
   pauseMessage?: string
   pauseTemperature?: string
   pauseTime?: string
+  moduleId?: string
 }
-// TODO: separate field values from from metadata
 export interface FormData {
   stepType: StepType
-  id: StepIdType // TODO: form value processing to ensure type
+  id: StepIdType
   [key: string]: any
 }
 export const PROFILE_CYCLE: 'profileCycle' = 'profileCycle'
@@ -229,92 +217,80 @@ export type BlankForm = AnnotationFields & {
   id: StepIdType
 }
 
-export interface HydratedMoveLiquidFormData {
+export interface HydratedMoveLiquidFormData extends AnnotationFields {
   id: string
   stepType: 'moveLiquid'
-  stepName: string
-  fields: {
-    aspirate_airGap_checkbox: boolean
-    aspirate_delay_checkbox: boolean
-    aspirate_labware: LabwareEntity
-    aspirate_mix_checkbox: boolean
-    aspirate_touchTip_checkbox: boolean
-    aspirate_wellOrder_first: WellOrderOption
-    aspirate_wellOrder_second: WellOrderOption
-    aspirate_wells: string[]
-    blowout_checkbox: boolean
-    changeTip: ChangeTipOptions
-    dispense_airGap_checkbox: boolean
-    dispense_delay_checkbox: boolean
-    dispense_labware: LabwareEntity | AdditionalEquipmentEntity
-    dispense_mix_checkbox: boolean
-    dispense_touchTip_checkbox: boolean
-    dispense_wellOrder_first: WellOrderOption
-    dispense_wellOrder_second: WellOrderOption
-    dispense_wells: string[]
-    disposalVolume_checkbox: boolean
-    dropTip_location: string
-    nozzles: NozzleConfigurationStyle | null
-    path: PathOption
-    pipette: PipetteEntity
-    tipRack: string
-    volume: number
-    aspirate_airGap_volume?: number | null
-    aspirate_delay_mmFromBottom?: number | null
-    aspirate_delay_seconds?: number | null
-    aspirate_flowRate?: number | null
-    aspirate_mix_times?: number | null
-    aspirate_mix_volume?: number | null
-    aspirate_mmFromBottom?: number | null
-    aspirate_touchTip_mmFromBottom?: number | null
-    aspirate_wells_grouped?: boolean | null
-    aspirate_x_position?: number | null
-    aspirate_y_position?: number | null
-    blowout_flowRate?: number | null
-    blowout_location?: string | null
-    blowout_z_offset?: number | null
-    dispense_airGap_volume?: number | null
-    dispense_delay_mmFromBottom?: number | null
-    dispense_delay_seconds?: number | null
-    dispense_flowRate?: number | null
-    dispense_mix_times?: number | null
-    dispense_mix_volume?: number | null
-    dispense_mmFromBottom?: number | null
-    dispense_touchTip_mmFromBottom?: number | null
-    dispense_x_position?: number | null
-    dispense_y_position?: number | null
-    disposalVolume_volume?: number | null
-    dropTip_wellNames?: string[] | null
-    pickUpTip_location?: string | null
-    pickUpTip_wellNames?: string[] | null
-    preWetTip?: boolean | null
-  }
-  description?: string | null
+  aspirate_airGap_checkbox: boolean
+  aspirate_delay_checkbox: boolean
+  aspirate_labware: LabwareEntity
+  aspirate_mix_checkbox: boolean
+  aspirate_touchTip_checkbox: boolean
+  aspirate_wellOrder_first: WellOrderOption
+  aspirate_wellOrder_second: WellOrderOption
+  aspirate_wells: string[]
+  blowout_checkbox: boolean
+  changeTip: ChangeTipOptions
+  dispense_airGap_checkbox: boolean
+  dispense_delay_checkbox: boolean
+  dispense_labware: LabwareEntity | AdditionalEquipmentEntity
+  dispense_mix_checkbox: boolean
+  dispense_touchTip_checkbox: boolean
+  dispense_wellOrder_first: WellOrderOption
+  dispense_wellOrder_second: WellOrderOption
+  dispense_wells: string[]
+  disposalVolume_checkbox: boolean
+  dropTip_location: string
+  nozzles: NozzleConfigurationStyle | null
+  path: PathOption
+  pipette: PipetteEntity
+  tipRack: string
+  volume: number
+  aspirate_airGap_volume?: number | null
+  aspirate_delay_mmFromBottom?: number | null
+  aspirate_delay_seconds?: number | null
+  aspirate_flowRate?: number | null
+  aspirate_mix_times?: number | null
+  aspirate_mix_volume?: number | null
+  aspirate_mmFromBottom?: number | null
+  aspirate_touchTip_mmFromBottom?: number | null
+  aspirate_wells_grouped?: boolean | null
+  aspirate_x_position?: number | null
+  aspirate_y_position?: number | null
+  blowout_flowRate?: number | null
+  blowout_location?: string | null
+  blowout_z_offset?: number | null
+  dispense_airGap_volume?: number | null
+  dispense_delay_mmFromBottom?: number | null
+  dispense_delay_seconds?: number | null
+  dispense_flowRate?: number | null
+  dispense_mix_times?: number | null
+  dispense_mix_volume?: number | null
+  dispense_mmFromBottom?: number | null
+  dispense_touchTip_mmFromBottom?: number | null
+  dispense_x_position?: number | null
+  dispense_y_position?: number | null
+  disposalVolume_volume?: number | null
+  dropTip_wellNames?: string[] | null
+  pickUpTip_location?: string | null
+  pickUpTip_wellNames?: string[] | null
+  preWetTip?: boolean | null
 }
 
-export interface HydratedMoveLabwareFormData {
+export interface HydratedMoveLabwareFormData extends AnnotationFields {
   id: string
   stepType: 'moveLabware'
-  stepName: string
-  fields: {
-    labware: LabwareEntity
-    newLocation: LabwareLocation
-    useGripper: boolean
-  }
-  description?: string | null
+  labware: LabwareEntity
+  newLocation: LabwareLocation
+  useGripper: boolean
 }
 
-export interface HydratedCommentFormData {
+export interface HydratedCommentFormData extends AnnotationFields {
   id: string
   stepType: 'comment'
-  stepName: string
-  fields: {
-    message: string
-  }
-  stepDetails?: string | null
+  message: string
 }
 
-export interface HydratedMixFormDataLegacy {
+export interface HydratedMixFormData extends AnnotationFields {
   aspirate_delay_checkbox: boolean
   blowout_checkbox: boolean
   changeTip: ChangeTipOptions
@@ -327,7 +303,6 @@ export interface HydratedMixFormDataLegacy {
   mix_wellOrder_second: WellOrderOption
   nozzles: NozzleConfigurationStyle | null
   pipette: PipetteEntity
-  stepName: string
   stepType: 'mix'
   tipRack: string
   volume: number
@@ -346,7 +321,6 @@ export interface HydratedMixFormDataLegacy {
   mix_y_position?: number | null
   pickUpTip_location?: string | null
   pickUpTip_wellNames?: string[] | null
-  stepDetails?: string | null
   times?: number | null
 }
 export type MagnetAction = 'engage' | 'disengage'
@@ -354,19 +328,18 @@ export type HydratedMagnetFormData = AnnotationFields & {
   engageHeight: string | null
   id: string
   magnetAction: MagnetAction
-  moduleId: string | null
+  moduleId: string
   stepDetails: string | null
   stepType: 'magnet'
 }
-export interface HydratedTemperatureFormData {
+export interface HydratedTemperatureFormData extends AnnotationFields {
   id: string
   moduleId: string | null
   setTemperature: 'true' | 'false'
-  stepDetails: string | null
   stepType: 'temperature'
   targetTemperature: string | null
 }
-export interface HydratedHeaterShakerFormData {
+export interface HydratedHeaterShakerFormData extends AnnotationFields {
   heaterShakerSetTimer: boolean | null
   heaterShakerTimer: string | null
   id: string
@@ -374,10 +347,30 @@ export interface HydratedHeaterShakerFormData {
   moduleId: string
   setHeaterShakerTemperature: boolean
   setShake: boolean
-  stepDetails: string | null
   stepType: 'heaterShaker'
   targetHeaterShakerTemperature: string | null
   targetSpeed: string | null
+}
+
+export interface HydratedThermocyclerFormData extends AnnotationFields {
+  id: string
+  stepType: 'thermocycler'
+  blockIsActive: boolean
+  blockIsActiveHold: boolean
+  blockTargetTemp: string | null
+  blockTargetTempHold: string | null
+  lidIsActive: boolean
+  lidIsActiveHold: boolean
+  lidOpen: boolean
+  lidOpenHold: boolean
+  lidTargetTemp: string | null
+  lidTargetTempHold: string | null
+  moduleId: string
+  orderedProfileItems: string[]
+  profileItemsById: Record<string, ProfileItem>
+  profileTargetLidTemp: string | null
+  profileVolume: string | null
+  thermocyclerFormType: 'thermocyclerState' | 'thermocyclerProfile'
 }
 
 export type AbsorbanceReaderFormType =
@@ -385,7 +378,9 @@ export type AbsorbanceReaderFormType =
   | typeof ABSORBANCE_READER_READ
   | typeof ABSORBANCE_READER_LID
 
-export interface HydratedAbsorbanceReaderFormData {
+export interface HydratedAbsorbanceReaderFormData extends AnnotationFields {
+  stepType: 'absorbanceReader'
+  id: string
   absorbanceReaderFormType: AbsorbanceReaderFormType | null
   fileName: string | null
   lidOpen: boolean | null
@@ -397,13 +392,7 @@ export interface HydratedAbsorbanceReaderFormData {
   referenceWavelengthActive: boolean
   wavelengths: string[]
 }
-// TODO: Ian 2019-01-17 Moving away from this and towards nesting all form fields
-// inside `fields` key, but deprecating transfer/consolidate/distribute is a pre-req
-export type HydratedMoveLiquidFormDataLegacy = AnnotationFields &
-  HydratedMoveLiquidFormData['fields'] & {
-    id: string
-    stepType: 'moveLiquid'
-  }
+
 // fields used in TipPositionInput
 export type TipZOffsetFields =
   | 'aspirate_mmFromBottom'
@@ -451,7 +440,14 @@ export function getIsDelayPositionField(fieldName: string): boolean {
 }
 export type CountPerStepType = Partial<Record<StepType, number>>
 
-//  TODO: get real HydratedFormData type
-export interface HydratedFormdata {
-  [key: string]: any
-}
+export type HydratedFormData =
+  | HydratedAbsorbanceReaderFormData
+  | HydratedCommentFormData
+  | HydratedHeaterShakerFormData
+  | HydratedMagnetFormData
+  | HydratedMixFormData
+  | HydratedMoveLabwareFormData
+  | HydratedMoveLiquidFormData
+  | HydratedPauseFormData
+  | HydratedTemperatureFormData
+  | HydratedThermocyclerFormData

@@ -42,12 +42,10 @@ describe('absorbanceReaderCloseLid', () => {
       {} as AbsorbanceReaderState
     )
   })
-  it.only('creates absorbance reader close lid command', () => {
-    const module = moduleId
+  it('creates absorbance reader close lid command', () => {
     const result = absorbanceReaderCloseLid(
       {
-        module,
-        commandCreatorFnName: 'absorbanceReaderCloseLid',
+        moduleId,
       },
       invariantContext,
       robotState
@@ -58,19 +56,17 @@ describe('absorbanceReaderCloseLid', () => {
           commandType: 'absorbanceReader/closeLid',
           key: expect.any(String),
           params: {
-            moduleId: module,
+            moduleId,
           },
         },
       ],
     })
   })
   it('creates returns error if bad module state', () => {
-    const module = moduleId
     vi.mocked(absorbanceReaderStateGetter).mockReturnValue(null)
     const result = absorbanceReaderCloseLid(
       {
-        module,
-        commandCreatorFnName: 'absorbanceReaderCloseLid',
+        moduleId,
       },
       invariantContext,
       robotState

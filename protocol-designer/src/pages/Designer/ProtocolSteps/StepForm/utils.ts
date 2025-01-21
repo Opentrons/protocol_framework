@@ -25,6 +25,7 @@ import type {
   StepFieldName,
   StepType,
   PathOption,
+  HydratedFormData,
 } from '../../../../form-types'
 import type { FormError } from '../../../../steplist/formLevel'
 import type { NozzleType } from '../../../../types'
@@ -254,7 +255,7 @@ export const makeSingleEditFieldProps = (
   focusHandlers: FocusHandlers,
   formData: FormData,
   handleChangeFormInput: (name: string, value: unknown) => void,
-  hydratedForm: { [key: string]: any }, //  TODO: create real HydratedFormData type
+  hydratedForm: HydratedFormData,
   t: any
 ): FieldPropsByName => {
   const { dirtyFields, blur, focusedField, focus } = focusHandlers
