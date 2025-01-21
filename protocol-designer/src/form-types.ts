@@ -220,62 +220,60 @@ export type BlankForm = AnnotationFields & {
 export interface HydratedMoveLiquidFormData extends AnnotationFields {
   id: string
   stepType: 'moveLiquid'
-  fields: {
-    aspirate_airGap_checkbox: boolean
-    aspirate_delay_checkbox: boolean
-    aspirate_labware: LabwareEntity
-    aspirate_mix_checkbox: boolean
-    aspirate_touchTip_checkbox: boolean
-    aspirate_wellOrder_first: WellOrderOption
-    aspirate_wellOrder_second: WellOrderOption
-    aspirate_wells: string[]
-    blowout_checkbox: boolean
-    changeTip: ChangeTipOptions
-    dispense_airGap_checkbox: boolean
-    dispense_delay_checkbox: boolean
-    dispense_labware: LabwareEntity | AdditionalEquipmentEntity
-    dispense_mix_checkbox: boolean
-    dispense_touchTip_checkbox: boolean
-    dispense_wellOrder_first: WellOrderOption
-    dispense_wellOrder_second: WellOrderOption
-    dispense_wells: string[]
-    disposalVolume_checkbox: boolean
-    dropTip_location: string
-    nozzles: NozzleConfigurationStyle | null
-    path: PathOption
-    pipette: PipetteEntity
-    tipRack: string
-    volume: number
-    aspirate_airGap_volume?: number | null
-    aspirate_delay_mmFromBottom?: number | null
-    aspirate_delay_seconds?: number | null
-    aspirate_flowRate?: number | null
-    aspirate_mix_times?: number | null
-    aspirate_mix_volume?: number | null
-    aspirate_mmFromBottom?: number | null
-    aspirate_touchTip_mmFromBottom?: number | null
-    aspirate_wells_grouped?: boolean | null
-    aspirate_x_position?: number | null
-    aspirate_y_position?: number | null
-    blowout_flowRate?: number | null
-    blowout_location?: string | null
-    blowout_z_offset?: number | null
-    dispense_airGap_volume?: number | null
-    dispense_delay_mmFromBottom?: number | null
-    dispense_delay_seconds?: number | null
-    dispense_flowRate?: number | null
-    dispense_mix_times?: number | null
-    dispense_mix_volume?: number | null
-    dispense_mmFromBottom?: number | null
-    dispense_touchTip_mmFromBottom?: number | null
-    dispense_x_position?: number | null
-    dispense_y_position?: number | null
-    disposalVolume_volume?: number | null
-    dropTip_wellNames?: string[] | null
-    pickUpTip_location?: string | null
-    pickUpTip_wellNames?: string[] | null
-    preWetTip?: boolean | null
-  }
+  aspirate_airGap_checkbox: boolean
+  aspirate_delay_checkbox: boolean
+  aspirate_labware: LabwareEntity
+  aspirate_mix_checkbox: boolean
+  aspirate_touchTip_checkbox: boolean
+  aspirate_wellOrder_first: WellOrderOption
+  aspirate_wellOrder_second: WellOrderOption
+  aspirate_wells: string[]
+  blowout_checkbox: boolean
+  changeTip: ChangeTipOptions
+  dispense_airGap_checkbox: boolean
+  dispense_delay_checkbox: boolean
+  dispense_labware: LabwareEntity | AdditionalEquipmentEntity
+  dispense_mix_checkbox: boolean
+  dispense_touchTip_checkbox: boolean
+  dispense_wellOrder_first: WellOrderOption
+  dispense_wellOrder_second: WellOrderOption
+  dispense_wells: string[]
+  disposalVolume_checkbox: boolean
+  dropTip_location: string
+  nozzles: NozzleConfigurationStyle | null
+  path: PathOption
+  pipette: PipetteEntity
+  tipRack: string
+  volume: number
+  aspirate_airGap_volume?: number | null
+  aspirate_delay_mmFromBottom?: number | null
+  aspirate_delay_seconds?: number | null
+  aspirate_flowRate?: number | null
+  aspirate_mix_times?: number | null
+  aspirate_mix_volume?: number | null
+  aspirate_mmFromBottom?: number | null
+  aspirate_touchTip_mmFromBottom?: number | null
+  aspirate_wells_grouped?: boolean | null
+  aspirate_x_position?: number | null
+  aspirate_y_position?: number | null
+  blowout_flowRate?: number | null
+  blowout_location?: string | null
+  blowout_z_offset?: number | null
+  dispense_airGap_volume?: number | null
+  dispense_delay_mmFromBottom?: number | null
+  dispense_delay_seconds?: number | null
+  dispense_flowRate?: number | null
+  dispense_mix_times?: number | null
+  dispense_mix_volume?: number | null
+  dispense_mmFromBottom?: number | null
+  dispense_touchTip_mmFromBottom?: number | null
+  dispense_x_position?: number | null
+  dispense_y_position?: number | null
+  disposalVolume_volume?: number | null
+  dropTip_wellNames?: string[] | null
+  pickUpTip_location?: string | null
+  pickUpTip_wellNames?: string[] | null
+  preWetTip?: boolean | null
 }
 
 export interface HydratedMoveLabwareFormData extends AnnotationFields {

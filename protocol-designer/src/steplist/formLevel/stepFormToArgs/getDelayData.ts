@@ -7,7 +7,7 @@ import type {
   HydratedMixFormDataLegacy,
 } from '../../../form-types'
 export function getMoveLiquidDelayData(
-  hydratedFormData: HydratedMoveLiquidFormData['fields'],
+  hydratedFormData: HydratedMoveLiquidFormData,
   checkboxField: DelayCheckboxFields,
   secondsField: DelaySecondFields,
   mmFromBottomField:

@@ -6,7 +6,7 @@ import type { HydratedMoveLiquidFormData } from '../../../form-types'
 // NOTE: expects that '_checkbox' fields are implemented so that
 // when checkbox is disabled, its dependent fields are hidden
 export function getDisabledFieldsMoveLiquidForm(
-  hydratedForm: HydratedMoveLiquidFormData['fields']
+  hydratedForm: HydratedMoveLiquidFormData
 ): Set<string> {
   const disabled: Set<string> = new Set()
   const prefixes = ['aspirate', 'dispense']

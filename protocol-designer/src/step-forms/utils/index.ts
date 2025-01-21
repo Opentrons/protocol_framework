@@ -290,7 +290,8 @@ export function getHydratedForm(
   const hydratedForm = mapValues(rawForm, (value, name) =>
     hydrateField(invariantContext, name, value as string)
   )
-  //  @ts-expect-error: todo: need to make FormData types
+  //  @ts-expect-error because hydrateField doesn't hydrate every formField type
+  //  need to udpate to hdyrate every field, will do this in a followup
   return hydratedForm
 }
 
