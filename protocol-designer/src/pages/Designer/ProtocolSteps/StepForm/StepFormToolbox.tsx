@@ -72,7 +72,6 @@ import {
   hoverSelection,
   selectDropdownItem,
 } from '../../../../ui/steps/actions/actions'
-import { title } from 'process'
 
 type StepFormMap = {
   [K in StepType]?: ComponentType<StepFormProps> | null
