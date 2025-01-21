@@ -45,7 +45,9 @@ export enum Actions {
   ChoseDeckSlotD2 = 'Choose deck slot D2',
   ChoseDeckSlotD3 = 'Choose deck slot D3',
   AddHardwareLabware = 'Adds labware to deck slot by chose deck slot',
+  EditHardwareLabwareOnDeck = 'Edits existing labware/harddware on deck slot',
   ClickLabwareHeader = 'Click Labware',
+  AddAdapters = 'Add an adapter to a module after selecting labware header',
   ClickWellPlatesSection = 'Click Well plates',
   SelectArmadillo96WellPlate = 'Select Armadillo 96 Well Plate',
   SelectBioRad96WellPlate = 'Select Bio-Rad 96 Well Plate',
@@ -59,6 +61,9 @@ export enum Actions {
   SetVolumeAndSaveforWells = 'Set volume and save for wells',
   ProtocolStepsH = 'Select Protocol Steps Header',
   AddStep = 'Use after making sure you are on ProtocolStepsH or have already made a step',
+  DeepWellTempModAdapter = 'Select Opentrons 96 Deep Well Temperature Module Adapter',
+  AddNest96DeepWellPlate = 'Adds Nest 96 Deep Well Plate',
+  Done = 'Select Done on a step form',
 }
 
 export enum Verifications {
@@ -114,6 +119,7 @@ export enum Content {
   EditProtocol = 'Edit protocol',
   EditSlot = 'Edit slot',
   AddLabwareToDeck = 'Add hardware/labware',
+  EditHardwareLabwareOnDeck = 'Edit hardware/labware',
   LabwareH = 'Labware',
   WellPlatesCat = 'Well plates',
   Armadillo96WellPlate200uL = 'Armadillo 96 Well Plate 200 µL PCR Full Skirt',
@@ -124,6 +130,7 @@ export enum Content {
   SampleLiquidName = 'My liquid!',
   ProtocolSteps = 'Protocol steps',
   AddStep = 'Add Step',
+  NestDeepWell = 'NEST 96 Deep Well Plate 2mL',
 }
 
 export enum Locators {
@@ -143,6 +150,7 @@ export enum Locators {
   SaveButton = 'button[type="submit"]',
   LiquidsDropdown = 'div[tabindex="0"].sc-bqWxrE', // Add new locator for the dropdown
   LabwareSelectionLocation = '[data-testid="Toolbox_confirmButton"]',
+  DoneButtonLabwareSelection = '[data-testid="Toolbox_confirmButton"]',
 }
 
 const chooseDeckSlot = (
@@ -307,13 +315,16 @@ const executeAction = (action: Actions | UniversalActions): void => {
     case Actions.ChoseDeckSlotD3:
       chooseDeckSlot('D3').click()
       break
-    case Actions.AddHardwareLabware: // New case
+    case Actions.AddHardwareLabware:
       cy.contains(Content.AddLabwareToDeck).click()
       break
-    case Actions.ClickLabwareHeader: // New case
+    case Actions.EditHardwareLabwareOnDeck:
+      cy.contains(Content.EditHardwareLabwareOnDeck).click()
+      break
+    case Actions.ClickLabwareHeader:
       cy.contains(Content.LabwareH).click()
       break
-    case Actions.ClickWellPlatesSection: // New case
+    case Actions.ClickWellPlatesSection:
       cy.contains(Content.WellPlatesCat).click()
       break
     case Actions.ChoseDeckSlotC2Labware:
@@ -379,6 +390,20 @@ const executeAction = (action: Actions | UniversalActions): void => {
       break
     case Actions.AddStep:
       cy.contains('button', Content.AddStep).click()
+      break
+    case Actions.AddAdapters:
+      cy.contains('Adapters').click()
+      break
+    case Actions.DeepWellTempModAdapter:
+      cy.contains('Opentrons 96 Deep Well Temperature Module Adapter').click()
+      break
+    case Actions.AddNest96DeepWellPlate:
+      cy.contains(Content.NestDeepWell).click()
+      break
+    case Actions.Done:
+      cy.get(Locators.DoneButtonLabwareSelection)
+        .contains('Done')
+        .click({ force: true })
       break
     default:
       throw new Error(`Unrecognized action: ${action as string}`)
