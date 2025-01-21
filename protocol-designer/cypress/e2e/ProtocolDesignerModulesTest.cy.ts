@@ -70,6 +70,7 @@ describe('The Redesigned Create Protocol Landing Page', () => {
       Actions.Done,
       Actions.ProtocolStepsH,
       Actions.AddStep,
+      Actions.AddTemperatureStep,
     ]
     runCreateTest(steps)
   })

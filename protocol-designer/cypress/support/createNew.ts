@@ -64,6 +64,7 @@ export enum Actions {
   DeepWellTempModAdapter = 'Select Opentrons 96 Deep Well Temperature Module Adapter',
   AddNest96DeepWellPlate = 'Adds Nest 96 Deep Well Plate',
   Done = 'Select Done on a step form',
+  AddTemperatureStep = 'Selects Temperature Module step',
 }
 
 export enum Verifications {
@@ -404,6 +405,9 @@ const executeAction = (action: Actions | UniversalActions): void => {
       cy.get(Locators.DoneButtonLabwareSelection)
         .contains('Done')
         .click({ force: true })
+      break
+    case Actions.AddTemperatureStep:
+      cy.contains('Temperature').click()
       break
     default:
       throw new Error(`Unrecognized action: ${action as string}`)
