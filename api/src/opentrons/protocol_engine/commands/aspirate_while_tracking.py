@@ -30,7 +30,7 @@ from ..state.update_types import CLEAR
 from ..types import CurrentWell, DeckPoint
 
 if TYPE_CHECKING:
-    from ..execution import MovementHandler, PipettingHandler, GantryMover
+    from ..execution import PipettingHandler, GantryMover
     from ..resources import ModelUtils
     from ..state.state import StateView
     from ..notes import CommandNoteAdder
@@ -72,7 +72,6 @@ class AspirateWhileTrackingImplementation(
         pipetting: PipettingHandler,
         state_view: StateView,
         hardware_api: HardwareControlAPI,
-        movement: MovementHandler,
         command_note_adder: CommandNoteAdder,
         model_utils: ModelUtils,
         gantry_mover: GantryMover,
@@ -81,7 +80,6 @@ class AspirateWhileTrackingImplementation(
         self._pipetting = pipetting
         self._state_view = state_view
         self._hardware_api = hardware_api
-        self._movement = movement
         self._command_note_adder = command_note_adder
         self._model_utils = model_utils
         self._gantry_mover = gantry_mover

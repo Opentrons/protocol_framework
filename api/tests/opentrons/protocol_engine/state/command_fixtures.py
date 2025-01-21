@@ -247,15 +247,14 @@ def create_aspirate_command(
     )
 
 
-# need a create_aspirate_while_tracking, create_dispense_while_tracking
 def create_aspirate_while_tracking_command(
-    pipette_id: str,
-    volume: float,
-    flow_rate: float,
+    pipette_id: str, volume: float, flow_rate: float, labware_id: str, well_name: str
 ) -> cmd.AspirateWhileTracking:
     """Get a completed Aspirate command."""
     params = cmd.AspirateWhileTrackingParams(
         pipetteId=pipette_id,
+        labwareId=labware_id,
+        wellName=well_name,
         volume=volume,
         flowRate=flow_rate,
     )
@@ -338,6 +337,29 @@ def create_dispense_in_place_command(
     result = cmd.DispenseInPlaceResult(volume=volume)
 
     return cmd.DispenseInPlace(
+        id="command-id",
+        key="command-key",
+        status=cmd.CommandStatus.SUCCEEDED,
+        createdAt=datetime.now(),
+        params=params,
+        result=result,
+    )
+
+
+def create_dispense_while_tracking_command(
+    pipette_id: str, volume: float, flow_rate: float, labware_id: str, well_name: str
+) -> cmd.DispenseWhileTracking:
+    """Get a completed DispenseWhileTracking command."""
+    params = cmd.DispenseWhileTrackingParams(
+        pipetteId=pipette_id,
+        labwareId=labware_id,
+        wellName=well_name,
+        volume=volume,
+        flowRate=flow_rate,
+    )
+    result = cmd.DispenseWhileTrackingResult(volume=volume)
+
+    return cmd.DispenseWhileTracking(
         id="command-id",
         key="command-key",
         status=cmd.CommandStatus.SUCCEEDED,

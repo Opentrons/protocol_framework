@@ -32,7 +32,7 @@ from .command import (
 )
 
 if TYPE_CHECKING:
-    from ..execution import MovementHandler, PipettingHandler, GantryMover
+    from ..execution import PipettingHandler, GantryMover
     from ..resources import ModelUtils
     from ..state.state import StateView
 
@@ -79,14 +79,12 @@ class DispenseWhileTrackingImplementation(
     def __init__(
         self,
         state_view: StateView,
-        movement: MovementHandler,
         pipetting: PipettingHandler,
         model_utils: ModelUtils,
         gantry_mover: GantryMover,
         **kwargs: object,
     ) -> None:
         self._state_view = state_view
-        self._movement = movement
         self._pipetting = pipetting
         self._model_utils = model_utils
         self._gantry_mover = gantry_mover

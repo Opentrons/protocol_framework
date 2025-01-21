@@ -370,6 +370,7 @@ class VirtualPipettingHandler(PipettingHandler):
     ) -> float:
         """Detect liquid level."""
         well_def = self._state_view.labware.get_well_definition(labware_id, well_name)
+        # raise ValueError(f"returning liquid height {well_def.depth}")
         return well_def.depth
 
     def _validate_tip_attached(self, pipette_id: str, command_name: str) -> None:
