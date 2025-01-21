@@ -247,6 +247,30 @@ def create_aspirate_command(
     )
 
 
+# need a create_aspirate_while_tracking, create_dispense_while_tracking
+def create_aspirate_while_tracking_command(
+    pipette_id: str,
+    volume: float,
+    flow_rate: float,
+) -> cmd.AspirateWhileTracking:
+    """Get a completed Aspirate command."""
+    params = cmd.AspirateWhileTrackingParams(
+        pipetteId=pipette_id,
+        volume=volume,
+        flowRate=flow_rate,
+    )
+    result = cmd.AspirateWhileTrackingResult(volume=volume)
+
+    return cmd.AspirateWhileTracking(
+        id="command-id",
+        key="command-key",
+        status=cmd.CommandStatus.SUCCEEDED,
+        createdAt=datetime.now(),
+        params=params,
+        result=result,
+    )
+
+
 def create_aspirate_in_place_command(
     pipette_id: str,
     volume: float,
