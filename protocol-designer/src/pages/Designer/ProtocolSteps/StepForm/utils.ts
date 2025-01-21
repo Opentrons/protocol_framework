@@ -339,6 +339,7 @@ export const getSaveStepSnackbarText = (
 }
 
 export const capitalizeFirstLetter = (stepName: string): string => {
+  // Note - this is a special case
   if (stepName === 'absorbance plate reader') return startCase(stepName)
 
   // Note - check is for heater-shaker
