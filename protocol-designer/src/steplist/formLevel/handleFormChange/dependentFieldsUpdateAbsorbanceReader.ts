@@ -3,6 +3,7 @@ import { chainPatchUpdaters, fieldHasChanged } from './utils'
 import { getDefaultsForStepType } from '../getDefaultsForStepType'
 import type { FormData, StepFieldName } from '../../../form-types'
 import type { FormPatch } from '../../actions/types'
+import { ABSORBANCE_READER_COLOR_BY_WAVELENGTH } from '../../../constants'
 
 const getDefaultFields = (...fields: StepFieldName[]): FormPatch =>
   pick(getDefaultsForStepType('absorbanceReader'), fields)
@@ -31,11 +32,35 @@ const updatePatchOnAbsorbanceReaderFormType = (
   return patch
 }
 
+const updatePatchOnAbsorbanceReaderReferenceWavelengthActive = (
+  patch: FormPatch,
+  rawForm: FormData
+): FormPatch => {
+  if (
+    fieldHasChanged(rawForm, patch, 'referenceWavelengthActive') &&
+    !rawForm.referenceWavelengthActive &&
+    rawForm.referenceWavelength == null
+  ) {
+    return {
+      ...patch,
+      referenceWavelength: Object.keys(
+        ABSORBANCE_READER_COLOR_BY_WAVELENGTH
+      )[0],
+    }
+  }
+  return patch
+}
+
 export const dependentFieldsUpdateAbsorbanceReader = (
   originalPatch: FormPatch,
   rawForm: FormData
 ): FormPatch => {
   return chainPatchUpdaters(originalPatch, [
     chainPatch => updatePatchOnAbsorbanceReaderFormType(chainPatch, rawForm),
+    chainPatch =>
+      updatePatchOnAbsorbanceReaderReferenceWavelengthActive(
+        chainPatch,
+        rawForm
+      ),
   ])
 }

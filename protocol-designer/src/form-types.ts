@@ -388,6 +388,7 @@ export type AbsorbanceReaderFormType =
 export interface HydratedAbsorbanceReaderFormData {
   absorbanceReaderFormType: AbsorbanceReaderFormType | null
   fileName: string | null
+  id: string
   lidOpen: boolean | null
   mode:
     | typeof ABSORBANCE_READER_INITIALIZE_MODE_MULTI
@@ -395,6 +396,8 @@ export interface HydratedAbsorbanceReaderFormData {
   moduleId: string
   referenceWavelength: string | null
   referenceWavelengthActive: boolean
+  stepDetails: string | null
+  stepType: 'absorbanceReader'
   wavelengths: string[]
 }
 // TODO: Ian 2019-01-17 Moving away from this and towards nesting all form fields
