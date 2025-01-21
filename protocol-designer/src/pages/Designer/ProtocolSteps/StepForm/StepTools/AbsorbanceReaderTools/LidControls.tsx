@@ -29,10 +29,10 @@ export function LidControls(props: LidControlsProps): JSX.Element {
         <StyledText desktopStyle="bodyDefaultSemiBold">{label}</StyledText>
       ) : null}
       <ToggleStepFormField
-        title={t('lid_position')}
+        title={t('step_edit_form.field.absorbanceReader.lidOpen.label')}
         isSelected={fieldProps.value === true}
-        onLabel={t('open')}
-        offLabel={t('closed')}
+        onLabel={t('step_edit_form.field.absorbanceReader.lidOpen.open')}
+        offLabel={t('step_edit_form.field.absorbanceReader.lidOpen.closed')}
         toggleUpdateValue={() => {
           fieldProps.updateValue(!fieldProps.value)
         }}

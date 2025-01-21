@@ -10,6 +10,7 @@ export const absorbanceReaderInitialize: CommandCreator<AbsorbanceReaderInitiali
   prevRobotState
 ) => {
   const { module: moduleId, mode, wavelengths, referenceWavelength } = args
+
   return {
     commands: [
       {

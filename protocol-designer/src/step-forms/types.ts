@@ -62,8 +62,10 @@ export interface HeaterShakerModuleState {
 export interface MagneticBlockState {
   type: typeof MAGNETIC_BLOCK_TYPE
 }
+
+export type InitializationMode = 'single' | 'multi'
 export interface Initialization {
-  mode: 'single' | 'multi'
+  mode: InitializationMode
   wavelengths: number[]
   referenceWavelength?: number
 }

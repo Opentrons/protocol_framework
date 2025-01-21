@@ -6,6 +6,7 @@ import { curryCommandCreator, reduceCommandCreators } from '../../utils'
 import type {
   AbsorbanceReaderInitializeArgs,
   CommandCreator,
+  CommandCreatorError,
   CurriedCommandCreator,
 } from '../../types'
 
@@ -19,12 +20,15 @@ export const absorbanceReaderCloseInitialize: CommandCreator<AbsorbanceReaderIni
     args.module
   )
 
-  if (args.module == null || absorbanceReaderState == null) {
-    return {
-      errors: [errorCreators.missingModuleError()],
-    }
-  }
   const { module, mode, wavelengths, referenceWavelength } = args
+  const errors: CommandCreatorError[] = []
+  if (absorbanceReaderState == null) {
+    errors.push(errorCreators.missingModuleError())
+  }
+
+  if (errors.length > 0) {
+    return { errors }
+  }
   const commandCreators: CurriedCommandCreator[] = [
     curryCommandCreator(absorbanceReaderCloseLid, {
       commandCreatorFnName: 'absorbanceReaderCloseLid',

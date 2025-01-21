@@ -392,10 +392,10 @@ export interface HydratedAbsorbanceReaderFormData {
   mode:
     | typeof ABSORBANCE_READER_INITIALIZE_MODE_MULTI
     | typeof ABSORBANCE_READER_INITIALIZE_MODE_SINGLE
-    | null
   moduleId: string
-  referenceWavelength: number | null
-  wavelengths: number[] | null
+  referenceWavelength: string | null
+  referenceWavelengthActive: boolean
+  wavelengths: string[]
 }
 // TODO: Ian 2019-01-17 Moving away from this and towards nesting all form fields
 // inside `fields` key, but deprecating transfer/consolidate/distribute is a pre-req
