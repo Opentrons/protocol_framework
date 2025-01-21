@@ -82,7 +82,9 @@ function FormAlertsComponent(props: FormAlertsProps): JSX.Element | null {
   })
 
   const profileItemsById: Record<string, ProfileItem> | null | undefined =
-    unsavedForm?.profileItemsById
+    unsavedForm?.stepType === 'thermocycler'
+      ? unsavedForm?.profileItemsById
+      : null
 
   let visibleDynamicFieldFormErrors: ProfileFormError[] = []
 

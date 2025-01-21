@@ -29,9 +29,11 @@ describe('absorbanceReaderCloseRead compound command creator', () => {
   let invariantContext: InvariantContext
   beforeEach(() => {
     absorbanceReaderCloseReadArgs = {
-      commandCreatorFnName: 'absorbanceReaderRead',
-      module: ABSORBANCE_READER_MODULE_ID,
+      moduleId: ABSORBANCE_READER_MODULE_ID,
       fileName: null,
+      commandCreatorFnName: 'absorbanceReaderRead',
+      name: 'some name',
+      description: 'some description',
     }
     invariantContext = {
       ...makeContext(),
