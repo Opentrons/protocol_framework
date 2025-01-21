@@ -1,12 +1,14 @@
 import { uuid } from '../../utils'
 import { missingModuleError } from '../../errorCreators'
 import { absorbanceReaderStateGetter } from '../../robotStateSelectors'
-import type { AbsorbanceReaderOpenLidCreateCommand } from '@opentrons/shared-data'
+import type { ModuleOnlyParams } from '@opentrons/shared-data'
 import type { CommandCreator } from '../../types'
 
-export const absorbanceReaderCloseLid: CommandCreator<
-  AbsorbanceReaderOpenLidCreateCommand['params']
-> = (args, invariantContext, prevRobotState) => {
+export const absorbanceReaderCloseLid: CommandCreator<ModuleOnlyParams> = (
+  args,
+  invariantContext,
+  prevRobotState
+) => {
   const absorbanceReaderState = absorbanceReaderStateGetter(
     prevRobotState,
     args.moduleId

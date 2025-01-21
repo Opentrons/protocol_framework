@@ -279,19 +279,15 @@ export interface HydratedMoveLiquidFormData extends AnnotationFields {
 export interface HydratedMoveLabwareFormData extends AnnotationFields {
   id: string
   stepType: 'moveLabware'
-  fields: {
-    labware: LabwareEntity
-    newLocation: LabwareLocation
-    useGripper: boolean
-  }
+  labware: LabwareEntity
+  newLocation: LabwareLocation
+  useGripper: boolean
 }
 
 export interface HydratedCommentFormData extends AnnotationFields {
   id: string
   stepType: 'comment'
-  fields: {
-    message: string
-  }
+  message: string
 }
 
 export interface HydratedMixFormData extends AnnotationFields {
@@ -386,7 +382,7 @@ export interface HydratedAbsorbanceReaderFormData extends AnnotationFields {
   stepType: 'absorbanceReader'
   id: string
   absorbanceReaderFormType: AbsorbanceReaderFormType | null
-  fileName?: string | null
+  fileName: string | null
   lidOpen: boolean | null
   mode:
     | typeof ABSORBANCE_READER_INITIALIZE_MODE_MULTI

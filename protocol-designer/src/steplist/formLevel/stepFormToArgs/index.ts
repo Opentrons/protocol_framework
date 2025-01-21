@@ -35,11 +35,7 @@ export const stepFormToArgs = (hydratedForm: HydratedFormData): StepArgs => {
   const castForm = _castForm(hydratedForm)
   switch (castForm.stepType) {
     case 'moveLiquid': {
-      const moveLiquidFormData: HydratedMoveLiquidFormData = {
-        ...castForm,
-        fields: castForm,
-      }
-      return moveLiquidFormToArgs(moveLiquidFormData)
+      return moveLiquidFormToArgs(castForm as HydratedMoveLiquidFormData)
     }
 
     case 'pause':
@@ -61,19 +57,11 @@ export const stepFormToArgs = (hydratedForm: HydratedFormData): StepArgs => {
       return heaterShakerFormToArgs(castForm as HydratedHeaterShakerFormData)
 
     case 'moveLabware': {
-      const moveLabwareFormData: HydratedMoveLabwareFormData = {
-        ...castForm,
-        fields: castForm,
-      }
-      return moveLabwareFormToArgs(moveLabwareFormData)
+      return moveLabwareFormToArgs(castForm as HydratedMoveLabwareFormData)
     }
 
     case 'comment': {
-      const commentFormData: HydratedCommentFormData = {
-        ...castForm,
-        fields: castForm,
-      }
-      return commentFormToArgs(commentFormData)
+      return commentFormToArgs(castForm as HydratedCommentFormData)
     }
 
     case 'absorbanceReader': {
