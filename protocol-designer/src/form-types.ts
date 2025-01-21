@@ -383,7 +383,6 @@ export interface HydratedAbsorbanceReaderFormData extends AnnotationFields {
   id: string
   absorbanceReaderFormType: AbsorbanceReaderFormType | null
   fileName: string | null
-  id: string
   lidOpen: boolean | null
   mode:
     | typeof ABSORBANCE_READER_INITIALIZE_MODE_MULTI
@@ -391,8 +390,7 @@ export interface HydratedAbsorbanceReaderFormData extends AnnotationFields {
   moduleId: string
   referenceWavelength: string | null
   referenceWavelengthActive: boolean
-  stepDetails: string | null
-  stepType: 'absorbanceReader'
+  stepDetails: string
   wavelengths: string[]
 }
 
