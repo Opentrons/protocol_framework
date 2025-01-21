@@ -6,7 +6,6 @@ import {
   Banner,
   DIRECTION_COLUMN,
   Flex,
-  SPACING,
   StyledText,
 } from '@opentrons/components'
 import { getRobotStateTimeline } from '../../file-data/selectors'
@@ -38,7 +37,7 @@ function TimelineAlertsComponent(props: StyleProps): JSX.Element | null {
       key={`${alertType}:${key}`}
       width="100%"
     >
-      <Flex flexDirection={DIRECTION_COLUMN} gridGap={SPACING.spacing4}>
+      <Flex flexDirection={DIRECTION_COLUMN}>
         <StyledText desktopStyle="bodyDefaultSemiBold">{data.title}</StyledText>
         <StyledText desktopStyle="bodyDefaultRegular">
           {data.description}
