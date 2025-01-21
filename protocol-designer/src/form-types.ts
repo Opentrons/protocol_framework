@@ -1,4 +1,9 @@
 import type {
+  ABSORBANCE_READER_INITIALIZE,
+  ABSORBANCE_READER_INITIALIZE_MODE_MULTI,
+  ABSORBANCE_READER_INITIALIZE_MODE_SINGLE,
+  ABSORBANCE_READER_LID,
+  ABSORBANCE_READER_READ,
   PAUSE_UNTIL_RESUME,
   PAUSE_UNTIL_TEMP,
   PAUSE_UNTIL_TIME,
@@ -133,6 +138,7 @@ export type StepFieldName = string
 
 // TODO Ian 2019-01-16 factor out to some constants.js ? See #2926
 export type StepType =
+  | 'absorbanceReader'
   | 'comment'
   | 'heaterShaker'
   | 'magnet'
@@ -143,9 +149,9 @@ export type StepType =
   | 'pause'
   | 'temperature'
   | 'thermocycler'
-  | 'plateReader'
 
 export const stepIconsByType: Record<StepType, IconName> = {
+  absorbanceReader: 'ot-absorbance',
   comment: 'comment',
   moveLabware: 'ot-move',
   moveLiquid: 'transfer',
@@ -156,7 +162,6 @@ export const stepIconsByType: Record<StepType, IconName> = {
   temperature: 'ot-temperature-v2',
   thermocycler: 'ot-thermocycler',
   heaterShaker: 'ot-heater-shaker',
-  plateReader: 'ot-absorbance',
 }
 // ===== Unprocessed form types =====
 export interface AnnotationFields {
@@ -373,6 +378,24 @@ export interface HydratedHeaterShakerFormData {
   stepType: 'heaterShaker'
   targetHeaterShakerTemperature: string | null
   targetSpeed: string | null
+}
+
+export type AbsorbanceReaderFormType =
+  | typeof ABSORBANCE_READER_INITIALIZE
+  | typeof ABSORBANCE_READER_READ
+  | typeof ABSORBANCE_READER_LID
+
+export interface HydratedAbsorbanceReaderFormData {
+  absorbanceReaderFormType: AbsorbanceReaderFormType | null
+  fileName: string | null
+  lidOpen: boolean | null
+  mode:
+    | typeof ABSORBANCE_READER_INITIALIZE_MODE_MULTI
+    | typeof ABSORBANCE_READER_INITIALIZE_MODE_SINGLE
+  moduleId: string
+  referenceWavelength: string | null
+  referenceWavelengthActive: boolean
+  wavelengths: string[]
 }
 // TODO: Ian 2019-01-17 Moving away from this and towards nesting all form fields
 // inside `fields` key, but deprecating transfer/consolidate/distribute is a pre-req

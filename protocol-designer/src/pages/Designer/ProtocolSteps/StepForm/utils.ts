@@ -1,6 +1,7 @@
 import difference from 'lodash/difference'
 import isEqual from 'lodash/isEqual'
 import without from 'lodash/without'
+import startCase from 'lodash/startCase'
 import {
   SOURCE_WELL_BLOWOUT_DESTINATION,
   DEST_WELL_BLOWOUT_DESTINATION,
@@ -338,6 +339,9 @@ export const getSaveStepSnackbarText = (
 }
 
 export const capitalizeFirstLetter = (stepName: string): string => {
+  // Note - this is a special case
+  if (stepName === 'absorbance plate reader') return startCase(stepName)
+
   // Note - check is for heater-shaker
   if (stepName.includes('-')) {
     return stepName
@@ -349,7 +353,7 @@ export const capitalizeFirstLetter = (stepName: string): string => {
   }
 }
 
-type ErrorMappedToField = Record<string, FormError>
+export type ErrorMappedToField = Record<string, FormError>
 
 export const getFormErrorsMappedToField = (
   formErrors: StepFormErrors

@@ -87,6 +87,7 @@ export const SingleLabwareModal = (
             {selectedLabware.nickName}
             {selectedLabwareLocation != null &&
             selectedLabwareLocation !== 'offDeck' &&
+            selectedLabwareLocation !== 'systemLocation' &&
             'labwareId' in selectedLabwareLocation
               ? t('on_adapter', {
                   adapterName: mostRecentAnalysis?.labware.find(

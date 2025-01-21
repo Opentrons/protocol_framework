@@ -42,6 +42,11 @@ import {
   volumeRequired,
   timesRequired,
   pauseActionRequired,
+  wavelengthRequired,
+  referenceWavelengthRequired,
+  fileNameRequired,
+  wavelengthOutOfRange,
+  referenceWavelengthOutOfRange,
 } from './errors'
 
 import {
@@ -76,6 +81,15 @@ interface FormHelpers {
   getWarnings?: (arg: unknown) => FormWarning[]
 }
 const stepFormHelperMap: Partial<Record<StepType, FormHelpers>> = {
+  absorbanceReader: {
+    getErrors: composeErrors(
+      wavelengthRequired,
+      referenceWavelengthRequired,
+      fileNameRequired,
+      wavelengthOutOfRange,
+      referenceWavelengthOutOfRange
+    ),
+  },
   heaterShaker: {
     getErrors: composeErrors(
       shakeSpeedRequired,
@@ -167,8 +181,7 @@ export const getFormErrors = (
   formData: HydratedFormdata
 ): FormError[] => {
   const formErrorGetter =
-    // @ts-expect-error(sa, 2021-6-20): not a valid type narrow
-    stepFormHelperMap[stepType] && stepFormHelperMap[stepType].getErrors
+    stepFormHelperMap[stepType] && stepFormHelperMap[stepType]?.getErrors
   const errors = formErrorGetter != null ? formErrorGetter(formData) : []
   return errors
 }
@@ -177,8 +190,7 @@ export const getFormWarnings = (
   formData: unknown
 ): FormWarning[] => {
   const formWarningGetter =
-    // @ts-expect-error(sa, 2021-6-20): not a valid type narrow
-    stepFormHelperMap[stepType] && stepFormHelperMap[stepType].getWarnings
+    stepFormHelperMap[stepType] && stepFormHelperMap[stepType]?.getWarnings
   const warnings = formWarningGetter != null ? formWarningGetter(formData) : []
   return warnings
 }

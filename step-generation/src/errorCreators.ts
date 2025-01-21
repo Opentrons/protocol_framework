@@ -157,6 +157,22 @@ export const heaterShakerLatchClosed = (): CommandCreatorError => {
   }
 }
 
+export const absorbanceReaderLidClosed = (): CommandCreatorError => {
+  return {
+    type: 'ABSORBANCE_READER_LID_CLOSED',
+    message:
+      'Attempted to interact with contents of an absorbance plate reader with the lid closed.',
+  }
+}
+
+export const absorbanceReaderNoInitialization = (): CommandCreatorError => {
+  return {
+    type: 'ABSORBANCE_READER_NO_INITIALIZATION',
+    message:
+      'This step tries to read labware without initializing the Plate Reader first. Initialize the Plate Reader module or remove this step in order to proceed.',
+  }
+}
+
 export const heaterShakerIsShaking = (): CommandCreatorError => {
   return {
     type: 'HEATER_SHAKER_IS_SHAKING',

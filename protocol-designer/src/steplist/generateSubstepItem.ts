@@ -492,7 +492,6 @@ export function generateSubstepItem(
 
   console.warn(
     "generateSubsteps doesn't support commandCreatorFnName: ",
-    // @ts-expect-error(sa, 2021-6-14): I don't think this case can ever happen, so stepArgs.commandCreatorFnName gets never typed
     stepArgs.commandCreatorFnName,
     stepId
   )

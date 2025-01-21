@@ -42,6 +42,8 @@ export const THERMOCYCLER_MODULE_V2: 'thermocyclerModuleV2' =
 export const HEATERSHAKER_MODULE_V1: 'heaterShakerModuleV1' =
   'heaterShakerModuleV1'
 export const ABSORBANCE_READER_V1: 'absorbanceReaderV1' = 'absorbanceReaderV1'
+export const FLEX_STACKER_MODULE_V1: 'flexStackerModuleV1' =
+  'flexStackerModuleV1'
 
 export const MAGNETIC_BLOCK_V1: 'magneticBlockV1' = 'magneticBlockV1'
 
@@ -84,6 +86,8 @@ export const HEATERSHAKER_MODULE_TYPE: 'heaterShakerModuleType' =
 export const MAGNETIC_BLOCK_TYPE: 'magneticBlockType' = 'magneticBlockType'
 export const ABSORBANCE_READER_TYPE: 'absorbanceReaderType' =
   'absorbanceReaderType'
+export const FLEX_STACKER_MODULE_TYPE: 'flexStackerModuleType' =
+  'flexStackerModuleType'
 
 export const MAGNETIC_MODULE_MODELS = [MAGNETIC_MODULE_V1, MAGNETIC_MODULE_V2]
 
@@ -103,6 +107,8 @@ export const HEATERSHAKER_MODULE_MODELS = [HEATERSHAKER_MODULE_V1]
 
 export const ABSORBANCE_READER_MODELS = [ABSORBANCE_READER_V1]
 
+export const FLEX_STACKER_MODULE_MODELS = [FLEX_STACKER_MODULE_V1]
+
 export const MAGNETIC_BLOCK_MODELS = [MAGNETIC_BLOCK_V1]
 
 export const MODULE_MODELS = [
@@ -112,6 +118,7 @@ export const MODULE_MODELS = [
   ...HEATERSHAKER_MODULE_MODELS,
   ...MAGNETIC_BLOCK_MODELS,
   ...ABSORBANCE_READER_MODELS,
+  ...FLEX_STACKER_MODULE_MODELS,
 ]
 
 export const MODULE_MODELS_OT2_ONLY = [
@@ -127,6 +134,7 @@ export const MODULE_TYPES = [
   HEATERSHAKER_MODULE_TYPE,
   MAGNETIC_BLOCK_TYPE,
   ABSORBANCE_READER_TYPE,
+  FLEX_STACKER_MODULE_TYPE,
 ]
 
 export const GEN_ONE_MULTI_PIPETTES = ['p10_multi', 'p50_multi', 'p300_multi']
@@ -381,6 +389,14 @@ export const ABSORBANCE_READER_LID_DOCK_C4_ADDRESSABLE_AREA: 'absorbanceReaderV1
   'absorbanceReaderV1LidDockC4'
 export const ABSORBANCE_READER_LID_DOCK_D4_ADDRESSABLE_AREA: 'absorbanceReaderV1LidDockD4' =
   'absorbanceReaderV1LidDockD4'
+export const FLEX_STACKER_A4_ADDRESSABLE_AREA: 'flexStackerModuleV1A4' =
+  'flexStackerModuleV1A4'
+export const FLEX_STACKER_B4_ADDRESSABLE_AREA: 'flexStackerModuleV1B4' =
+  'flexStackerModuleV1B4'
+export const FLEX_STACKER_C4_ADDRESSABLE_AREA: 'flexStackerModuleV1C4' =
+  'flexStackerModuleV1C4'
+export const FLEX_STACKER_D4_ADDRESSABLE_AREA: 'flexStackerModuleV1D4' =
+  'flexStackerModuleV1D4'
 
 export const MAGNETIC_BLOCK_ADDRESSABLE_AREAS: AddressableAreaName[] = [
   MAGNETIC_BLOCK_A1_ADDRESSABLE_AREA,
@@ -428,6 +444,13 @@ export const ABSORBANCE_READER_ADDRESSABLE_AREAS: AddressableAreaName[] = [
   ABSORBANCE_READER_LID_DOCK_B4_ADDRESSABLE_AREA,
   ABSORBANCE_READER_LID_DOCK_C4_ADDRESSABLE_AREA,
   ABSORBANCE_READER_LID_DOCK_D4_ADDRESSABLE_AREA,
+]
+
+export const FLEX_STACKER_ADDRESSABLE_AREAS: AddressableAreaName[] = [
+  FLEX_STACKER_A4_ADDRESSABLE_AREA,
+  FLEX_STACKER_B4_ADDRESSABLE_AREA,
+  FLEX_STACKER_C4_ADDRESSABLE_AREA,
+  FLEX_STACKER_D4_ADDRESSABLE_AREA,
 ]
 
 export const FLEX_USB_MODULE_ADDRESSABLE_AREAS: AddressableAreaName[] = [
@@ -540,6 +563,8 @@ export const THERMOCYCLER_V2_FRONT_FIXTURE: 'thermocyclerModuleV2Front' =
   'thermocyclerModuleV2Front'
 export const ABSORBANCE_READER_V1_FIXTURE: 'absorbanceReaderV1' =
   'absorbanceReaderV1'
+export const FLEX_STACKER_V1_FIXTURE: 'flexStackerModuleV1' =
+  'flexStackerModuleV1'
 
 export const MODULE_FIXTURES_BY_MODEL: {
   [moduleModel in ModuleModel]?: CutoutFixtureId[]
@@ -552,6 +577,7 @@ export const MODULE_FIXTURES_BY_MODEL: {
     THERMOCYCLER_V2_FRONT_FIXTURE,
   ],
   [ABSORBANCE_READER_V1]: [ABSORBANCE_READER_V1_FIXTURE],
+  [FLEX_STACKER_MODULE_V1]: [FLEX_STACKER_V1_FIXTURE],
 }
 
 export const FLEX_USB_MODULE_FIXTURES: CutoutFixtureId[] = [
@@ -560,6 +586,7 @@ export const FLEX_USB_MODULE_FIXTURES: CutoutFixtureId[] = [
   THERMOCYCLER_V2_REAR_FIXTURE,
   THERMOCYCLER_V2_FRONT_FIXTURE,
   ABSORBANCE_READER_V1_FIXTURE,
+  FLEX_STACKER_V1_FIXTURE,
 ]
 
 export const MAGNETIC_BLOCK_FIXTURES: CutoutFixtureId[] = [

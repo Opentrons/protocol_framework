@@ -38,6 +38,7 @@ import {
   FORM_WARNINGS_EVENT,
 } from '../../../../analytics/constants'
 import {
+  AbsorbanceReaderTools,
   CommentTools,
   HeaterShakerTools,
   MagnetTools,
@@ -45,7 +46,6 @@ import {
   MoveLabwareTools,
   MoveLiquidTools,
   PauseTools,
-  PlateReaderTools,
   TemperatureTools,
   ThermocyclerTools,
 } from './StepTools'
@@ -87,7 +87,7 @@ const STEP_FORM_MAP: StepFormMap = {
   thermocycler: ThermocyclerTools,
   heaterShaker: HeaterShakerTools,
   comment: CommentTools,
-  plateReader: PlateReaderTools,
+  absorbanceReader: AbsorbanceReaderTools,
 }
 
 interface StepFormToolboxProps {
@@ -205,6 +205,7 @@ export function StepFormToolbox(props: StepFormToolboxProps): JSX.Element {
   }
 
   const isMultiStepToolbox =
+    formData.stepType === 'absorbanceReader' ||
     formData.stepType === 'moveLiquid' ||
     formData.stepType === 'mix' ||
     formData.stepType === 'thermocycler'
@@ -274,6 +275,8 @@ export function StepFormToolbox(props: StepFormToolboxProps): JSX.Element {
       handleSaveClick()
     }
   }
+
+  console.log('stepName', formData.stepName)
 
   return (
     <>
@@ -347,7 +350,7 @@ export function StepFormToolbox(props: StepFormToolboxProps): JSX.Element {
             <Icon size="1rem" name={icon} minWidth="1rem" />
             <StyledText
               desktopStyle="bodyLargeSemiBold"
-              css={LINE_CLAMP_TEXT_STYLE(2)}
+              css={LINE_CLAMP_TEXT_STYLE(2, true)}
             >
               {capitalizeFirstLetter(String(formData.stepName))}
             </StyledText>

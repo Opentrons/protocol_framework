@@ -39,6 +39,7 @@ export const getInitialAndMovedLabwareInSlots = (
 
       if (
         location === 'offDeck' ||
+        location === 'systemLocation' ||
         'moduleId' in location ||
         'labwareId' in location
       )
@@ -108,6 +109,7 @@ export const getTopMostLabwareInSlots = (
       const labwareDef = command.result?.definition
       if (
         location === 'offDeck' ||
+        location === 'systemLocation' ||
         'moduleId' in location ||
         'labwareId' in location
       )

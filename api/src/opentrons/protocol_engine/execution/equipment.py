@@ -15,6 +15,7 @@ from opentrons.hardware_control.modules import (
     TempDeck,
     Thermocycler,
     AbsorbanceReader,
+    FlexStacker,
 )
 from opentrons.hardware_control.nozzle_manager import NozzleMap
 from opentrons.protocol_engine.state.module_substates import (
@@ -23,6 +24,7 @@ from opentrons.protocol_engine.state.module_substates import (
     TemperatureModuleId,
     ThermocyclerModuleId,
     AbsorbanceReaderId,
+    FlexStackerId,
 )
 from ..errors import (
     FailedToLoadPipetteError,
@@ -386,6 +388,7 @@ class EquipmentHandler:
         version: int,
         location: LabwareLocation,
         quantity: int,
+        labware_ids: Optional[List[str]] = None,
     ) -> List[LoadedLabwareData]:
         """Load one or many lid labware by assigning an identifier and pulling required data.
 
@@ -394,6 +397,7 @@ class EquipmentHandler:
             namespace: The lid labware's namespace.
             version: The lid labware's version.
             location: The deck location at which lid(s) will be placed.
+            quantity: The quantity of lids to load at a location.
             labware_ids: An optional list of identifiers to assign the labware. If None,
                 an identifier will be generated.
 
@@ -436,10 +440,20 @@ class EquipmentHandler:
             )
 
         load_labware_data_list = []
-        for i in range(quantity):
+        ids = []
+        if labware_ids is not None:
+            if len(labware_ids) < quantity:
+                raise ValueError(
+                    f"Requested quantity {quantity} is greater than the number of labware lid IDs provided for {load_name}."
+                )
+            ids = labware_ids
+        else:
+            for i in range(quantity):
+                ids.append(self._model_utils.generate_id())
+        for id in ids:
             load_labware_data_list.append(
                 LoadedLabwareData(
-                    labware_id=self._model_utils.generate_id(),
+                    labware_id=id,
                     definition=definition,
                     offsetId=None,
                 )
@@ -579,6 +593,13 @@ class EquipmentHandler:
         self,
         module_id: AbsorbanceReaderId,
     ) -> Optional[AbsorbanceReader]:
+        ...
+
+    @overload
+    def get_module_hardware_api(
+        self,
+        module_id: FlexStackerId,
+    ) -> Optional[FlexStacker]:
         ...
 
     def get_module_hardware_api(self, module_id: str) -> Optional[AbstractModule]:

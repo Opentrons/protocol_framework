@@ -4,6 +4,7 @@ import {
   Flex,
   LegacyStyledText,
   TYPOGRAPHY,
+  getLabwareDefinitionsFromCommands,
 } from '@opentrons/components'
 
 import {
@@ -13,7 +14,6 @@ import {
 } from '@opentrons/shared-data'
 import { UnorderedList } from '/app/molecules/UnorderedList'
 import { getLabwareDef } from './utils/labware'
-import { getLabwareDefinitionsFromCommands } from '/app/local-resources/labware'
 import { getDisplayLocation } from './utils/getDisplayLocation'
 import { RobotMotionLoader } from './RobotMotionLoader'
 import { PrepareSpace } from './PrepareSpace'

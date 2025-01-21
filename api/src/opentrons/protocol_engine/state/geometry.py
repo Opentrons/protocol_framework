@@ -26,6 +26,7 @@ from ..errors import (
 from ..resources import fixture_validation, labware_validation
 from ..types import (
     OFF_DECK_LOCATION,
+    SYSTEM_LOCATION,
     LoadedLabware,
     LoadedModule,
     WellLocation,
@@ -388,7 +389,7 @@ class GeometryView:
         elif isinstance(location, OnLabwareLocation):
             labware_data = self._labware.get(location.labwareId)
             return self._get_calibrated_module_offset(labware_data.location)
-        elif location == OFF_DECK_LOCATION:
+        elif location == OFF_DECK_LOCATION or location == SYSTEM_LOCATION:
             raise errors.LabwareNotOnDeckError(
                 "Labware does not have a slot or module associated with it"
                 " since it is no longer on the deck."
