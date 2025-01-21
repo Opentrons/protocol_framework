@@ -69,28 +69,18 @@ export function OffsetTable({
 
           return (
             <TableRow key={index}>
-              <TableDatum
-                css={`
-                  border-radius: ${BORDERS.borderRadius4} 0 0
-                    ${BORDERS.borderRadius4};
-                `}
-              >
+              <LeftRoundedTableDatum>
                 <LegacyStyledText
                   as="p"
                   textTransform={TYPOGRAPHY.textTransformCapitalize}
                 >
                   {displayLocation}
                 </LegacyStyledText>
-              </TableDatum>
+              </LeftRoundedTableDatum>
               <TableDatum>
                 <LegacyStyledText as="p">{lwDisplayName}</LegacyStyledText>
               </TableDatum>
-              <TableDatum
-                css={`
-                  border-radius: 0 ${BORDERS.borderRadius4}
-                    ${BORDERS.borderRadius4} 0;
-                `}
-              >
+              <RightRoundedTableDatum>
                 {isEqual(vector, IDENTITY_VECTOR) ? (
                   <LegacyStyledText>{t('no_labware_offsets')}</LegacyStyledText>
                 ) : (
@@ -112,7 +102,7 @@ export function OffsetTable({
                     ))}
                   </Flex>
                 )}
-              </TableDatum>
+              </RightRoundedTableDatum>
             </TableRow>
           )
         })}
@@ -146,4 +136,12 @@ const TableDatum = styled('td')`
   padding: ${SPACING.spacing4};
   white-space: break-spaces;
   text-overflow: wrap;
+`
+
+const LeftRoundedTableDatum = styled(TableDatum)`
+  border-radius: ${BORDERS.borderRadius4} 0 0 ${BORDERS.borderRadius4};
+`
+
+const RightRoundedTableDatum = styled(TableDatum)`
+  border-radius: 0 ${BORDERS.borderRadius4} ${BORDERS.borderRadius4} 0;
 `

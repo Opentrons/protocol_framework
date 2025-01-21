@@ -157,21 +157,7 @@ export const ResultsSummary = (
       padding={SPACING.spacing32}
       minHeight="29.5rem"
     >
-      <Flex
-        flexDirection={DIRECTION_COLUMN}
-        maxHeight="20rem"
-        css={css`
-          overflow-y: ${OVERFLOW_AUTO};
-          &::-webkit-scrollbar {
-            width: 0.75rem;
-            background-color: transparent;
-          }
-          &::-webkit-scrollbar-thumb {
-            background: ${COLORS.grey50};
-            border-radius: 11px;
-          }
-        `}
-      >
+      <ScrollContainer flexDirection={DIRECTION_COLUMN} maxHeight="20rem">
         <Header>{t('new_labware_offset_data')}</Header>
         {isLabwareOffsetCodeSnippetsOn ? (
           <LabwareOffsetTabs
@@ -183,7 +169,7 @@ export const ResultsSummary = (
         ) : (
           TableComponent
         )}
-      </Flex>
+      </ScrollContainer>
       {isOnDevice ? (
         <SmallButton
           alignSelf={ALIGN_FLEX_END}
@@ -262,6 +248,26 @@ const Header = styled.h1`
   }
 `
 
+const LeftRoundedTableDatum = styled(TableDatum)`
+  border-radius: ${BORDERS.borderRadius4} 0 0 ${BORDERS.borderRadius4};
+`
+
+const RightRoundedTableDatum = styled(TableDatum)`
+  border-radius: 0 ${BORDERS.borderRadius4} ${BORDERS.borderRadius4} 0;
+`
+
+const ScrollContainer = styled(Flex)`
+  overflow-y: ${OVERFLOW_AUTO};
+  &::-webkit-scrollbar {
+    width: 0.75rem;
+    background-color: transparent;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: ${COLORS.grey50};
+    border-radius: 11px;
+  }
+`
+
 interface OffsetTableProps {
   offsets: LabwareOffsetCreateData[]
   labwareDefinitions: LabwareDefinition2[]
@@ -290,12 +296,7 @@ const OffsetTable = (props: OffsetTableProps): JSX.Element => {
 
           return (
             <TableRow key={index}>
-              <TableDatum
-                css={`
-                  border-radius: ${BORDERS.borderRadius4} 0 0
-                    ${BORDERS.borderRadius4};
-                `}
-              >
+              <LeftRoundedTableDatum>
                 <LegacyStyledText
                   as="p"
                   textTransform={TYPOGRAPHY.textTransformCapitalize}
@@ -307,16 +308,11 @@ const OffsetTable = (props: OffsetTableProps): JSX.Element => {
                     i18n
                   )}
                 </LegacyStyledText>
-              </TableDatum>
+              </LeftRoundedTableDatum>
               <TableDatum>
                 <LegacyStyledText as="p">{labwareDisplayName}</LegacyStyledText>
               </TableDatum>
-              <TableDatum
-                css={`
-                  border-radius: 0 ${BORDERS.borderRadius4}
-                    ${BORDERS.borderRadius4} 0;
-                `}
-              >
+              <RightRoundedTableDatum>
                 {isEqual(vector, IDENTITY_VECTOR) ? (
                   <LegacyStyledText>{t('no_labware_offsets')}</LegacyStyledText>
                 ) : (
@@ -338,7 +334,7 @@ const OffsetTable = (props: OffsetTableProps): JSX.Element => {
                     ))}
                   </Flex>
                 )}
-              </TableDatum>
+              </RightRoundedTableDatum>
             </TableRow>
           )
         })}
