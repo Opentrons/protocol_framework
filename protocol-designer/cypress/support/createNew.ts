@@ -65,6 +65,13 @@ export enum Actions {
   AddNest96DeepWellPlate = 'Adds Nest 96 Deep Well Plate',
   Done = 'Select Done on a step form',
   AddTemperatureStep = 'Selects Temperature Module step',
+  ActivateTempdeck = 'Activates Temperature Module when you first use it',
+  InputTempDeck4 = 'Inputs 4C into tempdeck',
+  InputTempDeck96 = 'Inputs 96C into tempdeck',
+  InputTempDeck100 = 'Inputs 100C into tempdeck. Expect an error then exit',
+  ExitTempdeckCommand = 'Exits a tempdeck command',
+  PauseAfterSettingTempdeck = 'Allows you to puase protocol until reached',
+  SaveButtonTempdeck = 'Saves a temperature set',
 }
 
 export enum Verifications {
@@ -84,6 +91,8 @@ export enum Verifications {
   MagBlockImg = 'Magnetic Block GEN1',
   LiquidPage = 'Liquid page content is visible',
   TransferPopOut = 'Verify Step 1 of the transfer function is present',
+  TempeDeckInitialForm = 'Verify that the tempdeck stepform opens correctly',
+  Temp4CPauseTextVerification = 'Verify that the pause step has the right information in step preview',
 }
 export enum Content {
   Step1Title = 'Step 1',
@@ -132,6 +141,11 @@ export enum Content {
   ProtocolSteps = 'Protocol steps',
   AddStep = 'Add Step',
   NestDeepWell = 'NEST 96 Deep Well Plate 2mL',
+  ModState = 'Module state',
+  DecativeTempDeck = 'Deactivate',
+  Temperature = 'Temperature',
+  Save = 'Save',
+  Temp4CVerification = `Build a pause step to wait until Temperature Module GEN2 reaches 4˚C`,
 }
 
 export enum Locators {
@@ -152,6 +166,9 @@ export enum Locators {
   LiquidsDropdown = 'div[tabindex="0"].sc-bqWxrE', // Add new locator for the dropdown
   LabwareSelectionLocation = '[data-testid="Toolbox_confirmButton"]',
   DoneButtonLabwareSelection = '[data-testid="Toolbox_confirmButton"]',
+  Div = 'div',
+  Button = 'button',
+  TempdeckTempInput = 'input[name="targetTemperature"]',
 }
 
 const chooseDeckSlot = (
@@ -367,7 +384,7 @@ const executeAction = (action: Actions | UniversalActions): void => {
 
       cy.get(Locators.ModalShellArea)
         .find(Locators.SaveButton) // Locate the Save button
-        .contains('Save')
+        .contains(Content.Save)
         .click({ force: true }) // Trigger the Save button
       break
     case Actions.WellSelector:
@@ -383,14 +400,14 @@ const executeAction = (action: Actions | UniversalActions): void => {
       break
     case Actions.SetVolumeAndSaveforWells:
       cy.get('input[name="volume"]').type(`150`) // Set volume
-      cy.contains('button', 'Save').click() // Click Save button
+      cy.contains('button', Content.Save).click() // Click Save button
       cy.contains('button', 'Done').click({ force: true }) // Click Done button, forcing click if necessary
       break
     case Actions.ProtocolStepsH:
       cy.contains('button', Content.ProtocolSteps).click()
       break
     case Actions.AddStep:
-      cy.contains('button', Content.AddStep).click()
+      cy.contains('button', Content.AddStep).click({ force: true })
       break
     case Actions.AddAdapters:
       cy.contains('Adapters').click()
@@ -407,7 +424,33 @@ const executeAction = (action: Actions | UniversalActions): void => {
         .click({ force: true })
       break
     case Actions.AddTemperatureStep:
-      cy.contains('Temperature').click()
+      cy.contains('button', 'Temperature').click()
+      break
+    case Actions.ActivateTempdeck:
+      cy.contains(Content.DecativeTempDeck)
+        .closest(Locators.Div)
+        .find(Locators.Button)
+        .click()
+      break
+    case Actions.InputTempDeck4:
+      cy.get(Locators.TempdeckTempInput).type('4')
+      break
+    case Actions.InputTempDeck96:
+      cy.get(Locators.TempdeckTempInput).type('96')
+      break
+    case Actions.InputTempDeck100:
+      cy.get(Locators.TempdeckTempInput).type('100')
+      break
+    case Actions.ExitTempdeckCommand:
+      break
+    case Actions.PauseAfterSettingTempdeck:
+      cy.contains(Locators.Button, 'Pause protocol')
+        .should('exist')
+        .and('be.visible')
+        .click()
+      break
+    case Actions.SaveButtonTempdeck:
+      cy.contains(Content.Save).click()
       break
     default:
       throw new Error(`Unrecognized action: ${action as string}`)
@@ -501,7 +544,19 @@ const verifyStep = (verification: Verifications): void => {
       cy.contains('Tip handling')
       cy.contains('Tip drop location')
       break
-
+    case Verifications.TempeDeckInitialForm:
+      cy.contains(Content.ModState)
+      cy.contains(Content.DecativeTempDeck)
+      cy.contains(Content.Temperature)
+      break
+    case Verifications.Temp4CPauseTextVerification:
+      // This takes place
+      cy.contains('div', 'Pausing until')
+        .should('contain', 'Temperature Module GEN2')
+        .and('contain', 'reaches')
+        .find('[data-testid="Tag_default"]')
+        .should('contain', '4°C')
+      break
     default:
       throw new Error(
         `Unrecognized verification: ${verification as Verifications}`

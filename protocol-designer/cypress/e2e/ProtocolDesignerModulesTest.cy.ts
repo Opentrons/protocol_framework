@@ -71,7 +71,25 @@ describe('The Redesigned Create Protocol Landing Page', () => {
       Actions.ProtocolStepsH,
       Actions.AddStep,
       Actions.AddTemperatureStep,
+      Verifications.TempeDeckInitialForm,
+      UniversalActions.Snapshot,
+      Actions.ActivateTempdeck,
+      Actions.InputTempDeck4,
+      Actions.SaveButtonTempdeck,
+      Actions.PauseAfterSettingTempdeck,
+      Verifications.Temp4CPauseTextVerification,
+      UniversalActions.Snapshot,
+      Actions.AddStep,
+      Actions.AddTemperatureStep,
+      Actions.ActivateTempdeck,
+      Actions.InputTempDeck95,
+      Actions.SaveButtonTempdeck,
+      Actions.PauseAfterSettingTempdeck,
     ]
     runCreateTest(steps)
+    // Action
+
+    // Action
+    // Action, verification needed
   })
 })
