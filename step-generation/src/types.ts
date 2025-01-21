@@ -14,19 +14,15 @@ import type {
   LabwareLocation,
   PipetteMount as Mount,
   PipetteV2Specs,
+  ShakeSpeedParams,
 } from '@opentrons/shared-data'
-import type {
-  AtomicProfileStep,
-  EngageMagnetParams,
-  ModuleOnlyParams,
-} from '@opentrons/shared-data/protocol/types/schemaV4'
+import type { AtomicProfileStep } from '@opentrons/shared-data/protocol/types/schemaV4'
 import type { Command } from '@opentrons/shared-data/protocol/types/schemaV5Addendum'
 import type {
   TEMPERATURE_DEACTIVATED,
   TEMPERATURE_AT_TARGET,
   TEMPERATURE_APPROACHING_TARGET,
 } from './constants'
-import type { ShakeSpeedParams } from '@opentrons/shared-data/protocol/types/schemaV6/command/module'
 
 export type { Command }
 
@@ -343,34 +339,35 @@ export type PauseArgs = CommonArgs & {
     | undefined
 }
 
-export interface WaitForTemperatureArgs {
-  module: string | null
+export interface WaitForTemperatureArgs extends CommonArgs {
+  moduleId: string
   commandCreatorFnName: 'waitForTemperature'
-  temperature: number
+  celsius: number
   message?: string
 }
 
-export type EngageMagnetArgs = EngageMagnetParams & {
-  module: string
+export type EngageMagnetArgs = CommonArgs & {
+  height: number
+  moduleId: string
   commandCreatorFnName: 'engageMagnet'
   message?: string
 }
 
-export type DisengageMagnetArgs = ModuleOnlyParams & {
-  module: string
+export type DisengageMagnetArgs = CommonArgs & {
+  moduleId: string
   commandCreatorFnName: 'disengageMagnet'
   message?: string
 }
 
-export interface SetTemperatureArgs {
-  module: string | null
+export interface SetTemperatureArgs extends CommonArgs {
+  moduleId: string
   commandCreatorFnName: 'setTemperature'
-  targetTemperature: number
+  celsius: number
   message?: string
 }
 
-export interface DeactivateTemperatureArgs {
-  module: string | null
+export interface DeactivateTemperatureArgs extends CommonArgs {
+  moduleId: string
   commandCreatorFnName: 'deactivateTemperature'
   message?: string
 }
@@ -381,8 +378,8 @@ export type SetShakeSpeedArgs = ShakeSpeedParams & {
   message?: string
 }
 
-export interface HeaterShakerArgs {
-  module: string | null
+export interface HeaterShakerArgs extends CommonArgs {
+  moduleId: string | null
   rpm: number | null
   commandCreatorFnName: 'heaterShaker'
   targetTemperature: number | null
@@ -415,7 +412,7 @@ interface ProfileCycleItem {
 export type ProfileItem = ProfileStepItem | ProfileCycleItem
 
 export interface ThermocyclerProfileStepArgs {
-  module: string
+  moduleId: string
   commandCreatorFnName: THERMOCYCLER_PROFILE
   blockTargetTempHold: number | null
   lidOpenHold: boolean
@@ -430,7 +427,7 @@ export interface ThermocyclerProfileStepArgs {
 }
 
 export interface ThermocyclerStateStepArgs {
-  module: string
+  moduleId: string
   commandCreatorFnName: THERMOCYCLER_STATE
   blockTargetTemp: number | null
   lidTargetTemp: number | null
@@ -438,24 +435,24 @@ export interface ThermocyclerStateStepArgs {
   message?: string
 }
 
-export interface AbsorbanceReaderInitializeArgs {
-  module: string
+export interface AbsorbanceReaderInitializeArgs extends CommonArgs {
+  moduleId: string
   commandCreatorFnName: 'absorbanceReaderInitialize'
-  mode: 'single' | 'multi'
-  wavelengths: number[]
+  measureMode: 'single' | 'multi'
+  sampleWavelengths: number[]
   referenceWavelength?: number | null
   message?: string
 }
 
-export interface AbsorbanceReaderReadArgs {
-  module: string
+export interface AbsorbanceReaderReadArgs extends CommonArgs {
+  moduleId: string
   commandCreatorFnName: 'absorbanceReaderRead'
   fileName: string | null
   message?: string
 }
 
-export interface AbsorbanceReaderLidArgs {
-  module: string
+export interface AbsorbanceReaderLidArgs extends CommonArgs {
+  moduleId: string
   commandCreatorFnName: 'absorbanceReaderOpenLid' | 'absorbanceReaderCloseLid'
   message?: string
 }
