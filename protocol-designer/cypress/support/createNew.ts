@@ -93,6 +93,7 @@ export enum Actions {
   DispenseMixVolume = 'Mix volume for transfer dispense',
   DispenseMixTimes = 'Mix times for transfer dispense',
   DispenseAirGapVolume = 'Air gap volume for transfer dispense',
+  BlowoutTransferDestination = 'Select Destination well',
 }
 
 export enum Verifications {
@@ -117,6 +118,7 @@ export enum Verifications {
   TouchTip = 'Touch tip option is unchecked',
   MixT = 'Mix option is unchecked',
   AirGap = 'Air gap option is unchecked',
+  ExtraDispenseTransfer = 'These are the extra dispense transfer',
 }
 
 export enum Content {
@@ -176,6 +178,7 @@ export enum Content {
   PreWetTip = 'Pre-wet tip',
   TouchTip = 'Touch tip',
   AirGap = 'Air gap',
+  Save = 'Save',
 }
 
 export enum Locators {
@@ -488,7 +491,7 @@ const executeAction = (action: Actions | UniversalActions): void => {
 
       cy.get(Locators.ModalShellArea)
         .find(Locators.SaveButton) // Locate the Save button
-        .contains('Save')
+        .contains(Content.Save)
         .click({ force: true }) // Trigger the Save button
       break
     case Actions.WellSelector:
@@ -509,7 +512,7 @@ const executeAction = (action: Actions | UniversalActions): void => {
       break
     case Actions.SetVolumeAndSaveforWells:
       cy.get(Locators.AddInitialVolume).type(`150`) // Set volume
-      cy.contains('button', 'Save').click() // Click Save button
+      cy.contains('button', Content.Save).click() // Click Save button
       cy.contains('button', 'Done').click({ force: true }) // Click Done button, forcing click if necessary
       break
     case Actions.ProtocolStepsH:
@@ -550,7 +553,7 @@ const executeAction = (action: Actions | UniversalActions): void => {
       break
 
     case Actions.SaveSelectedWells:
-      cy.contains('Save').click({ force: true })
+      cy.contains(Content.Save).click({ force: true })
       break
 
     case Actions.InputTransferVolume30:
@@ -594,6 +597,11 @@ const executeAction = (action: Actions | UniversalActions): void => {
       break
     case Actions.DispenseAirGapVolume:
       cy.get('input[name = "dispense_airGap_volume"]').type('10')
+      break
+    case Actions.BlowoutTransferDestination:
+      cy.contains('Blowout').closest('div').find('button').click()
+      cy.contains('Choose option').click()
+      cy.contains('Destination Well').click()
       break
     default:
       throw new Error(`Unrecognized action: ${action as string}`)
@@ -726,6 +734,12 @@ const verifyStep = (verification: Verifications): void => {
         .find('svg')
         .should('exist')
         .and('have.attr', 'aria-hidden', 'true')
+      break
+    case Verifications.ExtraDispenseTransfer:
+      cy.contains('Blowout location')
+      cy.contains('Blowout flow rate')
+      cy.contains('Blowout position from top')
+      cy.contains('Choose option')
       break
 
     default:

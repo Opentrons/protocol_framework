@@ -105,14 +105,12 @@ describe('The Redesigned Create Protocol Landing Page', () => {
       Actions.DispenseMixVolume,
       Actions.DispenseMixTimes,
       Actions.DispenseAirGapVolume,
+      Actions.BlowoutTransferDestination,
+      Verifications.ExtraDispenseTransfer,
     ]
     runCreateTest(steps)
-    cy.contains('Blowout').closest('div').find('button').click()
-    cy.contains('Blowout location')
-    cy.contains('Blowout flow rate')
-    cy.contains('Blowout position from top')
-    cy.contains('Choose option').click()
-    cy.contains('Destination Well').click()
+
     cy.contains('Save').click()
+    cy.contains('button', 'Transfer').should('be.visible').click()
   })
 })
