@@ -13,7 +13,7 @@ function _getDisabledFields(hydratedForm: HydratedFormData): Set<string> {
   switch (hydratedForm.stepType) {
     case 'moveLiquid':
       return getDisabledFieldsMoveLiquidForm(
-        hydratedForm as HydratedMoveLiquidFormData
+        hydratedForm.fields as HydratedMoveLiquidFormData['fields']
       )
 
     case 'mix':
