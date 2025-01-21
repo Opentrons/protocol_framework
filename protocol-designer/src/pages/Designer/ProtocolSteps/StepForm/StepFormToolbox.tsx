@@ -49,6 +49,7 @@ import {
   TemperatureTools,
   ThermocyclerTools,
 } from './StepTools'
+import { useAbsorbanceReaderCommandType } from './hooks'
 import {
   getSaveStepSnackbarText,
   getVisibleFormErrors,
@@ -138,6 +139,10 @@ export function StepFormToolbox(props: StepFormToolboxProps): JSX.Element {
     dependentFields: error.dependentProfileFields,
   }))
   const timeline = useSelector(getRobotStateTimeline)
+  const moduleId = formData.moduleId
+  const enableReadOrInitialization = useAbsorbanceReaderCommandType(
+    moduleId as string | null
+  )
   const [toolboxStep, setToolboxStep] = useState<number>(0)
   const [showFormErrors, setShowFormErrors] = useState<boolean>(false)
   const [tab, setTab] = useState<LiquidHandlingTab>('aspirate')
@@ -205,7 +210,8 @@ export function StepFormToolbox(props: StepFormToolboxProps): JSX.Element {
   }
 
   const isMultiStepToolbox =
-    formData.stepType === 'absorbanceReader' ||
+    (formData.stepType === 'absorbanceReader' &&
+      enableReadOrInitialization != null) ||
     formData.stepType === 'moveLiquid' ||
     formData.stepType === 'mix' ||
     formData.stepType === 'thermocycler'

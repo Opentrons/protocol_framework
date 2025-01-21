@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react'
+import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useDispatch, useSelector } from 'react-redux'
 import {
@@ -18,6 +18,7 @@ import { DropdownStepFormField } from '../../../../../../molecules'
 import { getRobotStateAtActiveItem } from '../../../../../../top-selectors/labware-locations'
 import { getAbsorbanceReaderLabwareOptions } from '../../../../../../ui/modules/selectors'
 import { hoverSelection } from '../../../../../../ui/steps/actions/actions'
+import { useAbsorbanceReaderCommandType } from '../../hooks'
 import { InitializationSettings } from './InitializationSettings'
 import { Initialization } from './Initialization'
 import { LidControls } from './LidControls'
@@ -40,26 +41,18 @@ export function AbsorbanceReaderTools(props: StepFormProps): JSX.Element {
   const { t } = useTranslation(['application', 'form', 'protocol_steps'])
   const robotState = useSelector(getRobotStateAtActiveItem)
   const absorbanceReaderOptions = useSelector(getAbsorbanceReaderLabwareOptions)
-  const { labware = {}, modules = {} } = robotState ?? {}
-  const isLabwareOnAbsorbanceReader = useMemo(
-    () => Object.values(labware).some(lw => lw.slot === moduleId),
-    [moduleId]
+  const compoundCommandType = useAbsorbanceReaderCommandType(
+    moduleId as string | null
   )
+  const { modules } = robotState ?? {}
   const absorbanceReaderFormType = formData.absorbanceReaderFormType as AbsorbanceReaderFormType
-  const absorbanceReaderState = modules[moduleId]
-    ?.moduleState as AbsorbanceReaderState | null
-  const initialization = absorbanceReaderState?.initialization ?? null
-
-  const enableReadOrInitialization =
-    !isLabwareOnAbsorbanceReader || initialization != null
-  const compoundCommandType = isLabwareOnAbsorbanceReader
-    ? ABSORBANCE_READER_READ
-    : ABSORBANCE_READER_INITIALIZE
+  const initialization = (modules?.[moduleId]
+    ?.moduleState as AbsorbanceReaderState).initialization
 
   // pre-select radio button on mount and module change if not previously set
   useEffect(() => {
     if (formData.absorbanceReaderFormType == null) {
-      if (enableReadOrInitialization) {
+      if (compoundCommandType != null) {
         propsForFields.absorbanceReaderFormType.updateValue(compoundCommandType)
         return
       }
@@ -89,17 +82,20 @@ export function AbsorbanceReaderTools(props: StepFormProps): JSX.Element {
       initialization == null ? 'define' : 'change'
     }`
   }
-  const compoundCommandButton = (
-    <RadioButton
-      onChange={() => {
-        propsForFields.absorbanceReaderFormType.updateValue(compoundCommandType)
-      }}
-      isSelected={absorbanceReaderFormType === compoundCommandType}
-      buttonLabel={t(buttonLabelKey)}
-      buttonValue={compoundCommandType}
-      largeDesktopBorderRadius
-    />
-  )
+  const compoundCommandButton =
+    compoundCommandType != null ? (
+      <RadioButton
+        onChange={() => {
+          propsForFields.absorbanceReaderFormType.updateValue(
+            compoundCommandType
+          )
+        }}
+        isSelected={absorbanceReaderFormType === compoundCommandType}
+        buttonLabel={t(buttonLabelKey)}
+        buttonValue={compoundCommandType}
+        largeDesktopBorderRadius
+      />
+    ) : null
 
   const page1Content = (
     <Flex
@@ -134,7 +130,7 @@ export function AbsorbanceReaderTools(props: StepFormProps): JSX.Element {
             <StyledText desktopStyle="bodyDefaultSemiBold">
               {t('form:step_edit_form:absorbanceReader.module_controls')}
             </StyledText>
-            {enableReadOrInitialization ? (
+            {compoundCommandType != null ? (
               <>
                 {compoundCommandButton}
                 {lidRadioButton}
