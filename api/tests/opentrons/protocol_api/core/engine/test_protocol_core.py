@@ -34,6 +34,7 @@ from opentrons.hardware_control.modules.types import (
     ThermocyclerModuleModel,
     HeaterShakerModuleModel,
     MagneticBlockModel,
+    FlexStackerModuleModel,
 )
 from opentrons.protocol_engine import (
     ModuleModel as EngineModuleModel,
@@ -1613,6 +1614,7 @@ def test_load_module_thermocycler_with_no_location(
         MagneticModuleModel.MAGNETIC_V2,
         TemperatureModuleModel.TEMPERATURE_V1,
         TemperatureModuleModel.TEMPERATURE_V2,
+        FlexStackerModuleModel.FLEX_STACKER_V1,
     ],
 )
 def test_load_module_no_location(

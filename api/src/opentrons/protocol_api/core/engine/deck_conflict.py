@@ -300,6 +300,9 @@ def _map_module(
                 is_semi_configuration=False,
             ),
         )
+    elif module_type == ModuleType.FLEX_STACKER:
+        # TODO: This is a placeholder. We need to implement this.
+        return None
     else:
         return (
             mapped_location,
