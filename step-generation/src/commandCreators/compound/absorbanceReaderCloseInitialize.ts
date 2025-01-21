@@ -15,7 +15,7 @@ export const absorbanceReaderCloseInitialize: CommandCreator<AbsorbanceReaderIni
   invariantContext,
   prevRobotState
 ) => {
-  const { moduleId, mode, wavelengths, referenceWavelength } = args
+  const { moduleId, measureMode, sampleWavelengths, referenceWavelength } = args
   const absorbanceReaderState = absorbanceReaderStateGetter(
     prevRobotState,
     moduleId
@@ -35,8 +35,8 @@ export const absorbanceReaderCloseInitialize: CommandCreator<AbsorbanceReaderIni
     }),
     curryCommandCreator(absorbanceReaderInitialize, {
       moduleId,
-      measureMode: mode,
-      sampleWavelengths: wavelengths,
+      measureMode,
+      sampleWavelengths,
       referenceWavelength: referenceWavelength ?? undefined,
     }),
   ]

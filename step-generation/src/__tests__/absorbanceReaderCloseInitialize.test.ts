@@ -30,8 +30,8 @@ describe('absorbanceReaderCloseInitialize compound command creator', () => {
     absorbanceReaderCloseInitializeArgs = {
       commandCreatorFnName: 'absorbanceReaderInitialize',
       moduleId: ABSORBANCE_READER_MODULE_ID,
-      mode: 'single',
-      wavelengths: [450],
+      measureMode: 'single',
+      sampleWavelengths: [450],
       name: 'some name',
       description: 'some descirption',
     }
@@ -109,8 +109,8 @@ describe('absorbanceReaderCloseInitialize compound command creator', () => {
   it('should emit close and intalize commands if multi mode', () => {
     absorbanceReaderCloseInitializeArgs = {
       ...absorbanceReaderCloseInitializeArgs,
-      mode: 'multi',
-      wavelengths: [450, 600],
+      measureMode: 'multi',
+      sampleWavelengths: [450, 600],
     }
     vi.mocked(absorbanceReaderStateGetter).mockReturnValue(
       {} as AbsorbanceReaderState

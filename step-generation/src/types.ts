@@ -438,8 +438,8 @@ export interface ThermocyclerStateStepArgs {
 export interface AbsorbanceReaderInitializeArgs extends CommonArgs {
   moduleId: string
   commandCreatorFnName: 'absorbanceReaderInitialize'
-  mode: 'single' | 'multi'
-  wavelengths: number[]
+  measureMode: 'single' | 'multi'
+  sampleWavelengths: number[]
   referenceWavelength?: number | null
   message?: string
 }

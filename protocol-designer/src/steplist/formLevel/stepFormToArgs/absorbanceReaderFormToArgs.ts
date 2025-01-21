@@ -35,7 +35,7 @@ export const absorbanceReaderFormToArgs = (
         moduleId,
         commandCreatorFnName: 'absorbanceReaderInitialize',
         measureMode: mode,
-        referenceWavelengths: rawWavelengths?.map(wavelength =>
+        sampleWavelengths: rawWavelengths?.map(wavelength =>
           parseFloat(wavelength)
         ),
         ...(mode === 'single' &&
