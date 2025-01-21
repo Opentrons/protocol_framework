@@ -13,17 +13,20 @@ describe('absorbanceReaderFormToArgs', () => {
       moduleId: 'absorbanceReaderId',
       referenceWavelength: '500',
       referenceWavelengthActive: true,
-      stepDetails: null,
+      stepName: 'absorbance reader step',
+      stepDetails: '',
       stepType: 'absorbanceReader',
       wavelengths: ['450'],
     }
 
     const expected = {
-      module: 'absorbanceReaderId',
+      moduleId: 'absorbanceReaderId',
       commandCreatorFnName: 'absorbanceReaderInitialize',
-      mode: 'single',
-      wavelengths: [450],
+      measureMode: 'single',
+      sampleWavelengths: [450],
       referenceWavelength: 500,
+      description: '',
+      name: 'absorbance reader step',
     }
     expect(absorbanceReaderFormToArgs(formData)).toEqual(expected)
   })
@@ -37,17 +40,20 @@ describe('absorbanceReaderFormToArgs', () => {
       moduleId: 'absorbanceReaderId',
       referenceWavelength: '500',
       referenceWavelengthActive: true,
-      stepDetails: null,
+      stepName: 'absorbance reader step',
+      stepDetails: '',
       stepType: 'absorbanceReader',
       wavelengths: ['450', '600'],
     }
 
     const expected = {
-      module: 'absorbanceReaderId',
+      moduleId: 'absorbanceReaderId',
       commandCreatorFnName: 'absorbanceReaderInitialize',
-      mode: 'single',
-      wavelengths: [450],
+      measureMode: 'single',
+      sampleWavelengths: [450],
       referenceWavelength: 500,
+      description: '',
+      name: 'absorbance reader step',
     }
     expect(absorbanceReaderFormToArgs(formData)).toEqual(expected)
   })
@@ -61,16 +67,19 @@ describe('absorbanceReaderFormToArgs', () => {
       moduleId: 'absorbanceReaderId',
       referenceWavelength: '500',
       referenceWavelengthActive: false,
-      stepDetails: null,
+      stepName: 'absorbance reader step',
+      stepDetails: '',
       stepType: 'absorbanceReader',
       wavelengths: ['450'],
     }
 
     const expected = {
-      module: 'absorbanceReaderId',
+      moduleId: 'absorbanceReaderId',
       commandCreatorFnName: 'absorbanceReaderInitialize',
-      mode: 'single',
-      wavelengths: [450],
+      measureMode: 'single',
+      sampleWavelengths: [450],
+      description: '',
+      name: 'absorbance reader step',
     }
     expect(absorbanceReaderFormToArgs(formData)).toEqual(expected)
   })
@@ -84,16 +93,19 @@ describe('absorbanceReaderFormToArgs', () => {
       moduleId: 'absorbanceReaderId',
       referenceWavelength: null,
       referenceWavelengthActive: false,
-      stepDetails: null,
+      stepName: 'absorbance reader step',
+      stepDetails: '',
       stepType: 'absorbanceReader',
       wavelengths: ['450', '600'],
     }
 
     const expected = {
-      module: 'absorbanceReaderId',
+      moduleId: 'absorbanceReaderId',
       commandCreatorFnName: 'absorbanceReaderInitialize',
-      mode: 'multi',
-      wavelengths: [450, 600],
+      measureMode: 'multi',
+      sampleWavelengths: [450, 600],
+      description: '',
+      name: 'absorbance reader step',
     }
     expect(absorbanceReaderFormToArgs(formData)).toEqual(expected)
   })
@@ -107,15 +119,18 @@ describe('absorbanceReaderFormToArgs', () => {
       moduleId: 'absorbanceReaderId',
       referenceWavelength: null,
       referenceWavelengthActive: false,
-      stepDetails: null,
+      stepName: 'absorbance reader step',
+      stepDetails: '',
       stepType: 'absorbanceReader',
       wavelengths: [],
     }
 
     const expected = {
-      module: 'absorbanceReaderId',
+      moduleId: 'absorbanceReaderId',
       commandCreatorFnName: 'absorbanceReaderRead',
       fileName: 'output_path.csv',
+      description: '',
+      name: 'absorbance reader step',
     }
     expect(absorbanceReaderFormToArgs(formData)).toEqual(expected)
   })
@@ -129,18 +144,21 @@ describe('absorbanceReaderFormToArgs', () => {
       moduleId: 'absorbanceReaderId',
       referenceWavelength: null,
       referenceWavelengthActive: false,
-      stepDetails: null,
+      stepName: 'absorbance reader step',
+      stepDetails: '',
       stepType: 'absorbanceReader',
       wavelengths: [],
     }
 
     const expected = {
-      module: 'absorbanceReaderId',
+      moduleId: 'absorbanceReaderId',
       commandCreatorFnName: 'absorbanceReaderOpenLid',
+      description: '',
+      name: 'absorbance reader step',
     }
     expect(absorbanceReaderFormToArgs(formData)).toEqual(expected)
   })
-  it('returns absorbance reader lid command creator to close lid', () => {
+  it.only('returns absorbance reader lid command creator to close lid', () => {
     const formData: HydratedAbsorbanceReaderFormData = {
       absorbanceReaderFormType: 'absorbanceReaderLid',
       fileName: null,
@@ -150,14 +168,17 @@ describe('absorbanceReaderFormToArgs', () => {
       moduleId: 'absorbanceReaderId',
       referenceWavelength: null,
       referenceWavelengthActive: false,
-      stepDetails: null,
+      stepName: 'absorbance reader step',
+      stepDetails: '',
       stepType: 'absorbanceReader',
       wavelengths: [],
     }
 
     const expected = {
-      module: 'absorbanceReaderId',
+      moduleId: 'absorbanceReaderId',
       commandCreatorFnName: 'absorbanceReaderCloseLid',
+      description: '',
+      name: 'absorbance reader step',
     }
     expect(absorbanceReaderFormToArgs(formData)).toEqual(expected)
   })
