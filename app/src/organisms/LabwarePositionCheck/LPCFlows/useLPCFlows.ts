@@ -15,6 +15,7 @@ import { useNotifyCurrentMaintenanceRun } from '/app/resources/maintenance_runs'
 
 import type { RobotType } from '@opentrons/shared-data'
 import type { LPCFlowsProps } from '/app/organisms/LabwarePositionCheck/LPCFlows/LPCFlows'
+import { useNotifyDeckConfigurationQuery } from '/app/resources/deck_configuration'
 
 interface UseLPCFlowsBase {
   showLPC: boolean
@@ -49,6 +50,7 @@ export function useLPCFlows({
   const [hasCreatedLPCRun, setHasCreatedLPCRun] = useState(false)
 
   const { data: runRecord } = useNotifyRunQuery(runId, { staleTime: Infinity })
+  const deckConfig = useNotifyDeckConfigurationQuery().data
   const currentOffsets = runRecord?.data?.labwareOffsets ?? []
   const mostRecentAnalysis = useMostRecentCompletedAnalysis(runId)
 
@@ -115,7 +117,8 @@ export function useLPCFlows({
     hasCreatedLPCRun &&
     maintenanceRunId != null &&
     protocolName != null &&
-    mostRecentAnalysis != null
+    mostRecentAnalysis != null &&
+    deckConfig != null
 
   return showLPC
     ? {
@@ -126,6 +129,7 @@ export function useLPCFlows({
           onCloseClick: handleCloseLPC,
           runId,
           robotType,
+          deckConfig,
           existingOffsets: currentOffsets,
           mostRecentAnalysis,
           protocolName,

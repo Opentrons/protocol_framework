@@ -1,8 +1,8 @@
+import { useEffect } from 'react'
 import { useDispatch } from 'react-redux'
 
 import { getLabwareDefinitionsFromCommands } from '@opentrons/components'
 
-import { useNotifyDeckConfigurationQuery } from '/app/resources/deck_configuration'
 import { startLPC } from '/app/redux/protocol-runs'
 import { getLPCSteps } from './utils'
 
@@ -13,7 +13,6 @@ import type { LPCWizardFlexProps } from '/app/organisms/LabwarePositionCheck/LPC
 export interface UseLPCInitialStateProps
   extends Omit<LPCWizardFlexProps, 'onCloseClick'> {}
 
-// Inject initial LPC state into Redux.
 export function useLPCInitialState({
   mostRecentAnalysis,
   runId,
@@ -21,28 +20,28 @@ export function useLPCInitialState({
 }: UseLPCInitialStateProps): void {
   const dispatch = useDispatch()
 
-  const protocolCommands: RunTimeCommand[] = mostRecentAnalysis.commands
-  const labwareDefs = getLabwareDefinitionsFromCommands(protocolCommands)
-  const deckConfig = useNotifyDeckConfigurationQuery().data ?? []
-  const LPCSteps = getLPCSteps({
-    protocolData: mostRecentAnalysis,
-    labwareDefs,
-  })
+  useEffect(() => {
+    const protocolCommands: RunTimeCommand[] = mostRecentAnalysis.commands
+    const labwareDefs = getLabwareDefinitionsFromCommands(protocolCommands)
+    const LPCSteps = getLPCSteps({
+      protocolData: mostRecentAnalysis,
+      labwareDefs,
+    })
 
-  const initialState: LPCWizardState = {
-    ...rest,
-    protocolData: mostRecentAnalysis,
-    labwareDefs,
-    workingOffsets: [],
-    deckConfig,
-    steps: {
-      currentStepIndex: 0,
-      totalStepCount: LPCSteps.length,
-      current: LPCSteps[0],
-      all: LPCSteps,
-      next: LPCSteps[1],
-    },
-  }
+    const initialState: LPCWizardState = {
+      ...rest,
+      protocolData: mostRecentAnalysis,
+      labwareDefs,
+      workingOffsets: [],
+      steps: {
+        currentStepIndex: 0,
+        totalStepCount: LPCSteps.length,
+        current: LPCSteps[0],
+        all: LPCSteps,
+        next: LPCSteps[1],
+      },
+    }
 
-  dispatch(startLPC(runId, initialState))
+    dispatch(startLPC(runId, initialState))
+  }, [])
 }
