@@ -109,6 +109,7 @@ def test_submerge(
             in_place=True,
             is_meniscus=None,
             push_out=0,
+            correction_volume=None,
         ),
         mock_instrument_core.delay(0.5),
         mock_instrument_core.move_to(
@@ -132,7 +133,9 @@ def test_aspirate_and_wait(
     aspirate_flow_rate = (
         sample_transfer_props.aspirate.flow_rate_by_volume.get_for_volume(10)
     )
-
+    correction_volume = (
+        sample_transfer_props.aspirate.correction_by_volume.get_for_volume(10)
+    )
     subject = TransferComponentsExecutor(
         instrument_core=mock_instrument_core,
         transfer_properties=sample_transfer_props,
@@ -151,6 +154,7 @@ def test_aspirate_and_wait(
             flow_rate=aspirate_flow_rate,
             in_place=True,
             is_meniscus=None,
+            correction_volume=correction_volume,
         ),
         mock_instrument_core.delay(0.2),
     )
@@ -190,7 +194,9 @@ def test_dispense_and_wait(
     dispense_flow_rate = (
         sample_transfer_props.dispense.flow_rate_by_volume.get_for_volume(10)
     )
-
+    correction_volume = (
+        sample_transfer_props.dispense.correction_by_volume.get_for_volume(50)
+    )
     subject = TransferComponentsExecutor(
         instrument_core=mock_instrument_core,
         transfer_properties=sample_transfer_props,
@@ -210,6 +216,7 @@ def test_dispense_and_wait(
             in_place=True,
             push_out=123,
             is_meniscus=None,
+            correction_volume=correction_volume,
         ),
         mock_instrument_core.delay(0.5),
     )
@@ -252,6 +259,12 @@ def test_mix(
     dispense_flow_rate = (
         sample_transfer_props.dispense.flow_rate_by_volume.get_for_volume(50)
     )
+    aspirate_correction_volume = (
+        sample_transfer_props.aspirate.correction_by_volume.get_for_volume(50)
+    )
+    dispense_correction_volume = (
+        sample_transfer_props.dispense.correction_by_volume.get_for_volume(50)
+    )
     subject = TransferComponentsExecutor(
         instrument_core=mock_instrument_core,
         transfer_properties=sample_transfer_props,
@@ -274,6 +287,7 @@ def test_mix(
             flow_rate=aspirate_flow_rate,
             in_place=True,
             is_meniscus=None,
+            correction_volume=aspirate_correction_volume,
         ),
         mock_instrument_core.delay(0.2),
         mock_instrument_core.dispense(
@@ -285,6 +299,7 @@ def test_mix(
             in_place=True,
             push_out=2.0,
             is_meniscus=None,
+            correction_volume=dispense_correction_volume,
         ),
         mock_instrument_core.delay(0.5),
     )
@@ -301,6 +316,9 @@ def test_mix_disabled(
     aspirate_flow_rate = (
         sample_transfer_props.aspirate.flow_rate_by_volume.get_for_volume(50)
     )
+    correction_volume = (
+        sample_transfer_props.aspirate.correction_by_volume.get_for_volume(50)
+    )
     subject = TransferComponentsExecutor(
         instrument_core=mock_instrument_core,
         transfer_properties=sample_transfer_props,
@@ -322,6 +340,7 @@ def test_mix_disabled(
             flow_rate=aspirate_flow_rate,
             in_place=True,
             is_meniscus=None,
+            correction_volume=correction_volume,
         ),
         times=0,
     )
@@ -340,6 +359,12 @@ def test_pre_wet(
     dispense_flow_rate = (
         sample_transfer_props.dispense.flow_rate_by_volume.get_for_volume(40)
     )
+    aspirate_correction_volume = (
+        sample_transfer_props.aspirate.correction_by_volume.get_for_volume(50)
+    )
+    dispense_correction_volume = (
+        sample_transfer_props.dispense.correction_by_volume.get_for_volume(50)
+    )
     subject = TransferComponentsExecutor(
         instrument_core=mock_instrument_core,
         transfer_properties=sample_transfer_props,
@@ -359,6 +384,7 @@ def test_pre_wet(
             flow_rate=aspirate_flow_rate,
             in_place=True,
             is_meniscus=None,
+            correction_volume=aspirate_correction_volume,
         ),
         mock_instrument_core.delay(0.2),
         mock_instrument_core.dispense(
@@ -370,6 +396,7 @@ def test_pre_wet(
             in_place=True,
             push_out=0,
             is_meniscus=None,
+            correction_volume=dispense_correction_volume,
         ),
         mock_instrument_core.delay(0.5),
     )
@@ -386,6 +413,9 @@ def test_pre_wet_disabled(
     aspirate_flow_rate = (
         sample_transfer_props.aspirate.flow_rate_by_volume.get_for_volume(40)
     )
+    aspirate_correction_volume = (
+        sample_transfer_props.aspirate.correction_by_volume.get_for_volume(50)
+    )
     subject = TransferComponentsExecutor(
         instrument_core=mock_instrument_core,
         transfer_properties=sample_transfer_props,
@@ -405,6 +435,7 @@ def test_pre_wet_disabled(
             flow_rate=aspirate_flow_rate,
             in_place=True,
             is_meniscus=None,
+            correction_volume=aspirate_correction_volume,
         ),
         times=0,
     )

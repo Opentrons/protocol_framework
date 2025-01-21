@@ -502,7 +502,11 @@ class OT3PipetteHandler:
         self._ihp_log.debug(f"{action} on {target.name}")
 
     def plunger_position(
-        self, instr: Pipette, ul: float, action: "UlPerMmAction"
+        self,
+        instr: Pipette,
+        ul: float,
+        action: "UlPerMmAction",
+        correction_volume: float = 0.0,
     ) -> float:
         mm = ul / instr.ul_per_mm(ul, action)
         position = instr.plunger_positions.bottom - mm
@@ -531,6 +535,7 @@ class OT3PipetteHandler:
         mount: OT3Mount,
         volume: Optional[float],
         rate: float,
+        correction_volume: float = 0.0,
     ) -> Optional[LiquidActionSpec]:
         """Check preconditions for aspirate, parse args, and calculate positions.
 
@@ -566,7 +571,10 @@ class OT3PipetteHandler:
         ), "Cannot aspirate more than pipette max volume"
 
         dist = self.plunger_position(
-            instrument, instrument.current_volume + asp_vol, "aspirate"
+            instr=instrument,
+            ul=instrument.current_volume + asp_vol,
+            action="aspirate",
+            correction_volume=correction_volume,
         )
         speed = self.plunger_speed(
             instrument, instrument.aspirate_flow_rate * rate, "aspirate"
@@ -591,6 +599,7 @@ class OT3PipetteHandler:
         volume: Optional[float],
         rate: float,
         push_out: Optional[float],
+        correction_volume: float = 0.0,
     ) -> Optional[LiquidActionSpec]:
         """Check preconditions for dispense, parse args, and calculate positions.
 
@@ -659,7 +668,10 @@ class OT3PipetteHandler:
             )
 
         dist = self.plunger_position(
-            instrument, instrument.current_volume - disp_vol, "dispense"
+            instr=instrument,
+            ul=instrument.current_volume - disp_vol,
+            action="dispense",
+            correction_volume=correction_volume,
         )
         speed = self.plunger_speed(
             instrument, instrument.dispense_flow_rate * rate, "dispense"

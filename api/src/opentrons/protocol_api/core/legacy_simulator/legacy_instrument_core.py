@@ -99,6 +99,7 @@ class LegacyInstrumentCoreSimulator(
         flow_rate: float,
         in_place: bool,
         is_meniscus: Optional[bool] = None,
+        correction_volume: Optional[float] = None,
     ) -> None:
         if self.get_current_volume() == 0:
             # Make sure we're at the top of the labware and clear of any
@@ -141,6 +142,7 @@ class LegacyInstrumentCoreSimulator(
         in_place: bool,
         push_out: Optional[float],
         is_meniscus: Optional[bool] = None,
+        correction_volume: Optional[float] = None,
     ) -> None:
         if isinstance(location, (TrashBin, WasteChute)):
             raise APIVersionError(

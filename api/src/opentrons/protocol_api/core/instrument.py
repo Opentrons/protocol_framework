@@ -43,6 +43,7 @@ class AbstractInstrument(ABC, Generic[WellCoreType, LabwareCoreType]):
         flow_rate: float,
         in_place: bool,
         is_meniscus: Optional[bool] = None,
+        correction_volume: Optional[float] = None,
     ) -> None:
         """Aspirate a given volume of liquid from the specified location.
         Args:
@@ -52,6 +53,7 @@ class AbstractInstrument(ABC, Generic[WellCoreType, LabwareCoreType]):
             rate: The rate for how quickly to aspirate.
             flow_rate: The flow rate in µL/s to aspirate at.
             in_place: Whether this is in-place.
+            correction_volume: The correction volume in uL
         """
         ...
 
@@ -66,6 +68,7 @@ class AbstractInstrument(ABC, Generic[WellCoreType, LabwareCoreType]):
         in_place: bool,
         push_out: Optional[float],
         is_meniscus: Optional[bool] = None,
+        correction_volume: Optional[float] = None,
     ) -> None:
         """Dispense a given volume of liquid into the specified location.
         Args:
@@ -76,6 +79,7 @@ class AbstractInstrument(ABC, Generic[WellCoreType, LabwareCoreType]):
             flow_rate: The flow rate in µL/s to dispense at.
             in_place: Whether this is in-place.
             push_out: The amount to push the plunger below bottom position.
+            correction_volume: The correction volume in uL
         """
         ...
 

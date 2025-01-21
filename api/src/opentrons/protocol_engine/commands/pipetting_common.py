@@ -1,7 +1,7 @@
 """Common pipetting command base models."""
 
 from __future__ import annotations
-from typing import Literal, Tuple, TYPE_CHECKING
+from typing import Literal, Tuple, TYPE_CHECKING, Optional
 
 from typing_extensions import TypedDict
 from pydantic import BaseModel, Field
@@ -18,6 +18,10 @@ if TYPE_CHECKING:
     from ..execution.pipetting import PipettingHandler
     from ..resources import ModelUtils
     from ..notes import CommandNoteAdder
+
+
+DEFAULT_CORRECTION_VOLUME = 0.0
+"""Default correction volume (uL) for any aspirate/ dispense volume."""
 
 
 class PipetteIdMixin(BaseModel):
@@ -41,6 +45,11 @@ class AspirateVolumeMixin(BaseModel):
         " There is some tolerance for floating point rounding errors.",
         ge=0,
     )
+    correctionVolume: Optional[float] = Field(
+        DEFAULT_CORRECTION_VOLUME,
+        description="The correction volume in uL.",
+        ge=0,
+    )
 
 
 class DispenseVolumeMixin(BaseModel):
@@ -51,6 +60,11 @@ class DispenseVolumeMixin(BaseModel):
         description="The amount of liquid to dispense, in µL."
         " Must not be greater than the currently aspirated volume."
         " There is some tolerance for floating point rounding errors.",
+        ge=0,
+    )
+    correctionVolume: Optional[float] = Field(
+        DEFAULT_CORRECTION_VOLUME,
+        description="The correction volume in uL.",
         ge=0,
     )
 
@@ -176,18 +190,20 @@ async def aspirate_in_place(
     pipette_id: str,
     volume: float,
     flow_rate: float,
+    correction_volume: float,
     location_if_error: ErrorLocationInfo,
     command_note_adder: CommandNoteAdder,
     pipetting: PipettingHandler,
     model_utils: ModelUtils,
 ) -> SuccessData[BaseLiquidHandlingResult] | DefinedErrorData[OverpressureError]:
-    """Execute an aspirate in place microoperation."""
+    """Execute an aspirate in place micro-operation."""
     try:
         volume_aspirated = await pipetting.aspirate_in_place(
             pipette_id=pipette_id,
             volume=volume,
             flow_rate=flow_rate,
             command_note_adder=command_note_adder,
+            correction_volume=correction_volume,
         )
     except PipetteOverpressureError as e:
         return DefinedErrorData(
@@ -222,17 +238,19 @@ async def dispense_in_place(
     volume: float,
     flow_rate: float,
     push_out: float | None,
+    correction_volume: float,
     location_if_error: ErrorLocationInfo,
     pipetting: PipettingHandler,
     model_utils: ModelUtils,
 ) -> SuccessData[BaseLiquidHandlingResult] | DefinedErrorData[OverpressureError]:
-    """Dispense-in-place as a microoperation."""
+    """Dispense-in-place as a micro-operation."""
     try:
         volume = await pipetting.dispense_in_place(
             pipette_id=pipette_id,
             volume=volume,
             flow_rate=flow_rate,
             push_out=push_out,
+            correction_volume=correction_volume,
         )
     except PipetteOverpressureError as e:
         return DefinedErrorData(
