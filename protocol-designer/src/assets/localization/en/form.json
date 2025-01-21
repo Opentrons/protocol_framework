@@ -30,7 +30,68 @@
     "right": "(R)"
   },
   "step_edit_form": {
+    "absorbanceReader": {
+      "add_wavelength": {
+        "disabled": "Maximum allowed wavelengths reached",
+        "label": "Add a wavelength"
+      },
+      "color_parentheses": "({{color}})",
+      "current_initialization_settings": "Current initialization settings",
+      "custom_wavelength": {
+        "caption": "Value between 350 - 1000 nm",
+        "label": "Custom wavelength"
+      },
+      "delete": "Delete",
+      "errors": {
+        "custom_wavelength_required": "Custom wavelength required",
+        "wavelength_out_of_range": "Value falls outside of accepted range"
+      },
+      "export_settings": {
+        "body": "Copy explaining where the file will appear and when.",
+        "title": "Export settings"
+      },
+      "initialization_setting": {
+        "multi": {
+          "description": "Up to 6 wavelengths can be programmed.",
+          "title": "Multi initialization setting"
+        },
+        "single": {
+          "title": "Single initialization setting"
+        }
+      },
+      "module_controls": "Module controls",
+      "no_settings_defined": "No settings defined",
+      "reference_wavelength": "Reference wavelength",
+      "reference_wavelength_parentheses": "(Reference wavelength)",
+      "reference_wavelength_color_parentheses": "({{color}}, reference wavelength)",
+      "wavelength": "Wavelength"
+    },
     "field": {
+      "absorbanceReader": {
+        "absorbanceReaderFormType": {
+          "absorbanceReaderInitialize": {
+            "change": "Change initialization settings",
+            "define": "Define initialization settings"
+          },
+          "absorbanceReaderLid": "Change lid position",
+          "absorbanceReaderRead": "Read labware"
+        },
+        "fileName": "Exported file name",
+        "lidOpen": {
+          "closed": "Closed",
+          "label": "Lid position",
+          "open": "Open"
+        },
+        "mode": {
+          "label": "Select mode type",
+          "multi": "Multi",
+          "single": "Single"
+        },
+        "moduleId": {
+          "module": "Module"
+        },
+        "referenceWavelengthActive": "Add reference wavelength?"
+      },
       "airGap": {
         "label": "air gap"
       },
