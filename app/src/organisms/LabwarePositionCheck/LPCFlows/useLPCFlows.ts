@@ -68,7 +68,7 @@ export function useLPCFlows({
       void Promise.all(
         res.data.map(def => {
           if ('schemaVersion' in def) {
-            createLabwareDefinition({
+            return createLabwareDefinition({
               maintenanceRunId: maintenanceRunId as string,
               labwareDef: def,
             })

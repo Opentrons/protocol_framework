@@ -26,6 +26,8 @@ export interface UseHandleJogResult {
   handleJog: Jog
 }
 
+// TODO(jh, 01-21-25): Extract the throttling logic into its own hook that lives elsewhere and is used by other Jog flows.
+
 export function useHandleJog({
   runId,
   maintenanceRunId,

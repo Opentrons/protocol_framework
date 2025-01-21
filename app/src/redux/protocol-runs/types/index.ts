@@ -9,8 +9,8 @@ export interface PerRunUIState {
   lpc?: LPCWizardState
 }
 
-export type ProtocolRunState = Partial<{
+export interface ProtocolRunState {
   readonly [runId: string]: PerRunUIState
-}>
+}
 
 export type ProtocolRunAction = RunSetupStepsAction | LPCWizardAction

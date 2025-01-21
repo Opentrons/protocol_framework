@@ -39,7 +39,7 @@ export function LPCErrorModal({
   }
 
   return (
-    <Flex
+    <ModalContainer
       padding={SPACING.spacing32}
       flexDirection={DIRECTION_COLUMN}
       alignItems={ALIGN_CENTER}
@@ -55,18 +55,20 @@ export function LPCErrorModal({
       <ErrorHeader>
         {i18n.format(t('shared:something_went_wrong'), 'sentenceCase')}
       </ErrorHeader>
-      <LegacyStyledText
-        as="p"
-        fontWeight={TYPOGRAPHY.fontWeightSemiBold}
-        textAlign={TEXT_ALIGN_CENTER}
-      >
-        {t('remove_probe_before_exit')}
-      </LegacyStyledText>
-      <LegacyStyledText as="p" textAlign={TEXT_ALIGN_CENTER}>
-        {t('branded:help_us_improve_send_error_report', {
-          support_email: SUPPORT_EMAIL,
-        })}
-      </LegacyStyledText>
+      <ContentWrapper>
+        <LegacyStyledText
+          as="p"
+          fontWeight={TYPOGRAPHY.fontWeightSemiBold}
+          textAlign={TEXT_ALIGN_CENTER}
+        >
+          {t('remove_probe_before_exit')}
+        </LegacyStyledText>
+        <LegacyStyledText as="p" textAlign={TEXT_ALIGN_CENTER}>
+          {t('branded:help_us_improve_send_error_report', {
+            support_email: SUPPORT_EMAIL,
+          })}
+        </LegacyStyledText>
+      </ContentWrapper>
       <ErrorTextArea readOnly value={errorMessage ?? ''} spellCheck={false} />
       <PrimaryButton
         textTransform={TEXT_TRANSFORM_CAPITALIZE}
@@ -75,13 +77,34 @@ export function LPCErrorModal({
       >
         {t('shared:exit')}
       </PrimaryButton>
-    </Flex>
+    </ModalContainer>
   )
 }
+
+const ModalContainer = styled(Flex)`
+  width: 100%;
+  box-sizing: border-box;
+`
+
+const ContentWrapper = styled.div`
+  width: 100%;
+  padding: 0 ${SPACING.spacing16};
+  box-sizing: border-box;
+
+  p {
+    margin: ${SPACING.spacing8} 0;
+    line-height: 1.5;
+  }
+`
 
 const ErrorHeader = styled.h1`
   text-align: ${TEXT_ALIGN_CENTER};
   ${TYPOGRAPHY.h1Default}
+  width: 100%;
+  padding: 0 ${SPACING.spacing16};
+  box-sizing: border-box;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 
   @media ${RESPONSIVENESS.touchscreenMediaQuerySpecs} {
     ${TYPOGRAPHY.level4HeaderSemiBold}
@@ -90,7 +113,7 @@ const ErrorHeader = styled.h1`
 
 const ErrorTextArea = styled.textarea`
   min-height: 6rem;
-  width: 30rem;
+  width: 100%;
   background-color: #f8f8f8;
   border: ${BORDERS.lineBorder};
   border-radius: ${BORDERS.borderRadius4};
@@ -99,4 +122,5 @@ const ErrorTextArea = styled.textarea`
   font-size: ${TYPOGRAPHY.fontSizeCaption};
   font-family: monospace;
   resize: none;
+  box-sizing: border-box;
 `

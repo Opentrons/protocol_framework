@@ -29,39 +29,20 @@ export const protocolRunReducer: Reducer<ProtocolRunState, Action> = (
       }
     }
 
-    case Constants.START_LPC: {
-      const runId = action.payload.runId
-      const lpcState = action.payload.state
-      const currentRunState = state[runId]
-
-      if (currentRunState != null && currentRunState.lpc == null) {
-        return {
-          ...state,
-          [runId]: {
-            ...currentRunState,
-            lpc: lpcState,
-          },
-        }
-      } else {
-        return state
-      }
-    }
+    case Constants.START_LPC:
     case Constants.FINISH_LPC:
     case Constants.PROCEED_STEP:
     case Constants.SET_INITIAL_POSITION:
     case Constants.SET_FINAL_POSITION: {
       const runId = action.payload.runId
-      const currentRunState = state[runId]
-
-      if (currentRunState?.lpc == null) {
-        return state
-      }
+      const currentRunState = state[runId] || { lpc: undefined }
+      const nextLpcState = LPCReducer(currentRunState.lpc, action)
 
       return {
         ...state,
         [runId]: {
           ...currentRunState,
-          lpc: LPCReducer(currentRunState.lpc, action),
+          lpc: nextLpcState,
         },
       }
     }

@@ -3,6 +3,7 @@ import {
   SET_INITIAL_POSITION,
   SET_FINAL_POSITION,
   FINISH_LPC,
+  START_LPC,
 } from '../constants'
 import { updateWorkingOffset } from './transforms'
 
@@ -10,10 +11,17 @@ import type { LPCWizardAction, LPCWizardState } from '../types'
 
 // TODO(jh, 01-17-25): A lot of this state should live above the LPC slice, in the general protocolRuns slice instead.
 export function LPCReducer(
-  state: LPCWizardState,
+  state: LPCWizardState | undefined,
   action: LPCWizardAction
 ): LPCWizardState | undefined {
+  if (state == null) {
+    return undefined
+  }
+
   switch (action.type) {
+    case START_LPC: {
+      return action.payload.state
+    }
     case PROCEED_STEP: {
       const { currentStepIndex, totalStepCount } = state.steps
       const newStepIdx =
