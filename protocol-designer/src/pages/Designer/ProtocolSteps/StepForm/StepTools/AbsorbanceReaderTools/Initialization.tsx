@@ -28,11 +28,13 @@ import {
 import { maskToInteger } from '../../../../../../steplist/fieldLevel/processing'
 import { getFormErrorsMappedToField } from '../../utils'
 
-import type { FormData } from '../../../../../../form-types'
-import type { FieldProps, FieldPropsByName } from '../../types'
 import type { Dispatch, SetStateAction } from 'react'
+import type { TFunction } from 'i18next'
 import type { DropdownOption } from '@opentrons/components'
+import type { FormData } from '../../../../../../form-types'
 import type { StepFormErrors } from '../../../../../../steplist'
+import type { InitializationMode } from '../../../../../../step-forms/types'
+import type { FieldProps, FieldPropsByName } from '../../types'
 import type { ErrorMappedToField } from '../../utils'
 
 const MAX_WAVELENGTHS = 6
@@ -61,7 +63,7 @@ interface InitializationProps {
 const getBadWavelengthError = (
   wavelength: string | null,
   showErrors: boolean,
-  t: any
+  t: TFunction
 ): string | null => {
   if (!showErrors) {
     return null
@@ -152,7 +154,7 @@ interface InitializationEditorProps {
   formData: FormData
   propsForFields: FieldPropsByName
   wavelengths: string[]
-  mode: 'single' | 'multi'
+  mode: InitializationMode
   wavelengthsProps: FieldProps
   numWavelengths: number
   setNumWavelengths: Dispatch<SetStateAction<number>>
@@ -207,7 +209,11 @@ function IntializationEditor(props: InitializationEditorProps): JSX.Element {
           handleDeleteWavelength={handleDeleteWavelength}
           mode={mode}
           index={i}
-          error={getBadWavelengthError(wavelength, showFormErrors, t)}
+          error={getBadWavelengthError(
+            wavelength,
+            showFormErrors,
+            t as TFunction
+          )}
         />
       </ListItem>
     )
@@ -277,7 +283,7 @@ interface WavelengthItemProps {
   wavelengths: string[]
   wavelengthsProps: FieldProps
   handleDeleteWavelength: (_: number) => void
-  mode: 'single' | 'multi'
+  mode: InitializationMode
   index: number
   error: string | null
 }

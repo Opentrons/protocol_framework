@@ -83,12 +83,12 @@ export function AbsorbanceReaderTools(props: StepFormProps): JSX.Element {
     />
   )
 
-  const initializationModifier = initialization == null ? 'define' : 'change'
-  const buttonLabelKey = `form:step_edit_form.field.absorbanceReader.absorbanceReaderFormType.${compoundCommandType}${
-    compoundCommandType === 'absorbanceReaderInitialize'
-      ? `.${initializationModifier}`
-      : ''
-  }`
+  let buttonLabelKey: string = `form:step_edit_form.field.absorbanceReader.absorbanceReaderFormType.${compoundCommandType}`
+  if (compoundCommandType === 'absorbanceReaderInitialize') {
+    buttonLabelKey = `form:step_edit_form.field.absorbanceReader.absorbanceReaderFormType.${compoundCommandType}.${
+      initialization == null ? 'define' : 'change'
+    }`
+  }
   const compoundCommandButton = (
     <RadioButton
       onChange={() => {

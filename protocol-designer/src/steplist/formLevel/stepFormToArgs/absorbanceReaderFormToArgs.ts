@@ -25,7 +25,7 @@ export const absorbanceReaderFormToArgs = (
   switch (absorbanceReaderFormType) {
     case ABSORBANCE_READER_INITIALIZE:
       const rawWavelengths =
-        (mode === 'single' ? wavelengths?.slice(0, 1) ?? null : wavelengths) ?? // only take first wavelength in single mode
+        (mode === 'single' ? [wavelengths[0]] : wavelengths) ?? // only take first wavelength in single mode
         []
       return {
         module: moduleId,

@@ -7,8 +7,8 @@ import {
 } from '@opentrons/components'
 import { InputStepFormField } from '../../../../../../molecules'
 import { getFormErrorsMappedToField } from '../../utils'
-import type { FieldPropsByName } from '../../types'
 import type { StepFormErrors } from '../../../../../../steplist'
+import type { FieldPropsByName } from '../../types'
 
 interface ReadSettingsProps {
   propsForFields: FieldPropsByName
@@ -30,17 +30,18 @@ export function ReadSettings(props: ReadSettingsProps): JSX.Element {
     >
       <Flex flexDirection={DIRECTION_COLUMN}>
         <StyledText desktopStyle="bodyDefaultSemiBold">
-          {t('export_settings')}
+          {t('step_edit_form.absorbanceReader.export_settings.title')}
         </StyledText>
         <StyledText desktopStyle="bodyDefaultRegular">
-          {t('export_detail')}
+          {t('step_edit_form.absorbanceReader.export_settings.body')}
         </StyledText>
       </Flex>
       <InputStepFormField
         padding="0"
         {...propsForFields.fileName}
-        title={t('exported_file_name')}
+        title={t('step_edit_form.field.absorbanceReader.fileName')}
         errorToShow={mappedErrorsToField.fileName?.title}
+        showTooltip={false}
       />
     </Flex>
   )

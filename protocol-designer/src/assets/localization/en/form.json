@@ -46,6 +46,10 @@
         "custom_wavelength_required": "Custom wavelength required",
         "wavelength_out_of_range": "Value falls outside of accepted range"
       },
+      "export_settings": {
+        "body": "Copy explaining where the file will appear and when.",
+        "title": "Export settings"
+      },
       "initialization_setting": {
         "multi": {
           "description": "Up to 6 wavelengths can be programmed.",
@@ -72,6 +76,7 @@
           "absorbanceReaderLid": "Change lid position",
           "absorbanceReaderRead": "Read labware"
         },
+        "fileName": "Exported file name",
         "lidOpen": {
           "closed": "Closed",
           "label": "Lid position",

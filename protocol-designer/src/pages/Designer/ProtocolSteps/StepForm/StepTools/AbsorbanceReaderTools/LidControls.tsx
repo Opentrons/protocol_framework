@@ -17,7 +17,7 @@ interface LidControlsProps {
 
 export function LidControls(props: LidControlsProps): JSX.Element {
   const { fieldProps, label, paddingX = '0' } = props
-  const { t } = useTranslation(['form'])
+  const { t } = useTranslation('form')
   return (
     <Flex
       width="100%"
@@ -29,12 +29,10 @@ export function LidControls(props: LidControlsProps): JSX.Element {
         <StyledText desktopStyle="bodyDefaultSemiBold">{label}</StyledText>
       ) : null}
       <ToggleStepFormField
-        title={t('form:step_edit_form.field.absorbanceReader.lidOpen.label')}
+        title={t('step_edit_form.field.absorbanceReader.lidOpen.label')}
         isSelected={fieldProps.value === true}
-        onLabel={t('form:step_edit_form.field.absorbanceReader.lidOpen.open')}
-        offLabel={t(
-          'form:step_edit_form.field.absorbanceReader.lidOpen.closed'
-        )}
+        onLabel={t('step_edit_form.field.absorbanceReader.lidOpen.open')}
+        offLabel={t('step_edit_form.field.absorbanceReader.lidOpen.closed')}
         toggleUpdateValue={() => {
           fieldProps.updateValue(!fieldProps.value)
         }}

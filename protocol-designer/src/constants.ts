@@ -189,3 +189,9 @@ export const ABSORBANCE_READER_LID: 'absorbanceReaderLid' =
   'absorbanceReaderLid'
 export const ABSORBANCE_READER_MIN_WAVELENGTH_NM = 350
 export const ABSORBANCE_READER_MAX_WAVELENGTH_NM = 1000
+export const ABSORBANCE_READER_COLOR_BY_WAVELENGTH: Record<number, string> = {
+  450: 'Blue',
+  562: 'Green',
+  600: 'Orange',
+  650: 'Red',
+}

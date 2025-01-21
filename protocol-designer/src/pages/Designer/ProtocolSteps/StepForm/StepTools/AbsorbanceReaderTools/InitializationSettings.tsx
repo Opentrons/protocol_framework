@@ -7,14 +7,8 @@ import {
   StyledText,
   InfoScreen,
 } from '@opentrons/components'
+import { ABSORBANCE_READER_COLOR_BY_WAVELENGTH } from '../../../../../../constants'
 import type { Initialization } from '../../../../../../step-forms/types'
-
-const KNOWN_WAVELENGTHS_TO_COLOR: Record<number, string> = {
-  450: 'Blue',
-  562: 'Green',
-  600: 'Orange',
-  650: 'Red',
-}
 
 const getWavelengthDisplay = (
   wavelength: number,
@@ -61,7 +55,7 @@ export function InitializationSettings(
     ) : (
       <>
         {initialization.wavelengths.map(wavelength => {
-          const knownColor = KNOWN_WAVELENGTHS_TO_COLOR[wavelength]
+          const knownColor = ABSORBANCE_READER_COLOR_BY_WAVELENGTH[wavelength]
           return (
             <ListItem
               type="noActive"
@@ -83,7 +77,9 @@ export function InitializationSettings(
             <StyledText desktopStyle="bodyDefaultRegular">
               {getWavelengthDisplay(
                 initialization.referenceWavelength,
-                KNOWN_WAVELENGTHS_TO_COLOR[initialization.referenceWavelength],
+                ABSORBANCE_READER_COLOR_BY_WAVELENGTH[
+                  initialization.referenceWavelength
+                ],
                 true,
                 t
               )}
