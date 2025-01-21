@@ -72,6 +72,7 @@ import {
   hoverSelection,
   selectDropdownItem,
 } from '../../../../ui/steps/actions/actions'
+import { title } from 'process'
 
 type StepFormMap = {
   [K in StepType]?: ComponentType<StepFormProps> | null
@@ -276,6 +277,8 @@ export function StepFormToolbox(props: StepFormToolboxProps): JSX.Element {
     }
   }
 
+  console.log('stepName', formData.stepName)
+
   return (
     <>
       {isRename ? (
@@ -348,7 +351,7 @@ export function StepFormToolbox(props: StepFormToolboxProps): JSX.Element {
             <Icon size="1rem" name={icon} minWidth="1rem" />
             <StyledText
               desktopStyle="bodyLargeSemiBold"
-              css={LINE_CLAMP_TEXT_STYLE(2)}
+              css={LINE_CLAMP_TEXT_STYLE(2, true)}
             >
               {capitalizeFirstLetter(String(formData.stepName))}
             </StyledText>
