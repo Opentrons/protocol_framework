@@ -4,7 +4,7 @@ from opentrons.protocol_api import ProtocolContext
 metadata = {"protocolName": "gravimetric-ot3-p50-multi-50ul-tip-increment"}
 requirements = {
     "robotType": "Flex",
-    "apiLevel": "2.22",
+    "apiLevel": "2.23",
 }  # NOTE: apiLevel is ignored by script
 
 SLOT_SCALE = 4

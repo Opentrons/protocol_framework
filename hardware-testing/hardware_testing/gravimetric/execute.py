@@ -306,7 +306,14 @@ def _run_trial(
         lc_name = SupportedLiquid.from_string(trial.cfg.liquid).name_with_dilution(
             trial.cfg.dilution
         )
-        liquid_class = trial.ctx.define_liquid_class(lc_name)
+        liquid_class_root = trial.ctx.define_liquid_class(lc_name)
+        pip_load_name = (
+            f"flex_{trial.pipette.channels}channel_{int(trial.pipette.max_volume)}"
+        )
+        tiprack_load_name = (
+            f"opentrons/opentrons_flex_96_tiprack_{trial.cfg.tip_volume}ul/1"
+        )
+        liquid_class = liquid_class_root.get_for(pip_load_name, tiprack_load_name)
 
     def _tag(m_type: MeasurementType) -> str:
         tag = create_measurement_tag(
@@ -443,7 +450,7 @@ def _run_trial(
             pose_for_camera=trial.cfg.interactive,
         )
     else:
-        tip_contents = trial.pipette._core.dispense_liquid_class(
+        _ = trial.pipette._core.dispense_liquid_class(
             volume=trial.volume,
             dest=(Location(Point(), trial.well), trial.well._core),
             source=(Location(Point(), trial.well), trial.well._core),
@@ -451,7 +458,7 @@ def _run_trial(
             transfer_type=TransferType.ONE_TO_ONE,
             tip_contents=tip_contents,
             add_final_air_gap=True,
-            trash_location=trial.ctx.fixed_trash,
+            trash_location=trial.pipette.trash_container,
         )
     if not trial.recorder.is_simulator:
         trial.pipette._retract()  # retract to top of gantry
