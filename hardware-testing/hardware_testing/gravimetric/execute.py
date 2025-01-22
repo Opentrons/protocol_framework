@@ -3,6 +3,11 @@ from time import sleep
 from typing import Optional, Tuple, List, Dict
 
 from opentrons.protocol_api import ProtocolContext, Well, Labware, InstrumentContext
+from opentrons.protocol_api.core.engine.transfer_components_executor import (
+    TransferType,
+    LiquidAndAirGapPair,
+)
+from opentrons.types import Location, Point
 from hardware_testing.data import ui, dump_data_to_file
 from hardware_testing.data.csv_report import CSVReport
 from hardware_testing.opentrons_api.types import OT3Mount, Axis
@@ -261,33 +266,22 @@ def _take_photos(trial: GravimetricTrial, stage_str: str) -> None:
 
 
 def _run_trial(
-    trial: GravimetricTrial,
+    trial: GravimetricTrial, use_old_method: bool = False
 ) -> Tuple[float, MeasurementData, float, MeasurementData]:
     global _PREV_TRIAL_GRAMS
     assert trial.pipette.has_tip
-    pipetting_callbacks = _generate_callbacks_for_trial(
-        trial.ctx,
-        trial.pipette,
-        trial.test_report,
-        trial.recorder,
-        trial.volume,
-        trial.channel,
-        trial.trial,
-        trial.blank,
-    )
-    liquid_class = get_liquid_class(
-        trial.cfg.liquid,
-        trial.cfg.dilution,
-        int(trial.pipette.max_volume),
-        trial.pipette.channels,
-        trial.tip_volume,
-        trial.volume,
-    )
-    if trial.cfg.interactive:
-        liquid_class = interactively_build_liquid_class(liquid_class)
-        # store it, so that next loop we don't have to think so much
-        set_liquid_class(
-            liquid_class,
+    if use_old_method:
+        pipetting_callbacks = _generate_callbacks_for_trial(
+            trial.ctx,
+            trial.pipette,
+            trial.test_report,
+            trial.recorder,
+            trial.volume,
+            trial.channel,
+            trial.trial,
+            trial.blank,
+        )
+        liquid_class = get_liquid_class(
             trial.cfg.liquid,
             trial.cfg.dilution,
             int(trial.pipette.max_volume),
@@ -295,6 +289,24 @@ def _run_trial(
             trial.tip_volume,
             trial.volume,
         )
+        if trial.cfg.interactive:
+            liquid_class = interactively_build_liquid_class(liquid_class)
+            # store it, so that next loop we don't have to think so much
+            set_liquid_class(
+                liquid_class,
+                trial.cfg.liquid,
+                trial.cfg.dilution,
+                int(trial.pipette.max_volume),
+                trial.pipette.channels,
+                trial.tip_volume,
+                trial.volume,
+            )
+    else:
+        pipetting_callbacks = None
+        lc_name = SupportedLiquid.from_string(trial.cfg.liquid).name_with_dilution(
+            trial.cfg.dilution
+        )
+        liquid_class = trial.ctx.define_liquid_class(lc_name)
 
     def _tag(m_type: MeasurementType) -> str:
         tag = create_measurement_tag(
@@ -375,21 +387,31 @@ def _run_trial(
     _PREV_TRIAL_GRAMS = m_data_init
 
     # RUN ASPIRATE
-    aspirate_with_liquid_class(
-        trial.ctx,
-        liquid_class,
-        trial.pipette,
-        trial.volume,
-        trial.well,
-        trial.channel_offset,
-        trial.channel_count,
-        trial.liquid_tracker,
-        callbacks=pipetting_callbacks,
-        blank=trial.blank,
-        mode=trial.mode,
-        clear_accuracy_function=trial.cfg.nominal_plunger,
-        pose_for_camera=trial.cfg.interactive,
-    )
+    if use_old_method:
+        aspirate_with_liquid_class(
+            trial.ctx,
+            liquid_class,
+            trial.pipette,
+            trial.volume,
+            trial.well,
+            trial.channel_offset,
+            trial.channel_count,
+            trial.liquid_tracker,
+            callbacks=pipetting_callbacks,
+            blank=trial.blank,
+            mode=trial.mode,
+            clear_accuracy_function=trial.cfg.nominal_plunger,
+            pose_for_camera=trial.cfg.interactive,
+        )
+        tip_contents = None
+    else:
+        tip_contents = trial.pipette._core.aspirate_liquid_class(
+            volume=trial.volume,
+            source=(Location(Point(), trial.well), trial.well._core),
+            transfer_properties=liquid_class,
+            transfer_type=TransferType.ONE_TO_ONE,
+            tip_contents=[LiquidAndAirGapPair(liquid=0, air_gap=0)],
+        )
     if not trial.recorder.is_simulator:
         trial.pipette._retract()  # retract to top of gantry
     else:
@@ -404,21 +426,33 @@ def _run_trial(
         ui.get_user_ready("dispensing")
 
     # RUN DISPENSE
-    dispense_with_liquid_class(
-        ctx=trial.ctx,
-        liquid_class=liquid_class,
-        pipette=trial.pipette,
-        dispense_volume=trial.volume,
-        well=trial.well,
-        channel_offset=trial.channel_offset,
-        channel_count=trial.channel_count,
-        liquid_tracker=trial.liquid_tracker,
-        callbacks=pipetting_callbacks,
-        blank=trial.blank,
-        mode=trial.mode,
-        clear_accuracy_function=trial.cfg.nominal_plunger,
-        pose_for_camera=trial.cfg.interactive,
-    )
+    if use_old_method:
+        dispense_with_liquid_class(
+            ctx=trial.ctx,
+            liquid_class=liquid_class,
+            pipette=trial.pipette,
+            dispense_volume=trial.volume,
+            well=trial.well,
+            channel_offset=trial.channel_offset,
+            channel_count=trial.channel_count,
+            liquid_tracker=trial.liquid_tracker,
+            callbacks=pipetting_callbacks,
+            blank=trial.blank,
+            mode=trial.mode,
+            clear_accuracy_function=trial.cfg.nominal_plunger,
+            pose_for_camera=trial.cfg.interactive,
+        )
+    else:
+        tip_contents = trial.pipette._core.dispense_liquid_class(
+            volume=trial.volume,
+            dest=(Location(Point(), trial.well), trial.well._core),
+            source=(Location(Point(), trial.well), trial.well._core),
+            transfer_properties=liquid_class,
+            transfer_type=TransferType.ONE_TO_ONE,
+            tip_contents=tip_contents,
+            add_final_air_gap=True,
+            trash_location=trial.ctx.fixed_trash,
+        )
     if not trial.recorder.is_simulator:
         trial.pipette._retract()  # retract to top of gantry
     else:
