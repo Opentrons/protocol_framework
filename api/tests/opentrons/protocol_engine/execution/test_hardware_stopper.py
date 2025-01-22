@@ -243,7 +243,11 @@ async def test_hardware_stopping_sequence_with_gripper(
         await movement.home(
             axes=[MotorAxis.X, MotorAxis.Y, MotorAxis.LEFT_Z, MotorAxis.RIGHT_Z]
         ),
-        await ot3_hardware_api.stop(home_after=True),
+        await ot3_hardware_api.stop(home_after=False),
+        await ot3_hardware_api.home_z(mount=OT3Mount.GRIPPER),
+        await movement.home(
+            axes=[MotorAxis.X, MotorAxis.Y, MotorAxis.LEFT_Z, MotorAxis.RIGHT_Z]
+        ),
     )
 
 
@@ -295,7 +299,11 @@ async def test_hardware_stopping_sequence_with_fixed_trash(
             pipette_id="pipette-id",
             home_after=False,
         ),
-        await ot3_hardware_api.stop(home_after=True),
+        await ot3_hardware_api.stop(home_after=False),
+        await ot3_hardware_api.home_z(mount=OT3Mount.GRIPPER),
+        await movement.home(
+            axes=[MotorAxis.X, MotorAxis.Y, MotorAxis.LEFT_Z, MotorAxis.RIGHT_Z]
+        ),
     )
 
 
