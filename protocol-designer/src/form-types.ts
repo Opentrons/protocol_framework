@@ -390,7 +390,6 @@ export interface HydratedAbsorbanceReaderFormData extends AnnotationFields {
   moduleId: string
   referenceWavelength: string | null
   referenceWavelengthActive: boolean
-  stepDetails: string
   wavelengths: string[]
 }
 
