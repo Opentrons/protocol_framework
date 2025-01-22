@@ -38,7 +38,7 @@ import { setFeatureFlags } from '../../feature-flags/actions'
 import { createCustomTiprackDef } from '../../labware-defs/actions'
 import { useKitchen } from '../../organisms/Kitchen/hooks'
 import { IncompatibleTipsModal, PipetteInfoItem } from '../../organisms'
-import { BUTTON_LINK_STYLE } from '../../atoms'
+import { LINK_BUTTON_STYLE } from '../../atoms'
 import { WizardBody } from './WizardBody'
 import { PIPETTE_GENS, PIPETTE_TYPES, PIPETTE_VOLUMES } from './constants'
 import { getTiprackOptions } from './utils'
@@ -135,11 +135,15 @@ export function SelectPipettes(props: WizardTileProps): JSX.Element | null {
     }
   }
 
+  const clearPipettes = (): void => {
+    resetFields()
+    setValue(`pipettesByMount.${mount}.pipetteName`, undefined)
+    setValue(`pipettesByMount.${mount}.tiprackDefURI`, undefined)
+  }
+
   const handleGoBack = (): void => {
     if (page === 'add') {
-      resetFields()
-      setValue(`pipettesByMount.${mount}.pipetteName`, undefined)
-      setValue(`pipettesByMount.${mount}.tiprackDefURI`, undefined)
+      clearPipettes()
       if (
         pipettesByMount.left.pipetteName != null ||
         pipettesByMount.left.tiprackDefURI != null ||
@@ -152,7 +156,8 @@ export function SelectPipettes(props: WizardTileProps): JSX.Element | null {
       }
     }
     if (page === 'overview') {
-      setPage('add')
+      clearPipettes()
+      goBack(1)
     }
   }
 
@@ -450,7 +455,7 @@ export function SelectPipettes(props: WizardTileProps): JSX.Element | null {
                 (pipettesByMount.left.tiprackDefURI == null &&
                   pipettesByMount.right.tiprackDefURI == null) ? null : (
                   <Btn
-                    css={BUTTON_LINK_STYLE}
+                    css={LINK_BUTTON_STYLE}
                     onClick={() => {
                       const leftPipetteName = pipettesByMount.left.pipetteName
                       const rightPipetteName = pipettesByMount.right.pipetteName

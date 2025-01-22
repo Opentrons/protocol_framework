@@ -66,10 +66,6 @@ def interpolate(
                 a.dispense.break_off_flow_acceleration,
                 b.dispense.break_off_flow_acceleration,
             ),
-            break_off_flow_rate=_interp(
-                a.dispense.break_off_flow_rate, b.dispense.break_off_flow_rate
-            ),
-            break_off_ul=_interp(a.dispense.break_off_ul, b.dispense.break_off_ul),
             delay=_interp(a.dispense.delay, b.dispense.delay),
             retract_mm=_interp(a.dispense.retract_mm, b.dispense.retract_mm),
             push_out=_interp(a.dispense.push_out, b.dispense.push_out),

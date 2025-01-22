@@ -15,6 +15,7 @@ from opentrons_shared_data.pipette.types import LabwareUri
 from opentrons_shared_data.labware import load_definition
 from opentrons_shared_data.labware.labware_definition import (
     Parameters,
+    LabwareDefinition,
     LabwareRole,
     OverlapOffset as SharedDataOverlapOffset,
     GripperOffsets,
@@ -25,7 +26,6 @@ from opentrons.protocols.api_support.deck_type import (
     STANDARD_OT2_DECK,
     STANDARD_OT3_DECK,
 )
-from opentrons.protocols.models import LabwareDefinition
 from opentrons.types import DeckSlotName, MountType
 
 from opentrons.protocol_engine import errors
@@ -1389,7 +1389,8 @@ def test_raise_if_labware_cannot_be_stacked_on_labware_on_adapter() -> None:
         },
         definitions_by_uri={
             "def-uri-1": LabwareDefinition.model_construct(  # type: ignore[call-arg]
-                allowedRoles=[LabwareRole.labware]
+                allowedRoles=[LabwareRole.labware],
+                parameters=Parameters.model_construct(loadName="test"),  # type: ignore[call-arg]
             ),
             "def-uri-2": LabwareDefinition.model_construct(  # type: ignore[call-arg]
                 allowedRoles=[LabwareRole.adapter]
@@ -1414,25 +1415,25 @@ def test_raise_if_labware_cannot_be_stacked_on_labware_on_adapter() -> None:
 @pytest.mark.parametrize(
     argnames=[
         "allowed_roles",
-        "stacking_quirks",
+        "stack_limit",
         "exception",
     ],
     argvalues=[
         [
             [LabwareRole.labware],
-            [],
+            1,
             pytest.raises(errors.LabwareCannotBeStackedError),
         ],
         [
             [LabwareRole.lid],
-            ["stackingMaxFive"],
+            5,
             does_not_raise(),
         ],
     ],
 )
 def test_labware_stacking_height_passes_or_raises(
     allowed_roles: List[LabwareRole],
-    stacking_quirks: List[str],
+    stack_limit: int,
     exception: ContextManager[None],
 ) -> None:
     """It should raise if the labware is stacked too high, and pass if the labware definition allowed this."""
@@ -1468,11 +1469,11 @@ def test_labware_stacking_height_passes_or_raises(
                 allowedRoles=allowed_roles,
                 parameters=Parameters.model_construct(
                     format="irregular",
-                    quirks=stacking_quirks,
                     isTiprack=False,
                     loadName="name",
                     isMagneticModuleCompatible=False,
                 ),
+                stackLimit=stack_limit,
             )
         },
     )
@@ -1482,7 +1483,6 @@ def test_labware_stacking_height_passes_or_raises(
             top_labware_definition=LabwareDefinition.model_construct(  # type: ignore[call-arg]
                 parameters=Parameters.model_construct(
                     format="irregular",
-                    quirks=stacking_quirks,
                     isTiprack=False,
                     loadName="name",
                     isMagneticModuleCompatible=False,
@@ -1490,6 +1490,7 @@ def test_labware_stacking_height_passes_or_raises(
                 stackingOffsetWithLabware={
                     "test": SharedDataOverlapOffset(x=0, y=0, z=0)
                 },
+                stackLimit=stack_limit,
             ),
             bottom_labware_id="labware-id4",
         )

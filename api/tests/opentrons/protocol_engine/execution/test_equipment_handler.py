@@ -9,6 +9,7 @@ from typing import Any, Optional, cast, Dict
 
 from opentrons_shared_data.pipette.types import PipetteNameType
 from opentrons_shared_data.pipette import pipette_definition
+from opentrons_shared_data.labware.labware_definition import LabwareDefinition
 from opentrons_shared_data.labware.types import LabwareUri
 
 from opentrons.calibration_storage.helpers import uri_from_details
@@ -21,7 +22,6 @@ from opentrons.hardware_control.modules import (
     AbstractModule,
 )
 from opentrons.hardware_control.dev_types import PipetteDict
-from opentrons.protocols.models import LabwareDefinition
 
 from opentrons.protocol_engine import errors
 from opentrons.protocol_engine.types import (

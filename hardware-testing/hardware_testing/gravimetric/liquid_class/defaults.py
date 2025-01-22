@@ -928,7 +928,6 @@ _defaults: Dict[
     },
 }
 
-
 def get_default(liquid: str, dilution: float) -> LiquidClassSettings:
     """Get default."""
     cls_name = SupportedLiquid.from_string(liquid).name_with_dilution(dilution)

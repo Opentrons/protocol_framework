@@ -182,7 +182,7 @@ describe('getHoveredStepLabware', () => {
       } as any)
       const stepArgs = {
         commandCreatorFnName: setTempCommand,
-        module: type,
+        moduleId: type,
       }
       const argsByStepId = createArgsForStepId(hoveredStepId, stepArgs)
       const result = getHoveredStepLabware.resultFunc(

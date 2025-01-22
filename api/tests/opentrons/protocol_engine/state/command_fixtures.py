@@ -4,9 +4,9 @@ from datetime import datetime
 from pydantic import BaseModel
 from typing import Optional, cast, Dict
 
+from opentrons_shared_data.labware.labware_definition import LabwareDefinition
 from opentrons_shared_data.pipette.types import PipetteNameType
 from opentrons.types import MountType
-from opentrons.protocols.models import LabwareDefinition
 from opentrons.protocol_engine import ErrorOccurrence, commands as cmd
 from opentrons.protocol_engine.types import (
     DeckPoint,
@@ -247,6 +247,29 @@ def create_aspirate_command(
     )
 
 
+def create_aspirate_while_tracking_command(
+    pipette_id: str, volume: float, flow_rate: float, labware_id: str, well_name: str
+) -> cmd.AspirateWhileTracking:
+    """Get a completed Aspirate command."""
+    params = cmd.AspirateWhileTrackingParams(
+        pipetteId=pipette_id,
+        labwareId=labware_id,
+        wellName=well_name,
+        volume=volume,
+        flowRate=flow_rate,
+    )
+    result = cmd.AspirateWhileTrackingResult(volume=volume)
+
+    return cmd.AspirateWhileTracking(
+        id="command-id",
+        key="command-key",
+        status=cmd.CommandStatus.SUCCEEDED,
+        createdAt=datetime.now(),
+        params=params,
+        result=result,
+    )
+
+
 def create_aspirate_in_place_command(
     pipette_id: str,
     volume: float,
@@ -314,6 +337,29 @@ def create_dispense_in_place_command(
     result = cmd.DispenseInPlaceResult(volume=volume)
 
     return cmd.DispenseInPlace(
+        id="command-id",
+        key="command-key",
+        status=cmd.CommandStatus.SUCCEEDED,
+        createdAt=datetime.now(),
+        params=params,
+        result=result,
+    )
+
+
+def create_dispense_while_tracking_command(
+    pipette_id: str, volume: float, flow_rate: float, labware_id: str, well_name: str
+) -> cmd.DispenseWhileTracking:
+    """Get a completed DispenseWhileTracking command."""
+    params = cmd.DispenseWhileTrackingParams(
+        pipetteId=pipette_id,
+        labwareId=labware_id,
+        wellName=well_name,
+        volume=volume,
+        flowRate=flow_rate,
+    )
+    result = cmd.DispenseWhileTrackingResult(volume=volume)
+
+    return cmd.DispenseWhileTracking(
         id="command-id",
         key="command-key",
         status=cmd.CommandStatus.SUCCEEDED,

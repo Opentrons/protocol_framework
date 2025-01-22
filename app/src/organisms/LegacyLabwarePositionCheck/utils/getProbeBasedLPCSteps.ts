@@ -2,7 +2,7 @@ import { isEqual } from 'lodash'
 import { SECTIONS } from '../constants'
 import { getLabwareDefURI, getPipetteNameSpecs } from '@opentrons/shared-data'
 import { getLabwareLocationCombos } from '/app/organisms/LegacyApplyHistoricOffsets/hooks/getLabwareLocationCombos'
-import { getLabwareDefinitionsFromCommands } from '/app/local-resources/labware'
+import { getLabwareDefinitionsFromCommands } from '@opentrons/components'
 
 import type {
   CompletedProtocolAnalysis,

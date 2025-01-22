@@ -9,6 +9,7 @@ requirements = {
 }  # NOTE: apiLevel is ignored by script
 
 SLOTS_TIPRACK = {
+    20: [5, 6, 8, 9, 11],
     50: [5, 6, 8, 9, 11],
     200: [5, 6, 8, 9, 11],
 }
@@ -26,7 +27,7 @@ def run(ctx: ProtocolContext) -> None:
     pipette = ctx.load_instrument("flex_96channel_1000", "left")
     adapters = [
         ctx.load_adapter("opentrons_flex_96_tiprack_adapter", slot)
-        for slot in SLOTS_TIPRACK[50]
+        for slot in SLOTS_TIPRACK[20]
     ]
     for tip_size in SLOTS_TIPRACK.keys():
         tipracks = [

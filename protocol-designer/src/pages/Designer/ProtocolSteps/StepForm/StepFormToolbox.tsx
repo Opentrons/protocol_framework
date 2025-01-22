@@ -18,7 +18,7 @@ import {
 } from '@opentrons/components'
 import { stepIconsByType } from '../../../../form-types'
 import {
-  BUTTON_LINK_STYLE,
+  LINK_BUTTON_STYLE,
   LINE_CLAMP_TEXT_STYLE,
   NAV_BAR_HEIGHT_REM,
 } from '../../../../atoms'
@@ -38,6 +38,7 @@ import {
   FORM_WARNINGS_EVENT,
 } from '../../../../analytics/constants'
 import {
+  AbsorbanceReaderTools,
   CommentTools,
   HeaterShakerTools,
   MagnetTools,
@@ -45,7 +46,6 @@ import {
   MoveLabwareTools,
   MoveLiquidTools,
   PauseTools,
-  PlateReaderTools,
   TemperatureTools,
   ThermocyclerTools,
 } from './StepTools'
@@ -56,6 +56,8 @@ import {
   capitalizeFirstLetter,
   getIsErrorOnCurrentPage,
 } from './utils'
+
+import type { ComponentType } from 'react'
 import type { StepFieldName } from '../../../../steplist/fieldLevel'
 import type { FormData, StepType } from '../../../../form-types'
 import type { AnalyticsEvent } from '../../../../analytics/mixpanel'
@@ -72,7 +74,7 @@ import {
 } from '../../../../ui/steps/actions/actions'
 
 type StepFormMap = {
-  [K in StepType]?: React.ComponentType<StepFormProps> | null
+  [K in StepType]?: ComponentType<StepFormProps> | null
 }
 
 const STEP_FORM_MAP: StepFormMap = {
@@ -85,7 +87,7 @@ const STEP_FORM_MAP: StepFormMap = {
   thermocycler: ThermocyclerTools,
   heaterShaker: HeaterShakerTools,
   comment: CommentTools,
-  plateReader: PlateReaderTools,
+  absorbanceReader: AbsorbanceReaderTools,
 }
 
 interface StepFormToolboxProps {
@@ -203,6 +205,7 @@ export function StepFormToolbox(props: StepFormToolboxProps): JSX.Element {
   }
 
   const isMultiStepToolbox =
+    formData.stepType === 'absorbanceReader' ||
     formData.stepType === 'moveLiquid' ||
     formData.stepType === 'mix' ||
     formData.stepType === 'thermocycler'
@@ -273,6 +276,8 @@ export function StepFormToolbox(props: StepFormToolboxProps): JSX.Element {
     }
   }
 
+  console.log('stepName', formData.stepName)
+
   return (
     <>
       {isRename ? (
@@ -299,7 +304,7 @@ export function StepFormToolbox(props: StepFormToolboxProps): JSX.Element {
             onClick={() => {
               setIsRename(true)
             }}
-            css={BUTTON_LINK_STYLE}
+            css={LINK_BUTTON_STYLE}
             textDecoration={TYPOGRAPHY.textDecorationUnderline}
           >
             <StyledText desktopStyle="bodyDefaultRegular">
@@ -345,7 +350,7 @@ export function StepFormToolbox(props: StepFormToolboxProps): JSX.Element {
             <Icon size="1rem" name={icon} minWidth="1rem" />
             <StyledText
               desktopStyle="bodyLargeSemiBold"
-              css={LINE_CLAMP_TEXT_STYLE(2)}
+              css={LINE_CLAMP_TEXT_STYLE(2, true)}
             >
               {capitalizeFirstLetter(String(formData.stepName))}
             </StyledText>

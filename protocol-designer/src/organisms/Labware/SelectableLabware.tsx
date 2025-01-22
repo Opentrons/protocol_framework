@@ -12,7 +12,7 @@ import { SingleLabware } from './SingleLabware'
 import { WellTooltip } from './WellTooltip'
 import { SelectionRect } from './SelectionRect'
 
-import type * as React from 'react'
+import type { ComponentProps } from 'react'
 import type {
   WellMouseEvent,
   WellGroup,
@@ -25,10 +25,7 @@ import type { GenericRect } from '../../collision-types'
 import type { NozzleType } from '../../types'
 
 export interface SelectableLabwareProps {
-  labwareProps: Omit<
-    React.ComponentProps<typeof SingleLabware>,
-    'selectedWells'
-  >
+  labwareProps: Omit<ComponentProps<typeof SingleLabware>, 'selectedWells'>
   /** array of primary wells. Overrides labwareProps.selectedWells */
   selectedPrimaryWells: WellGroup
   selectWells: (wellGroup: WellGroup) => unknown

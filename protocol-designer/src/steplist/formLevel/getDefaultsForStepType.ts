@@ -1,10 +1,11 @@
 import {
+  ABSORBANCE_READER_COLOR_BY_WAVELENGTH,
   DEFAULT_CHANGE_TIP_OPTION,
+  DEFAULT_DELAY_SECONDS,
+  DEFAULT_MM_BLOWOUT_OFFSET_FROM_TOP,
   DEFAULT_MM_FROM_BOTTOM_DISPENSE,
   DEFAULT_WELL_ORDER_FIRST_OPTION,
   DEFAULT_WELL_ORDER_SECOND_OPTION,
-  DEFAULT_DELAY_SECONDS,
-  DEFAULT_MM_BLOWOUT_OFFSET_FROM_TOP,
 } from '../../constants'
 import type { StepType, StepFieldName } from '../../form-types'
 export function getDefaultsForStepType(
@@ -175,7 +176,17 @@ export function getDefaultsForStepType(
         profileVolume: null,
         thermocyclerFormType: 'thermocyclerState',
       }
-
+    case 'absorbanceReader':
+      return {
+        absorbanceReaderFormType: null,
+        fileName: null,
+        lidOpen: null,
+        mode: 'single',
+        moduleId: null,
+        referenceWavelength: null,
+        referenceWavelengthActive: false,
+        wavelengths: [Object.keys(ABSORBANCE_READER_COLOR_BY_WAVELENGTH)[0]], // default to first known wavelength
+      }
     default:
       return {}
   }

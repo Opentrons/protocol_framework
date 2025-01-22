@@ -47,7 +47,10 @@ AspirateCommandType = Literal["aspirate"]
 
 
 class AspirateParams(
-    PipetteIdMixin, AspirateVolumeMixin, FlowRateMixin, LiquidHandlingWellLocationMixin
+    PipetteIdMixin,
+    AspirateVolumeMixin,
+    FlowRateMixin,
+    LiquidHandlingWellLocationMixin,
 ):
     """Parameters required to aspirate from a specific well."""
 

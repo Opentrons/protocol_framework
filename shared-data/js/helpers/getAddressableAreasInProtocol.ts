@@ -19,6 +19,7 @@ export function getAddressableAreasInProtocol(
       if (
         commandType === 'moveLabware' &&
         params.newLocation !== 'offDeck' &&
+        params.newLocation !== 'systemLocation' &&
         'slotName' in params.newLocation &&
         !acc.includes(params.newLocation.slotName as AddressableAreaName)
       ) {
@@ -35,6 +36,7 @@ export function getAddressableAreasInProtocol(
       } else if (
         commandType === 'moveLabware' &&
         params.newLocation !== 'offDeck' &&
+        params.newLocation !== 'systemLocation' &&
         'addressableAreaName' in params.newLocation &&
         !acc.includes(params.newLocation.addressableAreaName)
       ) {
@@ -42,6 +44,7 @@ export function getAddressableAreasInProtocol(
       } else if (
         commandType === 'loadLabware' &&
         params.location !== 'offDeck' &&
+        params.location !== 'systemLocation' &&
         'slotName' in params.location &&
         !acc.includes(params.location.slotName as AddressableAreaName)
       ) {
@@ -74,6 +77,7 @@ export function getAddressableAreasInProtocol(
       } else if (
         commandType === 'loadLabware' &&
         params.location !== 'offDeck' &&
+        params.location !== 'systemLocation' &&
         'addressableAreaName' in params.location &&
         !acc.includes(params.location.addressableAreaName)
       ) {
@@ -100,6 +104,7 @@ export function getAddressableAreasInProtocol(
     ({ loadName, location }) =>
       loadName === 'opentrons_1_trash_3200ml_fixed' &&
       location !== 'offDeck' &&
+      location !== 'systemLocation' &&
       'slotName' in location &&
       location.slotName === 'A3'
   )

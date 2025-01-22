@@ -22,6 +22,7 @@ import {
   RECOMMENDED_LABWARE_BY_MODULE,
 } from './constants'
 
+import type { Dispatch, SetStateAction } from 'react'
 import type {
   AddressableAreaName,
   CutoutFixture,
@@ -229,7 +230,7 @@ export function zoomInOnCoordinate(props: ZoomInOnCoordinateProps): string {
 export interface AnimateZoomProps {
   targetViewBox: string
   viewBox: string
-  setViewBox: React.Dispatch<React.SetStateAction<string>>
+  setViewBox: Dispatch<SetStateAction<string>>
 }
 
 type ViewBox = [number, number, number, number]

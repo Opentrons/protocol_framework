@@ -37,6 +37,7 @@ from ..module import (
     AbstractHeaterShakerCore,
     AbstractMagneticBlockCore,
     AbstractAbsorbanceReaderCore,
+    AbstractFlexStackerCore,
 )
 from .exceptions import InvalidMagnetEngageHeightError
 
@@ -692,3 +693,39 @@ class AbsorbanceReaderCore(ModuleCore, AbstractAbsorbanceReaderCore):
             self.module_id
         )
         return abs_state.is_lid_on
+
+
+class FlexStackerCore(ModuleCore, AbstractFlexStackerCore):
+    """Flex Stacker core logic implementation for Python protocols."""
+
+    _sync_module_hardware: SynchronousAdapter[hw_modules.FlexStacker]
+
+    def set_static_mode(self, static: bool) -> None:
+        """Set the Flex Stacker's static mode.
+
+        The Flex Stacker cannot retrieve and or store when in static mode.
+        This allows the Flex Stacker carriage to be used as a staging slot,
+        and allowed the labware to be loaded onto it.
+        """
+        self._engine_client.execute_command(
+            cmd.flex_stacker.ConfigureParams(
+                moduleId=self.module_id,
+                static=static,
+            )
+        )
+
+    def retrieve(self) -> None:
+        """Retrieve a labware from the Flex Stacker's hopper."""
+        self._engine_client.execute_command(
+            cmd.flex_stacker.RetrieveParams(
+                moduleId=self.module_id,
+            )
+        )
+
+    def store(self) -> None:
+        """Store a labware into Flex Stacker's hopper."""
+        self._engine_client.execute_command(
+            cmd.flex_stacker.StoreParams(
+                moduleId=self.module_id,
+            )
+        )

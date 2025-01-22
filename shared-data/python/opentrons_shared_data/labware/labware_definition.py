@@ -112,6 +112,7 @@ class DisplayCategory(str, Enum):
     adapter = "adapter"
     other = "other"
     lid = "lid"
+    system = "system"
 
 
 class LabwareRole(str, Enum):
@@ -120,6 +121,7 @@ class LabwareRole(str, Enum):
     adapter = "adapter"
     maintenance = "maintenance"
     lid = "lid"
+    system = "system"
 
 
 class Metadata(BaseModel):
@@ -179,6 +181,11 @@ class Parameters(BaseModel):
     )
     magneticModuleEngageHeight: Optional[_NonNegativeNumber] = Field(
         None, description="Distance to move magnetic module magnets to engage"
+    )
+    isDeckSlotCompatible: Optional[bool] = Field(
+        None,
+        description="Flag marking whether a labware is compatible with placement"
+        " or load into a base deck slot, will be treated as true if unspecified.",
     )
 
 
@@ -291,6 +298,30 @@ class ConicalFrustum(BaseModel):
         default=1,
         description="Number of instances of this shape in the stackup, used for wells that have multiple sub-wells",
     )
+
+    @cached_property
+    def height_to_volume_table(self) -> Dict[float, float]:
+        """Return a lookup table of heights to volumes."""
+        # the accuracy of this method is approximately +- 10*dx so for dx of 0.001 we have a +- 0.01 ul
+        dx = 0.005
+        total_height = self.topHeight - self.bottomHeight
+        y = 0.0
+        table: Dict[float, float] = {}
+        # fill in the table
+        a = self.topDiameter / 2
+        b = self.bottomDiameter / 2
+        while y < total_height:
+            r_y = (y / total_height) * (a - b) + b
+            table[y] = (pi * y / 3) * (b**2 + b * r_y + r_y**2)
+            y = y + dx
+
+        # we always want to include the volume at the max height
+        table[total_height] = (pi * total_height / 3) * (b**2 + a * b + a**2)
+        return table
+
+    @cached_property
+    def volume_to_height_table(self) -> Dict[float, float]:
+        return dict((v, k) for k, v in self.height_to_volume_table.items())
 
     @cached_property
     def count(self) -> int:
@@ -729,4 +760,13 @@ class LabwareDefinition(BaseModel):
     innerLabwareGeometry: Optional[Dict[str, InnerWellGeometry]] = Field(
         None,
         description="A dictionary holding all unique inner well geometries in a labware.",
+    )
+    stackLimit: Optional[int] = Field(
+        None,
+        description="The limit representing the maximum stack size for a given labware,"
+        " defaults to 1 when unspecified indicating a single labware with no labware below it.",
+    )
+    compatibleParentLabware: Optional[List[str]] = Field(
+        None,
+        description="List of parent Labware on which a labware may be loaded, primarily the labware which owns a lid.",
     )

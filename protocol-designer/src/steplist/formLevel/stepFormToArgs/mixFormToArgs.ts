@@ -9,11 +9,11 @@ import {
 import { getOrderedWells } from '../../utils'
 import { getMixDelayData } from './getDelayData'
 import { getMatchingTipLiquidSpecs } from '../../../utils'
-import type { HydratedMixFormDataLegacy } from '../../../form-types'
+import type { HydratedMixFormData } from '../../../form-types'
 import type { MixArgs } from '@opentrons/step-generation'
 type MixStepArgs = MixArgs
 export const mixFormToArgs = (
-  hydratedFormData: HydratedMixFormDataLegacy
+  hydratedFormData: HydratedMixFormData
 ): MixStepArgs => {
   const {
     labware,
@@ -89,10 +89,8 @@ export const mixFormToArgs = (
   )
   return {
     commandCreatorFnName: 'mix',
-    name: `Mix ${hydratedFormData.id}`,
-    // TODO real name for steps
-    description: 'description would be here 2018-03-01',
-    // TODO get from form
+    name: hydratedFormData.stepName,
+    description: hydratedFormData.stepDetails,
     labware: labware.id,
     wells: orderedWells,
     volume,

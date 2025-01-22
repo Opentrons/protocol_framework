@@ -5,6 +5,7 @@ import {
   STANDARD_FLEX_SLOTS,
   STANDARD_OT2_SLOTS,
   THERMOCYCLER_MODULE_TYPE,
+  THERMOCYCLER_MODULE_V2,
   WASTE_CHUTE_CUTOUT,
   getAddressableAreaFromSlotId,
   getPositionFromSlotId,
@@ -26,6 +27,7 @@ import type {
   DeckDefinition,
   CutoutId,
   AddressableAreaName,
+  CoordinateTuple,
 } from '@opentrons/shared-data'
 import type { LabwareOnDeck, ModuleOnDeck } from '../../../step-forms'
 import type { Fixture } from './constants'
@@ -34,6 +36,10 @@ interface HighlightItemsProps {
   deckDef: DeckDefinition
   robotType: RobotType
 }
+//  TODO(ja, 1/13/25): get actual coordinates from thermocycler and deck definitions
+const FLEX_TC_POSITION: CoordinateTuple = [-20, 282, 0]
+const OT2_TC_GEN_1_POSITION: CoordinateTuple = [0, 264, 0]
+const OT2_TC_GEN_2_POSITION: CoordinateTuple = [0, 250, 0]
 
 const SLOTS = [
   ...STANDARD_FLEX_SLOTS,
@@ -120,9 +126,9 @@ export function HighlightItems(props: HighlightItemsProps): JSX.Element | null {
         }
 
         let labwareSlot = labwareOnDeck.slot
-        const hasTC = Object.values(modules).some(
+        const tcModel = Object.values(modules).find(
           module => module.type === THERMOCYCLER_MODULE_TYPE
-        )
+        )?.model
 
         if (modules[labwareSlot]) {
           labwareSlot = modules[labwareSlot].slot
@@ -133,6 +139,14 @@ export function HighlightItems(props: HighlightItemsProps): JSX.Element | null {
 
         const position = getPositionFromSlotId(labwareSlot, deckDef)
         if (position != null) {
+          let tcPosition: CoordinateTuple = FLEX_TC_POSITION
+          if (labwareSlot === '7') {
+            tcPosition =
+              tcModel === THERMOCYCLER_MODULE_V2
+                ? OT2_TC_GEN_2_POSITION
+                : OT2_TC_GEN_1_POSITION
+          }
+
           items.push(
             <LabwareLabel
               key={`${labwareOnDeck.id}_${index}`}
@@ -140,9 +154,7 @@ export function HighlightItems(props: HighlightItemsProps): JSX.Element | null {
                 selected => selected.id === labwareOnDeck.id
               )}
               isLast={true}
-              position={
-                hasTC && labwareSlot === 'B1' ? [-20, 282, 0] : position
-              }
+              position={tcModel != null ? tcPosition : position}
               labwareDef={labwareOnDeck.def}
               labelText={
                 hoveredItemLabware == null

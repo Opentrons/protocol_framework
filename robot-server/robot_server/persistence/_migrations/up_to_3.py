@@ -191,6 +191,12 @@ def _migrate_db_commands(
     the work across subprocesses. Each subprocess extracts, migrates, and inserts
     all of the commands for a single run.
     """
+    # Performance optimization: If we have nothing to migrate, don't even create the
+    # process pool. This avoids the heavy imports in the preload.
+    # On my laptop, this shaves ~1.5s off of each of our integration tests.
+    if not run_ids:
+        return
+
     mp = multiprocessing.get_context("forkserver")
     mp.set_forkserver_preload(_up_to_3_worker.imports)
 

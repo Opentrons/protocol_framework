@@ -2,13 +2,22 @@
 
 from __future__ import annotations
 
-from typing import Optional, TYPE_CHECKING, cast, Union, List
+from typing import (
+    Optional,
+    TYPE_CHECKING,
+    cast,
+    Union,
+    List,
+    Tuple,
+    NamedTuple,
+)
 from opentrons.types import Location, Mount, NozzleConfigurationType, NozzleMapInterface
 from opentrons.hardware_control import SyncHardwareAPI
 from opentrons.hardware_control.dev_types import PipetteDict
 from opentrons.protocols.api_support.util import FlowRates, find_value_for_api_version
 from opentrons.protocols.api_support.types import APIVersion
 from opentrons.protocols.advanced_control.transfers.common import TransferTipPolicyV2
+from opentrons.protocols.advanced_control.transfers import common as tx_commons
 from opentrons.protocol_engine import commands as cmd
 from opentrons.protocol_engine import (
     DeckPoint,
@@ -28,29 +37,33 @@ from opentrons.protocol_engine.types import (
     NozzleLayoutConfigurationType,
     AddressableOffsetVector,
     LiquidClassRecord,
+    NextTipInfo,
 )
 from opentrons.protocol_engine.errors.exceptions import TipNotAttachedError
 from opentrons.protocol_engine.clients import SyncClient as EngineClient
 from opentrons.protocols.api_support.definitions import MAX_SUPPORTED_VERSION
-from opentrons_shared_data.pipette.types import PipetteNameType
+from opentrons_shared_data.pipette.types import PipetteNameType, PIPETTE_API_NAMES_MAP
 from opentrons_shared_data.errors.exceptions import (
     UnsupportedHardwareCommand,
 )
 from opentrons.protocol_api._nozzle_layout import NozzleLayout
 from . import overlap_versions, pipette_movement_conflict
+from . import transfer_components_executor as tx_comps_executor
 
 from .well import WellCore
+from .labware import LabwareCore
 from ..instrument import AbstractInstrument
 from ...disposal_locations import TrashBin, WasteChute
 
 if TYPE_CHECKING:
     from .protocol import ProtocolCore
     from opentrons.protocol_api._liquid import LiquidClass
+    from opentrons.protocol_api._liquid_properties import TransferProperties
 
 _DISPENSE_VOLUME_VALIDATION_ADDED_IN = APIVersion(2, 17)
 
 
-class InstrumentCore(AbstractInstrument[WellCore]):
+class InstrumentCore(AbstractInstrument[WellCore, LabwareCore]):
     """Instrument API core using a ProtocolEngine.
 
     Args:
@@ -378,6 +391,7 @@ class InstrumentCore(AbstractInstrument[WellCore]):
         radius: float,
         z_offset: float,
         speed: float,
+        mm_from_edge: Optional[float] = None,
     ) -> None:
         """Touch pipette tip to edges of the well
 
@@ -387,7 +401,11 @@ class InstrumentCore(AbstractInstrument[WellCore]):
             radius: Percentage modifier for well radius to touch.
             z_offset: Vertical offset for pipette tip during touch tip.
             speed: Speed for the touch tip movements.
+            mm_from_edge: Offset from the edge of the well to move to. Requires a radius of 1.
         """
+        if mm_from_edge is not None and radius != 1.0:
+            raise ValueError("radius must be set to 1.0 if mm_from_edge is provided.")
+
         well_name = well_core.get_name()
         labware_id = well_core.labware_id
 
@@ -409,6 +427,7 @@ class InstrumentCore(AbstractInstrument[WellCore]):
                 wellName=well_name,
                 wellLocation=well_location,
                 radius=radius,
+                mmFromEdge=mm_from_edge,
                 speed=speed,
             )
         )
@@ -685,7 +704,7 @@ class InstrumentCore(AbstractInstrument[WellCore]):
         ).mount.to_hw_mount()
 
     def get_pipette_name(self) -> str:
-        """Get the pipette's load name as a string.
+        """Get the pipette's name as a string.
 
         Will match the load name of the actually loaded pipette,
         which may differ from the requested load name.
@@ -698,6 +717,24 @@ class InstrumentCore(AbstractInstrument[WellCore]):
             if isinstance(pipette.pipetteName, PipetteNameType)
             else pipette.pipetteName
         )
+
+    def get_load_name(self) -> str:
+        """Get the pipette's requested API load name.
+
+        This is the load name that is specified in the `ProtocolContext.load_instrument()`
+        method. This name might differ from the engine-specific pipette name.
+        """
+        pipette = self._engine_client.state.pipettes.get(self._pipette_id)
+        load_name = next(
+            (
+                pip_api_name
+                for pip_api_name, pip_name in PIPETTE_API_NAMES_MAP.items()
+                if pip_name == pipette.pipetteName
+            ),
+            None,
+        )
+        assert load_name, "Load name not found."
+        return load_name
 
     def get_model(self) -> str:
         return self._engine_client.state.pipettes.get_model_name(self._pipette_id)
@@ -866,23 +903,28 @@ class InstrumentCore(AbstractInstrument[WellCore]):
 
     def load_liquid_class(
         self,
-        liquid_class: LiquidClass,
-        pipette_load_name: str,
+        name: str,
+        transfer_properties: TransferProperties,
         tiprack_uri: str,
     ) -> str:
-        """Load a liquid class into the engine and return its ID."""
-        transfer_props = liquid_class.get_for(
-            pipette=pipette_load_name, tiprack=tiprack_uri
-        )
+        """Load a liquid class into the engine and return its ID.
 
+        Args:
+            name: Name of the liquid class
+            transfer_properties: Liquid class properties for a specific pipette & tiprack combination
+            tiprack_uri: URI of the tiprack whose transfer properties we will be using.
+
+        Returns:
+            Liquid class record's ID, as generated by the protocol engine.
+        """
         liquid_class_record = LiquidClassRecord(
-            liquidClassName=liquid_class.name,
-            pipetteModel=self.get_model(),  # TODO: verify this is the correct 'model' to use
+            liquidClassName=name,
+            pipetteModel=self.get_load_name(),
             tiprack=tiprack_uri,
-            aspirate=transfer_props.aspirate.as_shared_data_model(),
-            singleDispense=transfer_props.dispense.as_shared_data_model(),
-            multiDispense=transfer_props.multi_dispense.as_shared_data_model()
-            if transfer_props.multi_dispense
+            aspirate=transfer_properties.aspirate.as_shared_data_model(),
+            singleDispense=transfer_properties.dispense.as_shared_data_model(),
+            multiDispense=transfer_properties.multi_dispense.as_shared_data_model()
+            if transfer_properties.multi_dispense
             else None,
         )
         result = self._engine_client.execute_command_without_recovery(
@@ -892,16 +934,351 @@ class InstrumentCore(AbstractInstrument[WellCore]):
         )
         return result.liquidClassId
 
-    def transfer_liquid(
+    def get_next_tip(
+        self, tip_racks: List[LabwareCore], starting_well: Optional[str]
+    ) -> Optional[NextTipInfo]:
+        """Get the next tip to pick up."""
+        result = self._engine_client.execute_command_without_recovery(
+            cmd.GetNextTipParams(
+                pipetteId=self._pipette_id,
+                labwareIds=[tip_rack.labware_id for tip_rack in tip_racks],
+                startingTipWell=starting_well,
+            )
+        )
+        return (
+            result.nextTipInfo if isinstance(result.nextTipInfo, NextTipInfo) else None
+        )
+
+    def transfer_liquid(  # noqa: C901
         self,
-        liquid_class_id: str,
+        liquid_class: LiquidClass,
         volume: float,
-        source: List[WellCore],
-        dest: List[WellCore],
+        source: List[Tuple[Location, WellCore]],
+        dest: List[Tuple[Location, WellCore]],
         new_tip: TransferTipPolicyV2,
-        trash_location: Union[WellCore, Location, TrashBin, WasteChute],
+        tip_racks: List[Tuple[Location, LabwareCore]],
+        trash_location: Union[Location, TrashBin, WasteChute],
     ) -> None:
-        """Execute transfer using liquid class properties."""
+        """Execute transfer using liquid class properties.
+
+        Args:
+            liquid_class: The liquid class to use for transfer properties.
+            volume: Volume to transfer per well.
+            source: List of source wells, with each well represented as a tuple of
+                    types.Location and WellCore.
+                    types.Location is only necessary for saving the last accessed location.
+            dest: List of destination wells, with each well represented as a tuple of
+                    types.Location and WellCore.
+                    types.Location is only necessary for saving the last accessed location.
+            new_tip: Whether the transfer should use a new tip 'once', 'never', 'always',
+                     or 'per source'.
+            tiprack_uri: The URI of the tiprack that the transfer settings are for.
+            tip_drop_location: Location where the tip will be dropped (if appropriate).
+        """
+        if not tip_racks:
+            raise RuntimeError(
+                "No tipracks found for pipette in order to perform transfer"
+            )
+        tiprack_uri_for_transfer_props = tip_racks[0][1].get_uri()
+        transfer_props = liquid_class.get_for(
+            pipette=self.get_load_name(),
+            tiprack=tiprack_uri_for_transfer_props,
+        )
+        # TODO: use the ID returned by load_liquid_class in command annotations
+        self.load_liquid_class(
+            name=liquid_class.name,
+            transfer_properties=transfer_props,
+            tiprack_uri=tiprack_uri_for_transfer_props,
+        )
+
+        # TODO: add multi-channel pipette handling here
+        source_dest_per_volume_step = tx_commons.expand_for_volume_constraints(
+            volumes=[volume for _ in range(len(source))],
+            targets=zip(source, dest),
+            max_volume=self.get_max_volume(),
+        )
+
+        def _drop_tip() -> None:
+            if isinstance(trash_location, (TrashBin, WasteChute)):
+                self.drop_tip_in_disposal_location(
+                    disposal_location=trash_location,
+                    home_after=False,
+                    alternate_tip_drop=True,
+                )
+            elif isinstance(trash_location, Location):
+                self.drop_tip(
+                    location=trash_location,
+                    well_core=trash_location.labware.as_well()._core,  # type: ignore[arg-type]
+                    home_after=False,
+                    alternate_drop_location=True,
+                )
+
+        def _pick_up_tip() -> None:
+            next_tip = self.get_next_tip(
+                tip_racks=[core for loc, core in tip_racks],
+                starting_well=None,
+            )
+            if next_tip is None:
+                raise RuntimeError(
+                    f"No tip available among {tip_racks} for this transfer."
+                )
+            (
+                tiprack_loc,
+                tiprack_uri,
+                tip_well,
+            ) = self._get_location_and_well_core_from_next_tip_info(next_tip, tip_racks)
+            if tiprack_uri != tiprack_uri_for_transfer_props:
+                raise RuntimeError(
+                    f"Tiprack {tiprack_uri} does not match the tiprack designated "
+                    f"for this transfer- {tiprack_uri_for_transfer_props}."
+                )
+            self.pick_up_tip(
+                location=tiprack_loc,
+                well_core=tip_well,
+                presses=None,
+                increment=None,
+            )
+
+        if new_tip == TransferTipPolicyV2.ONCE:
+            _pick_up_tip()
+
+        prev_src: Optional[Tuple[Location, WellCore]] = None
+        post_disp_tip_contents = [
+            tx_comps_executor.LiquidAndAirGapPair(
+                liquid=0,
+                air_gap=0,
+            )
+        ]
+        next_step_volume, next_src_dest_combo = next(source_dest_per_volume_step)
+        is_last_step = False
+        while not is_last_step:
+            step_volume = next_step_volume
+            src_dest_combo = next_src_dest_combo
+            step_source, step_destination = src_dest_combo
+            try:
+                next_step_volume, next_src_dest_combo = next(
+                    source_dest_per_volume_step
+                )
+            except StopIteration:
+                is_last_step = True
+
+            if new_tip == TransferTipPolicyV2.ALWAYS or (
+                new_tip == TransferTipPolicyV2.PER_SOURCE and step_source != prev_src
+            ):
+                if prev_src is not None:
+                    _drop_tip()
+                _pick_up_tip()
+                post_disp_tip_contents = [
+                    tx_comps_executor.LiquidAndAirGapPair(
+                        liquid=0,
+                        air_gap=0,
+                    )
+                ]
+
+            post_asp_tip_contents = self.aspirate_liquid_class(
+                volume=step_volume,
+                source=step_source,
+                transfer_properties=transfer_props,
+                transfer_type=tx_comps_executor.TransferType.ONE_TO_ONE,
+                tip_contents=post_disp_tip_contents,
+            )
+            post_disp_tip_contents = self.dispense_liquid_class(
+                volume=step_volume,
+                dest=step_destination,
+                source=step_source,
+                transfer_properties=transfer_props,
+                transfer_type=tx_comps_executor.TransferType.ONE_TO_ONE,
+                tip_contents=post_asp_tip_contents,
+                add_final_air_gap=False
+                if is_last_step and new_tip == TransferTipPolicyV2.NEVER
+                else True,
+                trash_location=trash_location,
+            )
+            prev_src = step_source
+        if new_tip != TransferTipPolicyV2.NEVER:
+            _drop_tip()
+
+    def _get_location_and_well_core_from_next_tip_info(
+        self,
+        tip_info: NextTipInfo,
+        tip_racks: List[Tuple[Location, LabwareCore]],
+    ) -> _TipInfo:
+        tiprack_labware_core = self._protocol_core._labware_cores_by_id[
+            tip_info.labwareId
+        ]
+        tip_well = tiprack_labware_core.get_well_core(tip_info.tipStartingWell)
+
+        tiprack_loc = [
+            loc for loc, lw_core in tip_racks if lw_core == tiprack_labware_core
+        ]
+
+        return _TipInfo(
+            Location(tip_well.get_top(0), tiprack_loc[0].labware),
+            tiprack_labware_core.get_uri(),
+            tip_well,
+        )
+
+    def aspirate_liquid_class(
+        self,
+        volume: float,
+        source: Tuple[Location, WellCore],
+        transfer_properties: TransferProperties,
+        transfer_type: tx_comps_executor.TransferType,
+        tip_contents: List[tx_comps_executor.LiquidAndAirGapPair],
+    ) -> List[tx_comps_executor.LiquidAndAirGapPair]:
+        """Execute aspiration steps.
+
+        1. Submerge
+        2. Mix
+        3. pre-wet
+        4. Aspirate
+        5. Delay- wait inside the liquid
+        6. Aspirate retract
+
+        Return: List of liquid and air gap pairs in tip.
+        """
+        aspirate_props = transfer_properties.aspirate
+        tx_commons.check_valid_volume_parameters(
+            disposal_volume=0,  # No disposal volume for 1-to-1 transfer
+            air_gap=aspirate_props.retract.air_gap_by_volume.get_for_volume(volume),
+            max_volume=self.get_max_volume(),
+        )
+        source_loc, source_well = source
+        aspirate_point = (
+            tx_comps_executor.absolute_point_from_position_reference_and_offset(
+                well=source_well,
+                position_reference=aspirate_props.position_reference,
+                offset=aspirate_props.offset,
+            )
+        )
+        aspirate_location = Location(aspirate_point, labware=source_loc.labware)
+        last_liquid_and_airgap_in_tip = (
+            tip_contents[-1]
+            if tip_contents
+            else tx_comps_executor.LiquidAndAirGapPair(
+                liquid=0,
+                air_gap=0,
+            )
+        )
+        components_executor = tx_comps_executor.TransferComponentsExecutor(
+            instrument_core=self,
+            transfer_properties=transfer_properties,
+            target_location=aspirate_location,
+            target_well=source_well,
+            transfer_type=transfer_type,
+            tip_state=tx_comps_executor.TipState(
+                last_liquid_and_air_gap_in_tip=last_liquid_and_airgap_in_tip
+            ),
+        )
+        components_executor.submerge(submerge_properties=aspirate_props.submerge)
+        # TODO: when aspirating for consolidation, do not perform mix
+        components_executor.mix(
+            mix_properties=aspirate_props.mix, last_dispense_push_out=False
+        )
+        # TODO: when aspirating for consolidation, do not preform pre-wet
+        components_executor.pre_wet(
+            volume=volume,
+        )
+        components_executor.aspirate_and_wait(volume=volume)
+        components_executor.retract_after_aspiration(volume=volume)
+
+        # return copy of tip_contents with last entry replaced by tip state from executor
+        last_contents = components_executor.tip_state.last_liquid_and_air_gap_in_tip
+        new_tip_contents = tip_contents[0:-1] + [last_contents]
+        return new_tip_contents
+
+    def dispense_liquid_class(
+        self,
+        volume: float,
+        dest: Tuple[Location, WellCore],
+        source: Optional[Tuple[Location, WellCore]],
+        transfer_properties: TransferProperties,
+        transfer_type: tx_comps_executor.TransferType,
+        tip_contents: List[tx_comps_executor.LiquidAndAirGapPair],
+        add_final_air_gap: bool,
+        trash_location: Union[Location, TrashBin, WasteChute],
+    ) -> List[tx_comps_executor.LiquidAndAirGapPair]:
+        """Execute single-dispense steps.
+        1. Move pipette to the ‘submerge’ position with normal speed.
+            - The pipette will move in an arc- move to max z height of labware
+              (if asp & disp are in same labware)
+              or max z height of all labware (if asp & disp are in separate labware)
+        2. Air gap removal:
+            - If dispense location is above the meniscus, DO NOT remove air gap
+              (it will be dispensed along with rest of the liquid later).
+              All other scenarios, remove the air gap by doing a dispense
+            - Flow rate = min(dispenseFlowRate, (airGapByVolume)/sec)
+            - Use the post-dispense delay
+        4. Move to the dispense position at the specified ‘submerge’ speed
+           (even if we might not be moving into the liquid)
+           - Do a delay (submerge delay)
+        6. Dispense:
+            - Dispense at the specified flow rate.
+            - Do a push out as specified ONLY IF there is no mix following the dispense AND the tip is empty.
+            Volume for push out is the volume being dispensed. So if we are dispensing 50uL, use pushOutByVolume[50] as push out volume.
+        7. Delay
+        8. Mix using the same flow rate and delays as specified for asp+disp,
+           with the volume and the number of repetitions specified. Use the delays in asp & disp.
+            - If the dispense position is outside the liquid, then raise error if mix is enabled.
+              Can only be checked if using liquid level detection/ meniscus-based positioning.
+            - If the user wants to perform a mix then they should specify a dispense position that’s inside the liquid OR do mix() on the wells after transfer.
+            - Do push out at the last dispense.
+        9. Retract
+
+        Return:
+            List of liquid and air gap pairs in tip.
+        """
+        dispense_props = transfer_properties.dispense
+        dest_loc, dest_well = dest
+        dispense_point = (
+            tx_comps_executor.absolute_point_from_position_reference_and_offset(
+                well=dest_well,
+                position_reference=dispense_props.position_reference,
+                offset=dispense_props.offset,
+            )
+        )
+        dispense_location = Location(dispense_point, labware=dest_loc.labware)
+        last_liquid_and_airgap_in_tip = (
+            tip_contents[-1]
+            if tip_contents
+            else tx_comps_executor.LiquidAndAirGapPair(
+                liquid=0,
+                air_gap=0,
+            )
+        )
+        components_executor = tx_comps_executor.TransferComponentsExecutor(
+            instrument_core=self,
+            transfer_properties=transfer_properties,
+            target_location=dispense_location,
+            target_well=dest_well,
+            transfer_type=transfer_type,
+            tip_state=tx_comps_executor.TipState(
+                last_liquid_and_air_gap_in_tip=last_liquid_and_airgap_in_tip
+            ),
+        )
+        components_executor.submerge(submerge_properties=dispense_props.submerge)
+        if dispense_props.mix.enabled:
+            push_out_vol = 0.0
+        else:
+            # TODO: if distributing, do a push out only at the last dispense
+            push_out_vol = dispense_props.push_out_by_volume.get_for_volume(volume)
+        components_executor.dispense_and_wait(
+            volume=volume,
+            push_out_override=push_out_vol,
+        )
+        components_executor.mix(
+            mix_properties=dispense_props.mix,
+            last_dispense_push_out=True,
+        )
+        components_executor.retract_after_dispensing(
+            trash_location=trash_location,
+            source_location=source[0] if source else None,
+            source_well=source[1] if source else None,
+            add_final_air_gap=add_final_air_gap,
+        )
+        last_contents = components_executor.tip_state.last_liquid_and_air_gap_in_tip
+        new_tip_contents = tip_contents[0:-1] + [last_contents]
+        return new_tip_contents
 
     def retract(self) -> None:
         """Retract this instrument to the top of the gantry."""
@@ -994,3 +1371,13 @@ class InstrumentCore(AbstractInstrument[WellCore]):
         return self._engine_client.state.pipettes.get_nozzle_configuration_supports_lld(
             self.pipette_id
         )
+
+    def delay(self, seconds: float) -> None:
+        """Call a protocol delay."""
+        self._protocol_core.delay(seconds=seconds, msg=None)
+
+
+class _TipInfo(NamedTuple):
+    tiprack_location: Location
+    tiprack_uri: str
+    tip_well: WellCore

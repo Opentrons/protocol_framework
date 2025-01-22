@@ -9,8 +9,8 @@ from opentrons_shared_data import load_shared_data
 from opentrons_shared_data.deck import load as load_deck
 from opentrons_shared_data.deck.types import DeckDefinitionV5
 from opentrons_shared_data.labware import load_definition
+from opentrons_shared_data.labware.labware_definition import LabwareDefinition
 from opentrons_shared_data.pipette import pipette_definition
-from opentrons.protocols.models import LabwareDefinition
 from opentrons.protocols.api_support.deck_type import (
     STANDARD_OT2_DECK,
     SHORT_TRASH_DECK,
@@ -231,6 +231,13 @@ def mag_block_v1_def() -> ModuleDefinition:
 def abs_reader_v1_def() -> ModuleDefinition:
     """Get the definition of a V1 absorbance plate reader."""
     definition = load_shared_data("module/definitions/3/absorbanceReaderV1.json")
+    return ModuleDefinition.model_validate_json(definition)
+
+
+@pytest.fixture(scope="session")
+def flex_stacker_v1_def() -> ModuleDefinition:
+    """Get the definition of a V1 Flex Stacker."""
+    definition = load_shared_data("module/definitions/3/flexStackerModuleV1.json")
     return ModuleDefinition.model_validate_json(definition)
 
 

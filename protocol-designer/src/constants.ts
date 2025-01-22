@@ -91,6 +91,7 @@ export const MIN_TC_DURATION_SECONDS = 0
 export const MAX_TC_DURATION_SECONDS = 60
 export const MIN_TC_PROFILE_VOLUME = 0
 export const MAX_TC_PROFILE_VOLUME = 100
+// @ts-expect-error Flex stacker not yet supported in PD
 export const MODELS_FOR_MODULE_TYPE: Record<
   ModuleType,
   Array<{
@@ -149,6 +150,7 @@ export const MODELS_FOR_MODULE_TYPE: Record<
   ],
 }
 
+// @ts-expect-error Flex stacker not yet supported in PD
 export const DEFAULT_MODEL_FOR_MODULE_TYPE: Record<ModuleType, ModuleModel> = {
   [MAGNETIC_MODULE_TYPE]: MAGNETIC_MODULE_V2,
   [TEMPERATURE_MODULE_TYPE]: TEMPERATURE_MODULE_V2,
@@ -175,3 +177,21 @@ export const STAGING_AREA_CUTOUTS_ORDERED: CutoutId[] = [
   'cutoutD3',
   'cutoutA3',
 ]
+
+// Values for absorbance reader
+export const ABSORBANCE_READER_INITIALIZE_MODE_SINGLE = 'single'
+export const ABSORBANCE_READER_INITIALIZE_MODE_MULTI = 'multi'
+export const ABSORBANCE_READER_INITIALIZE: 'absorbanceReaderInitialize' =
+  'absorbanceReaderInitialize'
+export const ABSORBANCE_READER_READ: 'absorbanceReaderRead' =
+  'absorbanceReaderRead'
+export const ABSORBANCE_READER_LID: 'absorbanceReaderLid' =
+  'absorbanceReaderLid'
+export const ABSORBANCE_READER_MIN_WAVELENGTH_NM = 350
+export const ABSORBANCE_READER_MAX_WAVELENGTH_NM = 1000
+export const ABSORBANCE_READER_COLOR_BY_WAVELENGTH: Record<number, string> = {
+  450: 'Blue',
+  562: 'Green',
+  600: 'Orange',
+  650: 'Red',
+}

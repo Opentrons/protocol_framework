@@ -6,13 +6,6 @@ import {
 } from '@opentrons/components'
 import type { FlattenSimpleInterpolation } from 'styled-components'
 
-export const BUTTON_LINK_STYLE = css`
-  color: ${COLORS.grey60};
-  &:hover {
-    color: ${COLORS.grey40};
-  }
-`
-
 export const LINK_BUTTON_STYLE = css`
   color: ${COLORS.black90};
 
@@ -32,7 +25,8 @@ export const LINK_BUTTON_STYLE = css`
 `
 
 export const LINE_CLAMP_TEXT_STYLE = (
-  lineClamp: number
+  lineClamp: number,
+  title?: boolean
 ): FlattenSimpleInterpolation => css`
   display: -webkit-box;
   -webkit-box-orient: vertical;
@@ -40,7 +34,9 @@ export const LINE_CLAMP_TEXT_STYLE = (
   text-overflow: ellipsis;
   word-wrap: break-word;
   -webkit-line-clamp: ${lineClamp};
-  word-break: break-all; // for a non word case like aaaaaaaa
+  word-break: ${title === true
+    ? 'normal'
+    : 'break-all'}; // normal for tile and break-all for a non word case like aaaaaaaa
 `
 
 const MIN_OVERVIEW_WIDTH = '64rem'
