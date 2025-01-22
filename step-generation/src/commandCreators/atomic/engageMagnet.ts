@@ -2,15 +2,16 @@ import assert from 'assert'
 import { MAGNETIC_MODULE_TYPE } from '@opentrons/shared-data'
 import { uuid } from '../../utils'
 import * as errorCreators from '../../errorCreators'
-import type { CommandCreator, EngageMagnetArgs } from '../../types'
+import type { EngageMagnetParams } from '@opentrons/shared-data'
+import type { CommandCreator } from '../../types'
 
 /** Engage magnet of specified magnetic module to given engage height. */
-export const engageMagnet: CommandCreator<EngageMagnetArgs> = (
+export const engageMagnet: CommandCreator<EngageMagnetParams> = (
   args,
   invariantContext,
   prevRobotState
 ) => {
-  const { module: moduleId, engageHeight } = args
+  const { moduleId, height } = args
   const commandType = 'magneticModule/engage'
 
   if (moduleId === null) {
@@ -30,7 +31,7 @@ export const engageMagnet: CommandCreator<EngageMagnetArgs> = (
         key: uuid(),
         params: {
           moduleId,
-          height: engageHeight,
+          height,
         },
       },
     ],

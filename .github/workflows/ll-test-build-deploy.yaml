@@ -164,7 +164,7 @@ jobs:
         run: |
           make -C labware-library
       - name: 'upload github artifact'
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: 'll-artifact'
           path: labware-library/dist
@@ -197,7 +197,7 @@ jobs:
             const { buildComplexEnvVars } = require(`${process.env.GITHUB_WORKSPACE}/.github/workflows/utils.js`)
             buildComplexEnvVars(core, context)
       - name: 'download LL build'
-        uses: 'actions/download-artifact@v3'
+        uses: 'actions/download-artifact@v4'
         with:
           name: ll-artifact
           path: ./dist

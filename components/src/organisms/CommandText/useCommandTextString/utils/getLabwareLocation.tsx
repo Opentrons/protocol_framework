@@ -52,6 +52,8 @@ export function getLabwareLocation(
     return null
   } else if (location === 'offDeck') {
     return { slotName: 'offDeck' }
+  } else if (location === 'systemLocation') {
+    return { slotName: 'systemLocation' }
   } else if ('slotName' in location) {
     return { slotName: location.slotName }
   } else if ('addressableAreaName' in location) {
@@ -92,7 +94,10 @@ export function getLabwareLocation(
       const adapterName =
         adapterDef != null ? getLabwareDisplayName(adapterDef) : ''
 
-      if (adapter.location === 'offDeck') {
+      if (
+        adapter.location === 'offDeck' ||
+        adapter.location === 'systemLocation'
+      ) {
         return { slotName: 'offDeck', adapterName }
       } else if (
         'slotName' in adapter.location ||

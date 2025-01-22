@@ -5,25 +5,26 @@ import {
 } from '@opentrons/shared-data'
 import { uuid } from '../../utils'
 import * as errorCreators from '../../errorCreators'
-import type { CommandCreator, DeactivateTemperatureArgs } from '../../types'
+import type { ModuleOnlyParams } from '@opentrons/shared-data'
+import type { CommandCreator } from '../../types'
 
 /** Disengage temperature target for specified module. */
-export const deactivateTemperature: CommandCreator<DeactivateTemperatureArgs> = (
+export const deactivateTemperature: CommandCreator<ModuleOnlyParams> = (
   args,
   invariantContext,
   prevRobotState
 ) => {
-  const { module } = args
+  const { moduleId } = args
 
-  if (module === null) {
+  if (moduleId === null) {
     return {
       errors: [errorCreators.missingModuleError()],
     }
   }
 
-  const moduleType = invariantContext.moduleEntities[module]?.type
+  const moduleType = invariantContext.moduleEntities[moduleId]?.type
   const params = {
-    moduleId: module,
+    moduleId,
   }
 
   if (moduleType === TEMPERATURE_MODULE_TYPE) {
@@ -63,7 +64,7 @@ export const deactivateTemperature: CommandCreator<DeactivateTemperatureArgs> = 
     }
   } else {
     console.error(
-      `setTemperature expected module ${module} to be ${TEMPERATURE_MODULE_TYPE}, ${THERMOCYCLER_MODULE_TYPE} or ${HEATERSHAKER_MODULE_TYPE}, got ${moduleType}`
+      `setTemperature expected module ${moduleId} to be ${TEMPERATURE_MODULE_TYPE}, ${THERMOCYCLER_MODULE_TYPE} or ${HEATERSHAKER_MODULE_TYPE}, got ${moduleType}`
     )
     // NOTE: "missing module" isn't exactly the right error here, but better than a whitescreen!
     // This should never be shown.

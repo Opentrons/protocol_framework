@@ -80,10 +80,12 @@ export const getUnusedStagingAreas = (
         command =>
           (command.commandType === 'loadLabware' &&
             command.params.location !== 'offDeck' &&
+            command.params.location !== 'systemLocation' &&
             'addressableAreaName' in command.params.location &&
             command.params.location.addressableAreaName === location) ||
           (command.commandType === 'moveLabware' &&
             command.params.newLocation !== 'offDeck' &&
+            command.params.newLocation !== 'systemLocation' &&
             'addressableAreaName' in command.params.newLocation &&
             command.params.newLocation.addressableAreaName === location)
       )
@@ -131,6 +133,7 @@ export const getUnusedTrash = (
               )) ||
             (command.commandType === 'moveLabware' &&
               command.params.newLocation !== 'offDeck' &&
+              command.params.newLocation !== 'systemLocation' &&
               'addressableAreaName' in command.params.newLocation &&
               command.params.newLocation.addressableAreaName ===
                 'gripperWasteChute')

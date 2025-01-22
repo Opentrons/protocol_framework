@@ -7,12 +7,12 @@ import { fixture_96_plate } from '@opentrons/shared-data/labware/fixtures/2'
 import { mixFormToArgs } from '../mixFormToArgs'
 import { DEFAULT_MM_BLOWOUT_OFFSET_FROM_TOP } from '../../../../constants'
 import { getOrderedWells } from '../../../utils'
-import type { HydratedMixFormDataLegacy } from '../../../../form-types'
+import type { HydratedMixFormData } from '../../../../form-types'
 import type { LabwareDefinition2 } from '@opentrons/shared-data'
 
 vi.mock('../../../utils')
 
-let hydratedForm: HydratedMixFormDataLegacy
+let hydratedForm: HydratedMixFormData
 const labwareDef = fixture_96_plate as LabwareDefinition2
 const labwareType = getLabwareDefURI(labwareDef)
 

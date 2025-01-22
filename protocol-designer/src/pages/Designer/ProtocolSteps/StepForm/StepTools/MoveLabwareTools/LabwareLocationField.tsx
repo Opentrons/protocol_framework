@@ -61,6 +61,7 @@ export function LabwareLocationField(
       onExit={() => {
         dispatch(hoverSelection({ id: null, text: null }))
       }}
+      tooltipContent={null}
     />
   )
 }

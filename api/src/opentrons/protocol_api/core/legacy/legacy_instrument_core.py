@@ -180,11 +180,14 @@ class LegacyInstrumentCore(AbstractInstrument[LegacyWellCore, LegacyLabwareCore]
         radius: float,
         z_offset: float,
         speed: float,
+        mm_from_edge: Optional[float] = None,
     ) -> None:
         """
         Touch the pipette tip to the sides of a well, with the intent of
         removing left-over droplets
         """
+        if mm_from_edge is not None:
+            raise APIVersionError(api_element="mm_from_edge argument")
         # TODO al 20201110 - build_edges relies on where being a Well. This is
         #  an unpleasant compromise until refactoring build_edges to support
         #  LegacyWellCore.

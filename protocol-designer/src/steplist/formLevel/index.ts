@@ -42,6 +42,11 @@ import {
   volumeRequired,
   timesRequired,
   pauseActionRequired,
+  wavelengthRequired,
+  referenceWavelengthRequired,
+  fileNameRequired,
+  wavelengthOutOfRange,
+  referenceWavelengthOutOfRange,
 } from './errors'
 
 import {
@@ -56,7 +61,7 @@ import {
 } from './warnings'
 
 import type { FormWarning, FormWarningType } from './warnings'
-import type { HydratedFormdata, StepType } from '../../form-types'
+import type { HydratedFormData, StepType } from '../../form-types'
 import type { FormError } from './errors'
 export { handleFormChange } from './handleFormChange'
 export { createBlankForm } from './createBlankForm'
@@ -72,10 +77,19 @@ export { getNextDefaultEngageHeight } from './getNextDefaultEngageHeight'
 export { stepFormToArgs } from './stepFormToArgs'
 export type { FormError, FormWarning, FormWarningType }
 interface FormHelpers {
-  getErrors?: (arg: HydratedFormdata) => FormError[]
+  getErrors?: (arg: HydratedFormData) => FormError[]
   getWarnings?: (arg: unknown) => FormWarning[]
 }
 const stepFormHelperMap: Partial<Record<StepType, FormHelpers>> = {
+  absorbanceReader: {
+    getErrors: composeErrors(
+      wavelengthRequired,
+      referenceWavelengthRequired,
+      fileNameRequired,
+      wavelengthOutOfRange,
+      referenceWavelengthOutOfRange
+    ),
+  },
   heaterShaker: {
     getErrors: composeErrors(
       shakeSpeedRequired,
@@ -164,11 +178,10 @@ const stepFormHelperMap: Partial<Record<StepType, FormHelpers>> = {
 }
 export const getFormErrors = (
   stepType: StepType,
-  formData: HydratedFormdata
+  formData: HydratedFormData
 ): FormError[] => {
   const formErrorGetter =
-    // @ts-expect-error(sa, 2021-6-20): not a valid type narrow
-    stepFormHelperMap[stepType] && stepFormHelperMap[stepType].getErrors
+    stepFormHelperMap[stepType] && stepFormHelperMap[stepType]?.getErrors
   const errors = formErrorGetter != null ? formErrorGetter(formData) : []
   return errors
 }
@@ -177,8 +190,7 @@ export const getFormWarnings = (
   formData: unknown
 ): FormWarning[] => {
   const formWarningGetter =
-    // @ts-expect-error(sa, 2021-6-20): not a valid type narrow
-    stepFormHelperMap[stepType] && stepFormHelperMap[stepType].getWarnings
+    stepFormHelperMap[stepType] && stepFormHelperMap[stepType]?.getWarnings
   const warnings = formWarningGetter != null ? formWarningGetter(formData) : []
   return warnings
 }

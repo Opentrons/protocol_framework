@@ -16,6 +16,11 @@ def is_absorbance_reader_lid(load_name: str) -> bool:
     return load_name == "opentrons_flex_lid_absorbance_plate_reader_module"
 
 
+def is_lid_stack(load_name: str) -> bool:
+    """Check if a labware object is a system lid stack object."""
+    return load_name == "protocol_engine_lid_stack_object"
+
+
 def validate_definition_is_labware(definition: LabwareDefinition) -> bool:
     """Validate that one of the definition's allowed roles is `labware`.
 

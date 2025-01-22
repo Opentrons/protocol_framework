@@ -48,6 +48,7 @@ export const moveLabware: CommandCreator<MoveLabwareArgs> = (
 
   const newLocationInWasteChute =
     newLocation !== 'offDeck' &&
+    newLocation !== 'systemLocation' &&
     'addressableAreaName' in newLocation &&
     newLocation.addressableAreaName === 'gripperWasteChute'
 
@@ -56,7 +57,9 @@ export const moveLabware: CommandCreator<MoveLabwareArgs> = (
   )
 
   const newLocationSlot =
-    newLocation !== 'offDeck' && 'slotName' in newLocation
+    newLocation !== 'offDeck' &&
+    newLocation !== 'systemLocation' &&
+    'slotName' in newLocation
       ? newLocation.slotName
       : null
 
@@ -134,12 +137,16 @@ export const moveLabware: CommandCreator<MoveLabwareArgs> = (
     }
   }
   const destModuleId =
-    newLocation !== 'offDeck' && 'moduleId' in newLocation
+    newLocation !== 'offDeck' &&
+    newLocation !== 'systemLocation' &&
+    'moduleId' in newLocation
       ? newLocation.moduleId
       : null
 
   const destAdapterId =
-    newLocation !== 'offDeck' && 'labwareId' in newLocation
+    newLocation !== 'offDeck' &&
+    newLocation !== 'systemLocation' &&
+    'labwareId' in newLocation
       ? newLocation.labwareId
       : null
 

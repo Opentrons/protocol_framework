@@ -1,5 +1,5 @@
-import type { State } from '../types'
-import type * as Types from './types'
+import type { State } from '../../types'
+import type * as Types from '../types'
 
 export const getSetupStepComplete: (
   state: State,

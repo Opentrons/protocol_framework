@@ -1389,7 +1389,8 @@ def test_raise_if_labware_cannot_be_stacked_on_labware_on_adapter() -> None:
         },
         definitions_by_uri={
             "def-uri-1": LabwareDefinition.model_construct(  # type: ignore[call-arg]
-                allowedRoles=[LabwareRole.labware]
+                allowedRoles=[LabwareRole.labware],
+                parameters=Parameters.model_construct(loadName="test"),  # type: ignore[call-arg]
             ),
             "def-uri-2": LabwareDefinition.model_construct(  # type: ignore[call-arg]
                 allowedRoles=[LabwareRole.adapter]

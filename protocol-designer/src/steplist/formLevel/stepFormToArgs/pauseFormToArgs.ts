@@ -4,14 +4,14 @@ import {
   PAUSE_UNTIL_TEMP,
   PAUSE_UNTIL_RESUME,
 } from '../../../constants'
-import type { FormData } from '../../../form-types'
+import type { HydratedPauseFormData } from '../../../form-types'
 import type {
   WaitForTemperatureArgs,
   PauseArgs,
 } from '@opentrons/step-generation'
 
 export const pauseFormToArgs = (
-  formData: FormData
+  formData: HydratedPauseFormData
 ): PauseArgs | WaitForTemperatureArgs | null => {
   const { hours, minutes, seconds } = getTimeFromForm(formData, 'pauseTime')
   const totalSeconds = (hours ?? 0) * 3600 + minutes * 60 + seconds
@@ -22,18 +22,18 @@ export const pauseFormToArgs = (
     case PAUSE_UNTIL_TEMP:
       return {
         commandCreatorFnName: 'waitForTemperature',
-        temperature,
-        module: formData.moduleId,
+        name: formData.stepName,
+        description: formData.stepDetails ?? '',
+        celsius: temperature,
+        moduleId: formData.moduleId ?? '',
         message,
       }
 
     case PAUSE_UNTIL_TIME:
       return {
         commandCreatorFnName: 'delay',
-        name: `Pause ${formData.id}`,
-        // TODO real name for steps
-        description: formData.description ?? '',
-        // TODO get from form
+        name: formData.stepName,
+        description: formData.stepDetails ?? '',
         wait: totalSeconds,
         message,
         meta: {
@@ -46,10 +46,8 @@ export const pauseFormToArgs = (
     case PAUSE_UNTIL_RESUME:
       return {
         commandCreatorFnName: 'delay',
-        name: `Pause ${formData.id}`,
-        // TODO real name for steps
-        description: formData.description ?? '',
-        // TODO get from form
+        name: formData.stepName,
+        description: formData.stepDetails ?? '',
         wait: true,
         message,
         meta: {
