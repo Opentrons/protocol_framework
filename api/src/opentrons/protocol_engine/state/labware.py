@@ -889,7 +889,7 @@ class LabwareView:
 
     def raise_if_labware_cannot_be_ondeck(
         self,
-        location: OnDeckLabwareLocation,
+        location: LabwareLocation,
         labware_definition: LabwareDefinition,
     ) -> None:
         """Raise an error if the labware cannot be in the specified location."""

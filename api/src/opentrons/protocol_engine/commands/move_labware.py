@@ -226,7 +226,7 @@ class MoveLabwareImplementation(AbstractCommandImpl[MoveLabwareParams, _ExecuteR
 
         if isinstance(available_new_location, DeckSlotLocation):
             self._state_view.labware.raise_if_labware_cannot_be_ondeck(
-                location=params.newLocation,
+                location=available_new_location,
                 labware_definition=self._state_view.labware.get_definition(
                     params.labwareId
                 ),
