@@ -1,5 +1,5 @@
-import * as Constants from './constants'
-import type * as Types from './types'
+import * as Constants from '../constants'
+import type * as Types from '../types'
 
 export const updateRunSetupStepsComplete = (
   runId: string,

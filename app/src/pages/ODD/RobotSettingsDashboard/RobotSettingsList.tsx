@@ -61,7 +61,7 @@ export function RobotSettingsList(props: RobotSettingsListProps): JSX.Element {
     'app_settings',
     'branded',
   ])
-  const isNewLpc = useFeatureFlag('lpcRedesign')
+  const isNewLPC = useFeatureFlag('lpcRedesign')
   const dispatch = useDispatch<Dispatch>()
   const localRobot = useSelector(getLocalRobot)
   const robotName = localRobot?.name != null ? localRobot.name : 'no name'
@@ -188,7 +188,7 @@ export function RobotSettingsList(props: RobotSettingsListProps): JSX.Element {
           }}
           iconName="privacy"
         />
-        {!isNewLpc && (
+        {!isNewLPC && (
           <RobotSettingButton
             settingName={t('apply_historic_offsets')}
             dataTestId="RobotSettingButton_apply_historic_offsets"
