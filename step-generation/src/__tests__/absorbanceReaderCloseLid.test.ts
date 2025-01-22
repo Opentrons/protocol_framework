@@ -29,6 +29,12 @@ describe('absorbanceReaderCloseLid', () => {
       type: ABSORBANCE_READER_TYPE,
       model: ABSORBANCE_READER_V1,
     }
+    invariantContext.additionalEquipmentEntities = {
+      gripperId: {
+        name: 'gripper',
+        id: 'gripperId',
+      },
+    }
     robotState = getInitialRobotStateStandard(invariantContext)
     robotState.modules[moduleId] = {
       slot: 'D3',
@@ -42,12 +48,10 @@ describe('absorbanceReaderCloseLid', () => {
       {} as AbsorbanceReaderState
     )
   })
-  it.only('creates absorbance reader close lid command', () => {
-    const module = moduleId
+  it('creates absorbance reader close lid command', () => {
     const result = absorbanceReaderCloseLid(
       {
-        module,
-        commandCreatorFnName: 'absorbanceReaderCloseLid',
+        moduleId,
       },
       invariantContext,
       robotState
@@ -58,19 +62,17 @@ describe('absorbanceReaderCloseLid', () => {
           commandType: 'absorbanceReader/closeLid',
           key: expect.any(String),
           params: {
-            moduleId: module,
+            moduleId,
           },
         },
       ],
     })
   })
   it('creates returns error if bad module state', () => {
-    const module = moduleId
     vi.mocked(absorbanceReaderStateGetter).mockReturnValue(null)
     const result = absorbanceReaderCloseLid(
       {
-        module,
-        commandCreatorFnName: 'absorbanceReaderCloseLid',
+        moduleId,
       },
       invariantContext,
       robotState
@@ -78,6 +80,20 @@ describe('absorbanceReaderCloseLid', () => {
     expect(getErrorResult(result).errors).toHaveLength(1)
     expect(getErrorResult(result).errors[0]).toMatchObject({
       type: 'MISSING_MODULE',
+    })
+  })
+  it('creates returns error if no gripper', () => {
+    invariantContext.additionalEquipmentEntities = {}
+    const result = absorbanceReaderCloseLid(
+      {
+        moduleId,
+      },
+      invariantContext,
+      robotState
+    )
+    expect(getErrorResult(result).errors).toHaveLength(1)
+    expect(getErrorResult(result).errors[0]).toMatchObject({
+      type: 'ABSORBANCE_READER_NO_GRIPPER',
     })
   })
 })

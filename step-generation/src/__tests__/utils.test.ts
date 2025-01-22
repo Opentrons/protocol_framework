@@ -369,7 +369,7 @@ describe('thermocyclerStateDiff', () => {
         lidOpen: null,
       },
       args: {
-        module: thermocyclerId,
+        moduleId: thermocyclerId,
         commandCreatorFnName: 'thermocyclerState',
         blockTargetTemp: null,
         lidTargetTemp: null,
@@ -390,7 +390,7 @@ describe('thermocyclerStateDiff', () => {
         lidOpen: null,
       },
       args: {
-        module: thermocyclerId,
+        moduleId: thermocyclerId,
         commandCreatorFnName: 'thermocyclerState',
         blockTargetTemp: null,
         lidTargetTemp: null,
@@ -411,7 +411,7 @@ describe('thermocyclerStateDiff', () => {
         lidOpen: null,
       },
       args: {
-        module: thermocyclerId,
+        moduleId: thermocyclerId,
         commandCreatorFnName: 'thermocyclerState',
         blockTargetTemp: null,
         lidTargetTemp: null,
@@ -432,7 +432,7 @@ describe('thermocyclerStateDiff', () => {
         lidOpen: null,
       },
       args: {
-        module: thermocyclerId,
+        moduleId: thermocyclerId,
         commandCreatorFnName: 'thermocyclerState',
         blockTargetTemp: null,
         lidTargetTemp: null,
@@ -454,7 +454,7 @@ describe('thermocyclerStateDiff', () => {
         lidOpen: false,
       },
       args: {
-        module: thermocyclerId,
+        moduleId: thermocyclerId,
         commandCreatorFnName: 'thermocyclerState',
         blockTargetTemp: null,
         lidTargetTemp: 20,
@@ -475,7 +475,7 @@ describe('thermocyclerStateDiff', () => {
         lidOpen: false,
       },
       args: {
-        module: thermocyclerId,
+        moduleId: thermocyclerId,
         commandCreatorFnName: 'thermocyclerState',
         blockTargetTemp: null,
         lidTargetTemp: 30,
@@ -496,7 +496,7 @@ describe('thermocyclerStateDiff', () => {
         lidOpen: false,
       },
       args: {
-        module: thermocyclerId,
+        moduleId: thermocyclerId,
         commandCreatorFnName: 'thermocyclerState',
         blockTargetTemp: null,
         lidTargetTemp: 20,
@@ -517,7 +517,7 @@ describe('thermocyclerStateDiff', () => {
         lidOpen: false,
       },
       args: {
-        module: thermocyclerId,
+        moduleId: thermocyclerId,
         commandCreatorFnName: 'thermocyclerState',
         blockTargetTemp: null,
         lidTargetTemp: null,
@@ -538,7 +538,7 @@ describe('thermocyclerStateDiff', () => {
         lidOpen: false,
       },
       args: {
-        module: thermocyclerId,
+        moduleId: thermocyclerId,
         commandCreatorFnName: 'thermocyclerState',
         blockTargetTemp: 20,
         lidTargetTemp: null,
@@ -559,7 +559,7 @@ describe('thermocyclerStateDiff', () => {
         lidOpen: false,
       },
       args: {
-        module: thermocyclerId,
+        moduleId: thermocyclerId,
         commandCreatorFnName: 'thermocyclerState',
         blockTargetTemp: 20,
         lidTargetTemp: null,
@@ -579,7 +579,7 @@ describe('thermocyclerStateDiff', () => {
         lidOpen: false,
       },
       args: {
-        module: thermocyclerId,
+        moduleId: thermocyclerId,
         commandCreatorFnName: 'thermocyclerState',
         blockTargetTemp: 40,
         lidTargetTemp: null,
@@ -599,7 +599,7 @@ describe('thermocyclerStateDiff', () => {
         lidOpen: false,
       },
       args: {
-        module: thermocyclerId,
+        moduleId: thermocyclerId,
         commandCreatorFnName: 'thermocyclerState',
         blockTargetTemp: null,
         lidTargetTemp: null,
