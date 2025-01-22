@@ -20,7 +20,6 @@ import type {
   MoveLabwareParams,
 } from '@opentrons/shared-data'
 import type { InvariantContext, RobotState } from '../types'
-import type { MoveLabwareArgs } from '..'
 
 const mockWasteChuteId = 'mockWasteChuteId'
 const mockGripperId = 'mockGripperId'

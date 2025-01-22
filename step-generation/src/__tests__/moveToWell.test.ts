@@ -23,7 +23,6 @@ import {
   SOURCE_LABWARE,
 } from '../fixtures'
 import type { InvariantContext, RobotState } from '../types'
-import { an } from 'vitest/dist/chunks/reporters.D7Jzd9GS'
 
 vi.mock('../utils/absorbanceReaderCollision')
 vi.mock('../utils/thermocyclerPipetteCollision')

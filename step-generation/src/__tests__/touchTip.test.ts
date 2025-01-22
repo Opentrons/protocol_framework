@@ -11,9 +11,8 @@ import {
   SOURCE_LABWARE,
 } from '../fixtures'
 import type { InvariantContext, RobotState } from '../types'
-import type { WellLocation } from '@opentrons/shared-data'
 
-const wellLocation: WellLocation = {
+const wellLocation: any = {
   origin: 'bottom',
   offset: { z: 10 },
 }

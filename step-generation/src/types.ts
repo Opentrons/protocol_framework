@@ -15,9 +15,9 @@ import type {
   PipetteMount as Mount,
   PipetteV2Specs,
   ShakeSpeedParams,
-  AtomicProfileStep,
   LabwareMovementStrategy,
 } from '@opentrons/shared-data'
+import type { AtomicProfileStep } from '@opentrons/shared-data/protocol/types/schemaV4'
 import type {
   TEMPERATURE_DEACTIVATED,
   TEMPERATURE_AT_TARGET,

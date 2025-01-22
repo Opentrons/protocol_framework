@@ -17,9 +17,9 @@ import {
 import { COLUMN_4_SLOTS } from '../../constants'
 import type {
   CreateCommand,
+  DispenseParams,
   NozzleConfigurationStyle,
 } from '@opentrons/shared-data'
-import type { DispenseParams } from '@opentrons/shared-data'
 import type { Point } from '../../utils'
 import type { CommandCreator, CommandCreatorError } from '../../types'
 
