@@ -65,7 +65,7 @@ FS_STALL = "async ERR403:motor stall error" + FS_COMMAND_TERMINATOR.strip("\r")
 DEFAULT_COMMAND_RETRIES = 1
 TOTAL_TRAVEL_X = 192.5
 TOTAL_TRAVEL_Z = 136
-TOTAL_TRAVEL_L = 42
+TOTAL_TRAVEL_L = 44
 RETRACT_DIST_X = 1
 RETRACT_DIST_Z = 1
 HOME_SPEED = 10
@@ -88,9 +88,9 @@ MOVE_SPEED_X = 200
 MOVE_SPEED_UPZ = 200
 MOVE_SPEED_L = 100
 MOVE_SPEED_DOWNZ = 200
-x_sg_value = 1
-z_sg_value = 1
-l_sg_value = 1
+x_sg_value = 3
+z_sg_value = 3
+l_sg_value = 4
 
 class FlexStacker():
     """Flex Stacker Driver."""
@@ -376,61 +376,64 @@ class FlexStacker():
                 velocity: Optional[float] = None, acceleration: Optional[float] = None,
                 msd: Optional[float] = None,
                 current: Optional[float] = None):
-        if axis == AXIS.X:
-            current = self.set_default(current, MOVE_CURRENT_X)
-            #print(f"move current set: {current}")
-            self.set_run_current(current, AXIS.X)
-            velocity = self.set_default(velocity, MOVE_SPEED_X)
-            acceleration = self.set_default(acceleration, MOVE_ACCELERATION_X)
-            msd = self.set_default(msd, MAX_SPEED_DISCONTINUITY_X)
-        elif axis == AXIS.Z:
-            current = self.set_default(current, MOVE_CURRENT_Z)
-            #print(f"move current set: {current}")
-            self.set_run_current(current, AXIS.Z)
-            velocity = self.set_default(velocity, MOVE_SPEED_DOWNZ)
-            acceleration = self.set_default(acceleration, MOVE_ACCELERATION_Z)
-            msd = self.set_default(msd, MAX_SPEED_DISCONTINUITY_Z)
-        elif axis == AXIS.L:
-            current = self.set_default(current, MOVE_CURRENT_L)
-            #print(f"move current set: {current}")
-            self.set_run_current(current, AXIS.L)
-            velocity = self.set_default(velocity, MOVE_SPEED_L)
-            acceleration = self.set_default(acceleration, MOVE_ACCELERATION_L)
-            msd = self.set_default(msd, MAX_SPEED_DISCONTINUITY_L)
-        else:
-            raise(f"AXIS not defined!! {axis}")
-        # if self.current_position['X'] == None or self.current_position['Z'] == None:
-        #     raise(f"Motor must be Home{axis}")
-        c = CommandBuilder(terminator=FS_COMMAND_TERMINATOR).add_gcode(
-                                                gcode=GCODE.MOVE_DIST).add_element(
-                                                axis.upper() +
-                                                f'{direction}' +
-                                                f'{distance}').add_element(
-                                                    f'V{velocity}'
-                                                    ).add_element(
-                                                    f'A{acceleration}' #)
-                                                    ).add_element(
-                                                    f'D{msd}')
+        try:
+            if axis == AXIS.X:
+                current = self.set_default(current, MOVE_CURRENT_X)
+                #print(f"move current set: {current}")
+                self.set_run_current(current, AXIS.X)
+                velocity = self.set_default(velocity, MOVE_SPEED_X)
+                acceleration = self.set_default(acceleration, MOVE_ACCELERATION_X)
+                msd = self.set_default(msd, MAX_SPEED_DISCONTINUITY_X)
+            elif axis == AXIS.Z:
+                current = self.set_default(current, MOVE_CURRENT_Z)
+                #print(f"move current set: {current}")
+                self.set_run_current(current, AXIS.Z)
+                velocity = self.set_default(velocity, MOVE_SPEED_DOWNZ)
+                acceleration = self.set_default(acceleration, MOVE_ACCELERATION_Z)
+                msd = self.set_default(msd, MAX_SPEED_DISCONTINUITY_Z)
+            elif axis == AXIS.L:
+                current = self.set_default(current, MOVE_CURRENT_L)
+                #print(f"move current set: {current}")
+                self.set_run_current(current, AXIS.L)
+                velocity = self.set_default(velocity, MOVE_SPEED_L)
+                acceleration = self.set_default(acceleration, MOVE_ACCELERATION_L)
+                msd = self.set_default(msd, MAX_SPEED_DISCONTINUITY_L)
+            else:
+                raise(f"AXIS not defined!! {axis}")
+            # if self.current_position['X'] == None or self.current_position['Z'] == None:
+            #     raise(f"Motor must be Home{axis}")
+            c = CommandBuilder(terminator=FS_COMMAND_TERMINATOR).add_gcode(
+                                                    gcode=GCODE.MOVE_DIST).add_element(
+                                                    axis.upper() +
+                                                    f'{direction}' +
+                                                    f'{distance}').add_element(
+                                                        f'V{velocity}'
+                                                        ).add_element(
+                                                        f'A{acceleration}' #)
+                                                        ).add_element(
+                                                        f'D{msd}')
 
-        #print(c)
-        response = self.send_command(command=c, retries=DEFAULT_COMMAND_RETRIES)
-        stall_detection = "async ERR403:motor stall error"
-        if response == stall_detection:
-            raise(f"Stall Detected on {axis}")
-        if direction == DIR.POSITIVE and axis == AXIS.X:
-            self.current_position.update({'X': self.current_position['X'] + distance})
-        elif direction == DIR.NEGATIVE and axis == AXIS.X:
-            self.current_position.update({'X': self.current_position['X'] - distance})
-        elif direction == DIR.POSITIVE and axis == AXIS.Z:
-            self.current_position.update({'Z': self.current_position['Z'] + distance})
-        elif direction == DIR.NEGATIVE and axis == AXIS.Z:
-            self.current_position.update({'Z': self.current_position['Z'] - distance})
-        elif direction == DIR.POSITIVE and axis == AXIS.L:
-            self.current_position.update({'L': self.current_position['L'] + distance})
-        elif direction == DIR.NEGATIVE and axis == AXIS.L:
-            self.current_position.update({'L': self.current_position['L'] - distance})
-        else:
-            raise(f"Not recognized {axis} and {direction}")
+            #print(c)
+            response = self.send_command(command=c, retries=DEFAULT_COMMAND_RETRIES)
+            stall_detection = "async ERR403:motor stall error"
+            if response == stall_detection:
+                raise(f"Stall Detected on {axis}")
+            if direction == DIR.POSITIVE and axis == AXIS.X:
+                self.current_position.update({'X': self.current_position['X'] + distance})
+            elif direction == DIR.NEGATIVE and axis == AXIS.X:
+                self.current_position.update({'X': self.current_position['X'] - distance})
+            elif direction == DIR.POSITIVE and axis == AXIS.Z:
+                self.current_position.update({'Z': self.current_position['Z'] + distance})
+            elif direction == DIR.NEGATIVE and axis == AXIS.Z:
+                self.current_position.update({'Z': self.current_position['Z'] - distance})
+            elif direction == DIR.POSITIVE and axis == AXIS.L:
+                self.current_position.update({'L': self.current_position['L'] + distance})
+            elif direction == DIR.NEGATIVE and axis == AXIS.L:
+                self.current_position.update({'L': self.current_position['L'] - distance})
+            else:
+                raise(f"Not recognized {axis} and {direction}")
+        except Exception as e:
+            raise(e)
         #print(self.current_position)
 
 

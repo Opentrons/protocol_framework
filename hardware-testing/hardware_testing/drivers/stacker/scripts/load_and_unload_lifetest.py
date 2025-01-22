@@ -33,7 +33,7 @@ labware = labware_library[1]
 deck_slots = ["C1", "C2", "C3","D1", "D2", "D3"]
 load_order = ["D3", "D2", "D1", "C3", "C2", "C1"]
 # deck_slots = ["D1"]
-cycles = 5612
+cycles = 3987 #4104 #4610 #5062 #5071#5368 # quarter life = 5612^M
 STACKER_HEIGHT = 12
 
 test_data = {"Time(s)": None,
@@ -70,16 +70,22 @@ class Timer:
             raise TimerError(f"Timer is not running. Use .start() to start it")
         stop_time = time.perf_counter()
 
-def unload_labware(stacker):
+def unload_labware(stacker, test_data, log_file, f):
     try:
         stacker.unload_labware(labware_height)
     except Exception as e:
+        test_data['Error'] = str(e)
+        log_file.writerow(test_data)
+        f.flush()
         raise(e)
 
-def load_labware(stacker):
+def load_labware(stacker, test_data, log_file, f ):
     try:
         stacker.load_labware(labware_height)
     except Exception as e:
+        test_data['Error'] = str(e)
+        log_file.writerow(test_data)
+        f.flush()
         raise(e)
 
 def move_gripper(hardware):
@@ -87,27 +93,33 @@ def move_gripper(hardware):
                                             43.50825000000002,
                                             163.89025))
 
-def unload_labware_thread(protocol, stackers):
+def unload_labware_thread(protocol, stackers, test_data, log_file, f):
     try:
-        stacker_1_thread = threading.Thread(target = unload_labware, args = (stackers[0],))
-        stacker_2_thread = threading.Thread(target = unload_labware, args = (stackers[1],))
+        stacker_1_thread = threading.Thread(target = unload_labware, args = (stackers[0],test_data, log_file, f, ))
+        stacker_2_thread = threading.Thread(target = unload_labware, args = (stackers[1],test_data, log_file, f,))
         stacker_1_thread.start()
         stacker_2_thread.start()
         stacker_1_thread.join()
         stacker_2_thread.join()
     except Exception as e:
+        test_data['Error'] = str(e)
+        log_file.writerow(test_data)
+        f.flush()
         raise(e)
         exc_info = sys.exc_info()
 
-def load_labware_thread(protocol, stackers):
+def load_labware_thread(protocol, stackers, test_data, log_file, f):
     try:
-        stacker_1_thread = threading.Thread(target = load_labware, args = (stackers[0],))
-        stacker_2_thread = threading.Thread(target = load_labware, args = (stackers[1],))
+        stacker_1_thread = threading.Thread(target = load_labware, args = (stackers[0], test_data, log_file, f, ))
+        stacker_2_thread = threading.Thread(target = load_labware, args = (stackers[1], test_data, log_file, f, ))
         stacker_1_thread.start()
         stacker_2_thread.start()
         stacker_1_thread.join()
         stacker_2_thread.join()
     except Exception as e:
+        test_data['Error'] = str(e)
+        log_file.writerow(test_data)
+        f.flush()
         raise(e)
         raise("Something wrong happened")
 #Things to do, ADD test details to csv
@@ -174,7 +186,7 @@ def run(protocol: ProtocolContext) -> None:
                 for plates in range(1, num_plates+1):
                     plate_1 = protocol.load_labware(labware, stacker_platform_1)
                     plate_2 = protocol.load_labware(labware, stacker_platform_3)
-                    unload_labware_thread(protocol, stackers[:2])
+                    unload_labware_thread(protocol, stackers[:2], test_data, log_file, f)
                     e_time = _timer.elasped_time()
                     test_data['Time(s)'] = e_time
                     test_data['Cycle'] = c
@@ -194,7 +206,7 @@ def run(protocol: ProtocolContext) -> None:
                                                 use_gripper=True,
                                                 pick_up_offset={"x": -3.0, "y": 0, "z": STACKER_HEIGHT},
                                                 drop_offset = {"x": -3.0, "y": 0, "z": STACKER_HEIGHT})
-                    load_labware_thread(protocol, stackers[2:])
+                    load_labware_thread(protocol, stackers[2:], test_data, log_file, f)
                     del protocol.deck['A4']
                     del protocol.deck['B4']
                     del protocol.deck['C4']
@@ -214,7 +226,7 @@ def run(protocol: ProtocolContext) -> None:
                 for plates in range(1, num_plates+1):
                     plate_1 = protocol.load_labware(labware, stacker_platform_2)
                     plate_2 = protocol.load_labware(labware, stacker_platform_4)
-                    unload_labware_thread(protocol, stackers[2:])
+                    unload_labware_thread(protocol, stackers[2:], test_data, log_file, f)
                     e_time = _timer.elasped_time()
                     test_data['Time(s)'] = e_time
                     test_data['Cycle'] = c
@@ -234,7 +246,7 @@ def run(protocol: ProtocolContext) -> None:
                                                 use_gripper=True,
                                                 pick_up_offset={"x": -3.0, "y": 0, "z": STACKER_HEIGHT},
                                                 drop_offset = {"x": -3.0, "y": 0, "z": STACKER_HEIGHT})
-                    load_labware_thread(protocol, stackers[:2])
+                    load_labware_thread(protocol, stackers[:2], test_data, log_file, f)
                     del protocol.deck['A4']
                     del protocol.deck['B4']
                     del protocol.deck['C4']
@@ -253,6 +265,9 @@ def run(protocol: ProtocolContext) -> None:
                 hardware.home_z(gripper_instr)
             f.close()
         except Exception as e:
+            test_data['Error'] = str(e)
+            log_file.writerow(test_data)
+            f.flush()
             print(e)
         finally:
             print("Test Completed")
