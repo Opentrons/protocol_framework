@@ -2,6 +2,7 @@ import { when } from 'vitest-when'
 import { beforeEach, describe, it, expect, vi, afterEach } from 'vitest'
 import { OT2_ROBOT_TYPE, getPipetteSpecsV2 } from '@opentrons/shared-data'
 import {
+  absorbanceReaderCollision,
   thermocyclerPipetteCollision,
   pipetteIntoHeaterShakerLatchOpen,
   pipetteIntoHeaterShakerWhileShaking,
@@ -24,6 +25,7 @@ import { dispense } from '../commandCreators/atomic/dispense'
 import type { ExtendedDispenseParams } from '../commandCreators/atomic/dispense'
 import type { InvariantContext, RobotState } from '../types'
 
+vi.mock('../utils/absorbanceReaderCollision')
 vi.mock('../utils/thermocyclerPipetteCollision')
 vi.mock('../utils/heaterShakerCollision')
 
@@ -158,6 +160,26 @@ describe('dispense', () => {
       expect(res.errors).toHaveLength(1)
       expect(res.errors[0]).toMatchObject({
         type: 'THERMOCYCLER_LID_CLOSED',
+      })
+    })
+    it('should return an error when dispensing into absorbance reader with pipette collision', () => {
+      vi.mocked(absorbanceReaderCollision).mockImplementationOnce(
+        (
+          modules: RobotState['modules'],
+          labware: RobotState['labware'],
+          labwareId: string
+        ) => {
+          expect(modules).toBe(robotStateWithTip.modules)
+          expect(labware).toBe(robotStateWithTip.labware)
+          expect(labwareId).toBe(SOURCE_LABWARE)
+          return true
+        }
+      )
+      const result = dispense(params, invariantContext, robotStateWithTip)
+      const res = getErrorResult(result)
+      expect(res.errors).toHaveLength(1)
+      expect(res.errors[0]).toMatchObject({
+        type: 'ABSORBANCE_READER_LID_CLOSED',
       })
     })
     it('should return an error when dispensing into heater shaker with latch open', () => {

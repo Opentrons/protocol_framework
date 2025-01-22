@@ -1,6 +1,7 @@
 import { FLEX_ROBOT_TYPE, OT2_ROBOT_TYPE } from '@opentrons/shared-data'
 import * as errorCreators from '../../errorCreators'
 import {
+  absorbanceReaderCollision,
   modulePipetteCollision,
   thermocyclerPipetteCollision,
   pipetteIntoHeaterShakerLatchOpen,
@@ -102,6 +103,16 @@ export const moveToWell: CommandCreator<v5MoveToWellParams> = (
     )
   ) {
     errors.push(errorCreators.heaterShakerLatchOpen())
+  }
+
+  if (
+    absorbanceReaderCollision(
+      prevRobotState.modules,
+      prevRobotState.labware,
+      labware
+    )
+  ) {
+    errors.push(errorCreators.absorbanceReaderLidClosed())
   }
 
   if (

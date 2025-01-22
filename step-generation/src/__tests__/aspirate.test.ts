@@ -11,6 +11,7 @@ import {
 } from '@opentrons/shared-data'
 
 import {
+  absorbanceReaderCollision,
   pipetteIntoHeaterShakerLatchOpen,
   thermocyclerPipetteCollision,
   pipetteIntoHeaterShakerWhileShaking,
@@ -38,6 +39,7 @@ const fixtureTiprack1000ul = tip1000 as LabwareDefinition2
 const FLEX_PIPETTE = 'p1000_single_flex'
 const FlexPipetteNameSpecs = getPipetteSpecsV2(FLEX_PIPETTE)
 
+vi.mock('../utils/absorbanceReaderCollision')
 vi.mock('../utils/thermocyclerPipetteCollision')
 vi.mock('../utils/heaterShakerCollision')
 
@@ -280,6 +282,41 @@ describe('aspirate', () => {
     expect(getErrorResult(result).errors).toHaveLength(1)
     expect(getErrorResult(result).errors[0]).toMatchObject({
       type: 'THERMOCYCLER_LID_CLOSED',
+    })
+  })
+  it.only('should return an error when aspirating from absorbance with pipette collision', () => {
+    vi.mocked(absorbanceReaderCollision).mockImplementationOnce(
+      (
+        modules: RobotState['modules'],
+        labware: RobotState['labware'],
+        labwareId: string
+      ) => {
+        expect(modules).toBe(robotStateWithTip.modules)
+        expect(labware).toBe(robotStateWithTip.labware)
+        expect(labwareId).toBe(SOURCE_LABWARE)
+        return true
+      }
+    )
+    const result = aspirate(
+      {
+        ...({
+          ...flowRateAndOffsets,
+          pipette: DEFAULT_PIPETTE,
+          volume: 50,
+          labware: SOURCE_LABWARE,
+          well: 'A1',
+        } as AspDispAirgapParams),
+        tipRack: 'tipRack',
+        xOffset: 0,
+        yOffset: 0,
+        nozzles: null,
+      },
+      invariantContext,
+      robotStateWithTip
+    )
+    expect(getErrorResult(result).errors).toHaveLength(1)
+    expect(getErrorResult(result).errors[0]).toMatchObject({
+      type: 'ABSORBANCE_READER_LID_CLOSED',
     })
   })
   it('should return an error when aspirating from heaterShaker with latch opened', () => {
