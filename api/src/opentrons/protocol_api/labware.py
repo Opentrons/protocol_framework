@@ -34,7 +34,13 @@ from opentrons_shared_data.labware.types import (
     LabwareParameters3,
 )
 
-from opentrons.types import Location, Point, NozzleMapInterface, MeniscusTracking, MeniscusTrackingTarget
+from opentrons.types import (
+    Location,
+    Point,
+    NozzleMapInterface,
+    MeniscusTracking,
+    MeniscusTrackingTarget,
+)
 from opentrons.protocols.api_support.types import APIVersion
 from opentrons.protocols.api_support.util import (
     requires_version,
