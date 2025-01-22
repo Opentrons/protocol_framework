@@ -42,6 +42,14 @@ def add_parameters(parameters: ParameterContext) -> None:
     )
 
 
+def set_pressure_sensor_enabled(protocol: ProtocolContext, enabled: bool) -> None:
+    """Enable pressure sensor."""
+    hw_api = protocol._core.get_hardware()
+    ff = hw_api.hardware_feature_flags
+    ff.overpressure_detection_enabled = enabled
+    hw_api.hardware_feature_flags = ff
+
+
 def run(protocol: ProtocolContext) -> None:
     """Protocol."""
     robot_api = protocol.robot
@@ -172,8 +180,12 @@ def run(protocol: ProtocolContext) -> None:
 
     def pick_up_evo_tips() -> None:
         """Pick up evo tips."""
+        # #------------------------Pick up EvoSep Tips--------------------------------
+
+        set_pressure_sensor_enabled(protocol, False)
+
         move_pip_to_bot = robot_api.plunger_coordinates_for_volume(
-            "left", 1000, DISPENSE_ACTION
+            "left", 500, DISPENSE_ACTION
         )
         robot_api.move_axes_to(axis_map=move_pip_to_bot, speed=15)
 
@@ -182,10 +194,9 @@ def run(protocol: ProtocolContext) -> None:
         press_distance = 3.5
         ejector_push_mm = 7.0
         retract_distance = -1 * (prep_distance + press_distance)
-        robot_api.move_axes_relative(axis_map={AxisType.Z_L: -6.0}, speed=10.0)
+        robot_api.move_axes_relative(axis_map={AxisType.Z_L: -6}, speed=10)
 
-        # Drive Q down 3mm at fast speed -
-        # look into the pick up tip function to find slow and fast: 10.0
+        # Drive Q down 3mm at fast speed - look into the pick up tip fuinction to find slow and fast: 10.0
         robot_api.move_axes_relative(axis_map={AxisType.Q: prep_distance}, speed=10.0)
         # 2.8mm at slow speed - cam action pickup speed: 5.5
         robot_api.move_axes_relative(axis_map={AxisType.Q: press_distance}, speed=5.5)
@@ -193,14 +204,16 @@ def run(protocol: ProtocolContext) -> None:
         robot_api.move_axes_relative(axis_map={AxisType.Q: retract_distance}, speed=5.5)
 
         # Lower tip presence
-        robot_api.move_axes_relative(axis_map={AxisType.Z_L: 2.0}, speed=10)
+        robot_api.move_axes_relative(axis_map={AxisType.Z_L: 2}, speed=10)
         robot_api.move_axes_relative(axis_map={AxisType.Q: ejector_push_mm}, speed=5.5)
         robot_api.move_axes_relative(
-            axis_map={AxisType.Q: -1.0 * ejector_push_mm}, speed=5.5
+            axis_map={AxisType.Q: -1 * ejector_push_mm}, speed=5.5
         )
 
         # Lift the Pipette slightly before ejecting
-        robot_api.move_axes_relative(axis_map={AxisType.Z_L: 6.0}, speed=10.0)
+        robot_api.move_axes_relative(axis_map={AxisType.Z_L: 6}, speed=10)
+
+        set_pressure_sensor_enabled(protocol, False)
 
     ####
     pick_up_evo_tips()
@@ -208,6 +221,7 @@ def run(protocol: ProtocolContext) -> None:
     def push_out_liquid_and_drop() -> None:
         """Push out liquid."""
         # Push out liquid in 100 sec
+
         for vol in [750, 500, 250, 0]:
             dispense_liquid = robot_api.plunger_coordinates_for_volume(
                 "left", vol, DISPENSE_ACTION
@@ -234,6 +248,7 @@ def run(protocol: ProtocolContext) -> None:
     def move_evo_tips_and_probe() -> None:
         """Move Evo tips and probe."""
         # Move Evo tips out of the adapter
+        set_pressure_sensor_enabled(protocol, True)
         protocol.move_labware(evotip_rack, stacked_deepwell_plate_2, use_gripper=True)
 
         # Probe liquid ejected
