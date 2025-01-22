@@ -12,6 +12,8 @@ import {
   MOVABLE_TRASH_ADDRESSABLE_AREAS,
   FLEX_MODULE_ADDRESSABLE_AREAS,
   FLEX_STACKER_ADDRESSABLE_AREAS,
+  TC_MODULE_LOCATION_OT2,
+  TC_MODULE_LOCATION_OT3,
 } from '@opentrons/shared-data'
 import { COLUMN_4_SLOTS, getHasWasteChute } from '@opentrons/step-generation'
 import {
@@ -160,7 +162,6 @@ export const getUnoccupiedLabwareLocationOptions: Selector<
             : 'unknown module'
         const moduleSlotInfo = modSlot ?? 'unknown slot'
         const adapterSlotInfo = adapterSlot ?? 'unknown adapter'
-
         return labwareOnAdapter == null && isAdapter
           ? [
               ...acc,
@@ -182,6 +183,13 @@ export const getUnoccupiedLabwareLocationOptions: Selector<
         const moduleHasLabware = Object.entries(labware).some(
           ([lwId, lwOnDeck]) => lwOnDeck.slot === modId
         )
+        const type = moduleEntities[modId].type
+        const slot = modOnDeck.slot
+        let tcLocations
+        if (type === THERMOCYCLER_MODULE_TYPE) {
+          tcLocations =
+            slot === '7' ? TC_MODULE_LOCATION_OT2 : TC_MODULE_LOCATION_OT3
+        }
         return moduleHasLabware
           ? acc
           : [
@@ -189,7 +197,7 @@ export const getUnoccupiedLabwareLocationOptions: Selector<
               {
                 name: `${getModuleDisplayName(
                   moduleEntities[modId].model
-                )} on ${modOnDeck.slot}`,
+                )} on ${tcLocations != null ? tcLocations : slot}`,
                 value: modId,
               },
             ]
