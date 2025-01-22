@@ -158,7 +158,7 @@ describe('absorbanceReaderFormToArgs', () => {
     }
     expect(absorbanceReaderFormToArgs(formData)).toEqual(expected)
   })
-  it.only('returns absorbance reader lid command creator to close lid', () => {
+  it('returns absorbance reader lid command creator to close lid', () => {
     const formData: HydratedAbsorbanceReaderFormData = {
       absorbanceReaderFormType: 'absorbanceReaderLid',
       fileName: null,
