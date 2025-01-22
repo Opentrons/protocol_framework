@@ -28,6 +28,7 @@ import type {
   CommandCreator,
   CurriedCommandCreator,
 } from '../../types'
+import { curryCommandCreatorNoPython } from '../../utils/curryCommandCreator'
 /** Helper fn to make mix command creators w/ minimal arguments */
 export function mixUtil(args: {
   pipette: string
@@ -92,48 +93,45 @@ export function mixUtil(args: {
   // If there is no delay, then we can issue a single Python mix() command, so we want to suppresss
   // the Python from the individual aspirate dispense commands.
   const noDelay = !aspirateDelaySeconds && !dispenseDelaySeconds
+  const innerCurryCommandCreator = noDelay
+    ? curryCommandCreatorNoPython
+    : curryCommandCreator
+
+  const commands = repeatArray(
+    [
+      innerCurryCommandCreator(aspirate, {
+        pipette,
+        volume,
+        labware,
+        well,
+        offsetFromBottomMm: aspirateOffsetFromBottomMm,
+        flowRate: aspirateFlowRateUlSec,
+        tipRack,
+        xOffset: aspirateXOffset,
+        yOffset: aspirateYOffset,
+        nozzles: null,
+      }),
+      ...getDelayCommand(aspirateDelaySeconds),
+      innerCurryCommandCreator(dispense, {
+        pipette,
+        volume,
+        labware,
+        well,
+        offsetFromBottomMm: dispenseOffsetFromBottomMm,
+        flowRate: dispenseFlowRateUlSec,
+        xOffset: dispenseXOffset,
+        yOffset: dispenseYOffset,
+        tipRack,
+        nozzles: nozzles,
+      }),
+      ...getDelayCommand(dispenseDelaySeconds),
+    ],
+    times
+  )
 
   return [
     ...(noDelay ? [curryCommandCreator(pythonMixCommand, {})] : []),
-    ...repeatArray(
-      [
-        curryCommandCreator(
-          aspirate,
-          {
-            pipette,
-            volume,
-            labware,
-            well,
-            offsetFromBottomMm: aspirateOffsetFromBottomMm,
-            flowRate: aspirateFlowRateUlSec,
-            tipRack,
-            xOffset: aspirateXOffset,
-            yOffset: aspirateYOffset,
-            nozzles: null,
-          },
-          noDelay
-        ),
-        ...getDelayCommand(aspirateDelaySeconds),
-        curryCommandCreator(
-          dispense,
-          {
-            pipette,
-            volume,
-            labware,
-            well,
-            offsetFromBottomMm: dispenseOffsetFromBottomMm,
-            flowRate: dispenseFlowRateUlSec,
-            xOffset: dispenseXOffset,
-            yOffset: dispenseYOffset,
-            tipRack,
-            nozzles: nozzles,
-          },
-          noDelay
-        ),
-        ...getDelayCommand(dispenseDelaySeconds),
-      ],
-      times
-    ),
+    ...commands,
   ]
 }
 export const mix: CommandCreator<MixArgs> = (

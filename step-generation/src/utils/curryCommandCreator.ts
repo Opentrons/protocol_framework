@@ -4,8 +4,15 @@ import type { CommandCreator, CurriedCommandCreator } from '../types'
  * but it is still open to receiving different input states */
 export function curryCommandCreator<Args>(
   commandCreator: CommandCreator<Args>,
-  args: Args,
-  suppressPython?: boolean
+  args: Args
+): CurriedCommandCreator {
+  return (_invariantContext, _prevRobotState) =>
+    commandCreator(args, _invariantContext, _prevRobotState)
+}
+
+export function curryCommandCreatorNoPython<Args>(
+  commandCreator: CommandCreator<Args>,
+  args: Args
 ): CurriedCommandCreator {
   return (_invariantContext, _prevRobotState) => {
     const commandCreatorResult = commandCreator(
@@ -13,7 +20,7 @@ export function curryCommandCreator<Args>(
       _invariantContext,
       _prevRobotState
     )
-    if (suppressPython && 'python' in commandCreatorResult) {
+    if ('python' in commandCreatorResult) {
       const { python, ...withoutPython } = commandCreatorResult
       return withoutPython
     }
