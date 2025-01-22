@@ -17,7 +17,7 @@ def add_parameters(parameters):
         minimum=1,
         maximum=12,
         description="description text",
-        unit="μl",
+        unit="µl",
     )
 
 
