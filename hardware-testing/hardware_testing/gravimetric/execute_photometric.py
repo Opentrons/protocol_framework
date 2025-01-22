@@ -3,13 +3,18 @@ from typing import Tuple, List, Dict
 from math import ceil
 
 from opentrons.protocol_api import ProtocolContext, Well, Labware
-
+from opentrons.protocol_api.core.engine.transfer_components_executor import (
+    TransferType,
+    LiquidAndAirGapPair,
+)
 from hardware_testing.data import ui
+from opentrons.types import Location
 from hardware_testing.opentrons_api.types import Point
 from .measurement import (
     MeasurementType,
     create_measurement_tag,
     EnvironmentData,
+    SupportedLiquid,
 )
 from hardware_testing.drivers import asair_sensor
 from .measurement.environment import read_environment_data
@@ -130,7 +135,7 @@ def _dispense_volumes(volume: float) -> Tuple[float, float, int]:
     return target_volume, volume_to_dispense, num_dispenses
 
 
-def _run_trial(trial: PhotometricTrial) -> None:
+def _run_trial(trial: PhotometricTrial, use_old_method: bool) -> None:
     """Aspirate dye and dispense into a photometric plate."""
 
     def _no_op() -> None:
@@ -154,28 +159,17 @@ def _run_trial(trial: PhotometricTrial) -> None:
         )
         return m_data
 
-    pipetting_callbacks = PipettingCallbacks(
-        on_submerging=_no_op,
-        on_mixing=_no_op,
-        on_aspirating=_no_op,
-        on_dispensing=_no_op,
-        on_retracting=_no_op,
-        on_blowing_out=_no_op,
-        on_exiting=_no_op,
-    )
-    liquid_class = get_liquid_class(
-        trial.cfg.liquid,
-        trial.cfg.dilution,
-        int(trial.pipette.max_volume),
-        trial.pipette.channels,
-        trial.tip_volume,
-        trial.volume,
-    )
-    if trial.cfg.interactive:
-        liquid_class = interactively_build_liquid_class(liquid_class)
-        # store it, so that next loop we don't have to think so much
-        set_liquid_class(
-            liquid_class,
+    if use_old_method:
+        pipetting_callbacks = PipettingCallbacks(
+            on_submerging=_no_op,
+            on_mixing=_no_op,
+            on_aspirating=_no_op,
+            on_dispensing=_no_op,
+            on_retracting=_no_op,
+            on_blowing_out=_no_op,
+            on_exiting=_no_op,
+        )
+        liquid_class = get_liquid_class(
             trial.cfg.liquid,
             trial.cfg.dilution,
             int(trial.pipette.max_volume),
@@ -183,6 +177,24 @@ def _run_trial(trial: PhotometricTrial) -> None:
             trial.tip_volume,
             trial.volume,
         )
+        if trial.cfg.interactive:
+            liquid_class = interactively_build_liquid_class(liquid_class)
+            # store it, so that next loop we don't have to think so much
+            set_liquid_class(
+                liquid_class,
+                trial.cfg.liquid,
+                trial.cfg.dilution,
+                int(trial.pipette.max_volume),
+                trial.pipette.channels,
+                trial.tip_volume,
+                trial.volume,
+            )
+    else:
+        pipetting_callbacks = None
+        lc_name = SupportedLiquid.from_string(trial.cfg.liquid).name_with_dilution(
+            trial.cfg.dilution
+        )
+        liquid_class = trial.ctx.define_liquid_class(lc_name)
 
     channel_count = trial.channel_count
     # RUN INIT
@@ -198,20 +210,31 @@ def _run_trial(trial: PhotometricTrial) -> None:
     ui.print_info(f"aspirating from {trial.source}")
     _record_measurement_and_store(MeasurementType.INIT)
     trial.pipette.move_to(location=trial.source.top(), minimum_z_height=133)
+
     # RUN ASPIRATE
-    aspirate_with_liquid_class(
-        trial.ctx,
-        liquid_class,
-        trial.pipette,
-        trial.volume,
-        trial.source,
-        Point(),
-        channel_count,
-        trial.liquid_tracker,
-        callbacks=pipetting_callbacks,
-        blank=False,
-        touch_tip=False,
-    )
+    if use_old_method:
+        aspirate_with_liquid_class(
+            trial.ctx,
+            liquid_class,
+            trial.pipette,
+            trial.volume,
+            trial.source,
+            Point(),
+            channel_count,
+            trial.liquid_tracker,
+            callbacks=pipetting_callbacks,
+            blank=False,
+            touch_tip=False,
+        )
+        tip_contents = None
+    else:
+        tip_contents = trial.pipette._core.aspirate_liquid_class(
+            volume=trial.volume,
+            source=(Location(Point(), trial.source), trial.source._core),
+            transfer_properties=liquid_class,
+            transfer_type=TransferType.ONE_TO_ONE,
+            tip_contents=[LiquidAndAirGapPair(liquid=0, air_gap=0)],
+        )
 
     _record_measurement_and_store(MeasurementType.ASPIRATE)
     if not trial.ctx.is_simulating():
@@ -225,19 +248,31 @@ def _run_trial(trial: PhotometricTrial) -> None:
         trial.pipette.move_to(dest_well.top())
         ui.print_info(f"dispensing to {dest_well}")
         # RUN DISPENSE
-        dispense_with_liquid_class(
-            trial.ctx,
-            liquid_class,
-            trial.pipette,
-            volume_to_dispense,
-            dest_well,
-            Point(),
-            channel_count,
-            trial.liquid_tracker,
-            callbacks=pipetting_callbacks,
-            blank=False,
-            touch_tip=trial.cfg.touch_tip,
-        )
+        if use_old_method:
+            dispense_with_liquid_class(
+                trial.ctx,
+                liquid_class,
+                trial.pipette,
+                volume_to_dispense,
+                dest_well,
+                Point(),
+                channel_count,
+                trial.liquid_tracker,
+                callbacks=pipetting_callbacks,
+                blank=False,
+                touch_tip=trial.cfg.touch_tip,
+            )
+        else:
+            tip_contents = trial.pipette._core.dispense_liquid_class(
+                volume=trial.volume,
+                dest=(Location(Point(), dest_well), dest_well._core),
+                source=(Location(Point(), dest_well), dest_well._core),
+                transfer_properties=liquid_class,
+                transfer_type=TransferType.ONE_TO_ONE,
+                tip_contents=tip_contents,
+                add_final_air_gap=True,
+                trash_location=trial.ctx.fixed_trash,
+            )
         _record_measurement_and_store(MeasurementType.DISPENSE)
         if not trial.ctx.is_simulating():
             input("请记录排液状态，并尝试拍摄清晰的排液后的针管照片..........")
@@ -357,7 +392,7 @@ def execute_trials(
                 _pick_up_tip(
                     resources.ctx, resources.pipette, cfg, location=next_tip_location
                 )
-            _run_trial(trial)
+            _run_trial(trial, use_old_method=cfg.use_old_method)
         if not trial.ctx.is_simulating() and trial.channel_count != 96:
             ui.get_user_ready("add SEAL to plate and remove from DECK")
 

@@ -568,6 +568,7 @@ def _calculate_evaporation(
     liquid_tracker: LiquidTracker,
     test_report: report.CSVReport,
     labware_on_scale: Labware,
+    use_old_method: bool,
 ) -> Tuple[float, float]:
     ui.print_title("MEASURE EVAPORATION")
     blank_trials = build_gravimetric_trials(
@@ -596,7 +597,9 @@ def _calculate_evaporation(
     actual_disp_list_evap: List[float] = []
     for b_trial in blank_trials[resources.test_volumes[-1]][0]:
         ui.print_header(f"BLANK {b_trial.trial + 1}/{config.NUM_BLANK_TRIALS}")
-        evap_aspirate, _, evap_dispense, _ = _run_trial(b_trial)
+        evap_aspirate, _, evap_dispense, _ = _run_trial(
+            b_trial, use_old_method=use_old_method
+        )
         ui.print_info(
             f"blank {b_trial.trial + 1}/{config.NUM_BLANK_TRIALS}:\n"
             f"\taspirate: {evap_aspirate} uL\n"
@@ -750,6 +753,7 @@ def run(cfg: config.GravimetricConfig, resources: TestResources) -> None:  # noq
                 liquid_tracker,
                 resources.test_report,
                 labware_on_scale,
+                cfg.use_old_method,
             )
         hw_api.set_status_bar_state(StatusBarState.IDLE)
 
@@ -826,7 +830,7 @@ def run(cfg: config.GravimetricConfig, resources: TestResources) -> None:  # noq
                         aspirate_data,
                         actual_dispense,
                         dispense_data,
-                    ) = _run_trial(run_trial)
+                    ) = _run_trial(run_trial, use_old_method=cfg.use_old_method)
                     ui.print_info(
                         "measured volumes:\n"
                         f"\taspirate: {round(actual_aspirate, 2)} uL\n"

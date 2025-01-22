@@ -39,6 +39,7 @@ class VolumetricConfig:
     starting_tip: str
     liquid: str
     dilution: float
+    use_old_method: bool
 
 
 @dataclass

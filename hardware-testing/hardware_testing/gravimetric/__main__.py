@@ -438,6 +438,7 @@ def build_gravimetric_cfg(
     ignore_fail: bool,
     mode: str,
     starting_tip: str,
+    use_old_method: bool,
     run_args: RunArgs,
 ) -> GravimetricConfig:
     """Build."""
@@ -472,6 +473,7 @@ def build_gravimetric_cfg(
         liquid=run_args.liquid,
         dilution=run_args.dilution,
         starting_tip=starting_tip,
+        use_old_method=use_old_method,
     )
 
 
@@ -493,6 +495,7 @@ def build_photometric_cfg(
     dye_well_column_offset: List[int],
     mode: str,
     starting_tip: str,
+    use_old_method: bool,
     run_args: RunArgs,
 ) -> PhotometricConfig:
     """Run."""
@@ -528,6 +531,7 @@ def build_photometric_cfg(
         starting_tip=starting_tip,
         liquid=run_args.liquid,
         dilution=run_args.dilution,
+        use_old_method=use_old_method,
     )
 
 
@@ -557,6 +561,7 @@ def _main(
             args.dye_well_col_offset,
             args.mode,
             args.starting_tip,
+            args.use_old_method,
             run_args,
         )
         union_cfg = cfg_pm
@@ -582,6 +587,7 @@ def _main(
             args.ignore_fail,
             args.mode,
             args.starting_tip,
+            args.use_old_method,
             run_args,
         )
 
