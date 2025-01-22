@@ -47,7 +47,7 @@
         "wavelength_out_of_range": "Value falls outside of accepted range"
       },
       "export_settings": {
-        "body": "Copy explaining where the file will appear and when.",
+        "description": "A .csv file will appear upon protocol completion in your downloads folder.",
         "title": "Export settings"
       },
       "initialization_setting": {
@@ -61,7 +61,10 @@
       },
       "module_controls": "Module controls",
       "no_settings_defined": "No settings defined",
-      "reference_wavelength": "Reference wavelength",
+      "reference_wavelength": {
+        "title": "Reference wavelength",
+        "tooltip": "A reference wavelength is a baseline wavelength used for comparing measurements of other wavelengths."
+      },
       "reference_wavelength_parentheses": "(Reference wavelength)",
       "reference_wavelength_color_parentheses": "({{color}}, reference wavelength)",
       "wavelength": "Wavelength"
