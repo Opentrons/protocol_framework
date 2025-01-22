@@ -61,6 +61,14 @@ from .aspirate import (
     AspirateCommandType,
 )
 
+from .aspirate_while_tracking import (
+    AspirateWhileTracking,
+    AspirateWhileTrackingParams,
+    AspirateWhileTrackingCreate,
+    AspirateWhileTrackingResult,
+    AspirateWhileTrackingCommandType,
+)
+
 from .aspirate_in_place import (
     AspirateInPlace,
     AspirateInPlaceParams,
@@ -91,6 +99,14 @@ from .dispense import (
     DispenseCreate,
     DispenseResult,
     DispenseCommandType,
+)
+
+from .dispense_while_tracking import (
+    DispenseWhileTracking,
+    DispenseWhileTrackingParams,
+    DispenseWhileTrackingCreate,
+    DispenseWhileTrackingResult,
+    DispenseWhileTrackingCommandType,
 )
 
 from .dispense_in_place import (
@@ -436,6 +452,12 @@ __all__ = [
     "AspirateParams",
     "AspirateResult",
     "AspirateCommandType",
+    # aspirate while tracking command models
+    "AspirateWhileTracking",
+    "AspirateWhileTrackingCreate",
+    "AspirateWhileTrackingParams",
+    "AspirateWhileTrackingResult",
+    "AspirateWhileTrackingCommandType",
     # aspirate in place command models
     "AspirateInPlace",
     "AspirateInPlaceCreate",
@@ -460,6 +482,12 @@ __all__ = [
     "DispenseParams",
     "DispenseResult",
     "DispenseCommandType",
+    # dispense while tracking command models
+    "DispenseWhileTracking",
+    "DispenseWhileTrackingCreate",
+    "DispenseWhileTrackingParams",
+    "DispenseWhileTrackingResult",
+    "DispenseWhileTrackingCommandType",
     # dispense in place command models
     "DispenseInPlace",
     "DispenseInPlaceCreate",
