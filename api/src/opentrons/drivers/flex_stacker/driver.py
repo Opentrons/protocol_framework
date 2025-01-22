@@ -9,6 +9,7 @@ from opentrons.drivers.asyncio.communication import AsyncResponseSerialConnectio
 from .abstract import AbstractFlexStackerDriver
 from .types import (
     GCODE,
+    LEDPattern,
     MoveResult,
     StackerAxis,
     PlatformStatus,
@@ -30,6 +31,11 @@ FS_ERROR_KEYWORD = "err"
 FS_ASYNC_ERROR_ACK = "async"
 DEFAULT_COMMAND_RETRIES = 0
 GCODE_ROUNDING_PRECISION = 2
+
+# LED animation range values
+MIN_DURATION_MS = 25  # 25ms
+MAX_DURATION_MS = 10000  # 10s
+MAX_REPS = 10
 
 
 STACKER_MOTION_CONFIG = {
@@ -450,13 +456,22 @@ class FlexStackerDriver(AbstractFlexStackerDriver):
         return MoveResult.NO_ERROR
 
     async def set_led(
-        self, power: float, color: LEDColor | None = None, external: bool | None = None
+        self,
+        power: float,
+        color: Optional[LEDColor] = None,
+        external: Optional[bool] = None,
+        pattern: Optional[LEDPattern] = None,
+        duration: Optional[int] = None,
+        reps: Optional[int] = None,
     ) -> bool:
-        """Set LED color.
+        """Set LED Status bar color and pattern.
 
         :param power: Power of the LED (0-1.0), 0 is off, 1 is full power
         :param color: Color of the LED
         :param external: True if external LED, False if internal LED
+        :param pattern: Animation pattern of the LED status bar
+        :param duration: Animation duration in milliseconds (25-10000), 10s max
+        :param reps: Number of times to repeat the animation (-1 - 10), -1 is forever.
         """
         power = max(0, min(power, 1.0))
         command = GCODE.SET_LED.build_command().add_float(
@@ -466,6 +481,13 @@ class FlexStackerDriver(AbstractFlexStackerDriver):
             command.add_int("C", color.value)
         if external is not None:
             command.add_int("K", int(external))
+        if pattern is not None:
+            command.add_int("A", pattern.value)
+        if duration is not None:
+            duration = max(MIN_DURATION_MS, min(duration, MAX_DURATION_MS))
+            command.add_int("D", duration)
+        if reps is not None:
+            command.add_int("R", max(-1, min(reps, MAX_REPS)))
         resp = await self._connection.send_command(command)
         if not re.match(rf"^{GCODE.SET_LED}$", resp):
             raise ValueError(f"Incorrect Response for set led: {resp}")

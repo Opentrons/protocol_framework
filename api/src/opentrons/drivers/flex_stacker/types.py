@@ -83,6 +83,16 @@ class LEDColor(Enum):
     RED = 1
     GREEN = 2
     BLUE = 3
+    YELLOW = 4
+
+
+class LEDPattern(Enum):
+    """Stacker LED Pattern."""
+
+    STATIC = 0
+    FLASH = 1
+    PULSE = 2
+    CONFIRM = 3
 
 
 class Direction(Enum):
