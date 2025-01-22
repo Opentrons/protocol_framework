@@ -26,11 +26,14 @@ class AbstractInstrument(ABC, Generic[WellCoreType, LabwareCoreType]):
         ...
 
     @abstractmethod
-    def air_gap_in_place(self, volume: float, flow_rate: float) -> None:
+    def air_gap_in_place(
+        self, volume: float, flow_rate: float, correction_volume: Optional[float] = None
+    ) -> None:
         """Aspirate a given volume of air from the current location of the pipette.
         Args:
             volume: The volume of air to aspirate, in microliters.
             flow_rate: The flow rate of air into the pipette, in microliters.
+            correction_volume: The correction volume in uL.
         """
 
     @abstractmethod
