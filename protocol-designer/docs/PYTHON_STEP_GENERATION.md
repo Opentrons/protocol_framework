@@ -40,7 +40,7 @@ export const reduceCommandCreators = (...): CommandCreatorResult => {
 
 ## Data flow
 
-The JSON commands in the `CommandCreatorResult`s get propagated to the Timeline, which is where we ultimately get the commands from to write out to the exported JSON file. By analogy, we'll add the Python commands to the Timeline as well:
+The JSON commands from the `CommandCreatorResult`s get propagated to the `Timeline`, which is where we ultimately get the commands from to write out to the exported JSON file. By analogy, we'll add the Python commands to the `Timeline` as well:
 
 ```typescript
 export interface Timeline {
@@ -95,7 +95,7 @@ const pythonOnlyMix: CommandCreator<...> = (...) => {
 }
 ```
 
-When the reducer runs, it strings together all the non-empty JSON `commands` to get the final JSON output, and it'll string together all the non-empty `python` commands to get the final Python output.
+When the reducer runs, it joins together all the non-empty JSON `commands` to get the final JSON output, and it'll join together all the non-empty `python` commands to get the final Python output.
 
 We need one more tool to make this work: because the Python `mix()` command replaces both the aspirate and dispense, we need to _suppress_ Python generation from aspirate and dispense. We'll do that by adding a new flag to `curryCommandCreator`, so the final sequence becomes:
 
