@@ -93,7 +93,7 @@ def run(protocol: ProtocolContext) -> None:
     NOLABEL = False  # Default False   | True = Do not include Liquid Labeling,
 
     # =============================== PIPETTE ===============================
-    p1000 = protocol.load_instrument("flex_96channel_1000", "left")
+    p1000 = protocol.load_instrument("flex_96channel_200", "left")
     p96x_200_flow_rate_aspirate_default = 716
     p96x_200_flow_rate_dispense_default = 716
     p96x_200_flow_rate_blow_out_default = 716
@@ -133,14 +133,14 @@ def run(protocol: ProtocolContext) -> None:
         load_name="opentrons_flex_96_tiprack_200ul", quantity=6
     )
     reagent_plate_2 = protocol.load_labware(
-        "biorad_384_wellplate_50ul", "B3", "Reagent Plate 2"
+        "greiner_384_wellplate_240ul", "B3", "Reagent Plate 2"
     )
     # ========== THIRD ROW ===========
     temp_block: TemperatureModuleContext = protocol.load_module(
         helpers.temp_str, "C1"
     )  # type: ignore[assignment]
     reagent_plate_1 = temp_block.load_labware(
-        "biorad_384_wellplate_50ul", "Reagent Plate 1"
+        "greiner_384_wellplate_240ul", "Reagent Plate 1"
     )
     ETOH_Reservoir = protocol.load_labware(
         "nest_96_wellplate_2ml_deep", "C2", "EtOH Reservoir"
@@ -149,9 +149,9 @@ def run(protocol: ProtocolContext) -> None:
         "flexStackerModuleV1", "C4"
     )  # type: ignore[assignment]
     stacker_50_ul_tips.load_labware_to_hopper(
-        load_name="opentrons_flex_96_tiprack_50ul", quantity=7
+        load_name="opentrons_flex_96_tiprack_50ul", quantity=6
     )
-    lids = protocol.load_lid_stack("opentrons_tough_pcr_auto_sealing_lid", "C3", 3)
+    lids = protocol.load_lid_stack("opentrons_tough_pcr_auto_sealing_lid", "C3", 4)
     # lids: List[Labware] = [
     #     protocol.load_labware("opentrons_tough_pcr_auto_sealing_lid", "C3")
     # ]
@@ -258,7 +258,9 @@ def run(protocol: ProtocolContext) -> None:
                     "Pausing to run Fragmentation and End Repair on an off deck Thermocycler ~45min"
                 )
         protocol.comment("MOVING: Plate Lid #1 = sample_plate_1 --> lids[1]")
-        protocol.move_lid(source_location=lids, new_location=lids, use_gripper=True)
+        protocol.move_lid(
+            source_location=sample_plate_1, new_location=lids, use_gripper=True
+        )
 
         # protocol.move_labware(labware=lids[0], new_location=lids[1], use_gripper=True)
         ###############################################################################
@@ -326,8 +328,8 @@ def run(protocol: ProtocolContext) -> None:
             source_location=sample_plate_1, new_location=TRASH, use_gripper=True
         )
 
-        # protocol.move_labware(
-        #     labware=lids[0],
+        # # protocol.move_labware(
+        # #     labware=lids[0],
         #     new_location=TRASH,
         #     use_gripper=True,
         # )
@@ -1027,15 +1029,15 @@ def run(protocol: ProtocolContext) -> None:
 
         # ================================================================
         # GRIPPER MOVE tiprack_200_5 FROM: tiprack_A2_adapter --> TRASH
-        protocol.move_labware(
-            labware=tiprack_200_5,
-            new_location=TRASH,
-            use_gripper=True,
-        )
-        # TOWER DISPENSES NEW PLATE
-        tiprack_200_6 = stacker_200_ul_tips.retrieve()
-        protocol.move_labware(tiprack_200_6, tiprack_A2_adapter, use_gripper=True)
-        protocol.comment("MOVING: tiprack_200_6 = A4 --> tiprack_A2_adapter")
+        # protocol.move_labware(
+        #     labware=tiprack_200_5,
+        #     new_location=TRASH,
+        #     use_gripper=True,
+        # )
+        # # TOWER DISPENSES NEW PLATE
+        # tiprack_200_6 = stacker_200_ul_tips.retrieve()
+        # protocol.move_labware(tiprack_200_6, tiprack_A2_adapter, use_gripper=True)
+        # protocol.comment("MOVING: tiprack_200_6 = A4 --> tiprack_A2_adapter")
         # ===================================================================
 
         protocol.comment("--> Remove ETOH Wash")
@@ -1044,7 +1046,7 @@ def run(protocol: ProtocolContext) -> None:
         p1000.flow_rate.dispense = p96x_200_flow_rate_dispense_default
         p1000.flow_rate.blow_out = p96x_200_flow_rate_blow_out_default
         # =============================
-        p1000.pick_up_tip(tiprack_200_6["A1"])
+        p1000.pick_up_tip(tiprack_200_5["A1"])
         p1000.move_to(CleanupPlate_2["A1"].bottom(z=1))
         p1000.aspirate(RemoveSup - 100, rate=1)
         protocol.delay(minutes=0.1)
@@ -1143,7 +1145,7 @@ def run(protocol: ProtocolContext) -> None:
         )
         # GRIPPER MOVE tiprack_200_6 FROM tiprack_A3_adapter --> TRASH
         protocol.move_labware(
-            labware=tiprack_200_6,
+            labware=tiprack_200_5,
             new_location=TRASH,
             use_gripper=True,
         )
