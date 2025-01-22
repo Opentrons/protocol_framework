@@ -29,6 +29,13 @@ describe('absorbanceReaderOpenLid', () => {
       type: ABSORBANCE_READER_TYPE,
       model: ABSORBANCE_READER_V1,
     }
+    invariantContext.additionalEquipmentEntities = {
+      gripperId: {
+        name: 'gripper',
+        id: 'gripperId',
+      },
+    }
+
     robotState = getInitialRobotStateStandard(invariantContext)
     robotState.modules[moduleId] = {
       slot: 'D3',
@@ -74,6 +81,20 @@ describe('absorbanceReaderOpenLid', () => {
     expect(getErrorResult(result).errors).toHaveLength(1)
     expect(getErrorResult(result).errors[0]).toMatchObject({
       type: 'MISSING_MODULE',
+    })
+  })
+  it('creates returns error if no gripper', () => {
+    invariantContext.additionalEquipmentEntities = {}
+    const result = absorbanceReaderOpenLid(
+      {
+        moduleId,
+      },
+      invariantContext,
+      robotState
+    )
+    expect(getErrorResult(result).errors).toHaveLength(1)
+    expect(getErrorResult(result).errors[0]).toMatchObject({
+      type: 'ABSORBANCE_READER_NO_GRIPPER',
     })
   })
 })
