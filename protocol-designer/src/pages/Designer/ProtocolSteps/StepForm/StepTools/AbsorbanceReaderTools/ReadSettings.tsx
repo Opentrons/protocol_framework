@@ -33,7 +33,7 @@ export function ReadSettings(props: ReadSettingsProps): JSX.Element {
           {t('step_edit_form.absorbanceReader.export_settings.title')}
         </StyledText>
         <StyledText desktopStyle="bodyDefaultRegular">
-          {t('step_edit_form.absorbanceReader.export_settings.body')}
+          {t('step_edit_form.absorbanceReader.export_settings.description')}
         </StyledText>
       </Flex>
       <InputStepFormField
