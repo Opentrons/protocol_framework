@@ -1003,6 +1003,8 @@
     "format": "96Standard",
     "quirks": ["stackingOnly"],
     "isTiprack": false,
+    "tipLength": 42.0,
+    "tipOverlap": 10.0,
     "isMagneticModuleCompatible": false,
     "loadName": "evotips_opentrons_96_labware"
   },
