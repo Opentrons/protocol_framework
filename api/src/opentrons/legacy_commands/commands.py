@@ -10,7 +10,7 @@ from opentrons.protocol_api.disposal_locations import TrashBin, WasteChute
 
 if TYPE_CHECKING:
     from opentrons.protocol_api import InstrumentContext
-    from opentrons.protocol_api.labware import Well
+    from opentrons.protocol_api.labware import Labware, Well
 
 
 def home(mount: str) -> command_types.HomeCommand:
@@ -303,7 +303,7 @@ def move_to_disposal_location(
 
 def seal(
     instrument: InstrumentContext,
-    location: Location,
+    location: Union[Labware, Well],
 ) -> command_types.SealCommand:
     location_text = stringify_location(location)
     text = f"Sealing to {location_text}"
@@ -315,7 +315,7 @@ def seal(
 
 def unseal(
     instrument: InstrumentContext,
-    location: Location,
+    location: Union[Labware, Well],
 ) -> command_types.UnsealCommand:
     location_text = stringify_location(location)
     text = f"Unsealing from {location_text}"
@@ -327,13 +327,12 @@ def unseal(
 
 def pressurize(
     instrument: InstrumentContext,
-    location: Location,
     volume: float,
-    speed: float,
+    flow_rate: float,
 ) -> command_types.PressurizeCommand:
     location_text = stringify_location(location)
-    text = f"Pressurize on {location_text} for {volume}uL at {speed}mm/s."
+    text = f"Pressurize pipette for {volume}uL at {flow_rate}uL/s."
     return {
         "name": command_types.PRESSURIZE,
-        "payload": {"instrument": instrument, "location": location, "text": text},
+        "payload": {"instrument": instrument, "text": text},
     }

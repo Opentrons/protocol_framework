@@ -595,6 +595,7 @@ class ProtocolCore(
             engine_client=self._engine_client,
             sync_hardware_api=self._sync_hardware,
             protocol_core=self,
+            robot_core=self.load_robot(),
             # TODO(mm, 2022-11-10): Deduplicate "400" with legacy core.
             default_movement_speed=400,
         )

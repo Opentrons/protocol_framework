@@ -43,7 +43,7 @@ class EvotipDispenseInPlaceParams(PipetteIdMixin, FlowRateMixin):
     )
     volume: float = Field(
         None,
-        description="The volume of liquid to utilize during the dispense in place action."
+        description="The volume of liquid to utilize during the dispense in place action.",
     )
 
 
@@ -77,9 +77,7 @@ class EvotipDispenseInPlaceImplementation(
         self._gantry_mover = gantry_mover
         self._model_utils = model_utils
 
-    async def execute(
-        self, params: EvotipDispenseInPlaceParams
-    ) -> _ExecuteReturn:
+    async def execute(self, params: EvotipDispenseInPlaceParams) -> _ExecuteReturn:
         """Dispense without moving the pipette."""
         current_location = self._state_view.pipettes.get_current_location()
         current_position = await self._gantry_mover.get_position(params.pipetteId)

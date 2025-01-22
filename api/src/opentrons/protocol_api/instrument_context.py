@@ -1763,8 +1763,8 @@ class InstrumentContext(publisher.CommandPublisher):
         if isinstance(location, labware.Labware):
             well = location.wells()[0]._core
         else:
-            well=location._core
-        
+            well = location._core
+
         with publisher.publish_context(
             broker=self.broker,
             command=cmds.unseal(
@@ -1781,7 +1781,7 @@ class InstrumentContext(publisher.CommandPublisher):
         self,
         location: types.Location,
         volume: float,
-        speed: float,
+        flow_rate: float,
     ) -> InstrumentContext:
         """Seal resin tips onto the pipette.
 
@@ -1799,12 +1799,11 @@ class InstrumentContext(publisher.CommandPublisher):
             broker=self.broker,
             command=cmds.pressurize(
                 instrument=self,
-                location=location,
                 volume=volume,
-                speed=speed,
+                flow_rate=flow_rate,
             ),
         ):
-            self._core.evotip_dispense(location, volume, speed)
+            self._core.evotip_dispense(location, volume, flow_rate)
             return self
 
     @requires_version(2, 18)

@@ -701,7 +701,7 @@ class InstrumentCore(AbstractInstrument[WellCore]):
         )
 
     def evotip_unseal(
-        self, location: Location, well_core: WellCore, in_place: Optional[bool] 
+        self, location: Location, well_core: WellCore, in_place: Optional[bool]
     ) -> None:
         labware_id = well_core.labware_id
         well_name = well_core.get_name()
@@ -720,17 +720,20 @@ class InstrumentCore(AbstractInstrument[WellCore]):
         )
 
     def evotip_dispense(
-        self, volume: float, speed: float, in_place: bool
+        self, volume: float, flow_rate: float, in_place: Optional[bool]
     ) -> None:
         plunger_position = self._robot_core.get_plunger_position_from_volume(
-            mount=self.get_mount, volume=volume, action=PipetteActionTypes.DISPENSE_ACTION, robot_type=self._protocol_core.robot_type
+            mount=self.get_mount,
+            volume=volume,
+            action=PipetteActionTypes.DISPENSE_ACTION,
+            robot_type=self._protocol_core.robot_type,
         )
         self._engine_client.execute_command(
             cmd.EvotipDispenseInPlaceParams(
                 pipetteId=self._pipette_id,
-                flowRate=0,
+                flowRate=flow_rate,
                 plungerPosition=plunger_position,
-                volume=volume
+                volume=volume,
             )
         )
 

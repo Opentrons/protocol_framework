@@ -407,15 +407,19 @@ class LegacyInstrumentCore(AbstractInstrument[LegacyWellCore]):
         in_place: Optional[bool],
     ) -> None:
         """This will never be called because it was added in API 2.22."""
-        assert False, "get_nozzle_map only supported in API 2.22 & later"
+        assert False, "evotip_seal only supported in API 2.22 & later"
 
-    def evotip_unseal(self) -> None:
+    def evotip_unseal(
+        self, location: types.Location, well_core: WellCore, in_place: Optional[bool]
+    ) -> None:
         """This will never be called because it was added in API 2.22."""
-        assert False, "get_nozzle_map only supported in API 2.22 & later"
+        assert False, "evotip_unseal only supported in API 2.22 & later"
 
-    def evotip_dispense(self) -> None:
+    def evotip_dispense(
+        self, volume: float, flow_rate: float, in_place: Optional[bool]
+    ) -> None:
         """This will never be called because it was added in API 2.22."""
-        assert False, "get_nozzle_map only supported in API 2.22 & later"
+        assert False, "evotip_dispense only supported in API 2.22 & later"
 
     def get_mount(self) -> types.Mount:
         """Get the mount this pipette is attached to."""
