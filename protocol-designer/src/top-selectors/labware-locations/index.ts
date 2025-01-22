@@ -167,7 +167,7 @@ export const getUnoccupiedLabwareLocationOptions: Selector<
               {
                 name:
                   modIdWithAdapter != null
-                    ? `${moduleSlotInfo} on ${moduleUnderAdapter} with ${adapterDisplayName}`
+                    ? `${moduleUnderAdapter} on ${moduleSlotInfo} with ${adapterDisplayName}`
                     : `${adapterSlotInfo} with ${adapterDisplayName}`,
                 value: labwareId,
               },
@@ -187,9 +187,9 @@ export const getUnoccupiedLabwareLocationOptions: Selector<
           : [
               ...acc,
               {
-                name: `${modOnDeck.slot} on ${getModuleDisplayName(
+                name: `${getModuleDisplayName(
                   moduleEntities[modId].model
-                )}`,
+                )} on ${modOnDeck.slot}`,
                 value: modId,
               },
             ]
