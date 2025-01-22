@@ -567,6 +567,7 @@ export type RobotState = TimelineFrame // legacy name alias
 
 export type ErrorType =
   | 'ABSORBANCE_READER_LID_CLOSED'
+  | 'ABSORBANCE_READER_NO_GRIPPER'
   | 'ABSORBANCE_READER_NO_INITIALIZATION'
   | 'CANNOT_MOVE_WITH_GRIPPER'
   | 'DROP_TIP_LOCATION_DOES_NOT_EXIST'

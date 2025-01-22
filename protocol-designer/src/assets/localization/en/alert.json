@@ -166,6 +166,10 @@
       "ABSORBANCE_READER_LID_CLOSED": {
         "title": "Absorbance Plate Reader Module lid closed",
         "body": "This step tries to use labware in the Absorbance Plate Reader. Open the lid before this step."
+      },
+      "ABSORBANCE_READER_NO_GRIPPER": {
+        "title": "Cannot change lid state without gripper",
+        "body": "This step involves opening or closing the Absorbance Plate Reader lid with a gripper. Add a gripper or remove step to proceed."
       }
     },
     "warning": {
