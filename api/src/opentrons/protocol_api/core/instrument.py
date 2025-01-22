@@ -12,6 +12,7 @@ from opentrons.protocols.advanced_control.transfers.common import TransferTipPol
 from opentrons.protocol_api._nozzle_layout import NozzleLayout
 from opentrons.protocol_api._liquid import LiquidClass
 from ..disposal_locations import TrashBin, WasteChute
+from .labware import LabwareCoreType
 from .well import WellCoreType
 
 
@@ -181,15 +182,24 @@ class AbstractInstrument(ABC, Generic[WellCoreType]):
         ...
 
     @abstractmethod
-    def seal(self, location: types.Location) -> None:
+    def evotip_seal(
+        self,
+        location: types.Location,
+        well_core: WellCoreType,
+        in_place: Optional[bool],
+    ) -> None:
         ...
 
     @abstractmethod
-    def unseal(self, location: Union[types.Location, TrashBin, WasteChute]) -> None:
+    def evotip_unseal(
+        self, location: types.Location, well_core: WellCoreType
+    ) -> None:
         ...
 
     @abstractmethod
-    def pressurize(self, location: types.Location, volume: float, speed: float) -> None:
+    def evotip_dispense(
+        self, location: types.Location, volume: float, speed: float
+    ) -> None:
         ...
 
     @abstractmethod

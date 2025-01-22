@@ -373,6 +373,7 @@ class TouchTipIncompatibleArgumentsError(ProtocolEngineError):
         """Build a TouchTipIncompatibleArgumentsError."""
         super().__init__(ErrorCodes.GENERAL_ERROR, message, details, wrapping)
 
+
 class UnsupportedLabwareForActionError(ProtocolEngineError):
     """Raised when trying to use an unsupported labware for a command."""
 

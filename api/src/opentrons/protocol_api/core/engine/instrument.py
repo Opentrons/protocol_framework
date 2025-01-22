@@ -42,9 +42,10 @@ from . import overlap_versions, pipette_movement_conflict
 from .well import WellCore
 from ..instrument import AbstractInstrument
 from ...disposal_locations import TrashBin, WasteChute
+from opentrons.protocol_api._types import PipetteActionTypes
 
 if TYPE_CHECKING:
-    from .protocol import ProtocolCore
+    from .protocol import ProtocolCore, RobotCore
     from opentrons.protocol_api._liquid import LiquidClass
 
 _DISPENSE_VOLUME_VALIDATION_ADDED_IN = APIVersion(2, 17)
@@ -63,12 +64,14 @@ class InstrumentCore(AbstractInstrument[WellCore]):
         engine_client: EngineClient,
         sync_hardware_api: SyncHardwareAPI,
         protocol_core: ProtocolCore,
+        robot_core: RobotCore,
         default_movement_speed: float,
     ) -> None:
         self._pipette_id = pipette_id
         self._engine_client = engine_client
         self._sync_hardware_api = sync_hardware_api
         self._protocol_core = protocol_core
+        self._robot_core = robot_core
 
         # TODO(jbl 2022-11-03) flow_rates should not live in the cores, and should be moved to the protocol context
         #   along with other rate related refactors (for the hardware API)
@@ -678,41 +681,56 @@ class InstrumentCore(AbstractInstrument[WellCore]):
                 location=location, mount=self.get_mount()
             )
 
-    def evotip_seal(self, location: Location, in_place: bool) -> None:
+    def evotip_seal(
+        self, location: Location, well_core: WellCore, in_place: Optional[bool]
+    ) -> None:
+        labware_id = well_core.labware_id
+        well_name = well_core.get_name()
+        well_location = self._engine_client.state.geometry.get_relative_well_location(
+            labware_id=labware_id,
+            well_name=well_name,
+            absolute_point=location.point,
+        )
         self._engine_client.execute_command(
             cmd.EvotipSealPipetteParams(
                 pipetteId=self._pipette_id,
                 labwareId=labware_id,
                 wellName=well_name,
                 wellLocation=well_location,
-                homeAfter=home_after,
-                alternateDropLocation=alternate_drop_location,
             )
         )
 
     def evotip_unseal(
-        self, location: Union[Location, TrashBin, WasteChute], in_place: bool
+        self, location: Location, well_core: WellCore, in_place: Optional[bool] 
     ) -> None:
+        labware_id = well_core.labware_id
+        well_name = well_core.get_name()
+        well_location = self._engine_client.state.geometry.get_relative_well_location(
+            labware_id=labware_id,
+            well_name=well_name,
+            absolute_point=location.point,
+        )
         self._engine_client.execute_command(
             cmd.EvotipUnsealPipetteParams(
                 pipetteId=self._pipette_id,
                 labwareId=labware_id,
                 wellName=well_name,
                 wellLocation=well_location,
-                homeAfter=home_after,
             )
         )
 
     def evotip_dispense(
-        self, location: Location, volume: float, speed: float, in_place: bool
+        self, volume: float, speed: float, in_place: bool
     ) -> None:
-        plunger_position = self._robot_core.get_plunger_position_from_volume(mount, volume, action, robot_type)
+        plunger_position = self._robot_core.get_plunger_position_from_volume(
+            mount=self.get_mount, volume=volume, action=PipetteActionTypes.DISPENSE_ACTION, robot_type=self._protocol_core.robot_type
+        )
         self._engine_client.execute_command(
-            cmd.EvotipDispenseInPlace(
+            cmd.EvotipDispenseInPlaceParams(
                 pipetteId=self._pipette_id,
+                flowRate=0,
                 plungerPosition=plunger_position,
-                wellName=well_name,
-                speed=speed,
+                volume=volume
             )
         )
 

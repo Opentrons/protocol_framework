@@ -33,10 +33,17 @@ EvotipDispenseInPlaceCommandType = Literal["evotipDispenseInPlace"]
 
 class EvotipDispenseInPlaceParams(PipetteIdMixin, FlowRateMixin):
     """Payload required to dispense in place."""
-    plungerPosition: float = Field(..., description="The absolute location to move the plunger.")
+
+    plungerPosition: float = Field(
+        ..., description="The absolute location to move the plunger."
+    )
     pushOut: Optional[float] = Field(
         None,
-        description="push the plunger a small amount farther than necessary for accurate low-volume dispensing",
+        description="Push the plunger a small amount farther than necessary for accurate low-volume dispensing",
+    )
+    volume: float = Field(
+        None,
+        description="The volume of liquid to utilize during the dispense in place action."
     )
 
 
@@ -71,7 +78,7 @@ class EvotipDispenseInPlaceImplementation(
         self._model_utils = model_utils
 
     async def execute(
-        self, params: EvotipDispenseInPlaceImplementation
+        self, params: EvotipDispenseInPlaceParams
     ) -> _ExecuteReturn:
         """Dispense without moving the pipette."""
         current_location = self._state_view.pipettes.get_current_location()

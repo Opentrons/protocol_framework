@@ -1297,7 +1297,11 @@ class OT3API(
             if axis not in absolute_positions:
                 absolute_positions[axis] = position_value
 
-        await self._move(target_position=absolute_positions, speed=speed, expect_stalls=_expect_stalls)
+        await self._move(
+            target_position=absolute_positions,
+            speed=speed,
+            expect_stalls=_expect_stalls,
+        )
 
     async def move_rel(
         self,

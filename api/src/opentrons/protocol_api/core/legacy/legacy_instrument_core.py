@@ -400,6 +400,23 @@ class LegacyInstrumentCore(AbstractInstrument[LegacyWellCore]):
                 location=location, mount=location_cache_mount
             )
 
+    def evotip_seal(
+        self,
+        location: types.Location,
+        well_core: LegacyWellCore,
+        in_place: Optional[bool],
+    ) -> None:
+        """This will never be called because it was added in API 2.22."""
+        assert False, "get_nozzle_map only supported in API 2.22 & later"
+
+    def evotip_unseal(self) -> None:
+        """This will never be called because it was added in API 2.22."""
+        assert False, "get_nozzle_map only supported in API 2.22 & later"
+
+    def evotip_dispense(self) -> None:
+        """This will never be called because it was added in API 2.22."""
+        assert False, "get_nozzle_map only supported in API 2.22 & later"
+
     def get_mount(self) -> types.Mount:
         """Get the mount this pipette is attached to."""
         return self._mount

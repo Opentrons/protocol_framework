@@ -13,6 +13,7 @@ def is_absorbance_reader_lid(load_name: str) -> bool:
     """Check if a labware is an absorbance reader lid."""
     return load_name == "opentrons_flex_lid_absorbance_plate_reader_module"
 
+
 def is_evotips(load_name: str) -> bool:
     """Check if a labware is an evotips tiprack."""
     return load_name == "evotips_opentrons_96_labware"

@@ -299,3 +299,41 @@ def move_to_disposal_location(
         "name": command_types.MOVE_TO_DISPOSAL_LOCATION,
         "payload": {"instrument": instrument, "location": location, "text": text},
     }
+
+
+def seal(
+    instrument: InstrumentContext,
+    location: Location,
+) -> command_types.SealCommand:
+    location_text = stringify_location(location)
+    text = f"Sealing to {location_text}"
+    return {
+        "name": command_types.SEAL,
+        "payload": {"instrument": instrument, "location": location, "text": text},
+    }
+
+
+def unseal(
+    instrument: InstrumentContext,
+    location: Location,
+) -> command_types.UnsealCommand:
+    location_text = stringify_location(location)
+    text = f"Unsealing from {location_text}"
+    return {
+        "name": command_types.UNSEAL,
+        "payload": {"instrument": instrument, "location": location, "text": text},
+    }
+
+
+def pressurize(
+    instrument: InstrumentContext,
+    location: Location,
+    volume: float,
+    speed: float,
+) -> command_types.PressurizeCommand:
+    location_text = stringify_location(location)
+    text = f"Pressurize on {location_text} for {volume}uL at {speed}mm/s."
+    return {
+        "name": command_types.PRESSURIZE,
+        "payload": {"instrument": instrument, "location": location, "text": text},
+    }

@@ -705,7 +705,7 @@ __all__ = [
     "EvotipUnsealResult",
     "EvotipUnsealPipetteCommandType",
     # evotip dispense command bundle
-	"EvotipDispenseInPlace",
+    "EvotipDispenseInPlace",
     "EvotipDispenseInPlaceParams",
     "EvotipDispenseInPlaceCreate",
     "EvotipDispenseInPlaceResult",

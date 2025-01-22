@@ -91,7 +91,9 @@ class EvotipUnsealPipetteImplementation(
 
         well_location = params.wellLocation
         if not labware_validation.is_evotips(
-            self._state_view.labware.get_definition(params.labwareId).parameters.loadName
+            self._state_view.labware.get_definition(
+                params.labwareId
+            ).parameters.loadName
         ):
             raise ValueError()
         is_partially_configured = self._state_view.pipettes.get_is_partially_configured(
@@ -116,7 +118,7 @@ class EvotipUnsealPipetteImplementation(
             return move_result
 
         await self._tip_handler.drop_tip(pipette_id=pipette_id, home_after=home_after)
-    
+
         return SuccessData(
             public=EvotipUnsealResult(position=move_result.public.position),
             state_update=move_result.state_update.set_fluid_unknown(

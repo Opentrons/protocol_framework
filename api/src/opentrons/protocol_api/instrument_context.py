@@ -38,6 +38,7 @@ from .disposal_locations import TrashBin, WasteChute
 from ._nozzle_layout import NozzleLayout
 from ._liquid import LiquidClass
 from . import labware, validation
+from .labware import Labware
 from ..config import feature_flags
 from ..protocols.advanced_control.transfers.common import (
     TransferTipPolicyV2,
@@ -1715,7 +1716,7 @@ class InstrumentContext(publisher.CommandPublisher):
     @requires_version(2, 22)
     def seal(
         self,
-        location: types.Location,
+        location: Union[labware.Well, labware.Labware],
     ) -> InstrumentContext:
         """Seal resin tips onto the pipette.
 
@@ -1729,6 +1730,11 @@ class InstrumentContext(publisher.CommandPublisher):
 
         :type location: :py:class:`~.types.Location`
         """
+        if isinstance(location, labware.Labware):
+            well = location.wells()[0]._core
+        else:
+            well = location._core
+
         with publisher.publish_context(
             broker=self.broker,
             command=cmds.seal(
@@ -1736,13 +1742,13 @@ class InstrumentContext(publisher.CommandPublisher):
                 location=location,
             ),
         ):
-            self._core.seal(location)
+            self._core.evotip_seal(location=location, well_core=well)
         return self
 
     @requires_version(2, 22)
     def unseal(
         self,
-        location: types.Location,
+        location: Union[labware.Well, labware.Labware],
     ) -> InstrumentContext:
         """Release resin tips from the pipette.
 
@@ -1754,6 +1760,11 @@ class InstrumentContext(publisher.CommandPublisher):
 
         :type location: :py:class:`~.types.Location`
         """
+        if isinstance(location, labware.Labware):
+            well = location.wells()[0]._core
+        else:
+            well=location._core
+        
         with publisher.publish_context(
             broker=self.broker,
             command=cmds.unseal(
@@ -1761,7 +1772,7 @@ class InstrumentContext(publisher.CommandPublisher):
                 location=location,
             ),
         ):
-            self._core.unseal(location)
+            self._core.evotip_unseal(location=location, well_core=well)
 
         return self
 
@@ -1793,7 +1804,7 @@ class InstrumentContext(publisher.CommandPublisher):
                 speed=speed,
             ),
         ):
-            self._core.pressurize(location, volume, speed)
+            self._core.evotip_dispense(location, volume, speed)
             return self
 
     @requires_version(2, 18)

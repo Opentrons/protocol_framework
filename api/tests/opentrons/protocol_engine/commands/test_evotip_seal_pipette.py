@@ -34,9 +34,12 @@ from opentrons.protocol_engine.commands.evotip_seal_pipette import (
     EvotipSealPipetteImplementation,
 )
 
+
 @pytest.fixture
 def evotips_definition() -> LabwareDefinition:
-    return LabwareDefinition.parse_obj(load_definition("evotips_opentrons_96_labware", 1))
+    return LabwareDefinition.parse_obj(
+        load_definition("evotips_opentrons_96_labware", 1)
+    )
 
 
 async def test_success(
@@ -54,7 +57,7 @@ async def test_success(
         movement=movement,
         tip_handler=tip_handler,
         model_utils=model_utils,
-        gantry_mover=gantry_mover
+        gantry_mover=gantry_mover,
     )
 
     decoy.when(state_view.pipettes.get_mount("pipette-id")).then_return(MountType.LEFT)
@@ -65,9 +68,9 @@ async def test_success(
         )
     ).then_return(WellLocation(offset=WellOffset(x=1, y=2, z=3)))
 
-    decoy.when(
-        state_view.labware.get_definition("labware-id")
-    ).then_return(evotips_definition)
+    decoy.when(state_view.labware.get_definition("labware-id")).then_return(
+        evotips_definition
+    )
     decoy.when(
         await movement.move_to_well(
             pipette_id="pipette-id",
@@ -177,7 +180,9 @@ async def test_no_tip_physically_missing_error(
     decoy.when(model_utils.get_timestamp()).then_return(error_created_at)
 
     result = await subject.execute(
-        EvotipSealPipetteParams(pipetteId=pipette_id, labwareId=labware_id, wellName=well_name)
+        EvotipSealPipetteParams(
+            pipetteId=pipette_id, labwareId=labware_id, wellName=well_name
+        )
     )
 
     assert result == DefinedErrorData(
@@ -267,7 +272,9 @@ async def test_stall_error(
     decoy.when(model_utils.get_timestamp()).then_return(error_created_at)
 
     result = await subject.execute(
-        EvotipSealPipetteParams(pipetteId=pipette_id, labwareId=labware_id, wellName=well_name)
+        EvotipSealPipetteParams(
+            pipetteId=pipette_id, labwareId=labware_id, wellName=well_name
+        )
     )
 
     assert result == DefinedErrorData(
