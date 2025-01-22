@@ -85,6 +85,10 @@ test:
 test-cov:
 	$(pytest) $(tests) $(test_opts) $(cov_opts)
 
+.PHONY: plot-dynamic
+plot-dynamic:
+	$(python) -m hardware_testing.scripts.visualize_dynamic_la --pipette p1000_96_3.6 --tip 1000 --aspirate --action-volume 1000 --labware nest_1_reservoir_195ml --start-volume 195000
+
 .PHONY: test-photometric-single
 test-photometric-single:
 	$(python) -m hardware_testing.gravimetric --photometric --simulate --pipette 50 --channels 1 --tip 50
