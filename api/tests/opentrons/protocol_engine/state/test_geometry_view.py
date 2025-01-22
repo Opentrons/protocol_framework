@@ -25,7 +25,13 @@ from opentrons_shared_data.deck import load as load_deck
 from opentrons_shared_data.labware.types import LabwareUri
 from opentrons_shared_data.pipette import pipette_definition
 from opentrons.calibration_storage.helpers import uri_from_details
-from opentrons.types import Point, DeckSlotName, MountType, StagingSlotName
+from opentrons.types import (
+    Point,
+    DeckSlotName,
+    MountType,
+    StagingSlotName,
+    MeniscusTrackingTarget,
+)
 from opentrons_shared_data.pipette.types import PipetteNameType
 from opentrons_shared_data.labware.labware_definition import (
     CuboidalFrustum,
@@ -2070,6 +2076,7 @@ def test_get_relative_liquid_handling_well_location(
         labware_id="labware-id",
         well_name="B2",
         absolute_point=Point(x=0, y=0, z=-2),
+        meniscus_tracking=MeniscusTrackingTarget.END,
     )
 
     assert result == LiquidHandlingWellLocation(
@@ -2079,6 +2086,7 @@ def test_get_relative_liquid_handling_well_location(
             y=0.0,
             z=cast(float, pytest.approx(-2)),
         ),
+        volumeOffset="operationVolume",
     )
 
 

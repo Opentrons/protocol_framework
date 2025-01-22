@@ -38,7 +38,6 @@ from opentrons.types import (
     Location,
     Point,
     NozzleMapInterface,
-    MeniscusTracking,
     MeniscusTrackingTarget,
 )
 from opentrons.protocols.api_support.types import APIVersion
@@ -276,7 +275,7 @@ class Well:
         return Location(
             point=Point(x=0, y=0, z=z),
             labware=self,
-            _meniscus_tracking=MeniscusTracking(target=MeniscusTrackingTarget(target)),
+            _meniscus_tracking=MeniscusTrackingTarget(target),
         )
 
     @requires_version(2, 8)
