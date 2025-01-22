@@ -682,15 +682,16 @@ class InstrumentCore(AbstractInstrument[WellCore]):
             )
 
     def evotip_seal(
-        self, location: Location, well_core: WellCore, in_place: Optional[bool]
+        self, location: Location, well_core: WellCore, in_place: Optional[bool] = False
     ) -> None:
         labware_id = well_core.labware_id
         well_name = well_core.get_name()
-        well_location = self._engine_client.state.geometry.get_relative_well_location(
+        well_location = self._engine_client.state.geometry.get_relative_pick_up_tip_well_location(
             labware_id=labware_id,
             well_name=well_name,
-            absolute_point=location.point,
+            absolute_point=location.point
         )
+
         self._engine_client.execute_command(
             cmd.EvotipSealPipetteParams(
                 pipetteId=self._pipette_id,
@@ -701,7 +702,7 @@ class InstrumentCore(AbstractInstrument[WellCore]):
         )
 
     def evotip_unseal(
-        self, location: Location, well_core: WellCore, in_place: Optional[bool]
+        self, location: Location, well_core: WellCore, in_place: Optional[bool] = False
     ) -> None:
         labware_id = well_core.labware_id
         well_name = well_core.get_name()
@@ -720,7 +721,7 @@ class InstrumentCore(AbstractInstrument[WellCore]):
         )
 
     def evotip_dispense(
-        self, volume: float, flow_rate: float, in_place: Optional[bool]
+        self, volume: float, flow_rate: float, in_place: Optional[bool] = False
     ) -> None:
         plunger_position = self._robot_core.get_plunger_position_from_volume(
             mount=self.get_mount,

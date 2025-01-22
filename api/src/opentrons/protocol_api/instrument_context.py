@@ -1726,23 +1726,23 @@ class InstrumentContext(publisher.CommandPublisher):
 
         See :ref:`seal` for examples.
 
-        :param location: A location containing resin tips.
+        :param location: A location containing resin tips, must be a Labware or a Well.
 
         :type location: :py:class:`~.types.Location`
         """
         if isinstance(location, labware.Labware):
-            well = location.wells()[0]._core
+            well = location.wells()[0]
         else:
-            well = location._core
+            well = location
 
         with publisher.publish_context(
             broker=self.broker,
             command=cmds.seal(
                 instrument=self,
-                location=location,
+                location=well,
             ),
         ):
-            self._core.evotip_seal(location=location, well_core=well)
+            self._core.evotip_seal(location=well.top(), well_core=well._core, in_place=False)
         return self
 
     @requires_version(2, 22)
@@ -1761,18 +1761,18 @@ class InstrumentContext(publisher.CommandPublisher):
         :type location: :py:class:`~.types.Location`
         """
         if isinstance(location, labware.Labware):
-            well = location.wells()[0]._core
+            well = location.wells()[0]
         else:
-            well = location._core
+            well = location
 
         with publisher.publish_context(
             broker=self.broker,
             command=cmds.unseal(
                 instrument=self,
-                location=location,
+                location=well,
             ),
         ):
-            self._core.evotip_unseal(location=location, well_core=well)
+            self._core.evotip_unseal(location=location, well_core=well._core)
 
         return self
 

@@ -178,7 +178,8 @@ class EvotipSealPipetteImplementation(
                 relative_move=True,
             )
         # cache_tip
-        self._tip_handler.cache_tip(pipette_id, tip_geometry)
+        if self._state_view.config.use_virtual_pipettes is False:
+            self._tip_handler.cache_tip(pipette_id, tip_geometry)
 
     async def execute(
         self, params: EvotipSealPipetteParams
@@ -215,14 +216,14 @@ class EvotipSealPipetteImplementation(
         mount = self._state_view.pipettes.get_mount(pipette_id)
         if params.tipPickUpParams and channels != 96:
             await self.relative_pickup_tip(
-                pipette_id, params.tipPickUpParams, mount, press_fit=True
+                pipette_id=pipette_id, tip_geometry=tip_geometry, tip_pick_up_params=params.tipPickUpParams, mount=mount, press_fit=True
             )
         elif channels == 96:
             pick_up_params = (
-                params.tipPickUpParam if params.tipPickUpParams else TipPickUpParams()
+                params.tipPickUpParams if params.tipPickUpParams else TipPickUpParams()
             )
             await self.relative_pickup_tip(
-                pipette_id, pick_up_params, mount, press_fit=False
+                pipette_id=pipette_id, tip_geometry=tip_geometry, tip_pick_up_params=pick_up_params, mount=mount, press_fit=True
             )
         else:
             tip_geometry = await self._tip_handler.pick_up_tip(

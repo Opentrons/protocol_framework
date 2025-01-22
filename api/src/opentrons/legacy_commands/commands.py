@@ -303,7 +303,7 @@ def move_to_disposal_location(
 
 def seal(
     instrument: InstrumentContext,
-    location: Union[Labware, Well],
+    location: Well,
 ) -> command_types.SealCommand:
     location_text = stringify_location(location)
     text = f"Sealing to {location_text}"
@@ -315,7 +315,7 @@ def seal(
 
 def unseal(
     instrument: InstrumentContext,
-    location: Union[Labware, Well],
+    location: Well,
 ) -> command_types.UnsealCommand:
     location_text = stringify_location(location)
     text = f"Unsealing from {location_text}"

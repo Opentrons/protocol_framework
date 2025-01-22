@@ -404,19 +404,19 @@ class LegacyInstrumentCore(AbstractInstrument[LegacyWellCore]):
         self,
         location: types.Location,
         well_core: LegacyWellCore,
-        in_place: Optional[bool],
+        in_place: Optional[bool] = False,
     ) -> None:
         """This will never be called because it was added in API 2.22."""
         assert False, "evotip_seal only supported in API 2.22 & later"
 
     def evotip_unseal(
-        self, location: types.Location, well_core: WellCore, in_place: Optional[bool]
+        self, location: types.Location, well_core: WellCore, in_place: Optional[bool] = False
     ) -> None:
         """This will never be called because it was added in API 2.22."""
         assert False, "evotip_unseal only supported in API 2.22 & later"
 
     def evotip_dispense(
-        self, volume: float, flow_rate: float, in_place: Optional[bool]
+        self, volume: float, flow_rate: float, in_place: Optional[bool] = False
     ) -> None:
         """This will never be called because it was added in API 2.22."""
         assert False, "evotip_dispense only supported in API 2.22 & later"
