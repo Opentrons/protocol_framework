@@ -1,4 +1,4 @@
-import { beforeEach, describe, it, expect } from 'vitest'
+import { describe, it, expect } from 'vitest'
 import { delay } from '../commandCreators/atomic/delay'
 import { getSuccessResult } from '../fixtures'
 import type { PauseArgs } from '../types'
@@ -11,7 +11,6 @@ const getRobotInitialState = (): any => {
 // neither should InvariantContext
 const invariantContext: any = {}
 let mixInArgs: PauseArgs
-beforeEach(() => {})
 describe('delay', () => {
   it('should delay until the user clicks resume', () => {
     const robotInitialState = getRobotInitialState()

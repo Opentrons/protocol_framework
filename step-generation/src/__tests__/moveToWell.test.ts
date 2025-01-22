@@ -1,10 +1,6 @@
 import { when } from 'vitest-when'
 import { beforeEach, describe, it, expect, afterEach, vi } from 'vitest'
-import {
-  OT2_ROBOT_TYPE,
-  WellLocation,
-  getPipetteSpecsV2,
-} from '@opentrons/shared-data'
+import { OT2_ROBOT_TYPE, getPipetteSpecsV2 } from '@opentrons/shared-data'
 import { expectTimelineError } from '../__utils__/testMatchers'
 import { moveToWell } from '../commandCreators/atomic/moveToWell'
 import {
@@ -27,6 +23,7 @@ import {
   SOURCE_LABWARE,
 } from '../fixtures'
 import type { InvariantContext, RobotState } from '../types'
+import { an } from 'vitest/dist/chunks/reporters.D7Jzd9GS'
 
 vi.mock('../utils/absorbanceReaderCollision')
 vi.mock('../utils/thermocyclerPipetteCollision')
@@ -70,7 +67,7 @@ describe('moveToWell', () => {
       labwareId: SOURCE_LABWARE,
       wellName: 'A1',
       wellLocation: {
-        origin: 'bottom' as WellLocation['origin'],
+        origin: 'bottom' as any,
         offset: {
           x: 1,
           y: 2,
