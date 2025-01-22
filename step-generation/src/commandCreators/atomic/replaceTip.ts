@@ -24,48 +24,49 @@ import {
 import { dropTip } from './dropTip'
 import { configureNozzleLayout } from './configureNozzleLayout'
 
-import type { NozzleConfigurationStyle } from '@opentrons/shared-data'
+import type {
+  NozzleConfigurationStyle,
+  PickUpTipParams,
+} from '@opentrons/shared-data'
 import type {
   CommandCreator,
   CommandCreatorError,
   CurriedCommandCreator,
 } from '../../types'
 
-interface PickUpTipArgs {
-  pipette: string
-  tiprack: string
-  well: string
+interface PickUpTipAtomicParams extends PickUpTipParams {
   nozzles?: NozzleConfigurationStyle
 }
 
-const _pickUpTip: CommandCreator<PickUpTipArgs> = (
+const _pickUpTip: CommandCreator<PickUpTipAtomicParams> = (
   args,
   invariantContext,
   prevRobotState
 ) => {
+  const { pipetteId, labwareId, wellName, nozzles } = args
   const errors: CommandCreatorError[] = []
 
   const is96Channel =
-    invariantContext.pipetteEntities[args.pipette]?.spec.channels === 96
+    invariantContext.pipetteEntities[pipetteId]?.spec.channels === 96
 
   if (
     is96Channel &&
-    args.nozzles === COLUMN &&
+    nozzles === COLUMN &&
     !getIsSafePipetteMovement(
       prevRobotState,
       invariantContext,
-      args.pipette,
-      args.tiprack,
-      args.tiprack,
+      pipetteId,
+      labwareId,
+      labwareId,
       //  we don't adjust the offset when moving to the tiprack
       { x: 0, y: 0 },
-      args.well
+      wellName
     )
   ) {
     errors.push(errorCreators.possiblePipetteCollision())
   }
 
-  const tiprackSlot = prevRobotState.labware[args.tiprack].slot
+  const tiprackSlot = prevRobotState.labware[labwareId].slot
   if (COLUMN_4_SLOTS.includes(tiprackSlot)) {
     errors.push(
       errorCreators.pipettingIntoColumn4({ typeOfStep: 'pick up tip' })
@@ -88,9 +89,9 @@ const _pickUpTip: CommandCreator<PickUpTipArgs> = (
         commandType: 'pickUpTip',
         key: uuid(),
         params: {
-          pipetteId: args.pipette,
-          labwareId: args.tiprack,
-          wellName: args.well,
+          pipetteId,
+          labwareId,
+          wellName,
         },
       },
     ],
@@ -105,6 +106,8 @@ interface ReplaceTipArgs {
 }
 
 /**
+  TODO: need to move this out of atomic command since it breaks the rules of atomic commands. I don't
+  think it falls into the pattern of compount commands either though
   Pick up next available tip. Works differently for an 8-channel which needs a full row of tips.
   Expects 96-well format tip naming system on the tiprack.
   If there's already a tip on the pipette, this will drop it before getting a new one
@@ -254,7 +257,10 @@ export const replaceTip: CommandCreator<ReplaceTipArgs> = (
     channels === 96 && args.nozzles != null && args.nozzles !== stateNozzles
       ? [
           curryCommandCreator(configureNozzleLayout, {
-            nozzles: args.nozzles,
+            configurationParams: {
+              primaryNozzle: args.nozzles === COLUMN ? 'A12' : undefined,
+              style: args.nozzles,
+            },
             pipetteId: args.pipette,
           }),
         ]
@@ -267,9 +273,9 @@ export const replaceTip: CommandCreator<ReplaceTipArgs> = (
     }),
     ...configureNozzleLayoutCommand,
     curryCommandCreator(_pickUpTip, {
-      pipette,
-      tiprack: nextTiprack.tiprackId,
-      well: nextTiprack.well,
+      pipetteId: pipette,
+      labwareId: nextTiprack.tiprackId,
+      wellName: nextTiprack.well,
       nozzles: args.nozzles,
     }),
   ]
@@ -283,9 +289,9 @@ export const replaceTip: CommandCreator<ReplaceTipArgs> = (
       }),
       ...configureNozzleLayoutCommand,
       curryCommandCreator(_pickUpTip, {
-        pipette,
-        tiprack: nextTiprack.tiprackId,
-        well: nextTiprack.well,
+        pipetteId: pipette,
+        labwareId: nextTiprack.tiprackId,
+        wellName: nextTiprack.well,
         nozzles: args.nozzles,
       }),
     ]
@@ -300,9 +306,9 @@ export const replaceTip: CommandCreator<ReplaceTipArgs> = (
       }),
       ...configureNozzleLayoutCommand,
       curryCommandCreator(_pickUpTip, {
-        pipette,
-        tiprack: nextTiprack.tiprackId,
-        well: nextTiprack.well,
+        pipetteId: pipette,
+        labwareId: nextTiprack.tiprackId,
+        wellName: nextTiprack.well,
         nozzles: args.nozzles,
       }),
     ]

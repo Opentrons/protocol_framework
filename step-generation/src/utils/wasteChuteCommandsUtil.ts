@@ -35,7 +35,7 @@ export const wasteChuteCommandsUtil = (
     volume,
     flowRate,
   } = args
-
+  const offset = { x: 0, y: 0, z: 0 }
   let commands: CurriedCommandCreator[] = []
   switch (type) {
     case 'dropTip': {
@@ -45,6 +45,7 @@ export const wasteChuteCommandsUtil = (
             curryCommandCreator(moveToAddressableArea, {
               pipetteId,
               addressableAreaName,
+              offset,
             }),
             curryCommandCreator(dropTipInPlace, {
               pipetteId,
@@ -60,6 +61,7 @@ export const wasteChuteCommandsUtil = (
               curryCommandCreator(moveToAddressableArea, {
                 pipetteId,
                 addressableAreaName,
+                offset,
               }),
               curryCommandCreator(dispenseInPlace, {
                 pipetteId,
@@ -77,6 +79,7 @@ export const wasteChuteCommandsUtil = (
               curryCommandCreator(moveToAddressableArea, {
                 pipetteId,
                 addressableAreaName,
+                offset,
               }),
               curryCommandCreator(blowOutInPlace, {
                 pipetteId,
@@ -93,6 +96,7 @@ export const wasteChuteCommandsUtil = (
               curryCommandCreator(moveToAddressableArea, {
                 pipetteId,
                 addressableAreaName,
+                offset,
               }),
               curryCommandCreator(aspirateInPlace, {
                 pipetteId,

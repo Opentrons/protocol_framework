@@ -46,6 +46,7 @@ export const movableTrashCommandsUtil = (
     volume,
     flowRate,
   } = args
+  const offset = { x: 0, y: 0, z: 0 }
   const trash = Object.values(
     invariantContext.additionalEquipmentEntities
   ).find(aE => aE.name === 'trashBin')
@@ -89,6 +90,7 @@ export const movableTrashCommandsUtil = (
                 curryCommandCreator(moveToAddressableArea, {
                   pipetteId,
                   addressableAreaName,
+                  offset,
                 }),
                 curryCommandCreator(aspirateInPlace, {
                   pipetteId,
@@ -123,6 +125,7 @@ export const movableTrashCommandsUtil = (
                 curryCommandCreator(moveToAddressableArea, {
                   pipetteId,
                   addressableAreaName,
+                  offset,
                 }),
                 curryCommandCreator(dispenseInPlace, {
                   pipetteId,
@@ -140,6 +143,7 @@ export const movableTrashCommandsUtil = (
                 curryCommandCreator(moveToAddressableArea, {
                   pipetteId,
                   addressableAreaName,
+                  offset,
                 }),
                 curryCommandCreator(blowOutInPlace, {
                   pipetteId,
@@ -154,6 +158,7 @@ export const movableTrashCommandsUtil = (
           curryCommandCreator(moveToAddressableArea, {
             pipetteId,
             addressableAreaName,
+            offset,
           }),
         ]
       }

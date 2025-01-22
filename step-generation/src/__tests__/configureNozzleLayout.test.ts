@@ -14,7 +14,13 @@ const mockPipette = 'mockPipette'
 describe('configureNozzleLayout', () => {
   it('should call configureNozzleLayout with correct params for full tip', () => {
     const result = configureNozzleLayout(
-      { nozzles: ALL, pipetteId: mockPipette },
+      {
+        configurationParams: {
+          primaryNozzle: undefined,
+          style: ALL,
+        },
+        pipetteId: mockPipette,
+      },
       invariantContext,
       robotInitialState
     )
@@ -32,7 +38,13 @@ describe('configureNozzleLayout', () => {
   })
   it('should call configureNozzleLayout with correct params for column tip', () => {
     const result = configureNozzleLayout(
-      { nozzles: COLUMN, pipetteId: mockPipette },
+      {
+        configurationParams: {
+          primaryNozzle: 'A12',
+          style: COLUMN,
+        },
+        pipetteId: mockPipette,
+      },
       invariantContext,
       robotInitialState
     )

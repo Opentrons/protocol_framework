@@ -95,6 +95,7 @@ export const generateRobotStateTimeline = (
             curryCommandCreator(moveToAddressableArea, {
               pipetteId,
               addressableAreaName,
+              offset: { x: 0, y: 0, z: 0 },
             }),
             curryCommandCreator(dropTipInPlace, {
               pipetteId,

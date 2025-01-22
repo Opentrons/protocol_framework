@@ -19,15 +19,14 @@ import { COLUMN_4_SLOTS } from '../../constants'
 import type {
   CreateCommand,
   NozzleConfigurationStyle,
+  AspDispAirgapParams,
 } from '@opentrons/shared-data'
-import type { AspirateParams } from '@opentrons/shared-data/protocol/types/schemaV3'
 import type { CommandCreator, CommandCreatorError } from '../../types'
-
-export interface ExtendedAspirateParams extends AspirateParams {
-  xOffset: number
-  yOffset: number
+import type { Point } from '../../utils'
+export interface ExtendedAspirateParams extends AspDispAirgapParams {
   tipRack: string
   nozzles: NozzleConfigurationStyle | null
+  isAirGap?: boolean
 }
 /** Aspirate with given args. Requires tip. */
 export const aspirate: CommandCreator<ExtendedAspirateParams> = (
@@ -36,28 +35,26 @@ export const aspirate: CommandCreator<ExtendedAspirateParams> = (
   prevRobotState
 ) => {
   const {
-    pipette,
+    pipetteId,
     volume,
-    labware,
-    well,
-    offsetFromBottomMm,
+    labwareId,
+    wellName,
     flowRate,
     isAirGap,
     tipRack,
-    xOffset,
-    yOffset,
+    wellLocation,
     nozzles,
   } = args
   const actionName = 'aspirate'
   const labwareState = prevRobotState.labware
   const errors: CommandCreatorError[] = []
-  const pipetteSpec = invariantContext.pipetteEntities[pipette]?.spec
+  const pipetteSpec = invariantContext.pipetteEntities[pipetteId]?.spec
   const isFlexPipette =
     (pipetteSpec?.displayCategory === 'FLEX' || pipetteSpec?.channels === 96) ??
     false
 
   const slotName = getLabwareSlot(
-    labware,
+    labwareId,
     prevRobotState.labware,
     prevRobotState.modules
   )
@@ -65,19 +62,19 @@ export const aspirate: CommandCreator<ExtendedAspirateParams> = (
   if (!pipetteSpec) {
     errors.push(
       errorCreators.pipetteDoesNotExist({
-        pipette,
+        pipette: pipetteId,
       })
     )
   }
 
-  if (!labware || !prevRobotState.labware[labware]) {
+  if (!labwareId || !prevRobotState.labware[labwareId]) {
     errors.push(
       errorCreators.labwareDoesNotExist({
         actionName,
-        labware,
+        labware: labwareId,
       })
     )
-  } else if (prevRobotState.labware[labware].slot === 'offDeck') {
+  } else if (prevRobotState.labware[labwareId].slot === 'offDeck') {
     errors.push(errorCreators.labwareOffDeck())
   }
 
@@ -94,8 +91,8 @@ export const aspirate: CommandCreator<ExtendedAspirateParams> = (
 
   if (
     modulePipetteCollision({
-      pipette,
-      labware,
+      pipette: pipetteId,
+      labware: labwareId,
       invariantContext,
       prevRobotState,
     })
@@ -103,19 +100,19 @@ export const aspirate: CommandCreator<ExtendedAspirateParams> = (
     errors.push(errorCreators.modulePipetteCollisionDanger())
   }
 
-  if (!prevRobotState.tipState.pipettes[pipette]) {
+  if (!prevRobotState.tipState.pipettes[pipetteId]) {
     errors.push(
       errorCreators.noTipOnPipette({
         actionName,
-        pipette,
-        labware,
-        well,
+        pipette: pipetteId,
+        labware: labwareId,
+        well: wellName,
       })
     )
   }
 
   const is96Channel =
-    invariantContext.pipetteEntities[args.pipette]?.spec.channels === 96
+    invariantContext.pipetteEntities[pipetteId]?.spec.channels === 96
 
   if (
     is96Channel &&
@@ -123,11 +120,11 @@ export const aspirate: CommandCreator<ExtendedAspirateParams> = (
     !getIsSafePipetteMovement(
       prevRobotState,
       invariantContext,
-      args.pipette,
-      args.labware,
-      args.tipRack,
-      { x: xOffset, y: yOffset, z: offsetFromBottomMm },
-      args.well
+      pipetteId,
+      labwareId,
+      tipRack,
+      (wellLocation?.offset as Point) ?? { x: 0, y: 0, z: 0 },
+      wellName
     )
   ) {
     errors.push(errorCreators.possiblePipetteCollision())
@@ -137,7 +134,7 @@ export const aspirate: CommandCreator<ExtendedAspirateParams> = (
     thermocyclerPipetteCollision(
       prevRobotState.modules,
       prevRobotState.labware,
-      labware
+      labwareId
     )
   ) {
     errors.push(errorCreators.thermocyclerLidClosed())
@@ -157,7 +154,7 @@ export const aspirate: CommandCreator<ExtendedAspirateParams> = (
     pipetteIntoHeaterShakerLatchOpen(
       prevRobotState.modules,
       prevRobotState.labware,
-      labware
+      labwareId
     )
   ) {
     errors.push(errorCreators.heaterShakerLatchOpen())
@@ -167,7 +164,7 @@ export const aspirate: CommandCreator<ExtendedAspirateParams> = (
     pipetteIntoHeaterShakerWhileShaking(
       prevRobotState.modules,
       prevRobotState.labware,
-      labware
+      labwareId
     )
   ) {
     errors.push(errorCreators.heaterShakerIsShaking())
@@ -203,7 +200,7 @@ export const aspirate: CommandCreator<ExtendedAspirateParams> = (
         prevRobotState.modules,
         slotName,
         pipetteSpec,
-        invariantContext.labwareEntities[labware]
+        invariantContext.labwareEntities[labwareId]
       )
     ) {
       errors.push(
@@ -227,7 +224,7 @@ export const aspirate: CommandCreator<ExtendedAspirateParams> = (
 
   if (errors.length === 0 && pipetteSpec) {
     const tipMaxVolume = getPipetteWithTipMaxVol(
-      pipette,
+      pipetteId,
       invariantContext,
       tipRack
     )
@@ -253,18 +250,11 @@ export const aspirate: CommandCreator<ExtendedAspirateParams> = (
       commandType: 'aspirate',
       key: uuid(),
       params: {
-        pipetteId: pipette,
+        pipetteId,
         volume,
-        labwareId: labware,
-        wellName: well,
-        wellLocation: {
-          origin: 'bottom',
-          offset: {
-            z: offsetFromBottomMm,
-            x: xOffset,
-            y: yOffset,
-          },
-        },
+        labwareId,
+        wellName,
+        wellLocation,
         flowRate,
       },
       ...(isAirGap && { meta: { isAirGap } }),

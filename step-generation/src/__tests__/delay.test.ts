@@ -11,21 +11,13 @@ const getRobotInitialState = (): any => {
 // neither should InvariantContext
 const invariantContext: any = {}
 let mixInArgs: PauseArgs
-beforeEach(() => {
-  mixInArgs = {
-    commandCreatorFnName: 'delay',
-    meta: null,
-    name: 'Delay Test',
-    description: 'test blah blah',
-    wait: true,
-  }
-})
+beforeEach(() => {})
 describe('delay', () => {
   it('should delay until the user clicks resume', () => {
     const robotInitialState = getRobotInitialState()
     const message = 'delay indefinitely message'
     const result = delay(
-      { ...mixInArgs, message, wait: true },
+      { ...mixInArgs, message },
       invariantContext,
       robotInitialState
     )
@@ -45,7 +37,7 @@ describe('delay', () => {
     const robotInitialState = getRobotInitialState()
     const message = 'delay 95.5 secs message'
     const result = delay(
-      { ...mixInArgs, message, wait: 95.5 },
+      { ...mixInArgs, message, seconds: 95.5 },
       invariantContext,
       robotInitialState
     )

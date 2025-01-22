@@ -44,7 +44,7 @@ interface SlotInfo {
   addressableArea: AddressableArea | null
   position: CoordinateTuple | null
 }
-interface Point {
+export interface Point {
   x: number
   y: number
   z?: number

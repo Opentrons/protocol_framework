@@ -22,7 +22,7 @@ import {
   SOURCE_LABWARE,
 } from '../fixtures'
 import { dispense } from '../commandCreators/atomic/dispense'
-import type { ExtendedDispenseParams } from '../commandCreators/atomic/dispense'
+import type { DispenseAtomicCommandParams } from '../commandCreators/atomic/dispense'
 import type { InvariantContext, RobotState } from '../types'
 
 vi.mock('../utils/absorbanceReaderCollision')
@@ -45,17 +45,18 @@ describe('dispense', () => {
     vi.resetAllMocks()
   })
   describe('tip tracking & commands:', () => {
-    let params: ExtendedDispenseParams
+    let params: DispenseAtomicCommandParams
     beforeEach(() => {
       params = {
-        pipette: DEFAULT_PIPETTE,
+        pipetteId: DEFAULT_PIPETTE,
         volume: 50,
-        labware: SOURCE_LABWARE,
-        well: 'A1',
-        offsetFromBottomMm: 5,
+        labwareId: SOURCE_LABWARE,
+        wellName: 'A1',
+        wellLocation: {
+          origin: 'bottom',
+          offset: { z: 5, x: 0, y: 0 },
+        },
         flowRate: 6,
-        xOffset: 0,
-        yOffset: 0,
         tipRack: 'tiprack1Id',
         nozzles: null,
       }
@@ -99,13 +100,14 @@ describe('dispense', () => {
       const result = dispense(
         {
           flowRate: 10,
-          offsetFromBottomMm: 5,
-          pipette: DEFAULT_PIPETTE,
+          wellLocation: {
+            origin: 'bottom',
+            offset: { z: 5, x: 0, y: 0 },
+          },
+          pipetteId: DEFAULT_PIPETTE,
           volume: 50,
-          labware: SOURCE_LABWARE,
-          well: 'A1',
-          xOffset: 0,
-          yOffset: 0,
+          labwareId: SOURCE_LABWARE,
+          wellName: 'A1',
           tipRack: 'tiprack1Id',
           nozzles: null,
         },
@@ -119,7 +121,7 @@ describe('dispense', () => {
     })
     it('dispense to nonexistent labware should throw error', () => {
       const result = dispense(
-        { ...params, labware: 'someBadLabwareId' },
+        { ...params, labwareId: 'someBadLabwareId' },
         invariantContext,
         robotStateWithTip
       )

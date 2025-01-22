@@ -19,42 +19,41 @@ import type {
   CreateCommand,
   NozzleConfigurationStyle,
 } from '@opentrons/shared-data'
-import type { DispenseParams } from '@opentrons/shared-data/protocol/types/schemaV3'
+import type { DispenseParams } from '@opentrons/shared-data'
+import type { Point } from '../../utils'
 import type { CommandCreator, CommandCreatorError } from '../../types'
 
-export interface ExtendedDispenseParams extends DispenseParams {
-  xOffset: number
-  yOffset: number
-  tipRack: string
+export interface DispenseAtomicCommandParams extends DispenseParams {
   nozzles: NozzleConfigurationStyle | null
+  tipRack: string
+  isAirGap?: boolean
 }
 /** Dispense with given args. Requires tip. */
-export const dispense: CommandCreator<ExtendedDispenseParams> = (
+export const dispense: CommandCreator<DispenseAtomicCommandParams> = (
   args,
   invariantContext,
   prevRobotState
 ) => {
   const {
-    pipette,
+    pipetteId,
     volume,
-    labware,
-    well,
-    offsetFromBottomMm,
+    labwareId,
+    wellName,
     flowRate,
     isAirGap,
-    xOffset,
-    yOffset,
+    wellLocation,
     nozzles,
+    tipRack,
   } = args
   const actionName = 'dispense'
   const labwareState = prevRobotState.labware
   const errors: CommandCreatorError[] = []
-  const pipetteSpec = invariantContext.pipetteEntities[pipette]?.spec
+  const pipetteSpec = invariantContext.pipetteEntities[pipetteId]?.spec
   const isFlexPipette =
     (pipetteSpec?.displayCategory === 'FLEX' || pipetteSpec?.channels === 96) ??
     false
   const slotName = getLabwareSlot(
-    labware,
+    labwareId,
     prevRobotState.labware,
     prevRobotState.modules
   )
@@ -62,15 +61,15 @@ export const dispense: CommandCreator<ExtendedDispenseParams> = (
   if (!pipetteSpec) {
     errors.push(
       errorCreators.pipetteDoesNotExist({
-        pipette,
+        pipette: pipetteId,
       })
     )
   }
 
   if (
     modulePipetteCollision({
-      pipette,
-      labware,
+      pipette: pipetteId,
+      labware: labwareId,
       invariantContext,
       prevRobotState,
     })
@@ -78,25 +77,25 @@ export const dispense: CommandCreator<ExtendedDispenseParams> = (
     errors.push(errorCreators.modulePipetteCollisionDanger())
   }
 
-  if (!prevRobotState.tipState.pipettes[pipette]) {
+  if (!prevRobotState.tipState.pipettes[pipetteId]) {
     errors.push(
       errorCreators.noTipOnPipette({
         actionName,
-        pipette,
-        labware,
-        well,
+        pipette: pipetteId,
+        labware: labwareId,
+        well: wellName,
       })
     )
   }
 
-  if (!labware || !prevRobotState.labware[labware]) {
+  if (!labwareId || !prevRobotState.labware[labwareId]) {
     errors.push(
       errorCreators.labwareDoesNotExist({
         actionName,
-        labware,
+        labware: labwareId,
       })
     )
-  } else if (prevRobotState.labware[labware]?.slot === 'offDeck') {
+  } else if (prevRobotState.labware[labwareId]?.slot === 'offDeck') {
     errors.push(errorCreators.labwareOffDeck())
   }
 
@@ -112,7 +111,7 @@ export const dispense: CommandCreator<ExtendedDispenseParams> = (
   }
 
   const is96Channel =
-    invariantContext.pipetteEntities[args.pipette]?.spec.channels === 96
+    invariantContext.pipetteEntities[pipetteId]?.spec.channels === 96
 
   if (
     is96Channel &&
@@ -120,11 +119,11 @@ export const dispense: CommandCreator<ExtendedDispenseParams> = (
     !getIsSafePipetteMovement(
       prevRobotState,
       invariantContext,
-      args.pipette,
-      args.labware,
-      args.tipRack,
-      { x: xOffset, y: yOffset, z: offsetFromBottomMm },
-      args.well
+      pipetteId,
+      labwareId,
+      tipRack,
+      (wellLocation?.offset as Point) ?? { x: 0, y: 0, z: 0 },
+      wellName
     )
   ) {
     errors.push(errorCreators.possiblePipetteCollision())
@@ -134,7 +133,7 @@ export const dispense: CommandCreator<ExtendedDispenseParams> = (
     thermocyclerPipetteCollision(
       prevRobotState.modules,
       prevRobotState.labware,
-      labware
+      labwareId
     )
   ) {
     errors.push(errorCreators.thermocyclerLidClosed())
@@ -154,7 +153,7 @@ export const dispense: CommandCreator<ExtendedDispenseParams> = (
     pipetteIntoHeaterShakerLatchOpen(
       prevRobotState.modules,
       prevRobotState.labware,
-      labware
+      labwareId
     )
   ) {
     errors.push(errorCreators.heaterShakerLatchOpen())
@@ -164,7 +163,7 @@ export const dispense: CommandCreator<ExtendedDispenseParams> = (
     pipetteIntoHeaterShakerWhileShaking(
       prevRobotState.modules,
       prevRobotState.labware,
-      labware
+      labwareId
     )
   ) {
     errors.push(errorCreators.heaterShakerIsShaking())
@@ -199,7 +198,7 @@ export const dispense: CommandCreator<ExtendedDispenseParams> = (
         prevRobotState.modules,
         slotName,
         pipetteSpec,
-        invariantContext.labwareEntities[labware]
+        invariantContext.labwareEntities[labwareId]
       )
     ) {
       errors.push(
@@ -218,18 +217,11 @@ export const dispense: CommandCreator<ExtendedDispenseParams> = (
       commandType: 'dispense',
       key: uuid(),
       params: {
-        pipetteId: pipette,
+        pipetteId,
         volume,
-        labwareId: labware,
-        wellName: well,
-        wellLocation: {
-          origin: 'bottom',
-          offset: {
-            z: offsetFromBottomMm,
-            x: xOffset,
-            y: yOffset,
-          },
-        },
+        labwareId,
+        wellName,
+        wellLocation,
         flowRate,
         //  pushOut will always be undefined in step-generation for now
         //  since there is no easy way to allow users to  for it in PD

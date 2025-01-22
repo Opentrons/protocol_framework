@@ -72,11 +72,7 @@ export function mixUtil(args: {
     seconds
       ? [
           curryCommandCreator(delay, {
-            commandCreatorFnName: 'delay',
-            description: null,
-            name: null,
-            meta: null,
-            wait: seconds,
+            seconds,
           }),
         ]
       : []
@@ -84,27 +80,37 @@ export function mixUtil(args: {
   return repeatArray(
     [
       curryCommandCreator(aspirate, {
-        pipette,
+        pipetteId: pipette,
         volume,
-        labware,
-        well,
-        offsetFromBottomMm: aspirateOffsetFromBottomMm,
+        labwareId: labware,
+        wellName: well,
         flowRate: aspirateFlowRateUlSec,
         tipRack,
-        xOffset: aspirateXOffset,
-        yOffset: aspirateYOffset,
+        wellLocation: {
+          origin: 'bottom',
+          offset: {
+            z: aspirateOffsetFromBottomMm,
+            x: aspirateXOffset,
+            y: aspirateYOffset,
+          },
+        },
         nozzles: null,
       }),
       ...getDelayCommand(aspirateDelaySeconds),
       curryCommandCreator(dispense, {
-        pipette,
+        pipetteId: pipette,
         volume,
-        labware,
-        well,
-        offsetFromBottomMm: dispenseOffsetFromBottomMm,
+        labwareId: labware,
+        wellName: well,
+        wellLocation: {
+          origin: 'bottom',
+          offset: {
+            z: dispenseOffsetFromBottomMm,
+            x: dispenseXOffset,
+            y: dispenseYOffset,
+          },
+        },
         flowRate: dispenseFlowRateUlSec,
-        xOffset: dispenseXOffset,
-        yOffset: dispenseYOffset,
         tipRack,
         nozzles: nozzles,
       }),
@@ -254,10 +260,15 @@ export const mix: CommandCreator<MixArgs> = (
       const touchTipCommands = data.touchTip
         ? [
             curryCommandCreator(touchTip, {
-              pipette,
-              labware,
-              well,
-              offsetFromBottomMm: data.touchTipMmFromBottom,
+              pipetteId: pipette,
+              labwareId: labware,
+              wellName: well,
+              wellLocation: {
+                origin: 'bottom',
+                offset: {
+                  z: data.touchTipMmFromBottom,
+                },
+              },
             }),
           ]
         : []
