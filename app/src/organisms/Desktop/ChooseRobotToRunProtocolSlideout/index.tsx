@@ -68,7 +68,7 @@ export function ChooseRobotToRunProtocolSlideoutComponent(
     setSelectedRobot,
   } = props
   const navigate = useNavigate()
-  const isNewLpc = useFeatureFlag('lpcRedesign')
+  const isNewLPC = useFeatureFlag('lpcRedesign')
   const [shouldApplyOffsets, setShouldApplyOffsets] = useState<boolean>(true)
   const {
     protocolKey,
@@ -221,7 +221,7 @@ export function ChooseRobotToRunProtocolSlideoutComponent(
     </PrimaryButton>
   )
 
-  const offsetsComponent = isNewLpc ? null : (
+  const offsetsComponent = isNewLPC ? null : (
     <LegacyApplyHistoricOffsets
       offsetCandidates={offsetCandidates}
       shouldApplyOffsets={shouldApplyOffsets}
