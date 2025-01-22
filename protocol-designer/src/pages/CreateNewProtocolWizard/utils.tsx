@@ -1,4 +1,5 @@
 import {
+  ABSORBANCE_READER_TYPE,
   ABSORBANCE_READER_V1,
   getLabwareDefURI,
   getLabwareDisplayName,
@@ -33,6 +34,7 @@ import type { AdditionalEquipment, WizardFormState } from './types'
 const TOTAL_OUTER_SLOTS = 8
 const MIDDLE_SLOT_NUM = 4
 const MAX_MAGNETIC_BLOCK_SLOTS = 12
+const MAX_SLOTS_IN_COL_THREE = 4 // Note this may be switched to 4 in the future
 
 export const getNumOptions = (length: number): DropdownOption[] => {
   return Array.from({ length }, (_, i) => ({
@@ -60,7 +62,9 @@ export const getNumSlotsAvailable = (
   const magneticBlocks = Object.values(modules || {}).filter(
     module => module.type === MAGNETIC_BLOCK_TYPE
   )
+  console.log('modules', modules)
   let filteredModuleLength = modules != null ? Object.keys(modules).length : 0
+  // console.log('filteredModuleLength', filteredModuleLength)
   if (magneticBlocks.length > 0) {
     //  once blocks exceed 4, then we dont' want to subtract the amount available
     //  because block can go into the center slots where all other modules/trashes can not
@@ -76,14 +80,43 @@ export const getNumSlotsAvailable = (
   if (numStagingAreas >= 1 && hasWasteChute && type !== 'stagingArea') {
     filteredAdditionalEquipmentLength = filteredAdditionalEquipmentLength - 1
   }
+
+  // console.log(
+  //   'filteredAdditionalEquipmentLength',
+  //   filteredAdditionalEquipmentLength
+  // )
+
+  const modulesWithSlot3 =
+    modules !== null
+      ? Object.values(modules).filter(module => module.slot?.includes('3'))
+          .length
+      : 0
+
+  console.log('modulesWithSlot3', modulesWithSlot3)
+
+  // console.log('type', type)
+
   switch (type) {
     case 'gripper': {
       return 0
     }
-    // TODO: wire up absorbance reader
+
     case ABSORBANCE_READER_V1: {
-      return 1
+      // console.log('absorbance reader')
+      // return MAX_ABSORBANCE_READER_SLOTS - filteredAdditionalEquipmentLength
+      // return 1
+      const numExistingModules = Object.values(modules || {}).filter(
+        module => module.type === ABSORBANCE_READER_TYPE
+      ).length
+
+      return Math.max(
+        0,
+        MAX_SLOTS_IN_COL_THREE -
+          filteredAdditionalEquipmentLength -
+          numExistingModules
+      )
     }
+
     //  these modules don't support MoaM
     case THERMOCYCLER_MODULE_V1:
     case TEMPERATURE_MODULE_V1:
@@ -99,8 +132,13 @@ export const getNumSlotsAvailable = (
         return 2
       }
     }
+
+    case 'stagingArea': {
+      // console.log('stagingArea', MAX_SLOTS_IN_COL_THREE - modulesWithSlot3)
+      return MAX_SLOTS_IN_COL_THREE - modulesWithSlot3
+    }
+
     case 'trashBin':
-    case 'stagingArea':
     case HEATERSHAKER_MODULE_V1:
     case TEMPERATURE_MODULE_V2: {
       return (
@@ -108,6 +146,7 @@ export const getNumSlotsAvailable = (
         (filteredModuleLength + filteredAdditionalEquipmentLength)
       )
     }
+
     case 'wasteChute': {
       const adjustmentForStagingArea = numStagingAreas >= 1 ? 1 : 0
       return (
@@ -117,6 +156,7 @@ export const getNumSlotsAvailable = (
           adjustmentForStagingArea)
       )
     }
+
     case MAGNETIC_BLOCK_V1: {
       return (
         MAX_MAGNETIC_BLOCK_SLOTS -

@@ -51,11 +51,14 @@ export function SelectModules(props: WizardTileProps): JSX.Element | null {
   const modules = watch('modules')
   const additionalEquipment = watch('additionalEquipment')
   const enableAbsorbanceReader = useSelector(getEnableAbsorbanceReader)
+  const hasGripper = additionalEquipment.includes('gripper') // use for plate reader
+  console.log('hasGripper', hasGripper)
   const robotType = fields.robotType
   const supportedModules =
     robotType === FLEX_ROBOT_TYPE
       ? FLEX_SUPPORTED_MODULE_MODELS
       : OT2_SUPPORTED_MODULE_MODELS
+  // console.log('supportedModules', supportedModules)
   const filteredSupportedModules = supportedModules.filter(
     moduleModel =>
       !(
@@ -67,6 +70,7 @@ export function SelectModules(props: WizardTileProps): JSX.Element | null {
         )
       )
   )
+  // console.log('filteredSupportedModules', filteredSupportedModules)
   const MOAM_MODULE_TYPES: ModuleType[] = [
     TEMPERATURE_MODULE_TYPE,
     HEATERSHAKER_MODULE_TYPE,
@@ -112,7 +116,8 @@ export function SelectModules(props: WizardTileProps): JSX.Element | null {
     module: FormModule,
     newQuantity: number
   ): void => {
-    if (!modules) return
+    // if (!modules) return
+    const ABSORBANCE_READER_SLOTS = ['D3', 'C3', 'B3']
 
     const modulesOfType = Object.entries(modules).filter(
       ([, mod]) => mod.type === module.type
@@ -123,12 +128,31 @@ export function SelectModules(props: WizardTileProps): JSX.Element | null {
 
     if (newQuantity > modulesOfType.length) {
       const additionalModules: FormModules = {}
+      const usedSlots = new Set(
+        modulesOfType.map(([, mod]) => mod.slot).filter(Boolean)
+      )
+
       for (let i = 0; i < newQuantity - modulesOfType.length; i++) {
+        const nextSlot =
+          module.type === ABSORBANCE_READER_TYPE
+            ? ABSORBANCE_READER_SLOTS.find(slot => !usedSlots.has(slot)) || null
+            : null
+
+        if (nextSlot !== null) {
+          console.log('nextSlot', nextSlot)
+          usedSlots.add(nextSlot)
+        }
+
         //  @ts-expect-error: TS can't determine modules's type correctly
+        // additionalModules[uuid()] = {
+        //   model: module.model,
+        //   type: module.type,
+        //   slot: null,
+        // }
         additionalModules[uuid()] = {
           model: module.model,
           type: module.type,
-          slot: null,
+          slot: nextSlot,
         }
       }
 
@@ -177,6 +201,7 @@ export function SelectModules(props: WizardTileProps): JSX.Element | null {
             ) : null}
             <Flex gridGap={SPACING.spacing4} flexWrap={WRAP}>
               {filteredSupportedModules
+                .sort((moduleA, moduleB) => moduleA.localeCompare(moduleB))
                 .filter(module =>
                   enableAbsorbanceReader
                     ? module
@@ -221,6 +246,10 @@ export function SelectModules(props: WizardTileProps): JSX.Element | null {
                   gridGap={SPACING.spacing4}
                 >
                   {Object.entries(modules)
+                    .sort(
+                      ([, moduleA], [, moduleB]) =>
+                        moduleA.model.localeCompare(moduleB.model) // sort by model alphabetically
+                    )
                     .reduce<Array<FormModule & { count: number; key: string }>>(
                       (acc, [key, module]) => {
                         const existingModule = acc.find(
