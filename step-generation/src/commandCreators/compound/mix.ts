@@ -68,6 +68,14 @@ export function mixUtil(args: {
     nozzles,
   } = args
 
+  // This CommandCreator produces a Python command with no JSON command.
+  const pythonMixCommand: CommandCreator<{}> = () => {
+    return {
+      commands: [],
+      python: `blah.mix(repititions=${times}, location=blah.['${well}'], volume=${volume}, ...etc...)`,
+    }
+  }
+
   const getDelayCommand = (seconds?: number | null): CurriedCommandCreator[] =>
     seconds
       ? [
@@ -81,37 +89,52 @@ export function mixUtil(args: {
         ]
       : []
 
-  return repeatArray(
-    [
-      curryCommandCreator(aspirate, {
-        pipette,
-        volume,
-        labware,
-        well,
-        offsetFromBottomMm: aspirateOffsetFromBottomMm,
-        flowRate: aspirateFlowRateUlSec,
-        tipRack,
-        xOffset: aspirateXOffset,
-        yOffset: aspirateYOffset,
-        nozzles: null,
-      }),
-      ...getDelayCommand(aspirateDelaySeconds),
-      curryCommandCreator(dispense, {
-        pipette,
-        volume,
-        labware,
-        well,
-        offsetFromBottomMm: dispenseOffsetFromBottomMm,
-        flowRate: dispenseFlowRateUlSec,
-        xOffset: dispenseXOffset,
-        yOffset: dispenseYOffset,
-        tipRack,
-        nozzles: nozzles,
-      }),
-      ...getDelayCommand(dispenseDelaySeconds),
-    ],
-    times
-  )
+  // If there is no delay, then we can issue a single Python mix() command, so we want to suppresss
+  // the Python from the individual aspirate dispense commands.
+  const noDelay = !aspirateDelaySeconds && !dispenseDelaySeconds
+
+  return [
+    ...(noDelay ? [curryCommandCreator(pythonMixCommand, {})] : []),
+    ...repeatArray(
+      [
+        curryCommandCreator(
+          aspirate,
+          {
+            pipette,
+            volume,
+            labware,
+            well,
+            offsetFromBottomMm: aspirateOffsetFromBottomMm,
+            flowRate: aspirateFlowRateUlSec,
+            tipRack,
+            xOffset: aspirateXOffset,
+            yOffset: aspirateYOffset,
+            nozzles: null,
+          },
+          noDelay
+        ),
+        ...getDelayCommand(aspirateDelaySeconds),
+        curryCommandCreator(
+          dispense,
+          {
+            pipette,
+            volume,
+            labware,
+            well,
+            offsetFromBottomMm: dispenseOffsetFromBottomMm,
+            flowRate: dispenseFlowRateUlSec,
+            xOffset: dispenseXOffset,
+            yOffset: dispenseYOffset,
+            tipRack,
+            nozzles: nozzles,
+          },
+          noDelay
+        ),
+        ...getDelayCommand(dispenseDelaySeconds),
+      ],
+      times
+    ),
+  ]
 }
 export const mix: CommandCreator<MixArgs> = (
   data,

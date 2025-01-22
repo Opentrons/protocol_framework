@@ -356,6 +356,16 @@ export const createFile: Selector<ProtocolFile> = createSelector(
 
     const commands = [...loadCommands, ...nonLoadCommands]
 
+    // Print the combined Python commands for every timeline step:
+    console.log(
+      robotStateTimeline.timeline
+        .map(
+          (timelineFrame, idx) =>
+            `# Step ${idx + 1}\n${timelineFrame.python || ''}`
+        )
+        .join('\n\n')
+    )
+
     const flexDeckSpec: OT3RobotMixin = {
       robot: {
         model: FLEX_ROBOT_TYPE,
