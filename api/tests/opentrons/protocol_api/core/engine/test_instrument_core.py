@@ -1,6 +1,6 @@
 """Test for the ProtocolEngine-based instrument API core."""
 
-from typing import cast, Optional
+from typing import cast, Optional, Union, Literal
 
 from opentrons_shared_data.errors.exceptions import PipetteLiquidNotFoundError
 import pytest
@@ -708,11 +708,21 @@ def test_aspirate_from_coordinates(
     )
 
 
+@pytest.mark.parametrize(
+    ("meniscus_target", "expected_volume_offset"),
+    [
+        (MeniscusTrackingTarget.BEGINNING, 0.0),
+        (MeniscusTrackingTarget.END, "operationVolume"),
+        (MeniscusTrackingTarget.DYNAMIC_MENISCUS, 0.0),
+    ],
+)
 def test_aspirate_from_meniscus(
     decoy: Decoy,
     mock_engine_client: EngineClient,
     mock_protocol_core: ProtocolCore,
     subject: InstrumentCore,
+    meniscus_target: MeniscusTrackingTarget,
+    expected_volume_offset: Union[Literal["operationVolume"], float],
 ) -> None:
     """It should aspirate from a well."""
     location = Location(point=Point(1, 2, 3), labware=None)
@@ -726,14 +736,14 @@ def test_aspirate_from_meniscus(
             labware_id="123abc",
             well_name="my cool well",
             absolute_point=Point(1, 2, 3),
-            meniscus_tracking=MeniscusTrackingTarget.END,
+            meniscus_tracking=meniscus_target,
         )
     ).then_return(
         (
             LiquidHandlingWellLocation(
                 origin=WellOrigin.MENISCUS,
                 offset=WellOffset(x=3, y=2, z=1),
-                volumeOffset="operationVolume",
+                volumeOffset=expected_volume_offset,
             ),
             False,
         )
@@ -746,7 +756,7 @@ def test_aspirate_from_meniscus(
         rate=5.6,
         flow_rate=7.8,
         in_place=False,
-        meniscus_tracking=MeniscusTrackingTarget.END,
+        meniscus_tracking=meniscus_target,
     )
 
     decoy.verify(
@@ -758,7 +768,7 @@ def test_aspirate_from_meniscus(
             well_location=LiquidHandlingWellLocation(
                 origin=WellOrigin.MENISCUS,
                 offset=WellOffset(x=3, y=2, z=1),
-                volumeOffset="operationVolume",
+                volumeOffset=expected_volume_offset,
             ),
         ),
         mock_engine_client.execute_command(
@@ -769,7 +779,7 @@ def test_aspirate_from_meniscus(
                 wellLocation=LiquidHandlingWellLocation(
                     origin=WellOrigin.MENISCUS,
                     offset=WellOffset(x=3, y=2, z=1),
-                    volumeOffset="operationVolume",
+                    volumeOffset=expected_volume_offset,
                 ),
                 volume=12.34,
                 flowRate=7.8,
