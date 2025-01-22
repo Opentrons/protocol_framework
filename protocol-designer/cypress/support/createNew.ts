@@ -67,7 +67,7 @@ export enum Actions {
   AddTemperatureStep = 'Selects Temperature Module step',
   ActivateTempdeck = 'Activates Temperature Module when you first use it',
   InputTempDeck4 = 'Inputs 4C into tempdeck',
-  InputTempDeck96 = 'Inputs 96C into tempdeck',
+  InputTempDeck95 = 'Inputs 96C into tempdeck',
   InputTempDeck100 = 'Inputs 100C into tempdeck. Expect an error then exit',
   ExitTempdeckCommand = 'Exits a tempdeck command',
   PauseAfterSettingTempdeck = 'Allows you to puase protocol until reached',
@@ -435,8 +435,8 @@ const executeAction = (action: Actions | UniversalActions): void => {
     case Actions.InputTempDeck4:
       cy.get(Locators.TempdeckTempInput).type('4')
       break
-    case Actions.InputTempDeck96:
-      cy.get(Locators.TempdeckTempInput).type('96')
+    case Actions.InputTempDeck95:
+      cy.get(Locators.TempdeckTempInput).type('95')
       break
     case Actions.InputTempDeck100:
       cy.get(Locators.TempdeckTempInput).type('100')

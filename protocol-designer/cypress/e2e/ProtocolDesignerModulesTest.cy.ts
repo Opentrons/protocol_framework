@@ -4,6 +4,7 @@ import { UniversalActions } from '../support/universalActions'
 describe('The Redesigned Create Protocol Landing Page', () => {
   beforeEach(() => {
     cy.visit('/')
+    cy.verifyHomePage()
     cy.closeAnalyticsModal()
   })
 
