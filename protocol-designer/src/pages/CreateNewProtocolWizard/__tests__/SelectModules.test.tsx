@@ -95,4 +95,11 @@ describe('SelectModules', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Go back' }))
     expect(props.goBack).toHaveBeenCalled()
   })
+
+  it.only('disables absorbance reader if no gripper', () => {
+    render(props)
+    screen.debug()
+    fireEvent.click(screen.getByText('Absorbance Plate Reader Module GEN1'))
+    expect(props.setValue).not.toHaveBeenCalled()
+  })
 })

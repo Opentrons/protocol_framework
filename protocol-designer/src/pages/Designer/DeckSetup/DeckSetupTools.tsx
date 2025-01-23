@@ -18,7 +18,6 @@ import {
   TYPOGRAPHY,
 } from '@opentrons/components'
 import {
-  ABSORBANCE_READER_TYPE,
   ABSORBANCE_READER_V1,
   FLEX_ROBOT_TYPE,
   FLEX_STAGING_AREA_SLOT_ADDRESSABLE_AREAS,
@@ -36,10 +35,7 @@ import {
   createDeckFixture,
   deleteDeckFixture,
 } from '../../../step-forms/actions/additionalItems'
-import {
-  getAdditionalEquipment,
-  getSavedStepForms,
-} from '../../../step-forms/selectors'
+import { getSavedStepForms } from '../../../step-forms/selectors'
 import { deleteModule } from '../../../step-forms/actions'
 import { getDeckSetupForActiveItem } from '../../../top-selectors/labware-locations'
 import {
@@ -125,10 +121,6 @@ export function DeckSetupTools(props: DeckSetupToolsProps): JSX.Element | null {
 
   const [changeModuleWarningInfo, displayModuleWarning] = useState<boolean>(
     false
-  )
-  const additionalEquipment = useSelector(getAdditionalEquipment)
-  const isGripperAttached = Object.values(additionalEquipment).some(
-    equipment => equipment?.name === 'gripper'
   )
   const [selectedHardware, setSelectedHardware] = useState<
     ModuleModel | Fixture | null
@@ -345,11 +337,6 @@ export function DeckSetupTools(props: DeckSetupToolsProps): JSX.Element | null {
     if (selectedModuleModel != null) {
       //  create module
       const moduleType = getModuleType(selectedModuleModel)
-      // enforce gripper present in order to add plate reader
-      if (moduleType === ABSORBANCE_READER_TYPE && !isGripperAttached) {
-        makeSnackbar(t('gripper_required_for_plate_reader') as string)
-        return
-      }
 
       const moduleSteps = Object.values(savedSteps).filter(step => {
         return (
