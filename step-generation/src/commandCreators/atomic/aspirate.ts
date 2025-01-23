@@ -262,5 +262,6 @@ export const aspirate: CommandCreator<ExtendedAspirateParams> = (
   ]
   return {
     commands,
+    python: `blah.aspirate(volume=${volume}, ...etc...)`,
   }
 }

@@ -107,8 +107,9 @@ export const saveProtocolFile: () => ThunkAction<SaveProtocolFileAction> = () =>
   })
   const state = getState()
   const fileData = fileDataSelectors.createFile(state)
+  const pythonFileData = fileDataSelectors.createPythonFile(state)
   const protocolName =
     fileDataSelectors.getFileMetadata(state).protocolName || 'untitled'
   const fileName = `${protocolName}.json`
-  saveFile(fileData, fileName)
+  saveFile(fileData, fileName, pythonFileData)
 }

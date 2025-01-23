@@ -5,97 +5,100 @@ export const commandCreatorFromStepArgs = (
 ): StepGeneration.CurriedCommandCreator | null => {
   switch (args.commandCreatorFnName) {
     case 'consolidate': {
-      return StepGeneration.curryCommandCreator(
+      return StepGeneration.curryCommandTopPython(
         StepGeneration.consolidate,
         args
       )
     }
 
     case 'delay': {
-      return StepGeneration.curryCommandCreator(StepGeneration.delay, args)
+      return StepGeneration.curryCommandTopPython(StepGeneration.delay, args)
     }
 
     case 'distribute':
-      return StepGeneration.curryCommandCreator(StepGeneration.distribute, args)
+      return StepGeneration.curryCommandTopPython(
+        StepGeneration.distribute,
+        args
+      )
 
     case 'transfer':
-      return StepGeneration.curryCommandCreator(StepGeneration.transfer, args)
+      return StepGeneration.curryCommandTopPython(StepGeneration.transfer, args)
 
     case 'mix':
-      return StepGeneration.curryCommandCreator(StepGeneration.mix, args)
+      return StepGeneration.curryCommandTopPython(StepGeneration.mix, args)
 
     case 'moveLabware': {
-      return StepGeneration.curryCommandCreator(
+      return StepGeneration.curryCommandTopPython(
         StepGeneration.moveLabware,
         args
       )
     }
 
     case 'engageMagnet':
-      return StepGeneration.curryCommandCreator(
+      return StepGeneration.curryCommandTopPython(
         StepGeneration.engageMagnet,
         args
       )
 
     case 'disengageMagnet':
-      return StepGeneration.curryCommandCreator(
+      return StepGeneration.curryCommandTopPython(
         StepGeneration.disengageMagnet,
         args
       )
 
     case 'setTemperature':
-      return StepGeneration.curryCommandCreator(
+      return StepGeneration.curryCommandTopPython(
         StepGeneration.setTemperature,
         args
       )
 
     case 'deactivateTemperature':
-      return StepGeneration.curryCommandCreator(
+      return StepGeneration.curryCommandTopPython(
         StepGeneration.deactivateTemperature,
         args
       )
 
     case 'waitForTemperature':
-      return StepGeneration.curryCommandCreator(
+      return StepGeneration.curryCommandTopPython(
         StepGeneration.waitForTemperature,
         args
       )
 
     case 'thermocyclerProfile':
-      return StepGeneration.curryCommandCreator(
+      return StepGeneration.curryCommandTopPython(
         StepGeneration.thermocyclerProfileStep,
         args
       )
 
     case 'thermocyclerState':
-      return StepGeneration.curryCommandCreator(
+      return StepGeneration.curryCommandTopPython(
         StepGeneration.thermocyclerStateStep,
         args
       )
     case 'heaterShaker':
-      return StepGeneration.curryCommandCreator(
+      return StepGeneration.curryCommandTopPython(
         StepGeneration.heaterShaker,
         args
       )
     case 'comment':
-      return StepGeneration.curryCommandCreator(StepGeneration.comment, args)
+      return StepGeneration.curryCommandTopPython(StepGeneration.comment, args)
     case 'absorbanceReaderOpenLid':
-      return StepGeneration.curryCommandCreator(
+      return StepGeneration.curryCommandTopPython(
         StepGeneration.absorbanceReaderOpenLid,
         args
       )
     case 'absorbanceReaderCloseLid':
-      return StepGeneration.curryCommandCreator(
+      return StepGeneration.curryCommandTopPython(
         StepGeneration.absorbanceReaderCloseLid,
         args
       )
     case 'absorbanceReaderRead':
-      return StepGeneration.curryCommandCreator(
+      return StepGeneration.curryCommandTopPython(
         StepGeneration.absorbanceReaderCloseRead,
         args
       )
     case 'absorbanceReaderInitialize':
-      return StepGeneration.curryCommandCreator(
+      return StepGeneration.curryCommandTopPython(
         StepGeneration.absorbanceReaderCloseInitialize,
         args
       )

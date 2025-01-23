@@ -58,6 +58,7 @@ import type { LabwareDefByDefURI } from '../../labware-defs'
 import type { Selector } from '../../types'
 import type { DesignerApplicationData } from '../../load-file/migration/utils/getLoadLiquidCommands'
 import type { SecondOrderCommandAnnotation } from '@opentrons/shared-data/commandAnnotation/types'
+import genPythonProtocol from './pythonProtocol'
 
 // TODO: BC: 2018-02-21 uncomment this assert, causes test failures
 // console.assert(!isEmpty(process.env.OT_PD_VERSION), 'Could not find application version!')
@@ -355,6 +356,16 @@ export const createFile: Selector<ProtocolFile> = createSelector(
 
     const commands = [...loadCommands, ...nonLoadCommands]
 
+    // Print the combined Python commands for every timeline step:
+    console.log(
+      robotStateTimeline.timeline
+        .map(
+          (timelineFrame, idx) =>
+            `# Step ${idx + 1}\n${timelineFrame.python || ''}`
+        )
+        .join('\n\n')
+    )
+
     const flexDeckSpec: OT3RobotMixin = {
       robot: {
         model: FLEX_ROBOT_TYPE,
@@ -439,5 +450,56 @@ export const createFile: Selector<ProtocolFile> = createSelector(
       ...commandv8Mixin,
       ...commandAnnotionaV1Mixin,
     }
+  }
+)
+
+export const createPythonFile: Selector<string> = createSelector(
+  getFileMetadata,
+  getInitialRobotState,
+  getRobotStateTimeline,
+  getRobotType,
+  dismissSelectors.getAllDismissedWarnings,
+  ingredSelectors.getLiquidGroupsById,
+  ingredSelectors.getLiquidsByLabwareId,
+  stepFormSelectors.getSavedStepForms,
+  stepFormSelectors.getArgsAndErrorsByStepId,
+  stepFormSelectors.getOrderedStepIds,
+  stepFormSelectors.getLabwareEntities,
+  stepFormSelectors.getModuleEntities,
+  stepFormSelectors.getPipetteEntities,
+  uiLabwareSelectors.getLabwareNicknamesById,
+  labwareDefSelectors.getLabwareDefsByURI,
+  getStepGroups,
+  (
+    fileMetadata,
+    initialRobotState,
+    robotStateTimeline,
+    robotType,
+    dismissedWarnings,
+    ingredients,
+    ingredLocations,
+    savedStepForms,
+    allStepArgsAndErrors,
+    orderedStepIds,
+    labwareEntities,
+    moduleEntities,
+    pipetteEntities,
+    labwareNicknamesById,
+    labwareDefsByURI,
+    stepGroups
+  ) => {
+    const pythonProtocol = genPythonProtocol(
+      fileMetadata,
+      robotType,
+      initialRobotState,
+      robotStateTimeline,
+      labwareEntities,
+      labwareNicknamesById,
+      moduleEntities,
+      pipetteEntities,
+      ingredients,
+      ingredLocations
+    )
+    return pythonProtocol
   }
 )

@@ -1,7 +1,11 @@
 import uuidv4 from 'uuid/v4'
 import { absorbanceReaderCollision } from './absorbanceReaderCollision'
 import { commandCreatorsTimeline } from './commandCreatorsTimeline'
-import { curryCommandCreator } from './curryCommandCreator'
+import {
+  curryCommandCreator,
+  curryCommandCreatorNoPython,
+  curryCommandTopPython,
+} from './curryCommandCreator'
 import { reduceCommandCreators } from './reduceCommandCreators'
 import { modulePipetteCollision } from './modulePipetteCollision'
 import { thermocyclerPipetteCollision } from './thermocyclerPipetteCollision'
@@ -12,6 +16,8 @@ export {
   absorbanceReaderCollision,
   commandCreatorsTimeline,
   curryCommandCreator,
+  curryCommandCreatorNoPython,
+  curryCommandTopPython,
   reduceCommandCreators,
   modulePipetteCollision,
   thermocyclerPipetteCollision,

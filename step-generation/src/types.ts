@@ -170,7 +170,7 @@ export interface InnerDelayArgs {
   mmFromBottom: number
 }
 
-interface CommonArgs {
+export interface CommonArgs {
   /** Optional user-readable name for this step */
   name: string | null | undefined
   /** Optional user-readable description/notes for this step */
@@ -619,6 +619,7 @@ export interface CommandsAndRobotState {
   commands: CreateCommand[]
   robotState: RobotState
   warnings?: CommandCreatorWarning[]
+  python?: string
 }
 
 export interface CommandCreatorErrorResponse {
@@ -629,6 +630,7 @@ export interface CommandCreatorErrorResponse {
 export interface CommandsAndWarnings {
   commands: CreateCommand[]
   warnings?: CommandCreatorWarning[]
+  python?: string
 }
 export type CommandCreatorResult =
   | CommandsAndWarnings
