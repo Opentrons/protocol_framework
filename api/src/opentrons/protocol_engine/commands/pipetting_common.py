@@ -46,7 +46,7 @@ class AspirateVolumeMixin(BaseModel):
         ge=0,
     )
     correctionVolume: Optional[float] = Field(
-        DEFAULT_CORRECTION_VOLUME,
+        None,
         description="The correction volume in uL.",
         ge=0,
     )
@@ -63,7 +63,7 @@ class DispenseVolumeMixin(BaseModel):
         ge=0,
     )
     correctionVolume: Optional[float] = Field(
-        DEFAULT_CORRECTION_VOLUME,
+        None,
         description="The correction volume in uL.",
         ge=0,
     )

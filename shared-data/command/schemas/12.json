@@ -74,7 +74,7 @@
               "type": "null"
             }
           ],
-          "default": 0.0,
+          "default": null,
           "description": "The correction volume in uL.",
           "title": "Correctionvolume"
         },
@@ -183,7 +183,7 @@
               "type": "null"
             }
           ],
-          "default": 0.0,
+          "default": null,
           "description": "The correction volume in uL.",
           "title": "Correctionvolume"
         },
@@ -222,7 +222,7 @@
               "type": "null"
             }
           ],
-          "default": 0.0,
+          "default": null,
           "description": "The correction volume in uL.",
           "title": "Correctionvolume"
         },
@@ -1447,7 +1447,7 @@
               "type": "null"
             }
           ],
-          "default": 0.0,
+          "default": null,
           "description": "The correction volume in uL.",
           "title": "Correctionvolume"
         },
@@ -1491,7 +1491,7 @@
               "type": "null"
             }
           ],
-          "default": 0.0,
+          "default": null,
           "description": "The correction volume in uL.",
           "title": "Correctionvolume"
         },
