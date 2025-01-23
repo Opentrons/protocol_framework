@@ -59,7 +59,7 @@ def run(protocol):
 
     pipette.pick_up_tip()
     comment_tip_rack_status(protocol, partial_tip_rack)
-    # can the flex_8channel_50 with 50µl tips really reach the bottom of the tube?
+    # can the flex_8channel_50 with 50μl tips really reach the bottom of the tube?
     pipette.aspirate(30, tube_rack["A1"].bottom())
     pipette.dispense(30, tube_rack["A2"].bottom())
     pipette.drop_tip()

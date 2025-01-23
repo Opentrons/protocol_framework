@@ -9114,7 +9114,7 @@ exports[`snapshot tests > makeContext 1`] = `
         "backlashDistance": 0.3,
         "channels": 96,
         "displayCategory": "FLEX",
-        "displayName": "Flex 96-Channel 1000 µL",
+        "displayName": "Flex 96-Channel 1000 μL",
         "dropTipConfigurations": {
           "camAction": {
             "current": 1.5,
