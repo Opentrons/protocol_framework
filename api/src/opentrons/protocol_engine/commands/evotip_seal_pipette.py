@@ -129,13 +129,9 @@ class EvotipSealPipetteImplementation(
                 axis_map={mount_axis: prep_distance}, speed=10, relative_move=True
             )
 
-            # Drive Q down 3mm at fast speed - look into the pick up tip fuinction to find slow and fast: 10.0
+            # Drive mount down for press-fit
             await self._gantry_mover.move_axes(
-                axis_map={mount_axis: press_distance}, speed=10.0, relative_move=True
-            )
-            # 2.8mm at slow speed - cam action pickup speed: 5.5
-            await self._gantry_mover.move_axes(
-                axis_map={mount_axis: press_distance}, speed=5.5, relative_move=True
+                axis_map={mount_axis: press_distance}, speed=10.0, relative_move=True, _expect_stalls=True
             )
             # retract cam : 11.05
             await self._gantry_mover.move_axes(
