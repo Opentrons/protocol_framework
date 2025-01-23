@@ -39,7 +39,7 @@ describe('thermocyclerStateStep', () => {
     {
       testMsg: 'should open the lid when diff includes lidOpen',
       thermocyclerStateArgs: {
-        module: thermocyclerId,
+        moduleId: thermocyclerId,
         commandCreatorFnName: 'thermocyclerState',
         blockTargetTemp: null,
         lidTargetTemp: null,
@@ -63,7 +63,7 @@ describe('thermocyclerStateStep', () => {
     {
       testMsg: 'should close the lid when diff includes lidClosed',
       thermocyclerStateArgs: {
-        module: thermocyclerId,
+        moduleId: thermocyclerId,
         commandCreatorFnName: 'thermocyclerState',
         blockTargetTemp: null,
         lidTargetTemp: null,
@@ -88,7 +88,7 @@ describe('thermocyclerStateStep', () => {
       testMsg:
         'should set the block temperature when diff includes setBlockTemperature',
       thermocyclerStateArgs: {
-        module: thermocyclerId,
+        moduleId: thermocyclerId,
         commandCreatorFnName: 'thermocyclerState',
         blockTargetTemp: 10,
         lidTargetTemp: null,
@@ -121,7 +121,7 @@ describe('thermocyclerStateStep', () => {
       testMsg:
         'should decativate the block when diff includes deactivateBlockTemperature',
       thermocyclerStateArgs: {
-        module: thermocyclerId,
+        moduleId: thermocyclerId,
         commandCreatorFnName: 'thermocyclerState',
         blockTargetTemp: null,
         lidTargetTemp: null,
@@ -149,7 +149,7 @@ describe('thermocyclerStateStep', () => {
       testMsg:
         'should set the lid temperature when diff includes setLidTemperature',
       thermocyclerStateArgs: {
-        module: thermocyclerId,
+        moduleId: thermocyclerId,
         commandCreatorFnName: 'thermocyclerState',
         blockTargetTemp: null,
         lidTargetTemp: 10,
@@ -182,7 +182,7 @@ describe('thermocyclerStateStep', () => {
       testMsg:
         'should decativate the block when diff includes deactivateBlockTemperature',
       thermocyclerStateArgs: {
-        module: thermocyclerId,
+        moduleId: thermocyclerId,
         commandCreatorFnName: 'thermocyclerState',
         blockTargetTemp: null,
         lidTargetTemp: null,
@@ -210,7 +210,7 @@ describe('thermocyclerStateStep', () => {
       testMsg:
         'should set the lid temperature when diff includes setLidTemperature',
       thermocyclerStateArgs: {
-        module: thermocyclerId,
+        moduleId: thermocyclerId,
         commandCreatorFnName: 'thermocyclerState',
         blockTargetTemp: null,
         lidTargetTemp: 10,
@@ -243,7 +243,7 @@ describe('thermocyclerStateStep', () => {
       testMsg:
         'should deactivate the lid when diff includes deactivateLidTemperature',
       thermocyclerStateArgs: {
-        module: thermocyclerId,
+        moduleId: thermocyclerId,
         commandCreatorFnName: 'thermocyclerState',
         blockTargetTemp: null,
         lidTargetTemp: null,
@@ -270,7 +270,7 @@ describe('thermocyclerStateStep', () => {
     {
       testMsg: 'should issue commands in the correct order',
       thermocyclerStateArgs: {
-        module: thermocyclerId,
+        moduleId: thermocyclerId,
         commandCreatorFnName: 'thermocyclerState',
         blockTargetTemp: 10,
         lidTargetTemp: 20,

@@ -173,6 +173,14 @@ export const absorbanceReaderNoInitialization = (): CommandCreatorError => {
   }
 }
 
+export const absorbanceReaderNoGripper = (): CommandCreatorError => {
+  return {
+    type: 'ABSORBANCE_READER_NO_GRIPPER',
+    message:
+      'This step involves opening or closing the Absorbance Plate Reader lid with a gripper. Add a gripper or remove step to proceed.',
+  }
+}
+
 export const heaterShakerIsShaking = (): CommandCreatorError => {
   return {
     type: 'HEATER_SHAKER_IS_SHAKING',
