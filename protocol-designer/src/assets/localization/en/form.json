@@ -36,7 +36,10 @@
         "label": "Add a wavelength"
       },
       "color_parentheses": "({{color}})",
-      "current_initialization_settings": "Current initialization settings",
+      "current_initialization_settings": {
+        "title": "Current initialization settings",
+        "tooltip": "Module must be empty to change initialization settings"
+      },
       "custom_wavelength": {
         "caption": "Value between 350 - 1000 nm",
         "label": "Custom wavelength"
@@ -47,7 +50,7 @@
         "wavelength_out_of_range": "Value falls outside of accepted range"
       },
       "export_settings": {
-        "description": "A .csv file will appear upon protocol completion in your downloads folder.",
+        "description": "Absorbance Plate Reader data is saved as a .csv file and can be found on the robot's detail page in the Desktop App.",
         "title": "Export settings"
       },
       "initialization_setting": {
