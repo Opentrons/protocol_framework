@@ -196,7 +196,7 @@ class AbstractInstrument(ABC, Generic[WellCoreType]):
 
     @abstractmethod
     def evotip_dispense(
-        self, location: types.Location, volume: float, flow_rate: float, in_place: Optional[bool] = False
+        self, location: types.Location, well_core: WellCoreType, volume: float, flow_rate: float, push_out: Optional[float]
     ) -> None:
         ...
 

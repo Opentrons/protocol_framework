@@ -394,12 +394,12 @@ from .evotip_unseal_pipette import (
     EvotipUnsealResult,
     EvotipUnsealPipetteCommandType,
 )
-from .evotip_dispense_in_place import (
-    EvotipDispenseInPlace,
-    EvotipDispenseInPlaceParams,
-    EvotipDispenseInPlaceCreate,
-    EvotipDispenseInPlaceResult,
-    EvotipDispenseInPlaceCommandType,
+from .evotip_dispense import (
+    EvotipDispense,
+    EvotipDispenseParams,
+    EvotipDispenseCreate,
+    EvotipDispenseResult,
+    EvotipDispenseCommandType,
 )
 
 __all__ = [
@@ -705,9 +705,9 @@ __all__ = [
     "EvotipUnsealResult",
     "EvotipUnsealPipetteCommandType",
     # evotip dispense command bundle
-    "EvotipDispenseInPlace",
-    "EvotipDispenseInPlaceParams",
-    "EvotipDispenseInPlaceCreate",
-    "EvotipDispenseInPlaceResult",
-    "EvotipDispenseInPlaceCommandType",
+    "EvotipDispense",
+    "EvotipDispenseParams",
+    "EvotipDispenseCreate",
+    "EvotipDispenseResult",
+    "EvotipDispenseCommandType",
 ]

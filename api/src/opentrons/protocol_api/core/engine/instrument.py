@@ -64,14 +64,12 @@ class InstrumentCore(AbstractInstrument[WellCore]):
         engine_client: EngineClient,
         sync_hardware_api: SyncHardwareAPI,
         protocol_core: ProtocolCore,
-        robot_core: RobotCore,
         default_movement_speed: float,
     ) -> None:
         self._pipette_id = pipette_id
         self._engine_client = engine_client
         self._sync_hardware_api = sync_hardware_api
         self._protocol_core = protocol_core
-        self._robot_core = robot_core
 
         # TODO(jbl 2022-11-03) flow_rates should not live in the cores, and should be moved to the protocol context
         #   along with other rate related refactors (for the hardware API)
@@ -721,20 +719,43 @@ class InstrumentCore(AbstractInstrument[WellCore]):
         )
 
     def evotip_dispense(
-        self, volume: float, flow_rate: float, in_place: Optional[bool] = False
+        self, location: Location, well_core: WellCore, volume: float, flow_rate: float, push_out: Optional[float]
     ) -> None:
-        plunger_position = self._robot_core.get_plunger_position_from_volume(
-            mount=self.get_mount,
-            volume=volume,
-            action=PipetteActionTypes.DISPENSE_ACTION,
-            robot_type=self._protocol_core.robot_type,
+        """
+        Args:
+            volume: The volume of liquid to dispense, in microliters.
+            location: The exact location to dispense to.
+            well_core: The well to dispense to, if applicable.
+            flow_rate: The flow rate in µL/s to dispense at.
+            push_out: The amount to push the plunger below bottom position.
+        """
+        if isinstance(location, (TrashBin, WasteChute)):
+            raise ValueError("Trash Bin and Waste Chute have no Wells.")
+        well_name = well_core.get_name()
+        labware_id = well_core.labware_id
+
+        well_location = self._engine_client.state.geometry.get_relative_liquid_handling_well_location(
+            labware_id=labware_id,
+            well_name=well_name,
+            absolute_point=location.point,
+            is_meniscus=None,
+        )
+        pipette_movement_conflict.check_safe_for_pipette_movement(
+            engine_state=self._engine_client.state,
+            pipette_id=self._pipette_id,
+            labware_id=labware_id,
+            well_name=well_name,
+            well_location=well_location,
         )
         self._engine_client.execute_command(
-            cmd.EvotipDispenseInPlaceParams(
+            cmd.EvotipDispenseParams(
                 pipetteId=self._pipette_id,
-                flowRate=flow_rate,
-                plungerPosition=plunger_position,
+                labwareId=labware_id,
+                wellName=well_name,
+                wellLocation=well_location,
                 volume=volume,
+                flowRate=flow_rate,
+                pushOut=push_out,
             )
         )
 

@@ -1777,11 +1777,12 @@ class InstrumentContext(publisher.CommandPublisher):
         return self
 
     @requires_version(2, 22)
-    def pressurize(
+    def evotip_dispense(
         self,
         location: types.Location,
         volume: float,
         flow_rate: float,
+        push_out: Optional[float] = None
     ) -> InstrumentContext:
         """Seal resin tips onto the pipette.
 
@@ -1795,6 +1796,34 @@ class InstrumentContext(publisher.CommandPublisher):
 
         :type location: :py:class:`~.types.Location`
         """
+        well: Optional[labware.Well] = None
+        last_location = self._get_last_location_by_api_version()
+
+        try:
+            target = validation.validate_location(
+                location=location, last_location=last_location
+            )
+        except validation.NoLocationError as e:
+            raise RuntimeError(
+                "If dispense is called without an explicit location, another"
+                " method that moves to a location (such as move_to or "
+                "aspirate) must previously have been called so the robot "
+                "knows where it is."
+            ) from e
+
+        if isinstance(target, validation.WellTarget):
+            well = target.well
+            if target.location:
+                move_to_location = target.location
+            elif well.parent._core.is_fixed_trash():
+                move_to_location = target.well.top()
+            else:
+                move_to_location = target.well.bottom(
+                    z=self._well_bottom_clearances.dispense
+                )
+        else:
+            raise RuntimeError("A well must be specified when using `evotip_dispense`.")
+
         with publisher.publish_context(
             broker=self.broker,
             command=cmds.pressurize(
@@ -1803,8 +1832,8 @@ class InstrumentContext(publisher.CommandPublisher):
                 flow_rate=flow_rate,
             ),
         ):
-            self._core.evotip_dispense(location, volume, flow_rate)
-            return self
+            self._core.evotip_dispense(move_to_location, well_core=well._core, volume=volume, flow_rate=flow_rate, push_out=push_out)
+        return self
 
     @requires_version(2, 18)
     def _retract(
