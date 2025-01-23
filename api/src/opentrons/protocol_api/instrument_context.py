@@ -1749,6 +1749,7 @@ class InstrumentContext(publisher.CommandPublisher):
     def unseal(
         self,
         location: Union[labware.Well, labware.Labware],
+        home_after: Optional[bool] = None,
     ) -> InstrumentContext:
         """Release resin tips from the pipette.
 
@@ -1772,7 +1773,7 @@ class InstrumentContext(publisher.CommandPublisher):
                 location=well,
             ),
         ):
-            self._core.evotip_unseal(location=location, well_core=well._core)
+            self._core.evotip_unseal(location=location, well_core=well._core, home_after=home_after)
 
         return self
 

@@ -76,7 +76,7 @@ class TipHandler(TypingProtocol):
         """
         ...
 
-    async def drop_tip(self, pipette_id: str, home_after: Optional[bool]) -> None:
+    async def drop_tip(self, pipette_id: str, home_after: Optional[bool], do_not_ignore_tip_presence: Optional[bool] = True) -> None:
         """Drop the attached tip into the current location.
 
         Pipette should be in place over the destination prior to calling this method.
@@ -267,7 +267,7 @@ class HardwareTipHandler(TipHandler):
 
         return tip_geometry
 
-    async def drop_tip(self, pipette_id: str, home_after: Optional[bool]) -> None:
+    async def drop_tip(self, pipette_id: str, home_after: Optional[bool], do_not_ignore_tip_presence: Optional[bool] = True) -> None:
         """See documentation on abstract base class."""
         hw_mount = self._get_hw_mount(pipette_id)
 
@@ -280,8 +280,9 @@ class HardwareTipHandler(TipHandler):
 
         await self._hardware_api.tip_drop_moves(mount=hw_mount, **kwargs)
 
-        # Allow TipNotAttachedError to propagate.
-        await self.verify_tip_presence(pipette_id, TipPresenceStatus.ABSENT)
+        if do_not_ignore_tip_presence:
+            # Allow TipNotAttachedError to propagate.
+            await self.verify_tip_presence(pipette_id, TipPresenceStatus.ABSENT)
 
         self.remove_tip(pipette_id)
 
@@ -428,6 +429,7 @@ class VirtualTipHandler(TipHandler):
         self,
         pipette_id: str,
         home_after: Optional[bool],
+        do_not_ignore_tip_presence: Optional[bool] = True
     ) -> None:
         """Pick up a tip at the current location using a virtual pipette.
 

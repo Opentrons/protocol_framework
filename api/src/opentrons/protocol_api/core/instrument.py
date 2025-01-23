@@ -191,7 +191,7 @@ class AbstractInstrument(ABC, Generic[WellCoreType]):
         ...
 
     @abstractmethod
-    def evotip_unseal(self, location: types.Location, well_core: WellCoreType, in_place: Optional[bool] = False) -> None:
+    def evotip_unseal(self, location: types.Location, well_core: WellCoreType, home_after: Optional[bool]) -> None:
         ...
 
     @abstractmethod

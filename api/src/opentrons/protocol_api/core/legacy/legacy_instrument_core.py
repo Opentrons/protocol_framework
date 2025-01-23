@@ -410,7 +410,7 @@ class LegacyInstrumentCore(AbstractInstrument[LegacyWellCore]):
         assert False, "evotip_seal only supported in API 2.22 & later"
 
     def evotip_unseal(
-        self, location: types.Location, well_core: WellCore, in_place: Optional[bool] = False
+        self, location: types.Location, well_core: WellCore, home_after: Optional[bool]
     ) -> None:
         """This will never be called because it was added in API 2.22."""
         assert False, "evotip_unseal only supported in API 2.22 & later"

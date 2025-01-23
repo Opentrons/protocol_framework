@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING, Optional, Type
 from typing_extensions import Literal
 
 from opentrons.protocol_engine.resources.model_utils import ModelUtils
+from opentrons.protocol_engine.errors import UnsupportedLabwareForActionError
 
 from ..types import DropTipWellLocation
 from .pipetting_common import (
@@ -53,14 +54,14 @@ class EvotipUnsealPipetteParams(PipetteIdMixin):
     )
 
 
-class EvotipUnsealResult(DestinationPositionResult):
+class EvotipUnsealPipetteResult(DestinationPositionResult):
     """Result data from the execution of a DropTip command."""
 
     pass
 
 
 _ExecuteReturn = (
-    SuccessData[EvotipUnsealResult] | DefinedErrorData[StallOrCollisionError]
+    SuccessData[EvotipUnsealPipetteResult] | DefinedErrorData[StallOrCollisionError]
 )
 
 
@@ -90,12 +91,11 @@ class EvotipUnsealPipetteImplementation(
         home_after = params.homeAfter
 
         well_location = params.wellLocation
-        if not labware_validation.is_evotips(
-            self._state_view.labware.get_definition(
-                params.labwareId
-            ).parameters.loadName
-        ):
-            raise ValueError()
+        labware_definition = self._state_view.labware.get_definition(params.labwareId)
+        if not labware_validation.is_evotips(labware_definition.parameters.loadName):
+            raise UnsupportedLabwareForActionError(
+                f"Cannot use command: `EvotipUnsealPipette` with labware: {labware_definition.parameters.loadName}"
+            )
         is_partially_configured = self._state_view.pipettes.get_is_partially_configured(
             pipette_id=pipette_id
         )
@@ -117,10 +117,10 @@ class EvotipUnsealPipetteImplementation(
         if isinstance(move_result, DefinedErrorData):
             return move_result
 
-        await self._tip_handler.drop_tip(pipette_id=pipette_id, home_after=home_after)
+        await self._tip_handler.drop_tip(pipette_id=pipette_id, home_after=home_after, do_not_ignore_tip_presence=False)
 
         return SuccessData(
-            public=EvotipUnsealResult(position=move_result.public.position),
+            public=EvotipUnsealPipetteResult(position=move_result.public.position),
             state_update=move_result.state_update.set_fluid_unknown(
                 pipette_id=pipette_id
             ).update_pipette_tip_state(pipette_id=params.pipetteId, tip_geometry=None),
@@ -128,20 +128,20 @@ class EvotipUnsealPipetteImplementation(
 
 
 class EvotipUnsealPipette(
-    BaseCommand[EvotipUnsealPipetteParams, EvotipUnsealResult, StallOrCollisionError]
+    BaseCommand[EvotipUnsealPipetteParams, EvotipUnsealPipetteResult, StallOrCollisionError]
 ):
     """Evotip unseal command model."""
 
     commandType: EvotipUnsealPipetteCommandType = "evotipUnsealPipette"
     params: EvotipUnsealPipetteParams
-    result: Optional[EvotipUnsealResult]
+    result: Optional[EvotipUnsealPipetteResult]
 
     _ImplementationCls: Type[
         EvotipUnsealPipetteImplementation
     ] = EvotipUnsealPipetteImplementation
 
 
-class EvotipUnsealCreate(BaseCommandCreate[EvotipUnsealPipetteParams]):
+class EvotipUnsealPipetteCreate(BaseCommandCreate[EvotipUnsealPipetteParams]):
     """Evotip unseal command creation request model."""
 
     commandType: EvotipUnsealPipetteCommandType = "evotipUnsealPipette"

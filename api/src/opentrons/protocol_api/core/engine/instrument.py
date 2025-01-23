@@ -42,10 +42,9 @@ from . import overlap_versions, pipette_movement_conflict
 from .well import WellCore
 from ..instrument import AbstractInstrument
 from ...disposal_locations import TrashBin, WasteChute
-from opentrons.protocol_api._types import PipetteActionTypes
 
 if TYPE_CHECKING:
-    from .protocol import ProtocolCore, RobotCore
+    from .protocol import ProtocolCore
     from opentrons.protocol_api._liquid import LiquidClass
 
 _DISPENSE_VOLUME_VALIDATION_ADDED_IN = APIVersion(2, 17)
@@ -700,14 +699,33 @@ class InstrumentCore(AbstractInstrument[WellCore]):
         )
 
     def evotip_unseal(
-        self, location: Location, well_core: WellCore, in_place: Optional[bool] = False
+        self, location: Location, well_core: WellCore, home_after: Optional[bool]
     ) -> None:
-        labware_id = well_core.labware_id
         well_name = well_core.get_name()
-        well_location = self._engine_client.state.geometry.get_relative_well_location(
+        labware_id = well_core.labware_id
+
+        if location is not None:
+            relative_well_location = (
+                self._engine_client.state.geometry.get_relative_well_location(
+                    labware_id=labware_id,
+                    well_name=well_name,
+                    absolute_point=location.point,
+                )
+            )
+
+            well_location = DropTipWellLocation(
+                origin=DropTipWellOrigin(relative_well_location.origin.value),
+                offset=relative_well_location.offset,
+            )
+        else:
+            well_location = DropTipWellLocation()
+
+        pipette_movement_conflict.check_safe_for_pipette_movement(
+            engine_state=self._engine_client.state,
+            pipette_id=self._pipette_id,
             labware_id=labware_id,
             well_name=well_name,
-            absolute_point=location.point,
+            well_location=well_location,
         )
         self._engine_client.execute_command(
             cmd.EvotipUnsealPipetteParams(
@@ -715,8 +733,11 @@ class InstrumentCore(AbstractInstrument[WellCore]):
                 labwareId=labware_id,
                 wellName=well_name,
                 wellLocation=well_location,
+                homeAfter=home_after,
             )
         )
+
+        self._protocol_core.set_last_location(location=location, mount=self.get_mount())
 
     def evotip_dispense(
         self, location: Location, well_core: WellCore, volume: float, flow_rate: float, push_out: Optional[float]

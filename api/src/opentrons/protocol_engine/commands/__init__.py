@@ -390,8 +390,8 @@ from .evotip_seal_pipette import (
 from .evotip_unseal_pipette import (
     EvotipUnsealPipette,
     EvotipUnsealPipetteParams,
-    EvotipUnsealCreate,
-    EvotipUnsealResult,
+    EvotipUnsealPipetteCreate,
+    EvotipUnsealPipetteResult,
     EvotipUnsealPipetteCommandType,
 )
 from .evotip_dispense import (
@@ -701,8 +701,8 @@ __all__ = [
     # evotip unseal command bundle
     "EvotipUnsealPipette",
     "EvotipUnsealPipetteParams",
-    "EvotipUnsealCreate",
-    "EvotipUnsealResult",
+    "EvotipUnsealPipetteCreate",
+    "EvotipUnsealPipetteResult",
     "EvotipUnsealPipetteCommandType",
     # evotip dispense command bundle
     "EvotipDispense",
