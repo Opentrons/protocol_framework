@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import '@testing-library/jest-dom/vitest'
 import { FLEX_ROBOT_TYPE, OT2_ROBOT_TYPE } from '@opentrons/shared-data'
 import { fireEvent, screen } from '@testing-library/react'
@@ -46,7 +46,9 @@ describe('SelectModules', () => {
     } as WizardTileProps
     vi.mocked(getEnableAbsorbanceReader).mockReturnValue(true)
   })
-
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
   it('renders the flex options and overall text', () => {
     render(props)
     screen.getByText('Step 4')
@@ -95,7 +97,6 @@ describe('SelectModules', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Go back' }))
     expect(props.goBack).toHaveBeenCalled()
   })
-
   it('disables absorbance reader if no gripper', () => {
     render(props)
     fireEvent.click(screen.getByText('Absorbance Plate Reader Module GEN1'))
