@@ -2668,6 +2668,7 @@
       "key": "command.ASPIRATE-0",
       "notes": [],
       "params": {
+        "correctionVolume": 0.0,
         "flowRate": 92.86,
         "labwareId": "UUID",
         "pipetteId": "UUID",
@@ -2702,6 +2703,7 @@
       "key": "command.DISPENSE-0",
       "notes": [],
       "params": {
+        "correctionVolume": 0.0,
         "flowRate": 92.86,
         "labwareId": "UUID",
         "pipetteId": "UUID",

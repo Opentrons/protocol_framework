@@ -7046,6 +7046,7 @@
       "key": "command.ASPIRATE-0",
       "notes": [],
       "params": {
+        "correctionVolume": 0.0,
         "flowRate": 94.0,
         "labwareId": "UUID",
         "pipetteId": "UUID",

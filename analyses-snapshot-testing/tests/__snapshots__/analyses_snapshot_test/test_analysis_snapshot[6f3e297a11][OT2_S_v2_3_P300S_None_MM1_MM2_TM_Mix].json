@@ -3130,6 +3130,7 @@
       "key": "command.ASPIRATE-0",
       "notes": [],
       "params": {
+        "correctionVolume": 0.0,
         "flowRate": 46.43,
         "labwareId": "UUID",
         "pipetteId": "UUID",
@@ -3164,6 +3165,7 @@
       "key": "command.DISPENSE-0",
       "notes": [],
       "params": {
+        "correctionVolume": 0.0,
         "flowRate": 46.43,
         "labwareId": "UUID",
         "pipetteId": "UUID",
@@ -3198,6 +3200,7 @@
       "key": "command.ASPIRATE-1",
       "notes": [],
       "params": {
+        "correctionVolume": 0.0,
         "flowRate": 46.43,
         "labwareId": "UUID",
         "pipetteId": "UUID",
@@ -3232,6 +3235,7 @@
       "key": "command.DISPENSE-1",
       "notes": [],
       "params": {
+        "correctionVolume": 0.0,
         "flowRate": 46.43,
         "labwareId": "UUID",
         "pipetteId": "UUID",
@@ -3266,6 +3270,7 @@
       "key": "command.ASPIRATE-2",
       "notes": [],
       "params": {
+        "correctionVolume": 0.0,
         "flowRate": 46.43,
         "labwareId": "UUID",
         "pipetteId": "UUID",
@@ -3300,6 +3305,7 @@
       "key": "command.DISPENSE-2",
       "notes": [],
       "params": {
+        "correctionVolume": 0.0,
         "flowRate": 46.43,
         "labwareId": "UUID",
         "pipetteId": "UUID",
@@ -3334,6 +3340,7 @@
       "key": "command.ASPIRATE-3",
       "notes": [],
       "params": {
+        "correctionVolume": 0.0,
         "flowRate": 46.43,
         "labwareId": "UUID",
         "pipetteId": "UUID",
@@ -3368,6 +3375,7 @@
       "key": "command.DISPENSE-3",
       "notes": [],
       "params": {
+        "correctionVolume": 0.0,
         "flowRate": 46.43,
         "labwareId": "UUID",
         "pipetteId": "UUID",

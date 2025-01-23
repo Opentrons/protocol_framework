@@ -12051,6 +12051,7 @@
       "key": "78c85766-1162-491e-b184-5a81303e90fe",
       "notes": [],
       "params": {
+        "correctionVolume": 0.0,
         "flowRate": 6.0,
         "labwareId": "UUID",
         "pipetteId": "UUID",
@@ -12085,6 +12086,7 @@
       "key": "2a7371d1-de5c-4eec-a8b3-cf4c0912997f",
       "notes": [],
       "params": {
+        "correctionVolume": 0.0,
         "flowRate": 6.0,
         "labwareId": "UUID",
         "pipetteId": "UUID",
@@ -12194,6 +12196,7 @@
       "key": "e455aaa3-b216-488a-9350-d48803f76f58",
       "notes": [],
       "params": {
+        "correctionVolume": 0.0,
         "flowRate": 6.0,
         "labwareId": "UUID",
         "pipetteId": "UUID",
@@ -12228,6 +12231,7 @@
       "key": "836048ac-7025-4e72-8748-441b7930b9ca",
       "notes": [],
       "params": {
+        "correctionVolume": 0.0,
         "flowRate": 6.0,
         "labwareId": "UUID",
         "pipetteId": "UUID",
@@ -12351,6 +12355,7 @@
       "key": "efafa14f-a822-4936-aa4b-f1816fbce0cf",
       "notes": [],
       "params": {
+        "correctionVolume": 0.0,
         "flowRate": 6.0,
         "labwareId": "UUID",
         "pipetteId": "UUID",
@@ -12385,6 +12390,7 @@
       "key": "331b1293-2ea7-4bec-8764-ce5e681076e8",
       "notes": [],
       "params": {
+        "correctionVolume": 0.0,
         "flowRate": 6.0,
         "labwareId": "UUID",
         "pipetteId": "UUID",

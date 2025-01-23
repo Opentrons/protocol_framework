@@ -1760,6 +1760,7 @@
       "key": "982615cd-7c02-4348-a73d-4b477185f4e7",
       "notes": [],
       "params": {
+        "correctionVolume": 0.0,
         "flowRate": 137.35,
         "labwareId": "UUID",
         "pipetteId": "UUID",
@@ -1794,6 +1795,7 @@
       "key": "0228305f-739c-4551-b985-4a497b41cdff",
       "notes": [],
       "params": {
+        "correctionVolume": 0.0,
         "flowRate": 137.35,
         "labwareId": "UUID",
         "pipetteId": "UUID",
@@ -1828,6 +1830,7 @@
       "key": "e60ab109-74a6-4881-b4f4-42ea6fad6f27",
       "notes": [],
       "params": {
+        "correctionVolume": 0.0,
         "flowRate": 137.35,
         "labwareId": "UUID",
         "pipetteId": "UUID",
@@ -1862,6 +1865,7 @@
       "key": "f55d9a7f-7f95-4c91-82ca-04d7374cf546",
       "notes": [],
       "params": {
+        "correctionVolume": 0.0,
         "flowRate": 137.35,
         "labwareId": "UUID",
         "pipetteId": "UUID",
