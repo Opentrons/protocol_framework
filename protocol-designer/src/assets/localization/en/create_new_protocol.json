@@ -2,6 +2,7 @@
   "add_custom_tips": "Add custom pipette tips",
   "add_fixtures": "Add your fixtures",
   "add_gripper": "Add a gripper",
+  "add_gripper_for_absorbance_reader": "Add a gripper to enable adding Absorbance Plate Reader",
   "add_modules": "Add your modules",
   "add_pipette": "Add a pipette",
   "add_pipette_to_continue": "Add a pipette to continue",
