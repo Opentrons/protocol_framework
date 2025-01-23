@@ -196,7 +196,7 @@ export function SelectModules(props: WizardTileProps): JSX.Element | null {
                       key={moduleModel}
                       moduleModel={moduleModel}
                       areSlotsAvailable={numSlotsAvailable > 0}
-                      isGripperAttached={hasGripper}
+                      hasGripper={hasGripper}
                       handleAddModule={handleAddModule}
                     />
                   )
@@ -310,25 +310,19 @@ export function SelectModules(props: WizardTileProps): JSX.Element | null {
 interface AddModuleEmptySelectorButtonProps {
   moduleModel: ModuleModel
   areSlotsAvailable: boolean
-  isGripperAttached: boolean
+  hasGripper: boolean
   handleAddModule: (arg0: ModuleModel, arg1: boolean) => void
 }
 
 function AddModuleEmptySelectorButton(
   props: AddModuleEmptySelectorButtonProps
 ): JSX.Element {
-  const {
-    moduleModel,
-    areSlotsAvailable,
-    isGripperAttached,
-    handleAddModule,
-  } = props
+  const { moduleModel, areSlotsAvailable, hasGripper, handleAddModule } = props
   const [targetProps, tooltipProps] = useHoverTooltip()
   const { t } = useTranslation('create_new_protocol')
   const disableGripperRequired =
-    !isGripperAttached && moduleModel === ABSORBANCE_READER_V1
+    !hasGripper && moduleModel === ABSORBANCE_READER_V1
 
-  console.log({ isGripperAttached, moduleModel, disableGripperRequired })
   return (
     <>
       <Flex {...targetProps}>
