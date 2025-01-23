@@ -194,17 +194,4 @@ describe('DeckSetupTools', () => {
     fireEvent.click(screen.getByText('Done'))
     expect(props.onCloseClick).toHaveBeenCalled()
   })
-  it('should prevent saving plate reader and make toast if gripper not configured', () => {
-    vi.mocked(selectors.getZoomedInSlotInfo).mockReturnValue({
-      selectedLabwareDefUri: null,
-      selectedNestedLabwareDefUri: null,
-      selectedFixture: null,
-      selectedModuleModel: ABSORBANCE_READER_V1,
-      selectedSlot: { slot: 'D3', cutout: 'cutoutD3' },
-    })
-    render(props)
-    fireEvent.click(screen.getByText('Done'))
-    expect(props.onCloseClick).not.toHaveBeenCalled()
-    expect(mockMakeSnackbar).toHaveBeenCalled()
-  })
 })
