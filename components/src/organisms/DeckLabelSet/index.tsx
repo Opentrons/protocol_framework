@@ -46,7 +46,7 @@ const DeckLabelSetComponent = (
           ? deckLabels.map((deckLabel, index) => (
               <DeckLabel
                 key={`DeckLabel_${index}`}
-                maxWidth={`calc(${width}px - ${SPACING.spacing8})`}
+                maxWidth={`calc(${width}px - 8px)`}
                 {...deckLabel}
                 isLast={deckLabels.length - 1 === index}
               />
