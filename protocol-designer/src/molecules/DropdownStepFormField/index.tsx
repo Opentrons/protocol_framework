@@ -50,7 +50,7 @@ export function DropdownStepFormField(
   const handleSelection = (value: string): void => {
     let text = t('application:selected')
     if (fieldName === 'newLocation') {
-      text = t('application:location')
+      text = t('application:new_location')
     } else if (fieldName === 'aspirate_labware') {
       text = t('application:source')
     } else if (fieldName === 'dispense_labware') {

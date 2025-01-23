@@ -161,15 +161,15 @@
       },
       "ABSORBANCE_READER_NO_INITIALIZATION": {
         "title": "Missing Absorbance Plate Reader initialization step",
-        "body": "The Absorbance Plate Reader must be initialized before reading labware. Initialize the Absorbance Plate Reader module or remove this step to proceed."
+        "body": "This step tries to read labware without initializing the Absorbance Plate Reader first. Initialize the Absorbance Plate Reader module or remove this step in order to proceed."
       },
       "ABSORBANCE_READER_LID_CLOSED": {
         "title": "Absorbance Plate Reader Module lid closed",
         "body": "This step tries to use labware in the Absorbance Plate Reader. Open the lid before this step."
       },
       "ABSORBANCE_READER_NO_GRIPPER": {
-        "title": "Cannot change lid state without gripper",
-        "body": "This step involves opening or closing the Absorbance Plate Reader lid with a gripper. Add a gripper or remove step to proceed."
+        "title": "Cannot change Absorbance Plate Reader lid state without gripper",
+        "body": "The gripper is required to open or close the plate reader lid. Add a gripper or remove this step to proceed."
       }
     },
     "warning": {
