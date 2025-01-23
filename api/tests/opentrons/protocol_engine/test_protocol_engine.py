@@ -27,7 +27,7 @@ from opentrons.protocol_engine.types import (
     LabwareOffset,
     LabwareOffsetCreate,
     LabwareOffsetVector,
-    LabwareOffsetLocation,
+    LegacyLabwareOffsetLocation,
     LabwareUri,
     ModuleDefinition,
     ModuleModel,
@@ -1030,12 +1030,12 @@ def test_add_labware_offset(
     """It should have the labware offset request resolved and added to state."""
     request = LabwareOffsetCreate(
         definitionUri="definition-uri",
-        location=LabwareOffsetLocation(slotName=DeckSlotName.SLOT_1),
+        location=LegacyLabwareOffsetLocation(slotName=DeckSlotName.SLOT_1),
         vector=LabwareOffsetVector(x=1, y=2, z=3),
     )
     standardized_request = LabwareOffsetCreate(
         definitionUri="standardized-definition-uri",
-        location=LabwareOffsetLocation(slotName=DeckSlotName.SLOT_2),
+        location=LegacyLabwareOffsetLocation(slotName=DeckSlotName.SLOT_2),
         vector=LabwareOffsetVector(x=2, y=3, z=4),
     )
 
@@ -1066,7 +1066,7 @@ def test_add_labware_offset(
     result = subject.add_labware_offset(
         request=LabwareOffsetCreate(
             definitionUri="definition-uri",
-            location=LabwareOffsetLocation(slotName=DeckSlotName.SLOT_1),
+            location=LegacyLabwareOffsetLocation(slotName=DeckSlotName.SLOT_1),
             vector=LabwareOffsetVector(x=1, y=2, z=3),
         )
     )

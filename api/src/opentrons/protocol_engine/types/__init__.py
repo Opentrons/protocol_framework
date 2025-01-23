@@ -86,7 +86,7 @@ from .labware import (
     LoadedLabware,
 )
 from .liquid import HexColor, EmptyLiquidId, LiquidId, Liquid, FluidKind, AspiratedFluid
-from .labware_offset_location import LabwareOffsetLocation
+from .labware_offset_location import LegacyLabwareOffsetLocation
 from .labware_offset_vector import LabwareOffsetVector
 from .well_position import (
     WellOrigin,
@@ -194,7 +194,7 @@ __all__ = [
     "NonStackedLocation",
     "DeckPoint",
     # Labware offset location
-    "LabwareOffsetLocation",
+    "LegacyLabwareOffsetLocation",
     # Labware offset vector
     "LabwareOffsetVector",
     # Labware

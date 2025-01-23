@@ -34,7 +34,7 @@ from opentrons.protocol_engine.types import (
     Dimensions,
     LabwareOffset,
     LabwareOffsetVector,
-    LabwareOffsetLocation,
+    LegacyLabwareOffsetLocation,
     LoadedLabware,
     ModuleModel,
     ModuleLocation,
@@ -838,7 +838,7 @@ def test_get_labware_offset_vector() -> None:
         id="offset-id",
         createdAt=datetime(year=2021, month=1, day=2),
         definitionUri="some-labware-uri",
-        location=LabwareOffsetLocation(slotName=DeckSlotName.SLOT_1),
+        location=LegacyLabwareOffsetLocation(slotName=DeckSlotName.SLOT_1),
         vector=offset_vector,
     )
 
@@ -866,7 +866,7 @@ def test_get_labware_offset() -> None:
         id="id-a",
         createdAt=datetime(year=2021, month=1, day=1),
         definitionUri="uri-a",
-        location=LabwareOffsetLocation(slotName=DeckSlotName.SLOT_1),
+        location=LegacyLabwareOffsetLocation(slotName=DeckSlotName.SLOT_1),
         vector=LabwareOffsetVector(x=1, y=1, z=1),
     )
 
@@ -874,7 +874,7 @@ def test_get_labware_offset() -> None:
         id="id-b",
         createdAt=datetime(year=2022, month=2, day=2),
         definitionUri="uri-b",
-        location=LabwareOffsetLocation(slotName=DeckSlotName.SLOT_2),
+        location=LegacyLabwareOffsetLocation(slotName=DeckSlotName.SLOT_2),
         vector=LabwareOffsetVector(x=2, y=2, z=2),
     )
 
@@ -894,7 +894,7 @@ def test_get_labware_offsets() -> None:
         id="id-a",
         createdAt=datetime(year=2021, month=1, day=1),
         definitionUri="uri-a",
-        location=LabwareOffsetLocation(slotName=DeckSlotName.SLOT_1),
+        location=LegacyLabwareOffsetLocation(slotName=DeckSlotName.SLOT_1),
         vector=LabwareOffsetVector(x=1, y=1, z=1),
     )
 
@@ -902,7 +902,7 @@ def test_get_labware_offsets() -> None:
         id="id-b",
         createdAt=datetime(year=2022, month=2, day=2),
         definitionUri="uri-b",
-        location=LabwareOffsetLocation(slotName=DeckSlotName.SLOT_2),
+        location=LegacyLabwareOffsetLocation(slotName=DeckSlotName.SLOT_2),
         vector=LabwareOffsetVector(x=2, y=2, z=2),
     )
 
@@ -926,7 +926,7 @@ def test_find_applicable_labware_offset() -> None:
         id="id-1",
         createdAt=datetime(year=2021, month=1, day=1),
         definitionUri="definition-uri",
-        location=LabwareOffsetLocation(slotName=DeckSlotName.SLOT_1),
+        location=LegacyLabwareOffsetLocation(slotName=DeckSlotName.SLOT_1),
         vector=LabwareOffsetVector(x=1, y=1, z=1),
     )
 
@@ -935,7 +935,7 @@ def test_find_applicable_labware_offset() -> None:
         id="id-2",
         createdAt=datetime(year=2022, month=2, day=2),
         definitionUri="definition-uri",
-        location=LabwareOffsetLocation(slotName=DeckSlotName.SLOT_1),
+        location=LegacyLabwareOffsetLocation(slotName=DeckSlotName.SLOT_1),
         vector=LabwareOffsetVector(x=2, y=2, z=2),
     )
 
@@ -943,7 +943,7 @@ def test_find_applicable_labware_offset() -> None:
         id="id-3",
         createdAt=datetime(year=2023, month=3, day=3),
         definitionUri="on-module-definition-uri",
-        location=LabwareOffsetLocation(
+        location=LegacyLabwareOffsetLocation(
             slotName=DeckSlotName.SLOT_1,
             moduleModel=ModuleModel.TEMPERATURE_MODULE_V1,
         ),
@@ -959,7 +959,7 @@ def test_find_applicable_labware_offset() -> None:
     assert (
         subject.find_applicable_labware_offset(
             definition_uri="definition-uri",
-            location=LabwareOffsetLocation(slotName=DeckSlotName.SLOT_1),
+            location=LegacyLabwareOffsetLocation(slotName=DeckSlotName.SLOT_1),
         )
         == offset_2
     )
@@ -967,7 +967,7 @@ def test_find_applicable_labware_offset() -> None:
     assert (
         subject.find_applicable_labware_offset(
             definition_uri="on-module-definition-uri",
-            location=LabwareOffsetLocation(
+            location=LegacyLabwareOffsetLocation(
                 slotName=DeckSlotName.SLOT_1,
                 moduleModel=ModuleModel.TEMPERATURE_MODULE_V1,
             ),
@@ -979,7 +979,7 @@ def test_find_applicable_labware_offset() -> None:
     assert (
         subject.find_applicable_labware_offset(
             definition_uri="different-definition-uri",
-            location=LabwareOffsetLocation(slotName=DeckSlotName.SLOT_1),
+            location=LegacyLabwareOffsetLocation(slotName=DeckSlotName.SLOT_1),
         )
         is None
     )
@@ -988,7 +988,7 @@ def test_find_applicable_labware_offset() -> None:
     assert (
         subject.find_applicable_labware_offset(
             definition_uri="different-definition-uri",
-            location=LabwareOffsetLocation(slotName=DeckSlotName.SLOT_2),
+            location=LegacyLabwareOffsetLocation(slotName=DeckSlotName.SLOT_2),
         )
         is None
     )

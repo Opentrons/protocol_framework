@@ -14,7 +14,7 @@ from opentrons.protocol_engine import (
     LabwareLocation,
     LabwareMovementStrategy,
     LabwareOffsetCreate,
-    LabwareOffsetLocation,
+    LegacyLabwareOffsetLocation,
     LabwareOffsetVector,
     ModuleLocation,
     ModuleModel,
@@ -41,7 +41,7 @@ def test_standardize_labware_offset(
     """It should convert deck slots in `LabwareOffsetCreate`s."""
     original = LabwareOffsetCreate(
         definitionUri="opentrons-test/foo/1",
-        location=LabwareOffsetLocation(
+        location=LegacyLabwareOffsetLocation(
             moduleModel=module_model,
             slotName=slot_name,
         ),
@@ -49,7 +49,7 @@ def test_standardize_labware_offset(
     )
     expected = LabwareOffsetCreate(
         definitionUri="opentrons-test/foo/1",
-        location=LabwareOffsetLocation(
+        location=LegacyLabwareOffsetLocation(
             moduleModel=module_model,
             slotName=expected_slot_name,
         ),

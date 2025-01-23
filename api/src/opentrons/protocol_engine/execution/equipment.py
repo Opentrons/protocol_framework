@@ -45,7 +45,7 @@ from ..types import (
     ModuleLocation,
     OnLabwareLocation,
     LabwareOffset,
-    LabwareOffsetLocation,
+    LegacyLabwareOffsetLocation,
     ModuleModel,
     ModuleDefinition,
     AddressableAreaLocation,
@@ -649,9 +649,9 @@ class EquipmentHandler:
 
     def _get_labware_offset_location_from_labware_location(
         self, labware_location: LabwareLocation
-    ) -> Optional[LabwareOffsetLocation]:
+    ) -> Optional[LegacyLabwareOffsetLocation]:
         if isinstance(labware_location, DeckSlotLocation):
-            return LabwareOffsetLocation(slotName=labware_location.slotName)
+            return LegacyLabwareOffsetLocation(slotName=labware_location.slotName)
         elif isinstance(labware_location, ModuleLocation):
             module_id = labware_location.moduleId
             # Allow ModuleNotLoadedError to propagate.
@@ -685,7 +685,9 @@ class EquipmentHandler:
                 module_id=module_id
             )
             slot_name = module_location.slotName
-            return LabwareOffsetLocation(slotName=slot_name, moduleModel=module_model)
+            return LegacyLabwareOffsetLocation(
+                slotName=slot_name, moduleModel=module_model
+            )
         elif isinstance(labware_location, OnLabwareLocation):
             parent_labware_id = labware_location.labwareId
             parent_labware_uri = self._state_store.labware.get_definition_uri(
@@ -703,9 +705,9 @@ class EquipmentHandler:
                 return None
 
             # If labware is being stacked on itself, all labware in the stack will share a labware offset due to
-            # them sharing the same definitionUri in `LabwareOffsetLocation`. This will not be true for the
+            # them sharing the same definitionUri in `LegacyLabwareOffsetLocation`. This will not be true for the
             # bottom-most labware, which will have a `DeckSlotLocation` and have its definitionUri field empty.
-            return LabwareOffsetLocation(
+            return LegacyLabwareOffsetLocation(
                 slotName=base_labware_offset_location.slotName,
                 moduleModel=base_labware_offset_location.moduleModel,
                 definitionUri=parent_labware_uri,

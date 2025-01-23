@@ -51,7 +51,7 @@ from ..types import (
     AddressableAreaLocation,
     AddressableOffsetVector,
     StagingSlotLocation,
-    LabwareOffsetLocation,
+    LegacyLabwareOffsetLocation,
     ModuleModel,
 )
 from .config import Config
@@ -1360,22 +1360,24 @@ class GeometryView:
             labware_id=labware_id, slot_name=None
         )
 
-    def get_offset_location(self, labware_id: str) -> Optional[LabwareOffsetLocation]:
-        """Provide the LabwareOffsetLocation specifying the current position of the labware.
+    def get_offset_location(
+        self, labware_id: str
+    ) -> Optional[LegacyLabwareOffsetLocation]:
+        """Provide the LegacyLabwareOffsetLocation specifying the current position of the labware.
 
-        If the labware is in a location that cannot be specified by a LabwareOffsetLocation
+        If the labware is in a location that cannot be specified by a LegacyLabwareOffsetLocation
         (for instance, OFF_DECK) then return None.
         """
         parent_location = self._labware.get_location(labware_id)
 
         if isinstance(parent_location, DeckSlotLocation):
-            return LabwareOffsetLocation(
+            return LegacyLabwareOffsetLocation(
                 slotName=parent_location.slotName, moduleModel=None, definitionUri=None
             )
         elif isinstance(parent_location, ModuleLocation):
             module_model = self._modules.get_requested_model(parent_location.moduleId)
             module_location = self._modules.get_location(parent_location.moduleId)
-            return LabwareOffsetLocation(
+            return LegacyLabwareOffsetLocation(
                 slotName=module_location.slotName,
                 moduleModel=module_model,
                 definitionUri=None,
@@ -1385,7 +1387,7 @@ class GeometryView:
 
             parent_uri = self._labware.get_definition_uri(parent_location.labwareId)
             if isinstance(non_labware_parent_location, DeckSlotLocation):
-                return LabwareOffsetLocation(
+                return LegacyLabwareOffsetLocation(
                     slotName=non_labware_parent_location.slotName,
                     moduleModel=None,
                     definitionUri=parent_uri,
@@ -1397,7 +1399,7 @@ class GeometryView:
                 module_location = self._modules.get_location(
                     non_labware_parent_location.moduleId
                 )
-                return LabwareOffsetLocation(
+                return LegacyLabwareOffsetLocation(
                     slotName=module_location.slotName,
                     moduleModel=module_model,
                     definitionUri=parent_uri,

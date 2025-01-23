@@ -23,7 +23,7 @@ from opentrons.protocol_engine.clients import SyncClient as EngineClient
 from opentrons.protocol_engine.errors import LabwareNotOnDeckError
 from opentrons.protocol_engine.types import (
     LabwareOffsetCreate,
-    LabwareOffsetLocation,
+    LegacyLabwareOffsetLocation,
     LabwareOffsetVector,
 )
 from opentrons.protocol_api._liquid import Liquid
@@ -106,7 +106,7 @@ def test_set_calibration_succeeds_in_ok_location(
     decoy.when(
         mock_engine_client.state.labware.get_display_name("cool-labware")
     ).then_return("what a cool labware")
-    location = LabwareOffsetLocation(slotName=DeckSlotName.SLOT_C2)
+    location = LegacyLabwareOffsetLocation(slotName=DeckSlotName.SLOT_C2)
     decoy.when(
         mock_engine_client.state.geometry.get_offset_location("cool-labware")
     ).then_return(location)

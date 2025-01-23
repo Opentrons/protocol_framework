@@ -162,7 +162,7 @@ async def test_create_with_options(
 
     labware_offset = pe_types.LabwareOffsetCreate(
         definitionUri="namespace/load_name/version",
-        location=pe_types.LabwareOffsetLocation(slotName=DeckSlotName.SLOT_5),
+        location=pe_types.LegacyLabwareOffsetLocation(slotName=DeckSlotName.SLOT_5),
         vector=pe_types.LabwareOffsetVector(x=1, y=2, z=3),
     )
 

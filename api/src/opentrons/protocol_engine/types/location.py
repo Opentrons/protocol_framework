@@ -13,7 +13,7 @@ class DeckSlotLocation(BaseModel):
     slotName: DeckSlotName = Field(
         ...,
         description=(
-            # This description should be kept in sync with LabwareOffsetLocation.slotName.
+            # This description should be kept in sync with LegacyLabwareOffsetLocation.slotName.
             "A slot on the robot's deck."
             "\n\n"
             'The plain numbers like `"5"` are for the OT-2,'
@@ -33,7 +33,7 @@ class StagingSlotLocation(BaseModel):
     slotName: StagingSlotName = Field(
         ...,
         description=(
-            # This description should be kept in sync with LabwareOffsetLocation.slotName.
+            # This description should be kept in sync with LegacyLabwareOffsetLocation.slotName.
             "A slot on the robot's staging area."
             "\n\n"
             "These apply only to the Flex. The OT-2 has no staging slots."

@@ -12,7 +12,7 @@ from opentrons.types import DeckSlotName
 from .module import ModuleModel
 
 
-class LabwareOffsetLocation(BaseModel):
+class LegacyLabwareOffsetLocation(BaseModel):
     """Parameters describing when a given offset may apply to a given labware load."""
 
     slotName: DeckSlotName = Field(

@@ -8,7 +8,7 @@ from datetime import datetime
 from pydantic import BaseModel, Field
 
 from .location import LabwareLocation
-from .labware_offset_location import LabwareOffsetLocation
+from .labware_offset_location import LegacyLabwareOffsetLocation
 from .labware_offset_vector import LabwareOffsetVector
 from .util import Vec3f
 
@@ -28,7 +28,7 @@ class LabwareOffset(BaseModel):
     id: str = Field(..., description="Unique labware offset record identifier.")
     createdAt: datetime = Field(..., description="When this labware offset was added.")
     definitionUri: str = Field(..., description="The URI for the labware's definition.")
-    location: LabwareOffsetLocation = Field(
+    location: LegacyLabwareOffsetLocation = Field(
         ...,
         description="Where the labware is located on the robot.",
     )
@@ -42,7 +42,7 @@ class LabwareOffsetCreate(BaseModel):
     """Create request data for a labware offset."""
 
     definitionUri: str = Field(..., description="The URI for the labware's definition.")
-    location: LabwareOffsetLocation = Field(
+    location: LegacyLabwareOffsetLocation = Field(
         ...,
         description="Where the labware is located on the robot.",
     )

@@ -41,7 +41,7 @@ from ..types import (
     Dimensions,
     LabwareOffset,
     LabwareOffsetVector,
-    LabwareOffsetLocation,
+    LegacyLabwareOffsetLocation,
     LabwareLocation,
     LoadedLabware,
     ModuleLocation,
@@ -831,7 +831,7 @@ class LabwareView:
     def find_applicable_labware_offset(
         self,
         definition_uri: str,
-        location: LabwareOffsetLocation,
+        location: LegacyLabwareOffsetLocation,
     ) -> Optional[LabwareOffset]:
         """Find a labware offset that applies to the given definition and location.
 

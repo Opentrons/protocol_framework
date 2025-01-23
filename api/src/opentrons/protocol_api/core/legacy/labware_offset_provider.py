@@ -3,7 +3,11 @@ from dataclasses import dataclass
 from typing import Optional
 
 from opentrons.hardware_control.modules import ModuleModel as HardwareModuleModel
-from opentrons.protocol_engine import ProtocolEngine, LabwareOffsetLocation, ModuleModel
+from opentrons.protocol_engine import (
+    ProtocolEngine,
+    LegacyLabwareOffsetLocation,
+    ModuleModel,
+)
 from opentrons.types import DeckSlotName, Point
 
 from ..labware import LabwareLoadParams
@@ -83,7 +87,7 @@ class LabwareOffsetProvider(AbstractLabwareOffsetProvider):
         """
         offset = self._labware_view.find_applicable_labware_offset(
             definition_uri=load_params.as_uri(),
-            location=LabwareOffsetLocation(
+            location=LegacyLabwareOffsetLocation(
                 slotName=deck_slot,
                 moduleModel=(
                     None

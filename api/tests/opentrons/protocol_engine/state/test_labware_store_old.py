@@ -19,7 +19,7 @@ from opentrons.protocol_engine.types import (
     LabwareOffset,
     LabwareOffsetCreate,
     LabwareOffsetVector,
-    LabwareOffsetLocation,
+    LegacyLabwareOffsetLocation,
     DeckSlotLocation,
     LoadedLabware,
     OFF_DECK_LOCATION,
@@ -66,7 +66,7 @@ def test_handles_add_labware_offset(
     """It should add the labware offset to the state and add the ID."""
     request = LabwareOffsetCreate(
         definitionUri="offset-definition-uri",
-        location=LabwareOffsetLocation(slotName=DeckSlotName.SLOT_1),
+        location=LegacyLabwareOffsetLocation(slotName=DeckSlotName.SLOT_1),
         vector=LabwareOffsetVector(x=1, y=2, z=3),
     )
 
@@ -74,7 +74,7 @@ def test_handles_add_labware_offset(
         id="offset-id",
         createdAt=datetime(year=2021, month=1, day=2),
         definitionUri="offset-definition-uri",
-        location=LabwareOffsetLocation(slotName=DeckSlotName.SLOT_1),
+        location=LegacyLabwareOffsetLocation(slotName=DeckSlotName.SLOT_1),
         vector=LabwareOffsetVector(x=1, y=2, z=3),
     )
 
@@ -101,7 +101,7 @@ def test_handles_load_labware(
     """It should add the labware data to the state."""
     offset_request = LabwareOffsetCreate(
         definitionUri="offset-definition-uri",
-        location=LabwareOffsetLocation(slotName=DeckSlotName.SLOT_1),
+        location=LegacyLabwareOffsetLocation(slotName=DeckSlotName.SLOT_1),
         vector=LabwareOffsetVector(x=1, y=2, z=3),
     )
 
@@ -182,7 +182,7 @@ def test_handles_reload_labware(
 
     offset_request = LabwareOffsetCreate(
         definitionUri="offset-definition-uri",
-        location=LabwareOffsetLocation(slotName=DeckSlotName.SLOT_1),
+        location=LegacyLabwareOffsetLocation(slotName=DeckSlotName.SLOT_1),
         vector=LabwareOffsetVector(x=1, y=2, z=3),
     )
     subject.handle_action(
@@ -244,7 +244,7 @@ def test_handles_move_labware(
     comment_command = create_comment_command()
     offset_request = LabwareOffsetCreate(
         definitionUri="offset-definition-uri",
-        location=LabwareOffsetLocation(slotName=DeckSlotName.SLOT_1),
+        location=LegacyLabwareOffsetLocation(slotName=DeckSlotName.SLOT_1),
         vector=LabwareOffsetVector(x=1, y=2, z=3),
     )
     subject.handle_action(
@@ -299,7 +299,7 @@ def test_handles_move_labware_off_deck(
     comment_command = create_comment_command()
     offset_request = LabwareOffsetCreate(
         definitionUri="offset-definition-uri",
-        location=LabwareOffsetLocation(slotName=DeckSlotName.SLOT_1),
+        location=LegacyLabwareOffsetLocation(slotName=DeckSlotName.SLOT_1),
         vector=LabwareOffsetVector(x=1, y=2, z=3),
     )
     subject.handle_action(
