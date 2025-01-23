@@ -365,7 +365,7 @@ from .evotip_seal_pipette import (
     EvotipSealPipetteParams,
     EvotipSealPipetteCreate,
     EvotipSealPipetteResult,
-    EvotipSealPipetteCommandType
+    EvotipSealPipetteCommandType,
 )
 
 from .evotip_dispense import (
@@ -373,7 +373,7 @@ from .evotip_dispense import (
     EvotipDispenseParams,
     EvotipDispenseCreate,
     EvotipDispenseResult,
-    EvotipDispenseCommandType
+    EvotipDispenseCommandType,
 )
 
 from .evotip_unseal_pipette import (
@@ -381,7 +381,7 @@ from .evotip_unseal_pipette import (
     EvotipUnsealPipetteParams,
     EvotipUnsealPipetteCreate,
     EvotipUnsealPipetteResult,
-    EvotipUnsealPipetteCommandType
+    EvotipUnsealPipetteCommandType,
 )
 
 Command = Annotated[

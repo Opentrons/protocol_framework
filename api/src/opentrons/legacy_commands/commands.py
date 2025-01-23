@@ -330,7 +330,6 @@ def pressurize(
     volume: float,
     flow_rate: float,
 ) -> command_types.PressurizeCommand:
-    location_text = stringify_location(location)
     text = f"Pressurize pipette for {volume}uL at {flow_rate}uL/s."
     return {
         "name": command_types.PRESSURIZE,

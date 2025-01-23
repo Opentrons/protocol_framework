@@ -117,7 +117,11 @@ class EvotipUnsealPipetteImplementation(
         if isinstance(move_result, DefinedErrorData):
             return move_result
 
-        await self._tip_handler.drop_tip(pipette_id=pipette_id, home_after=home_after, do_not_ignore_tip_presence=False)
+        await self._tip_handler.drop_tip(
+            pipette_id=pipette_id,
+            home_after=home_after,
+            do_not_ignore_tip_presence=False,
+        )
 
         return SuccessData(
             public=EvotipUnsealPipetteResult(position=move_result.public.position),
@@ -128,7 +132,9 @@ class EvotipUnsealPipetteImplementation(
 
 
 class EvotipUnsealPipette(
-    BaseCommand[EvotipUnsealPipetteParams, EvotipUnsealPipetteResult, StallOrCollisionError]
+    BaseCommand[
+        EvotipUnsealPipetteParams, EvotipUnsealPipetteResult, StallOrCollisionError
+    ]
 ):
     """Evotip unseal command model."""
 

@@ -9,7 +9,7 @@ from typing_extensions import Literal
 
 from opentrons.protocol_engine.errors import UnsupportedLabwareForActionError
 from ..resources import ModelUtils, labware_validation
-from ..types import PickUpTipWellLocation, TipGeometry
+from ..types import PickUpTipWellLocation, TipGeometry, FluidKind, AspiratedFluid
 from .pipetting_common import (
     PipetteIdMixin,
 )
@@ -25,10 +25,16 @@ from .command import (
     DefinedErrorData,
     SuccessData,
 )
+from .pipetting_common import aspirate_in_place
+
+from opentrons.hardware_control import HardwareControlAPI
+from opentrons.hardware_control.types import Axis
+from ..state.update_types import StateUpdate
 
 if TYPE_CHECKING:
     from ..state.state import StateView
-    from ..execution import MovementHandler, TipHandler, GantryMover
+    from ..execution import MovementHandler, TipHandler, GantryMover, PipettingHandler, Had
+    from ..notes import CommandNoteAdder
 
 
 EvotipSealPipetteCommandType = Literal["evotipSealPipette"]
@@ -100,7 +106,10 @@ class EvotipSealPipetteImplementation(
         tip_handler: TipHandler,
         model_utils: ModelUtils,
         movement: MovementHandler,
+        hardware_api: HardwareControlAPI,
         gantry_mover: GantryMover,
+        command_note_adder: CommandNoteAdder,
+        pipetting: PipettingHandler,
         **kwargs: object,
     ) -> None:
         self._state_view = state_view
@@ -108,6 +117,9 @@ class EvotipSealPipetteImplementation(
         self._model_utils = model_utils
         self._movement = movement
         self._gantry_mover = gantry_mover
+        self._command_note_adder = command_note_adder
+        self._pipetting = pipetting
+        self._hardware_api = hardware_api
 
     async def relative_pickup_tip(
         self,
@@ -205,21 +217,38 @@ class EvotipSealPipetteImplementation(
         if isinstance(move_result, DefinedErrorData):
             return move_result
 
+        # Aspirate to move plunger to a maximum volume position per pipette type
         tip_geometry = self._state_view.geometry.get_nominal_tip_geometry(
             pipette_id, labware_id, well_name
         )
+        maximum_volume = self._state_view.pipettes.get_maximum_volume(pipette_id)
+        if self._state_view.pipettes.get_mount(pipette_id) == MountType.LEFT:
+            self._hardware_api.home(axes = [Axis.P_L])
+        else:
+            self._hardware_api.home(axes = [Axis.P_R])
+
+        # Begin relative pickup steps for the resin tips
+
         channels = self._state_view.tips.get_pipette_active_channels(pipette_id)
         mount = self._state_view.pipettes.get_mount(pipette_id)
         if params.tipPickUpParams and channels != 96:
             await self.relative_pickup_tip(
-                pipette_id=pipette_id, tip_geometry=tip_geometry, tip_pick_up_params=params.tipPickUpParams, mount=mount, press_fit=True
+                pipette_id=pipette_id,
+                tip_geometry=tip_geometry,
+                tip_pick_up_params=params.tipPickUpParams,
+                mount=mount,
+                press_fit=True,
             )
         elif channels == 96:
             pick_up_params = (
                 params.tipPickUpParams if params.tipPickUpParams else TipPickUpParams()
             )
             await self.relative_pickup_tip(
-                pipette_id=pipette_id, tip_geometry=tip_geometry, tip_pick_up_params=pick_up_params, mount=mount, press_fit=True
+                pipette_id=pipette_id,
+                tip_geometry=tip_geometry,
+                tip_pick_up_params=pick_up_params,
+                mount=mount,
+                press_fit=True,
             )
         else:
             tip_geometry = await self._tip_handler.pick_up_tip(
@@ -228,10 +257,14 @@ class EvotipSealPipetteImplementation(
                 well_name=well_name,
                 do_not_ignore_tip_presence=False,
             )
-        state_update = move_result.state_update.update_pipette_tip_state(
+        state_update = StateUpdate()
+        state_update.update_pipette_tip_state(
             pipette_id=pipette_id,
             tip_geometry=tip_geometry,
-        ).set_fluid_empty(pipette_id=pipette_id)
+        )
+        
+        
+        state_update.set_fluid_aspirated(pipette_id=pipette_id, fluid=AspiratedFluid(kind=FluidKind.LIQUID, volume=maximum_volume))
         return SuccessData(
             public=EvotipSealPipetteResult(
                 tipVolume=tip_geometry.volume,

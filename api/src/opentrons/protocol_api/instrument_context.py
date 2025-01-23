@@ -1742,7 +1742,9 @@ class InstrumentContext(publisher.CommandPublisher):
                 location=well,
             ),
         ):
-            self._core.evotip_seal(location=well.top(), well_core=well._core, in_place=False)
+            self._core.evotip_seal(
+                location=well.top(), well_core=well._core, in_place=False
+            )
         return self
 
     @requires_version(2, 22)
@@ -1773,7 +1775,9 @@ class InstrumentContext(publisher.CommandPublisher):
                 location=well,
             ),
         ):
-            self._core.evotip_unseal(location=location, well_core=well._core, home_after=home_after)
+            self._core.evotip_unseal(
+                location=well.top(), well_core=well._core, home_after=home_after
+            )
 
         return self
 
@@ -1783,7 +1787,7 @@ class InstrumentContext(publisher.CommandPublisher):
         location: types.Location,
         volume: float,
         flow_rate: float,
-        push_out: Optional[float] = None
+        push_out: Optional[float] = None,
     ) -> InstrumentContext:
         """Seal resin tips onto the pipette.
 
@@ -1833,7 +1837,13 @@ class InstrumentContext(publisher.CommandPublisher):
                 flow_rate=flow_rate,
             ),
         ):
-            self._core.evotip_dispense(move_to_location, well_core=well._core, volume=volume, flow_rate=flow_rate, push_out=push_out)
+            self._core.evotip_dispense(
+                move_to_location,
+                well_core=well._core,
+                volume=volume,
+                flow_rate=flow_rate,
+                push_out=push_out,
+            )
         return self
 
     @requires_version(2, 18)

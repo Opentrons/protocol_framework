@@ -331,6 +331,9 @@ class PipetteStore(HasState[PipetteState], HandlesActions):
     def _update_aspirated(
         self, update: update_types.PipetteAspiratedFluidUpdate
     ) -> None:
+        if self._state.pipette_contents_by_id[update.pipette_id] is None:
+          self._state.pipette_contents_by_id[update.pipette_id] = fluid_stack.FluidStack()
+          
         self._fluid_stack_log_if_empty(update.pipette_id).add_fluid(update.fluid)
 
     def _update_ejected(self, update: update_types.PipetteEjectedFluidUpdate) -> None:

@@ -13,7 +13,11 @@ from .pipetting_common import (
     BaseLiquidHandlingResult,
     dispense_in_place,
 )
-from .movement_common import LiquidHandlingWellLocationMixin, StallOrCollisionError, move_to_well
+from .movement_common import (
+    LiquidHandlingWellLocationMixin,
+    StallOrCollisionError,
+    move_to_well,
+)
 
 from .command import (
     AbstractCommandImpl,
@@ -35,7 +39,9 @@ if TYPE_CHECKING:
 EvotipDispenseCommandType = Literal["evotipDispense"]
 
 
-class EvotipDispenseParams(PipetteIdMixin, DispenseVolumeMixin, FlowRateMixin, LiquidHandlingWellLocationMixin):
+class EvotipDispenseParams(
+    PipetteIdMixin, DispenseVolumeMixin, FlowRateMixin, LiquidHandlingWellLocationMixin
+):
     """Payload required to dispense in place."""
 
     pushOut: Optional[float] = Field(
@@ -140,9 +146,7 @@ class EvotipDispenseImplementation(
                         current_location.well_name,
                         params.pipetteId,
                     ),
-                    volume_added=volume_added
-                    if volume_added is not None
-                    else CLEAR,
+                    volume_added=volume_added if volume_added is not None else CLEAR,
                 ),
             )
         else:
@@ -153,9 +157,7 @@ class EvotipDispenseImplementation(
 
 
 class EvotipDispense(
-    BaseCommand[
-        EvotipDispenseParams, EvotipDispenseResult, StallOrCollisionError
-    ]
+    BaseCommand[EvotipDispenseParams, EvotipDispenseResult, StallOrCollisionError]
 ):
     """DispenseInPlace command model."""
 

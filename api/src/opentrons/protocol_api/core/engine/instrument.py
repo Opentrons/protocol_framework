@@ -683,10 +683,12 @@ class InstrumentCore(AbstractInstrument[WellCore]):
     ) -> None:
         labware_id = well_core.labware_id
         well_name = well_core.get_name()
-        well_location = self._engine_client.state.geometry.get_relative_pick_up_tip_well_location(
-            labware_id=labware_id,
-            well_name=well_name,
-            absolute_point=location.point
+        well_location = (
+            self._engine_client.state.geometry.get_relative_pick_up_tip_well_location(
+                labware_id=labware_id,
+                well_name=well_name,
+                absolute_point=location.point,
+            )
         )
 
         self._engine_client.execute_command(
@@ -740,7 +742,12 @@ class InstrumentCore(AbstractInstrument[WellCore]):
         self._protocol_core.set_last_location(location=location, mount=self.get_mount())
 
     def evotip_dispense(
-        self, location: Location, well_core: WellCore, volume: float, flow_rate: float, push_out: Optional[float]
+        self,
+        location: Location,
+        well_core: WellCore,
+        volume: float,
+        flow_rate: float,
+        push_out: Optional[float],
     ) -> None:
         """
         Args:
