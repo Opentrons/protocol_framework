@@ -334,6 +334,7 @@ function WavelengthItem(props: WavelengthItemProps): JSX.Element {
             handleDeleteWavelength(index)
           }}
           alignSelf={ALIGN_FLEX_END}
+          padding={SPACING.spacing4}
         >
           <StyledText
             desktopStyle="bodyDefaultRegular"
