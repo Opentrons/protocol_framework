@@ -6,6 +6,8 @@ from typing import Dict, Optional, Mapping
 
 from opentrons.drivers.flex_stacker.types import (
     Direction,
+    LEDColor,
+    LEDPattern,
     MoveParams,
     MoveResult,
     StackerAxis,
@@ -114,6 +116,11 @@ class FlexStacker(mod_abc.AbstractModule):
             disconnected_callback=disconnected_callback,
         )
 
+        # Enable stallguard
+        await driver.set_stallguard_threshold(StackerAxis.X, True, 2)
+        await driver.set_stallguard_threshold(StackerAxis.Z, True, 2)
+        await driver.set_stallguard_threshold(StackerAxis.L, True, 2)
+
         try:
             await poller.start()
         except Exception:
@@ -145,6 +152,7 @@ class FlexStacker(mod_abc.AbstractModule):
         self._reader = reader
         self._poller = poller
         self._stacker_status = FlexStackerStatus.IDLE
+        self._stall_detected = False;
 
     async def cleanup(self) -> None:
         """Stop the poller task"""
@@ -227,6 +235,25 @@ class FlexStacker(mod_abc.AbstractModule):
     async def deactivate(self, must_be_running: bool = True) -> None:
         await self._driver.stop_motors()
 
+    async def reset_stall_detected(self) -> None:
+        """Sets the statusbar to normal."""
+        if self._stall_detected:
+            await self.set_led_state(0.5, LEDColor.GREEN, LEDPattern.STATIC)
+            self._stall_detected = False
+
+    async def set_led_state(
+        self,
+        power: float,
+        color: Optional[LEDColor] = None,
+        pattern: Optional[LEDPattern] = None,
+        duration: Optional[int] = None,
+        reps: Optional[int] = None,
+    ) -> bool:
+        """Sets the statusbar state."""
+        return await self._driver.set_led(
+            power, color=color, pattern=pattern, duration=duration, reps=reps
+        )
+
     async def move_axis(
         self,
         axis: StackerAxis,
@@ -237,6 +264,7 @@ class FlexStacker(mod_abc.AbstractModule):
         current: Optional[float] = None,
     ) -> bool:
         """Move the axis in a direction by the given distance in mm."""
+        await self.reset_stall_detected()
         motion_params = STACKER_MOTION_CONFIG[axis]["move"]
         await self._driver.set_run_current(axis, current or motion_params.current or 0)
         if any([speed, acceleration]):
@@ -245,6 +273,7 @@ class FlexStacker(mod_abc.AbstractModule):
         distance = direction.distance(distance)
         res = await self._driver.move_in_mm(axis, distance, params=motion_params)
         if res == MoveResult.STALL_ERROR:
+            self._stall_detected = True
             raise FlexStackerStallError(self.device_info["serial"], axis)
         return res == MoveResult.NO_ERROR
 
@@ -256,6 +285,7 @@ class FlexStacker(mod_abc.AbstractModule):
         acceleration: Optional[float] = None,
         current: Optional[float] = None,
     ) -> bool:
+        await self.reset_stall_detected()
         motion_params = STACKER_MOTION_CONFIG[axis]["home"]
         await self._driver.set_run_current(axis, current or motion_params.current or 0)
         # Set the max hold current for the Z axis
@@ -268,6 +298,7 @@ class FlexStacker(mod_abc.AbstractModule):
             axis=axis, direction=direction, params=motion_params
         )
         if success == MoveResult.STALL_ERROR:
+            self._stall_detected = True
             raise FlexStackerStallError(self.device_info["serial"], axis)
         return success == MoveResult.NO_ERROR
 

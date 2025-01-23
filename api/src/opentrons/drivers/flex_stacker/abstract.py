@@ -1,6 +1,7 @@
-from typing import List, Protocol
+from typing import List, Optional, Protocol
 
 from .types import (
+    LEDPattern,
     LimitSwitchStatus,
     MoveResult,
     StackerAxis,
@@ -122,9 +123,15 @@ class AbstractFlexStackerDriver(Protocol):
         ...
 
     async def set_led(
-        self, power: float, color: LEDColor | None = None, external: bool | None = None
+        self,
+        power: float,
+        color: Optional[LEDColor] = None,
+        external: Optional[bool] = None,
+        pattern: Optional[LEDPattern] = None,
+        duration: Optional[int] = None,
+        reps: Optional[int] = None,
     ) -> bool:
-        """Set LED color of status bar."""
+        """Set LED Status bar color and pattern."""
         ...
 
     async def enter_programming_mode(self) -> None:
