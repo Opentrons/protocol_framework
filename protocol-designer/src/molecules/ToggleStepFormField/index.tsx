@@ -4,7 +4,7 @@ import {
   DIRECTION_COLUMN,
   Flex,
   JUSTIFY_SPACE_BETWEEN,
-  ListItem,
+  ListButton,
   SPACING,
   StyledText,
   TOOLTIP_BOTTOM,
@@ -43,12 +43,14 @@ export function ToggleStepFormField(
 
   return (
     <>
-      <ListItem type="noActive">
-        <Flex
-          padding={SPACING.spacing12}
-          width="100%"
-          flexDirection={DIRECTION_COLUMN}
-        >
+      <ListButton
+        type="noActive"
+        padding={SPACING.spacing12}
+        onClick={() => {
+          toggleUpdateValue(!toggleValue)
+        }}
+      >
+        <Flex width="100%" flexDirection={DIRECTION_COLUMN}>
           <Flex
             justifyContent={JUSTIFY_SPACE_BETWEEN}
             alignItems={ALIGN_CENTER}
@@ -68,9 +70,6 @@ export function ToggleStepFormField(
               {isDisabled ? null : (
                 <ToggleButton
                   disabled={isDisabled}
-                  onClick={() => {
-                    toggleUpdateValue(!toggleValue)
-                  }}
                   label={isSelected ? onLabel : offLabel}
                   toggledOn={isSelected}
                 />
@@ -78,7 +77,7 @@ export function ToggleStepFormField(
             </Flex>
           </Flex>
         </Flex>
-      </ListItem>
+      </ListButton>
     </>
   )
 }
