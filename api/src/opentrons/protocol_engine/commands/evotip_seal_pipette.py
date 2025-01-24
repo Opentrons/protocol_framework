@@ -128,6 +128,7 @@ class EvotipSealPipetteImplementation(
         tip_pick_up_params: TipPickUpParams,
         mount: MountType,
         press_fit: bool,
+        current_volume: float,
     ) -> None:
         prep_distance = tip_pick_up_params.prepDistance
         press_distance = tip_pick_up_params.pressDistance
@@ -174,7 +175,7 @@ class EvotipSealPipetteImplementation(
             )
 
             # Lower tip presence
-            await self._gantry_mover.move_axes(axis_map={mount_axis: 2}, speed=10)
+            await self._gantry_mover.move_axes(axis_map={mount_axis: 2}, speed=10, relative_move=True)
             await self._gantry_mover.move_axes(
                 axis_map={MotorAxis.AXIS_96_CHANNEL_CAM: ejector_push_mm},
                 speed=5.5,
@@ -185,9 +186,11 @@ class EvotipSealPipetteImplementation(
                 speed=5.5,
                 relative_move=True,
             )
+
         # cache_tip
         if self._state_view.config.use_virtual_pipettes is False:
             self._tip_handler.cache_tip(pipette_id, tip_geometry)
+            self._hardware_api.hardware_instruments[mount.to_hw_mount()].set_current_volume(current_volume)
 
     async def execute(
         self, params: EvotipSealPipetteParams
@@ -238,6 +241,7 @@ class EvotipSealPipetteImplementation(
                 tip_pick_up_params=params.tipPickUpParams,
                 mount=mount,
                 press_fit=True,
+                current_volume=maximum_volume,
             )
         elif channels == 96:
             pick_up_params = (
@@ -248,14 +252,15 @@ class EvotipSealPipetteImplementation(
                 tip_geometry=tip_geometry,
                 tip_pick_up_params=pick_up_params,
                 mount=mount,
-                press_fit=True,
+                press_fit=False,
+                current_volume=maximum_volume,
             )
         else:
             tip_geometry = await self._tip_handler.pick_up_tip(
                 pipette_id=pipette_id,
                 labware_id=labware_id,
                 well_name=well_name,
-                do_not_ignore_tip_presence=False,
+                do_not_ignore_tip_presence=True,
             )
         state_update = StateUpdate()
         state_update.update_pipette_tip_state(

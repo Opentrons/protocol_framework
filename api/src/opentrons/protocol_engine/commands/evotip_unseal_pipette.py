@@ -8,6 +8,8 @@ from typing_extensions import Literal
 
 from opentrons.protocol_engine.resources.model_utils import ModelUtils
 from opentrons.protocol_engine.errors import UnsupportedLabwareForActionError
+from opentrons.protocol_engine.types import MotorAxis
+from opentrons.types import MountType
 
 from ..types import DropTipWellLocation
 from .pipetting_common import (
@@ -29,7 +31,7 @@ from ..resources import labware_validation
 
 if TYPE_CHECKING:
     from ..state.state import StateView
-    from ..execution import MovementHandler, TipHandler
+    from ..execution import MovementHandler, TipHandler, GantryMover
 
 
 EvotipUnsealPipetteCommandType = Literal["evotipUnsealPipette"]
@@ -76,12 +78,14 @@ class EvotipUnsealPipetteImplementation(
         tip_handler: TipHandler,
         movement: MovementHandler,
         model_utils: ModelUtils,
+        gantry_mover: GantryMover,
         **kwargs: object,
     ) -> None:
         self._state_view = state_view
         self._tip_handler = tip_handler
         self._movement_handler = movement
         self._model_utils = model_utils
+        self._gantry_mover = gantry_mover
 
     async def execute(self, params: EvotipUnsealPipetteParams) -> _ExecuteReturn:
         """Move to and drop a tip using the requested pipette."""
@@ -116,11 +120,20 @@ class EvotipUnsealPipetteImplementation(
         )
         if isinstance(move_result, DefinedErrorData):
             return move_result
+        
+        # Move to an appropriate position
+        mount = self._state_view.pipettes.get_mount(pipette_id)
+        
+        mount_axis = MotorAxis.LEFT_Z if mount == MountType.LEFT else MotorAxis.RIGHT_Z
+        await self._gantry_mover.move_axes(
+                axis_map={mount_axis: -14}, speed=10, relative_move=True
+            )
 
         await self._tip_handler.drop_tip(
             pipette_id=pipette_id,
             home_after=home_after,
             do_not_ignore_tip_presence=False,
+            ignore_plunger=True,
         )
 
         return SuccessData(

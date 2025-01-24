@@ -81,6 +81,7 @@ class TipHandler(TypingProtocol):
         pipette_id: str,
         home_after: Optional[bool],
         do_not_ignore_tip_presence: Optional[bool] = True,
+        ignore_plunger: Optional[bool] = False,
     ) -> None:
         """Drop the attached tip into the current location.
 
@@ -277,6 +278,7 @@ class HardwareTipHandler(TipHandler):
         pipette_id: str,
         home_after: Optional[bool],
         do_not_ignore_tip_presence: Optional[bool] = True,
+        ignore_plunger: Optional[bool] = False,
     ) -> None:
         """See documentation on abstract base class."""
         hw_mount = self._get_hw_mount(pipette_id)
@@ -288,7 +290,7 @@ class HardwareTipHandler(TipHandler):
         else:
             kwargs = {}
 
-        await self._hardware_api.tip_drop_moves(mount=hw_mount, **kwargs)
+        await self._hardware_api.tip_drop_moves(mount=hw_mount, ignore_plunger=ignore_plunger, **kwargs)
 
         if do_not_ignore_tip_presence:
             # Allow TipNotAttachedError to propagate.
@@ -440,6 +442,7 @@ class VirtualTipHandler(TipHandler):
         pipette_id: str,
         home_after: Optional[bool],
         do_not_ignore_tip_presence: Optional[bool] = True,
+        ignore_plunger: Optional[bool] = False,
     ) -> None:
         """Pick up a tip at the current location using a virtual pipette.
 
