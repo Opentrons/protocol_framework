@@ -34,7 +34,7 @@ export const pauseFormToArgs = (
         commandCreatorFnName: 'delay',
         name: formData.stepName,
         description: formData.stepDetails ?? '',
-        wait: totalSeconds,
+        seconds: totalSeconds,
         message,
         meta: {
           hours,
@@ -48,7 +48,7 @@ export const pauseFormToArgs = (
         commandCreatorFnName: 'delay',
         name: formData.stepName,
         description: formData.stepDetails ?? '',
-        wait: true,
+        seconds: null,
         message,
         meta: {
           hours,

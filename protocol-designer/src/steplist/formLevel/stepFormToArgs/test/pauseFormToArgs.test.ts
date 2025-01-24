@@ -41,7 +41,7 @@ describe('pauseFormToArgs', () => {
     const expected = {
       commandCreatorFnName: 'delay',
       name: 'pause step',
-      wait: true,
+      seconds: null,
       message: 'some message',
       description: 'some details',
       meta: {
@@ -66,7 +66,7 @@ describe('pauseFormToArgs', () => {
     const expected = {
       commandCreatorFnName: 'delay',
       name: 'pause step',
-      wait: 3600 + 20 * 60 + 5,
+      seconds: 3600 + 20 * 60 + 5,
       message: 'some message',
       description: 'some details',
       meta: {
