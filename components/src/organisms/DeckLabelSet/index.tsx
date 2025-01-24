@@ -82,8 +82,12 @@ const LabelContainer = styled.div`
     border-bottom-right-radius: ${BORDERS.borderRadius4};
   }
 
+  & > *:not(:first-child) {
+    border-top-right-radius: ${BORDERS.borderRadius4};
+    border-bottom-right-radius: ${BORDERS.borderRadius4};
+  }
+
   & > *:last-child {
     border-bottom-left-radius: ${BORDERS.borderRadius4};
-    border-bottom-right-radius: ${BORDERS.borderRadius4};
   }
 `
