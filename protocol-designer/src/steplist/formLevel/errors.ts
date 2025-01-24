@@ -122,6 +122,8 @@ const MODULE_ID_REQUIRED: FormError = {
   title:
     'Module is required. Ensure the appropriate module is present on the deck and selected for this step',
   dependentFields: ['moduleId'],
+  showAtForm: false,
+  showAtField: true,
 }
 const TARGET_TEMPERATURE_REQUIRED: FormError = {
   title: 'Temperature required',
@@ -390,6 +392,13 @@ const FILENAME_REQUIRED: FormError = {
   showAtForm: false,
   showAtField: true,
   page: 1,
+}
+const ABSORBANCE_READER_MODULE_ID_REQUIRED: FormError = {
+  title: 'Module required',
+  dependentFields: ['moduleId'],
+  showAtForm: false,
+  showAtField: true,
+  page: 0,
 }
 
 export interface HydratedFormData {
@@ -843,6 +852,13 @@ export const referenceWavelengthRequired = (
     absorbanceReaderFormType === ABSORBANCE_READER_INITIALIZE
     ? REFERENCE_WAVELENGTH_REQUIRED
     : null
+}
+export const absorbanceReaderModuleIdRequired = (
+  fields: HydratedFormData
+): FormError | null => {
+  const { moduleId } = fields
+  if (moduleId == null) return ABSORBANCE_READER_MODULE_ID_REQUIRED
+  return null
 }
 export const wavelengthOutOfRange = (
   fields: HydratedFormData
