@@ -243,7 +243,7 @@ export function DropdownMenu(props: DropdownMenuProps): JSX.Element {
       <Flex flexDirection={DIRECTION_COLUMN} position={POSITION_RELATIVE}>
         <Flex
           onClick={(e: MouseEvent) => {
-            e.preventDefault()
+            e.stopPropagation()
             toggleSetShowDropdownMenu()
           }}
           onFocus={onFocus}
@@ -300,9 +300,10 @@ export function DropdownMenu(props: DropdownMenuProps): JSX.Element {
                   disabled={option.disabled}
                   zIndex={3}
                   key={`${option.name}-${index}`}
-                  onClick={() => {
+                  onClick={e => {
                     onClick(option.value)
                     setShowDropdownMenu(false)
+                    e.stopPropagation()
                   }}
                   border="none"
                   onMouseEnter={() => onEnter?.(option.value)}
