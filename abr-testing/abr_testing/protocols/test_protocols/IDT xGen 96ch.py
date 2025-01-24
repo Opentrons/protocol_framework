@@ -11,7 +11,7 @@ from opentrons.protocol_api.module_contexts import (
 from opentrons.hardware_control.modules.types import ThermocyclerStep
 
 metadata = {
-    "protocolName": "IDT xGen 96x 1000ul v9",
+    "protocolName": "IDT xGen 96x 1000ul v9 ",
     "author": "Opentrons <protocols@opentrons.com>",
     "source": "Protocol Library",
 }
@@ -102,7 +102,20 @@ def run(protocol: ProtocolContext) -> None:
     p96x_50_flow_rate_blow_out_default = 478
 
     # ======================= SIMPLE SETUP ARRANGEMENT ======================
-
+    # STACKERS
+    stacker_200_ul_tips: FlexStackerContext = protocol.load_module(
+        "flexStackerModuleV1", "B4"
+    )  # type: ignore[assignment]
+    stacker_200_ul_tips.load_labware_to_hopper(
+        load_name="opentrons_flex_96_tiprack_200ul", quantity=6, lid = "opentrons_flex_tiprack_lid"
+    )
+    stacker_50_ul_tips: FlexStackerContext = protocol.load_module(
+        "flexStackerModuleV1", "C4"
+    )  # type: ignore[assignment]
+    stacker_50_ul_tips.load_labware_to_hopper(
+        load_name="opentrons_flex_96_tiprack_50ul", quantity=6, lid="opentrons_flex_tiprack_lid"
+    )
+    
     # ========== FIRST ROW ===========
     thermocycler: ThermocyclerContext = protocol.load_module(
         helpers.tc_str
@@ -126,12 +139,7 @@ def run(protocol: ProtocolContext) -> None:
     Liquid_trash = protocol.load_labware(
         "nest_96_wellplate_2ml_deep", "B2", "Liquid Waste Reservoir"
     )
-    stacker_200_ul_tips: FlexStackerContext = protocol.load_module(
-        "flexStackerModuleV1", "B4"
-    )  # type: ignore[assignment]
-    stacker_200_ul_tips.load_labware_to_hopper(
-        load_name="opentrons_flex_96_tiprack_200ul", lid = "opentrons_flex_tiprack_lid",quantity=6
-    )
+    
     reagent_plate_2 = protocol.load_labware(
         "greiner_384_wellplate_240ul", "B3", "Reagent Plate 2"
     )
@@ -144,12 +152,6 @@ def run(protocol: ProtocolContext) -> None:
     )
     ETOH_Reservoir = protocol.load_labware(
         "nest_96_wellplate_2ml_deep", "C2", "EtOH Reservoir"
-    )
-    stacker_50_ul_tips: FlexStackerContext = protocol.load_module(
-        "flexStackerModuleV1", "C4"
-    )  # type: ignore[assignment]
-    stacker_50_ul_tips.load_labware_to_hopper(
-        load_name="opentrons_flex_96_tiprack_50ul", lid= "opentrons_flex_tiprack_lid", quantity=7
     )
     lids = protocol.load_lid_stack("opentrons_tough_pcr_auto_sealing_lid", "C3", 4)
     # lids: List[Labware] = [
@@ -278,7 +280,6 @@ def run(protocol: ProtocolContext) -> None:
         p1000.flow_rate.dispense = p96x_50_flow_rate_dispense_default * 0.5
         p1000.flow_rate.blow_out = p96x_50_flow_rate_blow_out_default * 0.5
         # ===============================================
-        print("line where error is happening")
         p1000.pick_up_tip(tiprack_50_1["A1"])
         p1000.aspirate(ERATVol, ERAT.bottom(z=0.5))
         p1000.dispense(
@@ -428,7 +429,7 @@ def run(protocol: ProtocolContext) -> None:
 
         # ============================================================
         # GRIPPER MOVE tiprack_50_1 FROM: tiprack_A2_adapter --> TRASH
-        print("throw away labware")
+        print("threw out labware")
         protocol.move_labware(
             labware=tiprack_50_1,
             new_location=TRASH,
@@ -657,9 +658,8 @@ def run(protocol: ProtocolContext) -> None:
         )
         # TOWER DISPENSES NEW PLATE
         tiprack_200_4 = stacker_200_ul_tips.retrieve()
-        protocol.move_lid(tiprack_200_4, TRASH, use_gripper = True)
+        protocol.move_lid(tiprack_200_4, TRASH, use_gripper= True)
         protocol.move_labware(tiprack_200_4, tiprack_A2_adapter, use_gripper=True)
-        
         protocol.comment("MOVING: tiprack_200_4 = A4 --> tiprack_A2_adapter")
         # =======================================================================
         protocol.comment("--> Remove ETOH Wash")
@@ -920,7 +920,7 @@ def run(protocol: ProtocolContext) -> None:
         )
         # TOWER DISPENSES NEW PLATE
         tiprack_50_5 = stacker_50_ul_tips.retrieve()
-        protocol.move_lid(tiprack_50_5, TRASH, use_gripper = True)
+        protocol.move_lid(tiprack_50_5, TRASH, use_gripper=True)
         protocol.move_labware(tiprack_50_5, tiprack_A2_adapter, use_gripper=True)
         protocol.comment("MOVING: tiprack_50_5 = B4 --> tiprack_A2_adapter")
         # ======================================================================
@@ -1170,7 +1170,6 @@ def run(protocol: ProtocolContext) -> None:
         # TOWER DISPENSES NEW PLATE
         tiprack_50_6 = stacker_50_ul_tips.retrieve()
         protocol.move_lid(tiprack_50_6, TRASH, use_gripper = True)
-
         protocol.move_labware(tiprack_50_6, tiprack_A2_adapter, use_gripper=True)
         protocol.comment("MOVING: tiprack_50_6 = B4 --> tiprack_A2_adapter")
         # TOWER DISPENSES NEW PLATE
