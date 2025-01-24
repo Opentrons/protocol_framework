@@ -9,3 +9,21 @@ export function curryCommandCreator<Args>(
   return (_invariantContext, _prevRobotState) =>
     commandCreator(args, _invariantContext, _prevRobotState)
 }
+
+export function curryCommandCreatorNoPython<Args>(
+  commandCreator: CommandCreator<Args>,
+  args: Args
+): CurriedCommandCreator {
+  return (_invariantContext, _prevRobotState) => {
+    const commandCreatorResult = commandCreator(
+      args,
+      _invariantContext,
+      _prevRobotState
+    )
+    if ('python' in commandCreatorResult) {
+      const { python, ...withoutPython } = commandCreatorResult
+      return withoutPython
+    }
+    return commandCreatorResult
+  }
+}

@@ -28,6 +28,7 @@ import type {
   CommandCreator,
   CurriedCommandCreator,
 } from '../../types'
+import { curryCommandCreatorNoPython } from '../../utils/curryCommandCreator'
 /** Helper fn to make mix command creators w/ minimal arguments */
 export function mixUtil(args: {
   pipette: string
@@ -68,6 +69,14 @@ export function mixUtil(args: {
     nozzles,
   } = args
 
+  // This CommandCreator produces a Python command with no JSON command.
+  const pythonMixCommand: CommandCreator<{}> = () => {
+    return {
+      commands: [],
+      python: `blah.mix(repititions=${times}, location=blah.['${well}'], volume=${volume}, ...etc...)`,
+    }
+  }
+
   const getDelayCommand = (seconds?: number | null): CurriedCommandCreator[] =>
     seconds
       ? [
@@ -81,9 +90,16 @@ export function mixUtil(args: {
         ]
       : []
 
-  return repeatArray(
+  // If there is no delay, then we can issue a single Python mix() command, so we want to suppresss
+  // the Python from the individual aspirate dispense commands.
+  const noDelay = !aspirateDelaySeconds && !dispenseDelaySeconds
+  const innerCurryCommandCreator = noDelay
+    ? curryCommandCreatorNoPython
+    : curryCommandCreator
+
+  const commands = repeatArray(
     [
-      curryCommandCreator(aspirate, {
+      innerCurryCommandCreator(aspirate, {
         pipette,
         volume,
         labware,
@@ -96,7 +112,7 @@ export function mixUtil(args: {
         nozzles: null,
       }),
       ...getDelayCommand(aspirateDelaySeconds),
-      curryCommandCreator(dispense, {
+      innerCurryCommandCreator(dispense, {
         pipette,
         volume,
         labware,
@@ -112,6 +128,11 @@ export function mixUtil(args: {
     ],
     times
   )
+
+  return [
+    ...(noDelay ? [curryCommandCreator(pythonMixCommand, {})] : []),
+    ...commands,
+  ]
 }
 export const mix: CommandCreator<MixArgs> = (
   data,
