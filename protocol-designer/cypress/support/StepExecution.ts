@@ -14,6 +14,14 @@ import {
   executeVerifyModStep,
 } from './SupportModules'
 
+export type StepsList = Array<
+  | SetupActions
+  | SetupVerifications
+  | UniversalActions
+  | ModActions
+  | ModVerifications
+>
+
 export const runSteps = (
   steps: Array<
     | SetupActions

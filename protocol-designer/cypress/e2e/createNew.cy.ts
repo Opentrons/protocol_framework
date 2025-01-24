@@ -1,7 +1,11 @@
 import { SetupActions, SetupVerifications } from '../support/SetupSteps'
 import { UniversalActions } from '../support/universalActions'
 import '../support/commands'
-import { runSteps } from '../support/StepExecution'
+// Every test is goign to use StepsList
+// Now every test will be a list of some combination of support 
+// typescript file list of actions for specific PD stuff and include StepsList for steps
+
+import { runSteps, type StepsList } from '../support/StepExecution'
 
 describe('The Redesigned Create Protocol Landing Page', () => {
   beforeEach(() => {
@@ -12,7 +16,7 @@ describe('The Redesigned Create Protocol Landing Page', () => {
   it('content and step 1 flow works', () => {
     cy.verifyCreateNewHeader()
     cy.clickCreateNew()
-    const steps: Array<SetupActions | SetupVerifications | UniversalActions> = [
+    const steps: StepsList = [
       SetupVerifications.OnStep1,
       SetupVerifications.FlexSelected,
       UniversalActions.Snapshot,
