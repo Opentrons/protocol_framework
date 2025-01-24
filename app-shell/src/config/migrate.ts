@@ -448,14 +448,6 @@ const toVersion26 = (prevConfig: ConfigV25): ConfigV26 => {
   const nextConfig = {
     ...prevConfig,
     version: 26 as const,
-    onDeviceDisplaySettings: {
-      ...prevConfig.onDeviceDisplaySettings,
-      unfinishedUnboxingFlowRoute:
-        prevConfig.onDeviceDisplaySettings.unfinishedUnboxingFlowRoute ===
-        '/welcome'
-          ? '/choose-language'
-          : prevConfig.onDeviceDisplaySettings.unfinishedUnboxingFlowRoute,
-    },
   }
   return nextConfig
 }
