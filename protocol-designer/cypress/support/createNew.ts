@@ -370,7 +370,7 @@ const executeAction = (action: Actions | UniversalActions): void => {
       cy.contains('My liquid!').click() // Action for clicking 'My liquid!'
       break
     case Actions.SetVolumeAndSaveforWells:
-      cy.get('input[name="volume"]').type(`150`) // Set volume
+      cy.get('input[name="volume"]').type('150', { force: true }) // Set volume
       cy.contains('button', 'Save').click() // Click Save button
       cy.contains('button', 'Done').click({ force: true }) // Click Done button, forcing click if necessary
       break
