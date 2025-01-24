@@ -6,7 +6,6 @@ import {
   ALIGN_FLEX_END,
   Btn,
   COLORS,
-  CURSOR_POINTER,
   DIRECTION_COLUMN,
   Divider,
   Flex,
@@ -141,7 +140,7 @@ export function LiquidCard(props: LiquidCardProps): JSX.Element {
                 : null}
             </StyledText>
           </Flex>
-          <Flex cursor={CURSOR_POINTER}>
+          <Flex>
             <Icon
               name={isExpanded ? 'chevron-up' : 'chevron-down'}
               size="2rem"
@@ -166,8 +165,11 @@ export function LiquidCard(props: LiquidCardProps): JSX.Element {
       </Flex>
       {isExpanded ? (
         <>
-          <Divider borderBottom={`1px solid ${COLORS.grey40}`} />
-          <Flex flexDirection={DIRECTION_COLUMN} padding={SPACING.spacing16}>
+          <Divider borderColor={COLORS.grey40} />
+          <Flex
+            flexDirection={DIRECTION_COLUMN}
+            padding={`${SPACING.spacing8} ${SPACING.spacing16}`}
+          >
             <Flex gridGap={SPACING.spacing4} color={COLORS.grey60}>
               <StyledText width="50%" desktopStyle="bodyDefaultRegular">
                 {t('well')}
@@ -178,7 +180,7 @@ export function LiquidCard(props: LiquidCardProps): JSX.Element {
                 </StyledText>
               </Flex>
             </Flex>
-            <Divider borderBottom={`1px solid ${COLORS.grey40}`} />
+            <Divider borderColor={COLORS.grey40} />
             {info.liquidIndex != null
               ? fullWellsByLiquid[info.liquidIndex]
                   .sort((a, b) =>
@@ -194,9 +196,7 @@ export function LiquidCard(props: LiquidCardProps): JSX.Element {
                         <WellContents wellName={wellName} volume={volume} />
                         {wellliquidIndex <
                         fullWellsByLiquid[liquidIndex].length - 1 ? (
-                          <Divider
-                            borderBottom={`1px solid ${COLORS.grey40}`}
-                          />
+                          <Divider borderColor={COLORS.grey40} />
                         ) : null}
                       </>
                     )
