@@ -325,7 +325,7 @@ export type MixArgs = CommonArgs & {
 export type PauseArgs = CommonArgs & {
   commandCreatorFnName: 'delay'
   message?: string
-  seconds: number | null
+  seconds?: number
   pauseTemperature?: number | null
   meta:
     | {
