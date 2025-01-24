@@ -77,7 +77,6 @@ describe('The Redesigned Create Protocol Landing Page', () => {
       ModVerifications.TempeDeckInitialForm,
       UniversalActions.Snapshot,
       ModActions.ActivateTempdeck,
- 
       ModActions.InputTempDeck4,
       ModActions.SaveButtonTempdeck,
       ModActions.PauseAfterSettingTempdeck,
@@ -93,8 +92,6 @@ describe('The Redesigned Create Protocol Landing Page', () => {
       ModActions.AddTemperatureStep,
       ModActions.ActivateTempdeck,
       ModActions.InputTempDeck100,
-
-
     ]
     runSteps(steps)
   })
