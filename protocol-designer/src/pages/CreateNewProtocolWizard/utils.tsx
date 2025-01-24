@@ -32,7 +32,7 @@ import type { AdditionalEquipment, WizardFormState } from './types'
 
 const TOTAL_OUTER_SLOTS = 8
 const MIDDLE_SLOT_NUM = 4
-const MAX_SLOTS_IN_COL_THREE = 4
+const SLOTS_IN_COL_THREE = 4
 const MAX_MAGNETIC_BLOCK_SLOTS = 12
 
 export const getNumOptions = (length: number): DropdownOption[] => {
@@ -51,32 +51,37 @@ export const getNumSlotsAvailable = (
   const additionalEquipmentLength = additionalEquipment.filter(
     ae => ae !== 'gripper'
   ).length
+
   const hasTC = Object.values(modules || {}).some(
     module => module.type === THERMOCYCLER_MODULE_TYPE
   )
-  const numStagingAreas = additionalEquipment.filter(ae => ae === 'stagingArea')
-    ?.length
+
+  const numStagingAreas =
+    additionalEquipment.filter(ae => ae === 'stagingArea')?.length || 0
+
   const hasWasteChute = additionalEquipment.some(ae => ae === 'wasteChute')
 
   const magneticBlocks = Object.values(modules || {}).filter(
     module => module.type === MAGNETIC_BLOCK_TYPE
   )
-
-  let filteredModuleLength = modules != null ? Object.keys(modules).length : 0
-  if (magneticBlocks.length > 0) {
-    //  once blocks exceed 4, then we dont' want to subtract the amount available
-    //  because block can go into the center slots where all other modules/trashes can not
-    const numBlocks =
-      magneticBlocks.length >= 4 ? MIDDLE_SLOT_NUM : magneticBlocks.length
-    filteredModuleLength =
-      filteredModuleLength - (type !== 'magneticBlockV1' ? numBlocks : 0)
+  const magneticBlockCount = magneticBlocks.length
+  const moduleCount = modules != null ? Object.keys(modules).length : 0
+  let filteredModuleLength = moduleCount
+  if (magneticBlockCount <= MIDDLE_SLOT_NUM) {
+    // Subtract magnetic blocks directly if their count is ≤ 4
+    filteredModuleLength -= magneticBlockCount
+  } else {
+    // Subtract the excess magnetic blocks beyond 4
+    const extraMagneticBlocks = magneticBlockCount - MIDDLE_SLOT_NUM
+    filteredModuleLength -= extraMagneticBlocks
   }
   if (hasTC) {
-    filteredModuleLength = filteredModuleLength + 1
+    filteredModuleLength += 1
   }
+
   let filteredAdditionalEquipmentLength = additionalEquipmentLength
   if (numStagingAreas >= 1 && hasWasteChute && type !== 'stagingArea') {
-    filteredAdditionalEquipmentLength = filteredAdditionalEquipmentLength - 1
+    filteredAdditionalEquipmentLength -= 1
   }
   switch (type) {
     case 'gripper': {
@@ -100,6 +105,15 @@ export const getNumSlotsAvailable = (
       }
     }
 
+    case 'trashBin':
+    case HEATERSHAKER_MODULE_V1:
+    case TEMPERATURE_MODULE_V2: {
+      return (
+        TOTAL_OUTER_SLOTS -
+        (filteredModuleLength + filteredAdditionalEquipmentLength)
+      )
+    }
+
     case 'stagingArea': {
       const modulesWithSlot3 =
         modules !== null
@@ -110,17 +124,22 @@ export const getNumSlotsAvailable = (
         additionalEquipment !== null
           ? additionalEquipment.filter(slot => slot.includes('3')).length
           : 0
-      return MAX_SLOTS_IN_COL_THREE - modulesWithSlot3 - fixtureSlotsWithSlot3
+      return SLOTS_IN_COL_THREE - modulesWithSlot3 - fixtureSlotsWithSlot3
     }
 
-    case 'trashBin':
-    case HEATERSHAKER_MODULE_V1:
-    case TEMPERATURE_MODULE_V2: {
-      return (
-        TOTAL_OUTER_SLOTS -
-        (filteredModuleLength + filteredAdditionalEquipmentLength)
-      )
-    }
+    // case 'stagingArea': {
+    //   const lengthMinusMagneticBlock =
+    //     moduleCount + (hasTC ? 1 : 0) - magneticBlockCount
+    //   let adjustedModuleLength = 0
+    //   if (lengthMinusMagneticBlock > TOTAL_LEFT_SLOTS) {
+    //     adjustedModuleLength = lengthMinusMagneticBlock - TOTAL_LEFT_SLOTS
+    //   }
+
+    //   const occupiedSlots =
+    //     adjustedModuleLength + filteredAdditionalEquipmentLength
+
+    //   return TOTAL_LEFT_SLOTS - occupiedSlots
+    // }
 
     case 'wasteChute': {
       const adjustmentForStagingArea = numStagingAreas >= 1 ? 1 : 0
@@ -133,9 +152,13 @@ export const getNumSlotsAvailable = (
     }
 
     case MAGNETIC_BLOCK_V1: {
+      const filteredAdditionalEquipmentForMagneticBlockLength = additionalEquipment.filter(
+        ae => ae !== 'gripper' && ae !== 'stagingArea'
+      )?.length
       return (
         MAX_MAGNETIC_BLOCK_SLOTS -
-        (filteredModuleLength + filteredAdditionalEquipmentLength)
+        (filteredModuleLength +
+          filteredAdditionalEquipmentForMagneticBlockLength)
       )
     }
   }
@@ -311,13 +334,11 @@ export const getTrashSlot = (values: WizardFormState): string => {
       !moduleSlots.includes(cutout.slot) &&
       !wasteChuteSlot.includes(cutout.value)
   )
-
   if (unoccupiedSlot == null) {
     console.error(
       'Expected to find an unoccupied slot for the trash bin but could not'
     )
     return ''
   }
-
   return unoccupiedSlot?.value
 }

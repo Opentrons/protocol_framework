@@ -2,6 +2,7 @@ import { COLUMN, FLEX_ROBOT_TYPE, OT2_ROBOT_TYPE } from '@opentrons/shared-data'
 import * as errorCreators from '../../errorCreators'
 import { getPipetteWithTipMaxVol } from '../../robotStateSelectors'
 import {
+  absorbanceReaderCollision,
   modulePipetteCollision,
   thermocyclerPipetteCollision,
   pipetteIntoHeaterShakerLatchOpen,
@@ -140,6 +141,16 @@ export const aspirate: CommandCreator<ExtendedAspirateParams> = (
     )
   ) {
     errors.push(errorCreators.thermocyclerLidClosed())
+  }
+
+  if (
+    absorbanceReaderCollision(
+      prevRobotState.modules,
+      prevRobotState.labware,
+      labware
+    )
+  ) {
+    errors.push(errorCreators.absorbanceReaderLidClosed())
   }
 
   if (

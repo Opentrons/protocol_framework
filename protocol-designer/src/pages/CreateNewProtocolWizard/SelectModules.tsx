@@ -16,7 +16,6 @@ import {
   WRAP,
 } from '@opentrons/components'
 import {
-  ABSORBANCE_READER_TYPE,
   ABSORBANCE_READER_V1,
   FLEX_ROBOT_TYPE,
   getModuleDisplayName,
