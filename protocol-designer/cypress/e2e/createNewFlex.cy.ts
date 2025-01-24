@@ -1,9 +1,8 @@
 import { SetupActions, SetupVerifications } from '../support/SetupSteps'
 import { UniversalActions } from '../support/universalActions'
 import '../support/commands'
-
-import { runSteps, type StepsList } from '../support/StepExecution'
-
+import { runSteps } from '../support/StepExecution'
+import type { StepsList } from '../support/StepExecution'
 
 describe('The Redesigned Create Protocol Landing Page', () => {
   beforeEach(() => {
