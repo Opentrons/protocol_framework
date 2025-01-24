@@ -412,12 +412,15 @@ def _run_trial(
         )
         tip_contents = None
     else:
+        # FIXME: This assumes whatever is in the pipette from last trial is air (not liquid),
+        #        and so this would break any sort of multi-dispense testing
+        assumed_air_gap = trial.pipette.current_volume
         tip_contents = trial.pipette._core.aspirate_liquid_class(
             volume=trial.volume,
             source=(Location(Point(), trial.well), trial.well._core),
             transfer_properties=liquid_class,
             transfer_type=TransferType.ONE_TO_ONE,
-            tip_contents=[LiquidAndAirGapPair(liquid=0, air_gap=0)],
+            tip_contents=[LiquidAndAirGapPair(liquid=0, air_gap=assumed_air_gap)],
         )
     if not trial.recorder.is_simulator:
         trial.pipette._retract()  # retract to top of gantry
