@@ -2,10 +2,11 @@ import { SetupActions, SetupVerifications } from '../support/SetupSteps'
 import { UniversalActions } from '../support/universalActions'
 import '../support/commands'
 // Every test is goign to use StepsList
-// Now every test will be a list of some combination of support 
+// Now every test will be a list of some combination of support
 // typescript file list of actions for specific PD stuff and include StepsList for steps
 
-import { runSteps, type StepsList } from '../support/StepExecution'
+import { runSteps } from '../support/StepExecution'
+import type { StepsList } from '../support/StepExecution'
 
 describe('The Redesigned Create Protocol Landing Page', () => {
   beforeEach(() => {
