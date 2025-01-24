@@ -263,13 +263,15 @@ export function SelectModules(props: WizardTileProps): JSX.Element | null {
                           <ListItemCustomize
                             dropdown={
                               MOAM_MODULE_TYPES.includes(module.type) &&
-                              robotType === FLEX_ROBOT_TYPE
+                              robotType === FLEX_ROBOT_TYPE &&
+                              module.type !== ABSORBANCE_READER_TYPE
                                 ? dropdownProps
                                 : undefined
                             }
                             label={
                               MOAM_MODULE_TYPES.includes(module.type) &&
-                              robotType === FLEX_ROBOT_TYPE
+                              robotType === FLEX_ROBOT_TYPE &&
+                              module.type !== ABSORBANCE_READER_TYPE
                                 ? t('quantity')
                                 : null
                             }
