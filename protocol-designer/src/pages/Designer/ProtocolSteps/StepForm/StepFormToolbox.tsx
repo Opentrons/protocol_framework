@@ -282,8 +282,6 @@ export function StepFormToolbox(props: StepFormToolboxProps): JSX.Element {
     }
   }
 
-  console.log('stepName', formData.stepName)
-
   return (
     <>
       {isRename ? (

@@ -285,7 +285,7 @@ export function ThermocyclerStep(props: ThermocyclerStepProps): JSX.Element {
             handleValueUpdate(
               'temp',
               maskToFloat(e.target.value),
-              temperatureRangeFieldValue(4, 96)
+              temperatureRangeFieldValue(4, 99)
             )
           }}
           onBlur={() => {

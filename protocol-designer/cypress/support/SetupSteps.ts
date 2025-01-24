@@ -95,7 +95,7 @@ export enum SetupContent {
   TipRack = 'Filter Tip Rack 50 µL',
   PipetteType = 'Pipette type',
   PipetteVolume = 'Pipette volume',
-  FullP50SingleName = 'Flex 1-Channel 50 μL',
+  FullP50SingleName = 'Flex 1-Channel 50 µL',
   FullP50TiprackName = 'Opentrons Flex 96 Filter Tip Rack 50 µL',
   GoBack = 'Go back',
   Confirm = 'Confirm',
