@@ -508,8 +508,8 @@ class OT3PipetteHandler:
         action: "UlPerMmAction",
         correction_volume: float = 0.0,
     ) -> float:
-        # NOTE: "ul" is the total expected volume displaced inside tip (relative to "bottom")
-        #       so it will always be a POSITIVE value
+        if ul == 0:
+            return instr.plunger_positions.bottom
         multiplier = 1.0 + (correction_volume / ul)
         mm_dist_from_bottom = ul / instr.ul_per_mm(ul, action)
         mm_dist_from_bottom_corrected = mm_dist_from_bottom * multiplier
