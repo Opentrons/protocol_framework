@@ -25,10 +25,10 @@ import { getMockMoveLiquidStep, getMockMixStep } from '../__fixtures__'
 
 import * as utils from '../../modules/utils'
 
+import type { MoveLabwareArgs } from '@opentrons/step-generation'
 import type { FormData } from '../../../form-types'
 import type { StepArgsAndErrorsById } from '../../../steplist/types'
 import type { AllTemporalPropertiesForTimelineFrame } from '../../../step-forms'
-import { MoveLabwareArgs } from '@opentrons/step-generation'
 
 vi.mock('../../modules/utils')
 
@@ -47,7 +47,6 @@ function createArgsForStepId(
 const hoveredStepId = 'hoveredStepId'
 const labware = 'well plate'
 const mixCommand = 'mix'
-const moveLabwareCommand = 'moveLabware'
 describe('getHoveredStepLabware', () => {
   let initialDeckState: AllTemporalPropertiesForTimelineFrame
   beforeEach(() => {
