@@ -36,7 +36,7 @@ import type {
 // any default values for later config versions are specified in the migration
 // functions for those version below
 
-const CONFIG_VERSION_LATEST = 25
+const CONFIG_VERSION_LATEST = 26
 
 export const DEFAULTS_V0: ConfigV0 = {
   version: 0,
