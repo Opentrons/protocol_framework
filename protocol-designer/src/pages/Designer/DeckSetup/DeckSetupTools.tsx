@@ -245,14 +245,29 @@ export function DeckSetupTools(props: DeckSetupToolsProps): JSX.Element | null {
       setTab('hardware')
     },
   }
+
+  const isLabwareTabDisabled =
+    selectedFixture === 'wasteChute' ||
+    selectedFixture === 'wasteChuteAndStagingArea' ||
+    selectedFixture === 'trashBin' ||
+    selectedModuleModel === ABSORBANCE_READER_V1
+  let labwareTabDisabledReason: string | null = null
+  if (selectedModuleModel === ABSORBANCE_READER_V1) {
+    labwareTabDisabledReason = t('plate_reader_no_labware')
+  }
+  if (selectedFixture === 'trashBin') {
+    labwareTabDisabledReason = t('trash_no_labware')
+  }
+  if (
+    selectedFixture === 'wasteChute' ||
+    selectedFixture === 'wasteChuteAndStagingArea'
+  ) {
+    labwareTabDisabledReason = t('waste_chute_no_labware')
+  }
   const labwareTab = {
     text: t('labware'),
-    disabled:
-      selectedFixture === 'wasteChute' ||
-      selectedFixture === 'wasteChuteAndStagingArea' ||
-      selectedFixture === 'trashBin' ||
-      selectedModuleModel === ABSORBANCE_READER_V1,
-    disabledReasonForTooltip: t('plate_reader_no_labware'),
+    disabled: isLabwareTabDisabled,
+    disabledReasonForTooltip: labwareTabDisabledReason,
     isActive: tab === 'labware',
     onClick: () => {
       setTab('labware')
