@@ -305,12 +305,11 @@ const _patchAbsorbanceReaderModuleId = (args: {
     )?.length ?? 1
   const hasAbsorbanceReaderModuleId = stepType === 'absorbanceReader'
 
-  const robotState: RobotState | undefined = last(robotStateTimeline.timeline)
-    ?.robotState
-  if (robotState == null) {
-    return null
-  }
-  const { labware = {}, modules = {} } = robotState
+  const { modules } = initialDeckSetup
+  const robotState: RobotState | null =
+    last(robotStateTimeline.timeline)?.robotState ?? null
+
+  const labware = robotState?.labware ?? {}
 
   // pre-select form type if module is set
   if (hasAbsorbanceReaderModuleId && numOfModules === 1) {
