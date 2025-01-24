@@ -509,11 +509,12 @@ class OT3PipetteHandler:
         correction_volume: float = 0.0,
     ) -> float:
         if ul == 0:
-            return instr.plunger_positions.bottom
-        multiplier = 1.0 + (correction_volume / ul)
-        mm_dist_from_bottom = ul / instr.ul_per_mm(ul, action)
-        mm_dist_from_bottom_corrected = mm_dist_from_bottom * multiplier
-        position = instr.plunger_positions.bottom - mm_dist_from_bottom_corrected
+            position = instr.plunger_positions.bottom
+        else:
+            multiplier = 1.0 + (correction_volume / ul)
+            mm_dist_from_bottom = ul / instr.ul_per_mm(ul, action)
+            mm_dist_from_bottom_corrected = mm_dist_from_bottom * multiplier
+            position = instr.plunger_positions.bottom - mm_dist_from_bottom_corrected
         return round(position, 6)
 
     def plunger_speed(
