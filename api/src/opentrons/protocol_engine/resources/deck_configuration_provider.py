@@ -21,6 +21,7 @@ from ..errors import (
     CutoutDoesNotExistError,
     FixtureDoesNotExistError,
     AddressableAreaDoesNotExistError,
+    SlotDoesNotExistError,
 )
 
 
@@ -107,9 +108,10 @@ def get_addressable_area_from_name(
     """Given a name and a cutout position, get an addressable area on the deck."""
     for addressable_area in deck_definition["locations"]["addressableAreas"]:
         if addressable_area["id"] == addressable_area_name:
-            base_slot = get_deck_slot_for_addressable_area_name(
+            cutout_id, _ = get_potential_cutout_fixtures(
                 addressable_area_name, deck_definition
             )
+            base_slot = get_deck_slot_for_cutout_id(cutout_id)
             area_offset = addressable_area["offsetFromCutoutFixture"]
             position = AddressableOffsetVector(
                 x=area_offset[0] + cutout_position.x,
@@ -138,22 +140,51 @@ def get_addressable_area_from_name(
     )
 
 
-def get_deck_slot_for_addressable_area_name(
-    addressable_area_name: str, deck_definition: DeckDefinitionV5
-) -> DeckSlotName:
+def get_deck_slot_for_cutout_id(cutout_id: str) -> DeckSlotName:
     """Get the corresponding deck slot for an addressable area."""
-    for cutout_fixture in deck_definition["cutoutFixtures"]:
-        for cutout, provided in cutout_fixture["providesAddressableAreas"].items():
-            if addressable_area_name in provided:
-                return CUTOUT_TO_DECK_SLOT_MAP[cutout]
-    raise AddressableAreaDoesNotExistError(
-        f"Could not find addressable area with name {addressable_area_name}"
-    )
+    try:
+        return CUTOUT_TO_DECK_SLOT_MAP[cutout_id]
+    except KeyError:
+        raise CutoutDoesNotExistError(f"Could not find data for cutout {cutout_id}")
 
 
 def get_cutout_id_by_deck_slot_name(slot_name: DeckSlotName) -> str:
     """Get the Cutout ID of a given Deck Slot by Deck Slot Name."""
-    return DECK_SLOT_TO_CUTOUT_MAP[slot_name]
+    try:
+        return DECK_SLOT_TO_CUTOUT_MAP[slot_name]
+    except KeyError:
+        raise SlotDoesNotExistError(f"Could not find data for slot {slot_name.value}")
+
+
+def get_labware_hosting_addressable_area_name_for_cutout_and_cutout_fixture(
+    cutout_id: str, cutout_fixture_id: str, deck_definition: DeckDefinitionV5
+) -> str:
+    """Get the first addressable area that can contain labware for a cutout and fixture.
+
+    This probably isn't relevant outside of labware offset locations, where (for now) nothing
+    provides more than one labware-containing addressable area.
+    """
+    for cutoutFixture in deck_definition["cutoutFixtures"]:
+        if cutoutFixture["id"] != cutout_fixture_id:
+            continue
+        provided_aas = cutoutFixture["providesAddressableAreas"].get(cutout_id, None)
+        if provided_aas is None:
+            raise CutoutDoesNotExistError(
+                f"{cutout_fixture_id} does not go in {cutout_id}"
+            )
+        for aa_id in provided_aas:
+            for addressable_area in deck_definition["locations"]["addressableAreas"]:
+                if addressable_area["id"] != aa_id:
+                    continue
+                # TODO: In deck def v6 this will be easier, but as of right now there isn't really
+                # a way to tell from an addressable area whether it takes labware so let's take the
+                # first one
+                return aa_id
+            raise AddressableAreaDoesNotExistError(
+                f"Could not find an addressable area that allows labware from cutout fixture {cutout_fixture_id} in cutout {cutout_id}"
+            )
+
+    raise FixtureDoesNotExistError(f"Could not find entry for {cutout_fixture_id}")
 
 
 # This is a temporary shim while Protocol Engine's conflict-checking code

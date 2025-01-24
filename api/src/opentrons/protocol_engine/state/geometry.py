@@ -51,7 +51,10 @@ from ..types import (
     AddressableAreaLocation,
     AddressableOffsetVector,
     StagingSlotLocation,
-    LegacyLabwareOffsetLocation,
+    LabwareOffsetLocationSequence,
+    OnModuleOffsetLocationSequenceComponent,
+    OnAddressableAreaOffsetLocationSequenceComponent,
+    OnLabwareOffsetLocationSequenceComponent,
     ModuleModel,
 )
 from .config import Config
@@ -1362,50 +1365,89 @@ class GeometryView:
 
     def get_offset_location(
         self, labware_id: str
-    ) -> Optional[LegacyLabwareOffsetLocation]:
+    ) -> Optional[LabwareOffsetLocationSequence]:
         """Provide the LegacyLabwareOffsetLocation specifying the current position of the labware.
 
-        If the labware is in a location that cannot be specified by a LegacyLabwareOffsetLocation
+        If the labware is in a location that cannot be specified by a LabwareOffsetLocationSequence
         (for instance, OFF_DECK) then return None.
         """
         parent_location = self._labware.get_location(labware_id)
+        return self.get_projected_offset_location(parent_location)
 
-        if isinstance(parent_location, DeckSlotLocation):
-            return LegacyLabwareOffsetLocation(
-                slotName=parent_location.slotName, moduleModel=None, definitionUri=None
+    def get_projected_offset_location(
+        self, labware_location: LabwareLocation
+    ) -> Optional[LabwareOffsetLocationSequence]:
+        """Get the offset location that a labware loaded into this location would match."""
+        return self._recurse_labware_offset_location(labware_location, [])
+
+    def _recurse_labware_offset_location(
+        self, labware_location: LabwareLocation, building: LabwareOffsetLocationSequence
+    ) -> LabwareOffsetLocationSequence | None:
+        if isinstance(labware_location, DeckSlotLocation):
+            return building + [
+                OnAddressableAreaOffsetLocationSequenceComponent(
+                    addressableAreaName=labware_location.slotName.value
+                )
+            ]
+
+        elif isinstance(labware_location, ModuleLocation):
+            module_id = labware_location.moduleId
+            # Allow ModuleNotLoadedError to propagate.
+            # Note also that we match based on the module's requested model, not its
+            # actual model, to implement robot-server's documented HTTP API semantics.
+            module_model = self._modules.get_requested_model(module_id=module_id)
+
+            # If `module_model is None`, it probably means that this module was added by
+            # `ProtocolEngine.use_attached_modules()`, instead of an explicit
+            # `loadModule` command.
+            #
+            # This assert should never raise in practice because:
+            #   1. `ProtocolEngine.use_attached_modules()` is only used by
+            #      robot-server's "stateless command" endpoints, under `/commands`.
+            #   2. Those endpoints don't support loading labware, so this code will
+            #      never run.
+            #
+            # Nevertheless, if it does happen somehow, we do NOT want to pass the
+            # `None` value along to `LabwareView.find_applicable_labware_offset()`.
+            # `None` means something different there, which will cause us to return
+            # wrong results.
+            assert module_model is not None, (
+                "Can't find offsets for labware"
+                " that are loaded on modules"
+                " that were loaded with ProtocolEngine.use_attached_modules()."
             )
-        elif isinstance(parent_location, ModuleLocation):
-            module_model = self._modules.get_requested_model(parent_location.moduleId)
-            module_location = self._modules.get_location(parent_location.moduleId)
-            return LegacyLabwareOffsetLocation(
-                slotName=module_location.slotName,
-                moduleModel=module_model,
-                definitionUri=None,
+
+            module_location = self._modules.get_location(module_id=module_id)
+            if self._modules.get_deck_supports_module_fixtures():
+                module_aa = self._modules.ensure_and_convert_module_fixture_location(
+                    module_location.slotName, module_model
+                )
+            else:
+                module_aa = module_location.slotName.value
+            return building + [
+                OnModuleOffsetLocationSequenceComponent(moduleModel=module_model),
+                OnAddressableAreaOffsetLocationSequenceComponent(
+                    addressableAreaName=module_aa
+                ),
+            ]
+
+        elif isinstance(labware_location, OnLabwareLocation):
+            parent_labware_id = labware_location.labwareId
+            parent_labware_uri = self._labware.get_definition_uri(parent_labware_id)
+
+            base_location = self._labware.get_parent_location(parent_labware_id)
+            return self._recurse_labware_offset_location(
+                base_location,
+                building
+                + [
+                    OnLabwareOffsetLocationSequenceComponent(
+                        labwareUri=parent_labware_uri
+                    )
+                ],
             )
-        elif isinstance(parent_location, OnLabwareLocation):
-            non_labware_parent_location = self._labware.get_parent_location(labware_id)
 
-            parent_uri = self._labware.get_definition_uri(parent_location.labwareId)
-            if isinstance(non_labware_parent_location, DeckSlotLocation):
-                return LegacyLabwareOffsetLocation(
-                    slotName=non_labware_parent_location.slotName,
-                    moduleModel=None,
-                    definitionUri=parent_uri,
-                )
-            elif isinstance(non_labware_parent_location, ModuleLocation):
-                module_model = self._modules.get_requested_model(
-                    non_labware_parent_location.moduleId
-                )
-                module_location = self._modules.get_location(
-                    non_labware_parent_location.moduleId
-                )
-                return LegacyLabwareOffsetLocation(
-                    slotName=module_location.slotName,
-                    moduleModel=module_model,
-                    definitionUri=parent_uri,
-                )
-
-        return None
+        else:  # Off deck
+            return None
 
     def get_well_offset_adjustment(
         self,

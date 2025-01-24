@@ -64,6 +64,9 @@ from opentrons.protocol_engine.types import (
     ProbedHeightInfo,
     LoadedVolumeInfo,
     WellLiquidInfo,
+    OnAddressableAreaOffsetLocationSequenceComponent,
+    OnModuleOffsetLocationSequenceComponent,
+    OnLabwareOffsetLocationSequenceComponent,
 )
 from opentrons.protocol_engine.commands import (
     CommandStatus,
@@ -3017,10 +3020,9 @@ def test_get_offset_location_deck_slot(
     )
     labware_store.handle_action(action)
     offset_location = subject.get_offset_location("labware-id-1")
-    assert offset_location is not None
-    assert offset_location.slotName == DeckSlotName.SLOT_C2
-    assert offset_location.definitionUri is None
-    assert offset_location.moduleModel is None
+    assert offset_location == [
+        OnAddressableAreaOffsetLocationSequenceComponent(addressableAreaName="C2")
+    ]
 
 
 @pytest.mark.parametrize("use_mocks", [False])
@@ -3037,7 +3039,7 @@ def test_get_offset_location_module(
         command=LoadModule(
             params=LoadModuleParams(
                 location=DeckSlotLocation(slotName=DeckSlotName.SLOT_A3),
-                model=ModuleModel.TEMPERATURE_MODULE_V1,
+                model=ModuleModel.TEMPERATURE_MODULE_V2,
             ),
             id="load-module-1",
             createdAt=datetime.now(),
@@ -3082,10 +3084,14 @@ def test_get_offset_location_module(
     module_store.handle_action(load_module)
     labware_store.handle_action(load_labware)
     offset_location = subject.get_offset_location("labware-id-1")
-    assert offset_location is not None
-    assert offset_location.slotName == DeckSlotName.SLOT_A3
-    assert offset_location.definitionUri is None
-    assert offset_location.moduleModel == ModuleModel.TEMPERATURE_MODULE_V1
+    assert offset_location == [
+        OnModuleOffsetLocationSequenceComponent(
+            moduleModel=ModuleModel.TEMPERATURE_MODULE_V2
+        ),
+        OnAddressableAreaOffsetLocationSequenceComponent(
+            addressableAreaName="temperatureModuleV2A3"
+        ),
+    ]
 
 
 @pytest.mark.parametrize("use_mocks", [False])
@@ -3103,8 +3109,8 @@ def test_get_offset_location_module_with_adapter(
     load_module = SucceedCommandAction(
         command=LoadModule(
             params=LoadModuleParams(
-                location=DeckSlotLocation(slotName=DeckSlotName.SLOT_A2),
-                model=ModuleModel.TEMPERATURE_MODULE_V1,
+                location=DeckSlotLocation(slotName=DeckSlotName.SLOT_A3),
+                model=ModuleModel.TEMPERATURE_MODULE_V2,
             ),
             id="load-module-1",
             createdAt=datetime.now(),
@@ -3177,12 +3183,17 @@ def test_get_offset_location_module_with_adapter(
     labware_store.handle_action(load_adapter)
     labware_store.handle_action(load_labware)
     offset_location = subject.get_offset_location("labware-id-1")
-    assert offset_location is not None
-    assert offset_location.slotName == DeckSlotName.SLOT_A2
-    assert offset_location.definitionUri == labware_view.get_uri_from_definition(
-        nice_adapter_definition
-    )
-    assert offset_location.moduleModel == ModuleModel.TEMPERATURE_MODULE_V1
+    assert offset_location == [
+        OnLabwareOffsetLocationSequenceComponent(
+            labwareUri=labware_view.get_uri_from_definition(nice_adapter_definition)
+        ),
+        OnModuleOffsetLocationSequenceComponent(
+            moduleModel=ModuleModel.TEMPERATURE_MODULE_V2
+        ),
+        OnAddressableAreaOffsetLocationSequenceComponent(
+            addressableAreaName="temperatureModuleV2A3"
+        ),
+    ]
 
 
 @pytest.mark.parametrize("use_mocks", [False])

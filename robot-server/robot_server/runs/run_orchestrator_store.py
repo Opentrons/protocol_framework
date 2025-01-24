@@ -33,6 +33,7 @@ from opentrons.protocol_runner.run_orchestrator import ParseMode
 from opentrons.protocol_engine import (
     DeckType,
     LabwareOffsetCreate,
+    LegacyLabwareOffsetCreate,
     StateSummary,
     CommandSlice,
     CommandErrorSlice,
@@ -192,7 +193,7 @@ class RunOrchestratorStore:
     async def create(
         self,
         run_id: str,
-        labware_offsets: List[LabwareOffsetCreate],
+        labware_offsets: List[LabwareOffsetCreate | LegacyLabwareOffsetCreate],
         initial_error_recovery_policy: error_recovery_policy.ErrorRecoveryPolicy,
         deck_configuration: DeckConfigurationType,
         file_provider: FileProvider,
@@ -408,7 +409,7 @@ class RunOrchestratorStore:
         """Get whether the run has started."""
         return self.run_orchestrator.run_has_started()
 
-    def add_labware_offset(self, request: LabwareOffsetCreate) -> LabwareOffset:
+    def add_labware_offset(self, request: LabwareOffsetCreate | LegacyLabwareOffsetCreate) -> LabwareOffset:
         """Add a new labware offset to state."""
         return self.run_orchestrator.add_labware_offset(request)
 

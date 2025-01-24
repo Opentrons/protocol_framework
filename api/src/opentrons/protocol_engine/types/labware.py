@@ -3,12 +3,16 @@
 from __future__ import annotations
 
 from typing import Optional
+from dataclasses import dataclass
 from datetime import datetime
 
 from pydantic import BaseModel, Field
 
 from .location import LabwareLocation
-from .labware_offset_location import LegacyLabwareOffsetLocation
+from .labware_offset_location import (
+    LegacyLabwareOffsetLocation,
+    LabwareOffsetLocationSequence,
+)
 from .labware_offset_vector import LabwareOffsetVector
 from .util import Vec3f
 
@@ -30,7 +34,11 @@ class LabwareOffset(BaseModel):
     definitionUri: str = Field(..., description="The URI for the labware's definition.")
     location: LegacyLabwareOffsetLocation = Field(
         ...,
-        description="Where the labware is located on the robot.",
+        description="Where the labware is located on the robot. Deprecated and present only for backwards compatibility; cannot represent certain locations. Use locationSequence instead.",
+    )
+    locationSequence: Optional[LabwareOffsetLocationSequence] = Field(
+        default=None,
+        description="Where the labware is located on the robot. Can represent all locations, but may not be present for older runs.",
     )
     vector: LabwareOffsetVector = Field(
         ...,
@@ -38,8 +46,8 @@ class LabwareOffset(BaseModel):
     )
 
 
-class LabwareOffsetCreate(BaseModel):
-    """Create request data for a labware offset."""
+class LegacyLabwareOffsetCreate(BaseModel):
+    """Create request data for a labware offset with a legacy location field."""
 
     definitionUri: str = Field(..., description="The URI for the labware's definition.")
     location: LegacyLabwareOffsetLocation = Field(
@@ -50,6 +58,28 @@ class LabwareOffsetCreate(BaseModel):
         ...,
         description="The offset applied to matching labware.",
     )
+
+
+class LabwareOffsetCreate(BaseModel):
+    """Create request data for a labware offset with a modern location sequence."""
+
+    definitionUri: str = Field(..., description="The URI for the labware's definition.")
+    locationSequence: LabwareOffsetLocationSequence = Field(
+        ..., description="Where the labware is located on the robot."
+    )
+    vector: LabwareOffsetVector = Field(
+        ..., description="The offset applied to matching labware."
+    )
+
+
+@dataclass(frozen=True)
+class LabwareOffsetCreateInternal:
+    """An internal-only labware offset creator that captures both old and new location arguments."""
+
+    definitionUri: str
+    locationSequence: LabwareOffsetLocationSequence
+    legacyLocation: LegacyLabwareOffsetLocation
+    vector: LabwareOffsetVector
 
 
 class LoadedLabware(BaseModel):

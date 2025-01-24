@@ -78,7 +78,7 @@ OFF_DECK_LOCATION: _OffDeckLocationType = "offDeck"
 SYSTEM_LOCATION: _SystemLocationType = "systemLocation"
 
 
-class OnLabwareLocationVectorComponent(BaseModel):
+class OnLabwareLocationSequenceComponent(BaseModel):
     """Labware on another labware."""
 
     kind: Literal["onLabware"] = "onLabware"
@@ -86,14 +86,14 @@ class OnLabwareLocationVectorComponent(BaseModel):
     lidId: str | None
 
 
-class OnModuleLocationVectorComponent(BaseModel):
+class OnModuleLocationSequenceComponent(BaseModel):
     """Labware on a module."""
 
     kind: Literal["onModule"] = "onModule"
     moduleId: str
 
 
-class OnAddressableAreaLocationVectorComponent(BaseModel):
+class OnAddressableAreaLocationSequenceComponent(BaseModel):
     """Labware on an addressable area."""
 
     kind: Literal["onAddressableArea"] = "onAddressableArea"
@@ -101,18 +101,18 @@ class OnAddressableAreaLocationVectorComponent(BaseModel):
     slotName: str | None
 
 
-class NotOnDeckLocationVectorComponent(BaseModel):
+class NotOnDeckLocationSequenceComponent(BaseModel):
     """Labware on a system location."""
 
     kind: Literal["notOnDeck"] = "notOnDeck"
     logicalLocationName: _OffDeckLocationType | _SystemLocationType
 
 
-LabwareLocationVector = list[
-    OnLabwareLocationVectorComponent
-    | OnModuleLocationVectorComponent
-    | OnAddressableAreaLocationVectorComponent
-    | NotOnDeckLocationVectorComponent
+LabwareLocationSequence = list[
+    OnLabwareLocationSequenceComponent
+    | OnModuleLocationSequenceComponent
+    | OnAddressableAreaLocationSequenceComponent
+    | NotOnDeckLocationSequenceComponent
 ]
 """Labware location specifier."""
 

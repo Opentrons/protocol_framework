@@ -85,7 +85,7 @@ class LabwareOffsetProvider(AbstractLabwareOffsetProvider):
 
         See the parent class for param details.
         """
-        offset = self._labware_view.find_applicable_labware_offset(
+        offset = self._labware_view.find_applicable_labware_offset_by_legacy_location(
             definition_uri=load_params.as_uri(),
             location=LegacyLabwareOffsetLocation(
                 slotName=deck_slot,

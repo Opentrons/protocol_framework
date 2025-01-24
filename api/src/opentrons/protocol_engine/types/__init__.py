@@ -83,10 +83,18 @@ from .labware import (
     OverlapOffset,
     LabwareOffset,
     LabwareOffsetCreate,
+    LegacyLabwareOffsetCreate,
+    LabwareOffsetCreateInternal,
     LoadedLabware,
 )
 from .liquid import HexColor, EmptyLiquidId, LiquidId, Liquid, FluidKind, AspiratedFluid
-from .labware_offset_location import LegacyLabwareOffsetLocation
+from .labware_offset_location import (
+    LegacyLabwareOffsetLocation,
+    LabwareOffsetLocationSequence,
+    OnLabwareOffsetLocationSequenceComponent,
+    OnModuleOffsetLocationSequenceComponent,
+    OnAddressableAreaOffsetLocationSequenceComponent,
+)
 from .labware_offset_vector import LabwareOffsetVector
 from .well_position import (
     WellOrigin,
@@ -195,12 +203,18 @@ __all__ = [
     "DeckPoint",
     # Labware offset location
     "LegacyLabwareOffsetLocation",
+    "LabwareOffsetLocationSequence",
+    "OnLabwareOffsetLocationSequenceComponent",
+    "OnModuleOffsetLocationSequenceComponent",
+    "OnAddressableAreaOffsetLocationSequenceComponent",
     # Labware offset vector
     "LabwareOffsetVector",
     # Labware
     "OverlapOffset",
     "LabwareOffset",
     "LabwareOffsetCreate",
+    "LegacyLabwareOffsetCreate",
+    "LabwareOffsetCreateInternal",
     "LoadedLabware",
     "LabwareOffsetVector",
     # Liquids

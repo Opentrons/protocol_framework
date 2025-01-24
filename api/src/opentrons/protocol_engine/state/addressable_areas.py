@@ -261,6 +261,11 @@ class AddressableAreaView:
         self._state = state
 
     @cached_property
+    def deck_definition(self) -> DeckDefinitionV5:
+        """The full deck definition."""
+        return self._state.deck_definition
+
+    @cached_property
     def deck_extents(self) -> Point:
         """The maximum space on the deck."""
         extents = self._state.robot_definition["extents"]
