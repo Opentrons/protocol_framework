@@ -125,7 +125,7 @@ export function fieldsToLabware(
         x: 0,
         y: 0,
         //  ensure that z is a number!
-        z: fields.labwareZDimension - parseFloat(String(z)),
+        z: fields.labwareZDimension - parseFloat(String(z)) + 45,
       })
     })
 
