@@ -284,7 +284,7 @@ describe('aspirate', () => {
       type: 'THERMOCYCLER_LID_CLOSED',
     })
   })
-  it.only('should return an error when aspirating from absorbance with pipette collision', () => {
+  it('should return an error when aspirating from absorbance with pipette collision', () => {
     vi.mocked(absorbanceReaderCollision).mockImplementationOnce(
       (
         modules: RobotState['modules'],
