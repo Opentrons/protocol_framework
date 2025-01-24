@@ -9,7 +9,7 @@ import {
 } from '/app/redux/analytics'
 
 
-type commandType = 'toggle-hs-latch' | 'set-temperature-module-temperature' | 'set-thermocycler-lid-temperature' | 'set-thermocycler-block-temperature'
+type commandType = 'toggle-hs-latch' |'toggle-tc-lid'| 'set-temperature-module-temperature' | 'set-thermocycler-lid-temperature' | 'set-thermocycler-block-temperature' | 'set-heatershaker-temperature' | 'deactivate'
 type CommandResult = 'succeeded' | 'failed'
 
 export interface UseModuleCommandAnalyticsResult {

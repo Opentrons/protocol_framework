@@ -24,6 +24,7 @@ import { SubmitPrimaryButton } from '/app/atoms/buttons'
 import type { MouseEventHandler } from 'react'
 import type { HeaterShakerModule } from '/app/redux/modules/types'
 import type { HeaterShakerSetTargetTemperatureCreateCommand } from '@opentrons/shared-data'
+import { useModuleCommandAnalytics } from '/app/redux-resources/analytics/hooks/useModuleAnalytics'
 
 interface HeaterShakerSlideoutProps {
   module: HeaterShakerModule
@@ -40,6 +41,10 @@ export const HeaterShakerSlideout = (
   const { createLiveCommand } = useCreateLiveCommandMutation()
   const moduleName = getModuleDisplayName(module.moduleModel)
   const modulePart = t('temperature')
+  const {reportModuleCommandStarted,
+    reportModuleCommandCompleted,
+    reportModuleCommandError} = useModuleCommandAnalytics()
+  const serialNumber = module.serialNumber
 
   const sendSetTemperatureCommand: MouseEventHandler<HTMLInputElement> = e => {
     e.preventDefault()
@@ -53,9 +58,11 @@ export const HeaterShakerSlideout = (
           celsius: hsValue,
         },
       }
+      reportModuleCommandStarted('heaterShaker', 'set-heatershaker-temperature', serialNumber, hsValue)
       createLiveCommand({
         command: setTempCommand,
       }).catch((e: Error) => {
+        reportModuleCommandError('heatershaker', 'set-heatershaker-temperature', serialNumber, e.message, hsValue)
         console.error(
           `error setting module status with command type ${setTempCommand.commandType}: ${e.message}`
         )

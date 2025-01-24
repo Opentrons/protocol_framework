@@ -32,6 +32,8 @@ import type {
 } from '@opentrons/shared-data'
 
 import type { AttachedModule } from '/app/redux/modules/types'
+import { useModuleCommandAnalytics } from '/app/redux-resources/analytics/hooks/useModuleAnalytics'
+import { getRobotSerialNumber } from '/app/redux/discovery'
 
 export function useIsHeaterShakerInProtocol(): boolean {
   const currentRunId = useCurrentRunId()
@@ -64,11 +66,14 @@ export function useLatchControls(module: AttachedModule): LatchControls {
       moduleId: module.id,
     },
   }
-
+  const {reportModuleCommandStarted, reportModuleCommandCompleted, reportModuleCommandError} = useModuleCommandAnalytics()
+  const serialNumber = module.serialNumber
+  reportModuleCommandStarted('heaterShaker', 'toggle-hs-latch', serialNumber, null)
   const toggleLatch = (): void => {
     createLiveCommand({
       command: latchCommand,
     }).catch((e: Error) => {
+      reportModuleCommandError('heaterShaker', 'toggle-hs-latch', serialNumber, e.message, null)
       console.error(
         `error setting module status with command type ${latchCommand.commandType}: ${e.message}`
       )
@@ -207,6 +212,11 @@ export function useModuleOverflowMenu(
         moduleId: module.id,
       },
     }
+    const serialNumber = module.serialNumber
+    const {reportModuleCommandStarted,
+      reportModuleCommandCompleted,
+      reportModuleCommandError} = useModuleCommandAnalytics()
+    reportModuleCommandStarted(module.moduleModel, 'deactivate', serialNumber, null)
     createLiveCommand({
       command: deactivateCommand,
     }).catch((e: Error) => {
@@ -226,11 +236,15 @@ export function useModuleOverflowMenu(
       moduleId: module.id,
     },
   }
-
+  const {reportModuleCommandStarted,
+    reportModuleCommandError} = useModuleCommandAnalytics()
+  const serialNumber = module.serialNumber
+  reportModuleCommandStarted(module.moduleModel, 'toggle-tc-lid', serialNumber, null)
   const controlTCLid = (): void => {
     createLiveCommand({
       command: lidCommand,
     }).catch((e: Error) => {
+      reportModuleCommandError(module.moduleModel, 'toggle-tc-lid', serialNumber, e.message, null)
       console.error(
         `error setting thermocycler module status with command type ${lidCommand.commandType}: ${e.message}`
       )

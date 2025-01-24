@@ -46,6 +46,9 @@ export const ThermocyclerModuleSlideout = (
   const moduleName = getModuleDisplayName(module.moduleModel)
   const modulePart = isSecondaryTemp ? 'Lid' : 'Block'
   const tempRanges = getTCTempRange(isSecondaryTemp)
+  const {reportModuleCommandStarted,
+    reportModuleCommandCompleted,
+    reportModuleCommandError} = useModuleCommandAnalytics()
   const serialNumber = module.serialNumber
   let errorMessage
   if (isSecondaryTemp) {
@@ -60,7 +63,7 @@ export const ThermocyclerModuleSlideout = (
         ? t('input_out_of_range')
         : null
   }
-
+  // where do i put completed statement
   const handleSubmitTemp = (): void => {
     if (tempValue != null) {
       const saveLidCommand: TCSetTargetLidTemperatureCreateCommand = {
@@ -78,9 +81,21 @@ export const ThermocyclerModuleSlideout = (
           //  TODO(jr, 3/17/22): add volume, which will be provided by PD protocols
         },
       }
+      if (modulePart == 'Lid'){
+        reportModuleCommandStarted(module.moduleModel, 'set-thermocycler-lid-temperature', serialNumber, tempValue)
+      }
+      else if (modulePart == 'Block'){
+        reportModuleCommandStarted(module.moduleModel, 'set-thermocycler-block-temperature', serialNumber, tempValue)
+      }
       createLiveCommand({
         command: isSecondaryTemp ? saveLidCommand : saveBlockCommand,
       }).catch((e: Error) => {
+        if (modulePart == 'Lid'){
+          reportModuleCommandError(module.moduleModel, 'set-thermocycler-lid-temperature', e.message,serialNumber, tempValue)
+        }
+        else if (modulePart == 'Block'){
+          reportModuleCommandError(module.moduleModel, 'set-thermocycler-block-temperature',e.message, serialNumber, tempValue)
+        }
         console.error(
           `error setting module status with command type ${
             saveLidCommand.commandType ?? saveBlockCommand.commandType
