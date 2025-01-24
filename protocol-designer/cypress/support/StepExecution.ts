@@ -22,15 +22,7 @@ export type StepsList = Array<
   | ModVerifications
 >
 
-export const runSteps = (
-  steps: Array<
-    | SetupActions
-    | SetupVerifications
-    | ModActions
-    | ModVerifications
-    | UniversalActions
-  >
-): void => {
+export const runSteps = (steps: StepsList): void => {
   const enumsToCheck = [
     SetupActions,
     ModActions,

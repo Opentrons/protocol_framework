@@ -133,6 +133,7 @@ export enum SetupContent {
   ProtocolSteps = 'Protocol steps',
   AddStep = 'Add Step',
   NestDeepWell = 'NEST 96 Deep Well Plate 2mL',
+  Save = 'Save',
 }
 
 export enum SetupLocators {
@@ -511,11 +512,6 @@ export const executeVerificationStep = (
       cy.contains('Tip handling')
       cy.contains('Tip drop location')
       break
-
-    default:
-      throw new Error(
-        `Unrecognized verification: ${verification as SetupVerifications}`
-      )
   }
 }
 

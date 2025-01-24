@@ -1,4 +1,3 @@
-import { isEnumValue } from './utils'
 import '../support/commands'
 // ToDo Future planning should have Step 5, Step 6, and 7 verification
 // Todo ProtocolOverview page. This might change from deck map revamp,
@@ -181,9 +180,5 @@ export const executeVerifyModStep = (verification: ModVerifications): void => {
         .find('[data-testid="Tag_default"]')
         .should('contain', '4°C')
       break
-    default:
-      throw new Error(
-        `Unrecognized verification: ${verification as ModVerifications}`
-      )
   }
 }
