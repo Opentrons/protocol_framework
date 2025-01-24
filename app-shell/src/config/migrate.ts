@@ -29,6 +29,7 @@ import type {
   ConfigV23,
   ConfigV24,
   ConfigV25,
+  ConfigV26,
 } from '@opentrons/app/src/redux/config/types'
 // format
 // base config v0 defaults
@@ -443,6 +444,22 @@ const toVersion25 = (prevConfig: ConfigV24): ConfigV25 => {
   return nextConfig
 }
 
+const toVersion26 = (prevConfig: ConfigV25): ConfigV26 => {
+  const nextConfig = {
+    ...prevConfig,
+    version: 26 as const,
+    onDeviceDisplaySettings: {
+      ...prevConfig.onDeviceDisplaySettings,
+      unfinishedUnboxingFlowRoute:
+        prevConfig.onDeviceDisplaySettings.unfinishedUnboxingFlowRoute ===
+        '/welcome'
+          ? '/choose-language'
+          : prevConfig.onDeviceDisplaySettings.unfinishedUnboxingFlowRoute,
+    },
+  }
+  return nextConfig
+}
+
 const MIGRATIONS: [
   (prevConfig: ConfigV0) => ConfigV1,
   (prevConfig: ConfigV1) => ConfigV2,
@@ -468,7 +485,8 @@ const MIGRATIONS: [
   (prevConfig: ConfigV21) => ConfigV22,
   (prevConfig: ConfigV22) => ConfigV23,
   (prevConfig: ConfigV23) => ConfigV24,
-  (prevConfig: ConfigV24) => ConfigV25
+  (prevConfig: ConfigV24) => ConfigV25,
+  (prevConfig: ConfigV25) => ConfigV26
 ] = [
   toVersion1,
   toVersion2,
@@ -495,6 +513,7 @@ const MIGRATIONS: [
   toVersion23,
   toVersion24,
   toVersion25,
+  toVersion26,
 ]
 
 export const DEFAULTS: Config = migrate(DEFAULTS_V0)
@@ -527,6 +546,7 @@ export function migrate(
     | ConfigV23
     | ConfigV24
     | ConfigV25
+    | ConfigV26
 ): Config {
   const prevVersion = prevConfig.version
   let result = prevConfig
