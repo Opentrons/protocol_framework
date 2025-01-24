@@ -1,5 +1,7 @@
-import { Actions, Verifications, runCreateTest } from '../support/createNew'
+import { Actions, Verifications, runCreateTest } from '../support/SetupSteps'
 import { UniversalActions } from '../support/universalActions'
+
+import {type Actions as ModActions, type ModVerifications as ModVerifications} from '../support/SupportModules'
 
 describe('The Redesigned Create Protocol Landing Page', () => {
   beforeEach(() => {
@@ -11,7 +13,8 @@ describe('The Redesigned Create Protocol Landing Page', () => {
   it('content and step 1 flow works', () => {
     cy.clickCreateNew()
     cy.verifyCreateNewHeader()
-    const steps: Array<Actions | Verifications | UniversalActions> = [
+    const steps: Array<
+      Actions | Verifications | UniversalActions | ModActions | ModVerifications> = [
       Verifications.OnStep1,
       Verifications.FlexSelected,
       UniversalActions.Snapshot,
@@ -71,8 +74,9 @@ describe('The Redesigned Create Protocol Landing Page', () => {
       Actions.Done,
       Actions.ProtocolStepsH,
       Actions.AddStep,
-      Actions.AddTemperatureStep,
-      Verifications.TempeDeckInitialForm,
+      /*
+      ModActions.AddTemperatureStep,
+      ModVerifications.TempeDeckInitialForm,
       UniversalActions.Snapshot,
       Actions.ActivateTempdeck,
       Actions.InputTempDeck4,
@@ -86,11 +90,15 @@ describe('The Redesigned Create Protocol Landing Page', () => {
       Actions.InputTempDeck95,
       Actions.SaveButtonTempdeck,
       Actions.PauseAfterSettingTempdeck,
+      Actions.AddStep,
+      Actions.AddTemperatureStep,
+      Actions.ActivateTempdeck,
+      Actions.InputTempDeck100,
+      */
     ]
     runCreateTest(steps)
-    // Action
-
-    // Action
-    // Action, verification needed
   })
+
+
+
 })

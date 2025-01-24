@@ -1,6 +1,7 @@
-import { Actions, Verifications, runCreateTest } from '../support/createNew'
+import { SetupActions, SetupVerifications } from '../support/SetupSteps'
 import { UniversalActions } from '../support/universalActions'
 import '../support/commands'
+import { runSteps } from '../support/StepExecution'
 
 describe('The Redesigned Create Protocol Landing Page', () => {
   beforeEach(() => {
@@ -11,29 +12,29 @@ describe('The Redesigned Create Protocol Landing Page', () => {
   it('content and step 1 flow works', () => {
     cy.verifyCreateNewHeader()
     cy.clickCreateNew()
-    const steps: Array<Actions | Verifications | UniversalActions> = [
-      Verifications.OnStep1,
-      Verifications.FlexSelected,
+    const steps: Array<SetupActions | SetupVerifications | UniversalActions> = [
+      SetupVerifications.OnStep1,
+      SetupVerifications.FlexSelected,
       UniversalActions.Snapshot,
-      Actions.SelectOT2,
-      Verifications.OT2Selected,
+      SetupActions.SelectOT2,
+      SetupVerifications.OT2Selected,
       UniversalActions.Snapshot,
-      Actions.SelectFlex,
-      Verifications.FlexSelected,
+      SetupActions.SelectFlex,
+      SetupVerifications.FlexSelected,
       UniversalActions.Snapshot,
-      Actions.Confirm,
-      Verifications.OnStep2,
-      Verifications.NinetySixChannel,
+      SetupActions.Confirm,
+      SetupVerifications.OnStep2,
+      SetupVerifications.NinetySixChannel,
       UniversalActions.Snapshot,
-      Actions.GoBack,
-      Verifications.OnStep1,
-      Actions.SelectOT2,
-      Actions.Confirm,
-      Verifications.OnStep2,
-      Verifications.NotNinetySixChannel,
+      SetupActions.GoBack,
+      SetupVerifications.OnStep1,
+      SetupActions.SelectOT2,
+      SetupActions.Confirm,
+      SetupVerifications.OnStep2,
+      SetupVerifications.NotNinetySixChannel,
       UniversalActions.Snapshot,
     ]
 
-    runCreateTest(steps)
+    runSteps(steps)
   })
 })

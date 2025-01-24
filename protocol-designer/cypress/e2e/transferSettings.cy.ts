@@ -1,4 +1,4 @@
-import { Actions, Verifications, runCreateTest } from '../support/createNew'
+import { Actions, Verifications, runCreateTest } from '../support/SetupSteps'
 import { UniversalActions } from '../support/universalActions'
 
 describe('The Redesigned Create Protocol Landing Page', () => {

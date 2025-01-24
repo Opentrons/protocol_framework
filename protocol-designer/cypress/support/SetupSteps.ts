@@ -1,6 +1,6 @@
-import { executeUniversalAction, UniversalActions } from './universalActions'
 import { isEnumValue } from './utils'
-import '../support/commands'
+import './commands'
+
 // ToDo Future planning should have Step 5, Step 6, and 7 verification
 // Todo ProtocolOverview page. This might change from deck map revamp,
 // so let's hold off until then.
@@ -17,7 +17,7 @@ declare global {
     }
   }
 }
-export enum Actions {
+export enum SetupActions {
   SelectFlex = 'Select Opentrons Flex',
   SelectOT2 = 'Select Opentrons OT-2',
   Confirm = 'Confirm',
@@ -64,17 +64,9 @@ export enum Actions {
   DeepWellTempModAdapter = 'Select Opentrons 96 Deep Well Temperature Module Adapter',
   AddNest96DeepWellPlate = 'Adds Nest 96 Deep Well Plate',
   Done = 'Select Done on a step form',
-  AddTemperatureStep = 'Selects Temperature Module step',
-  ActivateTempdeck = 'Activates Temperature Module when you first use it',
-  InputTempDeck4 = 'Inputs 4C into tempdeck',
-  InputTempDeck95 = 'Inputs 96C into tempdeck',
-  InputTempDeck100 = 'Inputs 100C into tempdeck. Expect an error then exit',
-  ExitTempdeckCommand = 'Exits a tempdeck command',
-  PauseAfterSettingTempdeck = 'Allows you to puase protocol until reached',
-  SaveButtonTempdeck = 'Saves a temperature set',
 }
 
-export enum Verifications {
+export enum SetupVerifications {
   OnStep1 = 'On Step 1 page.',
   OnStep2 = 'On Step 2 page.',
   OnStep3 = 'on Step 3 page',
@@ -89,12 +81,12 @@ export enum Verifications {
   HeaterShakerImg = 'Heater-Shaker Module GEN1',
   Tempdeck2Img = 'Temperature Module GEN2',
   MagBlockImg = 'Magnetic Block GEN1',
-  LiquidPage = 'Liquid page content is visible',
+  LiquidPage = 'Liquid page SetupContent is visible',
   TransferPopOut = 'Verify Step 1 of the transfer function is present',
   TempeDeckInitialForm = 'Verify that the tempdeck stepform opens correctly',
   Temp4CPauseTextVerification = 'Verify that the pause step has the right information in step preview',
 }
-export enum Content {
+export enum SetupContent {
   Step1Title = 'Step 1',
   Step2Title = 'Step 2',
   Step3Title = 'Step3',
@@ -141,14 +133,9 @@ export enum Content {
   ProtocolSteps = 'Protocol steps',
   AddStep = 'Add Step',
   NestDeepWell = 'NEST 96 Deep Well Plate 2mL',
-  ModState = 'Module state',
-  DecativeTempDeck = 'Deactivate',
-  Temperature = 'Temperature',
-  Save = 'Save',
-  Temp4CVerification = `Build a pause step to wait until Temperature Module GEN2 reaches 4˚C`,
 }
 
-export enum Locators {
+export enum SetupLocators {
   Confirm = 'button:contains("Confirm")',
   GoBack = 'button:contains("Go back")',
   Step1Indicator = 'p:contains("Step 1")',
@@ -189,18 +176,29 @@ const chooseDeckSlot = (
     | 'D3',
     () => Cypress.Chainable<JQuery<HTMLElement>>
   > = {
-    A1: () => cy.contains('foreignObject[x="0"][y="321"]', Content.EditSlot),
-    A2: () => cy.contains('foreignObject[x="164"][y="321"]', Content.EditSlot),
-    A3: () => cy.contains('foreignObject[x="328"][y="321"]', Content.EditSlot),
-    B1: () => cy.contains('foreignObject[x="0"][y="214"]', Content.EditSlot),
-    B2: () => cy.contains('foreignObject[x="164"][y="214"]', Content.EditSlot),
-    B3: () => cy.contains('foreignObject[x="328"][y="214"]', Content.EditSlot),
-    C1: () => cy.contains('foreignObject[x="0"][y="107"]', Content.EditSlot),
-    C2: () => cy.contains('foreignObject[x="164"][y="107"]', Content.EditSlot),
-    C3: () => cy.contains('foreignObject[x="328"][y="107"]', Content.EditSlot),
-    D1: () => cy.contains('foreignObject[x="0"][y="0"]', Content.EditSlot),
-    D2: () => cy.contains('foreignObject[x="164"][y="0"]', Content.EditSlot),
-    D3: () => cy.contains('foreignObject[x="328"][y="0"]', Content.EditSlot),
+    A1: () =>
+      cy.contains('foreignObject[x="0"][y="321"]', SetupContent.EditSlot),
+    A2: () =>
+      cy.contains('foreignObject[x="164"][y="321"]', SetupContent.EditSlot),
+    A3: () =>
+      cy.contains('foreignObject[x="328"][y="321"]', SetupContent.EditSlot),
+    B1: () =>
+      cy.contains('foreignObject[x="0"][y="214"]', SetupContent.EditSlot),
+    B2: () =>
+      cy.contains('foreignObject[x="164"][y="214"]', SetupContent.EditSlot),
+    B3: () =>
+      cy.contains('foreignObject[x="328"][y="214"]', SetupContent.EditSlot),
+    C1: () =>
+      cy.contains('foreignObject[x="0"][y="107"]', SetupContent.EditSlot),
+    C2: () =>
+      cy.contains('foreignObject[x="164"][y="107"]', SetupContent.EditSlot),
+    C3: () =>
+      cy.contains('foreignObject[x="328"][y="107"]', SetupContent.EditSlot),
+    D1: () => cy.contains('foreignObject[x="0"][y="0"]', SetupContent.EditSlot),
+    D2: () =>
+      cy.contains('foreignObject[x="164"][y="0"]', SetupContent.EditSlot),
+    D3: () =>
+      cy.contains('foreignObject[x="328"][y="0"]', SetupContent.EditSlot),
   }
 
   const slotAction = deckSlots[slot as keyof typeof deckSlots]
@@ -245,296 +243,265 @@ const selectWells = (wells: string[]): void => {
 // Example usage
 // selectWells(['A1', 'B3', 'H12'])
 
-const executeAction = (action: Actions | UniversalActions): void => {
-  if (isEnumValue([UniversalActions], [action])) {
-    executeUniversalAction(action as UniversalActions)
-    return
-  }
-
+export const executeSetupSteps = (action: SetupActions): void => {
   switch (action) {
-    case Actions.SelectFlex:
-      cy.contains(Content.OpentronsFlex).should('be.visible').click()
+    case SetupActions.SelectFlex:
+      cy.contains(SetupContent.OpentronsFlex).should('be.visible').click()
       break
 
-    case Actions.SelectOT2:
-      cy.contains(Content.OpentronsOT2).should('be.visible').click()
+    case SetupActions.SelectOT2:
+      cy.contains(SetupContent.OpentronsOT2).should('be.visible').click()
       break
-    case Actions.Confirm:
-      cy.contains(Content.Confirm).should('be.visible').click()
+    case SetupActions.Confirm:
+      cy.contains(SetupContent.Confirm).should('be.visible').click()
       break
-    case Actions.GoBack:
-      cy.contains(Content.GoBack).should('be.visible').click()
+    case SetupActions.GoBack:
+      cy.contains(SetupContent.GoBack).should('be.visible').click()
       break
-    case Actions.SingleChannelPipette50:
-      cy.contains('label', Content.SingleChannel)
+    case SetupActions.SingleChannelPipette50:
+      cy.contains('label', SetupContent.SingleChannel)
         .should('exist')
         .and('be.visible')
         .click()
-      cy.contains(Content.Volume50).click()
-      cy.contains(Content.Tiprack50).click()
+      cy.contains(SetupContent.Volume50).click()
+      cy.contains(SetupContent.Tiprack50).click()
       // ToDo after PR, why does this click Tiprack50 again
       // instead of clicking the filter tiprack?
-      // cy.contains(Content.FilterTiprack50).click()
+      // cy.contains(SetupContent.FilterTiprack50).click()
       break
-    case Actions.AddThermocycler:
-      cy.contains(Content.Thermocycler).click()
+    case SetupActions.AddThermocycler:
+      cy.contains(SetupContent.Thermocycler).click()
       break
-    case Actions.AddHeaterShaker:
-      cy.contains(Content.HeaterShaker).click()
+    case SetupActions.AddHeaterShaker:
+      cy.contains(SetupContent.HeaterShaker).click()
       break
-    case Actions.AddTempdeck2:
-      cy.contains(Content.Tempdeck2).click()
+    case SetupActions.AddTempdeck2:
+      cy.contains(SetupContent.Tempdeck2).click()
       break
-    case Actions.AddMagBlock:
-      cy.contains(Content.MagBlock).click()
+    case SetupActions.AddMagBlock:
+      cy.contains(SetupContent.MagBlock).click()
       break
-    case Actions.YesGripper:
-      cy.contains(Content.Yes).click()
+    case SetupActions.YesGripper:
+      cy.contains(SetupContent.Yes).click()
       break
-    case Actions.NoGripper:
-      cy.contains(Content.No).click()
+    case SetupActions.NoGripper:
+      cy.contains(SetupContent.No).click()
       break
-    case Actions.EditProtocolA:
-      cy.contains(Content.EditProtocol).click()
+    case SetupActions.EditProtocolA:
+      cy.contains(SetupContent.EditProtocol).click()
       break
-    case Actions.ChoseDeckSlotA1:
+    case SetupActions.ChoseDeckSlotA1:
       chooseDeckSlot('A1').click()
       break
-    case Actions.ChoseDeckSlotA2:
+    case SetupActions.ChoseDeckSlotA2:
       chooseDeckSlot('A2').click()
       break
-    case Actions.ChoseDeckSlotA3:
+    case SetupActions.ChoseDeckSlotA3:
       chooseDeckSlot('A3').click()
       break
-    case Actions.ChoseDeckSlotB1:
+    case SetupActions.ChoseDeckSlotB1:
       chooseDeckSlot('B1').click()
       break
-    case Actions.ChoseDeckSlotB2:
+    case SetupActions.ChoseDeckSlotB2:
       chooseDeckSlot('B2').click()
       break
-    case Actions.ChoseDeckSlotB3:
+    case SetupActions.ChoseDeckSlotB3:
       chooseDeckSlot('B3').click()
       break
-    case Actions.ChoseDeckSlotC1:
+    case SetupActions.ChoseDeckSlotC1:
       chooseDeckSlot('C1').click()
       break
-    case Actions.ChoseDeckSlotC2:
+    case SetupActions.ChoseDeckSlotC2:
       chooseDeckSlot('C2').click()
       break
-    case Actions.ChoseDeckSlotC3:
+    case SetupActions.ChoseDeckSlotC3:
       chooseDeckSlot('C3').click()
       break
-    case Actions.ChoseDeckSlotD1:
+    case SetupActions.ChoseDeckSlotD1:
       chooseDeckSlot('D1').click()
       break
-    case Actions.ChoseDeckSlotD2:
+    case SetupActions.ChoseDeckSlotD2:
       chooseDeckSlot('D2').click()
       break
-    case Actions.ChoseDeckSlotD3:
+    case SetupActions.ChoseDeckSlotD3:
       chooseDeckSlot('D3').click()
       break
-    case Actions.AddHardwareLabware:
-      cy.contains(Content.AddLabwareToDeck).click()
+    case SetupActions.AddHardwareLabware:
+      cy.contains(SetupContent.AddLabwareToDeck).click()
       break
-    case Actions.EditHardwareLabwareOnDeck:
-      cy.contains(Content.EditHardwareLabwareOnDeck).click()
+    case SetupActions.EditHardwareLabwareOnDeck:
+      cy.contains(SetupContent.EditHardwareLabwareOnDeck).click()
       break
-    case Actions.ClickLabwareHeader:
-      cy.contains(Content.LabwareH).click()
+    case SetupActions.ClickLabwareHeader:
+      cy.contains(SetupContent.LabwareH).click()
       break
-    case Actions.ClickWellPlatesSection:
-      cy.contains(Content.WellPlatesCat).click()
+    case SetupActions.ClickWellPlatesSection:
+      cy.contains(SetupContent.WellPlatesCat).click()
       break
-    case Actions.ChoseDeckSlotC2Labware:
+    case SetupActions.ChoseDeckSlotC2Labware:
       // Todo Investigate making a dictionary of slot editing.
       // Maybe next PR
       chooseDeckSlot('C2')
         .find('.Box-sc-8ozbhb-0.kIDovv')
         .find('a[role="button"]')
-        .contains(Content.EditSlot)
+        .contains(SetupContent.EditSlot)
         .click({ force: true })
       break
-    case Actions.SelectArmadillo96WellPlate: // New case for selecting Armadillo plate
-      cy.contains(Content.Armadillo96WellPlate200uL).click({ force: true })
-      cy.get(Locators.LabwareSelectionLocation).click({ force: true })
+    case SetupActions.SelectArmadillo96WellPlate: // New case for selecting Armadillo plate
+      cy.contains(SetupContent.Armadillo96WellPlate200uL).click({ force: true })
+      cy.get(SetupLocators.LabwareSelectionLocation).click({ force: true })
       break
-    case Actions.SelectBioRad96WellPlate: // New case for selecting Armadillo plate
-      cy.contains(Content.Biorad96WellPlate200uL).click({ force: true })
-      cy.get(Locators.LabwareSelectionLocation).click({ force: true })
+    case SetupActions.SelectBioRad96WellPlate: // New case for selecting Armadillo plate
+      cy.contains(SetupContent.Biorad96WellPlate200uL).click({ force: true })
+      cy.get(SetupLocators.LabwareSelectionLocation).click({ force: true })
       break
 
-    case Actions.AddLiquid: // New case for "Add liquid"
-      cy.contains('button', Content.AddLiquid).click()
+    case SetupActions.AddLiquid: // New case for "Add liquid"
+      cy.contains('button', SetupContent.AddLiquid).click()
       break
-    case Actions.ClickLiquidButton: // New case for "Liquid button"
-      cy.contains('button', Content.LiquidButton).click()
+    case SetupActions.ClickLiquidButton: // New case for "Liquid button"
+      cy.contains('button', SetupContent.LiquidButton).click()
       break
-    case Actions.DefineLiquid: // New case for "Define a liquid"
-      cy.contains('button', Content.DefineALiquid).click()
+    case SetupActions.DefineLiquid: // New case for "Define a liquid"
+      cy.contains('button', SetupContent.DefineALiquid).click()
       break
-    case Actions.LiquidSaveWIP:
-      cy.get(Locators.LiquidNameInput) // Locate the input with name="name"
-        .type(Content.SampleLiquidName)
+    case SetupActions.LiquidSaveWIP:
+      cy.get(SetupLocators.LiquidNameInput) // Locate the input with name="name"
+        .type(SetupContent.SampleLiquidName)
 
-      cy.get(Locators.ModalShellArea)
+      cy.get(SetupLocators.ModalShellArea)
         .find('form') // Target the form inside the modal
         .invoke('submit', (e: SubmitEvent) => {
           e.preventDefault() // Prevent default form submission
         })
 
-      cy.get(Locators.ModalShellArea)
-        .find(Locators.SaveButton) // Locate the Save button
-        .contains(Content.Save)
+      cy.get(SetupLocators.ModalShellArea)
+        .find(SetupLocators.SaveButton) // Locate the Save button
+        .contains(SetupContent.Save)
         .click({ force: true }) // Trigger the Save button
       break
-    case Actions.WellSelector:
+    case SetupActions.WellSelector:
       selectWells(['A1', 'A2'])
       break
-    case Actions.LiquidDropdown: // New case for dropdown
-      cy.get(Locators.LiquidsDropdown)
+    case SetupActions.LiquidDropdown: // New case for dropdown
+      cy.get(SetupLocators.LiquidsDropdown)
         .should('be.visible') // Ensure the dropdown is visible
         .click() // Click the dropdown
       break
-    case Actions.SelectLiquidWells:
+    case SetupActions.SelectLiquidWells:
       cy.contains('My liquid!').click() // Action for clicking 'My liquid!'
       break
-    case Actions.SetVolumeAndSaveforWells:
+    case SetupActions.SetVolumeAndSaveforWells:
       cy.get('input[name="volume"]').type(`150`) // Set volume
-      cy.contains('button', Content.Save).click() // Click Save button
+      cy.contains('button', SetupContent.Save).click() // Click Save button
       cy.contains('button', 'Done').click({ force: true }) // Click Done button, forcing click if necessary
       break
-    case Actions.ProtocolStepsH:
-      cy.contains('button', Content.ProtocolSteps).click()
+    case SetupActions.ProtocolStepsH:
+      cy.contains('button', SetupContent.ProtocolSteps).click()
       break
-    case Actions.AddStep:
-      cy.contains('button', Content.AddStep).click({ force: true })
+    case SetupActions.AddStep:
+      cy.contains('button', SetupContent.AddStep).click({ force: true })
       break
-    case Actions.AddAdapters:
+    case SetupActions.AddAdapters:
       cy.contains('Adapters').click()
       break
-    case Actions.DeepWellTempModAdapter:
+    case SetupActions.DeepWellTempModAdapter:
       cy.contains('Opentrons 96 Deep Well Temperature Module Adapter').click()
       break
-    case Actions.AddNest96DeepWellPlate:
-      cy.contains(Content.NestDeepWell).click()
+    case SetupActions.AddNest96DeepWellPlate:
+      cy.contains(SetupContent.NestDeepWell).click()
       break
-    case Actions.Done:
-      cy.get(Locators.DoneButtonLabwareSelection)
+    case SetupActions.Done:
+      cy.get(SetupLocators.DoneButtonLabwareSelection)
         .contains('Done')
         .click({ force: true })
       break
-    case Actions.AddTemperatureStep:
-      cy.contains('button', 'Temperature').click()
-      break
-    case Actions.ActivateTempdeck:
-      cy.contains(Content.DecativeTempDeck)
-        .closest(Locators.Div)
-        .find(Locators.Button)
-        .click()
-      break
-    case Actions.InputTempDeck4:
-      cy.get(Locators.TempdeckTempInput).type('4')
-      break
-    case Actions.InputTempDeck95:
-      cy.get(Locators.TempdeckTempInput).type('95')
-      break
-    case Actions.InputTempDeck100:
-      cy.get(Locators.TempdeckTempInput).type('100')
-      break
-    case Actions.ExitTempdeckCommand:
-      break
-    case Actions.PauseAfterSettingTempdeck:
-      cy.contains(Locators.Button, 'Pause protocol')
-        .should('exist')
-        .and('be.visible')
-        .click()
-      break
-    case Actions.SaveButtonTempdeck:
-      cy.contains(Content.Save).click()
-      break
+
     default:
       throw new Error(`Unrecognized action: ${action as string}`)
   }
 }
 
-const verifyStep = (verification: Verifications): void => {
+export const executeVerificationStep = (
+  verification: SetupVerifications
+): void => {
   switch (verification) {
-    case Verifications.OnStep1:
-      cy.contains(Content.Step1Title).should('be.visible')
+    case SetupVerifications.OnStep1:
+      cy.contains(SetupContent.Step1Title).should('be.visible')
       break
-    case Verifications.OnStep2:
-      cy.contains(Content.Step2Title).should('be.visible')
-      cy.contains(Content.AddPipette).should('be.visible')
+    case SetupVerifications.OnStep2:
+      cy.contains(SetupContent.Step2Title).should('be.visible')
+      cy.contains(SetupContent.AddPipette).should('be.visible')
       break
-    case Verifications.FlexSelected:
-      cy.contains(Content.OpentronsFlex).should(
+    case SetupVerifications.FlexSelected:
+      cy.contains(SetupContent.OpentronsFlex).should(
         'have.css',
         'background-color',
         'rgb(0, 108, 250)'
       )
       break
-    case Verifications.OT2Selected:
-      cy.contains(Content.OpentronsOT2).should(
+    case SetupVerifications.OT2Selected:
+      cy.contains(SetupContent.OpentronsOT2).should(
         'have.css',
         'background-color',
         'rgb(0, 108, 250)'
       )
       break
-    case Verifications.NinetySixChannel:
-      cy.contains(Content.NinetySixChannel).should('be.visible')
+    case SetupVerifications.NinetySixChannel:
+      cy.contains(SetupContent.NinetySixChannel).should('be.visible')
       break
-    case Verifications.NotNinetySixChannel:
-      cy.contains(Content.NinetySixChannel).should('not.exist')
+    case SetupVerifications.NotNinetySixChannel:
+      cy.contains(SetupContent.NinetySixChannel).should('not.exist')
       break
-    case Verifications.StepTwo50uL:
+    case SetupVerifications.StepTwo50uL:
       // This function should get used after you select 50uL fully
-      cy.contains(Content.PipetteVolume)
-      cy.contains(Content.Volume50).should('be.visible')
-      cy.contains(Content.Volume1000).should('be.visible')
-      cy.contains(Content.Tiprack50).should('be.visible')
-      cy.contains(Content.FilterTiprack50).should('be.visible')
+      cy.contains(SetupContent.PipetteVolume)
+      cy.contains(SetupContent.Volume50).should('be.visible')
+      cy.contains(SetupContent.Volume1000).should('be.visible')
+      cy.contains(SetupContent.Tiprack50).should('be.visible')
+      cy.contains(SetupContent.FilterTiprack50).should('be.visible')
       break
-    case Verifications.StepTwoPart3:
+    case SetupVerifications.StepTwoPart3:
       // This function should get used after you select 50uL fully
-      cy.contains(Content.FullP50SingleName).should('be.visible')
-      cy.contains(Content.FullP50TiprackName).should('be.visible')
+      cy.contains(SetupContent.FullP50SingleName).should('be.visible')
+      cy.contains(SetupContent.FullP50TiprackName).should('be.visible')
       cy.contains('Left Mount').should('be.visible')
-      cy.contains(Content.Step2Title)
+      cy.contains(SetupContent.Step2Title)
       cy.contains('Robot pipettes')
-      cy.contains(Content.AddPipette)
+      cy.contains(SetupContent.AddPipette)
       break
-    case Verifications.OnStep3:
+    case SetupVerifications.OnStep3:
       cy.contains('Add a gripper').should('be.visible')
       cy.contains(
         'Do you want to move labware automatically with the gripper?'
       ).should('be.visible')
-      cy.contains(Content.Yes).should('be.visible')
-      cy.contains(Content.No).should('be.visible')
+      cy.contains(SetupContent.Yes).should('be.visible')
+      cy.contains(SetupContent.No).should('be.visible')
       break
-    case Verifications.Step4Verification:
-      cy.contains(Content.ModulePageH).should('be.visible')
-      cy.contains(Content.ModulePageB).should('be.visible')
-      cy.contains(Content.Thermocycler).should('be.visible')
-      cy.contains(Content.HeaterShaker).should('be.visible')
-      cy.contains(Content.MagBlock).should('be.visible')
-      cy.contains(Content.Tempdeck2).should('be.visible')
+    case SetupVerifications.Step4Verification:
+      cy.contains(SetupContent.ModulePageH).should('be.visible')
+      cy.contains(SetupContent.ModulePageB).should('be.visible')
+      cy.contains(SetupContent.Thermocycler).should('be.visible')
+      cy.contains(SetupContent.HeaterShaker).should('be.visible')
+      cy.contains(SetupContent.MagBlock).should('be.visible')
+      cy.contains(SetupContent.Tempdeck2).should('be.visible')
       break
-    case Verifications.ThermocyclerImg:
-      cy.get(Locators.TemperatureModuleImage).should('be.visible')
+    case SetupVerifications.ThermocyclerImg:
+      cy.get(SetupLocators.TemperatureModuleImage).should('be.visible')
       break
-    case Verifications.HeaterShakerImg:
-      cy.get(Locators.HeaterShakerImage).should('be.visible')
+    case SetupVerifications.HeaterShakerImg:
+      cy.get(SetupLocators.HeaterShakerImage).should('be.visible')
       break
-    case Verifications.Tempdeck2Img:
-      cy.contains(Content.Tempdeck2).should('be.visible')
+    case SetupVerifications.Tempdeck2Img:
+      cy.contains(SetupContent.Tempdeck2).should('be.visible')
       break
-    case Verifications.LiquidPage:
+    case SetupVerifications.LiquidPage:
       cy.contains('Liquid').should('be.visible')
       cy.contains('Add liquid').should('be.visible')
       cy.contains('Liquid volume by well').should('be.visible')
       cy.contains('Cancel').should('be.visible')
       break
-    case Verifications.TransferPopOut:
+    case SetupVerifications.TransferPopOut:
       cy.contains('button', 'Transfer').should('be.visible').click()
       cy.contains('Source labware')
       cy.contains('Select source wells')
@@ -544,52 +511,20 @@ const verifyStep = (verification: Verifications): void => {
       cy.contains('Tip handling')
       cy.contains('Tip drop location')
       break
-    case Verifications.TempeDeckInitialForm:
-      cy.contains(Content.ModState)
-      cy.contains(Content.DecativeTempDeck)
-      cy.contains(Content.Temperature)
-      break
-    case Verifications.Temp4CPauseTextVerification:
-      // This takes place
-      cy.contains('div', 'Pausing until')
-        .should('contain', 'Temperature Module GEN2')
-        .and('contain', 'reaches')
-        .find('[data-testid="Tag_default"]')
-        .should('contain', '4°C')
-      break
+
     default:
       throw new Error(
-        `Unrecognized verification: ${verification as Verifications}`
+        `Unrecognized verification: ${verification as SetupVerifications}`
       )
   }
 }
 
-export const runCreateTest = (
-  steps: Array<Actions | Verifications | UniversalActions>
-): void => {
-  const enumsToCheck = [Actions, Verifications, UniversalActions]
-
-  if (!isEnumValue(enumsToCheck, steps)) {
-    throw new Error('One or more steps are unrecognized.')
-  }
-
-  steps.forEach(step => {
-    if (isEnumValue([Actions], step)) {
-      executeAction(step as Actions)
-    } else if (isEnumValue([Verifications], step)) {
-      verifyStep(step as Verifications)
-    } else if (isEnumValue([UniversalActions], step)) {
-      executeAction(step as UniversalActions)
-    }
-  })
-}
-
 export const verifyCreateProtocolPage = (): void => {
-  // Verify step 1 and page content
-  cy.contains(Content.Step1Title).should('exist').should('be.visible')
-  cy.contains(Content.LetsGetStarted).should('exist').should('be.visible')
-  cy.contains(Content.WhatKindOfRobot).should('exist').should('be.visible')
-  cy.contains(Content.OpentronsFlex).should('exist').should('be.visible')
-  cy.contains(Content.OpentronsOT2).should('exist').should('be.visible')
-  cy.contains(Content.Confirm).should('exist').should('be.visible')
+  // Verify step 1 and page SetupContent
+  cy.contains(SetupContent.Step1Title).should('exist').should('be.visible')
+  cy.contains(SetupContent.LetsGetStarted).should('exist').should('be.visible')
+  cy.contains(SetupContent.WhatKindOfRobot).should('exist').should('be.visible')
+  cy.contains(SetupContent.OpentronsFlex).should('exist').should('be.visible')
+  cy.contains(SetupContent.OpentronsOT2).should('exist').should('be.visible')
+  cy.contains(SetupContent.Confirm).should('exist').should('be.visible')
 }
