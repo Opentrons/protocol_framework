@@ -4,6 +4,7 @@ import { OT2_ROBOT_TYPE, getPipetteSpecsV2 } from '@opentrons/shared-data'
 import { expectTimelineError } from '../__utils__/testMatchers'
 import { moveToWell } from '../commandCreators/atomic/moveToWell'
 import {
+  absorbanceReaderCollision,
   thermocyclerPipetteCollision,
   pipetteIntoHeaterShakerLatchOpen,
   pipetteIntoHeaterShakerWhileShaking,
@@ -23,6 +24,7 @@ import {
 } from '../fixtures'
 import type { InvariantContext, RobotState } from '../types'
 
+vi.mock('../utils/absorbanceReaderCollision')
 vi.mock('../utils/thermocyclerPipetteCollision')
 vi.mock('../utils/heaterShakerCollision')
 
@@ -185,6 +187,33 @@ describe('moveToWell', () => {
     expect(getErrorResult(result).errors).toHaveLength(1)
     expect(getErrorResult(result).errors[0]).toMatchObject({
       type: 'THERMOCYCLER_LID_CLOSED',
+    })
+  })
+  it('should return an error when moving to well in a absorbance reader with pipette collision', () => {
+    vi.mocked(absorbanceReaderCollision).mockImplementationOnce(
+      (
+        modules: RobotState['modules'],
+        labware: RobotState['labware'],
+        labwareId: string
+      ) => {
+        expect(modules).toBe(robotStateWithTip.modules)
+        expect(labware).toBe(robotStateWithTip.labware)
+        expect(labwareId).toBe(SOURCE_LABWARE)
+        return true
+      }
+    )
+    const result = moveToWell(
+      {
+        pipette: DEFAULT_PIPETTE,
+        labware: SOURCE_LABWARE,
+        well: 'A1',
+      },
+      invariantContext,
+      robotStateWithTip
+    )
+    expect(getErrorResult(result).errors).toHaveLength(1)
+    expect(getErrorResult(result).errors[0]).toMatchObject({
+      type: 'ABSORBANCE_READER_LID_CLOSED',
     })
   })
 
