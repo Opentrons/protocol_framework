@@ -28,6 +28,7 @@ import * as utils from '../../modules/utils'
 import type { FormData } from '../../../form-types'
 import type { StepArgsAndErrorsById } from '../../../steplist/types'
 import type { AllTemporalPropertiesForTimelineFrame } from '../../../step-forms'
+import { MoveLabwareArgs } from '@opentrons/step-generation'
 
 vi.mock('../../modules/utils')
 
@@ -135,9 +136,13 @@ describe('getHoveredStepLabware', () => {
   })
 
   it('correct labware is returned when command is moveLabware', () => {
-    const stepArgs = {
-      commandCreatorFnName: moveLabwareCommand,
-      labware,
+    const stepArgs: MoveLabwareArgs = {
+      labwareId: labware,
+      strategy: 'usingGripper',
+      newLocation: { slotName: 'A1' },
+      commandCreatorFnName: 'moveLabware',
+      name: 'some name',
+      description: 'some description',
     }
     const argsByStepId = createArgsForStepId(hoveredStepId, stepArgs)
     const result = getHoveredStepLabware.resultFunc(
@@ -146,7 +151,7 @@ describe('getHoveredStepLabware', () => {
       initialDeckState
     )
 
-    expect(result).toEqual([labware])
+    expect(result).toEqual([stepArgs.labwareId])
   })
 
   describe('modules', () => {
