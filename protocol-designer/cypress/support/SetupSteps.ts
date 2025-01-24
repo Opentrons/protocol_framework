@@ -1,10 +1,3 @@
-// ToDo Future planning should have Step 5, Step 6, and 7 verification
-// Todo ProtocolOverview page. This might change from deck map revamp,
-// so let's hold off until then.
-// This PR unblocks Sara and I to work on this separately, so I want
-// To prioritize its getting pulled into the repo
-// Some day we should make a way to input variables into actions
-
 import 'cypress-file-upload'
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -78,9 +71,9 @@ export enum SetupVerifications {
   HeaterShakerImg = 'Heater-Shaker Module GEN1',
   Tempdeck2Img = 'Temperature Module GEN2',
   MagBlockImg = 'Magnetic Block GEN1',
-  LiquidPage = 'Liquid page SetupContent is visible',
+  LiquidPage = 'Liquid page Content is visible',
   TransferPopOut = 'Verify Step 1 of the transfer function is present',
-  TempeDeckInitialForm = 'Verify that the tempdeck stepform opens correctly',
+  TempeDeckInitialForm = 'Verify that the tempdseteck stepform opens correctly',
   Temp4CPauseTextVerification = 'Verify that the pause step has the right information in step preview',
 }
 export enum SetupContent {
@@ -390,7 +383,7 @@ export const executeSetupSteps = (action: SetupActions): void => {
       cy.contains('My liquid!').click() // Action for clicking 'My liquid!'
       break
     case SetupActions.SetVolumeAndSaveforWells:
-      cy.get('input[name="volume"]').type(`150`) // Set volume
+      cy.get('input[name="volume"]').type(`150`, { force: true }) // Set volume
       cy.contains('button', SetupContent.Save).click() // Click Save button
       cy.contains('button', 'Done').click({ force: true }) // Click Done button, forcing click if necessary
       break
