@@ -23,6 +23,8 @@ import { SubmitPrimaryButton } from '/app/atoms/buttons'
 
 import type { TemperatureModuleSetTargetTemperatureCreateCommand } from '@opentrons/shared-data'
 import type { TemperatureModule } from '/app/redux/modules/types'
+import { useModuleCommandAnalytics } from '/app/redux-resources/analytics/hooks/useModuleAnalytics'
+
 
 interface TemperatureModuleSlideoutProps {
   module: TemperatureModule
@@ -39,17 +41,26 @@ export const TemperatureModuleSlideout = (
   const name = getModuleDisplayName(module.moduleModel)
   const [temperatureValue, setTemperatureValue] = useState<number | null>(null)
   const handleSubmitTemperature = (): void => {
+  const {reportModuleCommandStarted,
+      reportModuleCommandCompleted,
+      reportModuleCommandError} = useModuleCommandAnalytics()
+  const serialNumber = module.serialNumber
+
     if (temperatureValue != null) {
+      reportModuleCommandStarted('temperatureModule', 'set-temperature-module-temperature', serialNumber, temperatureValue)
       const saveTempCommand: TemperatureModuleSetTargetTemperatureCreateCommand = {
         commandType: 'temperatureModule/setTargetTemperature',
         params: {
-          moduleId: module.id,
+          moduleId: module.id, 
           celsius: temperatureValue,
         },
       }
+      //Not sure if this should go heres
+      reportModuleCommandCompleted('temperatureModule', 'set-temperature-module-temperature', 'succeeded', serialNumber, temperatureValue)
       createLiveCommand({
         command: saveTempCommand,
       }).catch((e: Error) => {
+        reportModuleCommandError('temperatureModule', 'set-temperature-module-temperature', e.message, serialNumber, temperatureValue)
         console.error(
           `error setting module status with command type ${saveTempCommand.commandType}: ${e.message}`
         )

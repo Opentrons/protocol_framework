@@ -27,6 +27,7 @@ import type {
   TCSetTargetLidTemperatureCreateCommand,
 } from '@opentrons/shared-data'
 import type { ThermocyclerModule } from '/app/redux/modules/types'
+import { useModuleCommandAnalytics } from '/app/redux-resources/analytics/hooks/useModuleAnalytics'
 
 interface ThermocyclerModuleSlideoutProps {
   module: ThermocyclerModule
@@ -45,7 +46,7 @@ export const ThermocyclerModuleSlideout = (
   const moduleName = getModuleDisplayName(module.moduleModel)
   const modulePart = isSecondaryTemp ? 'Lid' : 'Block'
   const tempRanges = getTCTempRange(isSecondaryTemp)
-
+  const serialNumber = module.serialNumber
   let errorMessage
   if (isSecondaryTemp) {
     errorMessage =

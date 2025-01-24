@@ -65,6 +65,7 @@ import type { HeaterShakerModule, Modules } from '@opentrons/api-client'
 import type { LabwareSetupItem } from '/app/transformations/commands'
 import type { SetupScreens } from '../types'
 import type { AttachedProtocolModuleMatch } from '/app/transformations/analysis'
+import { useModuleCommandAnalytics } from '/app/redux-resources/analytics/hooks/useModuleAnalytics'
 
 const MODULE_REFETCH_INTERVAL_MS = 5000
 const DECK_CONFIG_POLL_MS = 5000
@@ -310,14 +311,24 @@ function LabwareLatch({
       ? 'heaterShaker/openLabwareLatch'
       : 'heaterShaker/closeLabwareLatch',
     params: { moduleId: matchedHeaterShaker.id },
+    
   }
 
   const toggleLatch = (): void => {
-    createLiveCommand({
+    // Record latch toggle to analytics
+    const {reportModuleCommandStarted,
+          reportModuleCommandCompleted,
+          reportModuleCommandError} = useModuleCommandAnalytics()
+    const serialNumber = matchedHeaterShaker.serialNumber
+    reportModuleCommandStarted('heaterShaker', 'toggle-hs-latch', serialNumber, null)
+
+      createLiveCommand({
       command: latchCommand,
       waitUntilComplete: true,
     })
       .then(() => {
+        reportModuleCommandCompleted('heaterShaker', 'toggle-hs-latch', 'succeeded', serialNumber, null)
+
         setIsRefetchingModules(true)
         refetchModules()
           .then(() => {
@@ -331,6 +342,7 @@ function LabwareLatch({
           })
       })
       .catch((e: Error) => {
+        reportModuleCommandError('heaterShaker', 'toggle-hs-latch', e.message, serialNumber, null)
         console.error(
           `error setting module status with command type ${latchCommand.commandType}: ${e.message}`
         )

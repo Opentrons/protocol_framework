@@ -101,20 +101,9 @@ export const ANALYTICS_QUICK_TRANSFER_RERUN = 'quickTransferReRunFromSummary'
 /**
  * Module Actions Analytics
  */
-
-// Thermocycler
-export const THERMOCYCLER_LID_MOVEMENT = 'thermocyclerLidMovement'
-export const THERMOCYCLER_SET_LID_TEMPERATURE = 'thermocyclerSetLidTemperature'
-export const THERMOCYCLER_SET_BLOCK_TEMPERATURE = 'thermocyclerSetBlockTemperature'
-export const THERMOCYCLER_EXECUTE_PROFILE = 'thermocyclerExecuteProfile'
-
-// Heatershaker
-export const HEATERSHAKER_LATCH_MOVEMENT = 'heatershakerLatchMovement'
-export const HEATERSHAKER_SET_TEMPERATURE = 'heatershakerSetTemperature'
-export const HEATERSHAKER_ROTATE = 'heatershakerRotate'
-
-// Temperature Module
-export const TEMPERATURE_MODULE_SET_TEMPERATURE = 'temperatureModuleSetTemperature'
+export const ANALYTICS_MODULE_COMMAND_STARTED = 'moduleEventStarted'
+export const ANALYTICS_MODULE_COMMAND_COMPLETED = 'moduleEventCompleted'
+export const ANALYTICS_MODULE_COMMAND_ERROR = 'moduleCommandError'
 
 /**
  * Resource Monitor Analytics
