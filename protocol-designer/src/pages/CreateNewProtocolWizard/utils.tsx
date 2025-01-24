@@ -32,6 +32,7 @@ import type { AdditionalEquipment, WizardFormState } from './types'
 
 const TOTAL_OUTER_SLOTS = 8
 const MIDDLE_SLOT_NUM = 4
+const MAX_SLOTS_IN_COL_THREE = 4
 const MAX_MAGNETIC_BLOCK_SLOTS = 12
 
 export const getNumOptions = (length: number): DropdownOption[] => {
@@ -60,6 +61,7 @@ export const getNumSlotsAvailable = (
   const magneticBlocks = Object.values(modules || {}).filter(
     module => module.type === MAGNETIC_BLOCK_TYPE
   )
+
   let filteredModuleLength = modules != null ? Object.keys(modules).length : 0
   if (magneticBlocks.length > 0) {
     //  once blocks exceed 4, then we dont' want to subtract the amount available
@@ -80,11 +82,9 @@ export const getNumSlotsAvailable = (
     case 'gripper': {
       return 0
     }
-    // TODO: wire up absorbance reader
-    case ABSORBANCE_READER_V1: {
-      return 1
-    }
+
     //  these modules don't support MoaM
+    case ABSORBANCE_READER_V1:
     case THERMOCYCLER_MODULE_V1:
     case TEMPERATURE_MODULE_V1:
     case MAGNETIC_MODULE_V1:
@@ -99,8 +99,21 @@ export const getNumSlotsAvailable = (
         return 2
       }
     }
+
+    case 'stagingArea': {
+      const modulesWithSlot3 =
+        modules !== null
+          ? Object.values(modules).filter(module => module.slot?.includes('3'))
+              .length
+          : 0
+      const fixtureSlotsWithSlot3 =
+        additionalEquipment !== null
+          ? additionalEquipment.filter(slot => slot.includes('3')).length
+          : 0
+      return MAX_SLOTS_IN_COL_THREE - modulesWithSlot3 - fixtureSlotsWithSlot3
+    }
+
     case 'trashBin':
-    case 'stagingArea':
     case HEATERSHAKER_MODULE_V1:
     case TEMPERATURE_MODULE_V2: {
       return (
@@ -108,6 +121,7 @@ export const getNumSlotsAvailable = (
         (filteredModuleLength + filteredAdditionalEquipmentLength)
       )
     }
+
     case 'wasteChute': {
       const adjustmentForStagingArea = numStagingAreas >= 1 ? 1 : 0
       return (
@@ -117,6 +131,7 @@ export const getNumSlotsAvailable = (
           adjustmentForStagingArea)
       )
     }
+
     case MAGNETIC_BLOCK_V1: {
       return (
         MAX_MAGNETIC_BLOCK_SLOTS -
@@ -269,9 +284,21 @@ export const getTrashSlot = (values: WizardFormState): string => {
     equipment.includes('stagingArea')
   )
 
-  const cutouts = stagingAreas.map(
-    (_, index) => STAGING_AREA_CUTOUTS_ORDERED[index]
+  // when plate reader is present, cutoutB3 is not available for StagingArea
+  const hasPlateReader =
+    modules !== null
+      ? Object.values(modules).some(
+          module => module.model === ABSORBANCE_READER_V1
+        )
+      : false
+  const cutouts = stagingAreas.map((_, index) =>
+    hasPlateReader
+      ? STAGING_AREA_CUTOUTS_ORDERED.filter(cutout => cutout !== 'cutoutB3')[
+          index
+        ]
+      : STAGING_AREA_CUTOUTS_ORDERED[index]
   )
+
   const hasWasteChute = additionalEquipment.find(equipment =>
     equipment.includes('wasteChute')
   )
@@ -284,11 +311,13 @@ export const getTrashSlot = (values: WizardFormState): string => {
       !moduleSlots.includes(cutout.slot) &&
       !wasteChuteSlot.includes(cutout.value)
   )
+
   if (unoccupiedSlot == null) {
     console.error(
       'Expected to find an unoccupied slot for the trash bin but could not'
     )
     return ''
   }
+
   return unoccupiedSlot?.value
 }
