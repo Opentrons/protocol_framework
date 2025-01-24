@@ -35,15 +35,12 @@ export function mixUtil(args: {
   well: string
   volume: number
   times: number
-  aspirateOffsetFromBottomMm: number
-  dispenseOffsetFromBottomMm: number
+  offsetFromBottomMm: number
   aspirateFlowRateUlSec: number
   dispenseFlowRateUlSec: number
   tipRack: string
-  aspirateXOffset: number
-  dispenseXOffset: number
-  aspirateYOffset: number
-  dispenseYOffset: number
+  xOffset: number
+  yOffset: number
   aspirateDelaySeconds?: number | null | undefined
   dispenseDelaySeconds?: number | null | undefined
   nozzles: NozzleConfigurationStyle | null
@@ -54,17 +51,14 @@ export function mixUtil(args: {
     well,
     volume,
     times,
-    aspirateOffsetFromBottomMm,
-    dispenseOffsetFromBottomMm,
+    offsetFromBottomMm,
     aspirateFlowRateUlSec,
     dispenseFlowRateUlSec,
     aspirateDelaySeconds,
     dispenseDelaySeconds,
     tipRack,
-    aspirateXOffset,
-    aspirateYOffset,
-    dispenseXOffset,
-    dispenseYOffset,
+    xOffset,
+    yOffset,
     nozzles,
   } = args
 
@@ -89,9 +83,9 @@ export function mixUtil(args: {
         wellLocation: {
           origin: 'bottom',
           offset: {
-            z: aspirateOffsetFromBottomMm,
-            x: aspirateXOffset,
-            y: aspirateYOffset,
+            z: offsetFromBottomMm,
+            x: xOffset,
+            y: yOffset,
           },
         },
         nozzles: null,
@@ -105,9 +99,9 @@ export function mixUtil(args: {
         wellLocation: {
           origin: 'bottom',
           offset: {
-            z: dispenseOffsetFromBottomMm,
-            x: dispenseXOffset,
-            y: dispenseYOffset,
+            z: offsetFromBottomMm,
+            x: xOffset,
+            y: yOffset,
           },
         },
         flowRate: dispenseFlowRateUlSec,
@@ -143,18 +137,15 @@ export const mix: CommandCreator<MixArgs> = (
     changeTip,
     aspirateDelaySeconds,
     dispenseDelaySeconds,
-    aspirateOffsetFromBottomMm,
-    dispenseOffsetFromBottomMm,
+    offsetFromBottomMm,
     aspirateFlowRateUlSec,
     dispenseFlowRateUlSec,
     blowoutFlowRateUlSec,
     blowoutOffsetFromTopMm,
     dropTipLocation,
     tipRack,
-    aspirateXOffset,
-    aspirateYOffset,
-    dispenseXOffset,
-    dispenseYOffset,
+    xOffset,
+    yOffset,
     nozzles,
   } = data
 
@@ -213,7 +204,7 @@ export const mix: CommandCreator<MixArgs> = (
       pipette,
       labware,
       tipRack,
-      { x: aspirateXOffset, y: aspirateYOffset }
+      { x: xOffset, y: yOffset }
     )
     const isDispenseSafePipetteMovement = getIsSafePipetteMovement(
       prevRobotState,
@@ -221,7 +212,7 @@ export const mix: CommandCreator<MixArgs> = (
       pipette,
       labware,
       tipRack,
-      { x: dispenseXOffset, y: dispenseYOffset }
+      { x: xOffset, y: yOffset }
     )
     if (!isAspirateSafePipetteMovement && !isDispenseSafePipetteMovement) {
       return {
@@ -290,17 +281,14 @@ export const mix: CommandCreator<MixArgs> = (
         well,
         volume,
         times,
-        aspirateOffsetFromBottomMm,
-        dispenseOffsetFromBottomMm,
+        offsetFromBottomMm,
         aspirateFlowRateUlSec,
         dispenseFlowRateUlSec,
         aspirateDelaySeconds,
         dispenseDelaySeconds,
         tipRack,
-        aspirateXOffset,
-        aspirateYOffset,
-        dispenseXOffset,
-        dispenseYOffset,
+        xOffset,
+        yOffset,
         nozzles,
       })
       return [
