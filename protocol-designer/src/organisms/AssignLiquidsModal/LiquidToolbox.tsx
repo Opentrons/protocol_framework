@@ -406,11 +406,9 @@ export function LiquidToolbox(props: LiquidToolboxProps): JSX.Element {
                           textDecoration={TYPOGRAPHY.textDecorationUnderline}
                           onClick={handleCancelForm}
                           padding={SPACING.spacing4}
+                          css={LINK_BUTTON_STYLE}
                         >
-                          <StyledText
-                            desktopStyle="bodyDefaultRegular"
-                            css={LINK_BUTTON_STYLE}
-                          >
+                          <StyledText desktopStyle="bodyDefaultRegular">
                             {t('shared:cancel')}
                           </StyledText>
                         </Btn>
@@ -425,7 +423,9 @@ export function LiquidToolbox(props: LiquidToolboxProps): JSX.Element {
                           </StyledText>
                         </TertiaryButton>
                         <TertiaryButton type="submit" buttonType="primary">
-                          {t('save')}
+                          <StyledText desktopStyle="bodyDefaultSemiBold">
+                            {t('save')}
+                          </StyledText>
                         </TertiaryButton>
                       </Flex>
                     </Flex>

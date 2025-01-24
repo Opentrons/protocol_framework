@@ -1,22 +1,18 @@
 import styled, { css } from 'styled-components'
 import {
-  SPACING,
-  COLORS,
   BORDERS,
+  Btn,
+  COLORS,
+  SPACING,
   TYPOGRAPHY,
-  TertiaryBtn,
 } from '@opentrons/components'
 
 const baseStyles = css`
   border-radius: ${BORDERS.borderRadiusFull};
   box-shadow: none;
-  overflow: no-wrap;
+  overflow: hidden;
   padding: ${SPACING.spacing8} ${SPACING.spacing16};
   text-transform: ${TYPOGRAPHY.textTransformNone};
-
-  &:hover {
-    box-shadow: none;
-  }
 `
 
 const STYLE_MAP = {
@@ -28,12 +24,8 @@ const STYLE_MAP = {
       background-color: ${COLORS.blue55};
     }
 
-    $:active {
+    &:active {
       background-color: ${COLORS.blue60};
-    }
-
-    &:focus-visible {
-      background-color: ${COLORS.blue55};
     }
 
     &:disabled {
@@ -52,7 +44,7 @@ const STYLE_MAP = {
       border: 1px solid ${COLORS.blue50}${COLORS.opacity60HexCode};
     }
 
-    $:active {
+    &:active {
       background-color: ${COLORS.white};
       color: ${COLORS.blue50};
       border: 1px solid ${COLORS.blue50};
@@ -78,7 +70,7 @@ const STYLE_MAP = {
       background-color: ${COLORS.grey30};
     }
 
-    $:active {
+    &:active {
       background-color: ${COLORS.grey35};
     }
 
@@ -92,7 +84,7 @@ const STYLE_MAP = {
   `,
 }
 
-export const TertiaryButton = styled(TertiaryBtn)<{
+export const TertiaryButton = styled(Btn)<{
   buttonType: 'primary' | 'secondary' | 'white'
 }>`
   ${baseStyles}
