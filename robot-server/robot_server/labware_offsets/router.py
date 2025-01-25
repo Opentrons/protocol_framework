@@ -9,11 +9,7 @@ from pydantic import Json
 from pydantic.json_schema import SkipJsonSchema
 from server_utils.fastapi_utils.light_router import LightRouter
 
-from opentrons.protocol_engine import (
-    LabwareOffset,
-    LegacyLabwareOffsetCreate,
-    ModuleModel,
-)
+from opentrons.protocol_engine import LabwareOffsetCreate, ModuleModel
 from opentrons.types import DeckSlotName
 
 from robot_server.labware_offsets.models import LabwareOffsetNotFound
@@ -34,6 +30,7 @@ from .store import (
     LabwareOffsetStore,
 )
 from .fastapi_dependencies import get_labware_offset_store
+from .models import StoredLabwareOffset
 
 
 router = LightRouter()
@@ -57,9 +54,9 @@ async def post_labware_offset(  # noqa: D103
     store: Annotated[LabwareOffsetStore, fastapi.Depends(get_labware_offset_store)],
     new_offset_id: Annotated[str, fastapi.Depends(get_unique_id)],
     new_offset_created_at: Annotated[datetime, fastapi.Depends(get_current_time)],
-    request_body: Annotated[RequestModel[LegacyLabwareOffsetCreate], fastapi.Body()],
-) -> PydanticResponse[SimpleBody[LabwareOffset]]:
-    new_offset = LabwareOffset.model_construct(
+    request_body: Annotated[RequestModel[LabwareOffsetCreate], fastapi.Body()],
+) -> PydanticResponse[SimpleBody[StoredLabwareOffset]]:
+    new_offset = StoredLabwareOffset.model_construct(
         id=new_offset_id,
         createdAt=new_offset_created_at,
         definitionUri=request_body.data.definitionUri,
@@ -139,7 +136,7 @@ async def get_labware_offsets(  # noqa: D103
             alias="pageLength", description="The maximum number of entries to return."
         ),
     ] = "unlimited",
-) -> PydanticResponse[SimpleMultiBody[LabwareOffset]]:
+) -> PydanticResponse[SimpleMultiBody[StoredLabwareOffset]]:
     if cursor not in (0, None) or page_length != "unlimited":
         # todo(mm, 2024-12-06): Support this when LabwareOffsetStore supports it.
         raise NotImplementedError(
@@ -161,7 +158,7 @@ async def get_labware_offsets(  # noqa: D103
     )
 
     return await PydanticResponse.create(
-        SimpleMultiBody[LabwareOffset].model_construct(
+        SimpleMultiBody[StoredLabwareOffset].model_construct(
             data=result_data,
             meta=meta,
         )
@@ -180,7 +177,7 @@ async def delete_labware_offset(  # noqa: D103
         str,
         fastapi.Path(description="The `id` field of the offset to delete."),
     ],
-) -> PydanticResponse[SimpleBody[LabwareOffset]]:
+) -> PydanticResponse[SimpleBody[StoredLabwareOffset]]:
     try:
         deleted_offset = store.delete(offset_id=id)
     except LabwareOffsetNotFoundError as e:
@@ -197,7 +194,7 @@ async def delete_labware_offset(  # noqa: D103
     summary="Delete all labware offsets",
 )
 async def delete_all_labware_offsets(  # noqa: D103
-    store: Annotated[LabwareOffsetStore, fastapi.Depends(get_labware_offset_store)]
+    store: Annotated[LabwareOffsetStore, fastapi.Depends(get_labware_offset_store)],
 ) -> PydanticResponse[SimpleEmptyBody]:
     store.delete_all()
     return await PydanticResponse.create(SimpleEmptyBody.model_construct())

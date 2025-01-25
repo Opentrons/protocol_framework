@@ -20,7 +20,6 @@ from .util import Vec3f
 class OverlapOffset(Vec3f):
     """Offset representing overlap space of one labware on top of another labware or module."""
 
-
 class LabwareOffset(BaseModel):
     """An offset that the robot adds to a pipette's position when it moves to a labware.
 
