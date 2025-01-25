@@ -27,8 +27,10 @@ from .plugins import AbstractPlugin
 from .types import (
     LabwareOffset,
     LabwareOffsetCreate,
+    LegacyLabwareOffsetCreate,
     LabwareOffsetVector,
     LegacyLabwareOffsetLocation,
+    LabwareOffsetLocationSequence,
     LabwareMovementStrategy,
     AddressableOffsetVector,
     DeckPoint,
@@ -95,6 +97,8 @@ __all__ = [
     # public value interfaces and models
     "LabwareOffset",
     "LabwareOffsetCreate",
+    "LegacyLabwareOffsetCreate",
+    "LabwareOffsetLocationSequence",
     "LabwareOffsetVector",
     "LegacyLabwareOffsetLocation",
     "LabwareMovementStrategy",
