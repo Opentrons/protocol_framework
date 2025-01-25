@@ -11,6 +11,7 @@ import type {
   LabwareDisplayCategory,
   LabwareWellProperties,
   LabwareOffset,
+  ModuleModel,
 } from '@opentrons/shared-data'
 
 // TODO Ian 2019-07-29: move this constant to shared-data?
