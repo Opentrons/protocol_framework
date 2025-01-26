@@ -6,97 +6,25 @@ import {
 } from '@opentrons/shared-data'
 import { getNextTiprack } from '../../robotStateSelectors'
 import * as errorCreators from '../../errorCreators'
-import { COLUMN_4_SLOTS } from '../../constants'
 import { movableTrashCommandsUtil } from '../../utils/movableTrashCommandsUtil'
 import {
   curryCommandCreator,
   getIsHeaterShakerEastWestMultiChannelPipette,
   getIsHeaterShakerEastWestWithLatchOpen,
-  getIsSafePipetteMovement,
   getLabwareSlot,
   modulePipetteCollision,
   pipetteAdjacentHeaterShakerWhileShaking,
   reduceCommandCreators,
-  uuid,
   wasteChuteCommandsUtil,
   getWasteChuteAddressableAreaNamePip,
+  PRIMARY_NOZZLE,
 } from '../../utils'
-import { dropTip } from './dropTip'
-import { configureNozzleLayout } from './configureNozzleLayout'
+import { dropTip } from '../atomic/dropTip'
+import { pickUpTip } from '../atomic/pickUpTip'
+import { configureNozzleLayout } from '../atomic/configureNozzleLayout'
 
-import type {
-  NozzleConfigurationStyle,
-  PickUpTipParams,
-} from '@opentrons/shared-data'
-import type {
-  CommandCreator,
-  CommandCreatorError,
-  CurriedCommandCreator,
-} from '../../types'
-
-interface PickUpTipAtomicParams extends PickUpTipParams {
-  nozzles?: NozzleConfigurationStyle
-}
-
-const _pickUpTip: CommandCreator<PickUpTipAtomicParams> = (
-  args,
-  invariantContext,
-  prevRobotState
-) => {
-  const { pipetteId, labwareId, wellName, nozzles } = args
-  const errors: CommandCreatorError[] = []
-
-  const is96Channel =
-    invariantContext.pipetteEntities[pipetteId]?.spec.channels === 96
-
-  if (
-    is96Channel &&
-    nozzles === COLUMN &&
-    !getIsSafePipetteMovement(
-      prevRobotState,
-      invariantContext,
-      pipetteId,
-      labwareId,
-      labwareId,
-      //  we don't adjust the offset when moving to the tiprack
-      { x: 0, y: 0 },
-      wellName
-    )
-  ) {
-    errors.push(errorCreators.possiblePipetteCollision())
-  }
-
-  const tiprackSlot = prevRobotState.labware[labwareId].slot
-  if (COLUMN_4_SLOTS.includes(tiprackSlot)) {
-    errors.push(
-      errorCreators.pipettingIntoColumn4({ typeOfStep: 'pick up tip' })
-    )
-  } else if (prevRobotState.labware[tiprackSlot] != null) {
-    const adapterSlot = prevRobotState.labware[tiprackSlot].slot
-    if (COLUMN_4_SLOTS.includes(adapterSlot)) {
-      errors.push(
-        errorCreators.pipettingIntoColumn4({ typeOfStep: 'pick up tip' })
-      )
-    }
-  }
-
-  if (errors.length > 0) {
-    return { errors }
-  }
-  return {
-    commands: [
-      {
-        commandType: 'pickUpTip',
-        key: uuid(),
-        params: {
-          pipetteId,
-          labwareId,
-          wellName,
-        },
-      },
-    ],
-  }
-}
+import type { NozzleConfigurationStyle } from '@opentrons/shared-data'
+import type { CommandCreator, CurriedCommandCreator } from '../../types'
 
 interface ReplaceTipArgs {
   pipette: string
@@ -106,8 +34,6 @@ interface ReplaceTipArgs {
 }
 
 /**
-  TODO: need to move this out of atomic command since it breaks the rules of atomic commands. I don't
-  think it falls into the pattern of compount commands either though
   Pick up next available tip. Works differently for an 8-channel which needs a full row of tips.
   Expects 96-well format tip naming system on the tiprack.
   If there's already a tip on the pipette, this will drop it before getting a new one
@@ -258,7 +184,8 @@ export const replaceTip: CommandCreator<ReplaceTipArgs> = (
       ? [
           curryCommandCreator(configureNozzleLayout, {
             configurationParams: {
-              primaryNozzle: args.nozzles === COLUMN ? 'A12' : undefined,
+              primaryNozzle:
+                args.nozzles === COLUMN ? PRIMARY_NOZZLE : undefined,
               style: args.nozzles,
             },
             pipetteId: args.pipette,
@@ -272,7 +199,7 @@ export const replaceTip: CommandCreator<ReplaceTipArgs> = (
       dropTipLocation,
     }),
     ...configureNozzleLayoutCommand,
-    curryCommandCreator(_pickUpTip, {
+    curryCommandCreator(pickUpTip, {
       pipetteId: pipette,
       labwareId: nextTiprack.tiprackId,
       wellName: nextTiprack.well,
@@ -288,7 +215,7 @@ export const replaceTip: CommandCreator<ReplaceTipArgs> = (
         prevRobotState,
       }),
       ...configureNozzleLayoutCommand,
-      curryCommandCreator(_pickUpTip, {
+      curryCommandCreator(pickUpTip, {
         pipetteId: pipette,
         labwareId: nextTiprack.tiprackId,
         wellName: nextTiprack.well,
@@ -305,7 +232,7 @@ export const replaceTip: CommandCreator<ReplaceTipArgs> = (
         invariantContext,
       }),
       ...configureNozzleLayoutCommand,
-      curryCommandCreator(_pickUpTip, {
+      curryCommandCreator(pickUpTip, {
         pipetteId: pipette,
         labwareId: nextTiprack.tiprackId,
         wellName: nextTiprack.well,

@@ -28,10 +28,11 @@ import {
   dispense,
   dropTip,
   moveToWell,
-  replaceTip,
   touchTip,
 } from '../atomic'
 import { mixUtil } from './mix'
+import { replaceTip } from './replaceTip'
+
 import type {
   DistributeArgs,
   CommandCreator,

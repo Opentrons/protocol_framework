@@ -18,9 +18,9 @@ import {
   configureForVolume,
   delay,
   dispense,
-  replaceTip,
   touchTip,
 } from '../atomic'
+import { replaceTip } from './replaceTip'
 
 import type { NozzleConfigurationStyle } from '@opentrons/shared-data'
 import type {

@@ -11,6 +11,7 @@ import {
   moveToAddressableArea,
   moveToAddressableAreaForDropTip,
 } from '../commandCreators/atomic'
+import { ZERO_OFFSET } from '../constants'
 import { curryCommandCreator } from './curryCommandCreator'
 import type { AddressableAreaName, CutoutId } from '@opentrons/shared-data'
 import type {
@@ -46,7 +47,7 @@ export const movableTrashCommandsUtil = (
     volume,
     flowRate,
   } = args
-  const offset = { x: 0, y: 0, z: 0 }
+  const offset = ZERO_OFFSET
   const trash = Object.values(
     invariantContext.additionalEquipmentEntities
   ).find(aE => aE.name === 'trashBin')

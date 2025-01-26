@@ -29,10 +29,10 @@ import {
   delay,
   dropTip,
   moveToWell,
-  replaceTip,
   touchTip,
 } from '../atomic'
 import { mixUtil } from './mix'
+import { replaceTip } from './replaceTip'
 
 import type {
   ConsolidateArgs,

@@ -28,10 +28,10 @@ import {
   dispense,
   dropTip,
   moveToWell,
-  replaceTip,
   touchTip,
 } from '../atomic'
 import { mixUtil } from './mix'
+import { replaceTip } from './replaceTip'
 
 import type {
   TransferArgs,
@@ -39,6 +39,7 @@ import type {
   CommandCreator,
   CommandCreatorError,
 } from '../../types'
+
 export const transfer: CommandCreator<TransferArgs> = (
   args,
   invariantContext,
