@@ -126,7 +126,7 @@ export function AddStepButton({ hasText }: AddStepButtonProps): JSX.Element {
 
   const items = getSupportedSteps()
     .filter(stepType => isStepTypeEnabled[stepType])
-    .map(stepType => (
+    .map((stepType, index, array) => (
       <AddStepOverflowButton
         key={stepType}
         stepType={stepType}
@@ -138,6 +138,8 @@ export function AddStepButton({ hasText }: AddStepButtonProps): JSX.Element {
           }
           setShowStepOverflowMenu(false)
         }}
+        isFirstStep={index === 0}
+        isLastStep={index === array.length - 1}
       />
     ))
 
