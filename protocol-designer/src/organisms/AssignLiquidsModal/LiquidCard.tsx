@@ -168,7 +168,7 @@ export function LiquidCard(props: LiquidCardProps): JSX.Element {
           <Divider borderColor={COLORS.grey40} />
           <Flex
             flexDirection={DIRECTION_COLUMN}
-            padding={`${SPACING.spacing8} ${SPACING.spacing16}`}
+            padding={`${SPACING.spacing8} ${SPACING.spacing12} ${SPACING.spacing12}`}
           >
             <Flex gridGap={SPACING.spacing4} color={COLORS.grey60}>
               <StyledText width="50%" desktopStyle="bodyDefaultRegular">
