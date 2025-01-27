@@ -130,7 +130,7 @@ export function fieldsToLabware(
         z:
           fields.labwareZDimension -
           parseFloat(String(z)) +
-          moduleDefinition.dimensions.bareOverallHeight,
+          moduleDefinition.labwareOffset.z,
       })
     })
 
