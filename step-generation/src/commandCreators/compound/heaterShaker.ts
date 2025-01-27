@@ -20,7 +20,6 @@ export const heaterShaker: CommandCreator<HeaterShakerArgs> = (
   invariantContext,
   prevRobotState
 ) => {
-
   if (args.moduleId == null) {
     return {
       errors: [errorCreators.missingModuleError()],
