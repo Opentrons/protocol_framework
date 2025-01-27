@@ -43,7 +43,6 @@ class StackerModule:
             new_location,
             use_gripper=True,
             pick_up_offset=self.STACKER_GRIPPER_OFFSET,
-            drop_offset=self.GRIPPER_LABWARE_DROP_OFFSET,
         )
         del self.protocol.deck[self.slot]
         return lw
