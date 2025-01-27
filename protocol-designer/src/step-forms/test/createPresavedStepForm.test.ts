@@ -398,4 +398,14 @@ describe('createPresavedStepForm', () => {
       })
     })
   })
+  it('should default movdLabware form useGripper value to `true` if gripper is added', () => {
+    const args = {
+      ...defaultArgs,
+      additionalEquipmentEntities: {
+        gripperId: { name: 'gripper', id: 'gripperId' },
+      },
+      stepType: 'moveLabware',
+    }
+    expect(createPresavedStepForm(args)).toHaveProperty('useGripper', true)
+  })
 })
