@@ -1,137 +1,252 @@
-:og:description: How to define, load, and specify liquids in an Opentrons protocol, including labeling liquids in wells and defining liquid class. 
+:og:description: How to select and apply a liquid class definition in Opentrons protocols. 
 
 .. _liquids:
 
-########
-Liquids
-########
-
-At the core of your protocol are liquid transfers: steps the robot will perform to move liquids within labware.
-
-Liquid definitions aren't required in Python protocols. However, defining and specifying liquids you use can help keep track of each throughout your protocol. It also lets you take advantage of advanced pipetting settings optimized for certain liquid classes. This section covers defining and labeling liquids used in your protocol. 
-
-.. _labeling-liquids:
-
-*************************
-Labeling Liquids in Wells
-*************************
-
-Optionally, you can specify the liquids that should be in various wells at the beginning of your protocol. Doing so helps you identify well contents by name and volume, and adds corresponding labels to a single well, or group of wells, in well plates and reservoirs. You can view the initial liquid setup:
-
-- For Flex protocols, on the touchscreen.
-- For Flex or OT-2 protocols, in the Opentrons App (v6.3.0 or higher).
-
-To use these optional methods, first create a liquid object with :py:meth:`.ProtocolContext.define_liquid` and then label individual wells by calling :py:meth:`.Well.load_liquid`.
-
-Let's examine how these two methods work. The following examples demonstrate how to define colored water samples for a well plate and reservoir.
-
-.. _defining-liquids:
-
-Defining Liquids
-================
-
-This example uses ``define_liquid`` to create two liquid objects and instantiates them with the variables ``greenWater`` and ``blueWater``, respectively. The arguments for ``define_liquid`` are all required, and let you name the liquid, describe it, and assign it a color:
-
-.. code-block:: python
-
-        greenWater = protocol.define_liquid(
-            name="Green water",
-            description="Green colored water for demo",
-            display_color="#00FF00",
-        )
-        blueWater = protocol.define_liquid(
-            name="Blue water",
-            description="Blue colored water for demo",
-            display_color="#0000FF",
-        )
-
-.. versionadded:: 2.14
-        
-The ``display_color`` parameter accepts a hex color code, which adds a color to that liquid's label when you import your protocol into the Opentrons App. The ``define_liquid`` method accepts standard 3-, 4-, 6-, and 8-character hex color codes.
-
-.. _loading-liquids:
-
-Labeling Wells and Reservoirs
-=============================
-
-This example uses ``load_liquid`` to label the initial well location, contents, and volume (in µL) for the liquid objects created by ``define_liquid``. Notice how values of the ``liquid`` argument use the variable names ``greenWater`` and ``blueWater`` (defined above) to associate each well with a particular liquid: 
-
-.. code-block:: python
-
-        well_plate["A1"].load_liquid(liquid=greenWater, volume=50)
-        well_plate["A2"].load_liquid(liquid=greenWater, volume=50)
-        well_plate["B1"].load_liquid(liquid=blueWater, volume=50)
-        well_plate["B2"].load_liquid(liquid=blueWater, volume=50)
-        reservoir["A1"].load_liquid(liquid=greenWater, volume=200)
-        reservoir["A2"].load_liquid(liquid=blueWater, volume=200)
-        
-.. versionadded:: 2.14
-
-This information is available after you import your protocol to the app or send it to Flex. A summary of liquids appears on the protocol detail page, and well-by-well detail is available on the run setup page (under Initial Liquid Setup in the app, or under Liquids on Flex).
-
-.. note::
-    ``load_liquid`` does not validate volume for your labware nor does it prevent you from adding multiple liquids to each well. For example, you could label a 40 µL well with ``greenWater``, ``volume=50``, and then also add blue water to the well. The API won't stop you. It's your responsibility to ensure the labels you use accurately reflect the amounts and types of liquid you plan to place into wells and reservoirs.
-
-Labeling vs Handling Liquids
-============================
-
-The ``load_liquid`` arguments include a volume amount (``volume=n`` in µL). This amount is just a label. It isn't a command or function that manipulates liquids. It only tells you how much liquid should be in a well at the start of the protocol. You need to use a method like :py:meth:`.transfer` to physically move liquids from a source to a destination.
-
-
-.. _v2-location-within-wells:
-.. _new-labware-well-properties:
-
-**************
+##############
 Liquid Classes
-**************
+##############
 
-When handing liquids, accounting for specific properties of a liquid can improve robot accuracy in pipetting. 
+At the core of your protocol are liquid transfers, the liquid handling steps the robot performs to move liquids in labware. 
 
-Define a liquid class to automatically populate advanced settings in your protocol optimized for use with any of three liquid classes. 
+Liquid definitions aren't required in Python protocols. However, defining and specifying the liquids you use can help keep track of each throughout your protocol. It also lets you take advantage of transfer behavior optimized for liquid classes. 
 
-- **Aqueous liquids**, based on deionized water, and the system default. 
-- **Volatile liquids**, based on 80% ethanol. 
-- **Viscous liquid**, based on 50% glycerol. 
+Accounting for liquid properties like viscosity can improve pipetting accuracy on the Flex. You can select a liquid class, shown below, to use in your protocol. 
 
-The above liquid classes can be used with any pipette and compatible tips only on the Flex. Some settings like flow rate and air gap volume vary between pipette and tip combinations, regardless of liquid class. 
+.. list-table::
+    :header-rows: 1
 
+    * - Liquid Class
+      - Description
+      - Load Name
+    * - Aqueous
+      - 
+        * Based on deionized water
+        * The system default
+      - `water`
+    * - Aqueous
+      -
+        * Based on 80% ethanol
+      - `ethanol_80`
+      - Viscous
+      - 
+       * Based on 50% glycerol
+      - `glycerol_50`
 
-Use :py:meth:`.ProtocolContext.define_liquid_class` to define a liquid in your protocol as one of the three classes.
+Select a combination of liquid class, pipette, and tips to use in your protocol. Each combination automatically defines transfer behavior optimized for the liquid class. 
+
+*************************
+Selecting a liquid class
+*************************
+
+First, define the tips, trash, pipette, and labware used in your transfers. Then use :py:meth:`.ProtocolContext.define_liquid_class` to select a liquid in your protocol as one of the three classes. 
 
 .. code-block:: python
-   
-   def define_liquid_class(
-        liquid_class: "Viscous",
-        pipette_load_name: "insert pipette", 
-        tiprack_uri: "insert tiprack", 
-   )
+  :substitutions:
 
-When you define a liquid as `aqueous`, `volatile`, or `viscous`, you'll need to enter the pipette and tip rack combination to use with this liquid. Advanced settings for that liquid class, shown below, are then automatically used in your liquid transfers. 
+  from opentrons import protocol_api
 
-##TODO: insert table of changes between liquid classes, like submerge/retract speed, flow rate, and correction by volume for flow rate. anything else?
+  metadata = {'apiLevel': '|apiLevel|'
 
-Next, load and transfer liquids of a defined class. Use ``load_liquid_class`` and ``transfer_liquid``. Here, you'll only specify source and destination wells and transfer volume. The liquid class definition contains all other required information. 
+  requirements = {
+    "robotType": "Flex",
+    "apiLevel": "2.23"
+  }
+
+  ## define tips, trash, and pipette
+  def run(protocol_context):
+      tiprack1 = protocol_context.load_labware("opentrons_flex_96_tiprack_50ul", "D3")
+      trash = protocol_context.load_trash_bin('A3')
+      pipette_50 = protocol_context.load_instrument("flex_1channel_50", "left", tip_racks=[tiprack1])
+
+  ## load labware for transfers
+      nest_plate = protocol_context.load_labware("nest_96_wellplate_200ul_flat", "C3")
+      arma_plate = protocol_context.load_labware("armadillo_96_wellplate_200ul_pcr_full_skirt", "C2")
+
+  ## select liquid class 
+      liquid_1 = protocol_context.define_liquid_class("glycerol_50")
+      liquid_2 = protocol_context.define_liquid_class("glycerol_50")
+      liquid_3 = protocol_context.define_liquid_class("water")
+
+
+Here, you selected two viscous liquids, defined as `liquid_1` and `liquid_2`, using the load name `glycerol_50`. Defining liquids is especially important when using multiple liquids of the same class. 
+
+When you use `transfer_liquid` for any liquid, you'll choose a pipette, tip, and volume combination. You'll also enter source and destination wells in your labware and the trash location. 
+
+The `water`, `glycerol_50`, and `ethanol_80` liquid class definitions account for steps the robot will perform to optimize your liquid transfers. Transfer behavior like flow rate, air gap, delay, and submerge and retract speed automatically change based on your liquid class, pipette, and tip selections. Not all transfer behavior is easily visible. For more detail on transfer behavior, see the Liquid Class Definitions section. 
+
+***********************
+Liquid Class Transfers
+************************
+
+Use `transfer_liquid` to transfer an aqueous, volatile, or viscous liquid defined in your protocol. Here, you'll specify volume, source, and destination wells, tip handling preferences, and the trash location. 
 
 .. code-block:: python
 
-    ## Load a viscous liquid in a well plate on the deck with class-specific commands.## 
-    def load_liquid_class(
-        liquid_class: "Viscous",
-        pipette_load_name: "insert pipette",
-        tiprack_uri: "insert tiprack"
-    )
+        pipette_50.transfer_liquid(
+          liquid_class=liquid_1,
+          volume=30,
+          source=nest_plate.rows()[0],
+          dest=arma_plate.rows()[0], 
+          new_tip="always", 
+          trash_location=trash
+        )
 
-    well_plate["A1"].load_liquid_class(liquid_class=Viscous, volume=50)
+The `flex_1channel_50` pipette uses `opentrons_flex_96_tiprack_50ul` tips to transfer 30 µL of your viscous `liquid_1` from each well of the NEST source plate to each well of the Armadillo destination plate. A new tip is used for each well transfer, and each tip is dropped in the trash bin in deck slot A3. 
 
-    def transfer_liquid(
-        liquid_class_id: "Viscous", 
-        volume: "insert volume", 
-        source: "[wells]", 
-        dest: "[Wells]", 
-        new_tip: "once", 
-        trash_location: "[TrashBin]"
-    )
+All other transfer behavior is defined by the viscous liquid class definition and any changes you make for `liquid_1`. 
 
-##TODO: insert description of the transfer step the robot will perform, with advanced settings and changes included in liquid class description. 
+****************************************
+Changing transfer behavior for a liquid
+****************************************
 
-.. versionadded:: 2.22
+Each liquid class definition accounts for steps the robot will perform to optimize your liquid transfers. Advanced settings like mix, pre-wet tip, touch tip, and blowout are disabled for liquid class transfers. 
+
+You can make changes or enable these settings for each liquid you use in your protocol. Here, use your liquid name, piette, and tip rack combination to access and edit properties for `liquid_1`. 
+
+.. code-block:: python
+  ## change properties of p50 pipette, tips, and liquid_1
+    liquid_1_p50_props = liquid_1.get_for(pipette_50, tiprack1)
+
+  ## change submerge speed before aspirate to 50 m/sec
+    liquid_1_p50_props.aspirate.submerge.speed = 50
+
+  ## change flow rate to 120 µL/sec to aspirate 30 µL
+    liquid_1_p50_props.aspirate.flowrate_by_volume.set_for_volume(30, 120)
+
+  ## enable mix, touch tip, and pre-wet tip for aspirate with liquid_1
+    liquid_1_p50_props.aspirate.mix.enabled = True 
+    liquid_1_p50_props.aspirate.pre_wet = True
+    liquid_1_p50_props.aspirate.retract.touch_tip.enabled = True
+
+  ## enable blowout for dispense with liquid_1
+    liquid_1_p50_props.dispense.retract.blowout.location = "source"
+    liquid_1_p50_props.dispense.retract.blowout.flow_rate = pipette_50.flow_rate.blow_out
+    liquid_1_p50_props.dispense.retract.blowout.enabled = True
+
+
+Each liquid class definition includes flow rate for the volume range of the pipette. If you use the `flex_1channel_50` pipette and `opentrons_flex_96_tiprack_50ul` tips to transfer a viscous liquid, the aspirate flow rate changes for each volume: 
+  * 7 µL/sec to aspirate 1 µL
+  * 10 µL/sec to aspirate 10 µL
+  * 50 µL/sec to aspirate 50 µL 
+
+With the changes you made above, the `flex_1channel_50` pipette will aspirate 30 µL with a flow rate of 120 µL per second. Aspirate flow rates also apply to pre-wet tip and mix behavior associated with an aspirate step. For either aspirate or dispense flow rates, you can edit the flow rate by volume as shown above, or to a single value with `flowrate_by_volume`.
+
+If you were to perform the same transfer with changes made to `liquid_1` transfer behavior, your protocol would look the same. 
+
+.. code-block:: python
+
+        pipette_50.transfer_liquid(
+          liquid_class=liquid_1,
+          volume=30,
+          source=nest_plate.rows()[0],
+          dest=arma_plate.rows()[0], 
+          new_tip="always", 
+          trash_location=trash
+        )
+
+
+Here, transfer behavior is defined by both the viscous `glycerol_50` liquid class definition and any changes you made for `liquid_1`. Actions the Flex performs for each aspirate and single dispense include: 
+
+For each aspirate, the `flex_1channel_50` pipette: 
+  * Submerges into `liquid_1` at 50 mm/sec and does not delay afterwards
+  * Mixes 30 µL of `liquid_1` at 120 µL/sec and repeats once 
+  * Pre-wets a `opentrons_flex_96_tiprack_50ul` tip using specified aspirate and dispense flow rates 
+  * Aspirates 30 µL of `liquid_1` from the source well at 120 µL/sec with a correction by volume
+  * Delays for 1 second
+  * Touches the `opentrons_flex_96_tiprack_50ul` tip to all 4 sides of the source well at 0.5 mm from the well edge with a speed of 30 mm/sec
+  * Adds an air gap of 0.1 [units?]
+  * Retracts from `liquid_1` at 4 mm/sec and does not delay afterwards.
+
+For each single dispense, the `flex_1channel_50` pipette:  
+  * Submerges into the destination well at 4 mm/sec and does not delay afterwards
+  * Dispenses 30 µL of `liquid_1` into the destination well at 25 µL/sec with a correction by volume
+  * Pushes out 30 µL from the tip and does not mix `liquid_1`
+  * Blows out at the [source?]
+  * Delays for 0.5 second
+  * Adds an air gap of 0.1 [units?]
+  * Retracts from the destination well at 4 mm/sec and does not delay afterwards 
+  * Drops the tip into the trash bin in slot A3.
+
+See the section below for a summary of transfer behavior changes used with each liquid class, including multi-dispense behavior. 
+
+************************
+Liquid Class Definitions
+************************
+
+The aqueous, volatile, or viscous liquid classes are defined by optimized transfer behavior for each liquid. For example, a slower flow rate can improve pipetting for a viscous liquid, and an air gap can prevent a volatile liquid from dripping onto the Flex deck. 
+
+This section includes a summary of transfer behavior changes for each liquid class. The transfer steps are listed in the order the robot peforms them. Advanced settings like mix, pre-wet tip, touch tip, and blowout are disabled for liquid class transfers. See the Changing Transfer Behavior for a Liquid section to enable these settings for liquids in your protocols. 
+
+Transfer behaviors marked with an asterisk vary based on the pipette and tip combination used in your protocol. These include flow rate, air gap volume, and push out volume. Let's say you use a `flex_1channel_1000` pipette and `opentrons_flex_96_tiprack_200ul` tips to aspirate a volatile liquid. The transfer volume specifies the flow rate: 
+  * 7 µL/sec to aspirate 5 µL
+  * 50 µL/sec to aspirate 50 µL
+  * 200 µL/sec to aspirate 200 µL
+
+
+When you aspirate a liquid between these three volumes, a linear interpolation determines the flow rate. If you were to use a `flex_1channel_1000` pipette and `opentrons_flex_96_tiprack_1000ul` tips for the same transfer, the aspirate flow rate changes to 10, 100, or 200 µL per second. 
+
+Aspirating a Liquid
+====================
+
++-------------------+--------------------------------------+---------------------------------------------+---------------------------------------------+--+--+--+--+--+--+
+| Transfer Behavior | Aqueous                              | Volatile                                    | Viscous                                     |  |  |  |  |  |  |
++===================+======================================+=============================================+=============================================+==+==+==+==+==+==+
+| Submerge speed    | * 100 mm/sec  * 35 mm/sec for 96-ch. | 4 mm/sec                                    | * 100 mm/sec  * 35 mm/sec for 96-ch.        |  |  |  |  |  |  |
+| Flow rate*        | 50, 200, 478, or 716 µL/sec          | 7-200 µL/sec, includes correction by volume | 7-200 µL/sec, includes correction by volume |  |  |  |  |  |  |
+| Delay             | yes, duration varies                 | no                                          | yes, duration 0.5 sec                       |  |  |  |  |  |  |
+| Air gap*          | yes                                  | yes                                         | no                                          |  |  |  |  |  |  |
+| Retract speed     | * 50 mm/sec  * 35 mm/sec for 96-ch.  | 4 mm/sec                                    | * 100 mm/sec  * 35 mm/sec for 96-ch.        |  |  |  |  |  |  |
+|                   |                                      |                                             |                                             |  |  |  |  |  |  |
+|                   |                                      |                                             |                                             |  |  |  |  |  |  |
+|                   |                                      |                                             |                                             |  |  |  |  |  |  |
+|                   |                                      |                                             |                                             |  |  |  |  |  |  |
++-------------------+--------------------------------------+---------------------------------------------+---------------------------------------------+--+--+--+--+--+--+
+
+Dispensing a Liquid 
+====================
+
+Transfer behavior changes for single or multi-dispenses of aqueous, volatile, and viscous liquids in your protocol. 
+
+Single Dispense
+-----------------
+
++-------------------+--------------------------------------+-------------------------------------------------------------------+--------------------------------------+--+--+--+--+--+--+
+| Transfer Behavior | Aqueous                              | Volatile                                                          | Viscous                              |  |  |  |  |  |  |
++===================+======================================+===================================================================+======================================+==+==+==+==+==+==+
+| Submerge speed    | * 100 mm/sec  * 35 mm/sec for 96-ch. | 4 mm/sec                                                          | * 100 mm/sec  * 35 mm/sec for 96-ch. |  |  |  |  |  |  |
+| Air gap*          | yes                                  | no                                                                | yes                                  |  |  |  |  |  |  |
+| Flow rate*        | 40, 200, 478, or 716  µL/sec         | 25, 50, or 250  µL/sec                                            | 30, 125, or 250  µL/sec              |  |  |  |  |  |  |
+| Push out*         | yes                                  | yes                                                               | yes                                  |  |  |  |  |  |  |
+| Delay             | only for 50-ch. pipettes             | * yes, duration 0.5 sec *1 sec for 1000 µL pipette and 50 µL tips | yes, duration 0.2 sec                |  |  |  |  |  |  |
+|                   |                                      |                                                                   |                                      |  |  |  |  |  |  |
+|                   |                                      |                                                                   |                                      |  |  |  |  |  |  |
+|                   |                                      |                                                                   |                                      |  |  |  |  |  |  |
+|                   |                                      |                                                                   |                                      |  |  |  |  |  |  |
+|                   |                                      |                                                                   |                                      |  |  |  |  |  |  |
++-------------------+--------------------------------------+-------------------------------------------------------------------+--------------------------------------+--+--+--+--+--+--+
+
+Multi-Dispense
+-----------------
+
++-------------------+--------------------------------------+-------------------------------------------------------------------+--------------------------------------+--+--+--+--+--+--+
+| Transfer Behavior | Aqueous                              | Volatile                                                          | Viscous                              |  |  |  |  |  |  |
++===================+======================================+===================================================================+======================================+==+==+==+==+==+==+
+| Submerge speed    | * 100 mm/sec  * 35 mm/sec for 96-ch. | 4 mm/sec                                                          | * 100 mm/sec  * 35 mm/sec for 96-ch. |  |  |  |  |  |  |
+| Air gap*          | yes                                  | no                                                                | yes                                  |  |  |  |  |  |  |
+| Flow rate*        | 50, 200, 478, or 716 µL/sec          | 25, 50, or 250  µL/sec                                            | 30, 125, or 250  µL/sec              |  |  |  |  |  |  |
+| Push out*         | no                                   | no                                                                | no                                   |  |  |  |  |  |  |
+| Delay             | only for 50-ch. pipettes             | * yes, duration 0.5 sec *1 sec for 1000 µL pipette and 50 µL tips | yes, duration 0.2 sec                |  |  |  |  |  |  |
+| Retract speed     | * 50 mm/sec  * 35 mm/sec for 96-ch.  | 4 mm/sec                                                          | * 100 mm/sec  * 35 mm/sec for 96-ch. |  |  |  |  |  |  |
+|                   |                                      |                                                                   |                                      |  |  |  |  |  |  |
+|                   |                                      |                                                                   |                                      |  |  |  |  |  |  |
+|                   |                                      |                                                                   |                                      |  |  |  |  |  |  |
+|                   |                                      |                                                                   |                                      |  |  |  |  |  |  |
++-------------------+--------------------------------------+-------------------------------------------------------------------+--------------------------------------+--+--+--+--+--+--+
+
+
+## TODO: insert text to close out liquid classes section 
+
+
+
+
+.. versionadded:: 2.23
