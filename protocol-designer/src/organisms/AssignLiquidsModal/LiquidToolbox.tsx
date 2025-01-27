@@ -15,10 +15,11 @@ import {
   ListItem,
   SPACING,
   StyledText,
+  TertiaryButton,
   Toolbox,
   TYPOGRAPHY,
 } from '@opentrons/components'
-import { LINK_BUTTON_STYLE, TertiaryButton } from '../../atoms'
+import { LINK_BUTTON_STYLE } from '../../atoms'
 import { selectors as labwareIngredSelectors } from '../../labware-ingred/selectors'
 import * as wellContentsSelectors from '../../top-selectors/well-contents'
 import * as fieldProcessors from '../../steplist/fieldLevel/processing'

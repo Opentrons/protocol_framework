@@ -1,11 +1,7 @@
 import styled, { css } from 'styled-components'
-import {
-  BORDERS,
-  Btn,
-  COLORS,
-  SPACING,
-  TYPOGRAPHY,
-} from '@opentrons/components'
+import { BORDERS, COLORS } from '../../helix-design-system'
+import { Btn } from '../../primitives'
+import { SPACING, TYPOGRAPHY } from '../../ui-style-constants'
 
 const baseStyles = css`
   border-radius: ${BORDERS.borderRadiusFull};
