@@ -208,6 +208,8 @@ Flex pipette flow rates depend on pipette and tip capacity. Each pipette–tip c
 |                             | 1000              | 160            |
 +-----------------------------+-------------------+----------------+
 
+Original for comparison:
+
 .. list-table::
     :header-rows: 1
     
