@@ -327,6 +327,23 @@ class AbstractInstrument(ABC, Generic[WellCoreType, LabwareCoreType]):
         ...
 
     @abstractmethod
+    def distribute_liquid(
+        self,
+        liquid_class: LiquidClass,
+        volume: float,
+        source: Tuple[types.Location, WellCoreType],
+        dest: List[Tuple[types.Location, WellCoreType]],
+        new_tip: TransferTipPolicyV2,
+        tip_racks: List[Tuple[types.Location, LabwareCoreType]],
+        trash_location: Union[types.Location, TrashBin, WasteChute],
+    ) -> None:
+        """
+        Distribute a liquid from single source to multiple destinations
+        according to liquid class properties.
+        """
+        ...
+
+    @abstractmethod
     def is_tip_tracking_available(self) -> bool:
         """Return whether auto tip tracking is available for the pipette's current nozzle configuration."""
 
