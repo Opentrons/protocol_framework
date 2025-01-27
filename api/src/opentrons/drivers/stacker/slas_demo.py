@@ -49,7 +49,9 @@ class StackerModule:
 
     def move_and_store_labware(self, lw: Labware) -> None:
         self.protocol.move_labware(
-            lw, self.slot, use_gripper=True, drop_offset=self.STACKER_GRIPPER_OFFSET
+            lw, self.slot, use_gripper=True,
+            drop_offset={"x": -3, "y": 0, "z": 8},
+            pick_up_offset={"x": 0, "y": 0, "z": 5}
         )
         if self.stacker:
             self.stacker.load_labware(self.LABWARE_Z_OFFSET[self.labware_name])
