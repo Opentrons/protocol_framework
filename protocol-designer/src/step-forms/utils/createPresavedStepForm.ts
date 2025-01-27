@@ -378,6 +378,21 @@ const _patchThermocyclerFields = (args: {
   }
 }
 
+const _patchMoveLabwareFields = (args: {
+  additionalEquipmentEntities: AdditionalEquipmentEntities
+  stepType: StepType
+}): FormUpdater => () => {
+  const { additionalEquipmentEntities, stepType } = args
+  const isMoveLabware = stepType === 'moveLabware'
+  const hasGripper = Object.values(additionalEquipmentEntities).some(
+    ({ name }) => name === 'gripper'
+  )
+  if (isMoveLabware && hasGripper) {
+    return { useGripper: true }
+  }
+  return null
+}
+
 export const createPresavedStepForm = ({
   initialDeckSetup,
   labwareEntities,
@@ -449,6 +464,11 @@ export const createPresavedStepForm = ({
     robotStateTimeline,
   })
 
+  const updateMoveLabwareFields = _patchMoveLabwareFields({
+    additionalEquipmentEntities,
+    stepType,
+  })
+
   // finally, compose and apply all the updaters in order,
   // passing the applied result from one updater as the input of the next
   return [
@@ -460,6 +480,7 @@ export const createPresavedStepForm = ({
     updateMagneticModuleId,
     updateAbsorbanceReaderModuleId,
     updateDefaultLabwareLocations,
+    updateMoveLabwareFields,
   ].reduce<FormData>(
     (acc, updater: FormUpdater) => {
       const updates = updater(acc)
