@@ -305,15 +305,12 @@ export type MixArgs = CommonArgs & {
   blowoutFlowRateUlSec: number
   blowoutOffsetFromTopMm: number
 
-  /** offset from bottom of well in mm */
-  aspirateOffsetFromBottomMm: number
-  dispenseOffsetFromBottomMm: number
+  /**  z offset from bottom of well in mm */
+  offsetFromBottomMm: number
   /** x offset */
-  aspirateXOffset: number
-  dispenseXOffset: number
+  xOffset: number
   /** y offset */
-  aspirateYOffset: number
-  dispenseYOffset: number
+  yOffset: number
   /** flow rates in uL/sec */
   aspirateFlowRateUlSec: number
   dispenseFlowRateUlSec: number

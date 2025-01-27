@@ -3,7 +3,7 @@ import {
   DEFAULT_CHANGE_TIP_OPTION,
   DEFAULT_DELAY_SECONDS,
   DEFAULT_MM_BLOWOUT_OFFSET_FROM_TOP,
-  DEFAULT_MM_FROM_BOTTOM_DISPENSE,
+  DEFAULT_MM_OFFSET_FROM_BOTTOM,
   DEFAULT_WELL_ORDER_FIRST_OPTION,
   DEFAULT_WELL_ORDER_SECOND_OPTION,
 } from '../../constants'
@@ -31,7 +31,7 @@ export function getDefaultsForStepType(
         dropTip_location: null,
         dropTip_wellNames: undefined,
         labware: null,
-        mix_mmFromBottom: DEFAULT_MM_FROM_BOTTOM_DISPENSE,
+        mix_mmFromBottom: DEFAULT_MM_OFFSET_FROM_BOTTOM,
         mix_touchTip_checkbox: false,
         mix_touchTip_mmFromBottom: null,
         mix_wellOrder_first: DEFAULT_WELL_ORDER_FIRST_OPTION,

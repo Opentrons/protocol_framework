@@ -2,8 +2,7 @@ import floor from 'lodash/floor'
 import round from 'lodash/round'
 import { getIsTouchTipField } from '../../form-types'
 import {
-  DEFAULT_MM_FROM_BOTTOM_ASPIRATE,
-  DEFAULT_MM_FROM_BOTTOM_DISPENSE,
+  DEFAULT_MM_OFFSET_FROM_BOTTOM,
   DEFAULT_MM_TOUCH_TIP_OFFSET_FROM_TOP,
 } from '../../constants'
 import { DECIMALS_ALLOWED, TOO_MANY_DECIMALS } from './constants'
@@ -17,20 +16,19 @@ export function getDefaultMmFromBottom(args: {
 
   switch (name) {
     case 'aspirate_mmFromBottom':
-      return DEFAULT_MM_FROM_BOTTOM_ASPIRATE
+      return DEFAULT_MM_OFFSET_FROM_BOTTOM
 
     case 'aspirate_delay_mmFromBottom':
-      return DEFAULT_MM_FROM_BOTTOM_ASPIRATE
+      return DEFAULT_MM_OFFSET_FROM_BOTTOM
 
     case 'dispense_mmFromBottom':
-      return DEFAULT_MM_FROM_BOTTOM_DISPENSE
+      return DEFAULT_MM_OFFSET_FROM_BOTTOM
 
     case 'dispense_delay_mmFromBottom':
-      return DEFAULT_MM_FROM_BOTTOM_DISPENSE
+      return DEFAULT_MM_OFFSET_FROM_BOTTOM
 
     case 'mix_mmFromBottom':
-      // TODO: Ian 2018-11-131 figure out what offset makes most sense for mix
-      return DEFAULT_MM_FROM_BOTTOM_DISPENSE
+      return DEFAULT_MM_OFFSET_FROM_BOTTOM
 
     default:
       // touch tip fields
