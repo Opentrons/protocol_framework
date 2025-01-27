@@ -33,10 +33,10 @@ STACKER_MOTION_CONFIG = {
     StackerAxis.X: {
         "home": MoveParams(
             StackerAxis.X,
-            max_speed=10.0,
-            acceleration=100.0,
-            max_speed_discont=40,
-            current=1.5,
+            max_speed=10.0,  # mm/s
+            acceleration=100.0,  # mm/s^2
+            max_speed_discont=40,  # mm/s
+            current=1.5,  # mAmps
         ),
         "move": MoveParams(
             StackerAxis.X,

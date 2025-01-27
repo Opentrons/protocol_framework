@@ -55,6 +55,9 @@ OFFSET_SM = 5.0
 OFFSET_MD = 10.0
 OFFSET_LG = 20.0
 
+# height limit in mm of labware to use OFFSET_MD used when storing labware.
+MEDIUM_LABWARE_Z_LIMIT = 20.0
+
 
 class FlexStacker(mod_abc.AbstractModule):
     """Hardware control interface for an attached Flex-Stacker module."""
@@ -344,7 +347,7 @@ class FlexStacker(mod_abc.AbstractModule):
         await self._prepare_for_action()
 
         # Move X then Z axis
-        offset = OFFSET_MD if labware_height < 20 else OFFSET_LG * 2
+        offset = OFFSET_MD if labware_height < MEDIUM_LABWARE_Z_LIMIT else OFFSET_LG * 2
         distance = MAX_TRAVEL[StackerAxis.Z] - (labware_height / 2) - offset
         await self._move_and_home_axis(StackerAxis.X, Direction.RETRACT, OFFSET_SM)
         await self.move_axis(StackerAxis.Z, Direction.EXTENT, distance)
