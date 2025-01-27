@@ -208,30 +208,6 @@ Flex pipette flow rates depend on pipette and tip capacity. Each pipette–tip c
 |                             | 1000              | 160            |
 +-----------------------------+-------------------+----------------+
 
-Original for comparison:
-
-.. list-table::
-    :header-rows: 1
-    
-    * - Pipette Model
-      - Tip Capacity (µL)
-      - Flow Rate (µL/s)
-    * - 50 µL (1- and 8-channel)
-      - 50
-      - 57
-    * - 1000 µL (1-, 8-, and 96-channel)
-      - 50
-      - 478
-    * - 1000 µL (1-, 8-, and 96-channel)
-      - 200
-      - 716
-    * - 1000 µL (1-, 8-, and 96-channel)
-      - 1000
-      - 716
-
-
-
-
 .. _ot2-flow-rates:
 
 OT-2 Pipette Flow Rates
