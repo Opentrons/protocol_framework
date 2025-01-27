@@ -12,7 +12,7 @@ import { fixture_tiprack_10_ul } from '@opentrons/shared-data/labware/fixtures/2
 import { getStateAndContextTempTCModules } from '@opentrons/step-generation'
 import {
   DEFAULT_DELAY_SECONDS,
-  DEFAULT_MM_FROM_BOTTOM_DISPENSE,
+  DEFAULT_MM_OFFSET_FROM_BOTTOM,
 } from '../../constants'
 import { createPresavedStepForm } from '../utils/createPresavedStepForm'
 import type { CreatePresavedStepFormArgs } from '../utils/createPresavedStepForm'
@@ -216,7 +216,7 @@ describe('createPresavedStepForm', () => {
         aspirate_delay_seconds: `${DEFAULT_DELAY_SECONDS}`,
         dispense_delay_checkbox: false,
         dispense_delay_seconds: `${DEFAULT_DELAY_SECONDS}`,
-        mix_mmFromBottom: DEFAULT_MM_FROM_BOTTOM_DISPENSE,
+        mix_mmFromBottom: DEFAULT_MM_OFFSET_FROM_BOTTOM,
         mix_touchTip_mmFromBottom: null,
         mix_wellOrder_first: 't2b',
         mix_wellOrder_second: 'l2r',
@@ -397,5 +397,15 @@ describe('createPresavedStepForm', () => {
         })
       })
     })
+  })
+  it('should default movdLabware form useGripper value to `true` if gripper is added', () => {
+    const args = {
+      ...defaultArgs,
+      additionalEquipmentEntities: {
+        gripperId: { name: 'gripper', id: 'gripperId' },
+      },
+      stepType: 'moveLabware',
+    }
+    expect(createPresavedStepForm(args)).toHaveProperty('useGripper', true)
   })
 })

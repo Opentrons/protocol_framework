@@ -199,7 +199,7 @@ interface NozzleConfigurationParams {
   style: NozzleConfigurationStyle
 }
 
-interface ConfigureNozzleLayoutParams {
+export interface ConfigureNozzleLayoutParams {
   pipetteId: string
   configurationParams: NozzleConfigurationParams
 }

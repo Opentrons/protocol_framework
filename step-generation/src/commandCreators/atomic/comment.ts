@@ -1,8 +1,8 @@
 import { uuid } from '../../utils'
-import type { CommentCreateCommand } from '@opentrons/shared-data'
+import type { CommentParams } from '@opentrons/shared-data'
 import type { CommandCreator } from '../../types'
 
-export const comment: CommandCreator<CommentCreateCommand['params']> = (
+export const comment: CommandCreator<CommentParams> = (
   args,
   invariantContext,
   prevRobotState

@@ -1,12 +1,13 @@
 import { SetupActions, SetupVerifications } from '../support/SetupSteps'
 import { UniversalActions } from '../support/universalActions'
-import '../support/commands'
+import { ModActions, ModVerifications } from '../support/SupportModules'
 import { runSteps } from '../support/StepExecution'
 import type { StepsList } from '../support/StepExecution'
 
 describe('The Redesigned Create Protocol Landing Page', () => {
   beforeEach(() => {
     cy.visit('/')
+    cy.verifyHomePage()
     cy.closeAnalyticsModal()
   })
 
@@ -64,11 +65,34 @@ describe('The Redesigned Create Protocol Landing Page', () => {
       UniversalActions.Snapshot,
       SetupActions.SelectLiquidWells,
       SetupActions.SetVolumeAndSaveforWells,
-      SetupActions.ChoseDeckSlotC3,
-      SetupActions.AddHardwareLabware,
+      SetupActions.ChoseDeckSlotC1,
+      SetupActions.EditHardwareLabwareOnDeck,
       SetupActions.ClickLabwareHeader,
-      SetupActions.ClickWellPlatesSection,
-      SetupActions.SelectBioRad96WellPlate,
+      SetupActions.AddAdapters,
+      SetupActions.DeepWellTempModAdapter,
+      SetupActions.AddNest96DeepWellPlate,
+      SetupActions.Done,
+      SetupActions.ProtocolStepsH,
+      SetupActions.AddStep,
+      ModActions.AddTemperatureStep,
+      ModVerifications.TempeDeckInitialForm,
+      UniversalActions.Snapshot,
+      ModActions.ActivateTempdeck,
+      ModActions.InputTempDeck4,
+      ModActions.SaveButtonTempdeck,
+      ModActions.PauseAfterSettingTempdeck,
+      // ModVerifications.Temp4CPauseTextVerification,
+      UniversalActions.Snapshot,
+      SetupActions.AddStep,
+      ModActions.AddTemperatureStep,
+      ModActions.ActivateTempdeck,
+      ModActions.InputTempDeck95,
+      ModActions.SaveButtonTempdeck,
+      ModActions.PauseAfterSettingTempdeck,
+      SetupActions.AddStep,
+      ModActions.AddTemperatureStep,
+      ModActions.ActivateTempdeck,
+      ModActions.InputTempDeck100,
     ]
     runSteps(steps)
   })
