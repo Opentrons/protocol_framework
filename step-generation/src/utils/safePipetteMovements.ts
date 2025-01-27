@@ -22,7 +22,7 @@ import type {
 
 const A12_column_front_left_bound = { x: -11.03, y: 2 }
 const A12_column_back_right_bound = { x: 526.77, y: 506.2 }
-const PRIMARY_NOZZLE = 'A12'
+export const PRIMARY_NOZZLE = 'A12'
 const NOZZLE_CONFIGURATION = 'COLUMN'
 const FLEX_TC_LID_COLLISION_ZONE = {
   back_left: { x: -43.25, y: 454.9, z: 211.91 },
@@ -44,7 +44,7 @@ interface SlotInfo {
   addressableArea: AddressableArea | null
   position: CoordinateTuple | null
 }
-interface Point {
+export interface Point {
   x: number
   y: number
   z?: number

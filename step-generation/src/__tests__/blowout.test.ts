@@ -31,6 +31,7 @@ describe('blowout', () => {
       wellName: 'A1',
       flowRate: 21.1,
       wellLocation: {
+        origin: 'top',
         offset: {
           z: -1.3,
         },

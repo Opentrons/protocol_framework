@@ -15,16 +15,14 @@ import type {
   PipetteMount as Mount,
   PipetteV2Specs,
   ShakeSpeedParams,
+  LabwareMovementStrategy,
 } from '@opentrons/shared-data'
 import type { AtomicProfileStep } from '@opentrons/shared-data/protocol/types/schemaV4'
-import type { Command } from '@opentrons/shared-data/protocol/types/schemaV5Addendum'
 import type {
   TEMPERATURE_DEACTIVATED,
   TEMPERATURE_AT_TARGET,
   TEMPERATURE_APPROACHING_TARGET,
 } from './constants'
-
-export type { Command }
 
 // Copied from PD
 export type DeckSlot = string
@@ -327,7 +325,7 @@ export type MixArgs = CommonArgs & {
 export type PauseArgs = CommonArgs & {
   commandCreatorFnName: 'delay'
   message?: string
-  wait: number | true
+  seconds?: number
   pauseTemperature?: number | null
   meta:
     | {
@@ -464,9 +462,9 @@ export type AbsorbanceReaderArgs =
 
 export interface MoveLabwareArgs extends CommonArgs {
   commandCreatorFnName: 'moveLabware'
-  labware: string
-  useGripper: boolean
+  labwareId: string
   newLocation: LabwareLocation
+  strategy: LabwareMovementStrategy
 }
 
 export interface CommentArgs extends CommonArgs {

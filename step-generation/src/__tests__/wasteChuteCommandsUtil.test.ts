@@ -30,6 +30,7 @@ const args = {
 const mockMoveToAddressableAreaParams = {
   pipetteId: mockId,
   addressableAreaName: mockAddressableAreaName,
+  offset: { x: 0, y: 0, z: 0 },
 }
 
 const mockPipEntities: PipetteEntities = {
