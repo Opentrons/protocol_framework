@@ -59,7 +59,7 @@ async def test_add_labware_offset(
     run: Run,
 ) -> None:
     """It should add the labware offset to the engine, assuming the run is current."""
-    labware_offset_request = pe_types.LabwareOffsetCreate(
+    labware_offset_request = pe_types.LegacyLabwareOffsetCreate(
         definitionUri="namespace_1/load_name_1/123",
         location=pe_types.LegacyLabwareOffsetLocation(slotName=DeckSlotName.SLOT_1),
         vector=pe_types.LabwareOffsetVector(x=1, y=2, z=3),
@@ -95,7 +95,7 @@ async def test_add_labware_offset_not_current(
     """It should 409 if the run is not current."""
     not_current_run = run.model_copy(update={"current": False})
 
-    labware_offset_request = pe_types.LabwareOffsetCreate(
+    labware_offset_request = pe_types.LegacyLabwareOffsetCreate(
         definitionUri="namespace_1/load_name_1/123",
         location=pe_types.LegacyLabwareOffsetLocation(slotName=DeckSlotName.SLOT_1),
         vector=pe_types.LabwareOffsetVector(x=1, y=2, z=3),

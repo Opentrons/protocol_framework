@@ -1,4 +1,5 @@
 """Tests for /runs routes dealing with labware offsets and definitions."""
+
 import pytest
 from datetime import datetime
 from decoy import Decoy
@@ -55,7 +56,7 @@ async def test_add_labware_offset(
     run: MaintenanceRun,
 ) -> None:
     """It should add the labware offset to the engine, assuming the run is current."""
-    labware_offset_request = pe_types.LabwareOffsetCreate(
+    labware_offset_request = pe_types.LegacyLabwareOffsetCreate(
         definitionUri="namespace_1/load_name_1/123",
         location=pe_types.LegacyLabwareOffsetLocation(slotName=DeckSlotName.SLOT_1),
         vector=pe_types.LabwareOffsetVector(x=1, y=2, z=3),

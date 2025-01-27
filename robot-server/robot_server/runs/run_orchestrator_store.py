@@ -2,7 +2,7 @@
 
 import asyncio
 import logging
-from typing import Dict, List, Optional, Callable, Mapping
+from typing import Dict, List, Optional, Callable, Mapping, Sequence
 
 from opentrons.types import NozzleMapInterface
 from opentrons.protocol_engine.errors.exceptions import EStopActivatedError
@@ -193,7 +193,7 @@ class RunOrchestratorStore:
     async def create(
         self,
         run_id: str,
-        labware_offsets: List[LabwareOffsetCreate | LegacyLabwareOffsetCreate],
+        labware_offsets: Sequence[LabwareOffsetCreate | LegacyLabwareOffsetCreate],
         initial_error_recovery_policy: error_recovery_policy.ErrorRecoveryPolicy,
         deck_configuration: DeckConfigurationType,
         file_provider: FileProvider,
@@ -409,7 +409,9 @@ class RunOrchestratorStore:
         """Get whether the run has started."""
         return self.run_orchestrator.run_has_started()
 
-    def add_labware_offset(self, request: LabwareOffsetCreate | LegacyLabwareOffsetCreate) -> LabwareOffset:
+    def add_labware_offset(
+        self, request: LabwareOffsetCreate | LegacyLabwareOffsetCreate
+    ) -> LabwareOffset:
         """Add a new labware offset to state."""
         return self.run_orchestrator.add_labware_offset(request)
 

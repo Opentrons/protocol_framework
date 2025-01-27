@@ -1,4 +1,5 @@
 """Tests for the EngineStore interface."""
+
 from datetime import datetime
 import pytest
 from decoy import Decoy, matchers
@@ -103,7 +104,7 @@ async def test_create_engine_with_labware_offsets(
     subject: RunOrchestratorStore,
 ) -> None:
     """It should create an engine for a run with labware offsets."""
-    labware_offset = pe_types.LabwareOffsetCreate(
+    labware_offset = pe_types.LegacyLabwareOffsetCreate(
         definitionUri="namespace/load_name/version",
         location=pe_types.LegacyLabwareOffsetLocation(slotName=DeckSlotName.SLOT_5),
         vector=pe_types.LabwareOffsetVector(x=1, y=2, z=3),
