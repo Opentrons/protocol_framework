@@ -1429,150 +1429,6 @@
       },
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
-    },
-    {
-      "commandType": "loadPipette",
-      "completedAt": "TIMESTAMP",
-      "createdAt": "TIMESTAMP",
-      "id": "UUID",
-      "key": "commands.LOAD_PIPETTE-0",
-      "notes": [],
-      "params": {
-        "mount": "left",
-        "pipetteName": "p300_single_gen2"
-      },
-      "result": {
-        "pipetteId": "UUID"
-      },
-      "startedAt": "TIMESTAMP",
-      "status": "succeeded"
-    },
-    {
-      "commandType": "custom",
-      "completedAt": "TIMESTAMP",
-      "createdAt": "TIMESTAMP",
-      "id": "UUID",
-      "key": "command.MAGDECK_ENGAGE-0",
-      "notes": [],
-      "params": {
-        "legacyCommandText": "Engaging Magnetic Module",
-        "legacyCommandType": "command.MAGDECK_ENGAGE"
-      },
-      "result": {},
-      "startedAt": "TIMESTAMP",
-      "status": "succeeded"
-    },
-    {
-      "commandType": "custom",
-      "completedAt": "TIMESTAMP",
-      "createdAt": "TIMESTAMP",
-      "id": "UUID",
-      "key": "command.MAGDECK_ENGAGE-1",
-      "notes": [],
-      "params": {
-        "legacyCommandText": "Engaging Magnetic Module",
-        "legacyCommandType": "command.MAGDECK_ENGAGE"
-      },
-      "result": {},
-      "startedAt": "TIMESTAMP",
-      "status": "succeeded"
-    },
-    {
-      "commandType": "pickUpTip",
-      "completedAt": "TIMESTAMP",
-      "createdAt": "TIMESTAMP",
-      "id": "UUID",
-      "key": "command.PICK_UP_TIP-0",
-      "notes": [],
-      "params": {
-        "labwareId": "UUID",
-        "pipetteId": "UUID",
-        "wellLocation": {
-          "offset": {
-            "x": 0.0,
-            "y": 0.0,
-            "z": 0.0
-          },
-          "origin": "top"
-        },
-        "wellName": "A1"
-      },
-      "result": {
-        "position": {
-          "x": 0.0,
-          "y": 0.0,
-          "z": 0.0
-        },
-        "tipDiameter": 0.0,
-        "tipLength": 51.099999999999994,
-        "tipVolume": 300.0
-      },
-      "startedAt": "TIMESTAMP",
-      "status": "succeeded"
-    },
-    {
-      "commandType": "dropTip",
-      "completedAt": "TIMESTAMP",
-      "createdAt": "TIMESTAMP",
-      "id": "UUID",
-      "key": "command.DROP_TIP-0",
-      "notes": [],
-      "params": {
-        "alternateDropLocation": false,
-        "labwareId": "UUID",
-        "pipetteId": "UUID",
-        "wellLocation": {
-          "offset": {
-            "x": 0.0,
-            "y": 0.0,
-            "z": 0.0
-          },
-          "origin": "default"
-        },
-        "wellName": "A1"
-      },
-      "result": {
-        "position": {
-          "x": 0.0,
-          "y": 0.0,
-          "z": 0.0
-        }
-      },
-      "startedAt": "TIMESTAMP",
-      "status": "succeeded"
-    },
-    {
-      "commandType": "pickUpTip",
-      "completedAt": "TIMESTAMP",
-      "createdAt": "TIMESTAMP",
-      "id": "UUID",
-      "key": "command.PICK_UP_TIP-1",
-      "notes": [],
-      "params": {
-        "labwareId": "UUID",
-        "pipetteId": "UUID",
-        "wellLocation": {
-          "offset": {
-            "x": 0.0,
-            "y": 0.0,
-            "z": 0.0
-          },
-          "origin": "top"
-        },
-        "wellName": "B1"
-      },
-      "result": {
-        "position": {
-          "x": 0.0,
-          "y": 0.0,
-          "z": 0.0
-        },
-        "tipDiameter": 0.0,
-        "tipLength": 51.099999999999994,
-        "tipVolume": 300.0
-      },
-      "startedAt": "TIMESTAMP",
-      "status": "succeeded"
     }
   ],
   "config": {
@@ -1583,7 +1439,33 @@
     "protocolType": "python"
   },
   "createdAt": "TIMESTAMP",
-  "errors": [],
+  "errors": [
+    {
+      "createdAt": "TIMESTAMP",
+      "detail": "TypeError [line 12]: Can't instantiate abstract class LegacyInstrumentCoreSimulator with abstract methods evotip_dispense, evotip_seal, evotip_unseal",
+      "errorCode": "4000",
+      "errorInfo": {},
+      "errorType": "ExceptionInProtocolError",
+      "id": "UUID",
+      "isDefined": false,
+      "wrappedErrors": [
+        {
+          "createdAt": "TIMESTAMP",
+          "detail": "TypeError: Can't instantiate abstract class LegacyInstrumentCoreSimulator with abstract methods evotip_dispense, evotip_seal, evotip_unseal",
+          "errorCode": "4000",
+          "errorInfo": {
+            "args": "(\"Can't instantiate abstract class LegacyInstrumentCoreSimulator with abstract methods evotip_dispense, evotip_seal, evotip_unseal\",)",
+            "class": "TypeError",
+            "traceback": "  File \"/usr/local/lib/python3.10/site-packages/opentrons/protocols/execution/execute_python.py\", line N, in exec_run\n    exec(\"run(__context)\", new_globs)\n\n  File \"<string>\", line N, in <module>\n\n  File \"OT2_S_v2_2_P300S_None_MM1_MM2_EngageMagHeightFromBase.py\", line N, in run\n\n  File \"/usr/local/lib/python3.10/site-packages/opentrons/protocols/api_support/util.py\", line N, in _check_version_wrapper\n    return decorated_obj(*args, **kwargs)\n\n  File \"/usr/local/lib/python3.10/site-packages/opentrons/protocol_api/protocol_context.py\", line N, in load_instrument\n    instrument_core = self._core.load_instrument(\n\n  File \"/usr/local/lib/python3.10/site-packages/opentrons/protocol_api/core/legacy_simulator/legacy_protocol_core.py\", line N, in load_instrument\n    new_instr = LegacyInstrumentCoreSimulator(\n"
+          },
+          "errorType": "PythonException",
+          "id": "UUID",
+          "isDefined": false,
+          "wrappedErrors": []
+        }
+      ]
+    }
+  ],
   "files": [
     {
       "name": "OT2_S_v2_2_P300S_None_MM1_MM2_EngageMagHeightFromBase.py",
@@ -1631,14 +1513,8 @@
       "serialNumber": "UUID"
     }
   ],
-  "pipettes": [
-    {
-      "id": "UUID",
-      "mount": "left",
-      "pipetteName": "p300_single_gen2"
-    }
-  ],
-  "result": "ok",
+  "pipettes": [],
+  "result": "not-ok",
   "robotType": "OT-2 Standard",
   "runTimeParameters": []
 }

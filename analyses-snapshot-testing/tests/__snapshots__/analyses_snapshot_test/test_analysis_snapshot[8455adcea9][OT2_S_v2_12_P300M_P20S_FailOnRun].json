@@ -2318,301 +2318,6 @@
       },
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
-    },
-    {
-      "commandType": "loadPipette",
-      "completedAt": "TIMESTAMP",
-      "createdAt": "TIMESTAMP",
-      "id": "UUID",
-      "key": "commands.LOAD_PIPETTE-0",
-      "notes": [],
-      "params": {
-        "mount": "right",
-        "pipetteName": "p20_single_gen2"
-      },
-      "result": {
-        "pipetteId": "UUID"
-      },
-      "startedAt": "TIMESTAMP",
-      "status": "succeeded"
-    },
-    {
-      "commandType": "loadPipette",
-      "completedAt": "TIMESTAMP",
-      "createdAt": "TIMESTAMP",
-      "id": "UUID",
-      "key": "commands.LOAD_PIPETTE-1",
-      "notes": [],
-      "params": {
-        "mount": "left",
-        "pipetteName": "p300_multi_gen2"
-      },
-      "result": {
-        "pipetteId": "UUID"
-      },
-      "startedAt": "TIMESTAMP",
-      "status": "succeeded"
-    },
-    {
-      "commandType": "loadLabware",
-      "completedAt": "TIMESTAMP",
-      "createdAt": "TIMESTAMP",
-      "id": "UUID",
-      "key": "commands.LOAD_LABWARE-2",
-      "notes": [],
-      "params": {
-        "displayName": "dye container",
-        "loadName": "nest_12_reservoir_15ml",
-        "location": {
-          "slotName": "3"
-        },
-        "namespace": "opentrons",
-        "version": 1
-      },
-      "result": {
-        "definition": {
-          "allowedRoles": [],
-          "brand": {
-            "brand": "NEST",
-            "brandId": [
-              "360102"
-            ],
-            "links": [
-              "https://www.nest-biotech.com/reagent-reserviors/59178414.html"
-            ]
-          },
-          "cornerOffsetFromSlot": {
-            "x": 0,
-            "y": 0,
-            "z": 0
-          },
-          "dimensions": {
-            "xDimension": 127.76,
-            "yDimension": 85.48,
-            "zDimension": 31.4
-          },
-          "gripperOffsets": {},
-          "groups": [
-            {
-              "metadata": {
-                "wellBottomShape": "v"
-              },
-              "wells": [
-                "A1",
-                "A10",
-                "A11",
-                "A12",
-                "A2",
-                "A3",
-                "A4",
-                "A5",
-                "A6",
-                "A7",
-                "A8",
-                "A9"
-              ]
-            }
-          ],
-          "metadata": {
-            "displayCategory": "reservoir",
-            "displayName": "NEST 12 Well Reservoir 15 mL",
-            "displayVolumeUnits": "mL",
-            "tags": []
-          },
-          "namespace": "opentrons",
-          "ordering": [
-            [
-              "A1"
-            ],
-            [
-              "A10"
-            ],
-            [
-              "A11"
-            ],
-            [
-              "A12"
-            ],
-            [
-              "A2"
-            ],
-            [
-              "A3"
-            ],
-            [
-              "A4"
-            ],
-            [
-              "A5"
-            ],
-            [
-              "A6"
-            ],
-            [
-              "A7"
-            ],
-            [
-              "A8"
-            ],
-            [
-              "A9"
-            ]
-          ],
-          "parameters": {
-            "format": "trough",
-            "isMagneticModuleCompatible": false,
-            "isTiprack": false,
-            "loadName": "nest_12_reservoir_15ml",
-            "quirks": [
-              "centerMultichannelOnWells",
-              "touchTipDisabled"
-            ]
-          },
-          "schemaVersion": 2,
-          "stackingOffsetWithLabware": {},
-          "stackingOffsetWithModule": {},
-          "version": 1,
-          "wells": {
-            "A1": {
-              "depth": 26.85,
-              "shape": "rectangular",
-              "totalLiquidVolume": 15000,
-              "x": 14.38,
-              "xDimension": 8.2,
-              "y": 42.78,
-              "yDimension": 71.2,
-              "z": 4.55
-            },
-            "A10": {
-              "depth": 26.85,
-              "shape": "rectangular",
-              "totalLiquidVolume": 15000,
-              "x": 95.38,
-              "xDimension": 8.2,
-              "y": 42.78,
-              "yDimension": 71.2,
-              "z": 4.55
-            },
-            "A11": {
-              "depth": 26.85,
-              "shape": "rectangular",
-              "totalLiquidVolume": 15000,
-              "x": 104.38,
-              "xDimension": 8.2,
-              "y": 42.78,
-              "yDimension": 71.2,
-              "z": 4.55
-            },
-            "A12": {
-              "depth": 26.85,
-              "shape": "rectangular",
-              "totalLiquidVolume": 15000,
-              "x": 113.38,
-              "xDimension": 8.2,
-              "y": 42.78,
-              "yDimension": 71.2,
-              "z": 4.55
-            },
-            "A2": {
-              "depth": 26.85,
-              "shape": "rectangular",
-              "totalLiquidVolume": 15000,
-              "x": 23.38,
-              "xDimension": 8.2,
-              "y": 42.78,
-              "yDimension": 71.2,
-              "z": 4.55
-            },
-            "A3": {
-              "depth": 26.85,
-              "shape": "rectangular",
-              "totalLiquidVolume": 15000,
-              "x": 32.38,
-              "xDimension": 8.2,
-              "y": 42.78,
-              "yDimension": 71.2,
-              "z": 4.55
-            },
-            "A4": {
-              "depth": 26.85,
-              "shape": "rectangular",
-              "totalLiquidVolume": 15000,
-              "x": 41.38,
-              "xDimension": 8.2,
-              "y": 42.78,
-              "yDimension": 71.2,
-              "z": 4.55
-            },
-            "A5": {
-              "depth": 26.85,
-              "shape": "rectangular",
-              "totalLiquidVolume": 15000,
-              "x": 50.38,
-              "xDimension": 8.2,
-              "y": 42.78,
-              "yDimension": 71.2,
-              "z": 4.55
-            },
-            "A6": {
-              "depth": 26.85,
-              "shape": "rectangular",
-              "totalLiquidVolume": 15000,
-              "x": 59.38,
-              "xDimension": 8.2,
-              "y": 42.78,
-              "yDimension": 71.2,
-              "z": 4.55
-            },
-            "A7": {
-              "depth": 26.85,
-              "shape": "rectangular",
-              "totalLiquidVolume": 15000,
-              "x": 68.38,
-              "xDimension": 8.2,
-              "y": 42.78,
-              "yDimension": 71.2,
-              "z": 4.55
-            },
-            "A8": {
-              "depth": 26.85,
-              "shape": "rectangular",
-              "totalLiquidVolume": 15000,
-              "x": 77.38,
-              "xDimension": 8.2,
-              "y": 42.78,
-              "yDimension": 71.2,
-              "z": 4.55
-            },
-            "A9": {
-              "depth": 26.85,
-              "shape": "rectangular",
-              "totalLiquidVolume": 15000,
-              "x": 86.38,
-              "xDimension": 8.2,
-              "y": 42.78,
-              "yDimension": 71.2,
-              "z": 4.55
-            }
-          }
-        },
-        "labwareId": "UUID"
-      },
-      "startedAt": "TIMESTAMP",
-      "status": "succeeded"
-    },
-    {
-      "commandType": "comment",
-      "completedAt": "TIMESTAMP",
-      "createdAt": "TIMESTAMP",
-      "id": "UUID",
-      "key": "command.COMMENT-0",
-      "notes": [],
-      "params": {
-        "message": "one comment"
-      },
-      "result": {},
-      "startedAt": "TIMESTAMP",
-      "status": "succeeded"
     }
   ],
   "config": {
@@ -2623,7 +2328,33 @@
     "protocolType": "python"
   },
   "createdAt": "TIMESTAMP",
-  "errors": [],
+  "errors": [
+    {
+      "createdAt": "TIMESTAMP",
+      "detail": "TypeError [line 34]: Can't instantiate abstract class LegacyInstrumentCoreSimulator with abstract methods evotip_dispense, evotip_seal, evotip_unseal",
+      "errorCode": "4000",
+      "errorInfo": {},
+      "errorType": "ExceptionInProtocolError",
+      "id": "UUID",
+      "isDefined": false,
+      "wrappedErrors": [
+        {
+          "createdAt": "TIMESTAMP",
+          "detail": "TypeError: Can't instantiate abstract class LegacyInstrumentCoreSimulator with abstract methods evotip_dispense, evotip_seal, evotip_unseal",
+          "errorCode": "4000",
+          "errorInfo": {
+            "args": "(\"Can't instantiate abstract class LegacyInstrumentCoreSimulator with abstract methods evotip_dispense, evotip_seal, evotip_unseal\",)",
+            "class": "TypeError",
+            "traceback": "  File \"/usr/local/lib/python3.10/site-packages/opentrons/protocols/execution/execute_python.py\", line N, in exec_run\n    exec(\"run(__context)\", new_globs)\n\n  File \"<string>\", line N, in <module>\n\n  File \"OT2_S_v2_12_P300M_P20S_FailOnRun.py\", line N, in run\n\n  File \"/usr/local/lib/python3.10/site-packages/opentrons/protocols/api_support/util.py\", line N, in _check_version_wrapper\n    return decorated_obj(*args, **kwargs)\n\n  File \"/usr/local/lib/python3.10/site-packages/opentrons/protocol_api/protocol_context.py\", line N, in load_instrument\n    instrument_core = self._core.load_instrument(\n\n  File \"/usr/local/lib/python3.10/site-packages/opentrons/protocol_api/core/legacy_simulator/legacy_protocol_core.py\", line N, in load_instrument\n    new_instr = LegacyInstrumentCoreSimulator(\n"
+          },
+          "errorType": "PythonException",
+          "id": "UUID",
+          "isDefined": false,
+          "wrappedErrors": []
+        }
+      ]
+    }
+  ],
   "files": [
     {
       "name": "OT2_S_v2_12_P300M_P20S_FailOnRun.py",
@@ -2656,15 +2387,6 @@
       "location": {
         "slotName": "2"
       }
-    },
-    {
-      "definitionUri": "opentrons/nest_12_reservoir_15ml/1",
-      "displayName": "dye container",
-      "id": "UUID",
-      "loadName": "nest_12_reservoir_15ml",
-      "location": {
-        "slotName": "3"
-      }
     }
   ],
   "liquidClasses": [],
@@ -2677,19 +2399,8 @@
     "source": "Software Testing Team"
   },
   "modules": [],
-  "pipettes": [
-    {
-      "id": "UUID",
-      "mount": "right",
-      "pipetteName": "p20_single_gen2"
-    },
-    {
-      "id": "UUID",
-      "mount": "left",
-      "pipetteName": "p300_multi_gen2"
-    }
-  ],
-  "result": "ok",
+  "pipettes": [],
+  "result": "not-ok",
   "robotType": "OT-2 Standard",
   "runTimeParameters": []
 }
