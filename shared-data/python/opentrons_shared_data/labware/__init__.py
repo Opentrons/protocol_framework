@@ -12,7 +12,9 @@ if TYPE_CHECKING:
 Schema = NewType("Schema", Dict[str, Any])
 
 
-def load_definition(loadname: str, version: int, schema: int = 2) -> "LabwareDefinition":
+def load_definition(
+    loadname: str, version: int, schema: int = 2
+) -> "LabwareDefinition":
     return json.loads(
         load_shared_data(f"labware/definitions/{schema}/{loadname}/{version}.json")
     )
