@@ -22,6 +22,7 @@ import {
   getHasWasteChute,
 } from '../../utils'
 import {
+  airGapInPlace,
   aspirate,
   configureForVolume,
   delay,
@@ -223,8 +224,6 @@ export const transfer: CommandCreator<TransferArgs> = (
       pairIdx: number
     ): CurriedCommandCreator[] => {
       const [sourceWell, destinationWell] = wellPair
-      const sourceLabwareDef =
-        invariantContext.labwareEntities[args.sourceLabware].def
       const destLabwareDef =
         trashOrLabware === 'labware'
           ? invariantContext.labwareEntities[args.destLabware].def
@@ -233,8 +232,6 @@ export const transfer: CommandCreator<TransferArgs> = (
         destinationWell != null && destLabwareDef != null
           ? getWellDepth(destLabwareDef, destinationWell)
           : 0
-      const airGapOffsetSourceWell =
-        getWellDepth(sourceLabwareDef, sourceWell) + AIR_GAP_OFFSET_FROM_TOP
       const airGapOffsetDestWell = wellDepth + AIR_GAP_OFFSET_FROM_TOP
       const commands = subTransferVolumes.reduce(
         (
@@ -394,23 +391,10 @@ export const transfer: CommandCreator<TransferArgs> = (
           const airGapAfterAspirateCommands =
             aspirateAirGapVolume && destinationWell != null
               ? [
-                  curryCommandCreator(aspirate, {
+                  curryCommandCreator(airGapInPlace, {
                     pipetteId: args.pipette,
                     volume: aspirateAirGapVolume,
-                    labwareId: args.sourceLabware,
-                    wellName: sourceWell,
                     flowRate: aspirateFlowRateUlSec,
-                    wellLocation: {
-                      origin: 'bottom',
-                      offset: {
-                        z: airGapOffsetSourceWell,
-                        x: 0,
-                        y: 0,
-                      },
-                    },
-                    isAirGap: true,
-                    tipRack,
-                    nozzles: args.nozzles,
                   }),
                   ...(aspirateDelay != null
                     ? [
@@ -433,7 +417,6 @@ export const transfer: CommandCreator<TransferArgs> = (
                         y: 0,
                       },
                     },
-                    isAirGap: true,
                     tipRack: args.tipRack,
                     nozzles: args.nozzles,
                   }),
@@ -530,17 +513,11 @@ export const transfer: CommandCreator<TransferArgs> = (
             dispenseAirGapVolume && !willReuseTip
               ? [
                   curryCommandCreator(airGapHelper, {
-                    sourceWell,
-                    blowOutLocation: args.blowoutLocation,
-                    sourceId: args.sourceLabware,
                     pipetteId: args.pipette,
                     volume: dispenseAirGapVolume,
                     destinationId: args.destLabware,
                     destWell: destinationWell,
                     flowRate: aspirateFlowRateUlSec,
-                    offsetFromBottomMm: airGapOffsetDestWell,
-                    tipRack,
-                    nozzles: args.nozzles,
                   }),
                   ...(aspirateDelay != null
                     ? [

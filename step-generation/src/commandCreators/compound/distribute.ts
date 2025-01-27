@@ -16,12 +16,12 @@ import {
   reduceCommandCreators,
   blowoutUtil,
   wasteChuteCommandsUtil,
-  getDispenseAirGapLocation,
   getIsSafePipetteMovement,
   getWasteChuteAddressableAreaNamePip,
   getHasWasteChute,
 } from '../../utils'
 import {
+  airGapInPlace,
   aspirate,
   configureForVolume,
   delay,
@@ -204,34 +204,16 @@ export const distribute: CommandCreator<DistributeArgs> = (
     destWellChunks,
     (destWellChunk: string[], chunkIndex: number): CurriedCommandCreator[] => {
       const firstDestWell = destWellChunk[0]
-      const sourceLabwareDef =
-        invariantContext.labwareEntities[args.sourceLabware].def
       const destLabwareDef =
         invariantContext.labwareEntities[args.destLabware].def
-      const airGapOffsetSourceWell =
-        getWellDepth(sourceLabwareDef, args.sourceWell) +
-        AIR_GAP_OFFSET_FROM_TOP
       const airGapOffsetDestWell =
         getWellDepth(destLabwareDef, firstDestWell) + AIR_GAP_OFFSET_FROM_TOP
       const airGapAfterAspirateCommands = aspirateAirGapVolume
         ? [
-            curryCommandCreator(aspirate, {
+            curryCommandCreator(airGapInPlace, {
               pipetteId: args.pipette,
               volume: aspirateAirGapVolume,
-              labwareId: args.sourceLabware,
-              wellName: args.sourceWell,
               flowRate: aspirateFlowRateUlSec,
-              wellLocation: {
-                origin: 'bottom',
-                offset: {
-                  z: airGapOffsetSourceWell,
-                  x: 0,
-                  y: 0,
-                },
-              },
-              isAirGap: true,
-              tipRack: args.tipRack,
-              nozzles,
             }),
             ...(aspirateDelay != null
               ? [
@@ -254,7 +236,6 @@ export const distribute: CommandCreator<DistributeArgs> = (
                   y: 0,
                 },
               },
-              isAirGap: true,
               nozzles,
               tipRack: args.tipRack,
             }),
@@ -346,40 +327,15 @@ export const distribute: CommandCreator<DistributeArgs> = (
         ]
       }
 
-      const {
-        dispenseAirGapLabware,
-        dispenseAirGapWell,
-      } = getDispenseAirGapLocation({
-        blowoutLocation,
-        sourceLabware: args.sourceLabware,
-        destLabware: args.destLabware,
-        sourceWell: args.sourceWell,
-        // @ts-expect-error(SA, 2021-05-05): last can return undefined
-        destWell: last(destWellChunk),
-      })
       const isLastChunk = chunkIndex + 1 === destWellChunks.length
       const willReuseTip = args.changeTip !== 'always' && !isLastChunk
       const airGapAfterDispenseCommands =
         dispenseAirGapVolume && !willReuseTip
           ? [
-              curryCommandCreator(aspirate, {
+              curryCommandCreator(airGapInPlace, {
                 pipetteId: args.pipette,
                 volume: dispenseAirGapVolume,
-                labwareId: dispenseAirGapLabware,
-                wellName: dispenseAirGapWell,
                 flowRate: aspirateFlowRateUlSec,
-                wellLocation: {
-                  origin: 'bottom',
-                  offset: {
-                    z: airGapOffsetDestWell,
-                    x: 0,
-                    y: 0,
-                  },
-                },
-                isAirGap: true,
-                tipRack: args.tipRack,
-
-                nozzles,
               }),
               ...(aspirateDelay != null
                 ? [

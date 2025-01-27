@@ -13,7 +13,7 @@ import {
 } from '@opentrons/shared-data'
 import { reduceCommandCreators, wasteChuteCommandsUtil } from './index'
 import {
-  aspirate,
+  airGapInPlace,
   dispense,
   moveToAddressableArea,
   moveToWell,
@@ -624,33 +624,15 @@ interface AirGapArgs {
   destinationId: string
   destWell: string | null
   flowRate: number
-  offsetFromBottomMm: number
-  tipRack: string
   pipetteId: string
   volume: number
-  nozzles: NozzleConfigurationStyle | null
-  blowOutLocation?: string | null
-  sourceId?: string
-  sourceWell?: string
 }
 export const airGapHelper: CommandCreator<AirGapArgs> = (
   args,
   invariantContext,
   prevRobotState
 ) => {
-  const {
-    blowOutLocation,
-    destinationId,
-    destWell,
-    flowRate,
-    offsetFromBottomMm,
-    pipetteId,
-    tipRack,
-    sourceId,
-    sourceWell,
-    volume,
-    nozzles,
-  } = args
+  const { destinationId, destWell, flowRate, pipetteId, volume } = args
 
   const trashOrLabware = getTrashOrLabware(
     invariantContext.labwareEntities,
@@ -660,62 +642,13 @@ export const airGapHelper: CommandCreator<AirGapArgs> = (
 
   let commands: CurriedCommandCreator[] = []
   if (trashOrLabware === 'labware' && destWell != null) {
-    //  when aspirating out of 1 well for transfer
-    if (sourceId != null && sourceWell != null) {
-      const {
-        dispenseAirGapLabware,
-        dispenseAirGapWell,
-      } = getDispenseAirGapLocation({
-        blowoutLocation: blowOutLocation,
-        sourceLabware: sourceId,
-        destLabware: destinationId,
-        sourceWell,
-        destWell: destWell,
-      })
-
-      commands = [
-        curryCommandCreator(aspirate, {
-          pipetteId: pipetteId,
-          volume,
-          labwareId: dispenseAirGapLabware,
-          wellName: dispenseAirGapWell,
-          flowRate,
-          wellLocation: {
-            origin: 'bottom',
-            offset: {
-              z: offsetFromBottomMm,
-              x: 0,
-              y: 0,
-            },
-          },
-          isAirGap: true,
-          tipRack,
-          nozzles,
-        }),
-      ]
-      //  when aspirating out of multi wells for consolidate
-    } else {
-      commands = [
-        curryCommandCreator(aspirate, {
-          pipetteId: pipetteId,
-          volume,
-          labwareId: destinationId,
-          wellName: destWell,
-          flowRate,
-          wellLocation: {
-            origin: 'bottom',
-            offset: {
-              z: offsetFromBottomMm,
-              x: 0,
-              y: 0,
-            },
-          },
-          isAirGap: true,
-          tipRack,
-          nozzles,
-        }),
-      ]
-    }
+    commands = [
+      curryCommandCreator(airGapInPlace, {
+        pipetteId,
+        volume,
+        flowRate,
+      }),
+    ]
   } else if (trashOrLabware === 'wasteChute') {
     const pipetteChannels =
       invariantContext.pipetteEntities[pipetteId].spec.channels

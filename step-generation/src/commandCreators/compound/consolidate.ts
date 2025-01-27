@@ -2,11 +2,9 @@ import chunk from 'lodash/chunk'
 import flatMap from 'lodash/flatMap'
 import {
   COLUMN,
-  getWellDepth,
   LOW_VOLUME_PIPETTES,
   GRIPPER_WASTE_CHUTE_ADDRESSABLE_AREA,
 } from '@opentrons/shared-data'
-import { AIR_GAP_OFFSET_FROM_TOP } from '../../constants'
 import * as errorCreators from '../../errorCreators'
 import { getPipetteWithTipMaxVol } from '../../robotStateSelectors'
 import { movableTrashCommandsUtil } from '../../utils/movableTrashCommandsUtil'
@@ -15,7 +13,6 @@ import {
   curryCommandCreator,
   reduceCommandCreators,
   wasteChuteCommandsUtil,
-  getTrashOrLabware,
   airGapHelper,
   dispenseLocationHelper,
   moveHelper,
@@ -24,6 +21,7 @@ import {
   getHasWasteChute,
 } from '../../utils'
 import {
+  airGapInPlace,
   aspirate,
   configureForVolume,
   delay,
@@ -168,26 +166,8 @@ export const consolidate: CommandCreator<ConsolidateArgs> = (
     getPipetteWithTipMaxVol(args.pipette, invariantContext, args.tipRack) /
       (args.volume + aspirateAirGapVolume)
   )
-  const sourceLabwareDef =
-    invariantContext.labwareEntities[args.sourceLabware].def
-
-  const trashOrLabware = getTrashOrLabware(
-    invariantContext.labwareEntities,
-    invariantContext.additionalEquipmentEntities,
-    args.destLabware
-  )
 
   const destinationWell = args.destWell
-
-  const destLabwareDef =
-    trashOrLabware === 'labware'
-      ? invariantContext.labwareEntities[args.destLabware].def
-      : null
-  const wellDepth =
-    destLabwareDef != null && destinationWell != null
-      ? getWellDepth(destLabwareDef, destinationWell)
-      : 0
-  const airGapOffsetDestWell = wellDepth + AIR_GAP_OFFSET_FROM_TOP
 
   const sourceWellChunks = chunk(args.sourceWells, maxWellsPerChunk)
 
@@ -217,27 +197,12 @@ export const consolidate: CommandCreator<ConsolidateArgs> = (
       const aspirateCommands = flatMap(
         sourceWellChunk,
         (sourceWell: string, wellIndex: number): CurriedCommandCreator[] => {
-          const airGapOffsetSourceWell =
-            getWellDepth(sourceLabwareDef, sourceWell) + AIR_GAP_OFFSET_FROM_TOP
           const airGapAfterAspirateCommands = aspirateAirGapVolume
             ? [
-                curryCommandCreator(aspirate, {
+                curryCommandCreator(airGapInPlace, {
                   pipetteId: args.pipette,
                   volume: aspirateAirGapVolume,
-                  labwareId: args.sourceLabware,
-                  wellName: sourceWell,
                   flowRate: aspirateFlowRateUlSec,
-                  wellLocation: {
-                    origin: 'bottom',
-                    offset: {
-                      z: airGapOffsetSourceWell,
-                      x: 0,
-                      y: 0,
-                    },
-                  },
-                  isAirGap: true,
-                  tipRack: args.tipRack,
-                  nozzles,
                 }),
                 ...(aspirateDelay != null
                   ? [
@@ -466,9 +431,6 @@ export const consolidate: CommandCreator<ConsolidateArgs> = (
                 destinationId: args.destLabware,
                 destWell: destinationWell,
                 flowRate: aspirateFlowRateUlSec,
-                offsetFromBottomMm: airGapOffsetDestWell,
-                tipRack: args.tipRack,
-                nozzles,
               }),
               ...(aspirateDelay != null
                 ? [
