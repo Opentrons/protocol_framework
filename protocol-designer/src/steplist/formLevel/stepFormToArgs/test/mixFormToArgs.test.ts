@@ -90,18 +90,15 @@ describe('mix step form -> command creator args', () => {
       aspirateFlowRateUlSec: 5, // make sure flow rates are numbers instead of strings
       dispenseFlowRateUlSec: 4,
       blowoutFlowRateUlSec: 1000,
-      aspirateOffsetFromBottomMm: 0.5,
-      dispenseOffsetFromBottomMm: 0.5,
+      offsetFromBottomMm: 0.5,
       blowoutOffsetFromTopMm: 0,
       aspirateDelaySeconds: null,
       tipRack: 'mockTiprack',
       dispenseDelaySeconds: null,
       dropTipLocation: undefined,
       nozzles: undefined,
-      aspirateXOffset: 0,
-      dispenseXOffset: 0,
-      aspirateYOffset: 0,
-      dispenseYOffset: 0,
+      xOffset: 0,
+      yOffset: 0,
     })
   })
 
