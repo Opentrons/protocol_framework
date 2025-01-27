@@ -290,7 +290,9 @@ class HardwareTipHandler(TipHandler):
         else:
             kwargs = {}
 
-        await self._hardware_api.tip_drop_moves(mount=hw_mount, ignore_plunger=ignore_plunger, **kwargs)
+        await self._hardware_api.tip_drop_moves(
+            mount=hw_mount, ignore_plunger=ignore_plunger, **kwargs
+        )
 
         if do_not_ignore_tip_presence:
             # Allow TipNotAttachedError to propagate.

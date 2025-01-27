@@ -2325,11 +2325,16 @@ class OT3API(
         instrument.working_volume = tip_volume
 
     async def tip_drop_moves(
-        self, mount: Union[top_types.Mount, OT3Mount], home_after: bool = False, ignore_plunger: Optional[bool] = False
+        self,
+        mount: Union[top_types.Mount, OT3Mount],
+        home_after: bool = False,
+        ignore_plunger: Optional[bool] = False,
     ) -> None:
         realmount = OT3Mount.from_mount(mount)
         if ignore_plunger is False:
-            await self._move_to_plunger_bottom(realmount, rate=1.0, check_current_vol=False)
+            await self._move_to_plunger_bottom(
+                realmount, rate=1.0, check_current_vol=False
+            )
 
         if self.gantry_load == GantryLoad.HIGH_THROUGHPUT:
             spec = self._pipette_handler.plan_ht_drop_tip()

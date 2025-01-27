@@ -49,7 +49,7 @@ class EvotipUnsealPipetteParams(PipetteIdMixin):
     homeAfter: Optional[bool] = Field(
         None,
         description=(
-            "Whether to home this pipette's plunger after dropping the tip."
+            "Whether to home this pipette after dropping the tip."
             " You should normally leave this unspecified to let the robot choose"
             " a safe default depending on its hardware."
         ),
@@ -120,14 +120,14 @@ class EvotipUnsealPipetteImplementation(
         )
         if isinstance(move_result, DefinedErrorData):
             return move_result
-        
+
         # Move to an appropriate position
         mount = self._state_view.pipettes.get_mount(pipette_id)
-        
+
         mount_axis = MotorAxis.LEFT_Z if mount == MountType.LEFT else MotorAxis.RIGHT_Z
         await self._gantry_mover.move_axes(
-                axis_map={mount_axis: -14}, speed=10, relative_move=True
-            )
+            axis_map={mount_axis: -14}, speed=10, relative_move=True
+        )
 
         await self._tip_handler.drop_tip(
             pipette_id=pipette_id,

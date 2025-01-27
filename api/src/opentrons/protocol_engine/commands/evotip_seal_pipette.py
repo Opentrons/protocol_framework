@@ -33,7 +33,13 @@ from ..state.update_types import StateUpdate
 
 if TYPE_CHECKING:
     from ..state.state import StateView
-    from ..execution import MovementHandler, TipHandler, GantryMover, PipettingHandler, Had
+    from ..execution import (
+        MovementHandler,
+        TipHandler,
+        GantryMover,
+        PipettingHandler,
+        Had,
+    )
     from ..notes import CommandNoteAdder
 
 
@@ -144,7 +150,10 @@ class EvotipSealPipetteImplementation(
 
             # Drive mount down for press-fit
             await self._gantry_mover.move_axes(
-                axis_map={mount_axis: press_distance}, speed=10.0, relative_move=True, _expect_stalls=True
+                axis_map={mount_axis: press_distance},
+                speed=10.0,
+                relative_move=True,
+                _expect_stalls=True,
             )
             # retract cam : 11.05
             await self._gantry_mover.move_axes(
@@ -175,7 +184,9 @@ class EvotipSealPipetteImplementation(
             )
 
             # Lower tip presence
-            await self._gantry_mover.move_axes(axis_map={mount_axis: 2}, speed=10, relative_move=True)
+            await self._gantry_mover.move_axes(
+                axis_map={mount_axis: 2}, speed=10, relative_move=True
+            )
             await self._gantry_mover.move_axes(
                 axis_map={MotorAxis.AXIS_96_CHANNEL_CAM: ejector_push_mm},
                 speed=5.5,
@@ -190,7 +201,9 @@ class EvotipSealPipetteImplementation(
         # cache_tip
         if self._state_view.config.use_virtual_pipettes is False:
             self._tip_handler.cache_tip(pipette_id, tip_geometry)
-            self._hardware_api.hardware_instruments[mount.to_hw_mount()].set_current_volume(current_volume)
+            self._hardware_api.hardware_instruments[
+                mount.to_hw_mount()
+            ].set_current_volume(current_volume)
 
     async def execute(
         self, params: EvotipSealPipetteParams
@@ -226,9 +239,9 @@ class EvotipSealPipetteImplementation(
         )
         maximum_volume = self._state_view.pipettes.get_maximum_volume(pipette_id)
         if self._state_view.pipettes.get_mount(pipette_id) == MountType.LEFT:
-            self._hardware_api.home(axes = [Axis.P_L])
+            self._hardware_api.home(axes=[Axis.P_L])
         else:
-            self._hardware_api.home(axes = [Axis.P_R])
+            self._hardware_api.home(axes=[Axis.P_R])
 
         # Begin relative pickup steps for the resin tips
 
@@ -267,9 +280,11 @@ class EvotipSealPipetteImplementation(
             pipette_id=pipette_id,
             tip_geometry=tip_geometry,
         )
-        
-        
-        state_update.set_fluid_aspirated(pipette_id=pipette_id, fluid=AspiratedFluid(kind=FluidKind.LIQUID, volume=maximum_volume))
+
+        state_update.set_fluid_aspirated(
+            pipette_id=pipette_id,
+            fluid=AspiratedFluid(kind=FluidKind.LIQUID, volume=maximum_volume),
+        )
         return SuccessData(
             public=EvotipSealPipetteResult(
                 tipVolume=tip_geometry.volume,

@@ -325,7 +325,7 @@ def unseal(
     }
 
 
-def pressurize(
+def resin_tip_dispense(
     instrument: InstrumentContext,
     volume: float,
     flow_rate: float,

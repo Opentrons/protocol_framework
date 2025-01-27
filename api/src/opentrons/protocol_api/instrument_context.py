@@ -1714,7 +1714,7 @@ class InstrumentContext(publisher.CommandPublisher):
         return self
 
     @requires_version(2, 22)
-    def seal(
+    def resin_tip_seal(
         self,
         location: Union[labware.Well, labware.Labware],
     ) -> InstrumentContext:
@@ -1724,7 +1724,7 @@ class InstrumentContext(publisher.CommandPublisher):
         tip will perform a `pick up` action but there will be no tip tracking
         associated with the pipette.
 
-        See :ref:`seal` for examples.
+        See :ref:`resin_tip_seal` for examples.
 
         :param location: A location containing resin tips, must be a Labware or a Well.
 
@@ -1748,7 +1748,7 @@ class InstrumentContext(publisher.CommandPublisher):
         return self
 
     @requires_version(2, 22)
-    def unseal(
+    def resin_tip_unseal(
         self,
         location: Union[labware.Well, labware.Labware],
         home_after: Optional[bool] = None,
@@ -1757,11 +1757,20 @@ class InstrumentContext(publisher.CommandPublisher):
 
         The location provided should be a valid location to drop resin tips.
 
-        See :ref:`unseal` for examples.
+        See :ref:`resin_tip_unseal` for examples.
 
         :param location: A location containing that can accept tips.
 
         :type location: :py:class:`~.types.Location`
+
+        :param home_after:
+            Whether to home the pipette after dropping the tip. If not specified
+            defaults to ``True`` on a Flex. The plunger will not home on an unseal.
+
+            When ``False``, the pipette does not home its plunger. This can save a few
+            seconds, but is not recommended. Homing helps the robot track the pipette's
+            position.
+
         """
         if isinstance(location, labware.Labware):
             well = location.wells()[0]
@@ -1782,24 +1791,39 @@ class InstrumentContext(publisher.CommandPublisher):
         return self
 
     @requires_version(2, 22)
-    def evotip_dispense(
+    def resin_tip_dispense(
         self,
         location: types.Location,
         volume: float,
-        flow_rate: float,
+        rate: float,
         push_out: Optional[float] = None,
     ) -> InstrumentContext:
-        """Seal resin tips onto the pipette.
+        """Dispense a volume from resin tips into a labware.
 
-        The location provided should contain resin tips. Sealing the
-        tip will perform a `pick up` action but there will be no tip tracking
-        associated with the pipette.
+        The location provided should contain resin tips labware as well as a
+        receptical for dispensed liquid. Dispensing from tip will perform a
+        `dispense` action of the specified volume at a desired flow rate.
 
-        See :ref:`seal` for examples.
+        See :ref:`resin_tip_dispense` for examples.
 
         :param location: A location containing resin tips.
-
         :type location: :py:class:`~.types.Location`
+
+        :param volume: The volume, in µL, that the pipette will prepare to handle.
+        :type volume: float
+
+        :param rate: How quickly a pipette dispenses liquid. The speed in µL/s is
+                     calculated as ``rate`` multiplied by :py:attr:`flow_rate.dispense
+                     <flow_rate>`. If not specified, defaults to 1.0. See
+                     :ref:`new-plunger-flow-rates`.
+        :type rate: float
+
+        :param push_out: Continue past the plunger bottom to help ensure all liquid
+                         leaves the tip. Measured in µL. The default value is ``None``.
+
+                         See :ref:`push-out-dispense` for details.
+        :type push_out: float
+
         """
         well: Optional[labware.Well] = None
         last_location = self._get_last_location_by_api_version()
@@ -1827,21 +1851,23 @@ class InstrumentContext(publisher.CommandPublisher):
                     z=self._well_bottom_clearances.dispense
                 )
         else:
-            raise RuntimeError("A well must be specified when using `evotip_dispense`.")
+            raise RuntimeError(
+                "A well must be specified when using `resin_tip_dispense`."
+            )
 
         with publisher.publish_context(
             broker=self.broker,
-            command=cmds.pressurize(
+            command=cmds.resin_tip_dispense(
                 instrument=self,
                 volume=volume,
-                flow_rate=flow_rate,
+                flow_rate=rate,
             ),
         ):
             self._core.evotip_dispense(
                 move_to_location,
                 well_core=well._core,
                 volume=volume,
-                flow_rate=flow_rate,
+                flow_rate=rate,
                 push_out=push_out,
             )
         return self
