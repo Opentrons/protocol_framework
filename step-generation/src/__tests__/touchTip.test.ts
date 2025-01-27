@@ -12,6 +12,11 @@ import {
 } from '../fixtures'
 import type { InvariantContext, RobotState } from '../types'
 
+const wellLocation: any = {
+  origin: 'bottom',
+  offset: { z: 10 },
+}
+
 describe('touchTip', () => {
   let invariantContext: InvariantContext
   let initialRobotState: RobotState
@@ -26,10 +31,10 @@ describe('touchTip', () => {
   it('touchTip with tip, specifying offsetFromBottomMm', () => {
     const result = touchTip(
       {
-        pipette: DEFAULT_PIPETTE,
-        labware: SOURCE_LABWARE,
-        well: 'A1',
-        offsetFromBottomMm: 10,
+        pipetteId: DEFAULT_PIPETTE,
+        labwareId: SOURCE_LABWARE,
+        wellName: 'A1',
+        wellLocation,
       },
       invariantContext,
       robotStateWithTip
@@ -58,10 +63,10 @@ describe('touchTip', () => {
   it('touchTip with invalid pipette ID should throw error', () => {
     const result = touchTip(
       {
-        pipette: 'badPipette',
-        labware: SOURCE_LABWARE,
-        well: 'A1',
-        offsetFromBottomMm: 10,
+        pipetteId: 'badPipette',
+        labwareId: SOURCE_LABWARE,
+        wellName: 'A1',
+        wellLocation,
       },
       invariantContext,
       robotStateWithTip
@@ -74,10 +79,10 @@ describe('touchTip', () => {
   it('touchTip with no tip should throw error', () => {
     const result = touchTip(
       {
-        pipette: DEFAULT_PIPETTE,
-        labware: SOURCE_LABWARE,
-        well: 'A1',
-        offsetFromBottomMm: 10,
+        pipetteId: DEFAULT_PIPETTE,
+        labwareId: SOURCE_LABWARE,
+        wellName: 'A1',
+        wellLocation,
       },
       invariantContext,
       initialRobotState

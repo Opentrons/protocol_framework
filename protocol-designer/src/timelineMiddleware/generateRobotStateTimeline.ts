@@ -8,6 +8,7 @@ import {
   reduceCommandCreators,
   commandCreatorsTimeline,
   getPipetteIdFromCCArgs,
+  ZERO_OFFSET,
 } from '@opentrons/step-generation'
 import { commandCreatorFromStepArgs } from '../file-data/helpers'
 import type { StepArgsAndErrorsById } from '../steplist/types'
@@ -95,6 +96,7 @@ export const generateRobotStateTimeline = (
             curryCommandCreator(moveToAddressableArea, {
               pipetteId,
               addressableAreaName,
+              offset: ZERO_OFFSET,
             }),
             curryCommandCreator(dropTipInPlace, {
               pipetteId,

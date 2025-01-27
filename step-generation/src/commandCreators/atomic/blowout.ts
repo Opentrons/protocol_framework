@@ -193,12 +193,7 @@ export const blowout: CommandCreator<BlowoutParams> = (
         labwareId,
         wellName,
         flowRate,
-        wellLocation: {
-          origin: 'top',
-          offset: {
-            z: wellLocation?.offset?.z,
-          },
-        },
+        wellLocation,
       },
     },
   ]

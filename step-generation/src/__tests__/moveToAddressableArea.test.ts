@@ -20,7 +20,11 @@ describe('moveToAddressableArea', () => {
     const robotInitialState = getRobotInitialState()
     const mockName = '1ChannelWasteChute'
     const result = moveToAddressableArea(
-      { pipetteId: mockId, addressableAreaName: mockName },
+      {
+        pipetteId: mockId,
+        addressableAreaName: mockName,
+        offset: { x: 0, y: 0, z: 0 },
+      },
       invariantContext,
       robotInitialState
     )
