@@ -144,7 +144,7 @@ export const aspirate: CommandCreator<ExtendedAspirateParams> = (
     absorbanceReaderCollision(
       prevRobotState.modules,
       prevRobotState.labware,
-      labware
+      labwareId
     )
   ) {
     errors.push(errorCreators.absorbanceReaderLidClosed())

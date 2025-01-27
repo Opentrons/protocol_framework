@@ -207,9 +207,9 @@ describe('moveToWell', () => {
     )
     const result = moveToWell(
       {
-        pipette: DEFAULT_PIPETTE,
-        labware: SOURCE_LABWARE,
-        well: 'A1',
+        pipetteId: DEFAULT_PIPETTE,
+        labwareId: SOURCE_LABWARE,
+        wellName: 'A1',
       },
       invariantContext,
       robotStateWithTip

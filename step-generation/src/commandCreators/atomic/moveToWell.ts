@@ -114,7 +114,7 @@ export const moveToWell: CommandCreator<MoveToWellParams> = (
     absorbanceReaderCollision(
       prevRobotState.modules,
       prevRobotState.labware,
-      labware
+      labwareId
     )
   ) {
     errors.push(errorCreators.absorbanceReaderLidClosed())

@@ -143,7 +143,7 @@ export const dispense: CommandCreator<DispenseAtomicCommandParams> = (
     absorbanceReaderCollision(
       prevRobotState.modules,
       prevRobotState.labware,
-      labware
+      labwareId
     )
   ) {
     errors.push(errorCreators.absorbanceReaderLidClosed())
