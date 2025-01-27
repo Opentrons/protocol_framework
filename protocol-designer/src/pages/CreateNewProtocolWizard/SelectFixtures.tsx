@@ -70,6 +70,15 @@ export function SelectFixtures(props: WizardTileProps): JSX.Element | null {
         subHeader={t('fixtures_replace')}
         disabled={!hasTrash}
         goBack={() => {
+          // Note this is avoid the following case issue.
+          // https://github.com/Opentrons/opentrons/pull/17344#pullrequestreview-2576591908
+          setValue(
+            'additionalEquipment',
+            additionalEquipment.filter(
+              ae => ae === 'gripper' || ae === 'trashBin'
+            )
+          )
+
           goBack(1)
         }}
         proceed={handleProceed}
