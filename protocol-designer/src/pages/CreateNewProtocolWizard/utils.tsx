@@ -30,10 +30,10 @@ import type {
 import type { DropdownOption } from '@opentrons/components'
 import type { AdditionalEquipment, WizardFormState } from './types'
 
-const TOTAL_OUTER_SLOTS = 8
-const MIDDLE_SLOT_NUM = 4
-const SLOTS_IN_COL_THREE = 4
-const MAX_MAGNETIC_BLOCK_SLOTS = 12
+const NUM_SLOTS_OUTER = 8
+const NUM_SLOTS_MIDDLE = 4
+const NUM_SLOTS_COLUMN3 = 4
+const NUM_SLOTS_MAGNETIC_BLOCK = 12
 
 export const getNumOptions = (length: number): DropdownOption[] => {
   return Array.from({ length }, (_, i) => ({
@@ -67,12 +67,12 @@ export const getNumSlotsAvailable = (
   const magneticBlockCount = magneticBlocks.length
   const moduleCount = modules != null ? Object.keys(modules).length : 0
   let filteredModuleLength = moduleCount
-  if (magneticBlockCount <= MIDDLE_SLOT_NUM) {
+  if (magneticBlockCount <= NUM_SLOTS_MIDDLE) {
     // Subtract magnetic blocks directly if their count is ≤ 4
     filteredModuleLength -= magneticBlockCount
   } else {
     // Subtract the excess magnetic blocks beyond 4
-    const extraMagneticBlocks = magneticBlockCount - MIDDLE_SLOT_NUM
+    const extraMagneticBlocks = magneticBlockCount - NUM_SLOTS_MIDDLE
     filteredModuleLength -= extraMagneticBlocks
   }
   if (hasTC) {
@@ -109,42 +109,28 @@ export const getNumSlotsAvailable = (
     case HEATERSHAKER_MODULE_V1:
     case TEMPERATURE_MODULE_V2: {
       return (
-        TOTAL_OUTER_SLOTS -
+        NUM_SLOTS_OUTER -
         (filteredModuleLength + filteredAdditionalEquipmentLength)
       )
     }
 
     case 'stagingArea': {
-      const modulesWithSlot3 =
+      const modulesWithColumn3 =
         modules !== null
           ? Object.values(modules).filter(module => module.slot?.includes('3'))
               .length
           : 0
-      const fixtureSlotsWithSlot3 =
+      const fixtureSlotsWithColumn3 =
         additionalEquipment !== null
           ? additionalEquipment.filter(slot => slot.includes('3')).length
           : 0
-      return SLOTS_IN_COL_THREE - modulesWithSlot3 - fixtureSlotsWithSlot3
+      return NUM_SLOTS_COLUMN3 - modulesWithColumn3 - fixtureSlotsWithColumn3
     }
-
-    // case 'stagingArea': {
-    //   const lengthMinusMagneticBlock =
-    //     moduleCount + (hasTC ? 1 : 0) - magneticBlockCount
-    //   let adjustedModuleLength = 0
-    //   if (lengthMinusMagneticBlock > TOTAL_LEFT_SLOTS) {
-    //     adjustedModuleLength = lengthMinusMagneticBlock - TOTAL_LEFT_SLOTS
-    //   }
-
-    //   const occupiedSlots =
-    //     adjustedModuleLength + filteredAdditionalEquipmentLength
-
-    //   return TOTAL_LEFT_SLOTS - occupiedSlots
-    // }
 
     case 'wasteChute': {
       const adjustmentForStagingArea = numStagingAreas >= 1 ? 1 : 0
       return (
-        TOTAL_OUTER_SLOTS -
+        NUM_SLOTS_OUTER -
         (filteredModuleLength +
           filteredAdditionalEquipmentLength -
           adjustmentForStagingArea)
@@ -156,7 +142,7 @@ export const getNumSlotsAvailable = (
         ae => ae !== 'gripper' && ae !== 'stagingArea'
       )?.length
       return (
-        MAX_MAGNETIC_BLOCK_SLOTS -
+        NUM_SLOTS_MAGNETIC_BLOCK -
         (filteredModuleLength +
           filteredAdditionalEquipmentForMagneticBlockLength)
       )

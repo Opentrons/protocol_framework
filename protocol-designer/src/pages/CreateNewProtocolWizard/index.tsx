@@ -286,11 +286,11 @@ export function CreateNewProtocolWizard(): JSX.Element | null {
     )
 
     if (stagingAreas.length > 0) {
+      // Note: when plate reader is present, cutoutB3 is not available for StagingArea
+      const hasPlateReader = modules.some(
+        module => module.model === ABSORBANCE_READER_MODELS[0]
+      )
       stagingAreas.forEach((_, index) => {
-        // Note: when plate reader is present, cutoutB3 is not available for StagingArea
-        const hasPlateReader = modules.some(
-          module => module.model === ABSORBANCE_READER_MODELS[0]
-        )
         const stagingAreaCutout = hasPlateReader
           ? STAGING_AREA_CUTOUTS_ORDERED.filter(
               cutout => cutout !== 'cutoutB3'
