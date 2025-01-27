@@ -615,7 +615,7 @@ def run(protocol: protocol_api.ProtocolContext):
             protocol.move_labware(labware=tiprack_200_1,new_location=protocol_api.OFF_DECK,use_gripper=False)
         protocol.comment('MOVING: tiprack_200_2 = A4 --> tiprack_A3_adapter')
         tiprack_200_2 = stacker_200_1.retrieve()
-        protocol.move_lid(tiprack_200_2, use_gripper = True)
+        protocol.move_lid(tiprack_200_2,TRASH, use_gripper = True)
         protocol.move_labware(labware=tiprack_200_2,new_location=tiprack_A3_adapter,use_gripper=USE_GRIPPER,pick_up_offset=deck_pick_up_offset,drop_offset=deck_drop_offset)
         #============================================================================================
         
@@ -653,7 +653,7 @@ def run(protocol: protocol_api.ProtocolContext):
             protocol.move_labware(labware=tiprack_200_2,new_location=protocol_api.OFF_DECK,use_gripper=False)
         protocol.comment('MOVING: tiprack_200_X = B4 --> SCP_Position')
         tiprack_200_X = stacker_200_2.retrieve()
-        protocol.move_lid(tiprack_200_X, use_gripper = True)
+        protocol.move_lid(tiprack_200_X, TRASH,use_gripper = True)
         protocol.move_labware(labware=tiprack_200_X,new_location=SCP_Position,use_gripper=USE_GRIPPER,pick_up_offset=deck_pick_up_offset,drop_offset=deck_drop_offset)
         #============================================================================================
 
