@@ -1198,7 +1198,10 @@ class ModuleView:
                     else:
                         return m
 
-        raise errors.ModuleNotAttachedError(f"No available {model.value} found.")
+        raise errors.ModuleNotAttachedError(
+            f"No available {model.value} with {expected_serial_number or 'any'}"
+            " serial found."
+        )
 
     def get_heater_shaker_movement_restrictors(
         self,
