@@ -429,7 +429,6 @@ def run(protocol: ProtocolContext) -> None:
 
         # ============================================================
         # GRIPPER MOVE tiprack_50_1 FROM: tiprack_A2_adapter --> TRASH
-        print("threw out labware")
         protocol.move_labware(
             labware=tiprack_50_1,
             new_location=TRASH,
@@ -854,7 +853,7 @@ def run(protocol: ProtocolContext) -> None:
         #####################################################################
         protocol.comment("MOVING: Plate Lid #3= lids[2] --> sample_plate_1")
         protocol.move_lid(
-            source_location=lids, new_location=sample_plate_1, use_gripper=True
+            source_location=lids, new_location=sample_plate_2, use_gripper=True
         )
 
         if ONDECK_THERMO:
@@ -891,7 +890,7 @@ def run(protocol: ProtocolContext) -> None:
                 )
         protocol.comment("MOVING: Plate Lid #3 = sample_plate_1 --> TRASH")
         protocol.move_lid(
-            source_location=sample_plate_1, new_location=TRASH, use_gripper=True
+            source_location=sample_plate_2, new_location=TRASH, use_gripper=True
         )
 
     if STEP_CLEANUP_2:
