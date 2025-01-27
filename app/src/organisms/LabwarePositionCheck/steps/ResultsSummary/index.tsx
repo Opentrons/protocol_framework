@@ -28,20 +28,15 @@ import { SmallButton } from '/app/atoms/buttons'
 import { LabwareOffsetTabs } from '/app/organisms/LabwareOffsetTabs'
 import { TableComponent } from './TableComponent'
 
-import type {
-  LPCStepProps,
-  ResultsSummaryStep,
-} from '/app/organisms/LabwarePositionCheck/types'
 import type { State } from '/app/redux/types'
 import type { LPCWizardState } from '/app/redux/protocol-runs'
+import type { LPCWizardContentProps } from '/app/organisms/LabwarePositionCheck/types'
 
 // TODO(jh, 01-08-25): This support link will likely need updating as a part of RPRD-173, too.
 const LPC_HELP_LINK_URL =
   'https://support.opentrons.com/s/article/How-Labware-Offsets-work-on-the-OT-2'
 
-export function ResultsSummary(
-  props: LPCStepProps<ResultsSummaryStep>
-): JSX.Element {
+export function ResultsSummary(props: LPCWizardContentProps): JSX.Element {
   const { commandUtils, runId } = props
   const isOnDevice = useSelector(getIsOnDevice)
   const { protocolData } = useSelector(

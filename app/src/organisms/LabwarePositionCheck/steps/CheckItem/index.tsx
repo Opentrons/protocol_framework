@@ -8,7 +8,6 @@ import {
   getLabwareDisplayLocation,
 } from '@opentrons/components'
 
-import { NAV_STEPS } from '/app/organisms/LabwarePositionCheck/constants'
 import { FLEX_ROBOT_TYPE } from '@opentrons/shared-data'
 import { UnorderedList } from '/app/molecules/UnorderedList'
 import {
@@ -26,18 +25,12 @@ import {
 import { getIsOnDevice } from '/app/redux/config'
 
 import type { DisplayLocationParams } from '@opentrons/components'
-import type {
-  CheckPositionsStep,
-  LPCStepProps,
-} from '/app/organisms/LabwarePositionCheck/types'
 import type { State } from '/app/redux/types'
 import type { LPCWizardState } from '/app/redux/protocol-runs'
+import type { LPCWizardContentProps } from '/app/organisms/LabwarePositionCheck/types'
 
-export function CheckItem(
-  props: LPCStepProps<CheckPositionsStep>
-): JSX.Element {
-  const { runId, proceed, commandUtils, step } = props
-  const { labwareId, location } = step
+export function CheckItem(props: LPCWizardContentProps): JSX.Element {
+  const { runId, proceed, commandUtils } = props
   const {
     handleJog,
     handleCheckItemsPrepModules,
@@ -56,15 +49,9 @@ export function CheckItem(
   const { t } = useTranslation(['labware_position_check', 'shared'])
   const { t: commandTextT } = useTranslation('protocol_command_text')
 
-  const pipette = useSelector(
-    (state: State) => selectActivePipette(step, runId, state) ?? null
-  )
-  const initialPosition = useSelector((state: State) =>
-    selectActiveLwInitialPosition(step, runId, state)
-  )
-  const isLwTiprack = useSelector((state: State) =>
-    selectIsActiveLwTipRack(runId, state)
-  )
+  const pipette = useSelector(selectActivePipette(runId))
+  const initialPosition = useSelector(selectActiveLwInitialPosition(runId))
+  const isLwTiprack = useSelector(selectIsActiveLwTipRack(runId))
 
   const buildDisplayParams = (): Omit<
     DisplayLocationParams,
@@ -122,7 +109,7 @@ export function CheckItem(
         )
       })
       .then(() => {
-        if (steps.next?.section === NAV_STEPS.CHECK_POSITIONS) {
+        if (steps.next?.section === STEP.CHECK_POSITIONS) {
           return handleCheckItemsPrepModules(steps.next)
         } else {
           return handleValidMoveToMaintenancePosition(pipette, steps.next)

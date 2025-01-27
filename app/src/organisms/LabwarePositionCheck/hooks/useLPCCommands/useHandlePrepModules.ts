@@ -1,7 +1,7 @@
 import { useSelector } from 'react-redux'
 
 import { modulePrepCommands } from './commands'
-import { NAV_STEPS } from '/app/organisms/LabwarePositionCheck/constants'
+import { STEP } from '/app/organisms/LabwarePositionCheck/constants'
 import { selectActiveLwInitialPosition } from '/app/redux/protocol-runs'
 
 import type { CreateCommand } from '@opentrons/shared-data'
@@ -31,7 +31,7 @@ export function useHandlePrepModules({
   ): Promise<CommandData[]> => {
     const initialPosition = selectInitialPositionFrom(step)
 
-    if (step?.section === NAV_STEPS.CHECK_POSITIONS) {
+    if (step?.section === STEP.CHECK_POSITIONS) {
       const prepCommands: CreateCommand[] = modulePrepCommands({
         step,
       })
@@ -39,7 +39,7 @@ export function useHandlePrepModules({
       if (
         initialPosition == null &&
         // Only run these commands during the appropriate step.
-        step.section === NAV_STEPS.CHECK_POSITIONS &&
+        step.section === STEP.CHECK_POSITIONS &&
         prepCommands.length > 0
       ) {
         return chainLPCCommands(prepCommands, false)

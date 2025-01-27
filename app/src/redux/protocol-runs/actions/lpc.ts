@@ -4,6 +4,9 @@ import {
   SET_FINAL_POSITION,
   START_LPC,
   FINISH_LPC,
+  GO_BACK_STEP,
+  SET_SELECTED_LABWARE,
+  CLEAR_SELECTED_LABWARE,
 } from '../constants'
 
 import type {
@@ -14,12 +17,42 @@ import type {
   PositionParams,
   ProceedStepAction,
   FinishLPCAction,
+  GoBackStepAction,
+  LPCLabwareLocationDetails,
+  SelectedLabwareAction,
+  ClearSelectedLabwareAction,
 } from '../types'
 
 export const proceedStep = (runId: string): ProceedStepAction => ({
   type: PROCEED_STEP,
   payload: { runId },
 })
+
+export const goBackStep = (runId: string): GoBackStepAction => ({
+  type: GO_BACK_STEP,
+  payload: { runId },
+})
+
+export const setSelectedLabware = (
+  runId: string,
+  labwareUri: string,
+  location: LPCLabwareLocationDetails
+): SelectedLabwareAction => ({
+  type: SET_SELECTED_LABWARE,
+  payload: {
+    runId,
+    labwareUri,
+    location,
+  },
+})
+
+export const clearSelectedLabware = (
+  runId: string
+): ClearSelectedLabwareAction => ({
+  type: CLEAR_SELECTED_LABWARE,
+  payload: { runId },
+})
+
 export const setInitialPosition = (
   runId: string,
   params: PositionParams

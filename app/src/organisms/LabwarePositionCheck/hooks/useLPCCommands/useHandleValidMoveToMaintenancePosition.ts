@@ -1,5 +1,5 @@
 import { moveToMaintenancePosition } from '/app/organisms/LabwarePositionCheck/hooks/useLPCCommands/commands'
-import { NAV_STEPS } from '/app/organisms/LabwarePositionCheck/constants'
+import { STEP } from '/app/organisms/LabwarePositionCheck/constants'
 
 import type { CommandData } from '@opentrons/api-client'
 import type { LoadedPipette } from '@opentrons/shared-data'
@@ -23,8 +23,8 @@ export function useHandleValidMoveToMaintenancePosition({
       step: LabwarePositionCheckStep | null
     ): Promise<CommandData[]> => {
       if (
-        step?.section === NAV_STEPS.ATTACH_PROBE ||
-        step?.section === NAV_STEPS.DETACH_PROBE
+        step?.section === STEP.ATTACH_PROBE ||
+        step?.section === STEP.DETACH_PROBE
       ) {
         return chainLPCCommands(moveToMaintenancePosition(pipette), false)
       } else {
