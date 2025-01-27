@@ -48,6 +48,7 @@ if TYPE_CHECKING:
     from opentrons.protocol_api._liquid import LiquidClass
 
 _DISPENSE_VOLUME_VALIDATION_ADDED_IN = APIVersion(2, 17)
+_RESIN_TIP_DEFAULT_FLOW_RATE = 10.0
 
 
 class InstrumentCore(AbstractInstrument[WellCore]):
@@ -745,22 +746,28 @@ class InstrumentCore(AbstractInstrument[WellCore]):
         self,
         location: Location,
         well_core: WellCore,
-        volume: float,
-        flow_rate: float,
-        push_out: Optional[float],
+        volume: Optional[float] = None,
+        flow_rate: Optional[float] = None,
+        push_out: Optional[float] = None,
     ) -> None:
         """
         Args:
             volume: The volume of liquid to dispense, in microliters.
             location: The exact location to dispense to.
             well_core: The well to dispense to, if applicable.
-            flow_rate: The flow rate in µL/s to dispense at.
+            flow_rate: The flow rate in µL/s to dispense at. Defaults to 10.0.
             push_out: The amount to push the plunger below bottom position.
         """
         if isinstance(location, (TrashBin, WasteChute)):
             raise ValueError("Trash Bin and Waste Chute have no Wells.")
         well_name = well_core.get_name()
         labware_id = well_core.labware_id
+        if volume is None:
+            volume = self._engine_client.state.pipettes.get_maximum_volume(
+                self._pipette_id
+            )
+        if flow_rate is None:
+            flow_rate = _RESIN_TIP_DEFAULT_FLOW_RATE
 
         well_location = self._engine_client.state.geometry.get_relative_liquid_handling_well_location(
             labware_id=labware_id,

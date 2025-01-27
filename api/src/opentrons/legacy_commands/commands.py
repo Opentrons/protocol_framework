@@ -327,10 +327,9 @@ def unseal(
 
 def resin_tip_dispense(
     instrument: InstrumentContext,
-    volume: float,
     flow_rate: float,
 ) -> command_types.PressurizeCommand:
-    text = f"Pressurize pipette for {volume}uL at {flow_rate}uL/s."
+    text = f"Pressurize pipette to dispense from resin tip at {flow_rate}uL/s."
     return {
         "name": command_types.PRESSURIZE,
         "payload": {"instrument": instrument, "text": text},

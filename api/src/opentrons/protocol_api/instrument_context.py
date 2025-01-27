@@ -1794,8 +1794,8 @@ class InstrumentContext(publisher.CommandPublisher):
     def resin_tip_dispense(
         self,
         location: types.Location,
-        volume: float,
-        rate: float,
+        volume: Optional[float] = None,
+        rate: Optional[float] = None,
         push_out: Optional[float] = None,
     ) -> InstrumentContext:
         """Dispense a volume from resin tips into a labware.
@@ -1809,13 +1809,13 @@ class InstrumentContext(publisher.CommandPublisher):
         :param location: A location containing resin tips.
         :type location: :py:class:`~.types.Location`
 
-        :param volume: The volume, in µL, that the pipette will prepare to handle.
+        :param volume: Will default to maximum, recommended to use the default.
+                       The volume, in µL, that the pipette will prepare to handle.
         :type volume: float
 
-        :param rate: How quickly a pipette dispenses liquid. The speed in µL/s is
-                     calculated as ``rate`` multiplied by :py:attr:`flow_rate.dispense
-                     <flow_rate>`. If not specified, defaults to 1.0. See
-                     :ref:`new-plunger-flow-rates`.
+        :param rate: Will default to 10.0, recommended to use the default. How quickly
+                     a pipette dispenses liquid. The speed in µL/s is calculated as
+                     ``rate`` multiplied by :py:attr:`flow_rate.dispense<flow_rate>`.
         :type rate: float
 
         :param push_out: Continue past the plunger bottom to help ensure all liquid
@@ -1859,7 +1859,6 @@ class InstrumentContext(publisher.CommandPublisher):
             broker=self.broker,
             command=cmds.resin_tip_dispense(
                 instrument=self,
-                volume=volume,
                 flow_rate=rate,
             ),
         ):

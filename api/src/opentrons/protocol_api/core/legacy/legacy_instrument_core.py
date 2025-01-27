@@ -419,9 +419,9 @@ class LegacyInstrumentCore(AbstractInstrument[LegacyWellCore]):
         self,
         location: types.Location,
         well_core: WellCore,
-        volume: float,
-        flow_rate: float,
-        push_out: Optional[float],
+        volume: Optional[float] = None,
+        flow_rate: Optional[float] = None,
+        push_out: Optional[float] = None,
     ) -> None:
         """This will never be called because it was added in API 2.22."""
         assert False, "evotip_dispense only supported in API 2.22 & later"
