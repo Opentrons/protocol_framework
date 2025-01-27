@@ -1799,7 +1799,7 @@ def test_transfer_liquid_raises_for_non_liquid_handling_locations(
     robot_type: RobotType,
     minimal_liquid_class_def2: LiquidClassSchemaV1,
 ) -> None:
-    """It should raise errors if source and destination are not of same length."""
+    """It should raise errors if source or dest are invalid for liquid handling."""
     test_liq_class = LiquidClass.create(minimal_liquid_class_def2)
     mock_well = decoy.mock(cls=Well)
     decoy.when(mock_protocol_core.robot_type).then_return(robot_type)
@@ -1894,7 +1894,7 @@ def test_transfer_liquid_raises_if_tip_has_liquid(
     robot_type: RobotType,
     minimal_liquid_class_def2: LiquidClassSchemaV1,
 ) -> None:
-    """It should raise errors if there is no tip attached."""
+    """It should raise errors if tip has liquid before starting transfer."""
     test_liq_class = LiquidClass.create(minimal_liquid_class_def2)
     mock_well = decoy.mock(cls=Well)
     tip_racks = [decoy.mock(cls=Labware)]
@@ -1991,9 +1991,6 @@ def test_transfer_liquid_delegates_to_engine_core(
     )
 
 
-##############
-
-
 @pytest.mark.parametrize("robot_type", ["OT-2 Standard", "OT-3 Standard"])
 def test_distribute_liquid_raises_for_invalid_locations(
     decoy: Decoy,
@@ -2060,7 +2057,7 @@ def test_distribute_liquid_raises_for_non_liquid_handling_locations(
     robot_type: RobotType,
     minimal_liquid_class_def2: LiquidClassSchemaV1,
 ) -> None:
-    """It should raise errors if source and destination are not of same length."""
+    """It should raise errors if source or dest are invalid for liquid handling."""
     test_liq_class = LiquidClass.create(minimal_liquid_class_def2)
     mock_well = decoy.mock(cls=Well)
     decoy.when(mock_protocol_core.robot_type).then_return(robot_type)
@@ -2155,7 +2152,7 @@ def test_distribute_liquid_raises_if_tip_has_liquid(
     robot_type: RobotType,
     minimal_liquid_class_def2: LiquidClassSchemaV1,
 ) -> None:
-    """It should raise errors if there is no tip attached."""
+    """It should raise errors if the tip has liquid at the start of distribution."""
     test_liq_class = LiquidClass.create(minimal_liquid_class_def2)
     mock_well = decoy.mock(cls=Well)
     tip_racks = [decoy.mock(cls=Labware)]
