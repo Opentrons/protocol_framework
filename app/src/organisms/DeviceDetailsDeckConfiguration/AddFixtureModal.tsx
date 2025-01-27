@@ -47,6 +47,8 @@ import {
   TRASH_BIN_ADAPTER_FIXTURE,
   WASTE_CHUTE_CUTOUT,
   WASTE_CHUTE_FIXTURES,
+  FLEX_STACKER_MODULE_V1,
+  FLEX_STACKER_V1_FIXTURE,
 } from '@opentrons/shared-data'
 
 import { ODD_FOCUS_VISIBLE } from '/app/atoms/buttons/constants'
@@ -248,6 +250,21 @@ export function AddFixtureModal({
           ...unconfiguredAbsorbanceReaders,
         ]
       }
+    }
+    if (
+      STAGING_AREA_CUTOUTS.includes(cutoutId) &&
+      unconfiguredMods.some(m => m.moduleModel === FLEX_STACKER_MODULE_V1)
+    ) {
+      const unconfiguredFlexStackers = unconfiguredMods
+        .filter(mod => mod.moduleModel === FLEX_STACKER_MODULE_V1)
+        .map(mod => [
+          {
+            cutoutId,
+            cutoutFixtureId: FLEX_STACKER_V1_FIXTURE,
+            opentronsModuleSerialNumber: mod.serialNumber,
+          },
+        ])
+      availableOptions = [...availableOptions, ...unconfiguredFlexStackers]
     }
   } else if (optionStage === 'wasteChuteOptions') {
     availableOptions = WASTE_CHUTE_FIXTURES.map(fixture => [
