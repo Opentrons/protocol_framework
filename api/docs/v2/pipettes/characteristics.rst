@@ -184,7 +184,37 @@ These flow rates will remain in effect until you change the ``flow_rate`` attrib
 Flex Pipette Flow Rates
 -----------------------
 
-Flex pipette flow rates depend on pipette volume and tip capacity. Each pipette–tip combination has a default flow rate for aspirating, dispensing, and blowing out liquid. When using a 50 µL pipette, you should only use 50 µL tips.
+Flex pipette flow rates depend on pipette volume and tip capacity. Each pipette–tip combination has a default flow rate for aspirating, dispensing, and blowing out liquid. When using a 50 µL pipette, you should only use 50 µL tips. Additionally, all Flex pipettes have a well bottom clearance of 1 mm for aspirate and dispense actions.
+
+1-Channel Pipettes
+^^^^^^^^^^^^^^^^^^
+
++------------------------+-------------------+--------------------------+
+| Pipette Model          | Tip Capacity (µL) | Default Flow Rate (µL/s) |
++========================+===================+==========================+
+| 1-channel (1-50 µL)    | 50                | 35                       |
++------------------------+-------------------+--------------------------+
+| 1-channel (5-1000 µL)  | 50                | 478                      |
++                        +-------------------+--------------------------+
+|                        | 200               | 716                      |
++                        +-------------------+--------------------------+
+|                        | 1000              | 716                      |
++------------------------+-------------------+--------------------------+
+
+8-Channel Pipettes
+^^^^^^^^^^^^^^^^^^
+
++---------------------+-------------------+--------------------------+
+| Pipette Model       | Tip Capacity (uL) | Default Flow Rate (uL/s) |
++=====================+===================+==========================+
+| 8-channel (1-50 uL) | 50                | 35                       |
++---------------------+-------------------+--------------------------+
+| 1-channel (5-1000)  | 50                | 478                      |
++                     +-------------------+--------------------------+
+|                     | 200               | 716                      |
++                     +-------------------+--------------------------+
+|                     | 1000              | 716                      |
++---------------------+-------------------+--------------------------+
 
 .. list-table::
     :header-rows: 1
@@ -206,7 +236,7 @@ Flex pipette flow rates depend on pipette volume and tip capacity. Each pipette�
       - 716
 
 
-Additionally, all Flex pipettes have a well bottom clearance of 1 mm for aspirate and dispense actions.
+
 
 .. _ot2-flow-rates:
 
