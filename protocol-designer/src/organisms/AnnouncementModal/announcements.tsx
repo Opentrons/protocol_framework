@@ -19,7 +19,8 @@ import heaterShaker from '../../assets/images/modules/heatershaker.png'
 import thermocyclerGen2 from '../../assets/images/modules/thermocycler_gen2.png'
 import liquidEnhancements from '../../assets/images/announcements/liquid-enhancements.gif'
 import opentronsFlex from '../../assets/images/OpentronsFlex.png'
-import deckConfigutation from '../../assets/images/deck_configuration.png'
+import deckConfiguration from '../../assets/images/deck_configuration.png'
+import absorbancePlateReaderImage from '../../assets/images/opentrons_plate_reader.png'
 import { DOC_URL } from '../KnowledgeLink'
 import type { ReactNode } from 'react'
 
@@ -53,6 +54,8 @@ const batchEditStyles = css`
 const PD = 'Protocol Designer'
 const APP = 'Opentrons App'
 const OPENTRONS_PD = 'Opentrons Protocol Designer'
+const OPENTRONS_ABSORBANCE_READER_URL =
+  'https://opentrons.com/products/opentrons-flex-absorbance-plate-reader-module-gen1'
 
 export const useAnnouncements = (): Announcement[] => {
   const { t } = useTranslation('modal')
@@ -277,7 +280,7 @@ export const useAnnouncements = (): Announcement[] => {
       announcementKey: 'deckConfigAnd96Channel8.0',
       image: (
         <Flex justifyContent={JUSTIFY_CENTER} paddingTop={SPACING.spacing8}>
-          <img width="340" src={deckConfigutation} />
+          <img width="340" src={deckConfiguration} />
         </Flex>
       ),
       heading: t('announcements.header', { pd: PD }),
@@ -368,6 +371,59 @@ export const useAnnouncements = (): Announcement[] => {
               }}
               i18nKey="announcements.redesign.body5"
             />
+          </StyledText>
+        </Flex>
+      ),
+    },
+    {
+      announcementKey: 'plateReader',
+      image: (
+        <Flex justifyContent={JUSTIFY_CENTER} paddingTop={SPACING.spacing8}>
+          <img width="200" src={absorbancePlateReaderImage} />
+        </Flex>
+      ),
+      heading: t('announcements.plateReader.body1', { version: pdVersion }),
+      message: (
+        <Flex gridGap={SPACING.spacing8} flexDirection={DIRECTION_COLUMN}>
+          <StyledText desktopStyle="bodyDefaultRegular">
+            {t('announcements.plateReader.body2')}
+          </StyledText>
+          <Flex marginLeft={SPACING.spacing16}>
+            <ul>
+              <li>
+                <StyledText desktopStyle="bodyDefaultRegular">
+                  <Trans
+                    t={t}
+                    components={{
+                      link1: (
+                        <LinkComponent
+                          external
+                          href={OPENTRONS_ABSORBANCE_READER_URL}
+                          color={COLORS.blue50}
+                        />
+                      ),
+                    }}
+                    i18nKey="announcements.plateReader.body3"
+                  />
+                </StyledText>
+              </li>
+              <li>
+                <StyledText desktopStyle="bodyDefaultRegular">
+                  {t('announcements.plateReader.body4')}
+                </StyledText>
+              </li>
+              <li>
+                <StyledText desktopStyle="bodyDefaultRegular">
+                  {t('announcements.plateReader.body5')}
+                </StyledText>
+              </li>
+            </ul>
+          </Flex>
+          <StyledText desktopStyle="bodyDefaultRegular">
+            {t('announcements.plateReader.body6')}
+          </StyledText>
+          <StyledText desktopStyle="bodyDefaultRegular">
+            {t('announcements.plateReader.body7')}
           </StyledText>
         </Flex>
       ),
