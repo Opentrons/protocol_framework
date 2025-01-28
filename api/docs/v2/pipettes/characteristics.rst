@@ -184,7 +184,7 @@ These flow rates will remain in effect until you change the ``flow_rate`` attrib
 Flex Pipette Flow Rates
 -----------------------
 
-Flex pipette flow rates depend on pipette and tip capacity. Each pipette–tip combination has a default flow rate for aspirating, dispensing, and blowing out liquid. When using a 50 µL pipette, you should only use 50 µL tips.
+Flex pipette flow rates depend on pipette model and tip capacity. Each pipette–tip combination has a default flow rate for aspirating, dispensing, and blowing out liquid. When using a 50 µL pipette, you should only use 50 µL tips.
 
 +-----------------------------+-------------------+------------------------+
 | Pipette Model               | Tip Capacity (µL) | Default Flow Rate (µL) |
