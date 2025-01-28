@@ -40,7 +40,6 @@ export const aspirate: CommandCreator<ExtendedAspirateParams> = (
     labwareId,
     wellName,
     flowRate,
-    isAirGap,
     tipRack,
     wellLocation,
     nozzles,
@@ -257,7 +256,6 @@ export const aspirate: CommandCreator<ExtendedAspirateParams> = (
         wellLocation,
         flowRate,
       },
-      ...(isAirGap && { meta: { isAirGap } }),
     },
   ]
   return {
