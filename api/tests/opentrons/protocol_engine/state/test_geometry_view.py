@@ -62,6 +62,7 @@ from opentrons.protocol_engine.types import (
     TipGeometry,
     ModuleDefinition,
     ProbedHeightInfo,
+    ProbedVolumeInfo,
     LoadedVolumeInfo,
     WellLiquidInfo,
 )
@@ -1577,10 +1578,12 @@ def test_get_well_position_with_meniscus_offset(
     decoy.when(mock_labware_view.get_well_definition("labware-id", "B2")).then_return(
         well_def
     )
+    probe_time = datetime.now()
+    decoy.when(mock_well_view.get_last_liquid_update("labware-id", "B2")).then_return(probe_time)
     decoy.when(mock_well_view.get_well_liquid_info("labware-id", "B2")).then_return(
         WellLiquidInfo(
             probed_volume=None,
-            probed_height=ProbedHeightInfo(height=70.5, last_probed=datetime.now()),
+            probed_height=ProbedHeightInfo(height=70.5, last_probed=probe_time),
             loaded_volume=None,
         )
     )
@@ -1639,10 +1642,12 @@ def test_get_well_position_with_volume_offset_raises_error(
     decoy.when(mock_labware_view.get_well_definition("labware-id", "B2")).then_return(
         well_def
     )
+    probe_time = datetime.now()
+    decoy.when(mock_well_view.get_last_liquid_update("labware-id", "B2")).then_return(probe_time)
     decoy.when(mock_well_view.get_well_liquid_info("labware-id", "B2")).then_return(
         WellLiquidInfo(
             loaded_volume=None,
-            probed_height=ProbedHeightInfo(height=45.0, last_probed=datetime.now()),
+            probed_height=ProbedHeightInfo(height=45.0, last_probed=probe_time),
             probed_volume=None,
         )
     )
@@ -1698,13 +1703,15 @@ def test_get_well_position_with_meniscus_and_literal_volume_offset(
     decoy.when(
         mock_addressable_area_view.get_addressable_area_position(DeckSlotName.SLOT_4.id)
     ).then_return(slot_pos)
+    probe_time = datetime.now()
+    decoy.when(mock_well_view.get_last_liquid_update("labware-id", "B2")).then_return(probe_time)
     decoy.when(mock_labware_view.get_well_definition("labware-id", "B2")).then_return(
         well_def
     )
     decoy.when(mock_well_view.get_well_liquid_info("labware-id", "B2")).then_return(
         WellLiquidInfo(
             loaded_volume=None,
-            probed_height=ProbedHeightInfo(height=45.0, last_probed=datetime.now()),
+            probed_height=ProbedHeightInfo(height=45.0, last_probed=probe_time),
             probed_volume=None,
         )
     )
@@ -1771,10 +1778,12 @@ def test_get_well_position_with_meniscus_and_float_volume_offset(
     decoy.when(mock_labware_view.get_well_definition("labware-id", "B2")).then_return(
         well_def
     )
+    probe_time = datetime.now()
+    decoy.when(mock_well_view.get_last_liquid_update("labware-id", "B2")).then_return(probe_time)
     decoy.when(mock_well_view.get_well_liquid_info("labware-id", "B2")).then_return(
         WellLiquidInfo(
             loaded_volume=None,
-            probed_height=ProbedHeightInfo(height=45.0, last_probed=datetime.now()),
+            probed_height=ProbedHeightInfo(height=45.0, last_probed=probe_time),
             probed_volume=None,
         )
     )
@@ -1840,10 +1849,12 @@ def test_get_well_position_raises_validation_error(
     decoy.when(mock_labware_view.get_well_definition("labware-id", "B2")).then_return(
         well_def
     )
+    probe_time = datetime.now()
+    decoy.when(mock_well_view.get_last_liquid_update("labware-id", "B2")).then_return(probe_time)
     decoy.when(mock_well_view.get_well_liquid_info("labware-id", "B2")).then_return(
         WellLiquidInfo(
             loaded_volume=None,
-            probed_height=ProbedHeightInfo(height=40.0, last_probed=datetime.now()),
+            probed_height=ProbedHeightInfo(height=40.0, last_probed=probe_time),
             probed_volume=None,
         )
     )
@@ -1905,10 +1916,12 @@ def test_get_meniscus_height(
     decoy.when(mock_labware_view.get_well_definition("labware-id", "B2")).then_return(
         well_def
     )
+    probe_time = datetime.now()
+    decoy.when(mock_well_view.get_last_liquid_update("labware-id", "B2")).then_return(probe_time)
     decoy.when(mock_well_view.get_well_liquid_info("labware-id", "B2")).then_return(
         WellLiquidInfo(
             loaded_volume=LoadedVolumeInfo(
-                volume=2000.0, last_loaded=datetime.now(), operations_since_load=0
+                volume=2000.0, last_loaded=probe_time, operations_since_load=0
             ),
             probed_height=None,
             probed_volume=None,
@@ -3349,6 +3362,8 @@ def test_validate_dispense_volume_into_well_meniscus(
     decoy.when(mock_labware_view.get_well_geometry("labware-id", "A1")).then_return(
         inner_well_def
     )
+    probe_time = datetime.now()
+    decoy.when(mock_well_view.get_last_liquid_update("labware-id", "A1")).then_return(probe_time)
     decoy.when(mock_well_view.get_well_liquid_info("labware-id", "A1")).then_return(
         WellLiquidInfo(
             loaded_volume=None,
@@ -3368,6 +3383,115 @@ def test_validate_dispense_volume_into_well_meniscus(
             volume=1100000.0,
         )
 
+
+
+def test_validate_dispense_volume_into_well_meniscus(
+    decoy: Decoy,
+    mock_labware_view: LabwareView,
+    mock_well_view: WellView,
+    subject: GeometryView,
+) -> None:
+    """It should raise an InvalidDispenseVolumeError if too much volume is specified."""
+    # Setup
+    labware_def = _load_labware_definition_data()
+    assert labware_def.wells is not None
+    well_def = labware_def.wells["A1"]
+    assert labware_def.innerLabwareGeometry is not None
+    inner_well_def = labware_def.innerLabwareGeometry["welldefinition1111"]
+
+    load_time = datetime.min
+    probe_time = datetime.now()
+
+    decoy.when(mock_labware_view.get_well_definition("labware-id", "A1")).then_return(
+        well_def
+    )
+    decoy.when(mock_labware_view.get_well_geometry("labware-id", "A1")).then_return(
+        inner_well_def
+    )
+    ten_ul_height = subject.get_well_height_at_volume(
+            labware_id="labware-id",
+            well_name="A1",
+            volume=10.0
+    )
+    twenty_ul_height = subject.get_well_height_at_volume(
+            labware_id="labware-id",
+            well_name="A1",
+            volume=20.0
+    )
+
+    # Make sure Get height with no information raises an error
+    decoy.when(mock_well_view.get_last_liquid_update("labware-id", "A1")).then_return(None)
+    decoy.when(mock_well_view.get_well_liquid_info("labware-id", "A1")).then_return(
+        WellLiquidInfo(
+            loaded_volume=None,
+            probed_height=None,
+            probed_volume=None,
+        )
+    )
+    decoy.when(mock_well_view.get_last_liquid_update("labware-id", "A1")).then_return(None)
+
+    with pytest.raises(errors.LiquidHeightUnknownError):
+        subject.get_meniscus_height(
+            labware_id="labware-id",
+            well_name="A1"
+        )
+    # Make sure get height with a valid load returns the correct height
+    decoy.when(mock_well_view.get_well_liquid_info("labware-id", "A1")).then_return(
+        WellLiquidInfo(
+            loaded_volume=LoadedVolumeInfo(volume=10.0, last_loaded=load_time, operations_since_load = 0),
+            probed_height=None,
+            probed_volume=None,
+        )
+    )
+
+    decoy.when(mock_well_view.get_last_liquid_update("labware-id", "A1")).then_return(load_time)
+    assert subject.get_meniscus_height(
+            labware_id="labware-id",
+            well_name="A1"
+        ) == ten_ul_height
+
+    # Make sure that if there is a probe after a load that we get the correct height
+    decoy.when(mock_well_view.get_well_liquid_info("labware-id", "A1")).then_return(
+        WellLiquidInfo(
+            loaded_volume=LoadedVolumeInfo(volume=10.0, last_loaded=load_time, operations_since_load = 0),
+            probed_height=ProbedHeightInfo(height=40.0, last_probed=probe_time),
+            probed_volume=None,
+        )
+    )
+    decoy.when(mock_well_view.get_last_liquid_update("labware-id", "A1")).then_return(probe_time)
+
+    assert subject.get_meniscus_height(
+            labware_id="labware-id",
+            well_name="A1"
+        ) == 40.0
+
+    # Simulate a pipetting action and make sure we get the height based on the most current one
+    decoy.when(mock_well_view.get_well_liquid_info("labware-id", "A1")).then_return(
+        WellLiquidInfo(
+            loaded_volume=LoadedVolumeInfo(volume=10.0, last_loaded=load_time, operations_since_load = 1),
+            probed_height=None,
+            probed_volume=ProbedVolumeInfo(volume=20.0, last_probed=probe_time, operations_since_probe = 1),
+        )
+    )
+    decoy.when(mock_well_view.get_last_liquid_update("labware-id", "A1")).then_return(probe_time)
+    assert subject.get_meniscus_height(
+            labware_id="labware-id",
+            well_name="A1"
+        ) == twenty_ul_height
+
+    # Simulate a calling load_liquid after a probe and make sure we get the height based on the load_liquid
+    decoy.when(mock_well_view.get_well_liquid_info("labware-id", "A1")).then_return(
+        WellLiquidInfo(
+            loaded_volume=LoadedVolumeInfo(volume=10.0, last_loaded=datetime.max, operations_since_load = 0),
+            probed_height=ProbedHeightInfo(height=40.0, last_probed=probe_time),
+            probed_volume=ProbedVolumeInfo(volume=20.0, last_probed=probe_time, operations_since_probe = 0),
+        )
+    )
+    decoy.when(mock_well_view.get_last_liquid_update("labware-id", "A1")).then_return(datetime.max)
+    assert subject.get_meniscus_height(
+            labware_id="labware-id",
+            well_name="A1"
+        ) == ten_ul_height
 
 @pytest.mark.parametrize(
     [
