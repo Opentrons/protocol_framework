@@ -114,7 +114,6 @@ Cypress.Commands.add('verifyHomePage', () => {
   cy.contains(content.welcome)
   cy.get(locators.privacyPolicy).should('exist').and('be.visible')
   cy.get(locators.eula).should('exist').and('be.visible')
-  cy.contains(locators.confirm).click()
   cy.contains('button', locators.createProtocol).should('be.visible')
   cy.contains('label', locators.importProtocol).should('be.visible')
   cy.getByTestId(locators.settingsDataTestid).should('be.visible')
