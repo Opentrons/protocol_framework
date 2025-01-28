@@ -15,7 +15,10 @@ import {
   useHoverTooltip,
 } from '@opentrons/components'
 import { getTrashOrLabware } from '@opentrons/step-generation'
-import { getEnableReturnTip } from '../../../../../../feature-flags/selectors'
+import {
+  getEnableLiquidClasses,
+  getEnableReturnTip,
+} from '../../../../../../feature-flags/selectors'
 import {
   getAdditionalEquipmentEntities,
   getLabwareEntities,
@@ -73,6 +76,7 @@ export function MoveLiquidTools(props: StepFormProps): JSX.Element {
   const additionalEquipmentEntities = useSelector(
     getAdditionalEquipmentEntities
   )
+  const enableLiquidClasses = useSelector(getEnableLiquidClasses)
   const enableReturnTip = useSelector(getEnableReturnTip)
   const labwares = useSelector(getLabwareEntities)
   const pipettes = useSelector(getPipetteEntities)
@@ -323,60 +327,67 @@ export function MoveLiquidTools(props: StepFormProps): JSX.Element {
           ]
         }
       />
-      <Divider marginY="0" />
-      <Flex
-        flexDirection={DIRECTION_COLUMN}
-        gridGap={SPACING.spacing8}
-        padding={`0 ${SPACING.spacing16}`}
-      >
-        <Flex gridGap={SPACING.spacing8} alignItems={ALIGN_CENTER}>
-          <StyledText desktopStyle="bodyDefaultRegular" color={COLORS.grey60}>
-            {t('protocol_steps:submerge')}
-          </StyledText>
-          <Flex {...targetProps}>
-            <Icon
-              name="information"
-              size={SPACING.spacing12}
-              color={COLORS.grey60}
-              data-testid="information_icon"
-            />
-          </Flex>
-          <Tooltip tooltipProps={tooltipProps}>
-            {t(`tooltip:step_fields.defaults.${tab}_submerge`)}
-          </Tooltip>
-        </Flex>
-        <ListItem type="noActive">
+      {enableLiquidClasses ? (
+        <>
+          <Divider marginY="0" />
           <Flex
-            padding={SPACING.spacing12}
-            width="100%"
             flexDirection={DIRECTION_COLUMN}
             gridGap={SPACING.spacing8}
+            padding={`0 ${SPACING.spacing16}`}
           >
-            <InputStepFormField
-              showTooltip={false}
-              padding="0"
-              title={t('protocol_steps:submerge_speed')}
-              {...propsForFields[`${tab}_submerge_speed`]}
-              units={t('application:units.millimeterPerSec')}
-              errorToShow={getFormLevelError(
-                `${tab}_submerge_speed`,
-                mappedErrorsToField
-              )}
-            />
-            <InputStepFormField
-              showTooltip={false}
-              padding="0"
-              title={t('protocol_steps:delay_duration')}
-              {...propsForFields[`${tab}_delay_seconds`]}
-              units={t('application:units.seconds')}
-              errorToShow={getFormLevelError(
-                `${tab}_delay_seconds`,
-                mappedErrorsToField
-              )}
-            />
+            <Flex gridGap={SPACING.spacing8} alignItems={ALIGN_CENTER}>
+              <StyledText
+                desktopStyle="bodyDefaultRegular"
+                color={COLORS.grey60}
+              >
+                {t('protocol_steps:submerge')}
+              </StyledText>
+              <Flex {...targetProps}>
+                <Icon
+                  name="information"
+                  size={SPACING.spacing12}
+                  color={COLORS.grey60}
+                  data-testid="information_icon"
+                />
+              </Flex>
+              <Tooltip tooltipProps={tooltipProps}>
+                {t(`tooltip:step_fields.defaults.${tab}_submerge`)}
+              </Tooltip>
+            </Flex>
+            <ListItem type="noActive">
+              <Flex
+                padding={SPACING.spacing12}
+                width="100%"
+                flexDirection={DIRECTION_COLUMN}
+                gridGap={SPACING.spacing8}
+              >
+                <InputStepFormField
+                  showTooltip={false}
+                  padding="0"
+                  title={t('protocol_steps:submerge_speed')}
+                  {...propsForFields[`${tab}_submerge_speed`]}
+                  units={t('application:units.millimeterPerSec')}
+                  errorToShow={getFormLevelError(
+                    `${tab}_submerge_speed`,
+                    mappedErrorsToField
+                  )}
+                />
+                <InputStepFormField
+                  showTooltip={false}
+                  padding="0"
+                  title={t('protocol_steps:delay_duration')}
+                  {...propsForFields[`${tab}_delay_seconds`]}
+                  units={t('application:units.seconds')}
+                  errorToShow={getFormLevelError(
+                    `${tab}_delay_seconds`,
+                    mappedErrorsToField
+                  )}
+                />
+              </Flex>
+            </ListItem>
           </Flex>
-        </ListItem>
-      </Flex>
+        </>
+      ) : null}
       <Divider marginY="0" />
       <Flex
         flexDirection={DIRECTION_COLUMN}
