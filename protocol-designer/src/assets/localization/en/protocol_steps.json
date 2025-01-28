@@ -73,6 +73,7 @@
   "multiAspirate": "Consolidate path",
   "multiDispense": "Distribute path",
   "new_location": "New location",
+  "no_tiprack": "No tiprack available",
   "off_deck": "Off-Deck",
   "pause": {
     "untilResume": "Pausing until manually told to resume",
