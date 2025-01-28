@@ -164,7 +164,6 @@ export function SelectModules(props: WizardTileProps): JSX.Element | null {
         <Flex flexDirection={DIRECTION_COLUMN}>
           <Flex flexDirection={DIRECTION_COLUMN} gridGap={SPACING.spacing12}>
             {filteredSupportedModules.length > 0 ||
-            // note (kk:09/26/2024) the condition for absorbanceReaderV1 will be removed when ff is removed
             !(
               filteredSupportedModules.length === 1 &&
               filteredSupportedModules[0] === 'absorbanceReaderV1'
