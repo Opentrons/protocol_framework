@@ -1,14 +1,18 @@
 import { useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
 import {
+  ALIGN_CENTER,
   COLORS,
   DIRECTION_COLUMN,
   Divider,
   Flex,
+  Icon,
   ListItem,
   SPACING,
   StyledText,
   Tabs,
+  Tooltip,
+  useHoverTooltip,
 } from '@opentrons/components'
 import { getTrashOrLabware } from '@opentrons/step-generation'
 import { getEnableReturnTip } from '../../../../../../feature-flags/selectors'
@@ -63,6 +67,7 @@ export function MoveLiquidTools(props: StepFormProps): JSX.Element {
     tab,
     setTab,
   } = props
+  const [targetProps, tooltipProps] = useHoverTooltip()
   const { t, i18n } = useTranslation(['protocol_steps', 'form', 'tooltip'])
   const { path } = formData
   const additionalEquipmentEntities = useSelector(
@@ -324,9 +329,22 @@ export function MoveLiquidTools(props: StepFormProps): JSX.Element {
         gridGap={SPACING.spacing8}
         padding={`0 ${SPACING.spacing16}`}
       >
-        <StyledText desktopStyle="bodyDefaultRegular" color={COLORS.grey60}>
-          {t('protocol_steps:submerge')}
-        </StyledText>
+        <Flex gridGap={SPACING.spacing8} alignItems={ALIGN_CENTER}>
+          <StyledText desktopStyle="bodyDefaultRegular" color={COLORS.grey60}>
+            {t('protocol_steps:submerge')}
+          </StyledText>
+          <Flex {...targetProps}>
+            <Icon
+              name="information"
+              size={SPACING.spacing12}
+              color={COLORS.grey60}
+              data-testid="information_icon"
+            />
+          </Flex>
+          <Tooltip tooltipProps={tooltipProps}>
+            {t(`tooltip:step_fields.defaults.${tab}_submerge`)}
+          </Tooltip>
+        </Flex>
         <ListItem type="noActive">
           <Flex
             padding={SPACING.spacing12}
