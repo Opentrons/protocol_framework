@@ -86,7 +86,7 @@ function PathButton(props: PathButtonProps): JSX.Element {
   )
 
   return (
-    <Flex {...targetProps} key={id}>
+    <Flex {...targetProps} key={id} flexDirection={DIRECTION_COLUMN}>
       {tooltip}
       <RadioButton
         width="100%"
