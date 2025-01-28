@@ -432,15 +432,19 @@ describe('_getSavedMultiSelectFieldValues', () => {
         },
         aspirate_x_position: {
           isIndeterminate: false,
+          value: undefined,
         },
         aspirate_y_position: {
           isIndeterminate: false,
+          value: undefined,
         },
         dispense_x_position: {
           isIndeterminate: false,
+          value: undefined,
         },
         dispense_y_position: {
           isIndeterminate: false,
+          value: undefined,
         },
         blowout_z_offset: {
           isIndeterminate: false,
@@ -512,6 +516,10 @@ describe('_getSavedMultiSelectFieldValues', () => {
           value: 1,
           isIndeterminate: false,
         },
+        aspirate_submerge_speed: {
+          isIndeterminate: false,
+          value: undefined,
+        },
         // dispense settings
         dispense_labware: {
           value: 'dispense_labware_id',
@@ -572,6 +580,10 @@ describe('_getSavedMultiSelectFieldValues', () => {
         dispense_touchTip_mmFromBottom: {
           value: 1,
           isIndeterminate: false,
+        },
+        dispense_submerge_speed: {
+          isIndeterminate: false,
+          value: undefined,
         },
         blowout_checkbox: {
           value: true,
@@ -689,6 +701,7 @@ describe('_getSavedMultiSelectFieldValues', () => {
         },
         tipRack: {
           isIndeterminate: false,
+          value: undefined,
         },
         blowout_flowRate: {
           isIndeterminate: true,
@@ -710,18 +723,23 @@ describe('_getSavedMultiSelectFieldValues', () => {
         },
         aspirate_x_position: {
           isIndeterminate: false,
+          value: undefined,
         },
         aspirate_y_position: {
           isIndeterminate: false,
+          value: undefined,
         },
         dispense_x_position: {
           isIndeterminate: false,
+          value: undefined,
         },
         dispense_y_position: {
           isIndeterminate: false,
+          value: undefined,
         },
         blowout_z_offset: {
           isIndeterminate: false,
+          value: undefined,
         },
         preWetTip: {
           isIndeterminate: true,
@@ -761,6 +779,10 @@ describe('_getSavedMultiSelectFieldValues', () => {
         aspirate_touchTip_mmFromBottom: {
           isIndeterminate: false,
           value: 1,
+        },
+        aspirate_submerge_speed: {
+          isIndeterminate: false,
+          value: undefined,
         },
         // dispense settings
         dispense_labware: {
@@ -813,6 +835,10 @@ describe('_getSavedMultiSelectFieldValues', () => {
         dispense_touchTip_mmFromBottom: {
           isIndeterminate: false,
           value: 1,
+        },
+        dispense_submerge_speed: {
+          isIndeterminate: false,
+          value: undefined,
         },
         blowout_checkbox: {
           isIndeterminate: true,
