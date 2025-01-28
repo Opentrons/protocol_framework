@@ -5,9 +5,10 @@ from opentrons.protocol_api import (
     ProtocolContext,
     ParameterContext,
     InstrumentContext,
-    Well
+    Well,
 )
 from opentrons_shared_data.errors.exceptions import PipetteLiquidNotFoundError
+
 metadata = {
     "protocolName": "Evotip Test - 96ch Head Robot API",
     "author": "Boren Lin, Opentrons",
@@ -19,6 +20,8 @@ requirements = {
 }
 SEC_SOAK = 20
 EVOSEP_TEMPORARY_OFFSET = 4.5
+
+
 def add_parameters(parameters: ParameterContext) -> None:
     """Add Parameters."""
     parameters.add_bool(
@@ -35,13 +38,19 @@ def add_parameters(parameters: ParameterContext) -> None:
         minimum=1,
         maximum=10,
     )
+
+
 def set_pressure_sensor_enabled(protocol: ProtocolContext, enabled: bool) -> None:
     """Enable pressure sensor."""
     hw_api = protocol._core.get_hardware()
     ff = hw_api.hardware_feature_flags
     ff.overpressure_detection_enabled = enabled
     hw_api.hardware_feature_flags = ff
-    protocol.comment(f"Overpressure detection enabled {ff.overpressure_detection_enabled}")
+    protocol.comment(
+        f"Overpressure detection enabled {ff.overpressure_detection_enabled}"
+    )
+
+
 def find_liquid_height(pipette: InstrumentContext, well_to_probe: Well) -> float:
     """Find liquid height of well."""
     try:
@@ -52,6 +61,8 @@ def find_liquid_height(pipette: InstrumentContext, well_to_probe: Well) -> float
     except PipetteLiquidNotFoundError:
         liquid_height = 0
     return liquid_height
+
+
 def run(protocol: ProtocolContext) -> None:
     """Protocol."""
     robot_api = protocol.robot
@@ -179,8 +190,10 @@ def run(protocol: ProtocolContext) -> None:
         )
         # Lift the Pipette slightly before ejecting
         robot_api.move_axes_relative(axis_map={AxisType.Z_L: 6}, speed=10)
+
     ####
     pick_up_evo_tips()
+
     def push_out_liquid_and_drop() -> None:
         """Push out liquid."""
         # Push out liquid in 100 sec
@@ -201,7 +214,9 @@ def run(protocol: ProtocolContext) -> None:
         )
         # Retract the pipette
         robot_api.move_axes_relative(axis_map={AxisType.Z_L: 35.0}, speed=10.0)
+
     push_out_liquid_and_drop()
+
     def move_evo_tips_and_probe() -> None:
         """Move Evo tips and probe."""
         # Turn on pressure sensor
@@ -215,6 +230,7 @@ def run(protocol: ProtocolContext) -> None:
             p1k_96.pick_up_tip()
             find_liquid_height(p1k_96, stacked_deepwell_plate["A1"])
             p1k_96.return_tip()
+
     if not dry_run:
         move_evo_tips_and_probe()
         # move evotips back to original plate

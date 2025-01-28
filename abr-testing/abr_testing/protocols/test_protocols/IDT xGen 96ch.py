@@ -107,15 +107,19 @@ def run(protocol: ProtocolContext) -> None:
         "flexStackerModuleV1", "B4"
     )  # type: ignore[assignment]
     stacker_200_ul_tips.load_labware_to_hopper(
-        load_name="opentrons_flex_96_tiprack_200ul", quantity=6, lid = "opentrons_flex_tiprack_lid"
+        load_name="opentrons_flex_96_tiprack_200ul",
+        quantity=6,
+        lid="opentrons_flex_tiprack_lid",
     )
     stacker_50_ul_tips: FlexStackerContext = protocol.load_module(
         "flexStackerModuleV1", "C4"
     )  # type: ignore[assignment]
     stacker_50_ul_tips.load_labware_to_hopper(
-        load_name="opentrons_flex_96_tiprack_50ul", quantity=6, lid="opentrons_flex_tiprack_lid"
+        load_name="opentrons_flex_96_tiprack_50ul",
+        quantity=6,
+        lid="opentrons_flex_tiprack_lid",
     )
-    
+
     # ========== FIRST ROW ===========
     thermocycler: ThermocyclerContext = protocol.load_module(
         helpers.tc_str
@@ -139,7 +143,7 @@ def run(protocol: ProtocolContext) -> None:
     Liquid_trash = protocol.load_labware(
         "nest_96_wellplate_2ml_deep", "B2", "Liquid Waste Reservoir"
     )
-    
+
     reagent_plate_2 = protocol.load_labware(
         "greiner_384_wellplate_240ul", "B3", "Reagent Plate 2"
     )
@@ -442,7 +446,7 @@ def run(protocol: ProtocolContext) -> None:
         )
         # GRIPPER MOVE tiprack_200_1 FROM: D1 --> tiprack_A3_adapter
         tiprack_200_1 = stacker_200_ul_tips.retrieve()
-        protocol.move_lid(tiprack_200_1, TRASH, use_gripper = True)
+        protocol.move_lid(tiprack_200_1, TRASH, use_gripper=True)
         protocol.move_labware(tiprack_200_1, tiprack_A3_adapter, use_gripper=True)
         # GRIPPER MOVE CleanupPlate_1 FROM: MAG PLATE --> D1
         # protocol.move_labware(labware=sample_plate_3, new_location = "", use_gripper = True)
@@ -514,12 +518,12 @@ def run(protocol: ProtocolContext) -> None:
         )
         # GRIPPER MOVE tiprack_200_X FROM: A4 --> tiprack_A3_adapter
         tiprack_200_X = stacker_200_ul_tips.retrieve()
-        protocol.move_lid(tiprack_200_X, TRASH, use_gripper = True)
+        protocol.move_lid(tiprack_200_X, TRASH, use_gripper=True)
         protocol.move_labware(tiprack_200_X, tiprack_A3_adapter, use_gripper=True)
 
         # TOWER DISPENSES NEW PLATE
         tiprack_200_2 = stacker_200_ul_tips.retrieve()
-        protocol.move_lid(tiprack_200_2, TRASH, use_gripper = True)
+        protocol.move_lid(tiprack_200_2, TRASH, use_gripper=True)
         protocol.move_labware(tiprack_200_2, tiprack_A2_adapter, use_gripper=True)
         protocol.comment("Unloading tiprack 200 ul")
         # ==============================================================
@@ -594,7 +598,7 @@ def run(protocol: ProtocolContext) -> None:
         # TOWER DISPENSES NEW PLATE
         protocol.comment("MOVING: tiprack_200_3 = A4 --> tiprack_A2_adapter")
         tiprack_200_3 = stacker_200_ul_tips.retrieve()
-        protocol.move_lid(tiprack_200_3, TRASH, use_gripper = True)
+        protocol.move_lid(tiprack_200_3, TRASH, use_gripper=True)
         protocol.move_labware(tiprack_200_3, tiprack_A2_adapter, use_gripper=True)
         # ================================================================
         protocol.comment("--> Remove ETOH Wash")
@@ -657,7 +661,7 @@ def run(protocol: ProtocolContext) -> None:
         )
         # TOWER DISPENSES NEW PLATE
         tiprack_200_4 = stacker_200_ul_tips.retrieve()
-        protocol.move_lid(tiprack_200_4, TRASH, use_gripper= True)
+        protocol.move_lid(tiprack_200_4, TRASH, use_gripper=True)
         protocol.move_labware(tiprack_200_4, tiprack_A2_adapter, use_gripper=True)
         protocol.comment("MOVING: tiprack_200_4 = A4 --> tiprack_A2_adapter")
         # =======================================================================
@@ -727,7 +731,7 @@ def run(protocol: ProtocolContext) -> None:
         # )
         # TOWER DISPENSES NEW PLATE
         tiprack_50_3 = stacker_50_ul_tips.retrieve()
-        protocol.move_lid(tiprack_50_3, TRASH, use_gripper = True)
+        protocol.move_lid(tiprack_50_3, TRASH, use_gripper=True)
         protocol.move_labware(tiprack_50_3, tiprack_A2_adapter, use_gripper=True)
         protocol.comment("MOVING: tiprack_50_3 = B4 --> tiprack_A2_adapter")
         # GRIPPER MOVE CleanupPlate_1 FROM: MAG BLOCK --> D1
@@ -794,7 +798,7 @@ def run(protocol: ProtocolContext) -> None:
         protocol.comment("MOVING: tiprack_50_4 = B4 --> tiprack_A2_adapter")
 
         tiprack_50_4 = stacker_50_ul_tips.retrieve()
-        protocol.move_lid(tiprack_50_4, TRASH, use_gripper = True)
+        protocol.move_lid(tiprack_50_4, TRASH, use_gripper=True)
         protocol.move_labware(tiprack_50_4, tiprack_A2_adapter, use_gripper=True)
         # ========================================================================
 
@@ -979,7 +983,7 @@ def run(protocol: ProtocolContext) -> None:
         )
         # TOWER DISPENSES NEW PLATE
         tiprack_200_5 = stacker_200_ul_tips.retrieve()
-        protocol.move_lid(tiprack_200_5, TRASH, use_gripper = True)
+        protocol.move_lid(tiprack_200_5, TRASH, use_gripper=True)
         protocol.move_labware(tiprack_200_5, tiprack_A2_adapter, use_gripper=True)
         protocol.comment("MOVING: tiprack_200_5 = A4 --> tiprack_A2_adapter")
         # ====================================================================
@@ -1168,12 +1172,12 @@ def run(protocol: ProtocolContext) -> None:
         )
         # TOWER DISPENSES NEW PLATE
         tiprack_50_6 = stacker_50_ul_tips.retrieve()
-        protocol.move_lid(tiprack_50_6, TRASH, use_gripper = True)
+        protocol.move_lid(tiprack_50_6, TRASH, use_gripper=True)
         protocol.move_labware(tiprack_50_6, tiprack_A2_adapter, use_gripper=True)
         protocol.comment("MOVING: tiprack_50_6 = B4 --> tiprack_A2_adapter")
         # TOWER DISPENSES NEW PLATE
         tiprack_50_7 = stacker_50_ul_tips.retrieve()
-        protocol.move_lid(tiprack_50_7, TRASH, use_gripper = True)
+        protocol.move_lid(tiprack_50_7, TRASH, use_gripper=True)
         protocol.move_labware(tiprack_50_7, tiprack_A3_adapter, use_gripper=True)
         protocol.comment("MOVING: tiprack_50_7 = B4 --> tiprack_A3_adapter")
         # ================================================================
