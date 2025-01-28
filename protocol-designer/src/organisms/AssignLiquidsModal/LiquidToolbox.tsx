@@ -89,6 +89,17 @@ export function LiquidToolbox(props: LiquidToolboxProps): JSX.Element {
     wellContentsSelectors.getAllWellContentsForActiveItem
   )
 
+  const allWellsForActiveItem =
+    labwareId != null
+      ? Object.keys(allWellContentsForActiveItem?.[labwareId] ?? {})
+      : []
+  const activeItemHasLiquids =
+    labwareId != null
+      ? Object.values(allWellContentsForActiveItem?.[labwareId] ?? {}).some(
+          value => value.groupIds.length > 0
+        )
+      : false
+
   const selectionHasLiquids = Boolean(
     labwareId != null &&
       liquidLocations[labwareId] != null &&
@@ -141,6 +152,21 @@ export function LiquidToolbox(props: LiquidToolboxProps): JSX.Element {
     dispatch(deselectAllWells())
     setShowBadFormState(false)
     reset()
+  }
+
+  const handleClearAllWells: () => void = () => {
+    if (labwareId != null && activeItemHasLiquids) {
+      if (
+        global.confirm(t('application:are_you_sure_clear_all_wells') as string)
+      ) {
+        dispatch(
+          removeWellsContents({
+            labwareId,
+            wells: allWellsForActiveItem,
+          })
+        )
+      }
+    }
   }
 
   const handleChangeVolume: (e: ChangeEvent<HTMLInputElement>) => void = e => {
@@ -247,16 +273,13 @@ export function LiquidToolbox(props: LiquidToolboxProps): JSX.Element {
           dispatch(deselectAllWells())
           onClose()
         }}
-        onCloseClick={handleClearSelectedWells}
+        onCloseClick={handleClearAllWells}
         height="100%"
         width="21.875rem"
         closeButton={
           <StyledText desktopStyle="bodyDefaultRegular">
             {t('clear_wells')}
           </StyledText>
-        }
-        disableCloseButton={
-          !(labwareId != null && selectedWells != null && selectionHasLiquids)
         }
       >
         {(liquidsInLabware != null && liquidsInLabware.length > 0) ||
