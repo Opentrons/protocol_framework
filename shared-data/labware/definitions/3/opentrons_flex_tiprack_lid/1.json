@@ -85,7 +85,7 @@
     "opentrons_flex_96_filertiprack_200ul",
     "opentrons_flex_96_filertiprack_1000ul"
   ],
-  "gripForce": 13,
+  "gripForce": 10,
   "gripHeightFromLabwareBottom": 10,
   "gripperOffsets": {
     "default": {
