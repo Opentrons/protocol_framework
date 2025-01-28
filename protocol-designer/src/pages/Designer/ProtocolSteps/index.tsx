@@ -102,10 +102,15 @@ export function ProtocolSteps(): JSX.Element {
         <Flex
           flexDirection={DIRECTION_COLUMN}
           gridGap={SPACING.spacing16}
-          maxWidth={CONTENT_MAX_WIDTH}
+          width={CONTENT_MAX_WIDTH}
         >
           {showTimelineAlerts ? (
-            <TimelineAlerts justifyContent={JUSTIFY_CENTER} width="100%" />
+            <TimelineAlerts
+              justifyContent={JUSTIFY_CENTER}
+              width="100%"
+              flexDirection={DIRECTION_COLUMN}
+              gridGap={SPACING.spacing4}
+            />
           ) : null}
           <Flex justifyContent={JUSTIFY_SPACE_BETWEEN}>
             {currentStep != null && hoveredTerminalItem == null ? (

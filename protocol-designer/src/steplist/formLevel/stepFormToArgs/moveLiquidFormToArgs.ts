@@ -1,9 +1,8 @@
 import { getWellsDepth } from '@opentrons/shared-data'
 import { DEST_WELL_BLOWOUT_DESTINATION } from '@opentrons/step-generation'
 import {
-  DEFAULT_MM_FROM_BOTTOM_ASPIRATE,
-  DEFAULT_MM_FROM_BOTTOM_DISPENSE,
   DEFAULT_MM_BLOWOUT_OFFSET_FROM_TOP,
+  DEFAULT_MM_OFFSET_FROM_BOTTOM,
   DEFAULT_MM_TOUCH_TIP_OFFSET_FROM_TOP,
 } from '../../../constants'
 import { getOrderedWells } from '../../utils'
@@ -207,9 +206,9 @@ export const moveLiquidFormToArgs = (
       hydratedFormData.dispense_flowRate ||
       matchingTipLiquidSpecs.defaultDispenseFlowRate.default,
     aspirateOffsetFromBottomMm:
-      hydratedFormData.aspirate_mmFromBottom || DEFAULT_MM_FROM_BOTTOM_ASPIRATE,
+      hydratedFormData.aspirate_mmFromBottom || DEFAULT_MM_OFFSET_FROM_BOTTOM,
     dispenseOffsetFromBottomMm:
-      hydratedFormData.dispense_mmFromBottom || DEFAULT_MM_FROM_BOTTOM_DISPENSE,
+      hydratedFormData.dispense_mmFromBottom || DEFAULT_MM_OFFSET_FROM_BOTTOM,
     blowoutFlowRateUlSec:
       hydratedFormData.blowout_flowRate ||
       matchingTipLiquidSpecs.defaultBlowOutFlowRate.default,

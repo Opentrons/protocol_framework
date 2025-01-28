@@ -14,6 +14,7 @@ import {
   Icon,
   InputField,
   JUSTIFY_SPACE_BETWEEN,
+  ListButton,
   ListItem,
   RadioButton,
   SPACING,
@@ -334,6 +335,7 @@ function WavelengthItem(props: WavelengthItemProps): JSX.Element {
             handleDeleteWavelength(index)
           }}
           alignSelf={ALIGN_FLEX_END}
+          padding={SPACING.spacing4}
         >
           <StyledText
             desktopStyle="bodyDefaultRegular"
@@ -382,28 +384,29 @@ function ReferenceWavelength(props: ReferenceWavelengthProps): JSX.Element {
           {t('step_edit_form.absorbanceReader.reference_wavelength.tooltip')}
         </Tooltip>
       </Flex>
-      <ListItem
+      <ListButton
         type="noActive"
         padding={SPACING.spacing12}
         flexDirection={DIRECTION_COLUMN}
         gridGap={SPACING.spacing8}
+        onClick={() => {
+          propsForFields.referenceWavelengthActive.updateValue(!isExpanded)
+        }}
       >
-        <Flex width="100%" justifyContent={JUSTIFY_SPACE_BETWEEN}>
+        <Flex
+          width="100%"
+          justifyContent={JUSTIFY_SPACE_BETWEEN}
+          alignItems={ALIGN_CENTER}
+        >
           <StyledText desktopStyle="bodyDefaultRegular">
             {t(
               'step_edit_form.field.absorbanceReader.referenceWavelengthActive'
             )}
           </StyledText>
-          <Btn
-            onClick={() => {
-              propsForFields.referenceWavelengthActive.updateValue(!isExpanded)
-            }}
-          >
-            <Check
-              color={COLORS.blue50}
-              isChecked={formData.referenceWavelengthActive === true}
-            />
-          </Btn>
+          <Check
+            color={COLORS.blue50}
+            isChecked={formData.referenceWavelengthActive === true}
+          />
         </Flex>
         {isExpanded ? (
           <>
@@ -445,6 +448,9 @@ function ReferenceWavelength(props: ReferenceWavelengthProps): JSX.Element {
                     maskToInteger(e.target.value)
                   )
                 }}
+                onClick={e => {
+                  e.stopPropagation()
+                }}
                 onBlur={() => {
                   setIsFocused(false)
                 }}
@@ -456,7 +462,7 @@ function ReferenceWavelength(props: ReferenceWavelengthProps): JSX.Element {
             ) : null}
           </>
         ) : null}
-      </ListItem>
+      </ListButton>
     </Flex>
   )
 }

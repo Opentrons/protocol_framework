@@ -42,6 +42,7 @@ class PipettingHandler(TypingProtocol):
         volume: float,
         flow_rate: float,
         command_note_adder: CommandNoteAdder,
+        correction_volume: float = 0.0,
     ) -> float:
         """Set flow-rate and aspirate."""
 
@@ -73,6 +74,7 @@ class PipettingHandler(TypingProtocol):
         volume: float,
         flow_rate: float,
         push_out: Optional[float],
+        correction_volume: float = 0.0,
     ) -> float:
         """Set flow-rate and dispense."""
 
@@ -195,6 +197,7 @@ class HardwarePipettingHandler(PipettingHandler):
         volume: float,
         flow_rate: float,
         command_note_adder: CommandNoteAdder,
+        correction_volume: float = 0.0,
     ) -> float:
         """Set flow-rate and aspirate.
 
@@ -207,7 +210,9 @@ class HardwarePipettingHandler(PipettingHandler):
         )
         with self._set_flow_rate(pipette=hw_pipette, aspirate_flow_rate=flow_rate):
             await self._hardware_api.aspirate(
-                mount=hw_pipette.mount, volume=adjusted_volume
+                mount=hw_pipette.mount,
+                volume=adjusted_volume,
+                correction_volume=correction_volume,
             )
 
         return adjusted_volume
@@ -218,6 +223,7 @@ class HardwarePipettingHandler(PipettingHandler):
         volume: float,
         flow_rate: float,
         push_out: Optional[float],
+        correction_volume: float = 0.0,
     ) -> float:
         """Dispense liquid without moving the pipette."""
         hw_pipette, adjusted_volume = self.get_hw_dispense_params(pipette_id, volume)
@@ -228,7 +234,10 @@ class HardwarePipettingHandler(PipettingHandler):
             )
         with self._set_flow_rate(pipette=hw_pipette, dispense_flow_rate=flow_rate):
             await self._hardware_api.dispense(
-                mount=hw_pipette.mount, volume=adjusted_volume, push_out=push_out
+                mount=hw_pipette.mount,
+                volume=adjusted_volume,
+                push_out=push_out,
+                correction_volume=correction_volume,
             )
 
         return adjusted_volume
@@ -326,6 +335,7 @@ class VirtualPipettingHandler(PipettingHandler):
         volume: float,
         flow_rate: float,
         command_note_adder: CommandNoteAdder,
+        correction_volume: float = 0.0,
     ) -> float:
         """Virtually aspirate (no-op)."""
         self._validate_tip_attached(pipette_id=pipette_id, command_name="aspirate")
@@ -342,6 +352,7 @@ class VirtualPipettingHandler(PipettingHandler):
         volume: float,
         flow_rate: float,
         push_out: Optional[float],
+        correction_volume: float = 0.0,
     ) -> float:
         """Virtually dispense (no-op)."""
         # TODO (tz, 8-23-23): add a check for push_out not larger that the max volume allowed when working on this https://opentrons.atlassian.net/browse/RSS-329

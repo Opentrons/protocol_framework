@@ -87,7 +87,9 @@ class LegacyInstrumentCoreSimulator(
     def set_default_speed(self, speed: float) -> None:
         self._default_speed = speed
 
-    def air_gap_in_place(self, volume: float, flow_rate: float) -> None:
+    def air_gap_in_place(
+        self, volume: float, flow_rate: float, correction_volume: Optional[float] = None
+    ) -> None:
         assert False, "Air gap tracking only available in API version 2.22 and later"
 
     def aspirate(
@@ -99,6 +101,7 @@ class LegacyInstrumentCoreSimulator(
         flow_rate: float,
         in_place: bool,
         is_meniscus: Optional[bool] = None,
+        correction_volume: Optional[float] = None,
     ) -> None:
         if self.get_current_volume() == 0:
             # Make sure we're at the top of the labware and clear of any
@@ -141,6 +144,7 @@ class LegacyInstrumentCoreSimulator(
         in_place: bool,
         push_out: Optional[float],
         is_meniscus: Optional[bool] = None,
+        correction_volume: Optional[float] = None,
     ) -> None:
         if isinstance(location, (TrashBin, WasteChute)):
             raise APIVersionError(
@@ -490,9 +494,34 @@ class LegacyInstrumentCoreSimulator(
         tip_racks: List[Tuple[types.Location, LegacyLabwareCore]],
         trash_location: Union[types.Location, TrashBin, WasteChute],
     ) -> None:
-        """Transfer a liquid from source to dest according to liquid class properties."""
-        # TODO(spp, 2024-11-20): update the docstring and error to include API version
+        """This will never be called because it was added in API 2.23."""
         assert False, "transfer_liquid is not supported in legacy context"
+
+    def distribute_liquid(
+        self,
+        liquid_class: LiquidClass,
+        volume: float,
+        source: Tuple[types.Location, LegacyWellCore],
+        dest: List[Tuple[types.Location, LegacyWellCore]],
+        new_tip: TransferTipPolicyV2,
+        tip_racks: List[Tuple[types.Location, LegacyLabwareCore]],
+        trash_location: Union[types.Location, TrashBin, WasteChute],
+    ) -> None:
+        """This will never be called because it was added in API 2.23."""
+        assert False, "distribute_liquid is not supported in legacy context"
+
+    def consolidate_liquid(
+        self,
+        liquid_class: LiquidClass,
+        volume: float,
+        source: List[Tuple[types.Location, LegacyWellCore]],
+        dest: Tuple[types.Location, LegacyWellCore],
+        new_tip: TransferTipPolicyV2,
+        tip_racks: List[Tuple[types.Location, LegacyLabwareCore]],
+        trash_location: Union[types.Location, TrashBin, WasteChute],
+    ) -> None:
+        """This will never be called because it was added in API 2.23."""
+        assert False, "consolidate_liquid is not supported in legacy context"
 
     def get_active_channels(self) -> int:
         """This will never be called because it was added in API 2.16."""

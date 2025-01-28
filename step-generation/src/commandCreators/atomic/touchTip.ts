@@ -1,8 +1,7 @@
 import { uuid } from '../../utils'
 import { noTipOnPipette, pipetteDoesNotExist } from '../../errorCreators'
+import type { CreateCommand, TouchTipParams } from '@opentrons/shared-data'
 import type { CommandCreator, CommandCreatorError } from '../../types'
-import type { CreateCommand } from '@opentrons/shared-data'
-import type { TouchTipParams } from '@opentrons/shared-data/protocol/types/schemaV3'
 
 export const touchTip: CommandCreator<TouchTipParams> = (
   args,
@@ -11,25 +10,25 @@ export const touchTip: CommandCreator<TouchTipParams> = (
 ) => {
   /** touchTip with given args. Requires tip. */
   const actionName = 'touchTip'
-  const { pipette, labware, well, offsetFromBottomMm } = args
-  const pipetteData = prevRobotState.pipettes[pipette]
+  const { pipetteId, labwareId, wellName, wellLocation } = args
+  const pipetteData = prevRobotState.pipettes[pipetteId]
   const errors: CommandCreatorError[] = []
 
   if (!pipetteData) {
     errors.push(
       pipetteDoesNotExist({
-        pipette,
+        pipette: pipetteId,
       })
     )
   }
 
-  if (!prevRobotState.tipState.pipettes[pipette]) {
+  if (!prevRobotState.tipState.pipettes[pipetteId]) {
     errors.push(
       noTipOnPipette({
         actionName,
-        pipette,
-        labware,
-        well,
+        pipette: pipetteId,
+        labware: labwareId,
+        well: wellName,
       })
     )
   }
@@ -45,15 +44,10 @@ export const touchTip: CommandCreator<TouchTipParams> = (
       commandType: 'touchTip',
       key: uuid(),
       params: {
-        pipetteId: pipette,
-        labwareId: labware,
-        wellName: well,
-        wellLocation: {
-          origin: 'bottom',
-          offset: {
-            z: offsetFromBottomMm,
-          },
-        },
+        pipetteId,
+        labwareId,
+        wellName,
+        wellLocation,
       },
     },
   ]
