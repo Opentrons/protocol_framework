@@ -4712,8 +4712,8 @@
         },
         {
           "shape": "conical",
-          "bottomDiameter": 1.4,
           "topDiameter": 3.17,
+          "bottomDiameter": 1.4,
           "topHeight": 5.77,
           "bottomHeight": 0.34
         },
