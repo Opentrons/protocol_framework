@@ -355,12 +355,12 @@ export function generateQuickTransferArgs(
     aspirateAirGapVolume: quickTransferState.airGapAspirate ?? null,
     dispenseAirGapVolume: quickTransferState.airGapDispense ?? null,
     touchTipAfterAspirate: quickTransferState.touchTipAspirate != null,
-    touchTipAfterAspirateOffsetMmFromBottom:
+    touchTipAfterAspirateOffsetMmFromTop:
       quickTransferState.touchTipAspirate ??
       getWellsDepth(quickTransferState.source, sourceWells) +
         DEFAULT_MM_TOUCH_TIP_OFFSET_FROM_TOP,
     touchTipAfterDispense: quickTransferState.touchTipDispense != null,
-    touchTipAfterDispenseOffsetMmFromBottom:
+    touchTipAfterDispenseOffsetMmFromTop:
       quickTransferState.touchTipDispense ??
       getWellsDepth(
         quickTransferState.destination === 'source'

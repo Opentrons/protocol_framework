@@ -276,9 +276,9 @@ export const consolidate: CommandCreator<ConsolidateArgs> = (
                   labwareId: args.sourceLabware,
                   wellName: sourceWell,
                   wellLocation: {
-                    origin: 'bottom',
+                    origin: 'top',
                     offset: {
-                      z: args.touchTipAfterAspirateOffsetMmFromBottom,
+                      z: args.touchTipAfterAspirateOffsetMmFromTop,
                     },
                   },
                 }),
@@ -333,9 +333,9 @@ export const consolidate: CommandCreator<ConsolidateArgs> = (
                 labwareId: args.destLabware,
                 wellName: destinationWell,
                 wellLocation: {
-                  origin: 'bottom',
+                  origin: 'top',
                   offset: {
-                    z: args.touchTipAfterDispenseOffsetMmFromBottom,
+                    z: args.touchTipAfterDispenseOffsetMmFromTop,
                   },
                 },
               }),

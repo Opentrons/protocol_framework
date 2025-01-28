@@ -63,8 +63,8 @@ interface FlowRateAndOffsetParamsTransferlike {
   aspirateOffsetFromBottomMm: number
   dispenseOffsetFromBottomMm: number
   blowoutOffsetFromTopMm: number
-  touchTipAfterAspirateOffsetMmFromBottom: number
-  touchTipAfterDispenseOffsetMmFromBottom: number
+  touchTipAfterAspirateOffsetMmFromTop: number
+  touchTipAfterDispenseOffsetMmFromTop: number
 }
 export const getFlowRateAndOffsetParamsTransferLike = (): FlowRateAndOffsetParamsTransferlike => ({
   aspirateFlowRateUlSec: ASPIRATE_FLOW_RATE,
@@ -74,8 +74,8 @@ export const getFlowRateAndOffsetParamsTransferLike = (): FlowRateAndOffsetParam
   dispenseOffsetFromBottomMm: DISPENSE_OFFSET_FROM_BOTTOM_MM,
   blowoutOffsetFromTopMm: BLOWOUT_OFFSET_FROM_TOP_MM,
   // for consolidate/distribute/transfer only
-  touchTipAfterAspirateOffsetMmFromBottom: TOUCH_TIP_OFFSET_FROM_BOTTOM_MM,
-  touchTipAfterDispenseOffsetMmFromBottom: TOUCH_TIP_OFFSET_FROM_BOTTOM_MM,
+  touchTipAfterAspirateOffsetMmFromTop: TOUCH_TIP_OFFSET_FROM_BOTTOM_MM,
+  touchTipAfterDispenseOffsetMmFromTop: TOUCH_TIP_OFFSET_FROM_BOTTOM_MM,
 })
 interface FlowRateAndOffsetParamsMix {
   aspirateFlowRateUlSec: number
@@ -84,7 +84,7 @@ interface FlowRateAndOffsetParamsMix {
   aspirateOffsetFromBottomMm: number
   dispenseOffsetFromBottomMm: number
   blowoutOffsetFromTopMm: number
-  touchTipMmFromBottom: number
+  touchTipMmFromTop: number
 }
 export const getFlowRateAndOffsetParamsMix = (): FlowRateAndOffsetParamsMix => ({
   aspirateFlowRateUlSec: ASPIRATE_FLOW_RATE,
@@ -94,7 +94,7 @@ export const getFlowRateAndOffsetParamsMix = (): FlowRateAndOffsetParamsMix => (
   dispenseOffsetFromBottomMm: DISPENSE_OFFSET_FROM_BOTTOM_MM,
   blowoutOffsetFromTopMm: BLOWOUT_OFFSET_FROM_TOP_MM,
   // for mix only
-  touchTipMmFromBottom: TOUCH_TIP_OFFSET_FROM_BOTTOM_MM,
+  touchTipMmFromTop: TOUCH_TIP_OFFSET_FROM_BOTTOM_MM,
 })
 type MakeAspDispHelper<P> = (
   bakedParams?: Partial<P>
@@ -251,7 +251,7 @@ const _defaultTouchTipParams = {
   pipetteId: DEFAULT_PIPETTE,
   labwareId: SOURCE_LABWARE,
   wellLocation: {
-    origin: 'bottom' as const,
+    origin: 'top' as const,
     offset: {
       z: TOUCH_TIP_OFFSET_FROM_BOTTOM_MM,
     },

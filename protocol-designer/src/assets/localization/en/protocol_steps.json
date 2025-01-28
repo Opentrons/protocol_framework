@@ -138,7 +138,7 @@
   "tiprack": "Tiprack",
   "tip_handling": "Tip handling",
   "tip_position": "{{prefix}} tip position",
-  "touch_tip_position": "Touch tip position from bottom",
+  "touch_tip_position": "Touch tip position from top",
   "valid_range": "Valid range between {{min}} - {{max}} {{unit}}",
   "view_details": "View details",
   "volume_per_well": "Volume per well",
