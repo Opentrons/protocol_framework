@@ -14,7 +14,6 @@ import {
   getModuleType,
 } from '@opentrons/shared-data'
 
-import { getOnlyLatestDefs } from '../../../labware-defs'
 import { getStagingAreaAddressableAreas } from '../../../utils'
 import {
   FLEX_MODULE_MODELS,
@@ -33,6 +32,7 @@ import type {
   ModuleModel,
   RobotType,
 } from '@opentrons/shared-data'
+import type { LabwareDefByDefURI } from '../../../labware-defs'
 import type {
   AllTemporalPropertiesForTimelineFrame,
   InitialDeckSetup,
@@ -42,6 +42,8 @@ import type { Fixture } from './constants'
 
 const OT2_TC_SLOTS = ['7', '8', '10', '11']
 const FLEX_TC_SLOTS = ['A1', 'B1']
+
+export type ModuleModelExtended = ModuleModel | 'stagingAreaAndMagneticBlock'
 
 export function getCutoutIdForAddressableArea(
   addressableArea: AddressableAreaName,
@@ -62,13 +64,16 @@ export function getModuleModelsBySlot(
   enableAbsorbanceReader: boolean,
   robotType: RobotType,
   slot: DeckSlotId
-): ModuleModel[] {
+): ModuleModelExtended[] {
   const FLEX_MIDDLE_SLOTS = new Set(['B2', 'C2', 'A2', 'D2'])
   const OT2_MIDDLE_SLOTS = ['2', '5', '8', '11']
 
   const FLEX_RIGHT_SLOTS = new Set(['A3', 'B3', 'C3', 'D3'])
 
-  let moduleModels: ModuleModel[] = FLEX_MODULE_MODELS
+  let moduleModels: ModuleModelExtended[] = [
+    ...FLEX_MODULE_MODELS,
+    'stagingAreaAndMagneticBlock',
+  ]
 
   switch (robotType) {
     case FLEX_ROBOT_TYPE: {
@@ -76,7 +81,10 @@ export function getModuleModelsBySlot(
         slot as AddressableAreaName
       )
         ? []
-        : FLEX_MODULE_MODELS.filter(model => {
+        : [
+            ...FLEX_MODULE_MODELS,
+            'stagingAreaAndMagneticBlock' as ModuleModelExtended,
+          ].filter(model => {
             if (model === THERMOCYCLER_MODULE_V2) {
               return slot === 'B1'
             } else if (model === ABSORBANCE_READER_V1) {
@@ -86,6 +94,10 @@ export function getModuleModelsBySlot(
               model === HEATERSHAKER_MODULE_V1
             ) {
               return !FLEX_MIDDLE_SLOTS.has(slot)
+            } else if (
+              model === ('stagingAreaAndMagneticBlock' as ModuleModelExtended)
+            ) {
+              return FLEX_RIGHT_SLOTS.has(slot)
             }
             return true
           })
@@ -132,14 +144,12 @@ export const getLabwareIsRecommended = (
 }
 
 export const getLabwareCompatibleWithAdapter = (
+  defs: LabwareDefByDefURI,
   adapterLoadName?: string
 ): string[] => {
-  const defs = getOnlyLatestDefs()
-
   if (adapterLoadName == null) {
     return []
   }
-
   return Object.entries(defs)
     .filter(
       ([, { stackingOffsetWithLabware }]) =>

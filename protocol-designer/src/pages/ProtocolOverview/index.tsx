@@ -126,8 +126,10 @@ export function ProtocolOverview(): JSX.Element {
   const gripperInUse =
     fileData?.commands.find(
       command =>
-        command.commandType === 'moveLabware' &&
-        command.params.strategy === 'usingGripper'
+        (command.commandType === 'moveLabware' &&
+          command.params.strategy === 'usingGripper') ||
+        command.commandType === 'absorbanceReader/closeLid' ||
+        command.commandType === 'absorbanceReader/openLid'
     ) != null
   const noCommands = fileData != null ? nonLoadCommands.length === 0 : true
   const modulesWithoutStep = getUnusedEntities(

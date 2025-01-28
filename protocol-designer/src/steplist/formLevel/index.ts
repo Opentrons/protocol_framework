@@ -47,6 +47,7 @@ import {
   fileNameRequired,
   wavelengthOutOfRange,
   referenceWavelengthOutOfRange,
+  absorbanceReaderModuleIdRequired,
 } from './errors'
 
 import {
@@ -87,7 +88,8 @@ const stepFormHelperMap: Partial<Record<StepType, FormHelpers>> = {
       referenceWavelengthRequired,
       fileNameRequired,
       wavelengthOutOfRange,
-      referenceWavelengthOutOfRange
+      referenceWavelengthOutOfRange,
+      absorbanceReaderModuleIdRequired
     ),
   },
   heaterShaker: {

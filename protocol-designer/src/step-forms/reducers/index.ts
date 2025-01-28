@@ -1113,8 +1113,10 @@ export const additionalEquipmentInvariantProperties = handleActions<NormalizedAd
 
       const hasGripperCommands = Object.values(file.commands).some(
         (command): command is MoveLabwareCreateCommand =>
-          command.commandType === 'moveLabware' &&
-          command.params.strategy === 'usingGripper'
+          (command.commandType === 'moveLabware' &&
+            command.params.strategy === 'usingGripper') ||
+          command.commandType === 'absorbanceReader/closeLid' ||
+          command.commandType === 'absorbanceReader/openLid'
       )
       const hasWasteChuteCommands = Object.values(file.commands).some(
         command =>

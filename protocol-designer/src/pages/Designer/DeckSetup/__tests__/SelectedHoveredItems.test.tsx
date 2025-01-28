@@ -158,7 +158,7 @@ describe('SelectedHoveredItems', () => {
       screen.getAllByText(
         'Fixture Opentrons Universal Flat Heater-Shaker Adapter'
       )
-    ).toHaveLength(3)
+    ).toHaveLength(2)
   })
   it('renders nothing when there is a hovered module but selected fixture', () => {
     props.hoveredModule = HEATERSHAKER_MODULE_V1

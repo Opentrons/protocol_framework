@@ -54,13 +54,14 @@ export function LabwareLocationField(
         dispatch(
           hoverSelection({
             id,
-            text: t('application:location'),
+            text: t('application:new_location'),
           })
         )
       }}
       onExit={() => {
         dispatch(hoverSelection({ id: null, text: null }))
       }}
+      tooltipContent={null}
     />
   )
 }

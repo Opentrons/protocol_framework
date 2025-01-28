@@ -14,7 +14,7 @@ import {
   getMixData,
 } from '../moveLiquidFormToArgs'
 import { getOrderedWells } from '../../../utils'
-import { DEFAULT_MM_FROM_BOTTOM_ASPIRATE } from '../../../../constants'
+import { DEFAULT_MM_OFFSET_FROM_BOTTOM } from '../../../../constants'
 import type { LabwareDefinition2 } from '@opentrons/shared-data'
 import type {
   HydratedMoveLiquidFormData,
@@ -229,7 +229,7 @@ describe('move liquid step form -> command creator args', () => {
       expectedArgsChecked: {
         aspirateDelay: {
           seconds: 11,
-          mmFromBottom: DEFAULT_MM_FROM_BOTTOM_ASPIRATE,
+          mmFromBottom: DEFAULT_MM_OFFSET_FROM_BOTTOM,
         },
       },
     },

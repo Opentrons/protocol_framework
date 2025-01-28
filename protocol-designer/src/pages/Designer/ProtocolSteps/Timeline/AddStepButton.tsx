@@ -126,7 +126,7 @@ export function AddStepButton({ hasText }: AddStepButtonProps): JSX.Element {
 
   const items = getSupportedSteps()
     .filter(stepType => isStepTypeEnabled[stepType])
-    .map(stepType => (
+    .map((stepType, index, array) => (
       <AddStepOverflowButton
         key={stepType}
         stepType={stepType}
@@ -138,6 +138,8 @@ export function AddStepButton({ hasText }: AddStepButtonProps): JSX.Element {
           }
           setShowStepOverflowMenu(false)
         }}
+        isFirstStep={index === 0}
+        isLastStep={index === array.length - 1}
       />
     ))
 
@@ -202,9 +204,9 @@ export function AddStepButton({ hasText }: AddStepButtonProps): JSX.Element {
 const STEP_OVERFLOW_MENU_STYLE = css`
   position: ${POSITION_ABSOLUTE};
   z-index: 5;
-  right: -7.75rem;
+  right: -8.05rem;
   white-space: ${NO_WRAP};
-  bottom: 4.2rem;
+  bottom: 1rem;
   border-radius: ${BORDERS.borderRadius8};
   box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.2);
   background-color: ${COLORS.white};
