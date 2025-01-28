@@ -9,6 +9,7 @@ import {
   Link as LinkComponent,
   SPACING,
   StyledText,
+  TEXT_DECORATION_UNDERLINE,
 } from '@opentrons/components'
 
 import magTempCombined from '../../assets/images/modules/magdeck_tempdeck_combined.png'
@@ -20,7 +21,7 @@ import thermocyclerGen2 from '../../assets/images/modules/thermocycler_gen2.png'
 import liquidEnhancements from '../../assets/images/announcements/liquid-enhancements.gif'
 import opentronsFlex from '../../assets/images/OpentronsFlex.png'
 import deckConfiguration from '../../assets/images/deck_configuration.png'
-import absorbancePlateReaderImage from '../../assets/images/opentrons_plate_reader.png'
+import absorbancePlateReaderImage from '../../assets/images/opentrons_absorbance_plate_reader.png'
 import { DOC_URL } from '../KnowledgeLink'
 import type { ReactNode } from 'react'
 
@@ -376,54 +377,81 @@ export const useAnnouncements = (): Announcement[] => {
       ),
     },
     {
-      announcementKey: 'plateReader',
+      announcementKey: 'absorbancePlateReader',
       image: (
-        <Flex justifyContent={JUSTIFY_CENTER} paddingTop={SPACING.spacing8}>
-          <img width="200" src={absorbancePlateReaderImage} />
+        <Flex
+          justifyContent={JUSTIFY_CENTER}
+          paddingTop={SPACING.spacing8}
+          backgroundColor={COLORS.blue10}
+        >
+          <img width="100%" src={absorbancePlateReaderImage} />
         </Flex>
       ),
-      heading: t('announcements.plateReader.body1', { version: pdVersion }),
+      heading: t('announcements.absorbancePlateReaderSupport.heading', {
+        version: pdVersion,
+      }),
       message: (
-        <Flex gridGap={SPACING.spacing8} flexDirection={DIRECTION_COLUMN}>
-          <StyledText desktopStyle="bodyDefaultRegular">
-            {t('announcements.plateReader.body2')}
+        <Flex gridGap={SPACING.spacing4} flexDirection={DIRECTION_COLUMN}>
+          <StyledText desktopStyle="bodyDefaultSemiBold">
+            {t('announcements.absorbancePlateReaderSupport.body1', {
+              version: pdVersion,
+            })}
           </StyledText>
-          <Flex marginLeft={SPACING.spacing16}>
-            <ul>
-              <li>
-                <StyledText desktopStyle="bodyDefaultRegular">
-                  <Trans
-                    t={t}
-                    components={{
-                      link1: (
-                        <LinkComponent
-                          external
-                          href={OPENTRONS_ABSORBANCE_READER_URL}
-                          color={COLORS.blue50}
-                        />
-                      ),
-                    }}
-                    i18nKey="announcements.plateReader.body3"
-                  />
-                </StyledText>
-              </li>
-              <li>
-                <StyledText desktopStyle="bodyDefaultRegular">
-                  {t('announcements.plateReader.body4')}
-                </StyledText>
-              </li>
-              <li>
-                <StyledText desktopStyle="bodyDefaultRegular">
-                  {t('announcements.plateReader.body5')}
-                </StyledText>
-              </li>
-            </ul>
+          <Flex flexDirection={DIRECTION_COLUMN}>
+            <StyledText desktopStyle="bodyDefaultRegular">
+              {t('announcements.absorbancePlateReaderSupport.body2')}
+            </StyledText>
+            <Flex marginLeft={SPACING.spacing16}>
+              <ul>
+                <li>
+                  <StyledText desktopStyle="bodyDefaultRegular">
+                    <Trans
+                      t={t}
+                      components={{
+                        link1: (
+                          <LinkComponent
+                            external
+                            href={OPENTRONS_ABSORBANCE_READER_URL}
+                            textDecoration={TEXT_DECORATION_UNDERLINE}
+                            color={COLORS.black90}
+                          />
+                        ),
+                      }}
+                      i18nKey="announcements.absorbancePlateReaderSupport.body3"
+                    />
+                  </StyledText>
+                </li>
+                <li>
+                  <StyledText desktopStyle="bodyDefaultRegular">
+                    {t('announcements.absorbancePlateReaderSupport.body4')}
+                  </StyledText>
+                </li>
+                <li>
+                  <StyledText desktopStyle="bodyDefaultRegular">
+                    {t('announcements.absorbancePlateReaderSupport.body5')}
+                  </StyledText>
+                </li>
+              </ul>
+            </Flex>
           </Flex>
           <StyledText desktopStyle="bodyDefaultRegular">
-            {t('announcements.plateReader.body6')}
+            {t('announcements.absorbancePlateReaderSupport.body6')}
           </StyledText>
           <StyledText desktopStyle="bodyDefaultRegular">
-            {t('announcements.plateReader.body7')}
+            <Trans
+              t={t}
+              components={{
+                link1: (
+                  <LinkComponent
+                    external
+                    href={DOC_URL}
+                    textDecoration={TEXT_DECORATION_UNDERLINE}
+                    color={COLORS.black90}
+                  />
+                ),
+              }}
+              i18nKey="announcements.absorbancePlateReaderSupport.body7"
+            />
           </StyledText>
         </Flex>
       ),
