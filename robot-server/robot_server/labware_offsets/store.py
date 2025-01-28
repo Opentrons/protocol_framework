@@ -6,9 +6,9 @@ from typing import Final, Literal, TypeAlias, Iterator
 from opentrons.protocol_engine.types import (
     LabwareOffsetVector,
     ModuleModel,
-    OnAddressableAreaOffsetSequenceComponent,
-    OnModuleOffsetSequenceComponent,
-    OnLabwareOffsetSequenceComponent,
+    OnAddressableAreaOffsetLocationSequenceComponent,
+    OnModuleOffsetLocationSequenceComponent,
+    OnLabwareOffsetLocationSequenceComponent,
     LabwareOffsetLocationSequenceComponents,
 )
 from opentrons.types import DeckSlotName
@@ -42,8 +42,6 @@ Unfortunately, mypy doesn't let us write `Literal[DO_NOT_FILTER]`. Use this inst
 """
 
 
-# todo(mm, 2024-12-06): Convert to be SQL-based and persistent instead of in-memory.
-# https://opentrons.atlassian.net/browse/EXEC-1015
 class LabwareOffsetStore:
     """A persistent store for labware offsets, to support the `/labwareOffsets` endpoints."""
 
@@ -69,7 +67,9 @@ class LabwareOffsetStore:
                 .row_id
             )
             transaction.execute(
-                sqlalchemy.insert(labware_offset_table).values(
+                sqlalchemy.insert(
+                    labware_offset_location_sequence_components_table
+                ).values(
                     list(
                         _pydantic_to_sql_location_sequence_iterator(
                             offset, offset_row_id
@@ -98,7 +98,7 @@ class LabwareOffsetStore:
             .join(
                 labware_offset_location_sequence_components_table,
                 labware_offset_table.c.row_id
-                == labware_offset_sequence_table.c.offset_id,
+                == labware_offset_location_sequence_components_table.c.offset_id,
             )
             .where(labware_offset_table.c.active == True)  # noqa: E712
         )
@@ -112,7 +112,7 @@ class LabwareOffsetStore:
                 labware_offset_table.c.definition_uri == definition_uri_filter
             )
         if location_slot_name_filter is not DO_NOT_FILTER:
-            filter_statement = (
+            filter_statement = filter_statement.where(
                 filter_statement.where(
                     labware_offset_location_sequence_components_table.c.component_kind
                     == "onAddressableArea"
@@ -121,7 +121,7 @@ class LabwareOffsetStore:
                     labware_offset_location_sequence_components_table.c.primary_component_value
                     == location_slot_name_filter.value
                 )
-                .exists(0)
+                .exists()
             )
         if location_module_model_filter is not DO_NOT_FILTER:
             location_module_model_filter_value = (
@@ -129,7 +129,7 @@ class LabwareOffsetStore:
                 if location_module_model_filter is not None
                 else None
             )
-            filter_statement = (
+            filter_statement = filter_statement.where(
                 filter_statement.where(
                     labware_offset_location_sequence_components_table.c.component_kind
                     == "onModule"
@@ -141,7 +141,7 @@ class LabwareOffsetStore:
                 .exists()
             )
         if location_definition_uri_filter is not DO_NOT_FILTER:
-            filter_statement = (
+            filter_statement = filter_statement.where(
                 filter_statement.where(
                     labware_offset_location_sequence_components_table.c.component_kind
                     == "onLabware"
@@ -217,15 +217,15 @@ def _sql_sequence_component_to_pydantic_sequence_component(
     component_row: sqlalchemy.engine.Row,
 ) -> LabwareOffsetLocationSequenceComponents:
     if component_row.component_kind == "onLabware":
-        yield OnLabwareOffsetSequenceComponent(
+        yield OnLabwareOffsetLocationSequenceComponent(
             labwareUri=component_row.primary_component_value
         )
     elif component_row.component_kind == "onModule":
-        yield OnModuleOffsetSequenceComponent(
+        yield OnModuleOffsetLocationSequenceComponent(
             moduleModel=ModuleModel(component_row.primary_component_value)
         )
     elif component_row.component_kind == "onAddressableArea":
-        yield OnAddressableAreaOffsetSequenceComponent(
+        yield OnAddressableAreaOffsetLocationSequenceComponent(
             addressableAreaName=component_row.primary_component_value
         )
     else:
@@ -297,7 +297,7 @@ def _pydantic_to_sql_location_sequence_iterator(
     labware_offset: StoredLabwareOffset, offset_row_id: int
 ) -> Iterator[dict[str, object]]:
     for index, component in labware_offset.locationSequence:
-        if isinstance(component, OnLabwareOffsetSequenceComponent):
+        if isinstance(component, OnLabwareOffsetLocationSequenceComponent):
             yield dict(
                 offset_id=offset_row_id,
                 sequence_ordinal=index,
@@ -305,7 +305,7 @@ def _pydantic_to_sql_location_sequence_iterator(
                 primary_component_value=component.labwareUri,
                 component_value_json=component.model_dump(),
             )
-        elif isinstance(component, OnModuleOffsetSequenceComponent):
+        elif isinstance(component, OnModuleOffsetLocationSequenceComponent):
             yield dict(
                 offset_id=offset_row_id,
                 sequence_ordinal=index,
@@ -313,7 +313,7 @@ def _pydantic_to_sql_location_sequence_iterator(
                 primary_component_value=component.moduleModel.value,
                 component_value_json=component.model_dump(),
             )
-        elif isinstance(component, OnAddressableAreaOffsetSequenceComponent):
+        elif isinstance(component, OnAddressableAreaOffsetLocationSequenceComponent):
             yield dict(
                 offset_id=offset_row_id,
                 sequence_ordinal=index,

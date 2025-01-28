@@ -62,7 +62,8 @@ def _upmigrate_stored_offsets(connection: sqlalchemy.engine.Connection) -> None:
         DeckType(guess_deck_type_from_global_config()), version=5
     )
 
-    offsets = sqlalchemy.select(schema_9.labware_offset_table)
+    offsets = connection.execute(sqlalchemy.select(schema_9.labware_offset_table))
+
     for offset in offsets:
         new_row = (
             connection.execute(
@@ -100,25 +101,28 @@ def _v9_offset_to_v10_offset_locations(
     location_sequence = legacy_offset_location_to_offset_location_sequence(
         LegacyLabwareOffsetLocation(
             slotName=DeckSlotName(v9_offset.location_slot_name),
-            moduleModel=ModuleModel(v9_offset.location_module_model)
-            if v9_offset.location_module_model is not None
-            else None,
+            moduleModel=(
+                ModuleModel(v9_offset.location_module_model)
+                if v9_offset.location_module_model is not None
+                else None
+            ),
             definitionUri=v9_offset.location_definition_uri,
         ),
+        deck_definition,
     )
     values: list[dict[str, object]] = []
-    for index, sequence_component in location_sequence.enumerate():
+    for index, sequence_component in enumerate(location_sequence):
         primary_component_value = ""
         component_value_json = ""
         if sequence_component.kind == "onLabware":
             primary_component_value = sequence_component.labwareUri
-            component_value_json = sequence_component.model_dump()
+            component_value_json = sequence_component.model_dump_json()
         elif sequence_component.kind == "onModule":
             primary_component_value = sequence_component.moduleModel.value
-            component_value_json = sequence_component.model_dump()
+            component_value_json = sequence_component.model_dump_json()
         elif sequence_component.kind == "onAddressableArea":
             primary_component_value = sequence_component.addressableAreaName
-            component_value_json = sequence_component.model_dump()
+            component_value_json = sequence_component.model_dump_json()
         else:
             # This should never happen since we're exhaustively checking kinds here
             continue

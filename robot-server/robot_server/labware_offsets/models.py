@@ -10,6 +10,21 @@ from opentrons.protocol_engine import LabwareOffsetVector, LabwareOffsetLocation
 from robot_server.errors.error_responses import ErrorDetails
 
 
+class StoredLabwareOffsetCreate(BaseModel):
+    """Create an offset for storage."""
+
+    definitionUri: str = Field(..., description="The URI for the labware's definition.")
+
+    locationSequence: LabwareOffsetLocationSequence = Field(
+        ...,
+        description="Where the labware is located on the robot. Can represent all locations, but may not be present for older runs.",
+    )
+    vector: LabwareOffsetVector = Field(
+        ...,
+        description="The offset applied to matching labware.",
+    )
+
+
 class StoredLabwareOffset(BaseModel):
     """An offset that the robot adds to a pipette's position when it moves to labware."""
 
@@ -20,8 +35,8 @@ class StoredLabwareOffset(BaseModel):
     createdAt: datetime = Field(..., description="When this labware offset was added.")
     definitionUri: str = Field(..., description="The URI for the labware's definition.")
 
-    locationSequence: LabwareOffsetLocationSequence | None = Field(
-        default=None,
+    locationSequence: LabwareOffsetLocationSequence = Field(
+        ...,
         description="Where the labware is located on the robot. Can represent all locations, but may not be present for older runs.",
     )
     vector: LabwareOffsetVector = Field(

@@ -9,7 +9,7 @@ from pydantic import Json
 from pydantic.json_schema import SkipJsonSchema
 from server_utils.fastapi_utils.light_router import LightRouter
 
-from opentrons.protocol_engine import LabwareOffsetCreate, ModuleModel
+from opentrons.protocol_engine import ModuleModel
 from opentrons.types import DeckSlotName
 
 from robot_server.labware_offsets.models import LabwareOffsetNotFound
@@ -30,7 +30,7 @@ from .store import (
     LabwareOffsetStore,
 )
 from .fastapi_dependencies import get_labware_offset_store
-from .models import StoredLabwareOffset
+from .models import StoredLabwareOffset, StoredLabwareOffsetCreate
 
 
 router = LightRouter()
@@ -54,13 +54,13 @@ async def post_labware_offset(  # noqa: D103
     store: Annotated[LabwareOffsetStore, fastapi.Depends(get_labware_offset_store)],
     new_offset_id: Annotated[str, fastapi.Depends(get_unique_id)],
     new_offset_created_at: Annotated[datetime, fastapi.Depends(get_current_time)],
-    request_body: Annotated[RequestModel[LabwareOffsetCreate], fastapi.Body()],
+    request_body: Annotated[RequestModel[StoredLabwareOffsetCreate], fastapi.Body()],
 ) -> PydanticResponse[SimpleBody[StoredLabwareOffset]]:
     new_offset = StoredLabwareOffset.model_construct(
         id=new_offset_id,
         createdAt=new_offset_created_at,
         definitionUri=request_body.data.definitionUri,
-        location=request_body.data.location,
+        locationSequence=request_body.data.locationSequence,
         vector=request_body.data.vector,
     )
     store.add(new_offset)
