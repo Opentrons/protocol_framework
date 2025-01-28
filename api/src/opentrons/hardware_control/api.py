@@ -1040,6 +1040,7 @@ class API(
         mount: top_types.Mount,
         volume: Optional[float] = None,
         rate: float = 1.0,
+        correction_volume: float = 0.0,
     ) -> None:
         """
         Aspirate a volume of liquid (in microliters/uL) using this pipette.
@@ -1074,6 +1075,7 @@ class API(
         volume: Optional[float] = None,
         rate: float = 1.0,
         push_out: Optional[float] = None,
+        correction_volume: float = 0.0,
     ) -> None:
         """
         Dispense a volume of liquid in microliters(uL) using this pipette.

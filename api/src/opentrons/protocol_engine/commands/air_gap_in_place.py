@@ -14,6 +14,7 @@ from .pipetting_common import (
     FlowRateMixin,
     BaseLiquidHandlingResult,
     OverpressureError,
+    DEFAULT_CORRECTION_VOLUME,
 )
 from .command import (
     AbstractCommandImpl,
@@ -103,6 +104,7 @@ class AirGapInPlaceImplementation(
                 volume=params.volume,
                 flow_rate=params.flowRate,
                 command_note_adder=self._command_note_adder,
+                correction_volume=params.correctionVolume or DEFAULT_CORRECTION_VOLUME,
             )
         except PipetteOverpressureError as e:
             return DefinedErrorData(

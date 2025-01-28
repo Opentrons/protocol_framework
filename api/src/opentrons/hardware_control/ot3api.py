@@ -2051,12 +2051,16 @@ class OT3API(
         mount: Union[top_types.Mount, OT3Mount],
         volume: Optional[float] = None,
         rate: float = 1.0,
+        correction_volume: float = 0.0,
     ) -> None:
         """
         Aspirate a volume of liquid (in microliters/uL) using this pipette."""
         realmount = OT3Mount.from_mount(mount)
         aspirate_spec = self._pipette_handler.plan_check_aspirate(
-            realmount, volume, rate
+            mount=realmount,
+            volume=volume,
+            rate=rate,
+            correction_volume=correction_volume,
         )
         if not aspirate_spec:
             return
@@ -2093,12 +2097,17 @@ class OT3API(
         volume: Optional[float] = None,
         rate: float = 1.0,
         push_out: Optional[float] = None,
+        correction_volume: float = 0.0,
     ) -> None:
         """
         Dispense a volume of liquid in microliters(uL) using this pipette."""
         realmount = OT3Mount.from_mount(mount)
         dispense_spec = self._pipette_handler.plan_check_dispense(
-            realmount, volume, rate, push_out
+            mount=realmount,
+            volume=volume,
+            rate=rate,
+            push_out=push_out,
+            correction_volume=correction_volume,
         )
         if not dispense_spec:
             return

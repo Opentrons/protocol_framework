@@ -87,7 +87,9 @@ class LegacyInstrumentCoreSimulator(
     def set_default_speed(self, speed: float) -> None:
         self._default_speed = speed
 
-    def air_gap_in_place(self, volume: float, flow_rate: float) -> None:
+    def air_gap_in_place(
+        self, volume: float, flow_rate: float, correction_volume: Optional[float] = None
+    ) -> None:
         assert False, "Air gap tracking only available in API version 2.22 and later"
 
     def aspirate(
@@ -99,6 +101,7 @@ class LegacyInstrumentCoreSimulator(
         flow_rate: float,
         in_place: bool,
         is_meniscus: Optional[bool] = None,
+        correction_volume: Optional[float] = None,
     ) -> None:
         if self.get_current_volume() == 0:
             # Make sure we're at the top of the labware and clear of any
@@ -141,6 +144,7 @@ class LegacyInstrumentCoreSimulator(
         in_place: bool,
         push_out: Optional[float],
         is_meniscus: Optional[bool] = None,
+        correction_volume: Optional[float] = None,
     ) -> None:
         if isinstance(location, (TrashBin, WasteChute)):
             raise APIVersionError(
