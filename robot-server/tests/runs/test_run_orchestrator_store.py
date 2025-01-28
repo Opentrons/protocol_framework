@@ -126,6 +126,11 @@ async def test_create_engine_with_labware_offsets(
             createdAt=matchers.IsA(datetime),
             definitionUri="namespace/load_name/version",
             location=pe_types.LegacyLabwareOffsetLocation(slotName=DeckSlotName.SLOT_5),
+            locationSequence=[
+                pe_types.OnAddressableAreaOffsetLocationSequenceComponent(
+                    addressableAreaName="5"
+                )
+            ],
             vector=pe_types.LabwareOffsetVector(x=1, y=2, z=3),
         )
     ]
