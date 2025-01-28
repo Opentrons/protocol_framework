@@ -1110,6 +1110,18 @@ class InstrumentCore(AbstractInstrument[WellCore, LabwareCore]):
     ) -> None:
         pass
 
+    def consolidate_liquid(
+        self,
+        liquid_class: LiquidClass,
+        volume: float,
+        source: List[Tuple[Location, WellCore]],
+        dest: Tuple[Location, WellCore],
+        new_tip: TransferTipPolicyV2,
+        tip_racks: List[Tuple[Location, LabwareCore]],
+        trash_location: Union[Location, TrashBin, WasteChute],
+    ) -> None:
+        pass
+
     def _get_location_and_well_core_from_next_tip_info(
         self,
         tip_info: NextTipInfo,
