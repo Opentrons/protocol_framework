@@ -1,4 +1,4 @@
-import '../support/commands.ts'; // Importing the custom commands file
+import '../support/commands'
 import {
   Actions,
   Verifications,

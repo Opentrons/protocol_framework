@@ -1,4 +1,3 @@
-import { contains } from 'cypress/types/jquery'
 import { executeUniversalAction, UniversalActions } from './universalActions'
 import { isEnumValue } from './utils'
 
@@ -51,9 +50,9 @@ export enum Content {
   WellPlate = 'Opentrons Tough 96 Well Plate 200 µL PCR Full Skirt',
   PartOne = 'Part 1 / 2',
   PartTwo = 'Part 2 / 2',
-  WellSelectTitle = 'Select wells using a Flex 1-Channel 1000 μL',
+  WellSelectTitle = 'Select wells using a Flex 1-Channel 1000 µL',
   ClickAndDragWellSelect = "Click and drag to select wells",
-  PipettePreselect = 'Flex 1-Channel 1000 μL',
+  PipettePreselect = 'Flex 1-Channel 1000 µL',
   TiprackPreselect = 'Opentrons Flex 96 Tip Rack 1000 µL',
   BeforeEveryAsp = 'Before every aspirate',
   OnceAtStartStep = 'Once at the start of step',
