@@ -10,7 +10,7 @@ describe('The Redesigned Create Protocol Landing Page', () => {
     cy.closeAnalyticsModal()
   })
 
-  it('content and step 1 flow works', () => {
+  it('This is create new flex and focuses on basic Flex flow', () => {
     cy.clickCreateNew()
     cy.verifyCreateNewHeader()
     const steps: StepsList = [

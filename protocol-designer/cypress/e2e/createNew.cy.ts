@@ -14,7 +14,7 @@ describe('The Redesigned Create Protocol Landing Page', () => {
     cy.closeAnalyticsModal()
   })
 
-  it('content and step 1 flow works', () => {
+  it('Quick check for the new Flex and OT-2', () => {
     // cy.clickCreateNew()
     cy.verifyCreateNewHeader()
     cy.clickCreateNew()
