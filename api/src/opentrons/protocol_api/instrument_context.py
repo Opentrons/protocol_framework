@@ -1520,9 +1520,9 @@ class InstrumentContext(publisher.CommandPublisher):
             labware.Well, Sequence[labware.Well], Sequence[Sequence[labware.Well]]
         ],
         new_tip: TransferTipPolicyV2Type = "once",
-        tip_drop_location: Optional[
+        trash_location: Optional[
             Union[types.Location, labware.Well, TrashBin, WasteChute]
-        ] = None,  # Maybe call this 'tip_drop_location' which is similar to PD
+        ] = None,
     ) -> InstrumentContext:
         """Transfer liquid from source to dest using the specified liquid class properties.
 
@@ -1561,14 +1561,9 @@ class InstrumentContext(publisher.CommandPublisher):
                     " of 'once' or 'always'."
                 )
             else:
-                tiprack = self._last_tip_picked_up_from.parent
+                tip_racks = [self._last_tip_picked_up_from.parent]
         else:
-            tiprack, well = labware.next_available_tip(
-                starting_tip=self.starting_tip,
-                tip_racks=self.tip_racks,
-                channels=self.active_channels,
-                nozzle_map=self._core.get_nozzle_map(),
-            )
+            tip_racks = self._tip_racks
         if self.current_volume != 0:
             raise RuntimeError(
                 "A transfer on a liquid class cannot start with liquid already in the tip."
@@ -1577,39 +1572,121 @@ class InstrumentContext(publisher.CommandPublisher):
             )
 
         _trash_location: Union[types.Location, labware.Well, TrashBin, WasteChute]
-        if tip_drop_location is None:
+        if trash_location is None:
             saved_trash = self.trash_container
             if isinstance(saved_trash, labware.Labware):
                 _trash_location = saved_trash.wells()[0]
             else:
                 _trash_location = saved_trash
         else:
-            _trash_location = tip_drop_location
+            _trash_location = trash_location
 
-        checked_trash_location = (
-            validation.ensure_valid_tip_drop_location_for_transfer_v2(
-                tip_drop_location=_trash_location
-            )
+        checked_trash_location = validation.ensure_valid_trash_location_for_transfer_v2(
+            trash_location=_trash_location
         )
-        liquid_class_id = self._core.load_liquid_class(
-            liquid_class=liquid_class,
-            pipette_load_name=self.name,
-            tiprack_uri=tiprack.uri,
-        )
-
         self._core.transfer_liquid(
-            liquid_class_id=liquid_class_id,
+            liquid_class=liquid_class,
             volume=volume,
-            source=[well._core for well in flat_sources_list],
-            dest=[well._core for well in flat_dests_list],
+            source=[
+                (types.Location(types.Point(), labware=well), well._core)
+                for well in flat_sources_list
+            ],
+            dest=[
+                (types.Location(types.Point(), labware=well), well._core)
+                for well in flat_dests_list
+            ],
             new_tip=valid_new_tip,
-            trash_location=(
-                checked_trash_location._core
-                if isinstance(checked_trash_location, labware.Well)
-                else checked_trash_location
-            ),
+            tip_racks=[
+                (types.Location(types.Point(), labware=rack), rack._core)
+                for rack in tip_racks
+            ],
+            trash_location=checked_trash_location,
         )
+        return self
 
+    def distribute_liquid(
+        self,
+        liquid_class: LiquidClass,
+        volume: float,
+        source: labware.Well,
+        dest: Union[
+            labware.Well, Sequence[labware.Well], Sequence[Sequence[labware.Well]]
+        ],
+        new_tip: TransferTipPolicyV2Type = "once",
+        trash_location: Optional[
+            Union[types.Location, labware.Well, TrashBin, WasteChute]
+        ] = None,
+    ) -> InstrumentContext:
+        """
+        Distribute liquid from a single source to multiple destinations
+        using the specified liquid class properties.
+
+        TODO: Add args description.
+        """
+        if not feature_flags.allow_liquid_classes(
+            robot_type=RobotTypeEnum.robot_literal_to_enum(
+                self._protocol_core.robot_type
+            )
+        ):
+            raise NotImplementedError("This method is not implemented.")
+
+        if not isinstance(source, labware.Well):
+            raise ValueError(f"Source should be a single Well but received {source}.")
+        flat_dests_list = validation.ensure_valid_flat_wells_list_for_transfer_v2(dest)
+        for well in [source] + flat_dests_list:
+            instrument.validate_takes_liquid(
+                location=well.top(),
+                reject_module=True,
+                reject_adapter=True,
+            )
+
+        valid_new_tip = validation.ensure_new_tip_policy(new_tip)
+        if valid_new_tip == TransferTipPolicyV2.NEVER:
+            if self._last_tip_picked_up_from is None:
+                raise RuntimeError(
+                    "Pipette has no tip attached to perform transfer."
+                    " Either do a pick_up_tip beforehand or specify a new_tip parameter"
+                    " of 'once' or 'always'."
+                )
+            else:
+                tip_racks = [self._last_tip_picked_up_from.parent]
+        else:
+            tip_racks = self._tip_racks
+        if self.current_volume != 0:
+            raise RuntimeError(
+                "A transfer on a liquid class cannot start with liquid already in the tip."
+                " Ensure that all previously aspirated liquid is dispensed before starting"
+                " a new transfer."
+            )
+
+        _trash_location: Union[types.Location, labware.Well, TrashBin, WasteChute]
+        if trash_location is None:
+            saved_trash = self.trash_container
+            if isinstance(saved_trash, labware.Labware):
+                _trash_location = saved_trash.wells()[0]
+            else:
+                _trash_location = saved_trash
+        else:
+            _trash_location = trash_location
+
+        checked_trash_location = validation.ensure_valid_trash_location_for_transfer_v2(
+            trash_location=_trash_location
+        )
+        self._core.distribute_liquid(
+            liquid_class=liquid_class,
+            volume=volume,
+            source=(types.Location(types.Point(), labware=source), source._core),
+            dest=[
+                (types.Location(types.Point(), labware=well), well._core)
+                for well in flat_dests_list
+            ],
+            new_tip=valid_new_tip,
+            tip_racks=[
+                (types.Location(types.Point(), labware=rack), rack._core)
+                for rack in tip_racks
+            ],
+            trash_location=checked_trash_location,
+        )
         return self
 
     @requires_version(2, 0)

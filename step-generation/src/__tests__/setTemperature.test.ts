@@ -1,11 +1,11 @@
 import { beforeEach, describe, it, expect } from 'vitest'
 import { getStateAndContextTempTCModules } from '../fixtures'
 import { setTemperature } from '../commandCreators/atomic/setTemperature'
-import type { InvariantContext, RobotState, SetTemperatureArgs } from '../types'
+import type { InvariantContext, RobotState } from '../types'
+import type { TemperatureParams } from '@opentrons/shared-data'
 
 const temperatureModuleId = 'temperatureModuleId'
 const thermocyclerId = 'thermocyclerId'
-const commandCreatorFnName = 'setTemperature'
 
 let invariantContext: InvariantContext
 let robotState: RobotState
@@ -56,10 +56,9 @@ describe('setTemperature', () => {
 
   testCases.forEach(({ expected, moduleId, testName }) => {
     it(testName, () => {
-      const args: SetTemperatureArgs = {
-        module: moduleId,
-        targetTemperature,
-        commandCreatorFnName,
+      const args: TemperatureParams = {
+        moduleId: moduleId ?? '',
+        celsius: targetTemperature,
       }
       const result = setTemperature(args, invariantContext, robotState)
       expect(result).toEqual(expected)

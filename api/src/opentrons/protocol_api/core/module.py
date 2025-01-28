@@ -379,3 +379,25 @@ class AbstractAbsorbanceReaderCore(AbstractModuleCore):
     @abstractmethod
     def is_lid_on(self) -> bool:
         """Return True if the Absorbance Reader's lid is currently closed."""
+
+
+class AbstractFlexStackerCore(AbstractModuleCore):
+    """Core control interface for an attached Flex Stacker."""
+
+    MODULE_TYPE: ClassVar = ModuleType.FLEX_STACKER
+
+    @abstractmethod
+    def get_serial_number(self) -> str:
+        """Get the module's unique hardware serial number."""
+
+    @abstractmethod
+    def set_static_mode(self, static: bool) -> None:
+        """Set the Flex Stacker's static mode."""
+
+    @abstractmethod
+    def retrieve(self) -> None:
+        """Release a labware from the hopper to the staging slot."""
+
+    @abstractmethod
+    def store(self) -> None:
+        """Store a labware in the stacker hopper."""

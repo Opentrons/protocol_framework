@@ -10,11 +10,12 @@ import {
   ListItem,
   SPACING,
   StyledText,
+  Tooltip,
   TYPOGRAPHY,
+  useHoverTooltip,
   WRAP,
 } from '@opentrons/components'
 import {
-  ABSORBANCE_READER_TYPE,
   ABSORBANCE_READER_V1,
   FLEX_ROBOT_TYPE,
   getModuleDisplayName,
@@ -71,8 +72,8 @@ export function SelectModules(props: WizardTileProps): JSX.Element | null {
     TEMPERATURE_MODULE_TYPE,
     HEATERSHAKER_MODULE_TYPE,
     MAGNETIC_BLOCK_TYPE,
-    ABSORBANCE_READER_TYPE,
   ]
+  const hasGripper = additionalEquipment.some(aE => aE === 'gripper')
 
   const handleAddModule = (
     moduleModel: ModuleModel,
@@ -189,15 +190,12 @@ export function SelectModules(props: WizardTileProps): JSX.Element | null {
                     moduleModel
                   )
                   return (
-                    <EmptySelectorButton
+                    <AddModuleEmptySelectorButton
                       key={moduleModel}
-                      disabled={numSlotsAvailable === 0}
-                      textAlignment={TYPOGRAPHY.textAlignLeft}
-                      iconName="plus"
-                      text={getModuleDisplayName(moduleModel)}
-                      onClick={() => {
-                        handleAddModule(moduleModel, numSlotsAvailable === 0)
-                      }}
+                      moduleModel={moduleModel}
+                      areSlotsAvailable={numSlotsAvailable > 0}
+                      hasGripper={hasGripper}
+                      handleAddModule={handleAddModule}
                     />
                   )
                 })}
@@ -304,5 +302,43 @@ export function SelectModules(props: WizardTileProps): JSX.Element | null {
         </Flex>
       </WizardBody>
     </HandleEnter>
+  )
+}
+
+interface AddModuleEmptySelectorButtonProps {
+  moduleModel: ModuleModel
+  areSlotsAvailable: boolean
+  hasGripper: boolean
+  handleAddModule: (arg0: ModuleModel, arg1: boolean) => void
+}
+
+function AddModuleEmptySelectorButton(
+  props: AddModuleEmptySelectorButtonProps
+): JSX.Element {
+  const { moduleModel, areSlotsAvailable, hasGripper, handleAddModule } = props
+  const [targetProps, tooltipProps] = useHoverTooltip()
+  const { t } = useTranslation('create_new_protocol')
+  const disableGripperRequired =
+    !hasGripper && moduleModel === ABSORBANCE_READER_V1
+
+  return (
+    <>
+      <Flex {...targetProps}>
+        <EmptySelectorButton
+          disabled={!areSlotsAvailable || disableGripperRequired}
+          textAlignment={TYPOGRAPHY.textAlignLeft}
+          iconName="plus"
+          text={getModuleDisplayName(moduleModel)}
+          onClick={() => {
+            handleAddModule(moduleModel, !areSlotsAvailable)
+          }}
+        />
+      </Flex>
+      {disableGripperRequired ? (
+        <Tooltip tooltipProps={tooltipProps}>
+          {t('add_gripper_for_absorbance_reader')}
+        </Tooltip>
+      ) : null}
+    </>
   )
 }

@@ -40,6 +40,12 @@ import {
   forDispenseInPlace,
   forDropTipInPlace,
 } from './inPlaceCommandUpdates'
+import {
+  forAbsorbanceReaderCloseLid,
+  forAbsorbanceReaderInitialize,
+  forAbsorbanceReaderOpenLid,
+} from './absorbanceReaderUpdates'
+
 import type { CreateCommand } from '@opentrons/shared-data'
 import type {
   InvariantContext,
@@ -301,6 +307,29 @@ function _getNextRobotStateAndWarningsSingleCommand(
       break
     //  no state updates required
     case 'heaterShaker/waitForTemperature':
+      break
+    case 'absorbanceReader/openLid':
+      forAbsorbanceReaderOpenLid(
+        command.params,
+        invariantContext,
+        robotStateAndWarnings
+      )
+      break
+    case 'absorbanceReader/closeLid':
+      forAbsorbanceReaderCloseLid(
+        command.params,
+        invariantContext,
+        robotStateAndWarnings
+      )
+      break
+    case 'absorbanceReader/initialize':
+      forAbsorbanceReaderInitialize(
+        command.params,
+        invariantContext,
+        robotStateAndWarnings
+      )
+      break
+    case 'absorbanceReader/read':
       break
     default:
       assert(

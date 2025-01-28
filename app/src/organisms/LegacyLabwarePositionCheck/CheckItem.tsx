@@ -7,6 +7,7 @@ import {
   Flex,
   LegacyStyledText,
   TYPOGRAPHY,
+  getLabwareDefinitionsFromCommands,
 } from '@opentrons/components'
 import { RobotMotionLoader } from './RobotMotionLoader'
 import { PrepareSpace } from './PrepareSpace'
@@ -23,7 +24,6 @@ import {
 } from '@opentrons/shared-data'
 import { useSelector } from 'react-redux'
 import { getLabwareDef } from './utils/labware'
-import { getLabwareDefinitionsFromCommands } from '/app/local-resources/labware'
 import { UnorderedList } from '/app/molecules/UnorderedList'
 import { getCurrentOffsetForLabwareInLocation } from '/app/transformations/analysis'
 import { getIsOnDevice } from '/app/redux/config'

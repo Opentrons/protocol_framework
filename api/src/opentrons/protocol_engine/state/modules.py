@@ -35,7 +35,7 @@ from opentrons.protocol_engine.state.module_substates.absorbance_reader_substate
     AbsorbanceReaderMeasureMode,
 )
 from opentrons.types import DeckSlotName, MountType, StagingSlotName
-from .update_types import AbsorbanceReaderStateUpdate
+from .update_types import AbsorbanceReaderStateUpdate, FlexStackerStateUpdate
 from ..errors import ModuleNotConnectedError
 
 from ..types import (
@@ -77,11 +77,13 @@ from .module_substates import (
     TemperatureModuleSubState,
     ThermocyclerModuleSubState,
     AbsorbanceReaderSubState,
+    FlexStackerSubState,
     MagneticModuleId,
     HeaterShakerModuleId,
     TemperatureModuleId,
     ThermocyclerModuleId,
     AbsorbanceReaderId,
+    FlexStackerId,
     MagneticBlockSubState,
     MagneticBlockId,
     ModuleSubStateType,
@@ -301,6 +303,8 @@ class ModuleStore(HasState[ModuleState], HandlesActions):
             self._handle_absorbance_reader_commands(
                 state_update.absorbance_reader_state_update
             )
+        if state_update.flex_stacker_state_update != update_types.NO_CHANGE:
+            self._handle_flex_stacker_commands(state_update.flex_stacker_state_update)
 
     def _add_module_substate(
         self,
@@ -363,6 +367,12 @@ class ModuleStore(HasState[ModuleState], HandlesActions):
                 measure_mode=None,
                 configured_wavelengths=None,
                 reference_wavelength=None,
+            )
+        elif ModuleModel.is_flex_stacker(actual_model):
+            self._state.substate_by_module_id[module_id] = FlexStackerSubState(
+                module_id=FlexStackerId(module_id),
+                in_static_mode=False,
+                hopper_labware_ids=[],
             )
 
     def _update_additional_slots_occupied_by_thermocycler(
@@ -605,6 +615,20 @@ class ModuleStore(HasState[ModuleState], HandlesActions):
             data=data,
         )
 
+    def _handle_flex_stacker_commands(
+        self, state_update: FlexStackerStateUpdate
+    ) -> None:
+        """Handle Flex Stacker state updates."""
+        module_id = state_update.module_id
+        prev_substate = self._state.substate_by_module_id[module_id]
+        assert isinstance(
+            prev_substate, FlexStackerSubState
+        ), f"{module_id} is not a Flex Stacker."
+
+        self._state.substate_by_module_id[
+            module_id
+        ] = prev_substate.new_from_state_change(state_update)
+
 
 class ModuleView:
     """Read-only view of computed module state."""
@@ -754,6 +778,20 @@ class ModuleView:
             module_id=module_id,
             expected_type=AbsorbanceReaderSubState,
             expected_name="Absorbance Reader",
+        )
+
+    def get_flex_stacker_substate(self, module_id: str) -> FlexStackerSubState:
+        """Return a `FlexStackerSubState` for the given Flex Stacker.
+
+        Raises:
+           ModuleNotLoadedError: If module_id has not been loaded.
+           WrongModuleTypeError: If module_id has been loaded,
+               but it's not a Flex Stacker.
+        """
+        return self._get_module_substate(
+            module_id=module_id,
+            expected_type=FlexStackerSubState,
+            expected_name="Flex Stacker",
         )
 
     def get_location(self, module_id: str) -> DeckSlotLocation:
@@ -1160,7 +1198,10 @@ class ModuleView:
                     else:
                         return m
 
-        raise errors.ModuleNotAttachedError(f"No available {model.value} found.")
+        raise errors.ModuleNotAttachedError(
+            f"No available {model.value} with {expected_serial_number or 'any'}"
+            " serial found."
+        )
 
     def get_heater_shaker_movement_restrictors(
         self,
@@ -1187,7 +1228,10 @@ class ModuleView:
     ) -> None:
         """Raise if the given location has a module in it."""
         for module in self.get_all():
-            if module.location == location:
+            if (
+                module.location == location
+                and module.model != ModuleModel.FLEX_STACKER_MODULE_V1
+            ):
                 raise errors.LocationIsOccupiedError(
                     f"Module {module.model} is already present at {location}."
                 )
@@ -1289,6 +1333,10 @@ class ModuleView:
             # only allowed in column 3
             assert deck_slot.value[-1] == "3"
             return f"absorbanceReaderV1{deck_slot.value}"
+        elif model == ModuleModel.FLEX_STACKER_MODULE_V1:
+            # loaded to column 3 but the addressable area is in column 4
+            assert deck_slot.value[-1] == "3"
+            return f"flexStackerModuleV1{deck_slot.value[0]}4"
 
         raise ValueError(
             f"Unknown module {model.name} has no addressable areas to provide."

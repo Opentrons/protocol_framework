@@ -370,7 +370,7 @@ jobs:
 
       - name: 'upload github artifact'
         if: matrix.target == 'desktop'
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: 'opentrons-${{matrix.variant}}-${{ matrix.os }}'
           path: app-shell/dist/publish
@@ -392,7 +392,7 @@ jobs:
     if: contains(fromJSON(needs.determine-build-type.outputs.variants), 'release') || contains(fromJSON(needs.determine-build-type.outputs.variants), 'internal-release')
     steps:
       - name: 'download run app builds'
-        uses: 'actions/download-artifact@v3'
+        uses: 'actions/download-artifact@v4'
         with:
           path: ./artifacts
       - name: 'separate release and internal-release artifacts'

@@ -1,3 +1,7 @@
+import { absorbanceReaderCloseLid } from './absorbanceReaderCloseLid'
+import { absorbanceReaderInitialize } from './absorbanceReaderInitialize'
+import { absorbanceReaderOpenLid } from './absorbanceReaderOpenLid'
+import { absorbanceReaderRead } from './absorbanceReaderRead'
 import { aspirate } from './aspirate'
 import { aspirateInPlace } from './aspirateInPlace'
 import { blowout } from './blowout'
@@ -17,18 +21,23 @@ import { moveLabware } from './moveLabware'
 import { moveToAddressableArea } from './moveToAddressableArea'
 import { moveToAddressableAreaForDropTip } from './moveToAddressableAreaForDropTip'
 import { moveToWell } from './moveToWell'
-import { replaceTip } from './replaceTip'
 import { setTemperature } from './setTemperature'
 import { touchTip } from './touchTip'
 import { waitForTemperature } from './waitForTemperature'
+import { pickUpTip } from './pickUpTip'
+
 export {
+  absorbanceReaderCloseLid,
+  absorbanceReaderInitialize,
+  absorbanceReaderOpenLid,
+  absorbanceReaderRead,
   aspirate,
   aspirateInPlace,
   blowout,
   blowOutInPlace,
+  comment,
   configureForVolume,
   configureNozzleLayout,
-  comment,
   deactivateTemperature,
   delay,
   disengageMagnet,
@@ -41,7 +50,7 @@ export {
   moveToAddressableArea,
   moveToAddressableAreaForDropTip,
   moveToWell,
-  replaceTip,
+  pickUpTip,
   setTemperature,
   touchTip,
   waitForTemperature,

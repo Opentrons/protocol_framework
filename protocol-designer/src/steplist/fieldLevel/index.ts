@@ -416,12 +416,15 @@ const stepFieldHelperMap: Record<StepFieldName, StepFieldHelpers> = {
   },
   aspirate_flowRate: {
     maskValue: composeMaskers(trimDecimals(1)),
+    castValue: numberOrNull,
   },
   dispense_flowRate: {
     maskValue: composeMaskers(trimDecimals(1)),
+    castValue: numberOrNull,
   },
   mix_flowRate: {
     maskValue: composeMaskers(trimDecimals(1)),
+    castValue: numberOrNull,
   },
 }
 const profileFieldHelperMap: Record<string, StepFieldHelpers> = {

@@ -1,4 +1,5 @@
 import uuidv4 from 'uuid/v4'
+import { absorbanceReaderCollision } from './absorbanceReaderCollision'
 import { commandCreatorsTimeline } from './commandCreatorsTimeline'
 import { curryCommandCreator } from './curryCommandCreator'
 import { reduceCommandCreators } from './reduceCommandCreators'
@@ -8,6 +9,7 @@ import { getLabwareSlot } from './getLabwareSlot'
 import { movableTrashCommandsUtil } from './movableTrashCommandsUtil'
 
 export {
+  absorbanceReaderCollision,
   commandCreatorsTimeline,
   curryCommandCreator,
   reduceCommandCreators,
