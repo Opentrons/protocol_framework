@@ -15,7 +15,7 @@
         "default": 10,
         "valuesByApiLevel": { "2.14": 10 }
       },
-      "defaultFlowAcceleration": 16000.0,
+      "defaultFlowAcceleration": 3160.0
       "defaultTipLength": 52.0,
       "defaultReturnTipHeight": 0.6,
       "aspirate": {
@@ -64,7 +64,7 @@
         "default": 10,
         "valuesByApiLevel": { "2.14": 10 }
       },
-      "defaultFlowAcceleration": 16000.0,
+      "defaultFlowAcceleration": 3160.0
       "defaultTipLength": 57.9,
       "defaultReturnTipHeight": 0.2,
       "aspirate": {
@@ -127,7 +127,7 @@
         "default": 10,
         "valuesByApiLevel": { "2.14": 10 }
       },
-      "defaultFlowAcceleration": 16000.0,
+      "defaultFlowAcceleration": 3160.0
       "defaultTipLength": 58.35,
       "defaultReturnTipHeight": 0.2,
       "aspirate": {
