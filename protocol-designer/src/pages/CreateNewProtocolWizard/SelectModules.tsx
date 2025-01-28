@@ -178,6 +178,7 @@ export function SelectModules(props: WizardTileProps): JSX.Element | null {
             ) : null}
             <Flex gridGap={SPACING.spacing4} flexWrap={WRAP}>
               {filteredSupportedModules
+                .sort((moduleA, moduleB) => moduleA.localeCompare(moduleB))
                 .filter(module =>
                   enableAbsorbanceReader
                     ? module
@@ -219,6 +220,9 @@ export function SelectModules(props: WizardTileProps): JSX.Element | null {
                   gridGap={SPACING.spacing4}
                 >
                   {Object.entries(modules)
+                    .sort(([, moduleA], [, moduleB]) =>
+                      moduleA.model.localeCompare(moduleB.model)
+                    )
                     .reduce<Array<FormModule & { count: number; key: string }>>(
                       (acc, [key, module]) => {
                         const existingModule = acc.find(
@@ -253,7 +257,9 @@ export function SelectModules(props: WizardTileProps): JSX.Element | null {
                         },
                         dropdownType: 'neutral' as DropdownBorder,
                         filterOptions: getNumOptions(
-                          numSlotsAvailable + module.count
+                          module.model !== ABSORBANCE_READER_V1
+                            ? numSlotsAvailable + module.count
+                            : numSlotsAvailable
                         ),
                       }
                       return (
