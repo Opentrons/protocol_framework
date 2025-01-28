@@ -371,6 +371,23 @@ class AbstractInstrument(ABC, Generic[WellCoreType, LabwareCoreType]):
         ...
 
     @abstractmethod
+    def consolidate_liquid(
+        self,
+        liquid_class: LiquidClass,
+        volume: float,
+        source: List[Tuple[types.Location, WellCoreType]],
+        dest: Tuple[types.Location, WellCoreType],
+        new_tip: TransferTipPolicyV2,
+        tip_racks: List[Tuple[types.Location, LabwareCoreType]],
+        trash_location: Union[types.Location, TrashBin, WasteChute],
+    ) -> None:
+        """
+        Consolidate liquid from multiple sources to a single destination
+        using the specified liquid class properties.
+        """
+        ...
+
+    @abstractmethod
     def is_tip_tracking_available(self) -> bool:
         """Return whether auto tip tracking is available for the pipette's current nozzle configuration."""
 
