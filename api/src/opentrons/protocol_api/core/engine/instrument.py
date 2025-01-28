@@ -126,7 +126,9 @@ class InstrumentCore(AbstractInstrument[WellCore, LabwareCore]):
             pipette_id=self._pipette_id, speed=speed
         )
 
-    def air_gap_in_place(self, volume: float, flow_rate: float) -> None:
+    def air_gap_in_place(
+        self, volume: float, flow_rate: float, correction_volume: Optional[float] = None
+    ) -> None:
         """Aspirate a given volume of air from the current location of the pipette.
 
         Args:
@@ -135,7 +137,10 @@ class InstrumentCore(AbstractInstrument[WellCore, LabwareCore]):
         """
         self._engine_client.execute_command(
             cmd.AirGapInPlaceParams(
-                pipetteId=self._pipette_id, volume=volume, flowRate=flow_rate
+                pipetteId=self._pipette_id,
+                volume=volume,
+                flowRate=flow_rate,
+                correctionVolume=correction_volume,
             )
         )
 
@@ -148,6 +153,7 @@ class InstrumentCore(AbstractInstrument[WellCore, LabwareCore]):
         flow_rate: float,
         in_place: bool,
         is_meniscus: Optional[bool] = None,
+        correction_volume: Optional[float] = None,
     ) -> None:
         """Aspirate a given volume of liquid from the specified location.
         Args:
@@ -174,7 +180,10 @@ class InstrumentCore(AbstractInstrument[WellCore, LabwareCore]):
 
             self._engine_client.execute_command(
                 cmd.AspirateInPlaceParams(
-                    pipetteId=self._pipette_id, volume=volume, flowRate=flow_rate
+                    pipetteId=self._pipette_id,
+                    volume=volume,
+                    flowRate=flow_rate,
+                    correctionVolume=correction_volume,
                 )
             )
 
@@ -205,6 +214,7 @@ class InstrumentCore(AbstractInstrument[WellCore, LabwareCore]):
                     wellLocation=well_location,
                     volume=volume,
                     flowRate=flow_rate,
+                    correctionVolume=correction_volume,
                 )
             )
 
@@ -220,6 +230,7 @@ class InstrumentCore(AbstractInstrument[WellCore, LabwareCore]):
         in_place: bool,
         push_out: Optional[float],
         is_meniscus: Optional[bool] = None,
+        correction_volume: Optional[float] = None,
     ) -> None:
         """Dispense a given volume of liquid into the specified location.
         Args:
@@ -267,6 +278,7 @@ class InstrumentCore(AbstractInstrument[WellCore, LabwareCore]):
                     volume=volume,
                     flowRate=flow_rate,
                     pushOut=push_out,
+                    correctionVolume=correction_volume,
                 )
             )
         else:
@@ -297,6 +309,7 @@ class InstrumentCore(AbstractInstrument[WellCore, LabwareCore]):
                     volume=volume,
                     flowRate=flow_rate,
                     pushOut=push_out,
+                    correctionVolume=correction_volume,
                 )
             )
 
