@@ -1,5 +1,7 @@
-import { Actions, Verifications, runCreateTest } from '../support/createNew'
+import { SetupActions, SetupVerifications } from '../support/SetupSteps'
 import { UniversalActions } from '../support/universalActions'
+import { runSteps } from '../support/StepExecution'
+import type { StepsList } from '../support/StepExecution'
 
 describe('The Redesigned Create Protocol Landing Page', () => {
   beforeEach(() => {
@@ -11,23 +13,23 @@ describe('The Redesigned Create Protocol Landing Page', () => {
   it('content and step 1 flow works', () => {
     cy.clickCreateNew()
     cy.verifyCreateNewHeader()
-    const steps: Array<Actions | Verifications | UniversalActions> = [
-      Verifications.OnStep1,
-      Verifications.FlexSelected,
+    const steps: StepsList = [
+      SetupVerifications.OnStep1,
+      SetupVerifications.FlexSelected,
       UniversalActions.Snapshot,
-      Actions.SelectOT2,
-      Verifications.OT2Selected,
+      SetupActions.SelectOT2,
+      SetupVerifications.OT2Selected,
       UniversalActions.Snapshot,
-      Actions.SelectFlex,
-      Verifications.FlexSelected,
+      SetupActions.SelectFlex,
+      SetupVerifications.FlexSelected,
       UniversalActions.Snapshot,
-      Actions.Confirm,
-      Verifications.OnStep2,
-      Actions.SingleChannelPipette50,
-      Verifications.StepTwo50uL,
+      SetupActions.Confirm,
+      SetupVerifications.OnStep2,
+      SetupActions.SingleChannelPipette50,
+      SetupVerifications.StepTwo50uL,
       UniversalActions.Snapshot,
-      Actions.Confirm,
-      Verifications.StepTwoPart3,
+      SetupActions.Confirm,
+      SetupVerifications.StepTwoPart3,
       UniversalActions.Snapshot,
       Actions.Confirm,
       Verifications.OnStep3,
@@ -50,7 +52,7 @@ describe('The Redesigned Create Protocol Landing Page', () => {
       Actions.AddHardwareLabware,
       Actions.ClickLabwareHeader,
       Actions.ClickWellPlatesSection,
-      Actions.SelectArmadillo96WellPlateDefinition,
+      Actions.SelectArmadillo96WellPlate,
       Actions.ChoseDeckSlotC2Labware,
       Actions.AddLiquid,
       Actions.ClickLiquidButton,
@@ -60,17 +62,16 @@ describe('The Redesigned Create Protocol Landing Page', () => {
       Actions.LiquidDropdown,
       Verifications.LiquidPage,
       UniversalActions.Snapshot,
-      Actions.SelectLiquidWells,
-      Actions.SetVolumeAndSaveforWells,
-      Actions.ChoseDeckSlotC3,
-      Actions.AddHardwareLabware,
-      Actions.ClickLabwareHeader,
-      Actions.ClickWellPlatesSection,
-      Actions.SelectBioRad96WellPlateDefinition,
-      Actions.ProtocolStepsH,
-      Actions.AddStep,
-      Actions.SelectTransfer,
-      Verifications.TransferPopOut,
+      SetupActions.SelectLiquidWells,
+      SetupActions.SetVolumeAndSaveforWells,
+      SetupActions.ChoseDeckSlotC3,
+      SetupActions.AddHardwareLabware,
+      SetupActions.ClickLabwareHeader,
+      SetupActions.ClickWellPlatesSection,
+      SetupActions.SelectBioRad96WellPlate,
+      SetupActions.ProtocolStepsH,
+      SetupActions.AddStep,
+      SetupVerifications.TransferPopOut,
       UniversalActions.Snapshot,
       Actions.ChoseSourceLabware,
       Actions.SelectArmadillo96WellPlateTransfer,
@@ -112,5 +113,6 @@ describe('The Redesigned Create Protocol Landing Page', () => {
 
     cy.contains('Save').click()
     cy.contains('button', 'Transfer').should('be.visible').click()
+    runSteps(steps)
   })
 })

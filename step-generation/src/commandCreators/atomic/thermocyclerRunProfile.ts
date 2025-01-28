@@ -1,24 +1,24 @@
 import { uuid } from '../../utils'
-import type { TCProfileParams } from '@opentrons/shared-data/protocol/types/schemaV4'
+import type { TCProfileParams } from '@opentrons/shared-data'
 import type { CommandCreator } from '../../types'
 export const thermocyclerRunProfile: CommandCreator<TCProfileParams> = (
   args,
   invariantContext,
   prevRobotState
 ) => {
-  const { module, profile, volume } = args
+  const { moduleId, profile, blockMaxVolumeUl } = args
   return {
     commands: [
       {
         commandType: 'thermocycler/runProfile',
         key: uuid(),
         params: {
-          moduleId: module,
+          moduleId,
           profile: profile.map(profileItem => ({
-            holdSeconds: profileItem.holdTime,
-            celsius: profileItem.temperature,
+            holdSeconds: profileItem.holdSeconds,
+            celsius: profileItem.celsius,
           })),
-          blockMaxVolumeUl: volume,
+          blockMaxVolumeUl,
         },
       },
     ],

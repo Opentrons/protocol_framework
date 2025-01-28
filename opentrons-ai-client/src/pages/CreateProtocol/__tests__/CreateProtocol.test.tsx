@@ -119,8 +119,8 @@ describe('CreateProtocol', () => {
     expect(previewItems[0]).toHaveTextContent('Basic aliquoting')
     expect(previewItems[1]).toHaveTextContent('Test description')
     expect(previewItems[2]).toHaveTextContent('Opentrons Flex')
-    expect(previewItems[3]).toHaveTextContent('Flex 1-Channel 50 μL')
-    expect(previewItems[4]).toHaveTextContent('Flex 8-Channel 50 μL')
+    expect(previewItems[3]).toHaveTextContent('Flex 1-Channel 50 µL')
+    expect(previewItems[4]).toHaveTextContent('Flex 8-Channel 50 µL')
   })
 
   it('should open the Modules section when the Instruments section is completed', async () => {

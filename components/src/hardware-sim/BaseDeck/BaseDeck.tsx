@@ -305,6 +305,7 @@ export function BaseDeck(props: BaseDeckProps): JSX.Element {
           }) => {
             if (
               labwareLocation === 'offDeck' ||
+              labwareLocation === 'systemLocation' ||
               !('slotName' in labwareLocation) ||
               // for legacy protocols that list fixed trash as a labware, do not render
               definition.parameters.loadName ===
@@ -380,6 +381,7 @@ export function BaseDeck(props: BaseDeckProps): JSX.Element {
           ({ labwareLocation, definition, stacked = false }) => {
             if (
               labwareLocation === 'offDeck' ||
+              labwareLocation === 'systemLocation' ||
               !('slotName' in labwareLocation) ||
               // for legacy protocols that list fixed trash as a labware, do not render
               definition.parameters.loadName ===

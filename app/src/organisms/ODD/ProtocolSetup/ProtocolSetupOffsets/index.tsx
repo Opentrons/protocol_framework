@@ -7,6 +7,7 @@ import {
   InfoScreen,
   JUSTIFY_SPACE_BETWEEN,
   SPACING,
+  getLabwareDefinitionsFromCommands,
   StyledText,
 } from '@opentrons/components'
 
@@ -15,8 +16,7 @@ import { useToaster } from '/app/organisms/ToasterOven'
 import { ODDBackButton } from '/app/molecules/ODDBackButton'
 import { FloatingActionButton, SmallButton } from '/app/atoms/buttons'
 import type { SetupScreens } from '../types'
-import { TerseOffsetTable } from '/app/organisms/LegacyLabwarePositionCheck/ResultsSummary'
-import { getLabwareDefinitionsFromCommands } from '/app/local-resources/labware'
+import { TerseOffsetTable } from '/app/organisms/TerseOffsetTable'
 import {
   useNotifyRunQuery,
   useMostRecentCompletedAnalysis,
@@ -33,7 +33,6 @@ export interface ProtocolSetupOffsetsProps {
   LPCWizard: JSX.Element | null
   isConfirmed: boolean
   setIsConfirmed: (confirmed: boolean) => void
-  isNewLpc: boolean
 }
 
 export function ProtocolSetupOffsets({
@@ -44,7 +43,6 @@ export function ProtocolSetupOffsets({
   launchLPC,
   lpcDisabledReason,
   LPCWizard,
-  isNewLpc,
 }: ProtocolSetupOffsetsProps): JSX.Element {
   const { t } = useTranslation('protocol_setup')
   const { makeSnackbar } = useToaster()
@@ -78,8 +76,7 @@ export function ProtocolSetupOffsets({
   const nonIdentityOffsets = getLatestCurrentOffsets(sortedOffsets)
   return (
     <>
-      {isNewLpc ? null : LPCWizard}
-      {LPCWizard == null && (
+      {LPCWizard ?? (
         <>
           <Flex
             flexDirection={DIRECTION_ROW}
@@ -135,7 +132,7 @@ export function ProtocolSetupOffsets({
               if (lpcDisabledReason != null) {
                 makeDisabledReasonSnackbar()
               } else {
-                isNewLpc ? (() => null)() : launchLPC()
+                launchLPC()
               }
             }}
           />

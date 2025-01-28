@@ -1,7 +1,7 @@
 """Models and implementation for the ``moveLabware`` command."""
 
 from __future__ import annotations
-from typing import TYPE_CHECKING, Optional, Type, Any
+from typing import TYPE_CHECKING, Optional, Type, Any, List
 
 from pydantic.json_schema import SkipJsonSchema
 from pydantic import BaseModel, Field
@@ -273,7 +273,6 @@ class MoveLabwareImplementation(AbstractCommandImpl[MoveLabwareParams, _ExecuteR
                 raise LabwareMovementNotAllowedError(
                     f"Cannot move adapter '{current_labware_definition.parameters.loadName}' with gripper."
                 )
-
             validated_current_loc = (
                 self._state_view.geometry.ensure_valid_gripper_location(
                     current_labware.location
@@ -354,6 +353,40 @@ class MoveLabwareImplementation(AbstractCommandImpl[MoveLabwareParams, _ExecuteR
             new_location=available_new_location,
             new_offset_id=new_offset_id,
         )
+
+        if labware_validation.validate_definition_is_lid(
+            definition=self._state_view.labware.get_definition(params.labwareId)
+        ):
+            parent_updates: List[str] = []
+            lid_updates: List[str | None] = []
+            # when moving a lid between locations we need to:
+            assert isinstance(current_labware.location, OnLabwareLocation)
+            if (
+                self._state_view.labware.get_lid_by_labware_id(
+                    current_labware.location.labwareId
+                )
+                is not None
+            ):
+                # if the source location was a parent labware and not a lid stack or lid, update the parent labware lid ID to None (no more lid)
+                parent_updates.append(current_labware.location.labwareId)
+                lid_updates.append(None)
+
+            # If we're moving to a non lid object, add to the setlids list of things to do
+            if isinstance(
+                available_new_location, OnLabwareLocation
+            ) and not labware_validation.validate_definition_is_lid(
+                self._state_view.labware.get_definition(
+                    available_new_location.labwareId
+                )
+            ):
+                parent_updates.append(available_new_location.labwareId)
+                lid_updates.append(params.labwareId)
+            # Add to setlids
+            if len(parent_updates) > 0:
+                state_update.set_lids(
+                    parent_labware_ids=parent_updates,
+                    lid_ids=lid_updates,
+                )
 
         return SuccessData(
             public=MoveLabwareResult(offsetId=new_offset_id),
