@@ -214,14 +214,17 @@ export function DeckSetupContainer(props: DeckSetupTabType): JSX.Element {
   )
 
   return (
-    <Flex height="100%">
+    // <Flex height="100%" css={{ outline: 'solid 1px red' }}>
+    <>
       <Flex
-        backgroundColor={COLORS.white}
+        backgroundColor={COLORS.red20}
         borderRadius={BORDERS.borderRadius12}
         width="100%"
-        height={tab === 'protocolSteps' ? '65.75vh' : '100%'}
+        // height={tab === 'protocolSteps' ? '65.75vh' : '100%'}
+        height="65.75vh"
         flexDirection={DIRECTION_COLUMN}
-        padding={isZoomed ? '0' : SPACING.spacing24}
+        padding={isZoomed ? '0' : SPACING.spacing40}
+        css={{ outline: 'solid 1px blue' }}
       >
         <Flex
           width="100%"
@@ -404,6 +407,6 @@ export function DeckSetupContainer(props: DeckSetupTabType): JSX.Element {
           setHoveredLabware={setHoveredLabware}
         />
       ) : null}
-    </Flex>
+    </>
   )
 }

@@ -97,6 +97,7 @@ export function ProtocolSteps(): JSX.Element {
         flex="2.85"
         paddingTop={showTimelineAlerts ? '0' : SPACING.spacing24}
         position={POSITION_RELATIVE}
+        backgroundColor={COLORS.red40}
       >
         <Flex
           flexDirection={DIRECTION_COLUMN}
