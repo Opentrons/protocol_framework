@@ -173,22 +173,24 @@ export function SelectModules(props: WizardTileProps): JSX.Element | null {
               </StyledText>
             ) : null}
             <Flex gridGap={SPACING.spacing4} flexWrap={WRAP}>
-              {filteredSupportedModules.map(moduleModel => {
-                const numSlotsAvailable = getNumSlotsAvailable(
-                  modules,
-                  additionalEquipment,
-                  moduleModel
-                )
-                return (
-                  <AddModuleEmptySelectorButton
-                    key={moduleModel}
-                    moduleModel={moduleModel}
-                    areSlotsAvailable={numSlotsAvailable > 0}
-                    hasGripper={hasGripper}
-                    handleAddModule={handleAddModule}
-                  />
-                )
-              })}
+              {filteredSupportedModules
+                .sort((moduleA, moduleB) => moduleA.localeCompare(moduleB))
+                .map(moduleModel => {
+                  const numSlotsAvailable = getNumSlotsAvailable(
+                    modules,
+                    additionalEquipment,
+                    moduleModel
+                  )
+                  return (
+                    <AddModuleEmptySelectorButton
+                      key={moduleModel}
+                      moduleModel={moduleModel}
+                      areSlotsAvailable={numSlotsAvailable > 0}
+                      hasGripper={hasGripper}
+                      handleAddModule={handleAddModule}
+                    />
+                  )
+                })}
             </Flex>
             {modules != null && Object.keys(modules).length > 0 ? (
               <Flex
@@ -209,6 +211,9 @@ export function SelectModules(props: WizardTileProps): JSX.Element | null {
                   gridGap={SPACING.spacing4}
                 >
                   {Object.entries(modules)
+                    .sort(([, moduleA], [, moduleB]) =>
+                      moduleA.model.localeCompare(moduleB.model)
+                    )
                     .reduce<Array<FormModule & { count: number; key: string }>>(
                       (acc, [key, module]) => {
                         const existingModule = acc.find(
@@ -243,7 +248,9 @@ export function SelectModules(props: WizardTileProps): JSX.Element | null {
                         },
                         dropdownType: 'neutral' as DropdownBorder,
                         filterOptions: getNumOptions(
-                          numSlotsAvailable + module.count
+                          module.model !== ABSORBANCE_READER_V1
+                            ? numSlotsAvailable + module.count
+                            : numSlotsAvailable
                         ),
                       }
                       return (
