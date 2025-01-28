@@ -31,7 +31,7 @@
   },
   "namespace": "opentrons",
   "version": 1,
-  "schemaVersion": 2,
+  "schemaVersion": 3,
   "allowedRoles": ["adapter"],
   "cornerOffsetFromSlot": {
     "x": -14.25,
