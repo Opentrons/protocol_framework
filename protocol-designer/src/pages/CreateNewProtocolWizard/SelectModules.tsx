@@ -1,5 +1,4 @@
 import { useTranslation } from 'react-i18next'
-import { useSelector } from 'react-redux'
 import {
   ALIGN_CENTER,
   BORDERS,
@@ -25,7 +24,6 @@ import {
   TEMPERATURE_MODULE_TYPE,
 } from '@opentrons/shared-data'
 import { uuid } from '../../utils'
-import { getEnableAbsorbanceReader } from '../../feature-flags/selectors'
 import { useKitchen } from '../../organisms/Kitchen/hooks'
 import { ModuleDiagram } from './ModuleDiagram'
 import { WizardBody } from './WizardBody'
@@ -51,7 +49,6 @@ export function SelectModules(props: WizardTileProps): JSX.Element | null {
   const fields = watch('fields')
   const modules = watch('modules')
   const additionalEquipment = watch('additionalEquipment')
-  const enableAbsorbanceReader = useSelector(getEnableAbsorbanceReader)
   const robotType = fields.robotType
   const supportedModules =
     robotType === FLEX_ROBOT_TYPE
@@ -166,7 +163,7 @@ export function SelectModules(props: WizardTileProps): JSX.Element | null {
       >
         <Flex flexDirection={DIRECTION_COLUMN}>
           <Flex flexDirection={DIRECTION_COLUMN} gridGap={SPACING.spacing12}>
-            {(filteredSupportedModules.length > 0 && enableAbsorbanceReader) ||
+            {filteredSupportedModules.length > 0 ||
             // note (kk:09/26/2024) the condition for absorbanceReaderV1 will be removed when ff is removed
             !(
               filteredSupportedModules.length === 1 &&
@@ -177,28 +174,22 @@ export function SelectModules(props: WizardTileProps): JSX.Element | null {
               </StyledText>
             ) : null}
             <Flex gridGap={SPACING.spacing4} flexWrap={WRAP}>
-              {filteredSupportedModules
-                .filter(module =>
-                  enableAbsorbanceReader
-                    ? module
-                    : module !== ABSORBANCE_READER_V1
+              {filteredSupportedModules.map(moduleModel => {
+                const numSlotsAvailable = getNumSlotsAvailable(
+                  modules,
+                  additionalEquipment,
+                  moduleModel
                 )
-                .map(moduleModel => {
-                  const numSlotsAvailable = getNumSlotsAvailable(
-                    modules,
-                    additionalEquipment,
-                    moduleModel
-                  )
-                  return (
-                    <AddModuleEmptySelectorButton
-                      key={moduleModel}
-                      moduleModel={moduleModel}
-                      areSlotsAvailable={numSlotsAvailable > 0}
-                      hasGripper={hasGripper}
-                      handleAddModule={handleAddModule}
-                    />
-                  )
-                })}
+                return (
+                  <AddModuleEmptySelectorButton
+                    key={moduleModel}
+                    moduleModel={moduleModel}
+                    areSlotsAvailable={numSlotsAvailable > 0}
+                    hasGripper={hasGripper}
+                    handleAddModule={handleAddModule}
+                  />
+                )
+              })}
             </Flex>
             {modules != null && Object.keys(modules).length > 0 ? (
               <Flex
