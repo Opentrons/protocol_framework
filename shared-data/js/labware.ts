@@ -121,8 +121,8 @@ import thermoscientificnunc96Wellplate2000UlV1Uncasted from '../labware/definiti
 import tipone96Tiprack200UlV1Uncasted from '../labware/definitions/2/tipone_96_tiprack_200ul/1.json'
 import usascientific12Reservoir22MlV1Uncasted from '../labware/definitions/2/usascientific_12_reservoir_22ml/1.json'
 import usascientific96Wellplate24MlDeepV1Uncasted from '../labware/definitions/2/usascientific_96_wellplate_2.4ml_deep/1.json'
-import evotipsFlex96TiprackAdapterV1Uncasted from '../labware/definitions/2/evotips_flex_96_tiprack_adapter/1.json'
-import evotipsOpentrons96LabwareV1Uncasted from '../labware/definitions/2/evotips_opentrons_96_labware/1.json'
+import evotipsFlex96TiprackAdapterV1Uncasted from '../labware/definitions/3/evotips_flex_96_tiprack_adapter/1.json'
+import evotipsOpentrons96LabwareV1Uncasted from '../labware/definitions/3/evotips_opentrons_96_labware/1.json'
 
 // v1 legacy labware definitions
 
