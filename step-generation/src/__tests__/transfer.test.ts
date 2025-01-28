@@ -25,6 +25,7 @@ import {
   pickUpTipHelper,
   SOURCE_LABWARE,
   makeDispenseAirGapHelper,
+  makeMoveToWellHelper,
 } from '../fixtures'
 import { FIXED_TRASH_ID } from '../constants'
 import {
@@ -140,7 +141,8 @@ describe('pick up tip if no tip on pipette', () => {
       pickUpTipHelper('A1'),
       aspirateHelper('A1', 30),
       dispenseHelper('B2', 30),
-      makeAirGapHelper(5)(),
+      makeMoveToWellHelper('B2', 'destPlateId'),
+      makeAirGapHelper(5),
     ])
   })
 
@@ -832,11 +834,13 @@ describe('advanced options', () => {
       const res = getSuccessResult(result)
       expect(res.commands).toEqual([
         aspirateHelper('A1', 295),
-        makeAirGapHelper(5)(),
+        makeMoveToWellHelper('A1'),
+        makeAirGapHelper(5),
         dispenseAirGapHelper('B1', 5),
         dispenseHelper('B1', 295),
         aspirateHelper('A1', 55),
-        makeAirGapHelper(5)(),
+        makeMoveToWellHelper('A1'),
+        makeAirGapHelper(5),
         dispenseAirGapHelper('B1', 5),
         dispenseHelper('B1', 55),
       ])
@@ -852,11 +856,13 @@ describe('advanced options', () => {
       const res = getSuccessResult(result)
       expect(res.commands).toEqual([
         aspirateHelper('A1', 150),
-        makeAirGapHelper(5)(),
+        makeMoveToWellHelper('A1'),
+        makeAirGapHelper(5),
         dispenseAirGapHelper('B1', 5),
         dispenseHelper('B1', 150),
         aspirateHelper('A1', 150),
-        makeAirGapHelper(5)(),
+        makeMoveToWellHelper('A1'),
+        makeAirGapHelper(5),
         dispenseAirGapHelper('B1', 5),
         dispenseHelper('B1', 150),
       ])
@@ -874,7 +880,8 @@ describe('advanced options', () => {
       expect(res.commands).toEqual([
         aspirateHelper('A1', 295),
         ...delayWithOffset('A1', SOURCE_LABWARE),
-        makeAirGapHelper(5)(),
+        makeMoveToWellHelper('A1'),
+        makeAirGapHelper(5),
         delayCommand(12),
 
         dispenseAirGapHelper('B1', 5),
@@ -882,8 +889,8 @@ describe('advanced options', () => {
 
         aspirateHelper('A1', 55),
         ...delayWithOffset('A1', SOURCE_LABWARE),
-
-        makeAirGapHelper(5)(),
+        makeMoveToWellHelper('A1'),
+        makeAirGapHelper(5),
         delayCommand(12),
 
         dispenseAirGapHelper('B1', 5),
@@ -902,7 +909,8 @@ describe('advanced options', () => {
       const res = getSuccessResult(result)
       expect(res.commands).toEqual([
         aspirateHelper('A1', 295),
-        makeAirGapHelper(5)(),
+        makeMoveToWellHelper('A1'),
+        makeAirGapHelper(5),
 
         dispenseAirGapHelper('B1', 5),
         delayCommand(12),
@@ -911,7 +919,8 @@ describe('advanced options', () => {
         ...delayWithOffset('B1', DEST_LABWARE),
 
         aspirateHelper('A1', 55),
-        makeAirGapHelper(5)(),
+        makeMoveToWellHelper('A1'),
+        makeAirGapHelper(5),
 
         dispenseAirGapHelper('B1', 5),
         delayCommand(12),
@@ -1275,6 +1284,23 @@ describe('advanced options', () => {
         },
         // aspirate > air gap
         {
+          commandType: 'moveToWell',
+          key: expect.any(String),
+          params: {
+            pipetteId: 'p300SingleId',
+            labwareId: 'sourcePlateId',
+            wellName: 'A1',
+            wellLocation: {
+              origin: 'bottom',
+              offset: {
+                x: 0,
+                y: 0,
+                z: 11.54,
+              },
+            },
+          },
+        },
+        {
           commandType: 'airGapInPlace',
           key: expect.any(String),
           params: {
@@ -1568,6 +1594,23 @@ describe('advanced options', () => {
         },
         // aspirate > air gap
         {
+          commandType: 'moveToWell',
+          key: expect.any(String),
+          params: {
+            pipetteId: 'p300SingleId',
+            labwareId: 'sourcePlateId',
+            wellName: 'A1',
+            wellLocation: {
+              origin: 'bottom',
+              offset: {
+                x: 0,
+                y: 0,
+                z: 11.54,
+              },
+            },
+          },
+        },
+        {
           commandType: 'airGapInPlace',
           key: expect.any(String),
           params: {
@@ -1740,6 +1783,23 @@ describe('advanced options', () => {
           },
         },
         // use the dispense > air gap here before moving to trash
+        {
+          commandType: 'moveToWell',
+          key: expect.any(String),
+          params: {
+            pipetteId: 'p300SingleId',
+            labwareId: 'destPlateId',
+            wellName: 'B1',
+            wellLocation: {
+              origin: 'bottom',
+              offset: {
+                x: 0,
+                y: 0,
+                z: 11.54,
+              },
+            },
+          },
+        },
         {
           commandType: 'airGapInPlace',
           key: expect.any(String),
@@ -1940,6 +2000,23 @@ describe('advanced options', () => {
           },
         },
         // aspirate > air gap
+        {
+          commandType: 'moveToWell',
+          key: expect.any(String),
+          params: {
+            pipetteId: 'p300SingleId',
+            labwareId: 'sourcePlateId',
+            wellName: 'A1',
+            wellLocation: {
+              origin: 'bottom',
+              offset: {
+                x: 0,
+                y: 0,
+                z: 11.54,
+              },
+            },
+          },
+        },
         {
           commandType: 'airGapInPlace',
           key: expect.any(String),
@@ -2231,6 +2308,23 @@ describe('advanced options', () => {
         },
         // aspirate > air gap
         {
+          commandType: 'moveToWell',
+          key: expect.any(String),
+          params: {
+            pipetteId: 'p300SingleId',
+            labwareId: 'sourcePlateId',
+            wellName: 'A1',
+            wellLocation: {
+              origin: 'bottom',
+              offset: {
+                x: 0,
+                y: 0,
+                z: 11.54,
+              },
+            },
+          },
+        },
+        {
           commandType: 'airGapInPlace',
           key: expect.any(String),
           params: {
@@ -2402,6 +2496,23 @@ describe('advanced options', () => {
           },
         },
         // dispense > air gap on the way to trash
+        {
+          commandType: 'moveToWell',
+          key: expect.any(String),
+          params: {
+            pipetteId: 'p300SingleId',
+            labwareId: 'destPlateId',
+            wellName: 'B1',
+            wellLocation: {
+              origin: 'bottom',
+              offset: {
+                x: 0,
+                y: 0,
+                z: 11.54,
+              },
+            },
+          },
+        },
         {
           commandType: 'airGapInPlace',
           key: expect.any(String),
@@ -2629,6 +2740,23 @@ describe('advanced options', () => {
           },
         },
         // aspirate > air gap
+        {
+          commandType: 'moveToWell',
+          key: expect.any(String),
+          params: {
+            pipetteId: 'p300SingleId',
+            labwareId: 'sourcePlateId',
+            wellName: 'A1',
+            wellLocation: {
+              origin: 'bottom',
+              offset: {
+                x: 0,
+                y: 0,
+                z: 11.54,
+              },
+            },
+          },
+        },
         {
           commandType: 'airGapInPlace',
           key: expect.any(String),
@@ -2920,6 +3048,23 @@ describe('advanced options', () => {
         },
         // aspirate > air gap
         {
+          commandType: 'moveToWell',
+          key: expect.any(String),
+          params: {
+            pipetteId: 'p300SingleId',
+            labwareId: 'sourcePlateId',
+            wellName: 'A1',
+            wellLocation: {
+              origin: 'bottom',
+              offset: {
+                x: 0,
+                y: 0,
+                z: 11.54,
+              },
+            },
+          },
+        },
+        {
           commandType: 'airGapInPlace',
           key: expect.any(String),
           params: {
@@ -3092,6 +3237,23 @@ describe('advanced options', () => {
           },
         },
         // dispense > air gap
+        {
+          commandType: 'moveToWell',
+          key: expect.any(String),
+          params: {
+            pipetteId: 'p300SingleId',
+            labwareId: 'destPlateId',
+            wellName: 'B1',
+            wellLocation: {
+              origin: 'bottom',
+              offset: {
+                x: 0,
+                y: 0,
+                z: 11.54,
+              },
+            },
+          },
+        },
         {
           commandType: 'airGapInPlace',
           key: expect.any(String),
@@ -3318,6 +3480,23 @@ describe('advanced options', () => {
         },
         // aspirate > air gap
         {
+          commandType: 'moveToWell',
+          key: expect.any(String),
+          params: {
+            pipetteId: 'p300SingleId',
+            labwareId: 'sourcePlateId',
+            wellName: 'A1',
+            wellLocation: {
+              origin: 'bottom',
+              offset: {
+                x: 0,
+                y: 0,
+                z: 11.54,
+              },
+            },
+          },
+        },
+        {
           commandType: 'airGapInPlace',
           key: expect.any(String),
           params: {
@@ -3491,6 +3670,23 @@ describe('advanced options', () => {
         },
         // dispense > air gap
         {
+          commandType: 'moveToWell',
+          key: expect.any(String),
+          params: {
+            pipetteId: 'p300SingleId',
+            labwareId: 'sourcePlateId',
+            wellName: 'A1',
+            wellLocation: {
+              origin: 'bottom',
+              offset: {
+                x: 0,
+                y: 0,
+                z: 11.54,
+              },
+            },
+          },
+        },
+        {
           commandType: 'airGapInPlace',
           key: expect.any(String),
           params: {
@@ -3647,6 +3843,23 @@ describe('advanced options', () => {
           },
         },
         // aspirate > air gap
+        {
+          commandType: 'moveToWell',
+          key: expect.any(String),
+          params: {
+            pipetteId: 'p300SingleId',
+            labwareId: 'sourcePlateId',
+            wellName: 'A1',
+            wellLocation: {
+              origin: 'bottom',
+              offset: {
+                x: 0,
+                y: 0,
+                z: 11.54,
+              },
+            },
+          },
+        },
         {
           commandType: 'airGapInPlace',
           key: expect.any(String),
@@ -3820,6 +4033,23 @@ describe('advanced options', () => {
           },
         },
         // dispense > air gap
+        {
+          commandType: 'moveToWell',
+          key: expect.any(String),
+          params: {
+            pipetteId: 'p300SingleId',
+            labwareId: 'sourcePlateId',
+            wellName: 'A1',
+            wellLocation: {
+              origin: 'bottom',
+              offset: {
+                x: 0,
+                y: 0,
+                z: 11.54,
+              },
+            },
+          },
+        },
         {
           commandType: 'airGapInPlace',
           key: expect.any(String),

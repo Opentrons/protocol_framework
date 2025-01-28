@@ -624,15 +624,29 @@ interface AirGapArgs {
   destinationId: string
   destWell: string | null
   flowRate: number
+  offsetFromBottomMm: number
   pipetteId: string
   volume: number
+  blowOutLocation?: string | null
+  sourceId?: string
+  sourceWell?: string
 }
 export const airGapHelper: CommandCreator<AirGapArgs> = (
   args,
   invariantContext,
   prevRobotState
 ) => {
-  const { destinationId, destWell, flowRate, pipetteId, volume } = args
+  const {
+    blowOutLocation,
+    destinationId,
+    destWell,
+    flowRate,
+    offsetFromBottomMm,
+    pipetteId,
+    sourceId,
+    sourceWell,
+    volume,
+  } = args
 
   const trashOrLabware = getTrashOrLabware(
     invariantContext.labwareEntities,
@@ -642,13 +656,62 @@ export const airGapHelper: CommandCreator<AirGapArgs> = (
 
   let commands: CurriedCommandCreator[] = []
   if (trashOrLabware === 'labware' && destWell != null) {
-    commands = [
-      curryCommandCreator(airGapInPlace, {
-        pipetteId,
-        volume,
-        flowRate,
-      }),
-    ]
+    //  when aspirating out of 1 well for transfer
+    if (sourceId != null && sourceWell != null) {
+      const {
+        dispenseAirGapLabware,
+        dispenseAirGapWell,
+      } = getDispenseAirGapLocation({
+        blowoutLocation: blowOutLocation,
+        sourceLabware: sourceId,
+        destLabware: destinationId,
+        sourceWell,
+        destWell: destWell,
+      })
+
+      commands = [
+        curryCommandCreator(moveToWell, {
+          pipetteId,
+          labwareId: dispenseAirGapLabware,
+          wellName: dispenseAirGapWell,
+          wellLocation: {
+            origin: 'bottom',
+            offset: {
+              z: offsetFromBottomMm,
+              x: 0,
+              y: 0,
+            },
+          },
+        }),
+        curryCommandCreator(airGapInPlace, {
+          pipetteId,
+          volume,
+          flowRate,
+        }),
+      ]
+      //  when aspirating out of multi wells for consolidate
+    } else {
+      commands = [
+        curryCommandCreator(moveToWell, {
+          pipetteId,
+          labwareId: destinationId,
+          wellName: destWell,
+          wellLocation: {
+            origin: 'bottom',
+            offset: {
+              z: offsetFromBottomMm,
+              x: 0,
+              y: 0,
+            },
+          },
+        }),
+        curryCommandCreator(airGapInPlace, {
+          pipetteId,
+          volume,
+          flowRate,
+        }),
+      ]
+    }
   } else if (trashOrLabware === 'wasteChute') {
     const pipetteChannels =
       invariantContext.pipetteEntities[pipetteId].spec.channels

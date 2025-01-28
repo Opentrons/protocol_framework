@@ -138,7 +138,24 @@ export const makeAspirateHelper: MakeAspDispHelper<AspDispAirgapParams> = bakedP
     ...params,
   },
 })
-export const makeAirGapHelper = (volume: number) => () => ({
+export const makeMoveToWellHelper = (wellName: string, labwareId?: string) => ({
+  commandType: 'moveToWell',
+  key: expect.any(String),
+  params: {
+    pipetteId: DEFAULT_PIPETTE,
+    labwareId: labwareId ?? SOURCE_LABWARE,
+    wellName,
+    wellLocation: {
+      origin: 'bottom',
+      offset: {
+        x: 0,
+        y: 0,
+        z: 11.54,
+      },
+    },
+  },
+})
+export const makeAirGapHelper = (volume: number) => ({
   commandType: 'airGapInPlace',
   key: expect.any(String),
   params: {
