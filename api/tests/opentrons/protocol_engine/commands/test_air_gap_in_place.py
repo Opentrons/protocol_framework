@@ -101,6 +101,7 @@ async def test_air_gap_in_place_implementation(
         pipetteId="pipette-id-abc",
         volume=123,
         flowRate=1.234,
+        correctionVolume=321,
     )
 
     decoy.when(
@@ -115,6 +116,7 @@ async def test_air_gap_in_place_implementation(
             volume=123,
             flow_rate=1.234,
             command_note_adder=mock_command_note_adder,
+            correction_volume=321,
         )
     ).then_return(123)
 
@@ -194,6 +196,7 @@ async def test_aspirate_raises_volume_error(
             volume=50,
             flow_rate=1.23,
             command_note_adder=mock_command_note_adder,
+            correction_volume=0,
         )
     ).then_raise(AssertionError("blah blah"))
 
@@ -253,6 +256,7 @@ async def test_overpressure_error(
             volume=50,
             flow_rate=1.23,
             command_note_adder=mock_command_note_adder,
+            correction_volume=0,
         ),
     ).then_raise(PipetteOverpressureError())
 
