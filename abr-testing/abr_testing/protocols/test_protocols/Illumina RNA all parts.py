@@ -303,7 +303,6 @@ def run(protocol: protocol_api.ProtocolContext):
     # A5: tiprack_200_6     = protocol.load_labware('opentrons_flex_96_tiprack_200ul','A4')
     # A6: tiprack_200_7     = protocol.load_labware('opentrons_flex_96_tiprack_200ul','A4')
     # ========== SECOND ROW ==========
-
     # REAGENT PLATE STACK
     reagent_plate_2 = protocol.load_labware(
         "greiner_384_wellplate_240ul", "B2", "Reagent Plate 2"
@@ -324,11 +323,7 @@ def run(protocol: protocol_api.ProtocolContext):
     # ========== THIRD ROW ===========
     stacker_50_1 = protocol.load_module("flexStackerModuleV1", "C4")
     stacker_50_1.load_labware_to_hopper(
-        "opentrons_flex_96_tiprack_50ul", quantity=10, lid="opentrons_flex_tiprack_lid"
-    )
-    stacker_50_1.enter_static_mode()
-    CleanupPlate_2 = stacker_50_1.load_labware(
-        "nest_96_wellplate_2ml_deep", "Cleanup Plate 2"
+        "opentrons_flex_96_tiprack_50ul", quantity=6, lid="opentrons_flex_tiprack_lid"
     )
     if ONDECK_TEMP == True:
         temp_block = protocol.load_module("temperature module gen2", "C1")
@@ -351,8 +346,8 @@ def run(protocol: protocol_api.ProtocolContext):
     # C5 tiprack_50_X        = protocol.load_labware('opentrons_flex_96_tiprack_50ul','C4')
 
     # ========== FOURTH ROW ==========
-    # stacker_50_2 = protocol.load_module("flexStackerModuleV1", "D4")
-    # stacker_50_2.load_labware_to_hopper("opentrons_flex_96_tiprack_50ul", quantity = 6)
+    stacker_50_2 = protocol.load_module("flexStackerModuleV1", "D4")
+    stacker_50_2.load_labware_to_hopper("opentrons_flex_96_tiprack_50ul", quantity = 7, lid="opentrons_flex_tiprack_lid")
     TRASH = protocol.load_waste_chute()
     LW_reservoir = protocol.load_labware(
         "nest_96_wellplate_2ml_deep", "D1", "Liquid Waste Reservoir"
@@ -361,7 +356,8 @@ def run(protocol: protocol_api.ProtocolContext):
     CleanupPlate_1 = mag_block.load_labware(
         "nest_96_wellplate_2ml_deep", "Cleanup Plate 1"
     )
-    # CleanupPlate_2 = protocol.load_labware('nest_96_wellplate_2ml_deep', 'D4', 'Cleanup Plate 1')
+    stacker_50_2.enter_static_mode()
+    CleanupPlate_2 = stacker_50_2.load_labware('nest_96_wellplate_2ml_deep', 'Cleanup Plate 2')
 
     # ============ TRASH =============
 
@@ -521,7 +517,8 @@ def run(protocol: protocol_api.ProtocolContext):
     # =================================================================================================
     if ONDECK_THERMO == True:
         thermocycler.open_lid()
-    protocol.pause("Ready")
+    if ONDECK_TEMP == True:
+        temp_block.set_temperature(4)
     # =================================================================================================
     # ========================================= PROTOCOL START ========================================
     # =================================================================================================
@@ -591,10 +588,9 @@ def run(protocol: protocol_api.ProtocolContext):
             )
         protocol.comment("MOVING: tiprack_50_SCP_2 = D4 --> SCP_Position")
         protocol.move_labware(CleanupPlate_2, stacker_200_1, use_gripper=True)
-        stacker_50_1.exit_static_mode()
-        tiprack_50_SCP_2 = stacker_50_1.retrieve()
+        stacker_50_2.exit_static_mode()
+        tiprack_50_SCP_2 = stacker_50_2.retrieve()
         protocol.move_lid(tiprack_50_SCP_2, TRASH, use_gripper=True)
-        # tiprack_50_SCP_2 = stacker_50_2.retrieve()
         protocol.move_labware(
             labware=tiprack_50_SCP_2,
             new_location=SCP_Position,
@@ -665,8 +661,7 @@ def run(protocol: protocol_api.ProtocolContext):
                 use_gripper=False,
             )
         protocol.comment("DISPENSING: tiprack_50_SCP_3 = #1--> D4")
-        tiprack_50_SCP_3 = stacker_50_1.retrieve()
-        # tiprack_50_SCP_3 = stacker_50_2.retrieve()
+        tiprack_50_SCP_3 = stacker_50_2.retrieve()
         protocol.move_lid(tiprack_50_SCP_3, TRASH, use_gripper=True)
         protocol.comment("MOVING: tiprack_50_SCP_3 = D4 --> SCP_Position")
         protocol.move_labware(
@@ -745,10 +740,10 @@ def run(protocol: protocol_api.ProtocolContext):
                 use_gripper=False,
             )
         protocol.comment("MOVING: CleanupPlate_1 = mag_block --> D4")
-        # stacker_50_2.enter_static_mode()
+        stacker_50_2.enter_static_mode()
         protocol.move_labware(
             labware=CleanupPlate_1,
-            new_location="D4",
+            new_location=stacker_50_2,
             use_gripper=USE_GRIPPER,
             pick_up_offset=deck_pick_up_offset,
             drop_offset=deck_drop_offset,
@@ -1041,7 +1036,6 @@ def run(protocol: protocol_api.ProtocolContext):
                 labware=tiprack_200_4,
                 new_location=TRASH,
                 use_gripper=USE_GRIPPER,
-                pick_up_offset=deck_pick_up_offset,
             )
         else:
             protocol.comment("MOVING: tiprack_200_4 = tiprack_A3_adapter --> B3")
@@ -1049,7 +1043,6 @@ def run(protocol: protocol_api.ProtocolContext):
                 labware=tiprack_200_4,
                 new_location="B3",
                 use_gripper=USE_GRIPPER,
-                pick_up_offset=deck_pick_up_offset,
             )
             protocol.move_labware(
                 labware=tiprack_200_4,
@@ -1064,13 +1057,13 @@ def run(protocol: protocol_api.ProtocolContext):
         protocol.comment("MOVING: tiprack_200_X = SCP_Position --> B4")
         stacker_200_2.enter_static_mode()
         protocol.move_labware(
-            labware=tiprack_200_X, new_location="D4", use_gripper=USE_GRIPPER
+            labware=tiprack_200_X, new_location=tiprack_A3_adapter, use_gripper=USE_GRIPPER
         )
 
         protocol.comment("DISPENSING: tiprack_50_SCP_4 = #3--> D4")
-        tiprack_50_SCP_4 = stacker_50_1.retrieve()
+        stacker_50_2.exit_static_mode()
+        tiprack_50_SCP_4   = stacker_50_2.retrieve()
         protocol.move_lid(tiprack_50_SCP_4, TRASH, use_gripper=True)
-        # tiprack_50_SCP_4   = stacker_50_2.retrieve()
         protocol.comment("MOVING: tiprack_50_SCP_4 = D4 --> tiprack_A3_adapter")
         protocol.move_labware(
             labware=tiprack_50_SCP_4, new_location=SCP_Position, use_gripper=USE_GRIPPER
@@ -1128,16 +1121,13 @@ def run(protocol: protocol_api.ProtocolContext):
             drop_offset=deck_drop_offset,
         )
         protocol.comment("DISPENSING: tiprack_50_5 = #4--> D4")
-        tiprack_50_5 = stacker_50_1.retrieve()
+        tiprack_50_5   = stacker_50_2.retrieve()
         protocol.move_lid(tiprack_50_5, TRASH, use_gripper=True)
-        # tiprack_50_5   = stacker_50_2.retrieve()
         protocol.comment("MOVING: tiprack_50_5 = D4 --> tiprack_A3_adapter")
         protocol.move_labware(
             labware=tiprack_50_5,
             new_location=tiprack_A3_adapter,
             use_gripper=USE_GRIPPER,
-            pick_up_offset=deck_pick_up_offset,
-            drop_offset=deck_drop_offset,
         )
         protocol.comment("UNSTACKING: sample_plate_2 = --> A2")
         protocol.comment("MOVING: sample_plate_2 = A2 --> thermocycler")
@@ -1146,16 +1136,12 @@ def run(protocol: protocol_api.ProtocolContext):
                 labware=sample_plate_2,
                 new_location=thermocycler,
                 use_gripper=USE_GRIPPER,
-                pick_up_offset=deck_3_pick_up_offset,
-                drop_offset=tc_drop_offset,
             )
         else:
             protocol.move_labware(
                 labware=sample_plate_2,
                 new_location="B1",
                 use_gripper=USE_GRIPPER,
-                pick_up_offset=deck_3_pick_up_offset,
-                drop_offset=deck_drop_offset,
             )
         # ============================================================================================
 
@@ -1237,20 +1223,15 @@ def run(protocol: protocol_api.ProtocolContext):
             labware=tiprack_200_X,
             new_location=tiprack_A3_adapter,
             use_gripper=USE_GRIPPER,
-            pick_up_offset=deck_pick_up_offset,
-            drop_offset=deck_drop_offset,
         )
         protocol.comment("DISPENSING: tiprack_50_SCP_6 = #4--> D4")
-        tiprack_50_SCP_6 = stacker_50_1.retrieve()
+        tiprack_50_SCP_6   = stacker_50_2.retrieve()
         protocol.move_lid(tiprack_50_SCP_6, TRASH, use_gripper=True)
-        # tiprack_50_SCP_6   = stacker_50_2.retrieve()
         protocol.comment("MOVING: tiprack_50_SCP_6 = D4 --> SCP_Position")
         protocol.move_labware(
             labware=tiprack_50_SCP_6,
             new_location=SCP_Position,
             use_gripper=USE_GRIPPER,
-            pick_up_offset=deck_pick_up_offset,
-            drop_offset=deck_drop_offset,
         )
         # ============================================================================================
 
@@ -1332,7 +1313,7 @@ def run(protocol: protocol_api.ProtocolContext):
         # stacker_50_2.enter_static_mode()
         protocol.move_labware(
             labware=CleanupPlate_1,
-            new_location="D4",
+            new_location=stacker_50_2,
             use_gripper=USE_GRIPPER,
             pick_up_offset=deck_pick_up_offset,
             drop_offset=deck_drop_offset,
@@ -1603,10 +1584,8 @@ def run(protocol: protocol_api.ProtocolContext):
             drop_offset=deck_drop_offset,
         )
         protocol.comment("DISPENSING: tiprack_50_7 = #6--> D4")
-        # stacker_50_2.exit_static_mode()
-        # tiprack_50_7   = stacker_50_2.retrieve()
-        stacker_50_1.exit_static_mode()
-        tiprack_50_7 = stacker_50_1.retrieve()
+        stacker_50_2.exit_static_mode()
+        tiprack_50_7   = stacker_50_2.retrieve()
         protocol.move_lid(tiprack_50_7, TRASH, use_gripper=True)
         protocol.comment("MOVING: tiprack_50_7 = D4 --> tiprack_A3_adapter")
         protocol.move_labware(
@@ -1620,16 +1599,12 @@ def run(protocol: protocol_api.ProtocolContext):
                 labware=sample_plate_2,
                 new_location=thermocycler,
                 use_gripper=USE_GRIPPER,
-                pick_up_offset=mb_pick_up_offset,
-                drop_offset=tc_drop_offset,
             )
         else:
             protocol.move_labware(
                 labware=sample_plate_2,
                 new_location="B1",
                 use_gripper=USE_GRIPPER,
-                pick_up_offset=mb_pick_up_offset,
-                drop_offset=deck_drop_offset,
             )
         # ============================================================================================
 
@@ -1705,11 +1680,9 @@ def run(protocol: protocol_api.ProtocolContext):
             pick_up_offset=deck_pick_up_offset,
             drop_offset=mb_drop_offset,
         )
-        # stacker_50_2.exit_static_mode()
+        stacker_50_2.exit_static_mode()
         protocol.comment("DISPENSING: tiprack_50_8 = #1--> B4")
-        stacker_50_1.exit_static_mode()
-        tiprack_50_8 = stacker_50_1.retrieve()
-        # tiprack_50_8   = stacker_50_2.retrieve()
+        tiprack_50_8 = stacker_50_2.retrieve()
         protocol.move_lid(tiprack_50_8, TRASH, use_gripper=True)
 
         protocol.comment("MOVING: tiprack_50_8 = B4 --> tiprack_A3_adapter")
@@ -1952,16 +1925,16 @@ def run(protocol: protocol_api.ProtocolContext):
         )
 
         protocol.comment("MOVING: CleanupPlate_2 = C4 --> A4")
-        stacker_200_1.enter_static_mode()
+        stacker_50_2.enter_static_mode()
         protocol.move_labware(
             labware=CleanupPlate_2,
-            new_location="D4",
+            new_location=stacker_50_2,
             use_gripper=USE_GRIPPER,
             pick_up_offset=deck_pick_up_offset,
             drop_offset=deck_drop_offset,
         )
-        stacker_50_1.exit_static_mode()
         protocol.comment("DISPENSING: tiprack_50_SCP_9 = #3--> C4")
+        stacker_50_1.exit_static_mode()
         tiprack_50_SCP_9 = stacker_50_1.retrieve()
         protocol.move_lid(tiprack_50_SCP_9, TRASH, use_gripper=True)
         protocol.comment("MOVING: tiprack_50_SCP_9 = C4 --> SCP_Position")
@@ -2014,6 +1987,8 @@ def run(protocol: protocol_api.ProtocolContext):
                 use_gripper=False,
             )
         protocol.comment("DISPENSING: tiprack_50_SCP_10 = #4--> C4")
+        stacker_200_1.enter_static_mode()
+        protocol.move_labware(CleanupPlate_2, stacker_200_1, use_gripper = True)
         stacker_50_1.exit_static_mode()
         tiprack_50_SCP_10 = stacker_50_1.retrieve()
         protocol.move_lid(tiprack_50_SCP_10, TRASH, use_gripper=True)
@@ -2231,7 +2206,6 @@ def run(protocol: protocol_api.ProtocolContext):
             if ONDECK_THERMO == True:
                 thermocycler.set_block_temperature(58)
                 thermocycler.set_lid_temperature(58)
-
         # ============================================================================================
         protocol.comment("MOVING: tiprack_50_X = SCP_Position --> C4")
         stacker_50_1.enter_static_mode()
