@@ -18,7 +18,8 @@ export enum MixActions {
   Dispense = 'Select dispnse settings',
   AspWellOrder = 'Open well aspirate well order pop out',
   EditWellOrder = 'Edit well order selects',
-
+  AspMixTipPos = 'Edit tip position for executing mix step',
+  TipPosSideImageMove = 'Check that the tip position will update when data is enetered'
 }
 
 export enum MixVerifications {
@@ -28,6 +29,8 @@ export enum MixVerifications {
   WellSelectPopout = 'Verify labware image and available wells',
   AspWellOrder = 'Verify pop out for well order during aspirate',
   AspMixTipPos = 'Verify pop out for mix tip position durin aspirate',
+  FlowRateRangeWarning = 'Verify warning appears when outside flow rate parameters',
+  TipPosCollisionCheck = 'Verify banner warning appears when mix tip position is in contact with well wall'
 }
 
 export enum MixContent {
@@ -80,6 +83,14 @@ export enum MixContent {
   Then = 'then',
   SecondaryOrder = 'Secondary order',
   Cancel = 'Cancel',
+  EditMixTipPos = 'Edit mix tip position',
+  MixTipPosDescr = 'Change from where in the well the robot aspirates and dispenses during the mix.',
+  Xposition = 'X position',
+  Yposition = 'Y position',
+  Zposition = 'Z position',
+  StartingWellPos = 'Well position: X 0 Y 0 Z 1 (mm)',
+  TopView = 'Top view',
+  SideView = 'Side view',
 }
 
 export enum MixLocators {
@@ -97,7 +108,13 @@ export enum MixLocators {
   AspWellOrder = '[class="Flex-sc-1qhp8l7-0 ListButton___StyledFlex-sc-1lmhs3v-0 bToGfF bdMeyp"]',
   ResetToDefault = 'button:contains("Reset to default")',
   PrimaryOrderDropdown = 'div[tabindex="0"].sc-bqWxrE jKLbYH iFjNDq',
-  CancelWellOrder = '[class="SecondaryButton-sc-1opt1t9-0 kjpcRL"]',
+  CancelAspSettings = '[class="SecondaryButton-sc-1opt1t9-0 kjpcRL"]',
+  MixTipPos = '[class="Flex-sc-1qhp8l7-0 ListButton___StyledFlex-sc-1lmhs3v-0 gSONWG bdMeyp"]',
+  XpositionInput = '[id="TipPositionModal_x_custom_input"]',
+  YpositionInput = '[id="TipPositionModal_y_custom_input"]',
+  ZpositionInput = '[id="TipPositionModal_z_custom_input"]',
+  SwapView = 'button:contains("Swap view")',
+  SideViewTipPos = '[src="/src/assets/images/tip_side_bottom_layer.svg"]'
 }
 
 
@@ -136,9 +153,28 @@ export const executeMixAction = (action: MixActions | UniversalActions): void =>
       cy.contains(MixContent.TopBottomLeRi).should('exist').should('be.visible')
       cy.get(MixLocators.AspWellOrder).click()
       break
+    case MixActions.AspMixTipPos:
+      cy.contains(MixContent.StartingWellPos).should('exist').should('be.visible')
+      cy.get(MixLocators.MixTipPos).click()
+      break
+    case MixActions.TipPosSideImageMove:
+      cy.get(MixLocators.SideViewTipPos).should('have.css','transform', '0px')
+      break
+      // case MixAction.TipPosTopImageMove:
+      //   break
+    // case MixActions.Delay:
+    //   break
     case MixActions.Dispense:
       cy.get(MixLocators.Dispense).should('exist').should('be.visible').click()
       break
+    // case MixActions.DispenseFlowRate:
+    //   break
+    // case MixActions.Delay:
+    //   break
+    // case MixActions.Blowout:
+    //   break
+    // case MixActions.TouchTip:
+    //   break
     // case Actions.FlowRateWarning:
     //   break
     case MixActions.Save:
@@ -218,12 +254,29 @@ export const executeVerifyMixStep = (verification: MixVerifications): void => {
       cy.get(MixLocators.ResetToDefault).click()
       cy.contains(MixContent.TopToBottom).should('exist').should('be.visible')
       cy.contains(MixContent.LeftToRight).should('exist').should('be.visible')
-      cy.get(MixLocators.CancelWellOrder).should('exist').should('be.visible')
+      cy.get(MixLocators.CancelAspSettings).should('exist').should('be.visible')
       cy.get(MixLocators.Save).should('exist').should('be.visible')
       break
-      // case Verifications.MixTipPos:
+    case MixVerifications.AspMixTipPos:
+      cy.contains(MixContent.EditMixTipPos).should('exist').should('be.visible')
+      cy.contains(MixContent.MixTipPosDescr).should('exist').should('be.visible')
+      cy.contains(MixContent.SideView).should('exist').should('be.visible')
+      cy.get(MixLocators.SideViewTipPos).should('have.css','transform', '0px')
+      cy.get(MixLocators.SwapView).should('exist').should('be.visible').click()
+      cy.contains(MixContent.TopView).should('exist').should('be.visible')
+      cy.contains(MixContent.Xposition).should('exist').should('be.visible')
+      cy.get(MixLocators.XpositionInput).should('exist').should('be.visible')
+      cy.contains(MixContent.Yposition).should('exist').should('be.visible')
+      cy.get(MixLocators.YpositionInput).should('exist').should('be.visible')
+      cy.contains(MixContent.Zposition).should('exist').should('be.visible')
+      cy.get(MixLocators.ZpositionInput).should('exist').should('be.visible')
+      cy.get(MixLocators.ResetToDefault).should('exist').should('be.visible')
+      cy.get(MixLocators.CancelAspSettings).should('exist').should('be.visible')
+      cy.get(MixLocators.Save).should('exist').should('be.visible')
+      break
+      // case MixVerifications.FlowRateRangeWarning:
       //   break
-      // case Verifications.FlowRateRangeWarning:
+      // case MixVerifications.TipPosCollisionCheck:
       //   break
     default:
       throw new Error(
