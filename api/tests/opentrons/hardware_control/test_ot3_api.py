@@ -1895,7 +1895,7 @@ async def test_move_axes(
     await ot3_hardware.move_axes(position=input_position)
     mock_check_motor.return_value = True
 
-    mock_move.assert_called_once_with(target_position=expected_move_pos, speed=None)
+    mock_move.assert_called_once_with(target_position=expected_move_pos, speed=None, expect_stalls=False)
 
 
 async def test_move_gripper_mount_without_gripper_attached(
