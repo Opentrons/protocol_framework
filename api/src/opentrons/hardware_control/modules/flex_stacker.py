@@ -15,6 +15,7 @@ from opentrons.drivers.flex_stacker.types import (
 from opentrons.drivers.rpi_drivers.types import USBPort
 from opentrons.drivers.flex_stacker.driver import (
     STACKER_MOTION_CONFIG,
+    STALLGUARD_CONFIG,
     FlexStackerDriver,
 )
 from opentrons.drivers.flex_stacker.abstract import AbstractFlexStackerDriver
@@ -117,9 +118,11 @@ class FlexStacker(mod_abc.AbstractModule):
         )
 
         # Enable stallguard
-        await driver.set_stallguard_threshold(StackerAxis.X, True, 2)
-        await driver.set_stallguard_threshold(StackerAxis.Z, True, 2)
-        await driver.set_stallguard_threshold(StackerAxis.L, True, 2)
+        for axis in StackerAxis:
+            config = STALLGUARD_CONFIG[axis]
+            await driver.set_stallguard_threshold(
+                axis, config.enabled, config.threshold
+            )
 
         try:
             await poller.start()
@@ -152,7 +155,7 @@ class FlexStacker(mod_abc.AbstractModule):
         self._reader = reader
         self._poller = poller
         self._stacker_status = FlexStackerStatus.IDLE
-        self._stall_detected = False;
+        self._stall_detected = False
 
     async def cleanup(self) -> None:
         """Stop the poller task"""
@@ -436,9 +439,7 @@ class FlexStackerReader(Reader):
         """Get the limit switch status."""
         status = await self._driver.get_limit_switches_status()
         self.limit_switch_status = {
-            StackerAxis.X: StackerAxisState.from_status(status, StackerAxis.X),
-            StackerAxis.Z: StackerAxisState.from_status(status, StackerAxis.Z),
-            StackerAxis.L: StackerAxisState.from_status(status, StackerAxis.L),
+            axis: StackerAxisState.from_status(status, axis) for axis in StackerAxis
         }
 
     async def get_motion_parameters(self) -> None:
@@ -457,6 +458,7 @@ class FlexStackerReader(Reader):
         self.hopper_door_closed = await self._driver.get_hopper_door_closed()
 
     def on_error(self, exception: Exception) -> None:
+        self._driver.reset_serial_buffers()
         self._set_error(exception)
 
     def _set_error(self, exception: Optional[Exception]) -> None:

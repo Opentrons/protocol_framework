@@ -5,6 +5,7 @@ from opentrons.util.async_helpers import ensure_yield
 from .abstract import AbstractFlexStackerDriver
 from .types import (
     LEDColor,
+    LEDPattern,
     MoveResult,
     StackerAxis,
     PlatformStatus,
@@ -166,11 +167,21 @@ class SimulatingDriver(AbstractFlexStackerDriver):
         return MoveResult.NO_ERROR
 
     async def set_led(
-        self, power: float, color: LEDColor | None = None, external: bool | None = None
+        self,
+        power: float,
+        color: Optional[LEDColor] = None,
+        external: Optional[bool] = None,
+        pattern: Optional[LEDPattern] = None,
+        duration: Optional[int] = None,
+        reps: Optional[int] = None,
     ) -> bool:
-        """Set LED color."""
+        """Set LED Status bar color and pattern."""
         return True
 
     async def enter_programming_mode(self) -> None:
         """Reboot into programming mode"""
+        pass
+
+    def reset_serial_buffers(self) -> None:
+        """Reset the input and output serial buffers."""
         pass

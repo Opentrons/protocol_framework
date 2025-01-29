@@ -137,3 +137,7 @@ class AbstractFlexStackerDriver(Protocol):
     async def enter_programming_mode(self) -> None:
         """Reboot into programming mode"""
         ...
+
+    def reset_serial_buffers(self) -> None:
+        """Reset the input and output serial buffers."""
+        ...

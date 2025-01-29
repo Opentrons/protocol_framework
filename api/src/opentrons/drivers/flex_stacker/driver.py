@@ -37,6 +37,12 @@ MIN_DURATION_MS = 25  # 25ms
 MAX_DURATION_MS = 10000  # 10s
 MAX_REPS = 10
 
+# Stallguard defaults
+STALLGUARD_CONFIG = {
+    StackerAxis.X: StallGuardParams(StackerAxis.X, True, 2),
+    StackerAxis.Z: StallGuardParams(StackerAxis.Z, True, 2),
+    StackerAxis.L: StallGuardParams(StackerAxis.L, True, 2),
+}
 
 STACKER_MOTION_CONFIG = {
     StackerAxis.X: {
@@ -153,7 +159,7 @@ class FlexStackerDriver(AbstractFlexStackerDriver):
         field_names = MoveParams.get_fields()
         pattern = r"\s".join(
             [
-                rf"{f}:(?P<{f}>(\d*\.)?\d+)" if f != "M" else rf"{f}:(?P<{f}>[X,Z,L])"
+                rf"{f}:(?P<{f}>(\d*\.)?\d+)" if f != "M" else rf"{f}:(?P<{f}>[XZL])"
                 for f in field_names
             ]
         )
@@ -171,7 +177,7 @@ class FlexStackerDriver(AbstractFlexStackerDriver):
     @classmethod
     def parse_stallguard_params(cls, response: str) -> StallGuardParams:
         """Parse stallguard params."""
-        pattern = r"(?P<M>[X,Z,L]):(?P<E>\d) T:(?P<T>\d+)"
+        pattern = r"(?P<M>[XZL]):(?P<E>\d) T:(?P<T>\d+)"
         _RE = re.compile(f"^{GCODE.GET_STALLGUARD_THRESHOLD} {pattern}$")
         m = _RE.match(response)
         if not m:
@@ -185,7 +191,7 @@ class FlexStackerDriver(AbstractFlexStackerDriver):
     @classmethod
     def parse_get_motor_register(cls, response: str) -> int:
         """Parse get register value."""
-        pattern = r"(?P<M>[X,Z,L]):(?P<R>\d+) V:(?P<V>\d+)"
+        pattern = r"(?P<M>[XZL]):(?P<R>\d+) V:(?P<V>\d+)"
         _RE = re.compile(f"^{GCODE.GET_MOTOR_DRIVER_REGISTER} {pattern}$")
         m = _RE.match(response)
         if not m:
@@ -419,8 +425,7 @@ class FlexStackerDriver(AbstractFlexStackerDriver):
             if not re.match(rf"^{GCODE.MOVE_TO}$", resp):
                 raise ValueError(f"Incorrect Response for move to: {resp}")
         except MotorStall:
-            self._connection._serial.reset_input_buffer()
-            self._connection._serial.reset_output_buffer()
+            self.reset_serial_buffers()
             return MoveResult.STALL_ERROR
         return MoveResult.NO_ERROR
 
@@ -437,8 +442,7 @@ class FlexStackerDriver(AbstractFlexStackerDriver):
             if not re.match(rf"^{GCODE.MOVE_TO_SWITCH}$", resp):
                 raise ValueError(f"Incorrect Response for move to switch: {resp}")
         except MotorStall:
-            self._connection._serial.reset_input_buffer()
-            self._connection._serial.reset_output_buffer()
+            self.reset_serial_buffers()
             return MoveResult.STALL_ERROR
         return MoveResult.NO_ERROR
 
@@ -448,8 +452,7 @@ class FlexStackerDriver(AbstractFlexStackerDriver):
         try:
             resp = await self._connection.send_command(command, timeout=FS_MOVE_TIMEOUT)
         except MotorStall:
-            self._connection._serial.reset_input_buffer()
-            self._connection._serial.reset_output_buffer()
+            self.reset_serial_buffers()
             return MoveResult.STALL_ERROR
         if not re.match(rf"^{GCODE.HOME_AXIS}$", resp):
             raise ValueError(f"Incorrect Response for home axis: {resp}")
@@ -498,3 +501,8 @@ class FlexStackerDriver(AbstractFlexStackerDriver):
         command = GCODE.ENTER_BOOTLOADER.build_command()
         await self._connection.send_dfu_command(command)
         await self._connection.close()
+
+    def reset_serial_buffers(self) -> None:
+        """Reset the input and output serial buffers."""
+        self._connection._serial.reset_input_buffer()
+        self._connection._serial.reset_output_buffer()
