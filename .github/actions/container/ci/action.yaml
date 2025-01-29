@@ -15,7 +15,7 @@ outputs:
 runs:
   using: "composite"
   steps:
-    - name: Login to GHCR
+    - name: Login to GitHub Container Registry
       uses: docker/login-action@v3
       with:
         registry: ghcr.io
@@ -31,6 +31,6 @@ runs:
       with:
         context: .
         push: true
-        tags: opentrons/ci:${{ inputs.branch }}
-        cache-from: type=registry,ref=opentrons/ci
-        cache-to: type=registry,ref=opentrons/ci
+        tags: ci:${{ inputs.branch }}
+        cache-from: type=registry
+        cache-to: type=registry
