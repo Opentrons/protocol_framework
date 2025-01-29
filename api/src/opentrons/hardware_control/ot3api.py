@@ -1189,7 +1189,7 @@ class OT3API(
         speed: Optional[float] = None,
         critical_point: Optional[CriticalPoint] = None,
         max_speeds: Union[None, Dict[Axis, float], OT3AxisMap[float]] = None,
-        _expect_stalls: bool = False,
+        expect_stalls: bool = False,
     ) -> None:
         """Move the critical point of the specified mount to a location
         relative to the deck, at the specified speed."""
@@ -1233,7 +1233,7 @@ class OT3API(
             target_position,
             speed=speed,
             max_speeds=checked_max,
-            expect_stalls=_expect_stalls,
+            expect_stalls=expect_stalls,
         )
 
     async def move_axes(  # noqa: C901
@@ -1241,7 +1241,7 @@ class OT3API(
         position: Mapping[Axis, float],
         speed: Optional[float] = None,
         max_speeds: Optional[Dict[Axis, float]] = None,
-        _expect_stalls: bool = False,
+        expect_stalls: bool = False,
     ) -> None:
         """Moves the effectors of the specified axis to the specified position.
         The effector of the x,y axis is the center of the carriage.
@@ -1300,7 +1300,7 @@ class OT3API(
         await self._move(
             target_position=absolute_positions,
             speed=speed,
-            expect_stalls=_expect_stalls,
+            expect_stalls=expect_stalls,
         )
 
     async def move_rel(
@@ -1311,7 +1311,7 @@ class OT3API(
         max_speeds: Union[None, Dict[Axis, float], OT3AxisMap[float]] = None,
         check_bounds: MotionChecks = MotionChecks.NONE,
         fail_on_not_homed: bool = False,
-        _expect_stalls: bool = False,
+        expect_stalls: bool = False,
     ) -> None:
         """Move the critical point of the specified mount by a specified
         displacement in a specified direction, at the specified speed."""
@@ -1353,7 +1353,7 @@ class OT3API(
             speed=speed,
             max_speeds=checked_max,
             check_bounds=check_bounds,
-            expect_stalls=_expect_stalls,
+            expect_stalls=expect_stalls,
         )
 
     async def _cache_and_maybe_retract_mount(self, mount: OT3Mount) -> None:

@@ -38,23 +38,25 @@ if TYPE_CHECKING:
         TipHandler,
         GantryMover,
         PipettingHandler,
-        Had,
     )
     from ..notes import CommandNoteAdder
 
 
 EvotipSealPipetteCommandType = Literal["evotipSealPipette"]
+_PREP_DISTANCE_DEFAULT = 8.25
+_PRESS_DISTANCE_DEFAULT = 3.5
+_EJECTOR_PUSH_MM_DEFAULT = 7.0
 
 
 class TipPickUpParams(BaseModel):
     prepDistance: float = Field(
-        default=8.25, description="The distance to move down to fit the tips on."
+        default=0, description="The distance to move down to fit the tips on."
     )
     pressDistance: float = Field(
-        default=3.5, description="The distance to press on tips."
+        default=0, description="The distance to press on tips."
     )
-    ejectorPushmm: float = Field(
-        default=7.0,
+    ejectorPushMm: float = Field(
+        default=0,
         description="The distance to back off to ensure that the tip presence sensors are not triggered.",
     )
 
@@ -129,81 +131,82 @@ class EvotipSealPipetteImplementation(
 
     async def relative_pickup_tip(
         self,
-        pipette_id: str,
-        tip_geometry: TipGeometry,
         tip_pick_up_params: TipPickUpParams,
         mount: MountType,
-        press_fit: bool,
-        current_volume: float,
     ) -> None:
         prep_distance = tip_pick_up_params.prepDistance
         press_distance = tip_pick_up_params.pressDistance
-        ejector_push_mm = tip_pick_up_params.ejectorPushmm
         retract_distance = -1 * (prep_distance + press_distance)
 
         mount_axis = MotorAxis.LEFT_Z if mount == MountType.LEFT else MotorAxis.RIGHT_Z
 
-        if press_fit:
-            await self._gantry_mover.move_axes(
-                axis_map={mount_axis: prep_distance}, speed=10, relative_move=True
-            )
+        # TODO chb, 2025-01-29): Factor out the movement constants and relocate this logic into the hardware controller
+        await self._gantry_mover.move_axes(
+            axis_map={mount_axis: prep_distance}, speed=10, relative_move=True
+        )
 
-            # Drive mount down for press-fit
-            await self._gantry_mover.move_axes(
-                axis_map={mount_axis: press_distance},
-                speed=10.0,
-                relative_move=True,
-                _expect_stalls=True,
-            )
-            # retract cam : 11.05
-            await self._gantry_mover.move_axes(
-                axis_map={mount_axis: retract_distance}, speed=5.5, relative_move=True
-            )
-        else:
-            await self._gantry_mover.move_axes(
-                axis_map={mount_axis: -6}, speed=10, relative_move=True
-            )
+        # Drive mount down for press-fit
+        await self._gantry_mover.move_axes(
+            axis_map={mount_axis: press_distance},
+            speed=10.0,
+            relative_move=True,
+            expect_stalls=True,
+        )
+        # retract cam : 11.05
+        await self._gantry_mover.move_axes(
+            axis_map={mount_axis: retract_distance}, speed=5.5, relative_move=True
+        )
 
-            # Drive Q down 3mm at fast speed - look into the pick up tip fuinction to find slow and fast: 10.0
-            await self._gantry_mover.move_axes(
-                axis_map={MotorAxis.AXIS_96_CHANNEL_CAM: prep_distance},
-                speed=10.0,
-                relative_move=True,
-            )
-            # 2.8mm at slow speed - cam action pickup speed: 5.5
-            await self._gantry_mover.move_axes(
-                axis_map={MotorAxis.AXIS_96_CHANNEL_CAM: press_distance},
-                speed=5.5,
-                relative_move=True,
-            )
-            # retract cam : 11.05
-            await self._gantry_mover.move_axes(
-                axis_map={MotorAxis.AXIS_96_CHANNEL_CAM: retract_distance},
-                speed=5.5,
-                relative_move=True,
-            )
+    async def cam_action_relative_pickup_tip(
+        self,
+        tip_pick_up_params: TipPickUpParams,
+        mount: MountType,
+    ) -> None:
+        prep_distance = tip_pick_up_params.prepDistance
+        press_distance = tip_pick_up_params.pressDistance
+        ejector_push_mm = tip_pick_up_params.ejectorPushMm
+        retract_distance = -1 * (prep_distance + press_distance)
 
-            # Lower tip presence
-            await self._gantry_mover.move_axes(
-                axis_map={mount_axis: 2}, speed=10, relative_move=True
-            )
-            await self._gantry_mover.move_axes(
-                axis_map={MotorAxis.AXIS_96_CHANNEL_CAM: ejector_push_mm},
-                speed=5.5,
-                relative_move=True,
-            )
-            await self._gantry_mover.move_axes(
-                axis_map={MotorAxis.AXIS_96_CHANNEL_CAM: -1 * ejector_push_mm},
-                speed=5.5,
-                relative_move=True,
-            )
+        mount_axis = MotorAxis.LEFT_Z if mount == MountType.LEFT else MotorAxis.RIGHT_Z
 
-        # cache_tip
-        if self._state_view.config.use_virtual_pipettes is False:
-            self._tip_handler.cache_tip(pipette_id, tip_geometry)
-            self._hardware_api.hardware_instruments[
-                mount.to_hw_mount()
-            ].set_current_volume(current_volume)
+        # TODO chb, 2025-01-29): Factor out the movement constants and relocate this logic into the hardware controller
+        await self._gantry_mover.move_axes(
+            axis_map={mount_axis: -6}, speed=10, relative_move=True
+        )
+
+        # Drive Q down 3mm at fast speed - look into the pick up tip fuinction to find slow and fast: 10.0
+        await self._gantry_mover.move_axes(
+            axis_map={MotorAxis.AXIS_96_CHANNEL_CAM: prep_distance},
+            speed=10.0,
+            relative_move=True,
+        )
+        # 2.8mm at slow speed - cam action pickup speed: 5.5
+        await self._gantry_mover.move_axes(
+            axis_map={MotorAxis.AXIS_96_CHANNEL_CAM: press_distance},
+            speed=5.5,
+            relative_move=True,
+        )
+        # retract cam : 11.05
+        await self._gantry_mover.move_axes(
+            axis_map={MotorAxis.AXIS_96_CHANNEL_CAM: retract_distance},
+            speed=5.5,
+            relative_move=True,
+        )
+
+        # Lower tip presence
+        await self._gantry_mover.move_axes(
+            axis_map={mount_axis: 2}, speed=10, relative_move=True
+        )
+        await self._gantry_mover.move_axes(
+            axis_map={MotorAxis.AXIS_96_CHANNEL_CAM: ejector_push_mm},
+            speed=5.5,
+            relative_move=True,
+        )
+        await self._gantry_mover.move_axes(
+            axis_map={MotorAxis.AXIS_96_CHANNEL_CAM: -1 * ejector_push_mm},
+            speed=5.5,
+            relative_move=True,
+        )
 
     async def execute(
         self, params: EvotipSealPipetteParams
@@ -239,34 +242,31 @@ class EvotipSealPipetteImplementation(
         )
         maximum_volume = self._state_view.pipettes.get_maximum_volume(pipette_id)
         if self._state_view.pipettes.get_mount(pipette_id) == MountType.LEFT:
-            self._hardware_api.home(axes=[Axis.P_L])
+            await self._hardware_api.home(axes=[Axis.P_L])
         else:
-            self._hardware_api.home(axes=[Axis.P_R])
+            await self._hardware_api.home(axes=[Axis.P_R])
 
         # Begin relative pickup steps for the resin tips
 
         channels = self._state_view.tips.get_pipette_active_channels(pipette_id)
         mount = self._state_view.pipettes.get_mount(pipette_id)
-        if params.tipPickUpParams and channels != 96:
+        tip_pick_up_params = params.tipPickUpParams
+        if tip_pick_up_params is None:
+            tip_pick_up_params = TipPickUpParams(
+                prepDistance=_PREP_DISTANCE_DEFAULT,
+                pressDistance=_PRESS_DISTANCE_DEFAULT,
+                ejectorPushMm=_EJECTOR_PUSH_MM_DEFAULT,
+            )
+
+        if channels != 96:
             await self.relative_pickup_tip(
-                pipette_id=pipette_id,
-                tip_geometry=tip_geometry,
-                tip_pick_up_params=params.tipPickUpParams,
+                tip_pick_up_params=tip_pick_up_params,
                 mount=mount,
-                press_fit=True,
-                current_volume=maximum_volume,
             )
         elif channels == 96:
-            pick_up_params = (
-                params.tipPickUpParams if params.tipPickUpParams else TipPickUpParams()
-            )
-            await self.relative_pickup_tip(
-                pipette_id=pipette_id,
-                tip_geometry=tip_geometry,
-                tip_pick_up_params=pick_up_params,
+            await self.cam_action_relative_pickup_tip(
+                tip_pick_up_params=tip_pick_up_params,
                 mount=mount,
-                press_fit=False,
-                current_volume=maximum_volume,
             )
         else:
             tip_geometry = await self._tip_handler.pick_up_tip(
@@ -275,6 +275,14 @@ class EvotipSealPipetteImplementation(
                 well_name=well_name,
                 do_not_ignore_tip_presence=True,
             )
+
+        # cache_tip
+        if self._state_view.config.use_virtual_pipettes is False:
+            self._tip_handler.cache_tip(pipette_id, tip_geometry)
+            hw_instr = self._hardware_api.hardware_instruments[mount.to_hw_mount()]
+            if hw_instr is not None:
+                hw_instr.set_current_volume(maximum_volume)
+
         state_update = StateUpdate()
         state_update.update_pipette_tip_state(
             pipette_id=pipette_id,

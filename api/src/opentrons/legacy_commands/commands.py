@@ -327,8 +327,10 @@ def unseal(
 
 def resin_tip_dispense(
     instrument: InstrumentContext,
-    flow_rate: float,
+    flow_rate: float | None,
 ) -> command_types.PressurizeCommand:
+    if flow_rate is None:
+        flow_rate = 10  # The Protocol Engine default for Resin Tip Dispense
     text = f"Pressurize pipette to dispense from resin tip at {flow_rate}uL/s."
     return {
         "name": command_types.PRESSURIZE,

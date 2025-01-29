@@ -540,15 +540,17 @@ class MoveLabwareCommandPayload(TextOnlyPayload):
 
 
 class SealCommandPayload(TextOnlyPayload):
-    pass
+    instrument: InstrumentContext
+    location: Union[None, Location, Well]
 
 
 class UnsealCommandPayload(TextOnlyPayload):
-    pass
+    instrument: InstrumentContext
+    location: Union[None, Location, Well]
 
 
 class PressurizeCommandPayload(TextOnlyPayload):
-    pass
+    instrument: InstrumentContext
 
 
 class MoveLabwareCommand(TypedDict):

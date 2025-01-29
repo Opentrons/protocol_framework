@@ -46,14 +46,6 @@ class EvotipUnsealPipetteParams(PipetteIdMixin):
         default_factory=DropTipWellLocation,
         description="Relative well location at which to drop the tip.",
     )
-    homeAfter: Optional[bool] = Field(
-        None,
-        description=(
-            "Whether to home this pipette after dropping the tip."
-            " You should normally leave this unspecified to let the robot choose"
-            " a safe default depending on its hardware."
-        ),
-    )
 
 
 class EvotipUnsealPipetteResult(DestinationPositionResult):
@@ -92,7 +84,6 @@ class EvotipUnsealPipetteImplementation(
         pipette_id = params.pipetteId
         labware_id = params.labwareId
         well_name = params.wellName
-        home_after = params.homeAfter
 
         well_location = params.wellLocation
         labware_definition = self._state_view.labware.get_definition(params.labwareId)
@@ -131,7 +122,7 @@ class EvotipUnsealPipetteImplementation(
 
         await self._tip_handler.drop_tip(
             pipette_id=pipette_id,
-            home_after=home_after,
+            home_after=None,
             do_not_ignore_tip_presence=False,
             ignore_plunger=True,
         )

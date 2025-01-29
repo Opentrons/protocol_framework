@@ -195,7 +195,6 @@ class AbstractInstrument(ABC, Generic[WellCoreType]):
         self,
         location: types.Location,
         well_core: WellCoreType,
-        home_after: Optional[bool],
     ) -> None:
         ...
 

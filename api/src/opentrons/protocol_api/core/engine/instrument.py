@@ -701,9 +701,7 @@ class InstrumentCore(AbstractInstrument[WellCore]):
             )
         )
 
-    def resin_tip_unseal(
-        self, location: Location, well_core: WellCore, home_after: Optional[bool]
-    ) -> None:
+    def resin_tip_unseal(self, location: Location, well_core: WellCore) -> None:
         well_name = well_core.get_name()
         labware_id = well_core.labware_id
 
@@ -736,7 +734,6 @@ class InstrumentCore(AbstractInstrument[WellCore]):
                 labwareId=labware_id,
                 wellName=well_name,
                 wellLocation=well_location,
-                homeAfter=home_after,
             )
         )
 
@@ -790,7 +787,6 @@ class InstrumentCore(AbstractInstrument[WellCore]):
                 wellLocation=well_location,
                 volume=volume,
                 flowRate=flow_rate,
-                pushOut=push_out,
             )
         )
 

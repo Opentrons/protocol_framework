@@ -320,7 +320,6 @@ class LegacyInstrumentCore(AbstractInstrument[LegacyWellCore]):
         self,
         location: types.Location,
         well_core: WellCore,
-        home_after: Optional[bool],
     ) -> None:
         raise APIVersionError(api_element="Unsealing resin tips.")
 
@@ -333,7 +332,7 @@ class LegacyInstrumentCore(AbstractInstrument[LegacyWellCore]):
         push_out: Optional[float] = None,
     ) -> None:
         raise APIVersionError(api_element="Dispensing liquid from resin tips.")
-    
+
     def home(self) -> None:
         """Home the mount"""
         self._protocol_interface.get_hardware().home_z(

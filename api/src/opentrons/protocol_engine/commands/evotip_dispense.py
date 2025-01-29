@@ -44,10 +44,7 @@ class EvotipDispenseParams(
 ):
     """Payload required to dispense in place."""
 
-    pushOut: Optional[float] = Field(
-        None,
-        description="Push the plunger a small amount farther than necessary for accurate low-volume dispensing",
-    )
+    pass
 
 
 class EvotipDispenseResult(BaseLiquidHandlingResult):
@@ -110,7 +107,7 @@ class EvotipDispenseImplementation(
             pipette_id=params.pipetteId,
             volume=params.volume,
             flow_rate=params.flowRate,
-            push_out=params.pushOut,
+            push_out=None,
             location_if_error={
                 "retryLocation": (
                     current_position.x,
@@ -122,38 +119,10 @@ class EvotipDispenseImplementation(
             model_utils=self._model_utils,
         )
 
-        if (
-            isinstance(current_location, CurrentWell)
-            and current_location.pipette_id == params.pipetteId
-        ):
-            volume_added = (
-                self._state_view.pipettes.get_liquid_dispensed_by_ejecting_volume(
-                    pipette_id=params.pipetteId, volume=result.public.volume
-                )
-            )
-            if volume_added is not None:
-                volume_added *= self._state_view.geometry.get_nozzles_per_well(
-                    current_location.labware_id,
-                    current_location.well_name,
-                    params.pipetteId,
-                )
-            return SuccessData(
-                public=EvotipDispenseResult(volume=result.public.volume),
-                state_update=result.state_update.set_liquid_operated(
-                    labware_id=current_location.labware_id,
-                    well_names=self._state_view.geometry.get_wells_covered_by_pipette_with_active_well(
-                        current_location.labware_id,
-                        current_location.well_name,
-                        params.pipetteId,
-                    ),
-                    volume_added=volume_added if volume_added is not None else CLEAR,
-                ),
-            )
-        else:
-            return SuccessData(
-                public=EvotipDispenseResult(volume=result.public.volume),
-                state_update=result.state_update,
-            )
+        return SuccessData(
+            public=EvotipDispenseResult(volume=result.public.volume),
+            state_update=result.state_update,
+        )
 
 
 class EvotipDispense(
