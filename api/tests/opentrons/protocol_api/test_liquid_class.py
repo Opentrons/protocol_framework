@@ -31,7 +31,7 @@ def test_get_for_pipette_and_tip(
     }
     mock_instrument = decoy.mock(cls=InstrumentContext)
     mock_tiprack = decoy.mock(cls=Labware)
-    decoy.when(mock_instrument.load_name).then_return("flex_1channel_50")
+    decoy.when(mock_instrument.name).then_return("flex_1channel_50")
     decoy.when(mock_tiprack.uri).then_return("opentrons_flex_96_tiprack_50ul")
     result_2 = liq_class.get_for(mock_instrument, mock_tiprack)
     assert result_2.aspirate.flow_rate_by_volume.as_dict() == {

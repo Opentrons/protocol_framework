@@ -64,6 +64,7 @@ _PARTIAL_NOZZLE_CONFIGURATION_SINGLE_ROW_PARTIAL_COLUMN_ADDED_IN = APIVersion(2,
 _AIR_GAP_TRACKING_ADDED_IN = APIVersion(2, 22)
 """The version after which air gaps should be implemented with a separate call instead of an aspirate for better liquid volume tracking."""
 
+
 AdvancedLiquidHandling = v1_transfer.AdvancedLiquidHandling
 
 
@@ -2004,18 +2005,12 @@ class InstrumentContext(publisher.CommandPublisher):
     def name(self) -> str:
         """
         The name string for the pipette (e.g., ``"p300_single"``).
+
+        From API v2.15 to v2.22, this property returned an internal name for Flex pipettes.
+        From API v2.23 onwards, this behavior is fixed so that this property returns
+        the API-specific names of Flex pipettes.
         """
         return self._core.get_pipette_name()
-
-    @property
-    @requires_version(2, 23)
-    def load_name(self) -> str:
-        """The load name string for the pipette.
-
-        This is the load name that is specified in the `ProtocolContext.load_instrument()`.
-        This might differ from the `name` property of the instrument.
-        """
-        return self._core.get_load_name()
 
     @property
     @requires_version(2, 0)

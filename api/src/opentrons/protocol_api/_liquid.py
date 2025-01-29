@@ -74,7 +74,7 @@ class LiquidClass:
         from . import InstrumentContext, Labware
 
         if isinstance(pipette, InstrumentContext):
-            pipette_name = pipette.load_name
+            pipette_name = pipette.name
         elif isinstance(pipette, str):
             pipette_name = pipette
         else:

@@ -333,13 +333,6 @@ class LegacyInstrumentCoreSimulator(
     def get_pipette_name(self) -> str:
         return self._pipette_dict["name"]
 
-    def get_load_name(self) -> str:
-        """Get the pipette's requested API load name.
-
-        For OT-2 pipettes, this is the same as pipette name.
-        """
-        return self._pipette_dict["name"]
-
     def get_model(self) -> str:
         return self._pipette_dict["model"]
 

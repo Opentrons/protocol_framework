@@ -187,32 +187,60 @@ def test_pipette_id(subject: InstrumentCore) -> None:
     assert subject.pipette_id == "abc123"
 
 
-def test_get_pipette_name(
-    decoy: Decoy, mock_engine_client: EngineClient, subject: InstrumentCore
+@pytest.mark.parametrize(
+    "version",
+    [
+        APIVersion(2, 15),
+        APIVersion(2, 17),
+        APIVersion(2, 20),
+        APIVersion(2, 22),
+    ],
+)
+def test_get_pipette_name_old(
+    decoy: Decoy,
+    mock_engine_client: EngineClient,
+    mock_protocol_core: ProtocolCore,
+    subject: InstrumentCore,
+    version: APIVersion,
 ) -> None:
     """It should get the pipette's load name."""
+    decoy.when(mock_protocol_core.api_version).then_return(version)
     decoy.when(mock_engine_client.state.pipettes.get("abc123")).then_return(
         LoadedPipette.model_construct(pipetteName=PipetteNameType.P300_SINGLE)  # type: ignore[call-arg]
     )
-
-    result = subject.get_pipette_name()
-
-    assert result == "p300_single"
-
-
-def test_get_pipette_load_name(
-    decoy: Decoy, mock_engine_client: EngineClient, subject: InstrumentCore
-) -> None:
-    """It should get the pipette's API-specific load name."""
-    decoy.when(mock_engine_client.state.pipettes.get("abc123")).then_return(
-        LoadedPipette.model_construct(pipetteName=PipetteNameType.P300_SINGLE)  # type: ignore[call-arg]
-    )
-    assert subject.get_load_name() == "p300_single"
-
+    assert subject.get_pipette_name() == "p300_single"
     decoy.when(mock_engine_client.state.pipettes.get("abc123")).then_return(
         LoadedPipette.model_construct(pipetteName=PipetteNameType.P1000_96)  # type: ignore[call-arg]
     )
-    assert subject.get_load_name() == "flex_96channel_1000"
+    assert subject.get_pipette_name() == "p1000_96"
+    decoy.when(mock_engine_client.state.pipettes.get("abc123")).then_return(
+        LoadedPipette.model_construct(pipetteName=PipetteNameType.P50_SINGLE_FLEX)  # type: ignore[call-arg]
+    )
+    assert subject.get_pipette_name() == "p50_single_flex"
+
+
+@pytest.mark.parametrize("version", versions_at_or_above(APIVersion(2, 23)))
+def test_get_pipette_name_new(
+    decoy: Decoy,
+    mock_engine_client: EngineClient,
+    mock_protocol_core: ProtocolCore,
+    subject: InstrumentCore,
+    version: APIVersion,
+) -> None:
+    """It should get the pipette's API-specific load name."""
+    decoy.when(mock_protocol_core.api_version).then_return(version)
+    decoy.when(mock_engine_client.state.pipettes.get("abc123")).then_return(
+        LoadedPipette.model_construct(pipetteName=PipetteNameType.P300_SINGLE)  # type: ignore[call-arg]
+    )
+    assert subject.get_pipette_name() == "p300_single"
+    decoy.when(mock_engine_client.state.pipettes.get("abc123")).then_return(
+        LoadedPipette.model_construct(pipetteName=PipetteNameType.P1000_96)  # type: ignore[call-arg]
+    )
+    assert subject.get_pipette_name() == "flex_96channel_1000"
+    decoy.when(mock_engine_client.state.pipettes.get("abc123")).then_return(
+        LoadedPipette.model_construct(pipetteName=PipetteNameType.P50_SINGLE_FLEX)  # type: ignore[call-arg]
+    )
+    assert subject.get_pipette_name() == "flex_1channel_50"
 
 
 def test_get_mount(
@@ -1671,11 +1699,14 @@ def test_liquid_probe_with_recovery(
     )
 
 
+@pytest.mark.parametrize("version", versions_at_or_above(APIVersion(2, 23)))
 def test_load_liquid_class(
     decoy: Decoy,
     mock_engine_client: EngineClient,
+    mock_protocol_core: ProtocolCore,
     subject: InstrumentCore,
     minimal_liquid_class_def2: LiquidClassSchemaV1,
+    version: APIVersion,
 ) -> None:
     """It should send the load liquid class command to the engine."""
     sample_aspirate_data = minimal_liquid_class_def2.byPipette[0].byTipType[0].aspirate
@@ -1686,6 +1717,7 @@ def test_load_liquid_class(
         minimal_liquid_class_def2.byPipette[0].byTipType[0].multiDispense
     )
 
+    decoy.when(mock_protocol_core.api_version).then_return(version)
     test_liq_class = decoy.mock(cls=LiquidClass)
     test_transfer_props = decoy.mock(cls=TransferProperties)
 

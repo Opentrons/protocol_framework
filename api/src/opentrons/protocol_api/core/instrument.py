@@ -198,15 +198,6 @@ class AbstractInstrument(ABC, Generic[WellCoreType, LabwareCoreType]):
         ...
 
     @abstractmethod
-    def get_load_name(self) -> str:
-        """Get the pipette's requested API load name.
-
-        This is the load name that is specified in the `ProtocolContext.load_instrument()`
-        method. This name might differ from the engine-specific pipette name.
-        """
-        ...
-
-    @abstractmethod
     def get_model(self) -> str:
         ...
 
