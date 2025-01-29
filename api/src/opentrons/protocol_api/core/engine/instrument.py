@@ -997,8 +997,7 @@ class InstrumentCore(AbstractInstrument[WellCore, LabwareCore]):
             )
         tiprack_uri_for_transfer_props = tip_racks[0][1].get_uri()
         transfer_props = liquid_class.get_for(
-            pipette=self.get_pipette_name(),
-            tiprack=tiprack_uri_for_transfer_props,
+            pipette=self.get_pipette_name(), tip_rack=tiprack_uri_for_transfer_props
         )
         # TODO: use the ID returned by load_liquid_class in command annotations
         self.load_liquid_class(

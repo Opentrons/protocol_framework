@@ -68,7 +68,7 @@ class LiquidClass:
         return self._display_name
 
     def get_for(
-        self, pipette: Union[str, InstrumentContext], tiprack: Union[str, Labware]
+        self, pipette: Union[str, InstrumentContext], tip_rack: Union[str, Labware]
     ) -> TransferProperties:
         """Get liquid class transfer properties for the specified pipette and tip."""
         from . import InstrumentContext, Labware
@@ -83,13 +83,13 @@ class LiquidClass:
                 f" or a pipette name string."
             )
 
-        if isinstance(tiprack, Labware):
-            tiprack_uri = tiprack.uri
-        elif isinstance(tiprack, str):
-            tiprack_uri = tiprack
+        if isinstance(tip_rack, Labware):
+            tiprack_uri = tip_rack.uri
+        elif isinstance(tip_rack, str):
+            tiprack_uri = tip_rack
         else:
             raise ValueError(
-                f"{tiprack} should either be a tiprack Labware object"
+                f"{tip_rack} should either be a tiprack Labware object"
                 f" or a tiprack URI string."
             )
 
