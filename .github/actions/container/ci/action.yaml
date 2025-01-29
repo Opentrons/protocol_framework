@@ -5,7 +5,7 @@ inputs:
     description: "Branch name"
     required: true
   token:
-    description: 'A Github PAT'
+    description: 'A Github Token'
     required: true
 outputs:
   image:
@@ -32,5 +32,5 @@ runs:
         context: .
         push: true
         tags: ci:${{ inputs.branch }}
-        cache-from: type=registry
-        cache-to: type=registry
+        cache-from: type=registry,ref=ghcr.io/opentrons/opentrons
+        cache-to: type=registry,ref=ghcr.io/opentrons/opentrons
