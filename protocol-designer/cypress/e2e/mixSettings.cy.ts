@@ -48,12 +48,19 @@ describe('Redesigned Mixing Steps - Happy Path', () => {
       MixVerifications.AspWellOrder,
       MixActions.AspMixTipPos,
       MixVerifications.AspMixTipPos,
+      // MixActions.TipPosSideImageMove,
+      // MixActions.TipPosTopImageMove,
+      // MixVerification.TipPosCollisionCheck:
       // MixActions.Delay,
+      // Actions.FlowRateWarning, //for asp
       // MixActions.Back,
-      // MixUniversalActions.Snapshot,
-      // MixVerifications.AdvancedAspSettings,
       // MixActions.Dispense,
       // MixVerifications.PartTwoDisp,
+      // MixActions.DispenseFlowRate,
+      // MixActions.Delay,
+      // MixActions.Blowout,
+      // MixActions.TouchTip,
+      // Actions.FlowRateWarning, //for disp
 
     ]
     runSteps(steps)
