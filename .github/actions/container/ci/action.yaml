@@ -5,7 +5,7 @@ inputs:
     description: "Branch name"
     required: true
   token:
-    description: 'A Github Token'
+    description: 'A Github Token (must have write:packages scope)'
     required: true
 outputs:
   image:
@@ -31,8 +31,7 @@ runs:
       with:
         context: .
         push: true
-        tags: ci:${{ inputs.branch }}
-        cache-from: type=registry,ref=ghcr.io/opentrons/opentrons
-        cache-to: type=registry,ref=ghcr.io/opentrons/opentrons
-        secrets: |
-            GIT_AUTH_TOKEN=${{ inputs.token }}
+        tags: ghcr.io/opentrons/opentrons-ci:${{ inputs.branch }}
+        cache-from: type=registry,ref=ghcr.io/opentrons/opentrons-ci:latest
+        cache-to: type=registry,ref=ghcr.io/opentrons/opentrons-ci:latest
+        secrets: GIT_AUTH_TOKEN=${{ inputs.token }}
