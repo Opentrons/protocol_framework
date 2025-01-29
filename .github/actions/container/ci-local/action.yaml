@@ -14,9 +14,9 @@ runs:
       uses: actions/cache@v3
       with:
         path: /tmp/.buildx-cache
-        key: buildx-${{ input.branch }}
+        key: buildx-${{ inputs.branch }}
         restore-keys: |
-          buildx-${{ input.branch }}
+          buildx-${{ inputs.branch }}
           buildx-
     
     - name: Build container
@@ -25,7 +25,7 @@ runs:
         context: .
         target: ci
         load: true
-        tags: opentrons-ci:${{ input.branch }}
+        tags: opentrons-ci:${{ inputs.branch }}
         cache-from: type=local,src=/tmp/.buildx-cache
         cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
 
