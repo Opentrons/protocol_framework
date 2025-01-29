@@ -322,6 +322,23 @@ export function generateQuickTransferArgs(
   if (pipetteEntity.spec.channels === 96) {
     nozzles = 'ALL' as NozzleConfigurationStyle
   }
+  const touchTipAfterDispenseOffsetMmFromTop =
+    quickTransferState.touchTipDispense != null
+      ? quickTransferState.touchTipDispense -
+        getWellsDepth(
+          quickTransferState.destination === 'source'
+            ? quickTransferState.source
+            : quickTransferState.destination,
+          destWells
+        )
+      : DEFAULT_MM_TOUCH_TIP_OFFSET_FROM_TOP
+
+  const touchTipAfterAspirateOffsetMmFromTop =
+    quickTransferState.touchTipAspirate != null
+      ? quickTransferState.touchTipAspirate -
+        getWellsDepth(quickTransferState.source, sourceWells)
+      : DEFAULT_MM_TOUCH_TIP_OFFSET_FROM_TOP
+
   const commonFields = {
     pipette: pipetteEntity.id,
     volume: quickTransferState.volume,
@@ -355,19 +372,9 @@ export function generateQuickTransferArgs(
     aspirateAirGapVolume: quickTransferState.airGapAspirate ?? null,
     dispenseAirGapVolume: quickTransferState.airGapDispense ?? null,
     touchTipAfterAspirate: quickTransferState.touchTipAspirate != null,
-    touchTipAfterAspirateOffsetMmFromTop:
-      quickTransferState.touchTipAspirate ??
-      getWellsDepth(quickTransferState.source, sourceWells) +
-        DEFAULT_MM_TOUCH_TIP_OFFSET_FROM_TOP,
+    touchTipAfterAspirateOffsetMmFromTop,
     touchTipAfterDispense: quickTransferState.touchTipDispense != null,
-    touchTipAfterDispenseOffsetMmFromTop:
-      quickTransferState.touchTipDispense ??
-      getWellsDepth(
-        quickTransferState.destination === 'source'
-          ? quickTransferState.source
-          : quickTransferState.destination,
-        destWells
-      ) + DEFAULT_MM_TOUCH_TIP_OFFSET_FROM_TOP,
+    touchTipAfterDispenseOffsetMmFromTop,
     dropTipLocation,
     aspirateXOffset: 0,
     aspirateYOffset: 0,
