@@ -29,8 +29,14 @@ const getMigratedPositionFromTop = (
       ? `${matchingLoadLabware.params.namespace}/${matchingLoadLabware.params.loadName}/${matchingLoadLabware.params.version}`
       : ''
 
-  const matchingLabwareWellDepth =
-    labwareUri != null ? labwareDefinitions[labwareUri].wells.A1.depth : 0
+  //    early exit for dispense_labware equaling trashBin or wasteChute
+  if (labwareDefinitions[labwareUri] == null) {
+    return 0
+  }
+
+  const matchingLabwareWellDepth = labwareUri
+    ? labwareDefinitions[labwareUri].wells.A1.depth
+    : 0
 
   if (matchingLabwareWellDepth === 0) {
     console.error(

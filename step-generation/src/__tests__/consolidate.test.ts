@@ -1069,7 +1069,7 @@ describe('consolidate single-channel', () => {
   })
 
   describe('all advanced settings enabled', () => {
-    it.only('should create commands in the expected order with expected params (changeTip: never, blowout in trash)', () => {
+    it('should create commands in the expected order with expected params (changeTip: never, blowout in trash)', () => {
       const args = {
         ...mixinArgs,
         sourceWells: ['A1', 'A2', 'A3'],
@@ -1717,7 +1717,7 @@ describe('consolidate single-channel', () => {
             wellLocation: {
               origin: 'top',
               offset: {
-                z: undefined,
+                z: 3.4,
               },
             },
           },

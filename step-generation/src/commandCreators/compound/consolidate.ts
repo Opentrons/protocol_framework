@@ -324,6 +324,7 @@ export const consolidate: CommandCreator<ConsolidateArgs> = (
           }),
         ]
       }
+
       //  can not touch tip in a waste chute
       const touchTipAfterDispenseCommands: CurriedCommandCreator[] =
         args.touchTipAfterDispense && destinationWell != null
