@@ -82,7 +82,7 @@ export enum MixContent {
   Cancel = 'Cancel',
 }
 
-export enum Locators {
+export enum MixLocators {
   Continue = 'button:contains("Continue")',
   GoBack = 'button:contains("Go back")',
   Back = 'button:contains("Back")',
@@ -101,14 +101,7 @@ export enum Locators {
 }
 
 
-const executeAction = (action: MixActions | UniversalActions): void => {
-  if (isEnumValue([UniversalActions], [action])) {
-    executeUniversalAction(action as UniversalActions)
-    return
-  }
-
-
-
+export const executeMixAction = (action: MixActions | UniversalActions): void => {
   switch (action) {
     case MixActions.SelectMix:
       cy.get('button').contains('Mix').click()
@@ -118,13 +111,13 @@ const executeAction = (action: MixActions | UniversalActions): void => {
       cy.contains(MixContent.Reservoir).should('be.visible').click()
       break
     case MixActions.SelectWellInputField:
-      cy.get(Locators.WellInputField).should('be.visible').click()
+      cy.get(MixLocators.WellInputField).should('be.visible').click()
       break
     case MixActions.EnterVolume:
-      cy.get(Locators.Volume).should('exist').type('100')
+      cy.get(MixLocators.Volume).should('exist').type('100')
       break
     case MixActions.EnterMixReps:
-      cy.get(Locators.MixReps).should('exist').type('5')
+      cy.get(MixLocators.MixReps).should('exist').type('5')
       break
     case MixActions.SelectTipHandling:
       cy.contains(MixContent.BeforeEveryAsp).should('exist').should('be.visible').click()
@@ -135,34 +128,34 @@ const executeAction = (action: MixActions | UniversalActions): void => {
       cy.contains(MixContent.OnceAtStartStep).click()
       break
     case MixActions.AspirateFlowRate:
-      cy.get(Locators.Aspirate).should('exist').should('be.visible').click()
-      cy.get(Locators.AspFlowRateInput).should('exist')
-      cy.get(Locators.AspFlowRateInput).type('{selectAll}, {backspace}, 100')
+      cy.get(MixLocators.Aspirate).should('exist').should('be.visible').click()
+      cy.get(MixLocators.AspFlowRateInput).should('exist')
+      cy.get(MixLocators.AspFlowRateInput).type('{selectAll}, {backspace}, 100')
       break
     case MixActions.AspWellOrder:
       cy.contains(MixContent.TopBottomLeRi).should('exist').should('be.visible')
-      cy.get(Locators.AspWellOrder).click()
+      cy.get(MixLocators.AspWellOrder).click()
       break
     case MixActions.Dispense:
-      cy.get(Locators.Dispense).should('exist').should('be.visible').click()
+      cy.get(MixLocators.Dispense).should('exist').should('be.visible').click()
       break
     // case Actions.FlowRateWarning:
     //   break
     case MixActions.Save:
-      cy.get(Locators.Save).should('exist').should('be.visible').click()
+      cy.get(MixLocators.Save).should('exist').should('be.visible').click()
       break
     case MixActions.Back:
-      cy.get(Locators.Back).should('exist').should('be.visible').click()
+      cy.get(MixLocators.Back).should('exist').should('be.visible').click()
       break
     case MixActions.Continue:
-      cy.get(Locators.Continue).should('exist').should('be.visible').click({force: true})
+      cy.get(MixLocators.Continue).should('exist').should('be.visible').click({force: true})
       break
     default:
       throw new Error(`Unrecognized action: ${action as string}`)
   }
 }
 
-const verifyStep = (verification: MixVerifications): void => {
+export const executeVerifyMixStep = (verification: MixVerifications): void => {
   switch (verification) {
     case MixVerifications.PartOne:
       cy.contains(MixContent.PartOne).should('exist').should('be.visible')
@@ -178,31 +171,31 @@ const verifyStep = (verification: MixVerifications): void => {
       cy.contains(MixContent.TipHandling).should('exist').should('be.visible')
       cy.contains(MixContent.TipDropLocation).should('exist').should('be.visible')
       cy.contains(MixContent.WasteChute).should('exist').should('be.visible')
-      cy.get(Locators.Continue).should('exist').should('be.visible')
+      cy.get(MixLocators.Continue).should('exist').should('be.visible')
       break
     case MixVerifications.WellSelectPopout:
       cy.contains(MixContent.WellSelectTitle).should('exist').should('be.visible')
       cy.contains(MixContent.ClickAndDragWellSelect).should('exist').should('be.visible')
-      cy.get(Locators.OneWellReservoirImg).should('exist').should('be.visible')
-      cy.get(Locators.Save).should('exist').should('be.visible')
-      cy.get(Locators.Back).should('exist').should('be.visible')
+      cy.get(MixLocators.OneWellReservoirImg).should('exist').should('be.visible')
+      cy.get(MixLocators.Save).should('exist').should('be.visible')
+      cy.get(MixLocators.Back).should('exist').should('be.visible')
       break
     case MixVerifications.PartTwoAsp:
       cy.contains(MixContent.PartTwo).should('exist').should('be.visible')
       cy.contains(MixContent.Mix).should('exist').should('be.visible')
-      cy.get(Locators.Aspirate).should('exist').should('be.visible')
+      cy.get(MixLocators.Aspirate).should('exist').should('be.visible')
       cy.contains(MixContent.AspFlowRate).should('exist').should('be.visible')
       cy.contains(MixContent.AspWellOrder).should('exist').should('be.visible')
       cy.contains(MixContent.MixTipPosition).should('exist').should('be.visible')
       cy.contains(MixContent.AdvancedPipSettings).should('exist').should('be.visible')
       cy.contains(MixContent.Delay).should('exist').should('be.visible')
-      cy.get(Locators.Back).should('exist').should('be.visible')
-      cy.get(Locators.Save).should('exist').should('be.visible')
+      cy.get(MixLocators.Back).should('exist').should('be.visible')
+      cy.get(MixLocators.Save).should('exist').should('be.visible')
       break
     case MixVerifications.PartTwoDisp:
       cy.contains(MixContent.PartTwo).should('exist').should('be.visible')
       cy.contains(MixContent.Mix).should('exist').should('be.visible')
-      cy.get(Locators.Dispense).should('exist').should('be.visible')
+      cy.get(MixLocators.Dispense).should('exist').should('be.visible')
       cy.contains(MixContent.DispFlowRate).should('exist').should('be.visible')
       cy.contains(MixContent.AdvancedPipSettings).should('exist').should('be.visible')
       cy.contains(MixContent.Delay).should('exist').should('be.visible')
@@ -222,11 +215,11 @@ const verifyStep = (verification: MixVerifications): void => {
       cy.contains(MixContent.SecondaryOrder).should('exist').should('be.visible')
       cy.contains(MixContent.LeftToRight).should('exist').should('be.visible').click()
       cy.contains(MixContent.RightToLeft).should('exist').should('be.visible').click() 
-      cy.get(Locators.ResetToDefault).click()
+      cy.get(MixLocators.ResetToDefault).click()
       cy.contains(MixContent.TopToBottom).should('exist').should('be.visible')
       cy.contains(MixContent.LeftToRight).should('exist').should('be.visible')
-      cy.get(Locators.CancelWellOrder).should('exist').should('be.visible')
-      cy.get(Locators.Save).should('exist').should('be.visible')
+      cy.get(MixLocators.CancelWellOrder).should('exist').should('be.visible')
+      cy.get(MixLocators.Save).should('exist').should('be.visible')
       break
       // case Verifications.MixTipPos:
       //   break
@@ -239,23 +232,4 @@ const verifyStep = (verification: MixVerifications): void => {
   }
 }
 
-export const runMixSetup = (
-  steps: Array<MixActions | MixVerifications | UniversalActions>
-): void => {
-  const enumsToCheck = [MixActions, MixVerifications, UniversalActions]
-
-  if (!isEnumValue(enumsToCheck, steps)) {
-    throw new Error('One or more steps are unrecognized.')
-  }
-
-  steps.forEach(step => {
-    if (isEnumValue([MixActions], step)) {
-      executeAction(step as MixActions)
-    } else if (isEnumValue([MixVerifications], step)) {
-      verifyStep(step as MixVerifications)
-    } else if (isEnumValue([UniversalActions], step)) {
-      executeAction(step as UniversalActions)
-    }
-  })
-}
 

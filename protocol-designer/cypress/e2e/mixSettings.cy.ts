@@ -2,7 +2,6 @@ import '../support/commands'
 import {
   MixActions,
   MixVerifications,
-  runMixSetup,
 } from '../support/mixSetting'
 import { UniversalActions } from '../support/universalActions'
 import { TestFilePath, getTestFile } from '../support/testFiles'
@@ -29,7 +28,7 @@ describe('Redesigned Mixing Steps - Happy Path', () => {
 
 
   it('It should verify the working function of every permutation of mix checkboxes', () => {
-    const steps: Array<MixActions | MixVerifications | UniversalActions> = [
+    const steps: StepsList = [
       MixActions.SelectMix,
       UniversalActions.Snapshot,
       MixVerifications.PartOne,
@@ -55,9 +54,7 @@ describe('Redesigned Mixing Steps - Happy Path', () => {
       // Verifications.PartTwoDisp,
 
     ]
-
-    runMixSetup(steps)
-    // cy.contains('Primary order').closest('div')
+    runSteps(steps)
   });
 });
 
