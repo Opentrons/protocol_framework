@@ -84,7 +84,7 @@ def _legacy_offset_location_to_offset_location_sequence(
 
 
 def _offset_location_sequence_head_to_labware_and_module(
-    location_sequence: LabwareOffsetLocationSequence, deck_definition: DeckDefinitionV5
+    location_sequence: LabwareOffsetLocationSequence,
 ) -> tuple[ModuleModel | None, str | None]:
     labware_uri: str | None = None
     module_model: ModuleModel | None = None
@@ -130,7 +130,7 @@ def _offset_location_sequence_to_legacy_offset_location(
             "Offset locations must end with an addressable area."
         )
     module_model, labware_uri = _offset_location_sequence_head_to_labware_and_module(
-        location_sequence[:-1], deck_definition
+        location_sequence[:-1]
     )
     (
         cutout_id,
