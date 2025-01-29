@@ -524,7 +524,6 @@ class LabwareView:
         will be used.
         """
         definition = self.get_definition(labware_id)
-
         if well_name is None:
             well_name = definition.ordering[0][0]
 
@@ -886,6 +885,19 @@ class LabwareView:
                 raise errors.LocationIsOccupiedError(
                     f"Labware {labware.loadName} is already present at {location}."
                 )
+
+    def raise_if_labware_cannot_be_ondeck(
+        self,
+        location: LabwareLocation,
+        labware_definition: LabwareDefinition,
+    ) -> None:
+        """Raise an error if the labware cannot be in the specified location."""
+        if isinstance(
+            location, (DeckSlotLocation, AddressableAreaLocation)
+        ) and not labware_validation.validate_labware_can_be_ondeck(labware_definition):
+            raise errors.LabwareCannotSitOnDeckError(
+                f"{labware_definition.parameters.loadName} cannot sit in a slot by itself."
+            )
 
     def raise_if_labware_incompatible_with_plate_reader(
         self,

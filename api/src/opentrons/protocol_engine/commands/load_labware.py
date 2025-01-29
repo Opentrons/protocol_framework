@@ -192,6 +192,11 @@ class LoadLabwareImplementation(
                 self._state_view.labware.raise_if_labware_incompatible_with_plate_reader(
                     loaded_labware.definition
                 )
+
+        self._state_view.labware.raise_if_labware_cannot_be_ondeck(
+            location=params.location, labware_definition=loaded_labware.definition
+        )
+
         return SuccessData(
             public=LoadLabwareResult(
                 labwareId=loaded_labware.labware_id,
