@@ -358,22 +358,30 @@ export function AddFixtureModal({
     closeModal()
   }
 
-  const fixtureOptions = availableOptions.map(cutoutConfigs => (
-    <FixtureOption
-      key={cutoutConfigs[0].cutoutFixtureId}
-      optionName={getFixtureDisplayName(
-        cutoutConfigs[0].cutoutFixtureId,
-        (modulesData?.data ?? []).find(
-          m => m.serialNumber === cutoutConfigs[0].opentronsModuleSerialNumber
-        )?.usbPort.port
-      )}
-      buttonText={t('add')}
-      onClickHandler={() => {
-        handleAddFixture(cutoutConfigs)
-      }}
-      isOnDevice={isOnDevice}
-    />
-  ))
+  const fixtureOptions = availableOptions.map(cutoutConfigs => {
+    const usbPort = (modulesData?.data ?? []).find(
+      m => m.serialNumber === cutoutConfigs[0].opentronsModuleSerialNumber
+    )?.usbPort
+    const portDisplay =
+      usbPort?.hubPort != null
+        ? `${usbPort.port}.${usbPort.hubPort}`
+        : usbPort?.port
+
+    return (
+      <FixtureOption
+        key={cutoutConfigs[0].cutoutFixtureId}
+        optionName={getFixtureDisplayName(
+          cutoutConfigs[0].cutoutFixtureId,
+          portDisplay
+        )}
+        buttonText={t('add')}
+        onClickHandler={() => {
+          handleAddFixture(cutoutConfigs)
+        }}
+        isOnDevice={isOnDevice}
+      />
+    )
+  })
 
   return (
     <>

@@ -245,7 +245,7 @@ export function getAddressableAreaNamesFromLoadedModule(
 // note: we've decided not to translate these strings
 export function getFixtureDisplayName(
   cutoutFixtureId: CutoutFixtureId | null,
-  usbPortNumber?: number
+  usbPortNumber?: number | string
 ): string {
   switch (cutoutFixtureId) {
     case STAGING_AREA_RIGHT_SLOT_FIXTURE:
