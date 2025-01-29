@@ -38,9 +38,19 @@ env:
 
 jobs:
   setup:
-    runs-on: 'ubuntu-22.04'
+    runs-on: ubuntu-22.04
+    outputs:
+      image: ${{ steps.container.outputs.image }}
     steps:
       - uses: 'actions/checkout@v4'
+        with:
+          fetch-depth: 0
+        # https://github.com/actions/checkout/issues/290
+      - name: 'Fix actions/checkout odd handling of tags'
+        if: startsWith(github.ref, 'refs/tags')
+        run: |
+          git fetch -f origin ${{ github.ref }}:${{ github.ref }}
+          git checkout ${{ github.ref }}
       - name: Get branch name
         id: branch
         shell: bash
@@ -50,33 +60,20 @@ jobs:
           else
             echo "name=${GITHUB_REF#refs/*/}" >> $GITHUB_OUTPUT
           fi
-      - name: Build CI Container
-        uses: ./.github/actions/container/ci-local
+      - name: Build Container
+        id: container
+        uses: ./.github/actions/container/ci
         with:
           branch: ${{ steps.branch.outputs.name }}
-      - name: Save Docker image
-        run: docker save opentrons-ci:${{ steps.branch.outputs.name }} > /tmp/ci-image.tar
-      - name: Upload Docker image
-        uses: actions/upload-artifact@v4
-        with:
-          name: docker-image
-          path: /tmp/ci-image.tar
 
   js-unit-test:
     needs: ['setup']
     runs-on: 'ubuntu-22.04'
     steps:
-      - uses: actions/checkout@v4
-      - name: Download Docker image
-        uses: actions/download-artifact@v3
-        with:
-          name: docker-image
-          path: /tmp
-      - name: Load Docker image
-        run: docker load < /tmp/ci-image.tar
-      - name: Run tests
-        run: docker run --rm opentrons-ci:${{ needs.setup.outputs.branch }} make -C protocol-designer test-cov
-
+      - name: Run Tests
+        run: |
+          docker run --rm ${{ needs.setup.outputs.image }} \
+          make -C protocol-designer test-cov
 
   # e2e-test:
   #   name: 'pd e2e tests'
