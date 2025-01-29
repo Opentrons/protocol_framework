@@ -120,8 +120,6 @@ export function SelectPipettes(props: WizardTileProps): JSX.Element | null {
       (pipettesByMount.right.tiprackDefURI == null ||
         pipettesByMount.right.tiprackDefURI.length === 0))
 
-  console.log(pipettesByMount.left)
-
   const targetPipetteMount =
     pipettesByMount.left.pipetteName == null ||
     pipettesByMount.left.tiprackDefURI == null
