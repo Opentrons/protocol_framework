@@ -65,6 +65,7 @@ jobs:
         uses: ./.github/actions/container/ci
         with:
           branch: ${{ steps.branch.outputs.name }}
+          token: ${{ secrets.GITHUB_TOKEN }}
 
   js-unit-test:
     needs: ['setup']
