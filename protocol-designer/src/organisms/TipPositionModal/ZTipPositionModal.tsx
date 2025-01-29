@@ -116,7 +116,7 @@ export function ZTipPositionModal(props: ZTipPositionModalProps): JSX.Element {
   const handleCancel = (): void => {
     closeModal()
   }
-  console.log(value, defaultMm, 'test')
+
   const handleChange = (newValueRaw: string | number): void => {
     // if string, strip non-number characters from string and cast to number
     const newValue =
