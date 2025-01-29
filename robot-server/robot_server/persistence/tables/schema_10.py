@@ -397,7 +397,11 @@ labware_offset_location_sequence_components_table = sqlalchemy.Table(
     sqlalchemy.Column("row_id", sqlalchemy.Integer, primary_key=True),
     # Which offset this belongs to
     sqlalchemy.Column(
-        "offset_id", sqlalchemy.ForeignKey("labware_offset_with_sequence.row_id")
+        "offset_id",
+        sqlalchemy.ForeignKey(
+            "labware_offset_with_sequence.row_id",
+        ),
+        nullable=False,
     ),
     # Its position within the sequence
     sqlalchemy.Column("sequence_ordinal", sqlalchemy.Integer, nullable=False),

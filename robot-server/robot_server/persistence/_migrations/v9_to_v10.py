@@ -54,7 +54,7 @@ class Migration9to10(Migration):  # noqa: D101
         with sql_engine_ctx(
             dest_dir / DB_FILE
         ) as engine, engine.begin() as transaction:
-            transaction.execute("DROP TABLE ?", schema_9.labware_offset_table.name)
+            schema_9.labware_offset_table.drop(transaction)
 
 
 def _upmigrate_stored_offsets(connection: sqlalchemy.engine.Connection) -> None:
@@ -67,9 +67,9 @@ def _upmigrate_stored_offsets(connection: sqlalchemy.engine.Connection) -> None:
     for offset in offsets:
         new_row = (
             connection.execute(
-                sqlalchemy.insert(schema_10.labware_offset_table)
-                .values(_v9_offset_to_v10_offset(offset))
-                .returning(schema_10.labware_offset_table.c.row_id)
+                sqlalchemy.insert(schema_10.labware_offset_table).values(
+                    _v9_offset_to_v10_offset(offset)
+                )
             )
             .one()
             .row_id

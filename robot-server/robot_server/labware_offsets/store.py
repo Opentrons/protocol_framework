@@ -10,8 +10,8 @@ from opentrons.protocol_engine.types import (
     OnModuleOffsetLocationSequenceComponent,
     OnLabwareOffsetLocationSequenceComponent,
     LabwareOffsetLocationSequenceComponents,
+    LabwareOffsetLocationSequence,
 )
-from opentrons.types import DeckSlotName
 
 from robot_server.persistence.tables import (
     labware_offset_table,
@@ -59,9 +59,9 @@ class LabwareOffsetStore:
         with self._sql_engine.begin() as transaction:
             offset_row_id = (
                 transaction.execute(
-                    sqlalchemy.insert(labware_offset_table)
-                    .values(_pydantic_to_sql_offset(offset))
-                    .returning(labware_offset_table.c.row_id)
+                    sqlalchemy.insert(labware_offset_table).values(
+                        _pydantic_to_sql_offset(offset)
+                    )
                 )
                 .one()
                 .row_id
@@ -82,7 +82,7 @@ class LabwareOffsetStore:
         self,
         id_filter: str | DoNotFilterType = DO_NOT_FILTER,
         definition_uri_filter: str | DoNotFilterType = DO_NOT_FILTER,
-        location_slot_name_filter: DeckSlotName | DoNotFilterType = DO_NOT_FILTER,
+        location_addressable_area_filter: str | DoNotFilterType = DO_NOT_FILTER,
         location_module_model_filter: (
             ModuleModel | None | DoNotFilterType
         ) = DO_NOT_FILTER,
@@ -111,48 +111,72 @@ class LabwareOffsetStore:
             filter_statement = filter_statement.where(
                 labware_offset_table.c.definition_uri == definition_uri_filter
             )
-        if location_slot_name_filter is not DO_NOT_FILTER:
-            filter_statement = filter_statement.where(
-                filter_statement.where(
-                    labware_offset_location_sequence_components_table.c.component_kind
-                    == "onAddressableArea"
+        if location_addressable_area_filter is not DO_NOT_FILTER:
+            if location_addressable_area_filter is not None:
+                filter_statement = filter_statement.where(
+                    filter_statement.where(
+                        labware_offset_location_sequence_components_table.c.component_kind
+                        == "onAddressableArea"
+                    )
+                    .where(
+                        labware_offset_location_sequence_components_table.c.primary_component_value
+                        == location_addressable_area_filter
+                    )
+                    .exists()
                 )
-                .where(
-                    labware_offset_location_sequence_components_table.c.primary_component_value
-                    == location_slot_name_filter.value
+            else:
+                filter_statement = filter_statement.where(
+                    sqlalchemy.not_(
+                        filter_statement.where(
+                            labware_offset_location_sequence_components_table.c.component_kind
+                            == "onAddressableArea"
+                        ).exists()
+                    )
                 )
-                .exists()
-            )
         if location_module_model_filter is not DO_NOT_FILTER:
-            location_module_model_filter_value = (
-                location_module_model_filter.value
-                if location_module_model_filter is not None
-                else None
-            )
-            filter_statement = filter_statement.where(
-                filter_statement.where(
-                    labware_offset_location_sequence_components_table.c.component_kind
-                    == "onModule"
+            if location_module_model_filter is not None:
+                filter_statement = filter_statement.where(
+                    filter_statement.where(
+                        labware_offset_location_sequence_components_table.c.component_kind
+                        == "onModule"
+                    )
+                    .where(
+                        labware_offset_location_sequence_components_table.c.primary_component_value
+                        == location_module_model_filter.value
+                    )
+                    .exists()
                 )
-                .where(
-                    labware_offset_location_sequence_components_table.c.primary_component_value
-                    == location_module_model_filter.value
+            else:
+                filter_statement = filter_statement.where(
+                    sqlalchemy.not_(
+                        filter_statement.where(
+                            labware_offset_location_sequence_components_table.c.component_kind
+                            == "onModule"
+                        ).exists()
+                    )
                 )
-                .exists()
-            )
         if location_definition_uri_filter is not DO_NOT_FILTER:
-            filter_statement = filter_statement.where(
-                filter_statement.where(
-                    labware_offset_location_sequence_components_table.c.component_kind
-                    == "onLabware"
+            if location_definition_uri_filter is not None:
+                filter_statement = filter_statement.where(
+                    filter_statement.where(
+                        labware_offset_location_sequence_components_table.c.component_kind
+                        == "onLabware"
+                    )
+                    .where(
+                        labware_offset_location_sequence_components_table.c.primary_component_value
+                        == location_definition_uri_filter
+                    )
+                    .exists()
                 )
-                .where(
-                    labware_offset_location_sequence_components_table.c.primary
-                    - component_value
-                    == location_definition_uri_filter
+            else:
+                filter_statement = filter_statement.where(
+                    sqlalchemy.not_(
+                        filter_statement.where(
+                            labware_offset_location_sequence_components_table.c.component_kind
+                            == "onLabware"
+                        ).exists()
+                    )
                 )
-                .exists()
-            )
 
         filter_statement = filter_statement.order_by(
             labware_offset_table.c.row_id
@@ -167,14 +191,20 @@ class LabwareOffsetStore:
         """Delete a labware offset by its ID. Return what was just deleted."""
         with self._sql_engine.begin() as transaction:
             try:
-                row_to_delete = transaction.execute(
-                    sqlalchemy.select(labware_offset_table).where(
-                        labware_offset_table.c.offset_id == offset_id
+                offset_rows = transaction.execute(
+                    sqlalchemy.select(labware_offset_table)
+                    .join(
+                        labware_offset_location_sequence_components_table,
+                        labware_offset_table.c.row_id
+                        == labware_offset_location_sequence_components_table.c.offset_id,
                     )
-                ).one()
+                    .where(labware_offset_table.c.offset_id == offset_id)
+                ).all()
             except sqlalchemy.exc.NoResultFound:
                 raise LabwareOffsetNotFoundError(bad_offset_id=offset_id) from None
-            if not row_to_delete.active:
+            if len(offset_rows) == 0:
+                raise LabwareOffsetNotFoundError(bad_offset_id=offset_id)
+            if not offset_rows[0].active:
                 # Already soft-deleted.
                 raise LabwareOffsetNotFoundError(bad_offset_id=offset_id)
 
@@ -184,18 +214,7 @@ class LabwareOffsetStore:
                 .values(active=False)
             )
 
-            location_sequence = transaction.execute(
-                sqlalchemy.get(labware_offset_location_sequence_components_table)
-                .where(
-                    labware_offset_location_sequence_components_table.c.offset_id
-                    == row_to_delete.row_id
-                )
-                .order_by(
-                    labware_offset_location_sequence_components_table.c.sequence_ordinal
-                )
-            ).all()
-
-        return _sql_to_pydantic(row_to_delete, location_sequence)
+        return next(_collate_sql_to_pydantic(offset_rows))
 
     def delete_all(self) -> None:
         """Delete all labware offsets."""
@@ -217,15 +236,15 @@ def _sql_sequence_component_to_pydantic_sequence_component(
     component_row: sqlalchemy.engine.Row,
 ) -> LabwareOffsetLocationSequenceComponents:
     if component_row.component_kind == "onLabware":
-        yield OnLabwareOffsetLocationSequenceComponent(
+        return OnLabwareOffsetLocationSequenceComponent(
             labwareUri=component_row.primary_component_value
         )
     elif component_row.component_kind == "onModule":
-        yield OnModuleOffsetLocationSequenceComponent(
+        return OnModuleOffsetLocationSequenceComponent(
             moduleModel=ModuleModel(component_row.primary_component_value)
         )
     elif component_row.component_kind == "onAddressableArea":
-        yield OnAddressableAreaOffsetLocationSequenceComponent(
+        return OnAddressableAreaOffsetLocationSequenceComponent(
             addressableAreaName=component_row.primary_component_value
         )
     else:
@@ -234,7 +253,7 @@ def _sql_sequence_component_to_pydantic_sequence_component(
 
 def _collate_sql_locations(
     first_row: sqlalchemy.engine.Row, rest_rows: Iterator[sqlalchemy.engine.Row]
-) -> tuple[LabwareOffsetLocationSequence, Optional[sqlalchemy.engine.Row]]:
+) -> tuple[LabwareOffsetLocationSequence, sqlalchemy.engine.Row | None]:
     offset_id = first_row.offset_id
     location_sequence: list[LabwareOffsetLocationSequenceComponents] = [
         _sql_sequence_component_to_pydantic_sequence_component(first_row)
@@ -244,7 +263,7 @@ def _collate_sql_locations(
             row = next(rest_rows)
         except StopIteration:
             return location_sequence, None
-        if row.offset_id != first_row.offset_id:
+        if row.offset_id != offset_id:
             return location_sequence, row
         location_sequence.append(
             _sql_sequence_component_to_pydantic_sequence_component(row)
@@ -253,7 +272,7 @@ def _collate_sql_locations(
 
 def _sql_to_pydantic(
     first_row: sqlalchemy.engine.Row, rest_rows: Iterator[sqlalchemy.engine.Row]
-) -> tuple[StoredLabwareOffset, Optional[sqlalchemy.engine.Row]]:
+) -> tuple[StoredLabwareOffset, sqlalchemy.engine.Row | None]:
     location_sequence, next_row = _collate_sql_locations(first_row, rest_rows)
     return (
         StoredLabwareOffset(
@@ -275,7 +294,7 @@ def _collate_sql_to_pydantic(
     query_results: list[sqlalchemy.engine.Row],
 ) -> Iterator[StoredLabwareOffset]:
     row_iter = iter(query_results)
-    row = next(row_iter)
+    row: sqlalchemy.engine.Row | None = next(row_iter)
     while row:
         result, row = _sql_to_pydantic(row, row_iter)
         yield result

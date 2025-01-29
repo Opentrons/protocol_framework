@@ -10,7 +10,6 @@ from pydantic.json_schema import SkipJsonSchema
 from server_utils.fastapi_utils.light_router import LightRouter
 
 from opentrons.protocol_engine import ModuleModel
-from opentrons.types import DeckSlotName
 
 from robot_server.labware_offsets.models import LabwareOffsetNotFound
 from robot_server.service.dependencies import get_current_time, get_unique_id
@@ -96,8 +95,8 @@ async def get_labware_offsets(  # noqa: D103
             ),
         ),
     ] = DO_NOT_FILTER,
-    location_slot_name: Annotated[
-        Json[DeckSlotName] | SkipJsonSchema[DoNotFilterType],
+    location_addressable_area_name: Annotated[
+        Json[str] | SkipJsonSchema[DoNotFilterType],
         fastapi.Query(
             alias="locationSlotName",
             description="Filter for exact matches on the `location.slotName` field.",
@@ -146,7 +145,7 @@ async def get_labware_offsets(  # noqa: D103
     result_data = store.search(
         id_filter=id,
         definition_uri_filter=definition_uri,
-        location_slot_name_filter=location_slot_name,
+        location_addressable_area_filter=location_addressable_area_name,
         location_definition_uri_filter=location_definition_uri,
         location_module_model_filter=location_module_model,
     )
