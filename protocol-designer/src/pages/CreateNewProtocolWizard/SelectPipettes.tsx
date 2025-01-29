@@ -115,8 +115,12 @@ export function SelectPipettes(props: WizardTileProps): JSX.Element | null {
     (page === 'add' &&
       pipettesByMount[mount].tiprackDefURI == null &&
       noPipette) ||
-    (pipettesByMount.left.tiprackDefURI == null &&
-      pipettesByMount.right.tiprackDefURI == null)
+    ((pipettesByMount.left.tiprackDefURI == null ||
+      pipettesByMount.left.tiprackDefURI.length === 0) &&
+      (pipettesByMount.right.tiprackDefURI == null ||
+        pipettesByMount.right.tiprackDefURI.length === 0))
+
+  console.log(pipettesByMount.left)
 
   const targetPipetteMount =
     pipettesByMount.left.pipetteName == null ||
