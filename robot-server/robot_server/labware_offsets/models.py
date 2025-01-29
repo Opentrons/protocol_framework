@@ -38,6 +38,7 @@ class StoredLabwareOffset(BaseModel):
     locationSequence: LabwareOffsetLocationSequence = Field(
         ...,
         description="Where the labware is located on the robot. Can represent all locations, but may not be present for older runs.",
+        min_length=1,
     )
     vector: LabwareOffsetVector = Field(
         ...,

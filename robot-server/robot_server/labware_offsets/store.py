@@ -57,15 +57,11 @@ class LabwareOffsetStore:
     def add(self, offset: StoredLabwareOffset) -> None:
         """Store a new labware offset."""
         with self._sql_engine.begin() as transaction:
-            offset_row_id = (
-                transaction.execute(
-                    sqlalchemy.insert(labware_offset_table).values(
-                        _pydantic_to_sql_offset(offset)
-                    )
+            offset_row_id = transaction.execute(
+                sqlalchemy.insert(labware_offset_table).values(
+                    _pydantic_to_sql_offset(offset)
                 )
-                .one()
-                .row_id
-            )
+            ).lastrowid
             transaction.execute(
                 sqlalchemy.insert(
                     labware_offset_location_sequence_components_table
@@ -94,11 +90,24 @@ class LabwareOffsetStore:
     ) -> list[StoredLabwareOffset]:
         """Return all matching labware offsets in order from oldest-added to newest."""
         filter_statement = (
-            sqlalchemy.select(labware_offset_table)
-            .join(
-                labware_offset_location_sequence_components_table,
-                labware_offset_table.c.row_id
-                == labware_offset_location_sequence_components_table.c.offset_id,
+            sqlalchemy.select(
+                labware_offset_table.c.offset_id,
+                labware_offset_table.c.definition_uri,
+                labware_offset_table.c.vector_x,
+                labware_offset_table.c.vector_y,
+                labware_offset_table.c.vector_z,
+                labware_offset_table.c.created_at,
+                labware_offset_location_sequence_components_table.c.sequence_ordinal,
+                labware_offset_location_sequence_components_table.c.component_kind,
+                labware_offset_location_sequence_components_table.c.primary_component_value,
+            )
+            .select_from(
+                sqlalchemy.join(
+                    labware_offset_table,
+                    labware_offset_location_sequence_components_table,
+                    labware_offset_table.c.row_id
+                    == labware_offset_location_sequence_components_table.c.offset_id,
+                )
             )
             .where(labware_offset_table.c.active == True)  # noqa: E712
         )
@@ -185,7 +194,8 @@ class LabwareOffsetStore:
         with self._sql_engine.begin() as transaction:
             result = transaction.execute(filter_statement).all()
 
-        return list(_collate_sql_to_pydantic(result))
+        list_result = list(_collate_sql_to_pydantic(result))
+        return list_result
 
     def delete(self, offset_id: str) -> StoredLabwareOffset:
         """Delete a labware offset by its ID. Return what was just deleted."""
@@ -315,14 +325,14 @@ def _pydantic_to_sql_offset(labware_offset: StoredLabwareOffset) -> dict[str, ob
 def _pydantic_to_sql_location_sequence_iterator(
     labware_offset: StoredLabwareOffset, offset_row_id: int
 ) -> Iterator[dict[str, object]]:
-    for index, component in labware_offset.locationSequence:
+    for index, component in enumerate(labware_offset.locationSequence):
         if isinstance(component, OnLabwareOffsetLocationSequenceComponent):
             yield dict(
                 offset_id=offset_row_id,
                 sequence_ordinal=index,
                 component_kind=component.kind,
                 primary_component_value=component.labwareUri,
-                component_value_json=component.model_dump(),
+                component_value_json=component.model_dump_json(),
             )
         elif isinstance(component, OnModuleOffsetLocationSequenceComponent):
             yield dict(
@@ -330,7 +340,7 @@ def _pydantic_to_sql_location_sequence_iterator(
                 sequence_ordinal=index,
                 component_kind=component.kind,
                 primary_component_value=component.moduleModel.value,
-                component_value_json=component.model_dump(),
+                component_value_json=component.model_dump_json(),
             )
         elif isinstance(component, OnAddressableAreaOffsetLocationSequenceComponent):
             yield dict(
@@ -338,8 +348,8 @@ def _pydantic_to_sql_location_sequence_iterator(
                 sequence_ordinal=index,
                 component_kind=component.kind,
                 primary_component_value=component.addressableAreaName,
-                component_value_json=component.model_dump(),
+                component_value_json=component.model_dump_json(),
             )
         else:
-            # TODO: log here
+            print(f"ISINSTANCE FAILED: {component}")
             pass

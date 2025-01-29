@@ -62,7 +62,6 @@ def test_filter_fields(subject: LabwareOffsetStore) -> None:
         ],
         vector=LabwareOffsetVector(x=1, y=2, z=3),
     )
-
     subject.add(offset_a)
     subject.add(offset_b)
 
