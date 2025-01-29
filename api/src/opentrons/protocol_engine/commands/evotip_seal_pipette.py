@@ -9,7 +9,7 @@ from typing_extensions import Literal
 
 from opentrons.protocol_engine.errors import UnsupportedLabwareForActionError
 from ..resources import ModelUtils, labware_validation
-from ..types import PickUpTipWellLocation, TipGeometry, FluidKind, AspiratedFluid
+from ..types import PickUpTipWellLocation, FluidKind, AspiratedFluid
 from .pipetting_common import (
     PipetteIdMixin,
 )
@@ -39,7 +39,6 @@ if TYPE_CHECKING:
         GantryMover,
         PipettingHandler,
     )
-    from ..notes import CommandNoteAdder
 
 
 EvotipSealPipetteCommandType = Literal["evotipSealPipette"]
@@ -116,7 +115,6 @@ class EvotipSealPipetteImplementation(
         movement: MovementHandler,
         hardware_api: HardwareControlAPI,
         gantry_mover: GantryMover,
-        command_note_adder: CommandNoteAdder,
         pipetting: PipettingHandler,
         **kwargs: object,
     ) -> None:
@@ -125,7 +123,6 @@ class EvotipSealPipetteImplementation(
         self._model_utils = model_utils
         self._movement = movement
         self._gantry_mover = gantry_mover
-        self._command_note_adder = command_note_adder
         self._pipetting = pipetting
         self._hardware_api = hardware_api
 

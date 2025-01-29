@@ -1025,6 +1025,20 @@
   },
   "gripHeightFromLabwareBottom": 14.5,
   "gripForce": 15,
+  "gripperOffsets": {
+    "default": {
+      "pickUpOffset": {
+        "x": 0,
+        "y": 0,
+        "z": 15
+      },
+      "dropOffset": {
+        "x": 0,
+        "y": 0,
+        "z": 15
+      }
+    }
+  },
   "stackingOffsetWithLabware": {
     "nest_96_wellplate_2ml_deep": {
       "x": 0,

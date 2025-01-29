@@ -27,8 +27,7 @@ from .command import (
     DefinedErrorData,
 )
 from ..resources import labware_validation
-from ..state.update_types import CLEAR
-from ..types import CurrentWell
+from ..errors import ProtocolEngineError
 
 if TYPE_CHECKING:
     from ..execution import PipettingHandler, GantryMover, MovementHandler
@@ -101,7 +100,6 @@ class EvotipDispenseImplementation(
         if isinstance(move_result, DefinedErrorData):
             return move_result
 
-        current_location = self._state_view.pipettes.get_current_location()
         current_position = await self._gantry_mover.get_position(params.pipetteId)
         result = await dispense_in_place(
             pipette_id=params.pipetteId,
@@ -118,6 +116,11 @@ class EvotipDispenseImplementation(
             pipetting=self._pipetting,
             model_utils=self._model_utils,
         )
+        if isinstance(result, DefinedErrorData):
+            # TODO (chb, 2025-01-29): Remove this and the OverpressureError returns once disabled for this function
+            raise ProtocolEngineError(
+                message="Overpressure Error during Resin Tip Dispense Command."
+            )
 
         return SuccessData(
             public=EvotipDispenseResult(volume=result.public.volume),
@@ -126,7 +129,11 @@ class EvotipDispenseImplementation(
 
 
 class EvotipDispense(
-    BaseCommand[EvotipDispenseParams, EvotipDispenseResult, StallOrCollisionError]
+    BaseCommand[
+        EvotipDispenseParams,
+        EvotipDispenseResult,
+        StallOrCollisionError,
+    ]
 ):
     """DispenseInPlace command model."""
 

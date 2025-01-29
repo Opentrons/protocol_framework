@@ -28,7 +28,7 @@ from opentrons.protocol_engine.errors.exceptions import TipAttachedError
 from opentrons.protocol_engine.resources.model_utils import ModelUtils
 from opentrons.protocol_engine.state import update_types
 from opentrons.protocol_engine.state.state import StateView
-from opentrons.protocol_engine.execution import MovementHandler, TipHandler
+from opentrons.protocol_engine.execution import MovementHandler, GantryMover, TipHandler
 
 
 from opentrons.types import Point
@@ -60,7 +60,7 @@ def mock_model_utils(decoy: Decoy) -> ModelUtils:
 
 def test_drop_tip_params_defaults() -> None:
     """A drop tip should use a `WellOrigin.DROP_TIP` by default."""
-    default_params = EvotipUnsealPipetteParams.parse_obj(
+    default_params = EvotipUnsealPipetteParams.model_validate(
         {"pipetteId": "abc", "labwareId": "def", "wellName": "ghj"}
     )
 
@@ -71,7 +71,7 @@ def test_drop_tip_params_defaults() -> None:
 
 def test_drop_tip_params_default_origin() -> None:
     """A drop tip should drop a `WellOrigin.DROP_TIP` by default even if an offset is given."""
-    default_params = EvotipUnsealPipetteParams.parse_obj(
+    default_params = EvotipUnsealPipetteParams.model_validate(
         {
             "pipetteId": "abc",
             "labwareId": "def",
@@ -91,6 +91,7 @@ async def test_drop_tip_implementation(
     mock_movement_handler: MovementHandler,
     mock_tip_handler: TipHandler,
     mock_model_utils: ModelUtils,
+    gantry_mover: GantryMover,
 ) -> None:
     """A DropTip command should have an execution implementation."""
     subject = EvotipUnsealPipetteImplementation(
@@ -98,6 +99,7 @@ async def test_drop_tip_implementation(
         movement=mock_movement_handler,
         tip_handler=mock_tip_handler,
         model_utils=mock_model_utils,
+        gantry_mover=gantry_mover,
     )
 
     params = EvotipUnsealPipetteParams(
@@ -105,7 +107,6 @@ async def test_drop_tip_implementation(
         labwareId="123",
         wellName="A3",
         wellLocation=DropTipWellLocation(offset=WellOffset(x=1, y=2, z=3)),
-        homeAfter=True,
     )
 
     decoy.when(
@@ -169,6 +170,7 @@ async def test_drop_tip_with_alternating_locations(
     mock_movement_handler: MovementHandler,
     mock_tip_handler: TipHandler,
     mock_model_utils: ModelUtils,
+    gantry_mover: GantryMover,
 ) -> None:
     """It should drop tip at random location within the labware every time."""
     subject = EvotipUnsealPipetteImplementation(
@@ -176,14 +178,13 @@ async def test_drop_tip_with_alternating_locations(
         movement=mock_movement_handler,
         tip_handler=mock_tip_handler,
         model_utils=mock_model_utils,
+        gantry_mover=gantry_mover,
     )
     params = EvotipUnsealPipetteParams(
         pipetteId="abc",
         labwareId="123",
         wellName="A3",
         wellLocation=DropTipWellLocation(offset=WellOffset(x=1, y=2, z=3)),
-        homeAfter=True,
-        alternateDropLocation=True,
     )
     drop_location = DropTipWellLocation(
         origin=DropTipWellOrigin.DEFAULT, offset=WellOffset(x=10, y=20, z=30)
@@ -249,6 +250,7 @@ async def test_tip_attached_error(
     mock_movement_handler: MovementHandler,
     mock_tip_handler: TipHandler,
     mock_model_utils: ModelUtils,
+    gantry_mover: GantryMover,
 ) -> None:
     """A Evotip Unseal command should have an execution implementation."""
     subject = EvotipUnsealPipetteImplementation(
@@ -256,6 +258,7 @@ async def test_tip_attached_error(
         movement=mock_movement_handler,
         tip_handler=mock_tip_handler,
         model_utils=mock_model_utils,
+        gantry_mover=gantry_mover,
     )
 
     params = EvotipUnsealPipetteParams(
@@ -303,7 +306,7 @@ async def test_tip_attached_error(
     result = await subject.execute(params)
 
     assert result == DefinedErrorData(
-        public=TipPhysicallyAttachedError.construct(
+        public=StallOrCollisionError.model_construct(
             id="error-id",
             createdAt=datetime(year=1, month=2, day=3),
             wrappedErrors=[matchers.Anything()],
@@ -345,6 +348,7 @@ async def test_stall_error(
     mock_movement_handler: MovementHandler,
     mock_tip_handler: TipHandler,
     mock_model_utils: ModelUtils,
+    gantry_mover: GantryMover,
 ) -> None:
     """A DropTip command should have an execution implementation."""
     subject = EvotipUnsealPipetteImplementation(
@@ -352,6 +356,7 @@ async def test_stall_error(
         movement=mock_movement_handler,
         tip_handler=mock_tip_handler,
         model_utils=mock_model_utils,
+        gantry_mover=gantry_mover,
     )
 
     params = EvotipUnsealPipetteParams(
@@ -396,7 +401,7 @@ async def test_stall_error(
     result = await subject.execute(params)
 
     assert result == DefinedErrorData(
-        public=StallOrCollisionError.construct(
+        public=StallOrCollisionError.model_construct(
             id="error-id",
             createdAt=datetime(year=1, month=2, day=3),
             wrappedErrors=[matchers.Anything()],

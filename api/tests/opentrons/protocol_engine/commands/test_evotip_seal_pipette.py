@@ -33,12 +33,24 @@ from opentrons.protocol_engine.commands.evotip_seal_pipette import (
     EvotipSealPipetteResult,
     EvotipSealPipetteImplementation,
 )
+from opentrons.protocol_engine.execution import (
+    PipettingHandler,
+)
+from opentrons.hardware_control import HardwareControlAPI
+from opentrons.protocol_engine.resources import labware_validation
+import json
+from opentrons_shared_data import load_shared_data
 
 
 @pytest.fixture
 def evotips_definition() -> LabwareDefinition:
-    return LabwareDefinition.parse_obj(
-        load_definition("evotips_opentrons_96_labware", 1)
+    # TODO (chb 2025-01-29): When we migrate all labware to v3 we can clean this up
+    return LabwareDefinition.model_validate(
+        json.loads(
+            load_shared_data(
+                f"labware/definitions/3/evotips_opentrons_96_labware/1.json"
+            )
+        )
     )
 
 
@@ -50,6 +62,8 @@ async def test_success(
     model_utils: ModelUtils,
     gantry_mover: GantryMover,
     evotips_definition: LabwareDefinition,
+    hardware_api: HardwareControlAPI,
+    pipetting: PipettingHandler,
 ) -> None:
     """A PickUpTip command should have an execution implementation."""
     subject = EvotipSealPipetteImplementation(
@@ -58,6 +72,8 @@ async def test_success(
         tip_handler=tip_handler,
         model_utils=model_utils,
         gantry_mover=gantry_mover,
+        hardware_api=hardware_api,
+        pipetting=pipetting,
     )
 
     decoy.when(state_view.pipettes.get_mount("pipette-id")).then_return(MountType.LEFT)
@@ -136,6 +152,9 @@ async def test_no_tip_physically_missing_error(
     tip_handler: TipHandler,
     model_utils: ModelUtils,
     gantry_mover: GantryMover,
+    hardware_api: HardwareControlAPI,
+    pipetting: PipettingHandler,
+    evotips_definition: LabwareDefinition,
 ) -> None:
     """It should not return a TipPhysicallyMissingError even though evotips do not sit high enough on the pipette to be detected by the tip sensor."""
     subject = EvotipSealPipetteImplementation(
@@ -144,6 +163,8 @@ async def test_no_tip_physically_missing_error(
         tip_handler=tip_handler,
         model_utils=model_utils,
         gantry_mover=gantry_mover,
+        hardware_api=hardware_api,
+        pipetting=pipetting,
     )
 
     pipette_id = "pipette-id"
@@ -175,9 +196,16 @@ async def test_no_tip_physically_missing_error(
         await tip_handler.pick_up_tip(
             pipette_id=pipette_id, labware_id=labware_id, well_name=well_name
         )
-    ).then_raise(PickUpTipTipNotAttachedError(tip_geometry=sentinel.tip_geometry))
+    ).then_raise(
+        PickUpTipTipNotAttachedError(
+            tip_geometry=TipGeometry(length=42, diameter=5, volume=300)
+        )
+    )
     decoy.when(model_utils.generate_id()).then_return(error_id)
     decoy.when(model_utils.get_timestamp()).then_return(error_created_at)
+    decoy.when(state_view.labware.get_definition(labware_id)).then_return(
+        evotips_definition
+    )
 
     result = await subject.execute(
         EvotipSealPipetteParams(
@@ -186,7 +214,7 @@ async def test_no_tip_physically_missing_error(
     )
 
     assert result == DefinedErrorData(
-        public=TipPhysicallyMissingError.construct(
+        public=StallOrCollisionError.model_construct(
             id=error_id, createdAt=error_created_at, wrappedErrors=[matchers.Anything()]
         ),
         state_update=update_types.StateUpdate(
@@ -206,7 +234,8 @@ async def test_no_tip_physically_missing_error(
         ),
         state_update_if_false_positive=update_types.StateUpdate(
             pipette_tip_state=update_types.PipetteTipStateUpdate(
-                pipette_id="pipette-id", tip_geometry=sentinel.tip_geometry
+                pipette_id="pipette-id",
+                tip_geometry=TipGeometry(length=42, diameter=5, volume=300),
             ),
             pipette_aspirated_fluid=update_types.PipetteEmptyFluidUpdate(
                 pipette_id="pipette-id"
@@ -232,6 +261,9 @@ async def test_stall_error(
     tip_handler: TipHandler,
     model_utils: ModelUtils,
     gantry_mover: GantryMover,
+    hardware_api: HardwareControlAPI,
+    pipetting: PipettingHandler,
+    evotips_definition: LabwareDefinition,
 ) -> None:
     """It should return a TipPhysicallyMissingError if the HW API indicates that."""
     subject = EvotipSealPipetteImplementation(
@@ -240,6 +272,8 @@ async def test_stall_error(
         tip_handler=tip_handler,
         model_utils=model_utils,
         gantry_mover=gantry_mover,
+        hardware_api=hardware_api,
+        pipetting=pipetting,
     )
 
     pipette_id = "pipette-id"
@@ -270,6 +304,9 @@ async def test_stall_error(
 
     decoy.when(model_utils.generate_id()).then_return(error_id)
     decoy.when(model_utils.get_timestamp()).then_return(error_created_at)
+    decoy.when(state_view.labware.get_definition(labware_id)).then_return(
+        evotips_definition
+    )
 
     result = await subject.execute(
         EvotipSealPipetteParams(
@@ -278,7 +315,7 @@ async def test_stall_error(
     )
 
     assert result == DefinedErrorData(
-        public=StallOrCollisionError.construct(
+        public=StallOrCollisionError.model_construct(
             id=error_id, createdAt=error_created_at, wrappedErrors=[matchers.Anything()]
         ),
         state_update=update_types.StateUpdate(
