@@ -1,15 +1,16 @@
 import '../support/commands'
 import {
-  Actions,
-  Verifications,
+  MixActions,
+  MixVerifications,
   runMixSetup,
 } from '../support/mixSetting'
 import { UniversalActions } from '../support/universalActions'
 import { TestFilePath, getTestFile } from '../support/testFiles'
 import {
-  // verifyOldProtocolModal,
   verifyImportProtocolPage,
 } from '../support/import'
+import { runSteps } from '../support/StepExecution'
+import type { StepsList } from '../support/StepExecution'
 
 describe('Redesigned Mixing Steps - Happy Path', () => {
   beforeEach(() => {
@@ -28,24 +29,28 @@ describe('Redesigned Mixing Steps - Happy Path', () => {
 
 
   it('It should verify the working function of every permutation of mix checkboxes', () => {
-    const steps: Array<Actions | Verifications | UniversalActions> = [
-      Actions.SelectMix,
+    const steps: Array<MixActions | MixVerifications | UniversalActions> = [
+      MixActions.SelectMix,
       UniversalActions.Snapshot,
-      Verifications.PartOne,
-      Actions.SelectLabware,
-      Actions.SelectWellInputField,
-      Verifications.WellSelectPopout,
+      MixVerifications.PartOne,
+      MixActions.SelectLabware,
+      MixActions.SelectWellInputField,
+      MixVerifications.WellSelectPopout,
       UniversalActions.Snapshot,
-      Actions.Save,
-      Actions.EnterVolume,
-      Actions.EnterMixReps,
-      Actions.SelectTipHandling,
+      MixActions.Save,
+      MixActions.EnterVolume,
+      MixActions.EnterMixReps,
+      MixActions.SelectTipHandling,
       UniversalActions.Snapshot,
-      Actions.Continue,
-      Verifications.PartTwoAsp,
-      Actions.AspirateFlowRate,
-      Actions.AspWellOrder,
-      Verifications.AspWellOrder,
+      MixActions.Continue,
+      MixVerifications.PartTwoAsp,
+      MixActions.AspirateFlowRate,
+      MixActions.AspWellOrder,
+      MixVerifications.AspWellOrder,
+      // Actions.Delay,
+      // Actions.Back,
+      // UniversalActions.Snapshot,
+      // Verifications.AdvancedAspSettings,
       // Actions.Dispense,
       // Verifications.PartTwoDisp,
 
