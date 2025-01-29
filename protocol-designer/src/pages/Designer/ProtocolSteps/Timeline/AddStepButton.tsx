@@ -45,10 +45,7 @@ import {
   ConfirmDeleteModal,
   getMainPagePortalEl,
 } from '../../../../organisms'
-import {
-  getEnableAbsorbanceReader,
-  getEnableComment,
-} from '../../../../feature-flags/selectors'
+import { getEnableComment } from '../../../../feature-flags/selectors'
 import { AddStepOverflowButton } from './AddStepOverflowButton'
 
 import type { MouseEvent } from 'react'
@@ -87,7 +84,6 @@ export function AddStepButton({ hasText }: AddStepButtonProps): JSX.Element {
   const [enqueuedStepType, setEnqueuedStepType] = useState<StepType | null>(
     null
   )
-  const enableAbsorbanceReader = useSelector(getEnableAbsorbanceReader)
 
   const getSupportedSteps = (): Array<
     Exclude<StepType, 'manualIntervention'>
@@ -116,9 +112,7 @@ export function AddStepButton({ hasText }: AddStepButtonProps): JSX.Element {
     temperature: getIsModuleOnDeck(modules, TEMPERATURE_MODULE_TYPE),
     thermocycler: getIsModuleOnDeck(modules, THERMOCYCLER_MODULE_TYPE),
     heaterShaker: getIsModuleOnDeck(modules, HEATERSHAKER_MODULE_TYPE),
-    absorbanceReader:
-      getIsModuleOnDeck(modules, ABSORBANCE_READER_TYPE) &&
-      enableAbsorbanceReader,
+    absorbanceReader: getIsModuleOnDeck(modules, ABSORBANCE_READER_TYPE),
   }
 
   const addStep = (stepType: StepType): ReturnType<any> =>
@@ -204,9 +198,9 @@ export function AddStepButton({ hasText }: AddStepButtonProps): JSX.Element {
 const STEP_OVERFLOW_MENU_STYLE = css`
   position: ${POSITION_ABSOLUTE};
   z-index: 5;
-  right: -7.75rem;
+  right: -8.05rem;
   white-space: ${NO_WRAP};
-  bottom: 4.2rem;
+  bottom: 1rem;
   border-radius: ${BORDERS.borderRadius8};
   box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.2);
   background-color: ${COLORS.white};

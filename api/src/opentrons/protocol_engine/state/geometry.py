@@ -161,6 +161,7 @@ class GeometryView:
                 self._get_highest_z_from_labware_data(lw_data)
                 for lw_data in self._labware.get_all()
                 if lw_data.location != OFF_DECK_LOCATION
+                and not self._labware.get_labware_by_lid_id(lw_data.id)
             ),
             default=0.0,
         )
@@ -1447,17 +1448,25 @@ class GeometryView:
         well_name: str,
     ) -> float:
         """Returns stored meniscus height in specified well."""
+        last_updated = self._wells.get_last_liquid_update(labware_id, well_name)
+        if last_updated is None:
+            raise errors.LiquidHeightUnknownError(
+                "Must LiquidProbe or LoadLiquid before specifying WellOrigin.MENISCUS."
+            )
+
         well_liquid = self._wells.get_well_liquid_info(
             labware_id=labware_id, well_name=well_name
         )
         if (
             well_liquid.probed_height is not None
             and well_liquid.probed_height.height is not None
+            and well_liquid.probed_height.last_probed == last_updated
         ):
             return well_liquid.probed_height.height
         elif (
             well_liquid.loaded_volume is not None
             and well_liquid.loaded_volume.volume is not None
+            and well_liquid.loaded_volume.last_loaded == last_updated
         ):
             return self.get_well_height_at_volume(
                 labware_id=labware_id,
@@ -1467,6 +1476,7 @@ class GeometryView:
         elif (
             well_liquid.probed_volume is not None
             and well_liquid.probed_volume.volume is not None
+            and well_liquid.probed_volume.last_probed == last_updated
         ):
             return self.get_well_height_at_volume(
                 labware_id=labware_id,
@@ -1474,8 +1484,9 @@ class GeometryView:
                 volume=well_liquid.probed_volume.volume,
             )
         else:
+            # This should not happen if there was an update but who knows
             raise errors.LiquidHeightUnknownError(
-                "Must LiquidProbe or LoadLiquid before specifying WellOrigin.MENISCUS."
+                f"Unable to find liquid height despite an update at {last_updated}."
             )
 
     def get_well_handling_height(
