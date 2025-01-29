@@ -304,16 +304,16 @@ export function getFixtureDisplayName(
       return usbPortNumber != null
         ? `${getModuleDisplayName(
             FLEX_STACKER_MODULE_V1
-          )} in USB-${usbPortNumber} with waste chute with cover`
+          )} in USB-${usbPortNumber} and waste chute with cover`
         : `${getModuleDisplayName(
             FLEX_STACKER_MODULE_V1
-          )} with waste chute with cover`
+          )} and waste chute with cover`
     case FLEX_STACKER_WTIH_WASTE_CHUTE_ADAPTER_NO_COVER_FIXTURE:
       return usbPortNumber != null
         ? `${getModuleDisplayName(
             FLEX_STACKER_MODULE_V1
-          )} in USB-${usbPortNumber} with waste chute`
-        : `${getModuleDisplayName(FLEX_STACKER_MODULE_V1)} with waste chute`
+          )} in USB-${usbPortNumber} and waste chute`
+        : `${getModuleDisplayName(FLEX_STACKER_MODULE_V1)} and waste chute`
     default:
       return 'Slot'
   }
