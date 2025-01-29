@@ -24,10 +24,10 @@ runs:
     
     - name: Build and push
       id: build
-      uses: docker/build-push-action@v5
+      uses: docker/build-push-action@v6
       with:
         context: .
         push: true
-        tags: ghcr.io/${{ github.repository }}/ci:${{ inputs.branch }}
-        cache-from: type=gha,scope=${{ inputs.branch }}
-        cache-to: type=gha,mode=max,scope=${{ inputs.branch }}
+        tags: opentrons/ci:${{ inputs.branch }}
+        cache-from: type=registry,ref=opentrons/ci
+        cache-to: type=registry,ref=opentrons/ci
