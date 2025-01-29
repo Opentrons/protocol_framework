@@ -89,8 +89,9 @@ class LabwareOffsetStore:
         # making it worse.
     ) -> list[StoredLabwareOffset]:
         """Return all matching labware offsets in order from oldest-added to newest."""
-        filter_statement = (
+        base_select = (
             sqlalchemy.select(
+                labware_offset_table.c.row_id,
                 labware_offset_table.c.offset_id,
                 labware_offset_table.c.definition_uri,
                 labware_offset_table.c.vector_x,
@@ -111,6 +112,7 @@ class LabwareOffsetStore:
             )
             .where(labware_offset_table.c.active == True)  # noqa: E712
         )
+        filter_statement = base_select
 
         if id_filter is not DO_NOT_FILTER:
             filter_statement = filter_statement.where(
@@ -122,8 +124,24 @@ class LabwareOffsetStore:
             )
         if location_addressable_area_filter is not DO_NOT_FILTER:
             if location_addressable_area_filter is not None:
+                """
+                SELECT * from labware_offset_table CROSS JOIN labware_offset_location_sequence_table
+                       ON labware_offset_table.row_id = labware_offset_location_sequence_table.offset_id
+                       WHERE EXISTS (
+                              SELECT 1
+                              FROM labware_offset_location_sequence_table
+                              WHERE (labware_offset_location_sequence_table.component_kind = "onAddressableArea"
+                                    AND labware_offset_location_sequence_table.component_value = "A3")
+                        )
+                )
+                """
                 filter_statement = filter_statement.where(
-                    filter_statement.where(
+                    sqlalchemy.exists()
+                    .where(
+                        labware_offset_location_sequence_components_table.c.offset_id
+                        == base_select.c.row_id
+                    )
+                    .where(
                         labware_offset_location_sequence_components_table.c.component_kind
                         == "onAddressableArea"
                     )
@@ -131,8 +149,9 @@ class LabwareOffsetStore:
                         labware_offset_location_sequence_components_table.c.primary_component_value
                         == location_addressable_area_filter
                     )
-                    .exists()
+                    .correlate_except()
                 )
+                breakpoint()
             else:
                 filter_statement = filter_statement.where(
                     sqlalchemy.not_(
