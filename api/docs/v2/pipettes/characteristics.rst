@@ -184,7 +184,9 @@ These flow rates will remain in effect until you change the ``flow_rate`` attrib
 Flex Pipette Flow Rates
 -----------------------
 
-Flex pipette flow rates depend on pipette model and tip capacity. Each pipette–tip combination has a default flow rate for aspirating, dispensing, and blowing out liquid. When using a 50 µL pipette, you should only use 50 µL tips.
+The following table provides data on the default aspirate, dispense, and blowout flow rates (in µL/s) for Flex pipettes. Default flow rates for each pipette-tip combination are the same across all three actions.
+
+.. Excludes low-vol 96 channel. Not yet released.
 
 +-----------------------------+-------------------+------------------------+
 | Pipette Model               | Tip Capacity (µL) | Default Flow Rate (µL) |
@@ -197,10 +199,6 @@ Flex pipette flow rates depend on pipette model and tip capacity. Each pipette�
 +                             +-------------------+------------------------+
 |                             | 1000              | 716                    |
 +-----------------------------+-------------------+------------------------+
-| 96-channel (1-200 µL)       | 50                | 6                      |
-+                             +-------------------+------------------------+
-|                             | 200               | 80                     |
-+-----------------------------+-------------------+------------------------+
 | 96-channel (5-1000 µL)      | 50                | 6                      |
 +                             +-------------------+------------------------+
 |                             | 200               | 80                     |
@@ -208,7 +206,10 @@ Flex pipette flow rates depend on pipette model and tip capacity. Each pipette�
 |                             | 1000              | 160                    |
 +-----------------------------+-------------------+------------------------+
 
-Additionally, all Flex pipettes have a well bottom clearance of 1 mm for aspirate and dispense actions.
+Additionally:
+
+- When using a 50 µL pipette, you should only use 50 µL tips.
+- All Flex pipettes have a well bottom clearance of 1 mm for aspirate and dispense actions.
 
 .. _ot2-flow-rates:
 
