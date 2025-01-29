@@ -182,7 +182,7 @@ class AbstractInstrument(ABC, Generic[WellCoreType]):
         ...
 
     @abstractmethod
-    def evotip_seal(
+    def resin_tip_seal(
         self,
         location: types.Location,
         well_core: WellCoreType,
@@ -191,7 +191,7 @@ class AbstractInstrument(ABC, Generic[WellCoreType]):
         ...
 
     @abstractmethod
-    def evotip_unseal(
+    def resin_tip_unseal(
         self,
         location: types.Location,
         well_core: WellCoreType,
@@ -200,7 +200,7 @@ class AbstractInstrument(ABC, Generic[WellCoreType]):
         ...
 
     @abstractmethod
-    def evotip_dispense(
+    def resin_tip_dispense(
         self,
         location: types.Location,
         well_core: WellCoreType,

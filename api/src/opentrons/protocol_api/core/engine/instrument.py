@@ -679,7 +679,7 @@ class InstrumentCore(AbstractInstrument[WellCore]):
                 location=location, mount=self.get_mount()
             )
 
-    def evotip_seal(
+    def resin_tip_seal(
         self, location: Location, well_core: WellCore, in_place: Optional[bool] = False
     ) -> None:
         labware_id = well_core.labware_id
@@ -701,7 +701,7 @@ class InstrumentCore(AbstractInstrument[WellCore]):
             )
         )
 
-    def evotip_unseal(
+    def resin_tip_unseal(
         self, location: Location, well_core: WellCore, home_after: Optional[bool]
     ) -> None:
         well_name = well_core.get_name()
@@ -742,7 +742,7 @@ class InstrumentCore(AbstractInstrument[WellCore]):
 
         self._protocol_core.set_last_location(location=location, mount=self.get_mount())
 
-    def evotip_dispense(
+    def resin_tip_dispense(
         self,
         location: Location,
         well_core: WellCore,

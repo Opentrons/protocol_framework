@@ -1742,7 +1742,7 @@ class InstrumentContext(publisher.CommandPublisher):
                 location=well,
             ),
         ):
-            self._core.evotip_seal(
+            self._core.resin_tip_seal(
                 location=well.top(), well_core=well._core, in_place=False
             )
         return self
@@ -1862,7 +1862,7 @@ class InstrumentContext(publisher.CommandPublisher):
                 flow_rate=rate,
             ),
         ):
-            self._core.evotip_dispense(
+            self._core.resin_tip_dispense(
                 move_to_location,
                 well_core=well._core,
                 volume=volume,

@@ -17,7 +17,7 @@ from opentrons.protocol_engine import (
 from opentrons.protocol_engine.commands.command import DefinedErrorData, SuccessData
 from opentrons.protocol_engine.commands.evotip_unseal_pipette import (
     EvotipUnsealPipetteParams,
-    EvotipUnsealResult,
+    EvotipUnsealPipetteResult,
     EvotipUnsealPipetteImplementation,
 )
 from opentrons.protocol_engine.commands.pipetting_common import (
@@ -138,7 +138,7 @@ async def test_drop_tip_implementation(
     result = await subject.execute(params)
 
     assert result == SuccessData(
-        public=EvotipUnsealResult(position=DeckPoint(x=111, y=222, z=333)),
+        public=EvotipUnsealPipetteResult(position=DeckPoint(x=111, y=222, z=333)),
         state_update=update_types.StateUpdate(
             pipette_location=update_types.PipetteLocationUpdate(
                 pipette_id="abc",
@@ -223,7 +223,7 @@ async def test_drop_tip_with_alternating_locations(
 
     result = await subject.execute(params)
     assert result == SuccessData(
-        public=EvotipUnsealResult(position=DeckPoint(x=111, y=222, z=333)),
+        public=EvotipUnsealPipetteResult(position=DeckPoint(x=111, y=222, z=333)),
         state_update=update_types.StateUpdate(
             pipette_location=update_types.PipetteLocationUpdate(
                 pipette_id="abc",
