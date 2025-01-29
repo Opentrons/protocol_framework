@@ -4,7 +4,6 @@ import {
   orderWells,
   getAllDefinitions,
   getLabwareDefURI,
-  getWellsDepth,
   getTipTypeFromTipRackDefinition,
   TRASH_BIN_ADAPTER_FIXTURE,
   WASTE_CHUTE_FIXTURES,
@@ -323,21 +322,10 @@ export function generateQuickTransferArgs(
     nozzles = 'ALL' as NozzleConfigurationStyle
   }
   const touchTipAfterDispenseOffsetMmFromTop =
-    quickTransferState.touchTipDispense != null
-      ? quickTransferState.touchTipDispense -
-        getWellsDepth(
-          quickTransferState.destination === 'source'
-            ? quickTransferState.source
-            : quickTransferState.destination,
-          destWells
-        )
-      : DEFAULT_MM_TOUCH_TIP_OFFSET_FROM_TOP
+    quickTransferState.touchTipDispense ?? DEFAULT_MM_TOUCH_TIP_OFFSET_FROM_TOP
 
   const touchTipAfterAspirateOffsetMmFromTop =
-    quickTransferState.touchTipAspirate != null
-      ? quickTransferState.touchTipAspirate -
-        getWellsDepth(quickTransferState.source, sourceWells)
-      : DEFAULT_MM_TOUCH_TIP_OFFSET_FROM_TOP
+    quickTransferState.touchTipAspirate ?? DEFAULT_MM_TOUCH_TIP_OFFSET_FROM_TOP
 
   const commonFields = {
     pipette: pipetteEntity.id,
