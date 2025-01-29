@@ -11,33 +11,30 @@ import {
   getLabwareHasLiquid,
   uuid,
 } from '../../utils'
-import type {
-  CreateCommand,
-  LabwareMovementStrategy,
-} from '@opentrons/shared-data'
+import type { CreateCommand, MoveLabwareParams } from '@opentrons/shared-data'
 import type {
   CommandCreator,
   CommandCreatorError,
-  MoveLabwareArgs,
   CommandCreatorWarning,
 } from '../../types'
 
 /** Move labware from one location to another, manually or via a gripper. */
-export const moveLabware: CommandCreator<MoveLabwareArgs> = (
+export const moveLabware: CommandCreator<MoveLabwareParams> = (
   args,
   invariantContext,
   prevRobotState
 ) => {
-  const { labware, useGripper, newLocation } = args
+  const { labwareId, strategy, newLocation } = args
+  const useGripper = strategy === 'usingGripper'
   const { additionalEquipmentEntities, labwareEntities } = invariantContext
   const hasWasteChute = getHasWasteChute(additionalEquipmentEntities)
   const tiprackHasTip =
     prevRobotState.tipState != null
-      ? getTiprackHasTips(prevRobotState.tipState, labware)
+      ? getTiprackHasTips(prevRobotState.tipState, labwareId)
       : false
   const labwareHasLiquid =
     prevRobotState.liquidState != null
-      ? getLabwareHasLiquid(prevRobotState.liquidState, labware)
+      ? getLabwareHasLiquid(prevRobotState.liquidState, labwareId)
       : false
   const hasTipOnPipettes = Object.values(
     prevRobotState.tipState.pipettes
@@ -48,6 +45,7 @@ export const moveLabware: CommandCreator<MoveLabwareArgs> = (
 
   const newLocationInWasteChute =
     newLocation !== 'offDeck' &&
+    newLocation !== 'systemLocation' &&
     'addressableAreaName' in newLocation &&
     newLocation.addressableAreaName === 'gripperWasteChute'
 
@@ -56,7 +54,9 @@ export const moveLabware: CommandCreator<MoveLabwareArgs> = (
   )
 
   const newLocationSlot =
-    newLocation !== 'offDeck' && 'slotName' in newLocation
+    newLocation !== 'offDeck' &&
+    newLocation !== 'systemLocation' &&
+    'slotName' in newLocation
       ? newLocation.slotName
       : null
 
@@ -69,14 +69,17 @@ export const moveLabware: CommandCreator<MoveLabwareArgs> = (
     prevRobotState.modules
   ).find(module => module.slot === newLocationSlot)
 
-  if (!labware || !prevRobotState.labware[labware]) {
+  if (!labwareId || !prevRobotState.labware[labwareId]) {
     errors.push(
       errorCreators.labwareDoesNotExist({
         actionName,
-        labware,
+        labware: labwareId,
       })
     )
-  } else if (prevRobotState.labware[labware].slot === 'offDeck' && useGripper) {
+  } else if (
+    prevRobotState.labware[labwareId].slot === 'offDeck' &&
+    useGripper
+  ) {
     errors.push(errorCreators.labwareOffDeck())
   } else if (
     multipleObjectsInSameSlotLabware ||
@@ -86,7 +89,7 @@ export const moveLabware: CommandCreator<MoveLabwareArgs> = (
   }
 
   const isAluminumBlock =
-    labwareEntities[labware]?.def.metadata.displayCategory === 'aluminumBlock'
+    labwareEntities[labwareId]?.def.metadata.displayCategory === 'aluminumBlock'
 
   if (useGripper && isAluminumBlock) {
     errors.push(errorCreators.cannotMoveWithGripper())
@@ -103,7 +106,7 @@ export const moveLabware: CommandCreator<MoveLabwareArgs> = (
     errors.push(errorCreators.pipetteHasTip())
   }
 
-  const initialLabwareSlot = prevRobotState.labware[labware]?.slot
+  const initialLabwareSlot = prevRobotState.labware[labwareId]?.slot
 
   if (hasWasteChute && initialLabwareSlot === 'gripperWasteChute') {
     errors.push(errorCreators.labwareDiscarded())
@@ -134,12 +137,16 @@ export const moveLabware: CommandCreator<MoveLabwareArgs> = (
     }
   }
   const destModuleId =
-    newLocation !== 'offDeck' && 'moduleId' in newLocation
+    newLocation !== 'offDeck' &&
+    newLocation !== 'systemLocation' &&
+    'moduleId' in newLocation
       ? newLocation.moduleId
       : null
 
   const destAdapterId =
-    newLocation !== 'offDeck' && 'labwareId' in newLocation
+    newLocation !== 'offDeck' &&
+    newLocation !== 'systemLocation' &&
+    'labwareId' in newLocation
       ? newLocation.labwareId
       : null
 
@@ -191,10 +198,8 @@ export const moveLabware: CommandCreator<MoveLabwareArgs> = (
   }
 
   const params = {
-    labwareId: labware,
-    strategy: useGripper
-      ? 'usingGripper'
-      : ('manualMoveWithPause' as LabwareMovementStrategy),
+    labwareId,
+    strategy,
     newLocation,
   }
 

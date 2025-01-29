@@ -1,5 +1,5 @@
 import { useMemo, Fragment } from 'react'
-import styled, { css } from 'styled-components'
+import styled from 'styled-components'
 import { useSelector } from 'react-redux'
 import isEqual from 'lodash/isEqual'
 import { useTranslation } from 'react-i18next'
@@ -29,6 +29,7 @@ import {
   SPACING,
   LegacyStyledText,
   TYPOGRAPHY,
+  getLabwareDefinitionsFromCommands,
   DIRECTION_ROW,
 } from '@opentrons/components'
 import { PythonLabwareOffsetSnippet } from '/app/molecules/PythonLabwareOffsetSnippet'
@@ -39,7 +40,6 @@ import {
 import { SmallButton } from '/app/atoms/buttons'
 import { LabwareOffsetTabs } from '/app/organisms/LabwareOffsetTabs'
 import { getCurrentOffsetForLabwareInLocation } from '/app/transformations/analysis'
-import { getLabwareDefinitionsFromCommands } from '/app/local-resources/labware'
 import { getDisplayLocation } from './utils/getDisplayLocation'
 
 import type {
@@ -48,7 +48,7 @@ import type {
 } from '@opentrons/shared-data'
 import type {
   LabwareOffset,
-  LabwareOffsetCreateData,
+  LegacyLabwareOffsetCreateData,
 } from '@opentrons/api-client'
 import type { ResultsSummaryStep, WorkingOffset } from './types'
 import type { TFunction } from 'i18next'
@@ -60,9 +60,9 @@ interface ResultsSummaryProps extends ResultsSummaryStep {
   protocolData: CompletedProtocolAnalysis
   workingOffsets: WorkingOffset[]
   existingOffsets: LabwareOffset[]
-  handleApplyOffsets: (offsets: LabwareOffsetCreateData[]) => void
+  handleApplyOffsets: (offsets: LegacyLabwareOffsetCreateData[]) => void
   isApplyingOffsets: boolean
-  isDeletingMaintenanceRun: boolean
+  isDeletingMaintenanceRun?: boolean
 }
 export const ResultsSummary = (
   props: ResultsSummaryProps
@@ -86,7 +86,7 @@ export const ResultsSummary = (
   const isOnDevice = useSelector(getIsOnDevice)
 
   const offsetsToApply = useMemo(() => {
-    return workingOffsets.map<LabwareOffsetCreateData>(
+    return workingOffsets.map<LegacyLabwareOffsetCreateData>(
       ({ initialPosition, finalPosition, labwareId, location }) => {
         const definitionUri =
           protocolData.labware.find(l => l.id === labwareId)?.definitionUri ??
@@ -157,21 +157,7 @@ export const ResultsSummary = (
       padding={SPACING.spacing32}
       minHeight="29.5rem"
     >
-      <Flex
-        flexDirection={DIRECTION_COLUMN}
-        maxHeight="20rem"
-        css={css`
-          overflow-y: ${OVERFLOW_AUTO};
-          &::-webkit-scrollbar {
-            width: 0.75rem;
-            background-color: transparent;
-          }
-          &::-webkit-scrollbar-thumb {
-            background: ${COLORS.grey50};
-            border-radius: 11px;
-          }
-        `}
-      >
+      <ScrollContainer flexDirection={DIRECTION_COLUMN} maxHeight="20rem">
         <Header>{t('new_labware_offset_data')}</Header>
         {isLabwareOffsetCodeSnippetsOn ? (
           <LabwareOffsetTabs
@@ -183,7 +169,7 @@ export const ResultsSummary = (
         ) : (
           TableComponent
         )}
-      </Flex>
+      </ScrollContainer>
       {isOnDevice ? (
         <SmallButton
           alignSelf={ALIGN_FLEX_END}
@@ -262,8 +248,28 @@ const Header = styled.h1`
   }
 `
 
+const LeftRoundedTableDatum = styled(TableDatum)`
+  border-radius: ${BORDERS.borderRadius4} 0 0 ${BORDERS.borderRadius4};
+`
+
+const RightRoundedTableDatum = styled(TableDatum)`
+  border-radius: 0 ${BORDERS.borderRadius4} ${BORDERS.borderRadius4} 0;
+`
+
+const ScrollContainer = styled(Flex)`
+  overflow-y: ${OVERFLOW_AUTO};
+  &::-webkit-scrollbar {
+    width: 0.75rem;
+    background-color: transparent;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: ${COLORS.grey50};
+    border-radius: 11px;
+  }
+`
+
 interface OffsetTableProps {
-  offsets: LabwareOffsetCreateData[]
+  offsets: LegacyLabwareOffsetCreateData[]
   labwareDefinitions: LabwareDefinition2[]
 }
 
@@ -290,12 +296,7 @@ const OffsetTable = (props: OffsetTableProps): JSX.Element => {
 
           return (
             <TableRow key={index}>
-              <TableDatum
-                css={`
-                  border-radius: ${BORDERS.borderRadius4} 0 0
-                    ${BORDERS.borderRadius4};
-                `}
-              >
+              <LeftRoundedTableDatum>
                 <LegacyStyledText
                   as="p"
                   textTransform={TYPOGRAPHY.textTransformCapitalize}
@@ -307,16 +308,11 @@ const OffsetTable = (props: OffsetTableProps): JSX.Element => {
                     i18n
                   )}
                 </LegacyStyledText>
-              </TableDatum>
+              </LeftRoundedTableDatum>
               <TableDatum>
                 <LegacyStyledText as="p">{labwareDisplayName}</LegacyStyledText>
               </TableDatum>
-              <TableDatum
-                css={`
-                  border-radius: 0 ${BORDERS.borderRadius4}
-                    ${BORDERS.borderRadius4} 0;
-                `}
-              >
+              <RightRoundedTableDatum>
                 {isEqual(vector, IDENTITY_VECTOR) ? (
                   <LegacyStyledText>{t('no_labware_offsets')}</LegacyStyledText>
                 ) : (
@@ -338,7 +334,7 @@ const OffsetTable = (props: OffsetTableProps): JSX.Element => {
                     ))}
                   </Flex>
                 )}
-              </TableDatum>
+              </RightRoundedTableDatum>
             </TableRow>
           )
         })}

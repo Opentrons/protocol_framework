@@ -14,6 +14,7 @@ import type { LabwareDefinition2, ModuleType } from '@opentrons/shared-data'
 
 const PLATE_READER_MAX_LABWARE_Z_MM = 16
 
+// @ts-expect-error Flex stacker not yet supported in PD
 export const COMPATIBLE_LABWARE_ALLOWLIST_BY_MODULE_TYPE: Record<
   ModuleType,
   Readonly<string[]>

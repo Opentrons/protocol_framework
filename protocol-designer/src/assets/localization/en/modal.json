@@ -57,6 +57,16 @@
       "body3": "Add multiple Heater-Shaker Modules and Magnetic Blocks to the deck (Flex only).",
       "body4": "All protocols now require Opentrons App version <strong>8.2.0+</strong> to run.",
       "body5": "For more information, see the <link1>Protocol Designer Instruction Manual</link1>."
+    },
+    "absorbancePlateReaderSupport": {
+      "heading": "{{version}} Release Notes",
+      "body1": "Welcome to Protocol Designer {{version}}!",
+      "body2": "This release includes the following improvements:",
+      "body3": "Protocol Designer now supports the <link1>Absorbance Plate Reader Module</link1>",
+      "body4": "Bug fix for mismatched x- and y-offset values for aspirate and dispense during Mix steps",
+      "body5": "Bug fix for Move steps not using the gripper by default",
+      "body6": "All protocols now require Opentrons App version 8.2.0+ to run.",
+      "body7": "For more information, see the <link1>Protocol Designer Instruction Manual</link1>."
     }
   },
   "labware_selection": {

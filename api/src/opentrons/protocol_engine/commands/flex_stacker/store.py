@@ -6,8 +6,14 @@ from typing_extensions import Type
 from pydantic import BaseModel, Field
 
 from ..command import AbstractCommandImpl, BaseCommand, BaseCommandCreate, SuccessData
-from ...errors.error_occurrence import ErrorOccurrence
+from ...errors import (
+    ErrorOccurrence,
+    CannotPerformModuleAction,
+    LabwareNotLoadedOnModuleError,
+)
 from ...state import update_types
+from ...types import OFF_DECK_LOCATION
+
 
 if TYPE_CHECKING:
     from opentrons.protocol_engine.state.state import StateView
@@ -44,17 +50,47 @@ class StoreImpl(AbstractCommandImpl[StoreParams, SuccessData[StoreResult]]):
 
     async def execute(self, params: StoreParams) -> SuccessData[StoreResult]:
         """Execute the labware storage command."""
-        state_update = update_types.StateUpdate()
-        stacker_substate = self._state_view.modules.get_flex_stacker_substate(
-            module_id=params.moduleId
+        stacker_state = self._state_view.modules.get_flex_stacker_substate(
+            params.moduleId
         )
+        if stacker_state.in_static_mode:
+            raise CannotPerformModuleAction(
+                "Cannot store labware in Flex Stacker while in static mode"
+            )
 
         # Allow propagation of ModuleNotAttachedError.
-        stacker = self._equipment.get_module_hardware_api(stacker_substate.module_id)
+        stacker_hw = self._equipment.get_module_hardware_api(stacker_state.module_id)
 
-        if stacker is not None:
-            # TODO: get labware height from labware state view
-            await stacker.store_labware(labware_height=50.0)
+        try:
+            lw_id = self._state_view.labware.get_id_by_module(params.moduleId)
+        except LabwareNotLoadedOnModuleError:
+            raise CannotPerformModuleAction(
+                "Cannot store labware if Flex Stacker carriage is empty"
+            )
+
+        # TODO: check the type of the labware should match that already in the stack
+        state_update = update_types.StateUpdate()
+
+        if stacker_hw is not None:
+            labware = self._state_view.labware.get(lw_id)
+            labware_height = self._state_view.labware.get_dimensions(labware_id=lw_id).z
+            if labware.lid_id is not None:
+                lid_def = self._state_view.labware.get_definition(labware.lid_id)
+                offset = self._state_view.labware.get_labware_overlap_offsets(
+                    lid_def, labware.loadName
+                ).z
+                labware_height = labware_height + lid_def.dimensions.zDimension - offset
+            await stacker_hw.store_labware(labware_height=labware_height)
+
+        # update the state to reflect the labware is store in the stack
+        state_update.set_labware_location(
+            labware_id=lw_id,
+            new_location=OFF_DECK_LOCATION,
+            new_offset_id=None,
+        )
+        state_update.store_flex_stacker_labware(
+            module_id=params.moduleId, labware_id=lw_id
+        )
 
         return SuccessData(public=StoreResult(), state_update=state_update)
 

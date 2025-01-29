@@ -41,6 +41,7 @@ from opentrons.hardware_control.modules.types import (
     HeaterShakerModuleModel,
     MagneticBlockModel,
     AbsorbanceReaderModel,
+    FlexStackerModuleModel,
 )
 
 from .disposal_locations import TrashBin, WasteChute
@@ -57,6 +58,9 @@ _STAGING_DECK_SLOT_VERSION_GATE = APIVersion(2, 16)
 
 # The first APIVersion where Python protocols can load lids as stacks and treat them as attributes of a parent labware.
 LID_STACK_VERSION_GATE = APIVersion(2, 23)
+
+# The first APIVersion where Python protocols can use the Flex Stacker module.
+FLEX_STACKER_VERSION_GATE = APIVersion(2, 23)
 
 
 class InvalidPipetteMountError(ValueError):
@@ -389,6 +393,7 @@ _MODULE_MODELS: Dict[str, ModuleModel] = {
     "heaterShakerModuleV1": HeaterShakerModuleModel.HEATER_SHAKER_V1,
     "magneticBlockV1": MagneticBlockModel.MAGNETIC_BLOCK_V1,
     "absorbanceReaderV1": AbsorbanceReaderModel.ABSORBANCE_READER_V1,
+    "flexStackerModuleV1": FlexStackerModuleModel.FLEX_STACKER_V1,
 }
 
 
@@ -718,3 +723,22 @@ def ensure_valid_trash_location_for_transfer_v2(
             f" or `Well` (e.g. `reservoir.wells()[0]`) or an instance of `TrashBin` or `WasteChute`."
             f" However, it is '{trash_location}'."
         )
+
+
+def convert_flex_stacker_load_slot(slot_name: StagingSlotName) -> DeckSlotName:
+    """
+    Ensure a Flex Stacker load location to a deck slot location.
+
+    Args:
+        slot_name: The input staging slot location.
+
+    Returns:
+        A `DeckSlotName` on the deck.
+    """
+    _map = {
+        StagingSlotName.SLOT_A4: DeckSlotName.SLOT_A3,
+        StagingSlotName.SLOT_B4: DeckSlotName.SLOT_B3,
+        StagingSlotName.SLOT_C4: DeckSlotName.SLOT_C3,
+        StagingSlotName.SLOT_D4: DeckSlotName.SLOT_D3,
+    }
+    return _map[slot_name]

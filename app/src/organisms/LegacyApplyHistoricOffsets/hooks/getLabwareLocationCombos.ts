@@ -9,10 +9,10 @@ import type {
   ProtocolAnalysisOutput,
   RunTimeCommand,
 } from '@opentrons/shared-data'
-import type { LabwareOffsetLocation } from '@opentrons/api-client'
+import type { LegacyLabwareOffsetLocation } from '@opentrons/api-client'
 
 export interface LabwareLocationCombo {
-  location: LabwareOffsetLocation
+  location: LegacyLabwareOffsetLocation
   definitionUri: string
   labwareId: string
   moduleId?: string
@@ -32,7 +32,10 @@ export function getLabwareLocationCombos(
         )
           return acc
         const definitionUri = getLabwareDefURI(command.result.definition)
-        if (command.params.location === 'offDeck') {
+        if (
+          command.params.location === 'offDeck' ||
+          command.params.location === 'systemLocation'
+        ) {
           return acc
         } else if ('moduleId' in command.params.location) {
           const { moduleId } = command.params.location
@@ -85,7 +88,10 @@ export function getLabwareLocationCombos(
           )
           return acc
         }
-        if (command.params.newLocation === 'offDeck') {
+        if (
+          command.params.newLocation === 'offDeck' ||
+          command.params.newLocation === 'systemLocation'
+        ) {
           return acc
         } else if ('moduleId' in command.params.newLocation) {
           const modLocation = resolveModuleLocation(
@@ -161,7 +167,7 @@ function appendLocationComboIfUniq(
 function resolveModuleLocation(
   modules: ProtocolAnalysisOutput['modules'],
   moduleId: string
-): LabwareOffsetLocation | null {
+): LegacyLabwareOffsetLocation | null {
   const moduleEntity = modules.find(m => m.id === moduleId)
   if (moduleEntity == null) {
     console.warn(
@@ -176,7 +182,7 @@ function resolveModuleLocation(
 }
 
 interface ResolveAdapterLocation {
-  adapterOffsetLocation: LabwareOffsetLocation | null
+  adapterOffsetLocation: LegacyLabwareOffsetLocation | null
   moduleIdUnderAdapter?: string
 }
 function resolveAdapterLocation(
@@ -194,15 +200,18 @@ function resolveAdapterLocation(
   const labwareDefUri = labwareEntity.definitionUri
 
   let moduleIdUnderAdapter
-  let adapterOffsetLocation: LabwareOffsetLocation | null = null
-  if (labwareEntity.location === 'offDeck') {
+  let adapterOffsetLocation: LegacyLabwareOffsetLocation | null = null
+  if (
+    labwareEntity.location === 'offDeck' ||
+    labwareEntity.location === 'systemLocation'
+  ) {
     return { adapterOffsetLocation: null }
     // can't have adapter on top of an adapter
   } else if ('labwareId' in labwareEntity.location) {
     return { adapterOffsetLocation: null }
   } else if ('moduleId' in labwareEntity.location) {
     const moduleId = labwareEntity.location.moduleId
-    const resolvedModuleLocation: LabwareOffsetLocation | null = resolveModuleLocation(
+    const resolvedModuleLocation: LegacyLabwareOffsetLocation | null = resolveModuleLocation(
       modules,
       moduleId
     )

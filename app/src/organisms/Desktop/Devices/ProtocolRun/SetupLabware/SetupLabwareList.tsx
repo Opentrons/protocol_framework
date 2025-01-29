@@ -57,6 +57,7 @@ export function SetupLabwareList(
         const labwareOnAdapter = allItems.find(
           item =>
             labwareItem.initialLocation !== 'offDeck' &&
+            labwareItem.initialLocation !== 'systemLocation' &&
             'labwareId' in labwareItem.initialLocation &&
             item.labwareId === labwareItem.initialLocation.labwareId
         )

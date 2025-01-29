@@ -13,6 +13,7 @@ from .pipetting_common import (
     BaseLiquidHandlingResult,
     OverpressureError,
     aspirate_in_place,
+    DEFAULT_CORRECTION_VOLUME,
 )
 from .command import (
     AbstractCommandImpl,
@@ -108,6 +109,7 @@ class AspirateInPlaceImplementation(
             command_note_adder=self._command_note_adder,
             pipetting=self._pipetting,
             model_utils=self._model_utils,
+            correction_volume=params.correctionVolume or DEFAULT_CORRECTION_VOLUME,
         )
         if isinstance(result, DefinedErrorData):
             if (

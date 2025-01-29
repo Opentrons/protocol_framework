@@ -371,6 +371,8 @@ class ModuleStore(HasState[ModuleState], HandlesActions):
         elif ModuleModel.is_flex_stacker(actual_model):
             self._state.substate_by_module_id[module_id] = FlexStackerSubState(
                 module_id=FlexStackerId(module_id),
+                in_static_mode=False,
+                hopper_labware_ids=[],
             )
 
     def _update_additional_slots_occupied_by_thermocycler(
@@ -614,11 +616,18 @@ class ModuleStore(HasState[ModuleState], HandlesActions):
         )
 
     def _handle_flex_stacker_commands(
-        self, flex_stacker_state_update: FlexStackerStateUpdate
+        self, state_update: FlexStackerStateUpdate
     ) -> None:
         """Handle Flex Stacker state updates."""
-        # TODO: Implement Flex Stacker state updates
-        pass
+        module_id = state_update.module_id
+        prev_substate = self._state.substate_by_module_id[module_id]
+        assert isinstance(
+            prev_substate, FlexStackerSubState
+        ), f"{module_id} is not a Flex Stacker."
+
+        self._state.substate_by_module_id[
+            module_id
+        ] = prev_substate.new_from_state_change(state_update)
 
 
 class ModuleView:
@@ -1189,7 +1198,10 @@ class ModuleView:
                     else:
                         return m
 
-        raise errors.ModuleNotAttachedError(f"No available {model.value} found.")
+        raise errors.ModuleNotAttachedError(
+            f"No available {model.value} with {expected_serial_number or 'any'}"
+            " serial found."
+        )
 
     def get_heater_shaker_movement_restrictors(
         self,
@@ -1216,7 +1228,10 @@ class ModuleView:
     ) -> None:
         """Raise if the given location has a module in it."""
         for module in self.get_all():
-            if module.location == location:
+            if (
+                module.location == location
+                and module.model != ModuleModel.FLEX_STACKER_MODULE_V1
+            ):
                 raise errors.LocationIsOccupiedError(
                     f"Module {module.model} is already present at {location}."
                 )
@@ -1281,6 +1296,11 @@ class ModuleView:
                 "Only readings of 96 Well labware are supported for conversion to map of values by well."
             )
 
+    def get_deck_supports_module_fixtures(self) -> bool:
+        """Check if the loaded deck supports modules as fixtures."""
+        deck_type = self._state.deck_type
+        return deck_type not in [DeckType.OT2_STANDARD, DeckType.OT2_SHORT_TRASH]
+
     def ensure_and_convert_module_fixture_location(
         self,
         deck_slot: DeckSlotName,
@@ -1292,7 +1312,7 @@ class ModuleView:
         """
         deck_type = self._state.deck_type
 
-        if deck_type == DeckType.OT2_STANDARD or deck_type == DeckType.OT2_SHORT_TRASH:
+        if not self.get_deck_supports_module_fixtures():
             raise ValueError(
                 f"Invalid Deck Type: {deck_type.name} - Does not support modules as fixtures."
             )
@@ -1319,9 +1339,9 @@ class ModuleView:
             assert deck_slot.value[-1] == "3"
             return f"absorbanceReaderV1{deck_slot.value}"
         elif model == ModuleModel.FLEX_STACKER_MODULE_V1:
-            # only allowed in column 4
-            assert deck_slot.value[-1] == "4"
-            return f"flexStackerModuleV1{deck_slot.value}"
+            # loaded to column 3 but the addressable area is in column 4
+            assert deck_slot.value[-1] == "3"
+            return f"flexStackerModuleV1{deck_slot.value[0]}4"
 
         raise ValueError(
             f"Unknown module {model.name} has no addressable areas to provide."

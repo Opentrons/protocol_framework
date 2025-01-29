@@ -28,6 +28,7 @@ const mockCutout = 'cutoutA3'
 const mockMoveToAddressableAreaParams = {
   pipetteId: mockId,
   addressableAreaName: 'movableTrashA3',
+  offset: { x: 0, y: 0, z: 0 },
 }
 const invariantContext = makeContext()
 
@@ -88,7 +89,10 @@ describe('movableTrashCommandsUtil', () => {
     })
     expect(curryCommandCreator).toHaveBeenCalledWith(
       moveToAddressableAreaForDropTip,
-      mockMoveToAddressableAreaParams
+      {
+        pipetteId: mockId,
+        addressableAreaName: 'movableTrashA3',
+      }
     )
     expect(curryCommandCreator).toHaveBeenCalledWith(dropTipInPlace, {
       pipetteId: mockId,

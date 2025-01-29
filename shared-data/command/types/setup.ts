@@ -101,6 +101,7 @@ export type SetupCreateCommand =
 
 export type LabwareLocation =
   | 'offDeck'
+  | 'systemLocation'
   | { slotName: string }
   | { moduleId: string }
   | { labwareId: string }
@@ -198,7 +199,7 @@ interface NozzleConfigurationParams {
   style: NozzleConfigurationStyle
 }
 
-interface ConfigureNozzleLayoutParams {
+export interface ConfigureNozzleLayoutParams {
   pipetteId: string
   configurationParams: NozzleConfigurationParams
 }

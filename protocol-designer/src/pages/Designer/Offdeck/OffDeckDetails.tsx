@@ -68,7 +68,7 @@ export function OffDeckDetails(props: OffDeckDetailsProps): JSX.Element {
   return (
     <Flex
       backgroundColor={COLORS.white}
-      borderRadius={BORDERS.borderRadius8}
+      borderRadius={BORDERS.borderRadius12}
       width="100%"
       height="65vh"
       padding={padding}

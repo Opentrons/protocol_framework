@@ -161,6 +161,7 @@ class TransferComponentsExecutor:
         """Aspirate according to aspirate properties and wait if enabled."""
         # TODO: handle volume correction
         aspirate_props = self._transfer_properties.aspirate
+        correction_volume = aspirate_props.correction_by_volume.get_for_volume(volume)
         self._instrument.aspirate(
             location=self._target_location,
             well_core=None,
@@ -169,6 +170,7 @@ class TransferComponentsExecutor:
             flow_rate=aspirate_props.flow_rate_by_volume.get_for_volume(volume),
             in_place=True,
             is_meniscus=None,  # TODO: update this once meniscus is implemented
+            correction_volume=correction_volume,
         )
         self._tip_state.append_liquid(volume)
         delay_props = aspirate_props.delay
@@ -183,6 +185,7 @@ class TransferComponentsExecutor:
         """Dispense according to dispense properties and wait if enabled."""
         # TODO: handle volume correction
         dispense_props = self._transfer_properties.dispense
+        correction_volume = dispense_props.correction_by_volume.get_for_volume(volume)
         self._instrument.dispense(
             location=self._target_location,
             well_core=None,
@@ -192,6 +195,7 @@ class TransferComponentsExecutor:
             in_place=True,
             push_out=push_out_override,
             is_meniscus=None,
+            correction_volume=correction_volume,
         )
         if push_out_override:
             # If a push out was performed, we need to reset the plunger before we can aspirate again
@@ -293,13 +297,13 @@ class TransferComponentsExecutor:
                 and touch_tip_props.z_offset is not None
                 and touch_tip_props.mm_to_edge is not None
             )
-            # TODO: update this once touch tip has mmToEdge
             self._instrument.touch_tip(
                 location=retract_location,
                 well_core=self._target_well,
                 radius=1,
                 z_offset=touch_tip_props.z_offset,
                 speed=touch_tip_props.speed,
+                mm_from_edge=touch_tip_props.mm_to_edge,
             )
             self._instrument.move_to(
                 location=retract_location,
@@ -460,8 +464,7 @@ class TransferComponentsExecutor:
                 and touch_tip_props.z_offset is not None
                 and touch_tip_props.mm_to_edge is not None
             )
-            # TODO: update this once touch tip has mmToEdge
-            #  Also, check that when blow out is a non-dest-well,
+            # TODO:, check that when blow out is a non-dest-well,
             #  whether the touch tip params from transfer props should be used for
             #  both dest-well touch tip and non-dest-well touch tip.
             if well is not None and location is not None:
@@ -472,6 +475,7 @@ class TransferComponentsExecutor:
                         radius=1,
                         z_offset=touch_tip_props.z_offset,
                         speed=touch_tip_props.speed,
+                        mm_from_edge=touch_tip_props.mm_to_edge,
                     )
                 except TouchTipDisabledError:
                     # TODO: log a warning
@@ -504,12 +508,19 @@ class TransferComponentsExecutor:
         if air_gap_volume == 0:
             return
         aspirate_props = self._transfer_properties.aspirate
+        correction_volume = aspirate_props.correction_by_volume.get_for_volume(
+            air_gap_volume
+        )
         # The maximum flow rate should be air_gap_volume per second
         flow_rate = min(
             aspirate_props.flow_rate_by_volume.get_for_volume(air_gap_volume),
             air_gap_volume,
         )
-        self._instrument.air_gap_in_place(volume=air_gap_volume, flow_rate=flow_rate)
+        self._instrument.air_gap_in_place(
+            volume=air_gap_volume,
+            flow_rate=flow_rate,
+            correction_volume=correction_volume,
+        )
         delay_props = aspirate_props.delay
         if delay_props.enabled:
             # Assertion only for mypy purposes
@@ -524,6 +535,9 @@ class TransferComponentsExecutor:
             return
 
         dispense_props = self._transfer_properties.dispense
+        correction_volume = dispense_props.correction_by_volume.get_for_volume(
+            last_air_gap
+        )
         # The maximum flow rate should be air_gap_volume per second
         flow_rate = min(
             dispense_props.flow_rate_by_volume.get_for_volume(last_air_gap),
@@ -538,6 +552,7 @@ class TransferComponentsExecutor:
             in_place=True,
             is_meniscus=None,
             push_out=0,
+            correction_volume=correction_volume,
         )
         self._tip_state.delete_air_gap(last_air_gap)
         dispense_delay = dispense_props.delay

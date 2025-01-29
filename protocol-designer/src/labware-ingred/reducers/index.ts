@@ -243,7 +243,7 @@ export const savedLabware: Reducer<SavedLabwareState, any> = handleActions(
           const { displayName, loadName, labwareId } = command.params
           const location = command.params.location
           let slot
-          if (location === 'offDeck') {
+          if (location === 'offDeck' || location === 'systemLocation') {
             slot = 'offDeck'
           } else if ('moduleId' in location) {
             slot = location.moduleId

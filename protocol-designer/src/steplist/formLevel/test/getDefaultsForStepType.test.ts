@@ -2,7 +2,7 @@ import { vi, it, describe, expect, afterEach } from 'vitest'
 import {
   DEFAULT_CHANGE_TIP_OPTION,
   DEFAULT_DELAY_SECONDS,
-  DEFAULT_MM_FROM_BOTTOM_DISPENSE,
+  DEFAULT_MM_OFFSET_FROM_BOTTOM,
   DEFAULT_WELL_ORDER_FIRST_OPTION,
   DEFAULT_WELL_ORDER_SECOND_OPTION,
 } from '../../../constants'
@@ -94,7 +94,7 @@ describe('getDefaultsForStepType', () => {
         blowout_checkbox: false,
         blowout_location: null,
         blowout_flowRate: null,
-        mix_mmFromBottom: DEFAULT_MM_FROM_BOTTOM_DISPENSE,
+        mix_mmFromBottom: DEFAULT_MM_OFFSET_FROM_BOTTOM,
         mix_touchTip_mmFromBottom: null,
         mix_touchTip_checkbox: false,
         pipette: null,
