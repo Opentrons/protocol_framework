@@ -12,6 +12,8 @@ type LabwareId = string
 
 export type LPCStep = keyof typeof LPC_STEP
 
+export type LPCFlowType = 'default' | 'location-specific'
+
 export interface StepInfo {
   currentStepIndex: number
   totalStepCount: number
@@ -30,35 +32,52 @@ export interface WorkingOffset {
 
 export interface PositionParams {
   labwareUri: string
-  location: LPCLabwareLocationDetails
+  location: OffsetLocationDetails
   position: VectorOffset | null
 }
 
-export interface LPCLabwareLocationDetails {
+interface LPCLabwareOffsetDetails {
   labwareId: string
   definitionUri: string
-  slotName: string
   moduleModel?: ModuleModel
   moduleId?: string
   adapterId?: string
 }
 
+export interface LPCLabwareOffsetDefaultDetails
+  extends LPCLabwareOffsetDetails {
+  slotName: null
+}
+
+export interface LPCLabwareOffsetAppliedLocationDetails
+  extends LPCLabwareOffsetDetails {
+  slotName: string
+}
+
 // TODO(jh, 01-23-25): Revisit working/existing/initialOffsets once API rework becomes more finalized.
 export interface OffsetDetails {
-  existingOffset: ExistingOffset
+  existingOffset: ExistingOffset | null
   workingOffset: WorkingOffset | null
-  locationDetails: LPCLabwareLocationDetails
+  locationDetails: LPCLabwareOffsetAppliedLocationDetails
 }
 
 export interface LabwareDetails {
   id: LabwareId
+  displayName: string
   offsetDetails: OffsetDetails[]
 }
+
+export type OffsetLocationDetails =
+  | LPCLabwareOffsetDefaultDetails
+  | LPCLabwareOffsetAppliedLocationDetails
 
 export interface SelectedLabwareInfo {
   uri: LabwareURI
   id: LabwareId
-  locationDetails: LPCLabwareLocationDetails
+  /* Indicates the type of LPC offset flow the user is performing, a "default" flow, a "location-specific" flow, or no active flow.
+   * There is no `slotName` when a user performs the default offset flow.
+   * Until the user is in a default or location-specific offset flow, there is no location. * */
+  offsetLocationDetails: OffsetLocationDetails | null
 }
 
 export interface LPCLabwareInfo {
@@ -97,12 +116,20 @@ export interface GoBackStepAction {
   payload: { runId: string }
 }
 
+export interface SelectedLabwareNameAction {
+  type: 'SET_SELECTED_LABWARE_NAME'
+  payload: {
+    runId: string
+    labwareUri: LabwareURI
+  }
+}
+
 export interface SelectedLabwareAction {
   type: 'SET_SELECTED_LABWARE'
   payload: {
     runId: string
     labwareUri: LabwareURI
-    location: LPCLabwareLocationDetails
+    location: OffsetLocationDetails | null
   }
 }
 
@@ -124,7 +151,9 @@ export interface FinalPositionAction {
 export type LPCWizardAction =
   | StartLPCAction
   | FinishLPCAction
+  | SelectedLabwareNameAction
   | SelectedLabwareAction
+  | ClearSelectedLabwareAction
   | InitialPositionAction
   | FinalPositionAction
   | ProceedStepAction

@@ -7,10 +7,10 @@ import { ModalShell } from '@opentrons/components'
 import { getTopPortalEl } from '/app/App/portal'
 import {
   BeforeBeginning,
-  CheckItem,
+  HandleLabware,
   AttachProbe,
   DetachProbe,
-  ResultsSummary,
+  LPCComplete,
 } from '/app/organisms/LabwarePositionCheck/steps'
 import { ExitConfirmation } from './ExitConfirmation'
 import { RobotMotionLoader } from './RobotMotionLoader'
@@ -151,16 +151,14 @@ function LPCWizardContent(props: LPCWizardContentProps): JSX.Element {
     case LPC_STEP.ATTACH_PROBE:
       return <AttachProbe {...props} />
 
-    // TOME TODO: This gets entirely rewritten.
     case LPC_STEP.HANDLE_LABWARE:
-      return <CheckItem {...props} />
+      return <HandleLabware {...props} />
 
     case LPC_STEP.DETACH_PROBE:
       return <DetachProbe {...props} />
 
-    // TOME TODO: This gets rewritten, too.
     case LPC_STEP.LPC_COMPLETE:
-      return <ResultsSummary {...props} />
+      return <LPCComplete {...props} />
 
     default:
       console.error('Unhandled LPC step.')

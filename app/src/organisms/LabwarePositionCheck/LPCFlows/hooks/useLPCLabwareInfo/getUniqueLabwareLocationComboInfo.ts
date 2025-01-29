@@ -1,37 +1,15 @@
 import { isEqual } from 'lodash'
 
-import { getLabwareDefURI, getPipetteNameSpecs } from '@opentrons/shared-data'
+import { getLabwareDefURI } from '@opentrons/shared-data'
 
-import { STEP } from '/app/organisms/LabwarePositionCheck/constants'
 import { getLabwareLocationCombos } from '/app/organisms/LegacyApplyHistoricOffsets/hooks/getLabwareLocationCombos'
 
 import type {
   CompletedProtocolAnalysis,
   LabwareDefinition2,
-  LoadedPipette,
 } from '@opentrons/shared-data'
-import type { CheckPositionsStep } from '/app/organisms/LabwarePositionCheck/types'
 import type { LabwareLocationCombo } from '/app/organisms/LegacyApplyHistoricOffsets/hooks/getLabwareLocationCombos'
 
-// export function getProbeBasedLPCSteps(
-//   params: GetLPCStepsParams
-// ): LabwarePositionCheckStep[] {
-//   const { protocolData } = params
-//
-//   return [
-//     { section: NAV_STEPS.BEFORE_BEGINNING },
-//     {
-//       section: NAV_STEPS.ATTACH_PROBE,
-//       pipetteId: getPrimaryPipetteId(protocolData.pipettes),
-//     },
-//     ...getUniqueLabwareLocationComboInfo(params),
-//     {
-//       section: NAV_STEPS.DETACH_PROBE,
-//       pipetteId: getPrimaryPipetteId(protocolData.pipettes),
-//     },
-//     { section: NAV_STEPS.RESULTS_SUMMARY },
-//   ]
-// }
 export interface GetUniqueLocationComboInfoParams {
   protocolData: CompletedProtocolAnalysis | null
   labwareDefs: LabwareDefinition2[] | null

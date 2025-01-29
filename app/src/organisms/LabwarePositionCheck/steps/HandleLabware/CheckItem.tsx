@@ -1,5 +1,6 @@
 import { Trans, useTranslation } from 'react-i18next'
 import { useDispatch, useSelector } from 'react-redux'
+import { useEffect } from 'react'
 
 import {
   DIRECTION_COLUMN,
@@ -11,47 +12,66 @@ import {
 import { FLEX_ROBOT_TYPE } from '@opentrons/shared-data'
 import { UnorderedList } from '/app/molecules/UnorderedList'
 import {
+  clearSelectedLabware,
   setFinalPosition,
   setInitialPosition,
 } from '/app/redux/protocol-runs/actions'
-import { JogToWell } from './JogToWell'
+import { JogToWell } from './EditOffset'
 import { PrepareSpace } from './PrepareSpace'
 import { PlaceItemInstruction } from './PlaceItemInstruction'
 import {
-  selectActiveLwInitialPosition,
+  selectSelectedLwInitialPosition,
   selectActivePipette,
-  selectIsActiveLwTipRack,
+  selectIsSelectedLwTipRack,
+  selectSelectedLabwareInfo,
 } from '/app/redux/protocol-runs'
 import { getIsOnDevice } from '/app/redux/config'
 
 import type { DisplayLocationParams } from '@opentrons/components'
+import type { LoadedPipette } from '@opentrons/shared-data'
 import type { State } from '/app/redux/types'
-import type { LPCWizardState } from '/app/redux/protocol-runs'
+import type {
+  LPCWizardState,
+  OffsetLocationDetails,
+  SelectedLabwareInfo,
+} from '/app/redux/protocol-runs'
 import type { LPCWizardContentProps } from '/app/organisms/LabwarePositionCheck/types'
 
 export function CheckItem(props: LPCWizardContentProps): JSX.Element {
-  const { runId, proceed, commandUtils } = props
+  const { runId, commandUtils } = props
   const {
     handleJog,
     handleCheckItemsPrepModules,
     handleConfirmLwModulePlacement,
     handleConfirmLwFinalPosition,
     handleResetLwModulesOnDeck,
-    handleValidMoveToMaintenancePosition,
     toggleRobotMoving,
   } = commandUtils
   const dispatch = useDispatch()
 
   const isOnDevice = useSelector(getIsOnDevice)
-  const { protocolData, labwareDefs, steps } = useSelector(
+  const { protocolData, labwareDefs } = useSelector(
     (state: State) => state.protocolRuns[runId]?.lpc as LPCWizardState
   )
   const { t } = useTranslation(['labware_position_check', 'shared'])
   const { t: commandTextT } = useTranslation('protocol_command_text')
 
-  const pipette = useSelector(selectActivePipette(runId))
-  const initialPosition = useSelector(selectActiveLwInitialPosition(runId))
-  const isLwTiprack = useSelector(selectIsActiveLwTipRack(runId))
+  const pipette = useSelector(selectActivePipette(runId)) as LoadedPipette
+  const pipetteId = pipette.id
+  const initialPosition = useSelector(selectSelectedLwInitialPosition(runId))
+  const isLwTiprack = useSelector(selectIsSelectedLwTipRack(runId))
+  const lwInfo = useSelector(
+    selectSelectedLabwareInfo(runId)
+  ) as SelectedLabwareInfo
+  const offsetLocationDetails = lwInfo.offsetLocationDetails as OffsetLocationDetails
+
+  useEffect(() => {
+    void toggleRobotMoving(true)
+      .then(() =>
+        handleCheckItemsPrepModules(offsetLocationDetails, initialPosition)
+      )
+      .finally(() => toggleRobotMoving(false))
+  }, [])
 
   const buildDisplayParams = (): Omit<
     DisplayLocationParams,
@@ -61,7 +81,7 @@ export function CheckItem(props: LPCWizardContentProps): JSX.Element {
     loadedModules: protocolData.modules,
     loadedLabwares: protocolData.labware,
     robotType: FLEX_ROBOT_TYPE,
-    location,
+    location: offsetLocationDetails,
   })
 
   const slotOnlyDisplayLocation = getLabwareDisplayLocation({
@@ -76,12 +96,14 @@ export function CheckItem(props: LPCWizardContentProps): JSX.Element {
 
   const handlePrepareProceed = (): void => {
     void toggleRobotMoving(true)
-      .then(() => handleConfirmLwModulePlacement({ step }))
+      .then(() =>
+        handleConfirmLwModulePlacement(offsetLocationDetails, pipetteId)
+      )
       .then(position => {
         dispatch(
           setInitialPosition(runId, {
-            labwareId,
-            location,
+            labwareUri: lwInfo.uri,
+            location: offsetLocationDetails,
             position,
           })
         )
@@ -92,40 +114,30 @@ export function CheckItem(props: LPCWizardContentProps): JSX.Element {
   // TODO(jh, 01-14-25): Revisit next step injection after refactoring the store (after designs settle).
   const handleJogProceed = (): void => {
     void toggleRobotMoving(true)
-      .then(() =>
-        handleConfirmLwFinalPosition({
-          step,
-          onSuccess: proceed,
-          pipette,
-        })
-      )
+      .then(() => handleConfirmLwFinalPosition(offsetLocationDetails, pipette))
       .then(position => {
         dispatch(
           setFinalPosition(runId, {
-            labwareId,
-            location,
+            labwareUri: lwInfo.uri,
+            location: offsetLocationDetails,
             position,
           })
         )
       })
       .then(() => {
-        if (steps.next?.section === STEP.CHECK_POSITIONS) {
-          return handleCheckItemsPrepModules(steps.next)
-        } else {
-          return handleValidMoveToMaintenancePosition(pipette, steps.next)
-        }
+        dispatch(clearSelectedLabware(runId))
       })
       .finally(() => toggleRobotMoving(false))
   }
 
   const handleGoBack = (): void => {
     void toggleRobotMoving(true)
-      .then(() => handleResetLwModulesOnDeck({ step }))
+      .then(() => handleResetLwModulesOnDeck(offsetLocationDetails))
       .then(() => {
         dispatch(
           setInitialPosition(runId, {
-            labwareId,
-            location,
+            labwareUri: lwInfo.uri,
+            location: offsetLocationDetails,
             position: null,
           })
         )
@@ -182,12 +194,14 @@ export function CheckItem(props: LPCWizardContentProps): JSX.Element {
                   isLwTiprack={isLwTiprack}
                   slotOnlyDisplayLocation={slotOnlyDisplayLocation}
                   fullDisplayLocation={fullDisplayLocation}
+                  labwareInfo={lwInfo}
                   {...props}
                 />,
               ]}
             />
           }
           confirmPlacement={handlePrepareProceed}
+          labwareInfo={lwInfo}
           {...props}
         />
       )}

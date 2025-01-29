@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import styled from 'styled-components'
 import { useSelector } from 'react-redux'
@@ -19,9 +20,7 @@ import detachProbe1 from '/app/assets/videos/pipette-wizard-flows/Pipette_Detach
 import detachProbe8 from '/app/assets/videos/pipette-wizard-flows/Pipette_Detach_Probe_8.webm'
 import detachProbe96 from '/app/assets/videos/pipette-wizard-flows/Pipette_Detach_Probe_96.webm'
 
-import type { DetachProbeStep, LPCStepProps } from '../types'
-import type { State } from '/app/redux/types'
-import type { StepsInfo } from '/app/organisms/LabwarePositionCheck/redux/types'
+import type { LPCWizardContentProps } from '/app/organisms/LabwarePositionCheck/types'
 
 const StyledVideo = styled.video`
   padding-top: ${SPACING.spacing4};
@@ -42,18 +41,21 @@ export const DetachProbe = ({
   runId,
   proceed,
   commandUtils,
-}: LPCStepProps<DetachProbeStep>): JSX.Element => {
+}: LPCWizardContentProps): JSX.Element => {
   const { t, i18n } = useTranslation(['labware_position_check', 'shared'])
-  const { current: currentStep } = useSelector(
-    (state: State) => state.protocolRuns[runId]?.lpc?.steps as StepsInfo
-  )
-  const { createProbeDetachmentHandler, toggleRobotMoving } = commandUtils
-  const pipette = useSelector((state: State) =>
-    selectActivePipette(currentStep, runId, state)
-  )
-  const channels = useSelector((state: State) =>
-    selectActivePipetteChannelCount(currentStep, runId, state)
-  )
+  const {
+    handleProbeDetachment,
+    toggleRobotMoving,
+    handleValidMoveToMaintenancePosition,
+  } = commandUtils
+  const pipette = useSelector(selectActivePipette(runId))
+  const channels = useSelector(selectActivePipetteChannelCount(runId))
+
+  useEffect(() => {
+    void toggleRobotMoving(true)
+      .then(() => handleValidMoveToMaintenancePosition(pipette))
+      .finally(() => toggleRobotMoving(false))
+  }, [])
 
   const probeVideoSrc = ((): string => {
     switch (channels) {
@@ -66,11 +68,9 @@ export const DetachProbe = ({
     }
   })()
 
-  const handleProbeDetached = createProbeDetachmentHandler(pipette, proceed)
-
   const handleProceed = (): void => {
     void toggleRobotMoving(true)
-      .then(() => handleProbeDetached())
+      .then(() => handleProbeDetachment(pipette, proceed))
       .finally(() => toggleRobotMoving(false))
   }
 

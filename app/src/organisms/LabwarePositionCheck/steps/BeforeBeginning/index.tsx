@@ -38,9 +38,7 @@ export function BeforeBeginning({
   const { protocolName, labwareDefs } = useSelector(
     (state: State) => state.protocolRuns[runId]?.lpc as LPCWizardState
   )
-  const { createStartLPCHandler, toggleRobotMoving } = commandUtils
-
-  const handleStartLPC = createStartLPCHandler(activePipette, proceed)
+  const { handleStartLPC, toggleRobotMoving } = commandUtils
 
   const requiredEquipmentList = [
     {
@@ -55,7 +53,7 @@ export function BeforeBeginning({
 
   const handleProceed = (): void => {
     void toggleRobotMoving(true)
-      .then(() => handleStartLPC())
+      .then(() => handleStartLPC(activePipette, proceed))
       .finally(() => toggleRobotMoving(false))
   }
 

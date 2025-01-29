@@ -7,6 +7,7 @@ import {
   GO_BACK_STEP,
   SET_SELECTED_LABWARE,
   CLEAR_SELECTED_LABWARE,
+  SET_SELECTED_LABWARE_NAME,
 } from '../constants'
 
 import type {
@@ -18,9 +19,10 @@ import type {
   ProceedStepAction,
   FinishLPCAction,
   GoBackStepAction,
-  LPCLabwareLocationDetails,
   SelectedLabwareAction,
   ClearSelectedLabwareAction,
+  SelectedLabwareNameAction,
+  OffsetLocationDetails,
 } from '../types'
 
 export const proceedStep = (runId: string): ProceedStepAction => ({
@@ -33,10 +35,21 @@ export const goBackStep = (runId: string): GoBackStepAction => ({
   payload: { runId },
 })
 
+export const setSelectedLabwareName = (
+  runId: string,
+  labwareUri: string
+): SelectedLabwareNameAction => ({
+  type: SET_SELECTED_LABWARE_NAME,
+  payload: {
+    runId,
+    labwareUri,
+  },
+})
+
 export const setSelectedLabware = (
   runId: string,
   labwareUri: string,
-  location: LPCLabwareLocationDetails
+  location: OffsetLocationDetails | null
 ): SelectedLabwareAction => ({
   type: SET_SELECTED_LABWARE,
   payload: {

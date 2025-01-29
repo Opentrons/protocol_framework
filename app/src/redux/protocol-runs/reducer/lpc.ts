@@ -6,6 +6,8 @@ import {
   FINISH_LPC,
   START_LPC,
   GO_BACK_STEP,
+  SET_SELECTED_LABWARE_NAME,
+  CLEAR_SELECTED_LABWARE,
 } from '../constants'
 import { updateOffsetsForURI } from './transforms'
 
@@ -56,14 +58,14 @@ export function LPCReducer(
         }
       }
 
-      case SET_SELECTED_LABWARE: {
+      case SET_SELECTED_LABWARE_NAME: {
         const lwUri = action.payload.labwareUri
         const thisLwInfo = state.labwareInfo.labware[lwUri]
 
         const selectedLabware: SelectedLabwareInfo = {
           uri: action.payload.labwareUri,
           id: thisLwInfo.id,
-          locationDetails: action.payload.location,
+          offsetLocationDetails: null,
         }
 
         return {
@@ -71,6 +73,35 @@ export function LPCReducer(
           labwareInfo: {
             ...state.labwareInfo,
             selectedLabware,
+          },
+        }
+      }
+
+      case SET_SELECTED_LABWARE: {
+        const lwUri = action.payload.labwareUri
+        const thisLwInfo = state.labwareInfo.labware[lwUri]
+
+        const selectedLabware: SelectedLabwareInfo = {
+          uri: action.payload.labwareUri,
+          id: thisLwInfo.id,
+          offsetLocationDetails: action.payload.location,
+        }
+
+        return {
+          ...state,
+          labwareInfo: {
+            ...state.labwareInfo,
+            selectedLabware,
+          },
+        }
+      }
+
+      case CLEAR_SELECTED_LABWARE: {
+        return {
+          ...state,
+          labwareInfo: {
+            ...state.labwareInfo,
+            selectedLabware: null,
           },
         }
       }

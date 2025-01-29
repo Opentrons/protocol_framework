@@ -12,7 +12,7 @@ import {
   getItemLabwareDef,
   getSelectedLabwareOffsetDetails,
   getOffsetDetailsForAllLabware,
-  getItemLabwareDefFrom,
+  getSelectedLabwareDefFrom,
 } from './transforms'
 
 import type { Selector } from 'reselect'
@@ -23,9 +23,49 @@ import type {
 } from '@opentrons/api-client'
 import type { State } from '../../../types'
 import type { Coordinates, LabwareDefinition2 } from '@opentrons/shared-data'
-import type { LabwareDetails } from '/app/redux/protocol-runs'
+import type {
+  LabwareDetails,
+  LPCFlowType,
+  LPCLabwareInfo,
+  OffsetDetails,
+  SelectedLabwareInfo,
+} from '/app/redux/protocol-runs'
 
-export const selectActiveLwInitialPosition = (
+export const selectAllLabwareInfo = (
+  runId: string
+): Selector<State, LPCLabwareInfo['labware']> =>
+  createSelector(
+    (state: State) => state.protocolRuns[runId]?.lpc?.labwareInfo.labware,
+    labware => labware ?? {}
+  )
+
+export const selectSelectedLabwareInfo = (
+  runId: string
+): Selector<State, SelectedLabwareInfo | null> =>
+  createSelector(
+    (state: State) =>
+      state.protocolRuns[runId]?.lpc?.labwareInfo.selectedLabware,
+    selectedLabware => selectedLabware ?? null
+  )
+
+export const selectSelectedOffsetDetails = (
+  runId: string
+): Selector<State, OffsetDetails[]> =>
+  createSelector(
+    (state: State) =>
+      state.protocolRuns[runId]?.lpc?.labwareInfo.selectedLabware?.uri,
+    (state: State) => state.protocolRuns[runId]?.lpc?.labwareInfo.labware,
+    (uri, lw) => {
+      if (uri == null || lw == null) {
+        console.warn('Failed to access labware details.')
+        return []
+      } else {
+        return lw[uri].offsetDetails ?? []
+      }
+    }
+  )
+
+export const selectSelectedLwInitialPosition = (
   runId: string
 ): Selector<State, VectorOffset | null> =>
   createSelector(
@@ -34,7 +74,6 @@ export const selectActiveLwInitialPosition = (
       const workingOffset = details?.workingOffset
 
       if (workingOffset == null) {
-        console.warn('Working offset for active labware not set.')
         return null
       } else {
         return workingOffset.initialPosition
@@ -42,13 +81,13 @@ export const selectActiveLwInitialPosition = (
     }
   )
 
-export const selectActiveLwExistingOffset = (
+export const selectSelectedLwExistingOffset = (
   runId: string
 ): Selector<State, VectorOffset> =>
   createSelector(
     (state: State) => getSelectedLabwareOffsetDetails(runId, state),
     details => {
-      const existingVector = details?.existingOffset.vector
+      const existingVector = details?.existingOffset?.vector
 
       if (existingVector == null) {
         console.warn('No existing offset vector found for active labware')
@@ -85,7 +124,8 @@ export const selectOffsetsToApply = (
           if (
             finalPosition == null ||
             initialPosition == null ||
-            definitionUri == null
+            definitionUri == null ||
+            existingOffset == null
           ) {
             console.error(
               `Cannot generate offsets for labware with incomplete details. ID: ${locationDetails.labwareId}`
@@ -110,17 +150,56 @@ export const selectOffsetsToApply = (
     }
   )
 
-export const selectIsActiveLwTipRack = (
+// TOME TODO: You can break your selectors down into files along  offsets, maybe booleans, etc.
+export const selectSelectedLabwareFlowType = (
+  runId: string
+): Selector<State, LPCFlowType | null> =>
+  createSelector(
+    (state: State) =>
+      state.protocolRuns[runId]?.lpc?.labwareInfo.selectedLabware,
+    selectedLabware => {
+      if (selectedLabware?.offsetLocationDetails == null) {
+        return null
+      } else {
+        if (selectedLabware.offsetLocationDetails.slotName == null) {
+          return 'default'
+        } else {
+          return 'location-specific'
+        }
+      }
+    }
+  )
+
+export const selectSelectedLabwareDisplayName = (
+  runId: string
+): Selector<State, string> =>
+  createSelector(
+    (state: State) => state.protocolRuns[runId]?.lpc?.labwareInfo.labware,
+    (state: State) =>
+      state.protocolRuns[runId]?.lpc?.labwareInfo.selectedLabware?.uri,
+    (lw, uri) => {
+      if (lw == null || uri == null) {
+        console.warn('Cannot access invalid labware')
+        return ''
+      } else {
+        return lw[uri].displayName
+      }
+    }
+  )
+
+export const selectIsSelectedLwTipRack = (
   runId: string
 ): Selector<State, boolean> =>
   createSelector(
-    (state: State) => getItemLabwareDefFrom(runId, state),
+    (state: State) => getSelectedLabwareDefFrom(runId, state),
     def => (def != null ? getIsTiprack(def) : false)
   )
 
-export const selectLwDisplayName = (runId: string): Selector<State, string> =>
+export const selectSelectedLwDisplayName = (
+  runId: string
+): Selector<State, string> =>
   createSelector(
-    (state: State) => getItemLabwareDefFrom(runId, state),
+    (state: State) => getSelectedLabwareDefFrom(runId, state),
     def => (def != null ? getLabwareDisplayName(def) : '')
   )
 
@@ -133,7 +212,7 @@ export const selectActiveAdapterDisplayName = (
     (state: State) => state?.protocolRuns[runId]?.lpc?.labwareDefs,
     (state: State) => state?.protocolRuns[runId]?.lpc?.protocolData,
     (selectedLabware, labwareDefs, analysis) => {
-      const adapterId = selectedLabware?.locationDetails.adapterId
+      const adapterId = selectedLabware?.offsetLocationDetails?.adapterId
 
       if (selectedLabware == null || labwareDefs == null || analysis == null) {
         console.warn('No selected labware or store not properly initialized.')
@@ -150,6 +229,7 @@ export const selectActiveAdapterDisplayName = (
     }
   )
 
+// TODO(jh, 01-29-25): Revisit this once "View Offsets" is refactored out of LPC.
 export const selectLabwareOffsetsForAllLw = (
   runId: string
 ): Selector<State, LabwareOffset[]> =>
@@ -164,19 +244,19 @@ export const selectLabwareOffsetsForAllLw = (
       return Object.values(labware).flatMap((details: LabwareDetails) =>
         details.offsetDetails.map(offsetDetail => ({
           id: details.id,
-          createdAt: offsetDetail.existingOffset.createdAt,
+          createdAt: offsetDetail?.existingOffset?.createdAt ?? '',
           definitionUri: offsetDetail.locationDetails.definitionUri,
           location: {
             slotName: offsetDetail.locationDetails.slotName,
             moduleModel: offsetDetail.locationDetails.moduleModel,
             definitionUri: offsetDetail.locationDetails.definitionUri,
           },
-          vector: offsetDetail.existingOffset.vector,
+          vector: offsetDetail?.existingOffset?.vector ?? IDENTITY_VECTOR,
         }))
       )
     }
   )
-export const selectItemLabwareDef = (
+export const selectSelectedLabwareDef = (
   runId: string
 ): Selector<State, LabwareDefinition2 | null> =>
   createSelector(

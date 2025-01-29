@@ -45,12 +45,12 @@ export const getSelectedLabwareOffsetDetails = (
 
   return (
     offsetDetails?.find(offset =>
-      isEqual(offset.workingOffset, selectedLabware?.locationDetails)
+      isEqual(offset.workingOffset, selectedLabware?.offsetLocationDetails)
     ) ?? null
   )
 }
 
-export const getItemLabwareDefFrom = (
+export const getSelectedLabwareDefFrom = (
   runId: string,
   state: State
 ): LabwareDefinition2 | null => {
