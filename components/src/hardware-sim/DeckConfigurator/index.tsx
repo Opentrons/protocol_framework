@@ -12,6 +12,7 @@ import {
   MAGNETIC_BLOCK_V1_FIXTURE,
   ABSORBANCE_READER_V1_FIXTURE,
   FLEX_STACKER_V1_FIXTURE,
+  FLEX_STACKER_FIXTURES,
   STAGING_AREA_SLOT_WITH_MAGNETIC_BLOCK_V1_FIXTURE,
   THERMOCYCLER_MODULE_CUTOUTS,
 } from '@opentrons/shared-data'
@@ -118,8 +119,8 @@ export function DeckConfigurator(props: DeckConfiguratorProps): JSX.Element {
     ({ cutoutFixtureId }) =>
       cutoutFixtureId === STAGING_AREA_SLOT_WITH_MAGNETIC_BLOCK_V1_FIXTURE
   )
-  const flexStackerFixtures = deckConfig.filter(
-    ({ cutoutFixtureId }) => cutoutFixtureId === FLEX_STACKER_V1_FIXTURE
+  const flexStackerFixtures = deckConfig.filter(({ cutoutFixtureId }) =>
+    FLEX_STACKER_FIXTURES.includes(cutoutFixtureId)
   )
 
   return (
@@ -276,6 +277,7 @@ export function DeckConfigurator(props: DeckConfiguratorProps): JSX.Element {
           }
           fixtureLocation={cutoutId}
           cutoutFixtureId={cutoutFixtureId}
+          hasWasteChute={cutoutFixtureId !== FLEX_STACKER_V1_FIXTURE}
           selected={cutoutId === selectedCutoutId}
         />
       ))}

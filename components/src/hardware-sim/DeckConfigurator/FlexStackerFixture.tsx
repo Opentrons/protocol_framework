@@ -23,6 +23,7 @@ interface FlexStackerFixtureProps {
   deckDefinition: DeckDefinition
   fixtureLocation: CutoutId
   cutoutFixtureId: CutoutFixtureId
+  hasWasteChute: boolean
   handleClickRemove?: (
     fixtureLocation: CutoutId,
     cutoutFixtureId: CutoutFixtureId
@@ -31,6 +32,7 @@ interface FlexStackerFixtureProps {
 }
 
 const FLEX_STACKER_FIXTURE_DISPLAY_NAME = 'Stacker'
+const FLEX_STACKER_WASTE_CHUTE_DISPLAY_NAME = 'Stacker + Waste chute'
 
 export function FlexStackerFixture(
   props: FlexStackerFixtureProps
@@ -40,6 +42,7 @@ export function FlexStackerFixture(
     handleClickRemove,
     fixtureLocation,
     cutoutFixtureId,
+    hasWasteChute,
     selected = false,
   } = props
 
@@ -80,7 +83,9 @@ export function FlexStackerFixture(
         }
       >
         <Text css={TYPOGRAPHY.smallBodyTextSemiBold}>
-          {FLEX_STACKER_FIXTURE_DISPLAY_NAME}
+          {hasWasteChute
+            ? FLEX_STACKER_WASTE_CHUTE_DISPLAY_NAME
+            : FLEX_STACKER_FIXTURE_DISPLAY_NAME}
         </Text>
         {handleClickRemove != null ? (
           <Icon name="remove" color={COLORS.white} size="2rem" />

@@ -49,6 +49,8 @@ import {
   WASTE_CHUTE_FIXTURES,
   FLEX_STACKER_MODULE_V1,
   FLEX_STACKER_V1_FIXTURE,
+  FLEX_STACKER_WITH_WASTE_CHUTE_ADAPTER_COVERED_FIXTURE,
+  FLEX_STACKER_WTIH_WASTE_CHUTE_ADAPTER_NO_COVER_FIXTURE,
 } from '@opentrons/shared-data'
 
 import { ODD_FOCUS_VISIBLE } from '/app/atoms/buttons/constants'
@@ -252,6 +254,30 @@ export function AddFixtureModal({
       }
     }
     if (
+      cutoutId === 'cutoutD3' &&
+      unconfiguredMods.some(m => m.moduleModel === FLEX_STACKER_MODULE_V1)
+    ) {
+      const unconfiguredFlexStackers = unconfiguredMods
+        .filter(mod => mod.moduleModel === FLEX_STACKER_MODULE_V1)
+        .map(mod => [
+          {
+            cutoutId,
+            cutoutFixtureId: FLEX_STACKER_V1_FIXTURE,
+            opentronsModuleSerialNumber: mod.serialNumber,
+          },
+          {
+            cutoutId,
+            cutoutFixtureId: FLEX_STACKER_WITH_WASTE_CHUTE_ADAPTER_COVERED_FIXTURE,
+            opentronsModuleSerialNumber: mod.serialNumber,
+          },
+          {
+            cutoutId,
+            cutoutFixtureId: FLEX_STACKER_WTIH_WASTE_CHUTE_ADAPTER_NO_COVER_FIXTURE,
+            opentronsModuleSerialNumber: mod.serialNumber,
+          },
+        ])
+      availableOptions = [...availableOptions, ...unconfiguredFlexStackers]
+    } else if (
       STAGING_AREA_CUTOUTS.includes(cutoutId) &&
       unconfiguredMods.some(m => m.moduleModel === FLEX_STACKER_MODULE_V1)
     ) {
