@@ -79,20 +79,21 @@ export const getLoadCommands = (
     ): LoadLabwareCreateCommand[] => {
       const { def } = labwareEntities[labwareId]
       const isAdapter = def.allowedRoles?.includes('adapter')
-      if (!isAdapter) return acc
+      if (!isAdapter) {
+        return acc
+      }
       const isOnTopOfModule = labware.slot in initialRobotState.modules
-      const namespace = def.namespace
-      const loadName = def.parameters.loadName
-      const version = def.version
+      const { namespace, parameters, version, metadata } = def
+      const loadName = parameters.loadName
       const loadAdapterCommands = {
         key: uuid(),
         commandType: 'loadLabware' as const,
         params: {
-          displayName: def.metadata.displayName,
+          displayName: metadata.displayName,
           labwareId,
           loadName,
-          namespace: namespace,
-          version: version,
+          namespace,
+          version,
           location: isOnTopOfModule
             ? { moduleId: labware.slot }
             : { slotName: labware.slot },
@@ -122,9 +123,9 @@ export const getLoadCommands = (
         loadAdapterCommands.find(
           command => command.params.labwareId === labware.slot
         ) != null
-      const namespace = def.namespace
-      const loadName = def.parameters.loadName
-      const version = def.version
+      const { namespace, parameters, version } = def
+      const loadName = parameters.loadName
+
       const isAddressableAreaName = COLUMN_4_SLOTS.includes(labware.slot)
 
       let location: LabwareLocation = { slotName: labware.slot }

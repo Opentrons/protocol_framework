@@ -4,8 +4,8 @@ import reduce from 'lodash/reduce'
 import ViewportList from 'react-viewport-list'
 
 import {
-  getResultingTimelineFrameFromRunCommands,
   constructInvariantContextFromRunCommands,
+  getResultingTimelineFrameFromRunCommands,
 } from '@opentrons/step-generation'
 import {
   FLEX_ROBOT_TYPE,
@@ -125,7 +125,7 @@ export function ProtocolTimelineScrubber(
     robotState
   )
   const liquidDisplayColors = liquids.map(
-    liquid => liquid.displayColor ?? COLORS.blue50
+    ({ displayColor }) => displayColor ?? COLORS.blue50
   )
 
   const isValidRobotSideAnalysis = analysis != null
