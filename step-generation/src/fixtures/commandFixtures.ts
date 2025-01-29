@@ -55,7 +55,7 @@ export const BLOWOUT_FLOW_RATE = 2.3
 export const ASPIRATE_OFFSET_FROM_BOTTOM_MM = 3.1
 export const DISPENSE_OFFSET_FROM_BOTTOM_MM = 3.2
 export const BLOWOUT_OFFSET_FROM_TOP_MM = 3.3
-const TOUCH_TIP_OFFSET_FROM_BOTTOM_MM = 3.4
+const TOUCH_TIP_OFFSET_FROM_TOP_MM = -3.4
 interface FlowRateAndOffsetParamsTransferlike {
   aspirateFlowRateUlSec: number
   dispenseFlowRateUlSec: number
@@ -74,8 +74,8 @@ export const getFlowRateAndOffsetParamsTransferLike = (): FlowRateAndOffsetParam
   dispenseOffsetFromBottomMm: DISPENSE_OFFSET_FROM_BOTTOM_MM,
   blowoutOffsetFromTopMm: BLOWOUT_OFFSET_FROM_TOP_MM,
   // for consolidate/distribute/transfer only
-  touchTipAfterAspirateOffsetMmFromTop: TOUCH_TIP_OFFSET_FROM_BOTTOM_MM,
-  touchTipAfterDispenseOffsetMmFromTop: TOUCH_TIP_OFFSET_FROM_BOTTOM_MM,
+  touchTipAfterAspirateOffsetMmFromTop: TOUCH_TIP_OFFSET_FROM_TOP_MM,
+  touchTipAfterDispenseOffsetMmFromTop: TOUCH_TIP_OFFSET_FROM_TOP_MM,
 })
 interface FlowRateAndOffsetParamsMix {
   aspirateFlowRateUlSec: number
@@ -94,7 +94,7 @@ export const getFlowRateAndOffsetParamsMix = (): FlowRateAndOffsetParamsMix => (
   dispenseOffsetFromBottomMm: DISPENSE_OFFSET_FROM_BOTTOM_MM,
   blowoutOffsetFromTopMm: BLOWOUT_OFFSET_FROM_TOP_MM,
   // for mix only
-  touchTipMmFromTop: TOUCH_TIP_OFFSET_FROM_BOTTOM_MM,
+  touchTipMmFromTop: TOUCH_TIP_OFFSET_FROM_TOP_MM,
 })
 type MakeAspDispHelper<P> = (
   bakedParams?: Partial<P>
@@ -253,7 +253,7 @@ const _defaultTouchTipParams = {
   wellLocation: {
     origin: 'top' as const,
     offset: {
-      z: TOUCH_TIP_OFFSET_FROM_BOTTOM_MM,
+      z: TOUCH_TIP_OFFSET_FROM_TOP_MM,
     },
   },
 }

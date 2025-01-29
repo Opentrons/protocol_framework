@@ -509,7 +509,7 @@ describe('_getSavedMultiSelectFieldValues', () => {
           isIndeterminate: false,
         },
         aspirate_touchTip_mmFromTop: {
-          value: 1,
+          value: -1,
           isIndeterminate: false,
         },
         // dispense settings
@@ -570,7 +570,7 @@ describe('_getSavedMultiSelectFieldValues', () => {
           isIndeterminate: false,
         },
         dispense_touchTip_mmFromTop: {
-          value: 1,
+          value: -1,
           isIndeterminate: false,
         },
         blowout_checkbox: {
@@ -760,7 +760,7 @@ describe('_getSavedMultiSelectFieldValues', () => {
         },
         aspirate_touchTip_mmFromTop: {
           isIndeterminate: false,
-          value: 1,
+          value: -1,
         },
         // dispense settings
         dispense_labware: {
@@ -812,7 +812,7 @@ describe('_getSavedMultiSelectFieldValues', () => {
         },
         dispense_touchTip_mmFromTop: {
           isIndeterminate: false,
-          value: 1,
+          value: -1,
         },
         blowout_checkbox: {
           isIndeterminate: true,
@@ -974,7 +974,7 @@ describe('_getSavedMultiSelectFieldValues', () => {
           dispense_delay_checkbox: true,
           dispense_delay_seconds: '3',
           mix_touchTip_checkbox: true,
-          mix_touchTip_mmFromTop: '14',
+          mix_touchTip_mmFromTop: '-14',
           nozzles: null,
         },
       }

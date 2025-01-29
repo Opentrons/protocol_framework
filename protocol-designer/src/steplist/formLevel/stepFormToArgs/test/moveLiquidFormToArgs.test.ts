@@ -189,14 +189,14 @@ describe('move liquid step form -> command creator args', () => {
     },
     {
       checkboxField: 'dispense_touchTip_checkbox',
-      formFields: { dispense_touchTip_mmFromTop: -42 },
+      formFields: { dispense_touchTip_mmFromTop: -22 },
       expectedArgsUnchecked: {
         touchTipAfterDispense: false,
-        touchTipAfterDispenseOffsetMmFromTop: -42,
+        touchTipAfterDispenseOffsetMmFromTop: -22,
       },
       expectedArgsChecked: {
         touchTipAfterDispense: true,
-        touchTipAfterDispenseOffsetMmFromTop: -42,
+        touchTipAfterDispenseOffsetMmFromTop: -22,
       },
     },
     // MIXES

@@ -1080,7 +1080,7 @@ describe('consolidate single-channel', () => {
         preWetTip: true,
         aspirateDelay: { seconds: 11, mmFromBottom: 15 },
         touchTipAfterAspirate: true,
-        touchTipAfterAspirateOffsetMmFromTop: 14.5,
+        touchTipAfterAspirateOffsetMmFromTop: -14.5,
         aspirateAirGapVolume: 31,
         // dispense column
         dispenseDelay: { seconds: 12, mmFromBottom: 14 },
@@ -1209,7 +1209,7 @@ describe('consolidate single-channel', () => {
             wellLocation: {
               origin: 'top',
               offset: {
-                z: 14.5,
+                z: -14.5,
               },
             },
           },
@@ -1302,7 +1302,7 @@ describe('consolidate single-channel', () => {
             wellLocation: {
               origin: 'top',
               offset: {
-                z: 14.5,
+                z: -14.5,
               },
             },
           },
@@ -1451,7 +1451,7 @@ describe('consolidate single-channel', () => {
             wellLocation: {
               origin: 'top',
               offset: {
-                z: 3.4,
+                z: -3.4,
               },
             },
           },
@@ -1568,7 +1568,7 @@ describe('consolidate single-channel', () => {
             wellLocation: {
               origin: 'top',
               offset: {
-                z: 14.5,
+                z: -14.5,
               },
             },
           },
@@ -1717,7 +1717,7 @@ describe('consolidate single-channel', () => {
             wellLocation: {
               origin: 'top',
               offset: {
-                z: 3.4,
+                z: -3.4,
               },
             },
           },
@@ -1773,7 +1773,7 @@ describe('consolidate single-channel', () => {
         preWetTip: true,
         aspirateDelay: { seconds: 11, mmFromBottom: 15 },
         touchTipAfterAspirate: true,
-        touchTipAfterAspirateOffsetMmFromTop: 14.5,
+        touchTipAfterAspirateOffsetMmFromTop: -14.5,
         aspirateAirGapVolume: 31,
         // dispense column
         dispenseDelay: { seconds: 12, mmFromBottom: 14 },
@@ -1908,7 +1908,7 @@ describe('consolidate single-channel', () => {
             wellLocation: {
               origin: 'top',
               offset: {
-                z: 14.5,
+                z: -14.5,
               },
             },
           },
@@ -2001,7 +2001,7 @@ describe('consolidate single-channel', () => {
             wellLocation: {
               origin: 'top',
               offset: {
-                z: 14.5,
+                z: -14.5,
               },
             },
           },
@@ -2165,7 +2165,7 @@ describe('consolidate single-channel', () => {
             wellLocation: {
               origin: 'top',
               offset: {
-                z: 3.4,
+                z: -3.4,
               },
             },
           },
@@ -2282,7 +2282,7 @@ describe('consolidate single-channel', () => {
             wellLocation: {
               origin: 'top',
               offset: {
-                z: 14.5,
+                z: -14.5,
               },
             },
           },
@@ -2446,7 +2446,7 @@ describe('consolidate single-channel', () => {
             wellLocation: {
               origin: 'top',
               offset: {
-                z: 3.4,
+                z: -3.4,
               },
             },
           },
@@ -2499,7 +2499,7 @@ describe('consolidate single-channel', () => {
         preWetTip: true,
         aspirateDelay: { seconds: 11, mmFromBottom: 15 },
         touchTipAfterAspirate: true,
-        touchTipAfterAspirateOffsetMmFromTop: 14.5,
+        touchTipAfterAspirateOffsetMmFromTop: -14.5,
         aspirateAirGapVolume: 31,
         // dispense column
         dispenseDelay: { seconds: 12, mmFromBottom: 14 },
@@ -2634,7 +2634,7 @@ describe('consolidate single-channel', () => {
             wellLocation: {
               origin: 'top',
               offset: {
-                z: 14.5,
+                z: -14.5,
               },
             },
           },
@@ -2727,7 +2727,7 @@ describe('consolidate single-channel', () => {
             wellLocation: {
               origin: 'top',
               offset: {
-                z: 14.5,
+                z: -14.5,
               },
             },
           },
@@ -2891,7 +2891,7 @@ describe('consolidate single-channel', () => {
             wellLocation: {
               origin: 'top',
               offset: {
-                z: 3.4,
+                z: -3.4,
               },
             },
           },
@@ -3051,7 +3051,7 @@ describe('consolidate single-channel', () => {
             wellLocation: {
               origin: 'top',
               offset: {
-                z: 14.5,
+                z: -14.5,
               },
             },
           },
@@ -3215,7 +3215,7 @@ describe('consolidate single-channel', () => {
             wellLocation: {
               origin: 'top',
               offset: {
-                z: 3.4,
+                z: -3.4,
               },
             },
           },

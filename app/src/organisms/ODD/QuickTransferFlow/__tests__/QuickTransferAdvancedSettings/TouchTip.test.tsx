@@ -145,7 +145,7 @@ describe('TouchTip', () => {
     expect(vi.mocked(InputField)).toHaveBeenCalledWith(
       {
         title: 'Touch tip position from top of well (mm)',
-        error: 'Value must be between -25-0',
+        error: 'Value must be between -25 to 0',
         readOnly: true,
         type: 'number',
         value: -98,
@@ -171,7 +171,7 @@ describe('TouchTip', () => {
     expect(vi.mocked(InputField)).toHaveBeenCalledWith(
       {
         title: 'Touch tip position from top of well (mm)',
-        error: 'Value must be between -100-0',
+        error: 'Value must be between -100 to 0',
         readOnly: true,
         type: 'number',
         value: 1,

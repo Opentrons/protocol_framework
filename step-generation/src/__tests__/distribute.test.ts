@@ -859,7 +859,7 @@ describe('advanced settings: volume, mix, pre-wet tip, tip touch, tip position',
         },
         aspirateDelay: { seconds: 11, mmFromBottom: 15 },
         touchTipAfterAspirate: true,
-        touchTipAfterAspirateOffsetMmFromTop: 14.5,
+        touchTipAfterAspirateOffsetMmFromTop: -14.5,
         aspirateAirGapVolume: 31,
         // dispense column
         dispenseDelay: { seconds: 12, mmFromBottom: 14 },
@@ -884,7 +884,7 @@ describe('advanced settings: volume, mix, pre-wet tip, tip touch, tip position',
         },
         aspirateDelay: { seconds: 11, mmFromBottom: 15 },
         touchTipAfterAspirate: true,
-        touchTipAfterAspirateOffsetMmFromTop: 14.5,
+        touchTipAfterAspirateOffsetMmFromTop: -14.5,
         aspirateAirGapVolume: 31,
         // dispense column
         dispenseDelay: { seconds: 12, mmFromBottom: 14 },
@@ -919,7 +919,7 @@ describe('advanced settings: volume, mix, pre-wet tip, tip touch, tip position',
           wellLocation: {
             origin: 'top',
             offset: {
-              z: 14.5,
+              z: -14.5,
             },
           },
         }),
@@ -967,7 +967,7 @@ describe('advanced settings: volume, mix, pre-wet tip, tip touch, tip position',
           wellLocation: {
             origin: 'top',
             offset: {
-              z: 14.5,
+              z: -14.5,
             },
           },
         }),
@@ -1000,7 +1000,7 @@ describe('advanced settings: volume, mix, pre-wet tip, tip touch, tip position',
           wellLocation: {
             origin: 'top',
             offset: {
-              z: 14.5,
+              z: -14.5,
             },
           },
         }),
@@ -1050,7 +1050,7 @@ describe('advanced settings: volume, mix, pre-wet tip, tip touch, tip position',
           wellLocation: {
             origin: 'top',
             offset: {
-              z: 14.5,
+              z: -14.5,
             },
           },
         }),
@@ -1089,7 +1089,7 @@ describe('advanced settings: volume, mix, pre-wet tip, tip touch, tip position',
           wellLocation: {
             origin: 'top',
             offset: {
-              z: 14.5,
+              z: -14.5,
             },
           },
         }),
@@ -1140,7 +1140,7 @@ describe('advanced settings: volume, mix, pre-wet tip, tip touch, tip position',
           wellLocation: {
             origin: 'top',
             offset: {
-              z: 14.5,
+              z: -14.5,
             },
           },
         }),
@@ -1172,7 +1172,7 @@ describe('advanced settings: volume, mix, pre-wet tip, tip touch, tip position',
           wellLocation: {
             origin: 'top',
             offset: {
-              z: 14.5,
+              z: -14.5,
             },
           },
         }),
@@ -1220,7 +1220,7 @@ describe('advanced settings: volume, mix, pre-wet tip, tip touch, tip position',
           wellLocation: {
             origin: 'top',
             offset: {
-              z: 14.5,
+              z: -14.5,
             },
           },
         }),
@@ -1253,7 +1253,7 @@ describe('advanced settings: volume, mix, pre-wet tip, tip touch, tip position',
           wellLocation: {
             origin: 'top',
             offset: {
-              z: 14.5,
+              z: -14.5,
             },
           },
         }),
@@ -1305,7 +1305,7 @@ describe('advanced settings: volume, mix, pre-wet tip, tip touch, tip position',
           wellLocation: {
             origin: 'top',
             offset: {
-              z: 14.5,
+              z: -14.5,
             },
           },
         }),
@@ -1346,7 +1346,7 @@ describe('advanced settings: volume, mix, pre-wet tip, tip touch, tip position',
           wellLocation: {
             origin: 'top',
             offset: {
-              z: 14.5,
+              z: -14.5,
             },
           },
         }),
@@ -1397,7 +1397,7 @@ describe('advanced settings: volume, mix, pre-wet tip, tip touch, tip position',
           wellLocation: {
             origin: 'top',
             offset: {
-              z: 14.5,
+              z: -14.5,
             },
           },
         }),
@@ -1430,7 +1430,7 @@ describe('advanced settings: volume, mix, pre-wet tip, tip touch, tip position',
           wellLocation: {
             origin: 'top',
             offset: {
-              z: 14.5,
+              z: -14.5,
             },
           },
         }),
@@ -1479,7 +1479,7 @@ describe('advanced settings: volume, mix, pre-wet tip, tip touch, tip position',
           wellLocation: {
             origin: 'top',
             offset: {
-              z: 14.5,
+              z: -14.5,
             },
           },
         }),
@@ -1512,7 +1512,7 @@ describe('advanced settings: volume, mix, pre-wet tip, tip touch, tip position',
           wellLocation: {
             origin: 'top',
             offset: {
-              z: 14.5,
+              z: -14.5,
             },
           },
         }),
@@ -1564,7 +1564,7 @@ describe('advanced settings: volume, mix, pre-wet tip, tip touch, tip position',
           wellLocation: {
             origin: 'top',
             offset: {
-              z: 14.5,
+              z: -14.5,
             },
           },
         }),
@@ -1605,7 +1605,7 @@ describe('advanced settings: volume, mix, pre-wet tip, tip touch, tip position',
           wellLocation: {
             origin: 'top',
             offset: {
-              z: 14.5,
+              z: -14.5,
             },
           },
         }),
@@ -1656,7 +1656,7 @@ describe('advanced settings: volume, mix, pre-wet tip, tip touch, tip position',
           wellLocation: {
             origin: 'top',
             offset: {
-              z: 14.5,
+              z: -14.5,
             },
           },
         }),
@@ -1689,7 +1689,7 @@ describe('advanced settings: volume, mix, pre-wet tip, tip touch, tip position',
           wellLocation: {
             origin: 'top',
             offset: {
-              z: 14.5,
+              z: -14.5,
             },
           },
         }),

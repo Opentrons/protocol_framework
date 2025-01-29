@@ -38,7 +38,7 @@ export const mixFormToArgs = (
   )
   const touchTip = Boolean(hydratedFormData.mix_touchTip_checkbox)
   const touchTipMmFromTop =
-    hydratedFormData.mix_touchTip_mmFromTop ||
+    hydratedFormData.mix_touchTip_mmFromTop ??
     DEFAULT_MM_TOUCH_TIP_OFFSET_FROM_TOP
   const volume = hydratedFormData.volume || 0
   const times = hydratedFormData.times || 0
