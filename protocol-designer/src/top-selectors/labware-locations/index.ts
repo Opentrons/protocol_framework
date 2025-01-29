@@ -225,7 +225,7 @@ export const getUnoccupiedLabwareLocationOptions: Selector<
       .filter(slotId => {
         const isTrashSlot =
           robotType === FLEX_ROBOT_TYPE
-            ? MOVABLE_TRASH_ADDRESSABLE_AREAS.includes(slotId)
+            ? MOVABLE_TRASH_ADDRESSABLE_AREAS.some(aE => aE.includes(slotId))
             : ['fixedTrash', '12'].includes(slotId)
         return (
           !slotIdsOccupiedByModules.includes(slotId) &&
