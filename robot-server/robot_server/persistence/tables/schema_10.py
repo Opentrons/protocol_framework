@@ -402,6 +402,7 @@ labware_offset_location_sequence_components_table = sqlalchemy.Table(
             "labware_offset_with_sequence.row_id",
         ),
         nullable=False,
+        index=True,
     ),
     # Its position within the sequence
     sqlalchemy.Column("sequence_ordinal", sqlalchemy.Integer, nullable=False),
