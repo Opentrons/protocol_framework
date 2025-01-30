@@ -70,8 +70,7 @@ jobs:
             docker pull ghcr.io/opentrons/opentrons-ci:${{ github.ref_name }}
         - name: Run Tests in Container
           run: |
-            docker run --rm ghcr.io/opentrons/opentrons-ci:${{ github.ref_name }} \
-            make -C protocol-designer test-cov
+            docker run --rm ghcr.io/opentrons/opentrons-ci:${{ github.ref_name }} make -C protocol-designer test-cov
 
   # e2e-test:
   #   name: 'pd e2e tests'

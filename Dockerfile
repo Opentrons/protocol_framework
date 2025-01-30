@@ -31,6 +31,9 @@ RUN apt-get update || (sleep 1 && apt-get update) \
 ENV NVS_HOME="/root/.nvs"
 ENV PYENV_ROOT="/root/.pyenv"
 ENV PATH="$NVS_HOME:$PYENV_ROOT/bin:$PATH"
+ENV LANG=en_US.UTF-8
+ENV LANGUAGE=en_US:en
+ENV LC_ALL=en_US.UTF-8
 
 RUN git clone https://github.com/jasongin/nvs.git "$NVS_HOME" \
     && echo 'export NVS_HOME="/root/.nvs"' >> /root/.bashrc \
@@ -43,15 +46,20 @@ RUN git clone https://github.com/pyenv/pyenv.git "$PYENV_ROOT" \
     && echo 'eval "$(pyenv init --path)"' >> /root/.bashrc \
     && echo 'eval "$(pyenv init -)"' >> /root/.bashrc
 
+# Install Node.js 22
 RUN bash -c " \
     source $NVS_HOME/nvs.sh && \
     nvs add 22.11.0 && \
-    nvs use 22.11.0 && \
-    nvs link 22.11.0 && \
+    nvs use node/22.11.0/x64 && \
+    nvs link node/22.11.0/x64 && \
     node --version && \
     npm install --global yarn@1 \
-    "
+"
 
+# Set Yarn Cache Path
+ENV YARN_CACHE_FOLDER=/root/.cache/yarn
+
+# Install Python 3.10
 RUN bash -c " \
     export PATH=\"$PYENV_ROOT/bin:\$PATH\" && \
     eval \"\$(pyenv init --path)\" && \
@@ -60,7 +68,11 @@ RUN bash -c " \
     pyenv global 3.10.13 && \
     pyenv rehash && \
     python --version \
-    "
+"
+
+# Set Pipenv Cache Path
+ENV PIPENV_VENV_IN_PROJECT=1
+ENV PIP_CACHE_DIR=/root/.cache/pip
 
 # ========== CI IMAGE ==========
 FROM base AS ci
@@ -68,20 +80,18 @@ FROM base AS ci
 WORKDIR /opentrons
 COPY . .
 
-ENV LANG=en_US.UTF-8
-ENV LANGUAGE=en_US:en
-ENV LC_ALL=en_US.UTF-8
-
 RUN bash -c " \
     source $NVS_HOME/nvs.sh && \
     export PATH=\"$PYENV_ROOT/bin:\$PATH\" && \
     eval \"\$(pyenv init --path)\" && \
     eval \"\$(pyenv init -)\" && \
-    nvs use 22.11.0 && \
+    nvs use node/22.11.0/x64 && \
     pyenv global 3.10.13 && \
     pyenv rehash && \
-    make setup -j \
-    "
+    yarn config set cache-folder $YARN_CACHE_FOLDER && \
+    make setup-py -j &&\
+    make setup-js \
+"
 
 # Create initialization script
 RUN echo '#!/bin/bash\n\
@@ -89,7 +99,7 @@ RUN echo '#!/bin/bash\n\
     export PATH="$PYENV_ROOT/bin:$PATH"\n\
     eval "$(pyenv init --path)"\n\
     eval "$(pyenv init -)"\n\
-    nvs use 22.11.0\n\
+    nvs use node/22.11.0/x64\n\
     pyenv global 3.10.13\n\
     pyenv rehash\n\
     exec "$@"' > /entrypoint.sh && chmod +x /entrypoint.sh
