@@ -1786,6 +1786,42 @@ def test_aspirate_liquid_class(
     assert result == [LiquidAndAirGapPair(air_gap=222, liquid=111)]
 
 
+def test_aspirate_liquid_class_raises_for_more_than_max_volume(
+    decoy: Decoy,
+    mock_engine_client: EngineClient,
+    subject: InstrumentCore,
+    minimal_liquid_class_def2: LiquidClassSchemaV1,
+    mock_transfer_components_executor: TransferComponentsExecutor,
+) -> None:
+    """It should call aspirate sub-steps execution based on liquid class."""
+    source_well = decoy.mock(cls=WellCore)
+    source_location = Location(Point(1, 2, 3), labware=None)
+    test_liquid_class = LiquidClass.create(minimal_liquid_class_def2)
+    test_transfer_properties = test_liquid_class.get_for(
+        "flex_1channel_50", "opentrons_flex_96_tiprack_50ul"
+    )
+    decoy.when(
+        mock_engine_client.state.pipettes.get_working_volume("abc123")
+    ).then_return(100)
+    decoy.when(
+        tx_commons.check_valid_volume_parameters(
+            disposal_volume=0,
+            air_gap=test_transfer_properties.aspirate.retract.air_gap_by_volume.get_for_volume(
+                123
+            ),
+            max_volume=100,
+        )
+    ).then_raise(ValueError("Oh oh!"))
+    with pytest.raises(ValueError, match="Oh oh!"):
+        subject.aspirate_liquid_class(
+            volume=123,
+            source=(source_location, source_well),
+            transfer_properties=test_transfer_properties,
+            transfer_type=TransferType.ONE_TO_ONE,
+            tip_contents=[],
+        )
+
+
 def test_dispense_liquid_class(
     decoy: Decoy,
     mock_engine_client: EngineClient,

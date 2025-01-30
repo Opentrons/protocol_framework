@@ -27,8 +27,8 @@ def test_water_transfer_with_volume_more_than_tip_max(
     tiprack = simulated_protocol_context.load_labware(
         "opentrons_flex_96_tiprack_50ul", "D1"
     )
-    pipette_50 = simulated_protocol_context.load_instrument(
-        "flex_1channel_50", mount="left", tip_racks=[tiprack]
+    pipette_1k = simulated_protocol_context.load_instrument(
+        "flex_1channel_1000", mount="left", tip_racks=[tiprack]
     )
     nest_plate = simulated_protocol_context.load_labware(
         "nest_96_wellplate_200ul_flat", "C3"
@@ -47,7 +47,7 @@ def test_water_transfer_with_volume_more_than_tip_max(
         mock_manager = mock.Mock()
         mock_manager.attach_mock(patched_pick_up_tip, "pick_up_tip")
 
-        pipette_50.transfer_liquid(
+        pipette_1k.transfer_liquid(
             liquid_class=water,
             volume=60,
             source=nest_plate.rows()[0],
@@ -58,7 +58,7 @@ def test_water_transfer_with_volume_more_than_tip_max(
         assert patched_pick_up_tip.call_count == 24
         patched_pick_up_tip.reset_mock()
 
-        pipette_50.transfer_liquid(
+        pipette_1k.transfer_liquid(
             liquid_class=water,
             volume=100,
             source=nest_plate.rows()[0],
@@ -69,8 +69,8 @@ def test_water_transfer_with_volume_more_than_tip_max(
         assert patched_pick_up_tip.call_count == 12
         patched_pick_up_tip.reset_mock()
 
-        pipette_50.pick_up_tip()
-        pipette_50.transfer_liquid(
+        pipette_1k.pick_up_tip()
+        pipette_1k.transfer_liquid(
             liquid_class=water,
             volume=50,
             source=nest_plate.rows()[0],
@@ -78,7 +78,7 @@ def test_water_transfer_with_volume_more_than_tip_max(
             new_tip="never",
             trash_location=trash,
         )
-        pipette_50.drop_tip()
+        pipette_1k.drop_tip()
         assert patched_pick_up_tip.call_count == 1
 
 
