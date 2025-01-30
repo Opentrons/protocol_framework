@@ -209,6 +209,7 @@ async def _execute_common(  # noqa: C901
                 ],
                 errorInfo=(
                     {
+                        # This is here bc its not optional in the type but we are not using the retry location for this case
                         "retryLocation": (
                             current_position.x,
                             current_position.y,
