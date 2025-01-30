@@ -9,7 +9,10 @@ import {
 } from '../transforms'
 
 import type { Selector } from 'reselect'
-import type { LabwareOffsetLocation, VectorOffset } from '@opentrons/api-client'
+import type {
+  LegacyLabwareOffsetLocation,
+  VectorOffset,
+} from '@opentrons/api-client'
 import type { State } from '/app/redux/types'
 import type { Coordinates, LabwareDefinition2 } from '@opentrons/shared-data'
 import type {
@@ -53,7 +56,7 @@ export const selectSelectedLwInitialPosition = (
 
 export interface SelectOffsetsToApplyResult {
   definitionUri: string
-  location: LabwareOffsetLocation
+  location: LegacyLabwareOffsetLocation
   vector: Coordinates
 }
 

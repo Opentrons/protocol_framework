@@ -15,16 +15,14 @@ import type {
   PipetteMount as Mount,
   PipetteV2Specs,
   ShakeSpeedParams,
+  LabwareMovementStrategy,
 } from '@opentrons/shared-data'
 import type { AtomicProfileStep } from '@opentrons/shared-data/protocol/types/schemaV4'
-import type { Command } from '@opentrons/shared-data/protocol/types/schemaV5Addendum'
 import type {
   TEMPERATURE_DEACTIVATED,
   TEMPERATURE_AT_TARGET,
   TEMPERATURE_APPROACHING_TARGET,
 } from './constants'
-
-export type { Command }
 
 // Copied from PD
 export type DeckSlot = string
@@ -197,7 +195,7 @@ export type SharedTransferLikeArgs = CommonArgs & {
   /** Touch tip after every aspirate */
   touchTipAfterAspirate: boolean
   /** Optional offset for touch tip after aspirate (if null, use PD default) */
-  touchTipAfterAspirateOffsetMmFromBottom: number
+  touchTipAfterAspirateOffsetMmFromTop: number
   /** changeTip is interpreted differently by different Step types */
   changeTip: ChangeTipOptions
   /** Delay after every aspirate */
@@ -221,7 +219,7 @@ export type SharedTransferLikeArgs = CommonArgs & {
   /** Touch tip in destination well after dispense */
   touchTipAfterDispense: boolean
   /** Optional offset for touch tip after dispense (if null, use PD default) */
-  touchTipAfterDispenseOffsetMmFromBottom: number
+  touchTipAfterDispenseOffsetMmFromTop: number
   /** Flow rate in uL/sec for all dispenses */
   dispenseFlowRateUlSec: number
   /** offset from bottom of well in mm */
@@ -297,7 +295,7 @@ export type MixArgs = CommonArgs & {
   times: number
   /** Touch tip after mixing */
   touchTip: boolean
-  touchTipMmFromBottom: number
+  touchTipMmFromTop: number
   /** change tip: see comments in step-generation/mix.js */
   changeTip: ChangeTipOptions
   /** drop tip location entity id */
@@ -307,15 +305,12 @@ export type MixArgs = CommonArgs & {
   blowoutFlowRateUlSec: number
   blowoutOffsetFromTopMm: number
 
-  /** offset from bottom of well in mm */
-  aspirateOffsetFromBottomMm: number
-  dispenseOffsetFromBottomMm: number
+  /**  z offset from bottom of well in mm */
+  offsetFromBottomMm: number
   /** x offset */
-  aspirateXOffset: number
-  dispenseXOffset: number
+  xOffset: number
   /** y offset */
-  aspirateYOffset: number
-  dispenseYOffset: number
+  yOffset: number
   /** flow rates in uL/sec */
   aspirateFlowRateUlSec: number
   dispenseFlowRateUlSec: number
@@ -327,7 +322,7 @@ export type MixArgs = CommonArgs & {
 export type PauseArgs = CommonArgs & {
   commandCreatorFnName: 'delay'
   message?: string
-  wait: number | true
+  seconds?: number
   pauseTemperature?: number | null
   meta:
     | {
@@ -464,9 +459,9 @@ export type AbsorbanceReaderArgs =
 
 export interface MoveLabwareArgs extends CommonArgs {
   commandCreatorFnName: 'moveLabware'
-  labware: string
-  useGripper: boolean
+  labwareId: string
   newLocation: LabwareLocation
+  strategy: LabwareMovementStrategy
 }
 
 export interface CommentArgs extends CommonArgs {
@@ -567,6 +562,7 @@ export type RobotState = TimelineFrame // legacy name alias
 
 export type ErrorType =
   | 'ABSORBANCE_READER_LID_CLOSED'
+  | 'ABSORBANCE_READER_NO_GRIPPER'
   | 'ABSORBANCE_READER_NO_INITIALIZATION'
   | 'CANNOT_MOVE_WITH_GRIPPER'
   | 'DROP_TIP_LOCATION_DOES_NOT_EXIST'

@@ -25,6 +25,7 @@ import { getMockMoveLiquidStep, getMockMixStep } from '../__fixtures__'
 
 import * as utils from '../../modules/utils'
 
+import type { MoveLabwareArgs } from '@opentrons/step-generation'
 import type { FormData } from '../../../form-types'
 import type { StepArgsAndErrorsById } from '../../../steplist/types'
 import type { AllTemporalPropertiesForTimelineFrame } from '../../../step-forms'
@@ -46,7 +47,6 @@ function createArgsForStepId(
 const hoveredStepId = 'hoveredStepId'
 const labware = 'well plate'
 const mixCommand = 'mix'
-const moveLabwareCommand = 'moveLabware'
 describe('getHoveredStepLabware', () => {
   let initialDeckState: AllTemporalPropertiesForTimelineFrame
   beforeEach(() => {
@@ -135,9 +135,13 @@ describe('getHoveredStepLabware', () => {
   })
 
   it('correct labware is returned when command is moveLabware', () => {
-    const stepArgs = {
-      commandCreatorFnName: moveLabwareCommand,
-      labware,
+    const stepArgs: MoveLabwareArgs = {
+      labwareId: labware,
+      strategy: 'usingGripper',
+      newLocation: { slotName: 'A1' },
+      commandCreatorFnName: 'moveLabware',
+      name: 'some name',
+      description: 'some description',
     }
     const argsByStepId = createArgsForStepId(hoveredStepId, stepArgs)
     const result = getHoveredStepLabware.resultFunc(
@@ -146,7 +150,7 @@ describe('getHoveredStepLabware', () => {
       initialDeckState
     )
 
-    expect(result).toEqual([labware])
+    expect(result).toEqual([stepArgs.labwareId])
   })
 
   describe('modules', () => {
@@ -504,8 +508,8 @@ describe('_getSavedMultiSelectFieldValues', () => {
           value: true,
           isIndeterminate: false,
         },
-        aspirate_touchTip_mmFromBottom: {
-          value: 1,
+        aspirate_touchTip_mmFromTop: {
+          value: -1,
           isIndeterminate: false,
         },
         // dispense settings
@@ -565,8 +569,8 @@ describe('_getSavedMultiSelectFieldValues', () => {
           value: true,
           isIndeterminate: false,
         },
-        dispense_touchTip_mmFromBottom: {
-          value: 1,
+        dispense_touchTip_mmFromTop: {
+          value: -1,
           isIndeterminate: false,
         },
         blowout_checkbox: {
@@ -650,7 +654,7 @@ describe('_getSavedMultiSelectFieldValues', () => {
           aspirate_airGap_checkbox: false,
           // same thing here with air gap volume
           aspirate_touchTip_checkbox: false,
-          // same thing with aspirate_touchTip_mmFromBottom
+          // same thing with aspirate_touchTip_mmFromTop
           dispense_labware: 'other_disp_labware',
           dispense_flowRate: 2,
           dispense_mmFromBottom: '2',
@@ -664,7 +668,7 @@ describe('_getSavedMultiSelectFieldValues', () => {
           dispense_airGap_checkbox: false,
           // same thing here with air gap volume
           dispense_touchTip_checkbox: false,
-          // same thing with dispense_touchTip_mmFromBottom
+          // same thing with dispense_touchTip_mmFromTop
           blowout_checkbox: false,
           // same thing here with blowout location
           nozzles: null,
@@ -754,9 +758,9 @@ describe('_getSavedMultiSelectFieldValues', () => {
         aspirate_touchTip_checkbox: {
           isIndeterminate: true,
         },
-        aspirate_touchTip_mmFromBottom: {
+        aspirate_touchTip_mmFromTop: {
           isIndeterminate: false,
-          value: 1,
+          value: -1,
         },
         // dispense settings
         dispense_labware: {
@@ -806,9 +810,9 @@ describe('_getSavedMultiSelectFieldValues', () => {
         dispense_touchTip_checkbox: {
           isIndeterminate: true,
         },
-        dispense_touchTip_mmFromBottom: {
+        dispense_touchTip_mmFromTop: {
           isIndeterminate: false,
-          value: 1,
+          value: -1,
         },
         blowout_checkbox: {
           isIndeterminate: true,
@@ -913,7 +917,7 @@ describe('_getSavedMultiSelectFieldValues', () => {
         dispense_delay_checkbox: { value: false, isIndeterminate: false },
         dispense_delay_seconds: { value: '1', isIndeterminate: false },
         mix_touchTip_checkbox: { value: false, isIndeterminate: false },
-        mix_touchTip_mmFromBottom: { value: null, isIndeterminate: false },
+        mix_touchTip_mmFromTop: { value: null, isIndeterminate: false },
         nozzles: { value: undefined, isIndeterminate: false },
         mix_x_position: {
           isIndeterminate: false,
@@ -970,7 +974,7 @@ describe('_getSavedMultiSelectFieldValues', () => {
           dispense_delay_checkbox: true,
           dispense_delay_seconds: '3',
           mix_touchTip_checkbox: true,
-          mix_touchTip_mmFromBottom: '14',
+          mix_touchTip_mmFromTop: '-14',
           nozzles: null,
         },
       }
@@ -1007,7 +1011,7 @@ describe('_getSavedMultiSelectFieldValues', () => {
         dispense_delay_checkbox: { isIndeterminate: true },
         dispense_delay_seconds: { isIndeterminate: true },
         mix_touchTip_checkbox: { isIndeterminate: true },
-        mix_touchTip_mmFromBottom: { isIndeterminate: true },
+        mix_touchTip_mmFromTop: { isIndeterminate: true },
         nozzles: { isIndeterminate: true },
         mix_x_position: {
           isIndeterminate: false,
@@ -1150,7 +1154,7 @@ describe('getMultiSelectDisabledFields', () => {
           aspirate_delay_seconds: aspirateLabwareDifferentText,
           aspirate_delay_mmFromBottom: aspirateLabwareDifferentText,
           aspirate_touchTip_checkbox: aspirateLabwareDifferentText,
-          aspirate_touchTip_mmFromBottom: aspirateLabwareDifferentText,
+          aspirate_touchTip_mmFromTop: aspirateLabwareDifferentText,
         })
       })
     })
@@ -1180,7 +1184,7 @@ describe('getMultiSelectDisabledFields', () => {
           dispense_delay_seconds: dispenseLabwareDifferentText,
           dispense_delay_mmFromBottom: dispenseLabwareDifferentText,
           dispense_touchTip_checkbox: dispenseLabwareDifferentText,
-          dispense_touchTip_mmFromBottom: dispenseLabwareDifferentText,
+          dispense_touchTip_mmFromTop: dispenseLabwareDifferentText,
         })
       })
     })
@@ -1368,7 +1372,7 @@ describe('getMultiSelectDisabledFields', () => {
           dispense_delay_checkbox: labwareDifferentText,
           dispense_delay_seconds: labwareDifferentText,
           mix_touchTip_checkbox: labwareDifferentText,
-          mix_touchTip_mmFromBottom: labwareDifferentText,
+          mix_touchTip_mmFromTop: labwareDifferentText,
         })
       })
     })

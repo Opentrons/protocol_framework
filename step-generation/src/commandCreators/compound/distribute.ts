@@ -16,22 +16,24 @@ import {
   reduceCommandCreators,
   blowoutUtil,
   wasteChuteCommandsUtil,
-  getDispenseAirGapLocation,
   getIsSafePipetteMovement,
   getWasteChuteAddressableAreaNamePip,
   getHasWasteChute,
+  getDispenseAirGapLocation,
 } from '../../utils'
 import {
+  airGapInPlace,
   aspirate,
   configureForVolume,
   delay,
   dispense,
   dropTip,
   moveToWell,
-  replaceTip,
   touchTip,
 } from '../atomic'
 import { mixUtil } from './mix'
+import { replaceTip } from './replaceTip'
+
 import type {
   DistributeArgs,
   CommandCreator,
@@ -214,51 +216,52 @@ export const distribute: CommandCreator<DistributeArgs> = (
         getWellDepth(destLabwareDef, firstDestWell) + AIR_GAP_OFFSET_FROM_TOP
       const airGapAfterAspirateCommands = aspirateAirGapVolume
         ? [
-            curryCommandCreator(aspirate, {
-              pipette: args.pipette,
+            curryCommandCreator(moveToWell, {
+              pipetteId: args.pipette,
+              labwareId: args.sourceLabware,
+              wellName: args.sourceWell,
+              wellLocation: {
+                origin: 'bottom',
+                offset: {
+                  z: airGapOffsetSourceWell,
+                  x: 0,
+                  y: 0,
+                },
+              },
+            }),
+            curryCommandCreator(airGapInPlace, {
+              pipetteId: args.pipette,
               volume: aspirateAirGapVolume,
-              labware: args.sourceLabware,
-              well: args.sourceWell,
               flowRate: aspirateFlowRateUlSec,
-              offsetFromBottomMm: airGapOffsetSourceWell,
-              isAirGap: true,
-              xOffset: 0,
-              yOffset: 0,
-              tipRack: args.tipRack,
-              nozzles,
             }),
             ...(aspirateDelay != null
               ? [
                   curryCommandCreator(delay, {
-                    commandCreatorFnName: 'delay',
-                    description: null,
-                    name: null,
-                    meta: null,
-                    wait: aspirateDelay.seconds,
+                    seconds: aspirateDelay.seconds,
                   }),
                 ]
               : []),
             curryCommandCreator(dispense, {
-              pipette: args.pipette,
+              pipetteId: args.pipette,
               volume: aspirateAirGapVolume,
-              labware: args.destLabware,
-              well: firstDestWell,
+              labwareId: args.destLabware,
+              wellName: firstDestWell,
               flowRate: dispenseFlowRateUlSec,
-              offsetFromBottomMm: airGapOffsetDestWell,
-              isAirGap: true,
-              xOffset: 0,
-              yOffset: 0,
+              wellLocation: {
+                origin: 'bottom',
+                offset: {
+                  z: airGapOffsetDestWell,
+                  x: 0,
+                  y: 0,
+                },
+              },
               nozzles,
               tipRack: args.tipRack,
             }),
             ...(dispenseDelay != null
               ? [
                   curryCommandCreator(delay, {
-                    commandCreatorFnName: 'delay',
-                    description: null,
-                    name: null,
-                    meta: null,
-                    wait: dispenseDelay.seconds,
+                    seconds: dispenseDelay.seconds,
                   }),
                 ]
               : []),
@@ -271,45 +274,53 @@ export const distribute: CommandCreator<DistributeArgs> = (
             dispenseDelay != null
               ? [
                   curryCommandCreator(moveToWell, {
-                    pipette: args.pipette,
-                    labware: args.destLabware,
-                    well: destWell,
-                    offset: {
-                      x: 0,
-                      y: 0,
-                      z: dispenseDelay.mmFromBottom,
+                    pipetteId: args.pipette,
+                    labwareId: args.destLabware,
+                    wellName: destWell,
+                    wellLocation: {
+                      origin: 'bottom',
+                      offset: {
+                        x: 0,
+                        y: 0,
+                        z: dispenseDelay.mmFromBottom,
+                      },
                     },
                   }),
                   curryCommandCreator(delay, {
-                    commandCreatorFnName: 'delay',
-                    description: null,
-                    name: null,
-                    meta: null,
-                    wait: dispenseDelay.seconds,
+                    seconds: dispenseDelay.seconds,
                   }),
                 ]
               : []
           const touchTipAfterDispenseCommand = args.touchTipAfterDispense
             ? [
                 curryCommandCreator(touchTip, {
-                  pipette,
-                  labware: args.destLabware,
-                  well: destWell,
-                  offsetFromBottomMm:
-                    args.touchTipAfterDispenseOffsetMmFromBottom,
+                  pipetteId: pipette,
+                  labwareId: args.destLabware,
+                  wellName: destWell,
+                  wellLocation: {
+                    origin: 'top',
+                    offset: {
+                      z: args.touchTipAfterDispenseOffsetMmFromTop,
+                    },
+                  },
                 }),
               ]
             : []
           return [
             curryCommandCreator(dispense, {
-              pipette,
+              pipetteId: pipette,
               volume: args.volume,
-              labware: args.destLabware,
-              well: destWell,
+              labwareId: args.destLabware,
+              wellName: destWell,
               flowRate: dispenseFlowRateUlSec,
-              offsetFromBottomMm: dispenseOffsetFromBottomMm,
-              xOffset: dispenseXOffset,
-              yOffset: dispenseYOffset,
+              wellLocation: {
+                origin: 'bottom',
+                offset: {
+                  z: dispenseOffsetFromBottomMm,
+                  x: dispenseXOffset,
+                  y: dispenseYOffset,
+                },
+              },
               nozzles,
               tipRack: args.tipRack,
             }),
@@ -334,7 +345,6 @@ export const distribute: CommandCreator<DistributeArgs> = (
           }),
         ]
       }
-
       const {
         dispenseAirGapLabware,
         dispenseAirGapWell,
@@ -351,27 +361,28 @@ export const distribute: CommandCreator<DistributeArgs> = (
       const airGapAfterDispenseCommands =
         dispenseAirGapVolume && !willReuseTip
           ? [
-              curryCommandCreator(aspirate, {
-                pipette: args.pipette,
+              curryCommandCreator(moveToWell, {
+                pipetteId: args.pipette,
+                labwareId: dispenseAirGapLabware,
+                wellName: dispenseAirGapWell,
+                wellLocation: {
+                  origin: 'bottom',
+                  offset: {
+                    z: airGapOffsetDestWell,
+                    x: 0,
+                    y: 0,
+                  },
+                },
+              }),
+              curryCommandCreator(airGapInPlace, {
+                pipetteId: args.pipette,
                 volume: dispenseAirGapVolume,
-                labware: dispenseAirGapLabware,
-                well: dispenseAirGapWell,
                 flowRate: aspirateFlowRateUlSec,
-                offsetFromBottomMm: airGapOffsetDestWell,
-                isAirGap: true,
-                tipRack: args.tipRack,
-                xOffset: 0,
-                yOffset: 0,
-                nozzles,
               }),
               ...(aspirateDelay != null
                 ? [
                     curryCommandCreator(delay, {
-                      commandCreatorFnName: 'delay',
-                      description: null,
-                      name: null,
-                      meta: null,
-                      wait: aspirateDelay.seconds,
+                      seconds: aspirateDelay.seconds,
                     }),
                   ]
                 : []),
@@ -422,31 +433,35 @@ export const distribute: CommandCreator<DistributeArgs> = (
         aspirateDelay != null
           ? [
               curryCommandCreator(moveToWell, {
-                pipette: args.pipette,
-                labware: args.sourceLabware,
-                well: args.sourceWell,
-                offset: {
-                  x: 0,
-                  y: 0,
-                  z: aspirateDelay.mmFromBottom,
+                pipetteId: args.pipette,
+                labwareId: args.sourceLabware,
+                wellName: args.sourceWell,
+                wellLocation: {
+                  origin: 'bottom',
+                  offset: {
+                    x: 0,
+                    y: 0,
+                    z: aspirateDelay.mmFromBottom,
+                  },
                 },
               }),
               curryCommandCreator(delay, {
-                commandCreatorFnName: 'delay',
-                description: null,
-                name: null,
-                meta: null,
-                wait: aspirateDelay.seconds,
+                seconds: aspirateDelay.seconds,
               }),
             ]
           : []
       const touchTipAfterAspirateCommand = args.touchTipAfterAspirate
         ? [
             curryCommandCreator(touchTip, {
-              pipette: args.pipette,
-              labware: args.sourceLabware,
-              well: args.sourceWell,
-              offsetFromBottomMm: args.touchTipAfterAspirateOffsetMmFromBottom,
+              pipetteId: args.pipette,
+              labwareId: args.sourceLabware,
+              wellName: args.sourceWell,
+              wellLocation: {
+                origin: 'top',
+                offset: {
+                  z: args.touchTipAfterAspirateOffsetMmFromTop,
+                },
+              },
             }),
           ]
         : []
@@ -458,17 +473,14 @@ export const distribute: CommandCreator<DistributeArgs> = (
               well: args.sourceWell,
               volume: args.mixBeforeAspirate.volume,
               times: args.mixBeforeAspirate.times,
-              aspirateOffsetFromBottomMm,
-              dispenseOffsetFromBottomMm: aspirateOffsetFromBottomMm,
+              offsetFromBottomMm: aspirateOffsetFromBottomMm,
               aspirateFlowRateUlSec,
               dispenseFlowRateUlSec,
               aspirateDelaySeconds: aspirateDelay?.seconds,
               dispenseDelaySeconds: dispenseDelay?.seconds,
               tipRack: args.tipRack,
-              aspirateXOffset,
-              aspirateYOffset,
-              dispenseXOffset,
-              dispenseYOffset,
+              xOffset: aspirateXOffset,
+              yOffset: aspirateYOffset,
               nozzles,
             })
           : []
@@ -489,7 +501,7 @@ export const distribute: CommandCreator<DistributeArgs> = (
         ...configureForVolumeCommand,
         ...mixBeforeAspirateCommands,
         curryCommandCreator(aspirate, {
-          pipette,
+          pipetteId: pipette,
           volume:
             args.volume * destWellChunk.length +
             //  only add disposal volume if its the 1st chunk and changing tip once
@@ -497,13 +509,18 @@ export const distribute: CommandCreator<DistributeArgs> = (
             (args.changeTip === 'once' && blowoutLocation == null
               ? aspirateDisposalVolumeOnce
               : disposalVolume),
-          labware: args.sourceLabware,
-          well: args.sourceWell,
+          labwareId: args.sourceLabware,
+          wellName: args.sourceWell,
           flowRate: aspirateFlowRateUlSec,
-          offsetFromBottomMm: aspirateOffsetFromBottomMm,
+          wellLocation: {
+            origin: 'bottom',
+            offset: {
+              z: aspirateOffsetFromBottomMm,
+              x: aspirateXOffset,
+              y: aspirateYOffset,
+            },
+          },
           tipRack: args.tipRack,
-          xOffset: aspirateXOffset,
-          yOffset: aspirateYOffset,
           nozzles,
         }),
         ...delayAfterAspirateCommands,

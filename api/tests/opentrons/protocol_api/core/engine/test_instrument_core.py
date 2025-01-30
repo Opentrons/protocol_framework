@@ -599,6 +599,7 @@ def test_aspirate_from_well(
         rate=5.6,
         flow_rate=7.8,
         in_place=False,
+        correction_volume=123,
     )
 
     decoy.verify(
@@ -621,6 +622,7 @@ def test_aspirate_from_well(
                 ),
                 volume=12.34,
                 flowRate=7.8,
+                correctionVolume=123,
             )
         ),
         mock_protocol_core.set_last_location(location=location, mount=Mount.LEFT),
@@ -659,6 +661,7 @@ def test_aspirate_from_coordinates(
                 pipetteId="abc123",
                 volume=12.34,
                 flowRate=7.8,
+                correctionVolume=None,
             )
         ),
         mock_protocol_core.set_last_location(location=location, mount=Mount.LEFT),
@@ -725,6 +728,7 @@ def test_aspirate_from_meniscus(
                 ),
                 volume=12.34,
                 flowRate=7.8,
+                correctionVolume=None,
             )
         ),
         mock_protocol_core.set_last_location(location=location, mount=Mount.LEFT),
@@ -754,6 +758,7 @@ def test_aspirate_in_place(
                 pipetteId="abc123",
                 volume=12.34,
                 flowRate=7.8,
+                correctionVolume=None,
             )
         ),
         mock_protocol_core.set_last_location(location=location, mount=Mount.LEFT),
@@ -896,6 +901,7 @@ def test_dispense_to_well(
         rate=5.6,
         flow_rate=6.0,
         in_place=False,
+        correction_volume=321,
         push_out=7,
     )
 
@@ -919,6 +925,7 @@ def test_dispense_to_well(
                 ),
                 volume=12.34,
                 flowRate=6.0,
+                correctionVolume=321,
                 pushOut=7,
             )
         ),
@@ -948,7 +955,11 @@ def test_dispense_in_place(
     decoy.verify(
         mock_engine_client.execute_command(
             cmd.DispenseInPlaceParams(
-                pipetteId="abc123", volume=12.34, flowRate=7.8, pushOut=None
+                pipetteId="abc123",
+                volume=12.34,
+                correctionVolume=None,
+                flowRate=7.8,
+                pushOut=None,
             )
         ),
     )
@@ -985,7 +996,11 @@ def test_dispense_to_coordinates(
         ),
         mock_engine_client.execute_command(
             cmd.DispenseInPlaceParams(
-                pipetteId="abc123", volume=12.34, flowRate=7.8, pushOut=None
+                pipetteId="abc123",
+                volume=12.34,
+                correctionVolume=None,
+                flowRate=7.8,
+                pushOut=None,
             )
         ),
     )
@@ -1023,7 +1038,11 @@ def test_dispense_conditionally_clamps_volume(
         decoy.verify(
             mock_engine_client.execute_command(
                 cmd.DispenseInPlaceParams(
-                    pipetteId="abc123", volume=111.111, flowRate=7.8, pushOut=None
+                    pipetteId="abc123",
+                    volume=111.111,
+                    correctionVolume=None,
+                    flowRate=7.8,
+                    pushOut=None,
                 )
             ),
         )
@@ -1034,6 +1053,7 @@ def test_dispense_conditionally_clamps_volume(
                     pipetteId="abc123",
                     volume=99999999.99999999,
                     flowRate=7.8,
+                    correctionVolume=None,
                     pushOut=None,
                 )
             ),

@@ -20,6 +20,7 @@ export function MoveLabwareField(props: FieldProps): JSX.Element {
       onExit={() => {
         dispatch(hoverSelection({ id: null, text: null }))
       }}
+      tooltipContent={null}
     />
   )
 }

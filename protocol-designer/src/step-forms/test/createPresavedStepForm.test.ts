@@ -12,7 +12,7 @@ import { fixture_tiprack_10_ul } from '@opentrons/shared-data/labware/fixtures/2
 import { getStateAndContextTempTCModules } from '@opentrons/step-generation'
 import {
   DEFAULT_DELAY_SECONDS,
-  DEFAULT_MM_FROM_BOTTOM_DISPENSE,
+  DEFAULT_MM_OFFSET_FROM_BOTTOM,
 } from '../../constants'
 import { createPresavedStepForm } from '../utils/createPresavedStepForm'
 import type { CreatePresavedStepFormArgs } from '../utils/createPresavedStepForm'
@@ -161,7 +161,7 @@ describe('createPresavedStepForm', () => {
       aspirate_mix_volume: null,
       aspirate_mmFromBottom: null,
       aspirate_touchTip_checkbox: false,
-      aspirate_touchTip_mmFromBottom: null,
+      aspirate_touchTip_mmFromTop: null,
       aspirate_wellOrder_first: 't2b',
       aspirate_wellOrder_second: 'l2r',
       aspirate_wells: [],
@@ -178,7 +178,7 @@ describe('createPresavedStepForm', () => {
       dispense_mix_volume: null,
       dispense_mmFromBottom: null,
       dispense_touchTip_checkbox: false,
-      dispense_touchTip_mmFromBottom: null,
+      dispense_touchTip_mmFromTop: null,
       dispense_wellOrder_first: 't2b',
       dispense_wellOrder_second: 'l2r',
       dispense_wells: [],
@@ -216,8 +216,8 @@ describe('createPresavedStepForm', () => {
         aspirate_delay_seconds: `${DEFAULT_DELAY_SECONDS}`,
         dispense_delay_checkbox: false,
         dispense_delay_seconds: `${DEFAULT_DELAY_SECONDS}`,
-        mix_mmFromBottom: DEFAULT_MM_FROM_BOTTOM_DISPENSE,
-        mix_touchTip_mmFromBottom: null,
+        mix_mmFromBottom: DEFAULT_MM_OFFSET_FROM_BOTTOM,
+        mix_touchTip_mmFromTop: null,
         mix_wellOrder_first: 't2b',
         mix_wellOrder_second: 'l2r',
         blowout_checkbox: false,
@@ -397,5 +397,15 @@ describe('createPresavedStepForm', () => {
         })
       })
     })
+  })
+  it('should default movdLabware form useGripper value to `true` if gripper is added', () => {
+    const args = {
+      ...defaultArgs,
+      additionalEquipmentEntities: {
+        gripperId: { name: 'gripper', id: 'gripperId' },
+      },
+      stepType: 'moveLabware',
+    }
+    expect(createPresavedStepForm(args)).toHaveProperty('useGripper', true)
   })
 })

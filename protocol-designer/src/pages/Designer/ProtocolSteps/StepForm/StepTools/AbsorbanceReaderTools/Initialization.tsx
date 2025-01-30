@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
+  ALIGN_CENTER,
   ALIGN_FLEX_END,
   Btn,
   Check,
@@ -10,9 +11,10 @@ import {
   DropdownMenu,
   EmptySelectorButton,
   Flex,
-  FLEX_MAX_CONTENT,
+  Icon,
   InputField,
   JUSTIFY_SPACE_BETWEEN,
+  ListButton,
   ListItem,
   RadioButton,
   SPACING,
@@ -51,7 +53,7 @@ const DEFINED_OPTIONS: DropdownOption[] = [
   { name: '600 nm (orange)', value: '600' },
   { name: '650 nm (red)', value: '650' },
 ]
-const WAVELENGTH_OPTIONS = [CUSTOM_OPTION, ...DEFINED_OPTIONS]
+const WAVELENGTH_OPTIONS = [...DEFINED_OPTIONS, CUSTOM_OPTION]
 
 interface InitializationProps {
   formData: FormData
@@ -70,7 +72,7 @@ const getBadWavelengthError = (
   }
   if (!wavelength) {
     return t(
-      'form:step_edit_form.absorbanceReader.errors.custom_wavelength_required'
+      'step_edit_form.absorbanceReader.errors.custom_wavelength_required'
     )
   }
   const wavelengthFloat = parseFloat(wavelength)
@@ -78,9 +80,7 @@ const getBadWavelengthError = (
     wavelengthFloat < ABSORBANCE_READER_MIN_WAVELENGTH_NM ||
     wavelengthFloat > ABSORBANCE_READER_MAX_WAVELENGTH_NM
   ) {
-    return t(
-      'form:step_edit_form.absorbanceReader.errors.wavelength_out_of_range'
-    )
+    return t('step_edit_form.absorbanceReader.errors.wavelength_out_of_range')
   }
   return null
 }
@@ -121,7 +121,7 @@ interface SelectModeProps {
 
 function SelectMode(props: SelectModeProps): JSX.Element {
   const { modeProps } = props
-  const { t } = useTranslation(['form'])
+  const { t } = useTranslation('form')
   const buttonValues = ['single', 'multi']
   return (
     <Flex
@@ -130,14 +130,12 @@ function SelectMode(props: SelectModeProps): JSX.Element {
       gridGap={SPACING.spacing4}
     >
       <StyledText desktopStyle="bodyDefaultSemiBold">
-        {t('form:step_edit_form.field.absorbanceReader.mode.label')}
+        {t('step_edit_form.field.absorbanceReader.mode.label')}
       </StyledText>
       {buttonValues.map(val => (
         <RadioButton
           key={val}
-          buttonLabel={t(
-            `form:step_edit_form.field.absorbanceReader.mode.${val}`
-          )}
+          buttonLabel={t(`step_edit_form.field.absorbanceReader.mode.${val}`)}
           buttonValue={val}
           onChange={() => {
             modeProps.updateValue(val)
@@ -174,7 +172,7 @@ function IntializationEditor(props: InitializationEditorProps): JSX.Element {
     mappedErrorsToField,
     showFormErrors,
   } = props
-  const { t } = useTranslation(['form'])
+  const { t } = useTranslation('form')
 
   const handleDeleteWavelength = (index: number): void => {
     const clone = [
@@ -185,11 +183,9 @@ function IntializationEditor(props: InitializationEditorProps): JSX.Element {
     setNumWavelengths(numWavelengths - 1)
   }
 
-  const [targetProps, tooltipProps] = useHoverTooltip()
-
   const handleAddWavelength = (): void => {
     setNumWavelengths(numWavelengths + 1)
-    wavelengthsProps.updateValue([...wavelengths, CUSTOM_OPTION.value])
+    wavelengthsProps.updateValue([...wavelengths, WAVELENGTH_OPTIONS[0].value])
   }
 
   const wavelengthItems: JSX.Element[] = []
@@ -227,39 +223,26 @@ function IntializationEditor(props: InitializationEditorProps): JSX.Element {
       >
         <StyledText desktopStyle="bodyDefaultSemiBold">
           {t(
-            `form:step_edit_form.absorbanceReader.initialization_setting.${mode}.title`
+            `step_edit_form.absorbanceReader.initialization_setting.${mode}.title`
           )}
         </StyledText>
         {mode === 'multi' ? (
           <StyledText desktopStyle="bodyDefaultRegular">
             {t(
-              `form:step_edit_form.absorbanceReader.initialization_setting.${mode}.description`
+              `step_edit_form.absorbanceReader.initialization_setting.${mode}.description`
             )}
           </StyledText>
         ) : null}
         <Flex flexDirection={DIRECTION_COLUMN} gridGap={SPACING.spacing4}>
           {wavelengthItems}
         </Flex>
-        {mode === 'multi' ? (
-          <>
-            <Flex {...targetProps} width={FLEX_MAX_CONTENT}>
-              <EmptySelectorButton
-                onClick={handleAddWavelength}
-                text={t(
-                  'form:step_edit_form.absorbanceReader.add_wavelength.label'
-                )}
-                textAlignment="left"
-                disabled={numWavelengths === MAX_WAVELENGTHS}
-              />
-            </Flex>
-            {numWavelengths === MAX_WAVELENGTHS ? (
-              <Tooltip tooltipProps={tooltipProps}>
-                {t(
-                  'form:step_edit_form.absorbanceReader.add_wavelength.disabled'
-                )}
-              </Tooltip>
-            ) : null}
-          </>
+        {mode === 'multi' && wavelengths.length < MAX_WAVELENGTHS ? (
+          <EmptySelectorButton
+            onClick={handleAddWavelength}
+            text={t('step_edit_form.absorbanceReader.add_wavelength.label')}
+            textAlignment="left"
+            disabled={numWavelengths === MAX_WAVELENGTHS}
+          />
         ) : null}
       </Flex>
       {mode === 'single' ? (
@@ -297,13 +280,13 @@ function WavelengthItem(props: WavelengthItemProps): JSX.Element {
     index,
     error,
   } = props
-  const { t } = useTranslation(['form'])
+  const { t } = useTranslation('form')
   const showCustom = !DEFINED_OPTIONS.some(({ value }) => value === wavelength)
   const [isFocused, setIsFocused] = useState<boolean>(false)
   return (
     <>
       <DropdownMenu
-        title={t('form:step_edit_form.absorbanceReader.wavelength')}
+        title={t('step_edit_form.absorbanceReader.wavelength')}
         filterOptions={WAVELENGTH_OPTIONS}
         dropdownType="neutral"
         width="100%"
@@ -326,11 +309,9 @@ function WavelengthItem(props: WavelengthItemProps): JSX.Element {
       />
       {showCustom ? (
         <InputField
-          title={t(
-            'form:step_edit_form.absorbanceReader.custom_wavelength.label'
-          )}
+          title={t('step_edit_form.absorbanceReader.custom_wavelength.label')}
           caption={t(
-            'form:step_edit_form.absorbanceReader.custom_wavelength.caption'
+            'step_edit_form.absorbanceReader.custom_wavelength.caption'
           )}
           value={wavelength}
           onChange={e => {
@@ -354,12 +335,13 @@ function WavelengthItem(props: WavelengthItemProps): JSX.Element {
             handleDeleteWavelength(index)
           }}
           alignSelf={ALIGN_FLEX_END}
+          padding={SPACING.spacing4}
         >
           <StyledText
             desktopStyle="bodyDefaultRegular"
             textDecoration={TEXT_DECORATION_UNDERLINE}
           >
-            {t('form:step_edit_form.absorbanceReader.delete')}
+            {t('step_edit_form.absorbanceReader.delete')}
           </StyledText>
         </Btn>
       ) : null}
@@ -375,7 +357,7 @@ interface ReferenceWavelengthProps {
 
 function ReferenceWavelength(props: ReferenceWavelengthProps): JSX.Element {
   const { formData, propsForFields, error } = props
-  const { t } = useTranslation(['form'])
+  const { t } = useTranslation('form')
   const isExpanded = formData.referenceWavelengthActive === true
   const referenceWavelength = formData.referenceWavelength
   const showCustom = !DEFINED_OPTIONS.some(
@@ -383,6 +365,7 @@ function ReferenceWavelength(props: ReferenceWavelengthProps): JSX.Element {
   )
 
   const [isFocused, setIsFocused] = useState<boolean>(false)
+  const [targetProps, tooltipProps] = useHoverTooltip()
 
   return (
     <Flex
@@ -390,36 +373,45 @@ function ReferenceWavelength(props: ReferenceWavelengthProps): JSX.Element {
       width="100%"
       gridGap={SPACING.spacing4}
     >
-      <StyledText desktopStyle="bodyDefaultSemiBold">
-        {t('form:step_edit_form.absorbanceReader.reference_wavelength')}
-      </StyledText>
-      <ListItem
+      <Flex gridGap={SPACING.spacing8} alignItems={ALIGN_CENTER}>
+        <StyledText desktopStyle="bodyDefaultSemiBold">
+          {t('step_edit_form.absorbanceReader.reference_wavelength.title')}
+        </StyledText>
+        <Flex {...targetProps}>
+          <Icon name="information" size="1rem" color={COLORS.grey60} />
+        </Flex>
+        <Tooltip tooltipProps={tooltipProps}>
+          {t('step_edit_form.absorbanceReader.reference_wavelength.tooltip')}
+        </Tooltip>
+      </Flex>
+      <ListButton
         type="noActive"
         padding={SPACING.spacing12}
         flexDirection={DIRECTION_COLUMN}
         gridGap={SPACING.spacing8}
+        onClick={() => {
+          propsForFields.referenceWavelengthActive.updateValue(!isExpanded)
+        }}
       >
-        <Flex width="100%" justifyContent={JUSTIFY_SPACE_BETWEEN}>
+        <Flex
+          width="100%"
+          justifyContent={JUSTIFY_SPACE_BETWEEN}
+          alignItems={ALIGN_CENTER}
+        >
           <StyledText desktopStyle="bodyDefaultRegular">
             {t(
-              'form:step_edit_form.field.absorbanceReader.referenceWavelengthActive'
+              'step_edit_form.field.absorbanceReader.referenceWavelengthActive'
             )}
           </StyledText>
-          <Btn
-            onClick={() => {
-              propsForFields.referenceWavelengthActive.updateValue(!isExpanded)
-            }}
-          >
-            <Check
-              color={COLORS.blue50}
-              isChecked={formData.referenceWavelengthActive === true}
-            />
-          </Btn>
+          <Check
+            color={COLORS.blue50}
+            isChecked={formData.referenceWavelengthActive === true}
+          />
         </Flex>
         {isExpanded ? (
           <>
             <DropdownMenu
-              title={t('form:step_edit_form.absorbanceReader.wavelength')}
+              title={t('step_edit_form.absorbanceReader.wavelength')}
               filterOptions={WAVELENGTH_OPTIONS}
               dropdownType="neutral"
               width="100%"
@@ -445,16 +437,19 @@ function ReferenceWavelength(props: ReferenceWavelengthProps): JSX.Element {
             {showCustom ? (
               <InputField
                 title={t(
-                  'form:step_edit_form.absorbanceReader.custom_wavelength.label'
+                  'step_edit_form.absorbanceReader.custom_wavelength.label'
                 )}
                 caption={t(
-                  'form:step_edit_form.absorbanceReader.custom_wavelength.caption'
+                  'step_edit_form.absorbanceReader.custom_wavelength.caption'
                 )}
                 value={formData.referenceWavelength ?? ''}
                 onChange={e => {
                   propsForFields.referenceWavelength.updateValue(
                     maskToInteger(e.target.value)
                   )
+                }}
+                onClick={e => {
+                  e.stopPropagation()
                 }}
                 onBlur={() => {
                   setIsFocused(false)
@@ -467,7 +462,7 @@ function ReferenceWavelength(props: ReferenceWavelengthProps): JSX.Element {
             ) : null}
           </>
         ) : null}
-      </ListItem>
+      </ListButton>
     </Flex>
   )
 }

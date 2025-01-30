@@ -110,9 +110,9 @@ describe('InstrumentsInfo', () => {
     }
     render(props)
 
-    screen.getByText('Flex 1-Channel 50 μL')
+    screen.getByText('Flex 1-Channel 50 µL')
     screen.getByText('Opentrons Flex 96 Tip Rack 50 µL')
-    screen.getByText('Flex 8-Channel 50 μL')
+    screen.getByText('Flex 8-Channel 50 µL')
     screen.getByText('Opentrons Flex 96 Filter Tip Rack 50 µL')
     screen.getByText('Opentrons Flex Gripper')
   })

@@ -25,6 +25,7 @@ describe('absorbanceReaderCloseRead compound command creator', () => {
   const ABSORBANCE_READER_MODULE_ID = 'absorbanceReaderModuleId'
   const ABSORBANCE_READER_OUTPUT_PATH = 'outputPath.csv'
   const ABSORBANCE_READER_MODULE_SLOT = 'D3'
+  const GRIPPER_ID = 'gripperId'
   let robotState: RobotState
   let invariantContext: InvariantContext
   beforeEach(() => {
@@ -42,6 +43,12 @@ describe('absorbanceReaderCloseRead compound command creator', () => {
           id: ABSORBANCE_READER_MODULE_ID,
           type: ABSORBANCE_READER_TYPE,
           model: ABSORBANCE_READER_V1,
+        },
+      },
+      additionalEquipmentEntities: {
+        [GRIPPER_ID]: {
+          id: GRIPPER_ID,
+          name: 'gripper',
         },
       },
     }

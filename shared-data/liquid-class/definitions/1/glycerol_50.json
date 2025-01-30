@@ -8,7 +8,7 @@
       "pipetteModel": "flex_1channel_50",
       "byTipType": [
         {
-          "tiprack": "opentrons_flex_96_tiprack_50ul",
+          "tiprack": "opentrons/opentrons_flex_96_tiprack_50ul/1",
           "aspirate": {
             "submerge": {
               "positionReference": "well-top",
@@ -236,7 +236,7 @@
       "pipetteModel": "flex_8channel_50",
       "byTipType": [
         {
-          "tiprack": "opentrons_flex_96_tiprack_50ul",
+          "tiprack": "opentrons/opentrons_flex_96_tiprack_50ul/1",
           "aspirate": {
             "submerge": {
               "positionReference": "well-top",
@@ -464,7 +464,7 @@
       "pipetteModel": "flex_1channel_1000",
       "byTipType": [
         {
-          "tiprack": "opentrons_flex_96_tiprack_50ul",
+          "tiprack": "opentrons/opentrons_flex_96_tiprack_50ul/1",
           "aspirate": {
             "submerge": {
               "positionReference": "well-top",
@@ -686,7 +686,7 @@
           }
         },
         {
-          "tiprack": "opentrons_flex_96_tiprack_200ul",
+          "tiprack": "opentrons/opentrons_flex_96_tiprack_200ul/1",
           "aspirate": {
             "submerge": {
               "positionReference": "well-top",
@@ -904,7 +904,7 @@
           }
         },
         {
-          "tiprack": "opentrons_flex_96_tiprack_1000ul",
+          "tiprack": "opentrons/opentrons_flex_96_tiprack_1000ul/1",
           "aspirate": {
             "submerge": {
               "positionReference": "well-top",
@@ -1127,7 +1127,7 @@
       "pipetteModel": "flex_8channel_1000",
       "byTipType": [
         {
-          "tiprack": "opentrons_flex_96_tiprack_50ul",
+          "tiprack": "opentrons/opentrons_flex_96_tiprack_50ul/1",
           "aspirate": {
             "submerge": {
               "positionReference": "well-top",
@@ -1349,7 +1349,7 @@
           }
         },
         {
-          "tiprack": "opentrons_flex_96_tiprack_200ul",
+          "tiprack": "opentrons/opentrons_flex_96_tiprack_200ul/1",
           "aspirate": {
             "submerge": {
               "positionReference": "well-top",
@@ -1567,7 +1567,7 @@
           }
         },
         {
-          "tiprack": "opentrons_flex_96_tiprack_1000ul",
+          "tiprack": "opentrons/opentrons_flex_96_tiprack_1000ul/1",
           "aspirate": {
             "submerge": {
               "positionReference": "well-top",
@@ -1790,7 +1790,7 @@
       "pipetteModel": "flex_96channel_1000",
       "byTipType": [
         {
-          "tiprack": "opentrons_flex_96_tiprack_50ul",
+          "tiprack": "opentrons/opentrons_flex_96_tiprack_50ul/1",
           "aspirate": {
             "submerge": {
               "positionReference": "well-top",
@@ -2020,7 +2020,7 @@
           }
         },
         {
-          "tiprack": "opentrons_flex_96_tiprack_200ul",
+          "tiprack": "opentrons/opentrons_flex_96_tiprack_200ul/1",
           "aspirate": {
             "submerge": {
               "positionReference": "well-top",
@@ -2238,7 +2238,7 @@
           }
         },
         {
-          "tiprack": "opentrons_flex_96_tiprack_1000ul",
+          "tiprack": "opentrons/opentrons_flex_96_tiprack_1000ul/1",
           "aspirate": {
             "submerge": {
               "positionReference": "well-top",

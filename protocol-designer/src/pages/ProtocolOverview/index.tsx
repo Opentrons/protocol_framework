@@ -28,6 +28,7 @@ import {
 import { selectors as fileSelectors } from '../../file-data'
 import { selectors as stepFormSelectors } from '../../step-forms'
 import { actions as loadFileActions } from '../../load-file'
+import { getEnableTimelineScrubber } from '../../feature-flags/selectors'
 import { selectors as labwareIngredSelectors } from '../../labware-ingred/selectors'
 import { MaterialsListModal } from '../../organisms/MaterialsListModal'
 import { LINE_CLAMP_TEXT_STYLE, COLUMN_STYLE } from '../../atoms'
@@ -47,7 +48,7 @@ import {
   getUnusedStagingAreas,
   getUnusedTrash,
 } from './utils'
-
+import { ScrubberContainer } from './ScrubberContainer'
 import type { CreateCommand } from '@opentrons/shared-data'
 import type { ThunkDispatch } from '../../types'
 
@@ -80,6 +81,7 @@ export function ProtocolOverview(): JSX.Element {
     showEditInstrumentsModal,
     setShowEditInstrumentsModal,
   ] = useState<boolean>(false)
+  const enableTimelineScrubber = useSelector(getEnableTimelineScrubber)
   const [showEditMetadataModal, setShowEditMetadataModal] = useState<boolean>(
     false
   )
@@ -126,8 +128,10 @@ export function ProtocolOverview(): JSX.Element {
   const gripperInUse =
     fileData?.commands.find(
       command =>
-        command.commandType === 'moveLabware' &&
-        command.params.strategy === 'usingGripper'
+        (command.commandType === 'moveLabware' &&
+          command.params.strategy === 'usingGripper') ||
+        command.commandType === 'absorbanceReader/closeLid' ||
+        command.commandType === 'absorbanceReader/openLid'
     ) != null
   const noCommands = fileData != null ? nonLoadCommands.length === 0 : true
   const modulesWithoutStep = getUnusedEntities(
@@ -320,6 +324,7 @@ export function ProtocolOverview(): JSX.Element {
             css={COLUMN_STYLE}
             gridGap={SPACING.spacing12}
           >
+            {enableTimelineScrubber ? <ScrubberContainer /> : null}
             <StartingDeck
               robotType={robotType}
               setShowMaterialsListModal={setShowMaterialsListModal}

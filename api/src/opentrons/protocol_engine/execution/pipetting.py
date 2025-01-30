@@ -1,5 +1,5 @@
 """Pipetting command handling."""
-from typing import Optional, Iterator
+from typing import Optional, Iterator, Tuple
 from typing_extensions import Protocol as TypingProtocol
 from contextlib import contextmanager
 
@@ -42,8 +42,31 @@ class PipettingHandler(TypingProtocol):
         volume: float,
         flow_rate: float,
         command_note_adder: CommandNoteAdder,
+        correction_volume: float = 0.0,
     ) -> float:
         """Set flow-rate and aspirate."""
+
+    async def aspirate_while_tracking(
+        self,
+        pipette_id: str,
+        labware_id: str,
+        well_name: str,
+        volume: float,
+        flow_rate: float,
+        command_note_adder: CommandNoteAdder,
+    ) -> float:
+        """Set flow-rate and aspirate while tracking."""
+
+    async def dispense_while_tracking(
+        self,
+        pipette_id: str,
+        labware_id: str,
+        well_name: str,
+        volume: float,
+        flow_rate: float,
+        push_out: Optional[float],
+    ) -> float:
+        """Set flow-rate and dispense while tracking."""
 
     async def dispense_in_place(
         self,
@@ -51,6 +74,7 @@ class PipettingHandler(TypingProtocol):
         volume: float,
         flow_rate: float,
         push_out: Optional[float],
+        correction_volume: float = 0.0,
     ) -> float:
         """Set flow-rate and dispense."""
 
@@ -99,9 +123,47 @@ class HardwarePipettingHandler(PipettingHandler):
         hw_mount = self._state_view.pipettes.get_mount(pipette_id).to_hw_mount()
         await self._hardware_api.prepare_for_aspirate(mount=hw_mount)
 
-    async def aspirate_in_place(
+    def get_hw_aspirate_params(
         self,
         pipette_id: str,
+        volume: float,
+        command_note_adder: CommandNoteAdder,
+    ) -> Tuple[HardwarePipette, float]:
+        """Get params for hardware aspirate."""
+        _adjusted_volume = _validate_aspirate_volume(
+            state_view=self._state_view,
+            pipette_id=pipette_id,
+            aspirate_volume=volume,
+            command_note_adder=command_note_adder,
+        )
+        _hw_pipette = self._state_view.pipettes.get_hardware_pipette(
+            pipette_id=pipette_id,
+            attached_pipettes=self._hardware_api.attached_instruments,
+        )
+        return _hw_pipette, _adjusted_volume
+
+    def get_hw_dispense_params(
+        self,
+        pipette_id: str,
+        volume: float,
+    ) -> Tuple[HardwarePipette, float]:
+        """Get params for hardware dispense."""
+        _adjusted_volume = _validate_dispense_volume(
+            state_view=self._state_view,
+            pipette_id=pipette_id,
+            dispense_volume=volume,
+        )
+        _hw_pipette = self._state_view.pipettes.get_hardware_pipette(
+            pipette_id=pipette_id,
+            attached_pipettes=self._hardware_api.attached_instruments,
+        )
+        return _hw_pipette, _adjusted_volume
+
+    async def aspirate_while_tracking(
+        self,
+        pipette_id: str,
+        labware_id: str,
+        well_name: str,
         volume: float,
         flow_rate: float,
         command_note_adder: CommandNoteAdder,
@@ -111,20 +173,46 @@ class HardwarePipettingHandler(PipettingHandler):
         Raises:
             PipetteOverpressureError, propagated as-is from the hardware controller.
         """
+        return 0.0
+
+    async def dispense_while_tracking(
+        self,
+        pipette_id: str,
+        labware_id: str,
+        well_name: str,
+        volume: float,
+        flow_rate: float,
+        push_out: Optional[float],
+    ) -> float:
+        """Set flow-rate and dispense.
+
+        Raises:
+            PipetteOverpressureError, propagated as-is from the hardware controller.
+        """
+        return 0.0
+
+    async def aspirate_in_place(
+        self,
+        pipette_id: str,
+        volume: float,
+        flow_rate: float,
+        command_note_adder: CommandNoteAdder,
+        correction_volume: float = 0.0,
+    ) -> float:
+        """Set flow-rate and aspirate.
+
+        Raises:
+            PipetteOverpressureError, propagated as-is from the hardware controller.
+        """
         # get mount and config data from state and hardware controller
-        adjusted_volume = _validate_aspirate_volume(
-            state_view=self._state_view,
-            pipette_id=pipette_id,
-            aspirate_volume=volume,
-            command_note_adder=command_note_adder,
-        )
-        hw_pipette = self._state_view.pipettes.get_hardware_pipette(
-            pipette_id=pipette_id,
-            attached_pipettes=self._hardware_api.attached_instruments,
+        hw_pipette, adjusted_volume = self.get_hw_aspirate_params(
+            pipette_id, volume, command_note_adder
         )
         with self._set_flow_rate(pipette=hw_pipette, aspirate_flow_rate=flow_rate):
             await self._hardware_api.aspirate(
-                mount=hw_pipette.mount, volume=adjusted_volume
+                mount=hw_pipette.mount,
+                volume=adjusted_volume,
+                correction_volume=correction_volume,
             )
 
         return adjusted_volume
@@ -135,15 +223,10 @@ class HardwarePipettingHandler(PipettingHandler):
         volume: float,
         flow_rate: float,
         push_out: Optional[float],
+        correction_volume: float = 0.0,
     ) -> float:
         """Dispense liquid without moving the pipette."""
-        adjusted_volume = _validate_dispense_volume(
-            state_view=self._state_view, pipette_id=pipette_id, dispense_volume=volume
-        )
-        hw_pipette = self._state_view.pipettes.get_hardware_pipette(
-            pipette_id=pipette_id,
-            attached_pipettes=self._hardware_api.attached_instruments,
-        )
+        hw_pipette, adjusted_volume = self.get_hw_dispense_params(pipette_id, volume)
         # TODO (tz, 8-23-23): add a check for push_out not larger that the max volume allowed when working on this https://opentrons.atlassian.net/browse/RSS-329
         if push_out and push_out < 0:
             raise InvalidPushOutVolumeError(
@@ -151,7 +234,10 @@ class HardwarePipettingHandler(PipettingHandler):
             )
         with self._set_flow_rate(pipette=hw_pipette, dispense_flow_rate=flow_rate):
             await self._hardware_api.dispense(
-                mount=hw_pipette.mount, volume=adjusted_volume, push_out=push_out
+                mount=hw_pipette.mount,
+                volume=adjusted_volume,
+                push_out=push_out,
+                correction_volume=correction_volume,
             )
 
         return adjusted_volume
@@ -249,6 +335,7 @@ class VirtualPipettingHandler(PipettingHandler):
         volume: float,
         flow_rate: float,
         command_note_adder: CommandNoteAdder,
+        correction_volume: float = 0.0,
     ) -> float:
         """Virtually aspirate (no-op)."""
         self._validate_tip_attached(pipette_id=pipette_id, command_name="aspirate")
@@ -265,6 +352,7 @@ class VirtualPipettingHandler(PipettingHandler):
         volume: float,
         flow_rate: float,
         push_out: Optional[float],
+        correction_volume: float = 0.0,
     ) -> float:
         """Virtually dispense (no-op)."""
         # TODO (tz, 8-23-23): add a check for push_out not larger that the max volume allowed when working on this https://opentrons.atlassian.net/browse/RSS-329
@@ -293,6 +381,7 @@ class VirtualPipettingHandler(PipettingHandler):
     ) -> float:
         """Detect liquid level."""
         well_def = self._state_view.labware.get_well_definition(labware_id, well_name)
+        # raise ValueError(f"returning liquid height {well_def.depth}")
         return well_def.depth
 
     def _validate_tip_attached(self, pipette_id: str, command_name: str) -> None:
@@ -302,6 +391,45 @@ class VirtualPipettingHandler(PipettingHandler):
             raise TipNotAttachedError(
                 f"Cannot perform {command_name} without a tip attached"
             )
+
+    async def aspirate_while_tracking(
+        self,
+        pipette_id: str,
+        labware_id: str,
+        well_name: str,
+        volume: float,
+        flow_rate: float,
+        command_note_adder: CommandNoteAdder,
+    ) -> float:
+        """Virtually aspirate (no-op)."""
+        self._validate_tip_attached(pipette_id=pipette_id, command_name="aspirate")
+
+        return _validate_aspirate_volume(
+            state_view=self._state_view,
+            pipette_id=pipette_id,
+            aspirate_volume=volume,
+            command_note_adder=command_note_adder,
+        )
+
+    async def dispense_while_tracking(
+        self,
+        pipette_id: str,
+        labware_id: str,
+        well_name: str,
+        volume: float,
+        flow_rate: float,
+        push_out: Optional[float],
+    ) -> float:
+        """Virtually dispense (no-op)."""
+        # TODO (tz, 8-23-23): add a check for push_out not larger that the max volume allowed when working on this https://opentrons.atlassian.net/browse/RSS-329
+        if push_out and push_out < 0:
+            raise InvalidPushOutVolumeError(
+                "push out value cannot have a negative value."
+            )
+        self._validate_tip_attached(pipette_id=pipette_id, command_name="dispense")
+        return _validate_dispense_volume(
+            state_view=self._state_view, pipette_id=pipette_id, dispense_volume=volume
+        )
 
 
 def create_pipetting_handler(

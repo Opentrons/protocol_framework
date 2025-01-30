@@ -154,7 +154,11 @@ export function HighlightItems(props: HighlightItemsProps): JSX.Element | null {
                 selected => selected.id === labwareOnDeck.id
               )}
               isLast={true}
-              position={tcModel != null ? tcPosition : position}
+              position={
+                tcModel != null && (labwareSlot === '7' || labwareSlot === 'B1')
+                  ? tcPosition
+                  : position
+              }
               labwareDef={labwareOnDeck.def}
               labelText={
                 hoveredItemLabware == null
