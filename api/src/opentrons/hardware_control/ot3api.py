@@ -2328,7 +2328,7 @@ class OT3API(
         self,
         mount: Union[top_types.Mount, OT3Mount],
         home_after: bool = False,
-        ignore_plunger: Optional[bool] = False,
+        ignore_plunger: bool = False,
     ) -> None:
         realmount = OT3Mount.from_mount(mount)
         if ignore_plunger is False:

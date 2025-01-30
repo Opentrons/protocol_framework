@@ -24,7 +24,7 @@ from opentrons.protocol_engine.execution import MovementHandler, GantryMover, Ti
 from opentrons.protocol_engine.resources import ModelUtils
 from opentrons.protocol_engine.state import update_types
 from opentrons.protocol_engine.state.state import StateView
-from opentrons.protocol_engine.types import TipGeometry
+from opentrons.protocol_engine.types import TipGeometry, FluidKind, AspiratedFluid
 
 from opentrons.protocol_engine.commands.movement_common import StallOrCollisionError
 from opentrons.protocol_engine.commands.command import DefinedErrorData, SuccessData
@@ -100,6 +100,10 @@ async def test_success(
             operation_volume=None,
         )
     ).then_return(Point(x=111, y=222, z=333))
+    decoy.when(
+        state_view.geometry.get_nominal_tip_geometry("pipette-id", "labware-id", "A3")
+    ).then_return(TipGeometry(length=42, diameter=5, volume=300))
+    decoy.when(state_view.pipettes.get_maximum_volume("pipette-id")).then_return(1000)
 
     decoy.when(
         await tip_handler.pick_up_tip(
@@ -126,20 +130,13 @@ async def test_success(
             position=DeckPoint(x=111, y=222, z=333),
         ),
         state_update=update_types.StateUpdate(
-            pipette_location=update_types.PipetteLocationUpdate(
-                pipette_id="pipette-id",
-                new_location=update_types.Well(labware_id="labware-id", well_name="A3"),
-                new_deck_point=DeckPoint(x=111, y=222, z=333),
-            ),
             pipette_tip_state=update_types.PipetteTipStateUpdate(
                 pipette_id="pipette-id",
                 tip_geometry=TipGeometry(length=42, diameter=5, volume=300),
             ),
-            tips_used=update_types.TipsUsedUpdate(
-                pipette_id="pipette-id", labware_id="labware-id", well_name="A3"
-            ),
-            pipette_aspirated_fluid=update_types.PipetteEmptyFluidUpdate(
-                pipette_id="pipette-id"
+            pipette_aspirated_fluid=update_types.PipetteAspiratedFluidUpdate(
+                pipette_id="pipette-id",
+                fluid=AspiratedFluid(kind=FluidKind.LIQUID, volume=1000),
             ),
         ),
     )
@@ -193,19 +190,20 @@ async def test_no_tip_physically_missing_error(
         )
     ).then_return(Point(x=111, y=222, z=333))
     decoy.when(
+        state_view.geometry.get_nominal_tip_geometry(pipette_id, labware_id, well_name)
+    ).then_return(TipGeometry(length=42, diameter=5, volume=300))
+
+    decoy.when(
         await tip_handler.pick_up_tip(
             pipette_id=pipette_id, labware_id=labware_id, well_name=well_name
         )
-    ).then_raise(
-        PickUpTipTipNotAttachedError(
-            tip_geometry=TipGeometry(length=42, diameter=5, volume=300)
-        )
-    )
+    ).then_raise(PickUpTipTipNotAttachedError(tip_geometry=sentinel.tip_geometry))
     decoy.when(model_utils.generate_id()).then_return(error_id)
     decoy.when(model_utils.get_timestamp()).then_return(error_created_at)
     decoy.when(state_view.labware.get_definition(labware_id)).then_return(
         evotips_definition
     )
+    decoy.when(state_view.pipettes.get_maximum_volume(pipette_id)).then_return(1000)
 
     result = await subject.execute(
         EvotipSealPipetteParams(
@@ -213,42 +211,21 @@ async def test_no_tip_physically_missing_error(
         )
     )
 
-    assert result == DefinedErrorData(
-        public=StallOrCollisionError.model_construct(
-            id=error_id, createdAt=error_created_at, wrappedErrors=[matchers.Anything()]
+    assert result == SuccessData(
+        public=EvotipSealPipetteResult(
+            tipLength=42,
+            tipVolume=300,
+            tipDiameter=5,
+            position=DeckPoint(x=111, y=222, z=333),
         ),
         state_update=update_types.StateUpdate(
-            pipette_location=update_types.PipetteLocationUpdate(
-                pipette_id="pipette-id",
-                new_location=update_types.Well(
-                    labware_id="labware-id", well_name="well-name"
-                ),
-                new_deck_point=DeckPoint(x=111, y=222, z=333),
-            ),
-            tips_used=update_types.TipsUsedUpdate(
-                pipette_id="pipette-id", labware_id="labware-id", well_name="well-name"
-            ),
-            pipette_aspirated_fluid=update_types.PipetteUnknownFluidUpdate(
-                pipette_id="pipette-id"
-            ),
-        ),
-        state_update_if_false_positive=update_types.StateUpdate(
             pipette_tip_state=update_types.PipetteTipStateUpdate(
                 pipette_id="pipette-id",
                 tip_geometry=TipGeometry(length=42, diameter=5, volume=300),
             ),
-            pipette_aspirated_fluid=update_types.PipetteEmptyFluidUpdate(
-                pipette_id="pipette-id"
-            ),
-            tips_used=update_types.TipsUsedUpdate(
-                pipette_id="pipette-id", labware_id="labware-id", well_name="well-name"
-            ),
-            pipette_location=update_types.PipetteLocationUpdate(
+            pipette_aspirated_fluid=update_types.PipetteAspiratedFluidUpdate(
                 pipette_id="pipette-id",
-                new_location=update_types.Well(
-                    labware_id="labware-id", well_name="well-name"
-                ),
-                new_deck_point=DeckPoint(x=111, y=222, z=333),
+                fluid=AspiratedFluid(kind=FluidKind.LIQUID, volume=1000),
             ),
         ),
     )
