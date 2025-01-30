@@ -25,6 +25,7 @@ from .command import (
     SuccessData,
     DefinedErrorData,
 )
+from ..state.update_types import StateUpdate
 from ..resources import labware_validation
 from ..errors import ProtocolEngineError
 
@@ -120,10 +121,11 @@ class EvotipDispenseImplementation(
             raise ProtocolEngineError(
                 message="Overpressure Error during Resin Tip Dispense Command."
             )
-
         return SuccessData(
             public=EvotipDispenseResult(volume=result.public.volume),
-            state_update=result.state_update,
+            state_update=StateUpdate.reduce(
+                move_result.state_update, result.state_update
+            ),
         )
 
 
