@@ -132,7 +132,7 @@ class EvotipSealPipetteImplementation(
         tip_pick_up_params: TipPickUpParams,
         mount: MountType,
     ) -> None:
-        
+
         """A relative press-fit pick up command using gantry moves."""
 
         prep_distance = tip_pick_up_params.prepDistance
