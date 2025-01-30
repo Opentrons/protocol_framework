@@ -73,7 +73,7 @@ export const getLoadCommandText = ({
         display_location: displayLocation,
       })
     }
-    // TODO: finish these strings
+    // TODO(sb, 01/29): Add full support for these commands in run log once location refactor is complete
     case 'loadLid': {
       return t('load_lid')
     }
