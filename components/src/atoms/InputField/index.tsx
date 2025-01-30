@@ -58,7 +58,6 @@ export interface InputFieldProps {
     | typeof LEGACY_INPUT_TYPE_TEXT
     | typeof LEGACY_INPUT_TYPE_PASSWORD
     | typeof INPUT_TYPE_NUMBER
-    | 'string'
   /** mouse click handler */
   onClick?: (event: MouseEvent<HTMLInputElement>) => unknown
   /** focus handler */

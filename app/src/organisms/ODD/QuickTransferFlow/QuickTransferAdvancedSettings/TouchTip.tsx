@@ -205,8 +205,8 @@ export function TouchTip(props: TouchTipProps): JSX.Element {
             marginTop={SPACING.spacing68}
           >
             <InputField
-              type="string"
-              value={String(position)}
+              type="text"
+              value={String(position ?? '')}
               title={t('touch_tip_position_mm')}
               error={positionError}
               readOnly
