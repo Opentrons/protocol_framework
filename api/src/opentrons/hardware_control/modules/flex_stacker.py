@@ -273,7 +273,9 @@ class FlexStacker(mod_abc.AbstractModule):
         await self.reset_stall_detected()
         motion_params = STACKER_MOTION_CONFIG[axis]["move"]
         await self._driver.set_run_current(axis, current or motion_params.current or 0)
-        if any([speed, acceleration]):
+        if any([speed, acceleration, current]):
+            motion_params = self._reader.motion_params[axis]
+            motion_params.current = current or motion_params.current
             motion_params.max_speed = speed or motion_params.max_speed
             motion_params.acceleration = acceleration or motion_params.acceleration
         distance = direction.distance(distance)
@@ -391,8 +393,11 @@ class FlexStacker(mod_abc.AbstractModule):
 
         # Transfer
         await self.open_latch()
-        await self.move_axis(StackerAxis.Z, Direction.EXTEND, (labware_height / 2))
-        await self.home_axis(StackerAxis.Z, Direction.EXTEND)
+        z_speed = (STACKER_MOTION_CONFIG[StackerAxis.Z]["move"].max_speed or 0) / 2
+        await self.move_axis(
+            StackerAxis.Z, Direction.EXTEND, (labware_height / 2), z_speed
+        )
+        await self.home_axis(StackerAxis.Z, Direction.EXTEND, z_speed)
         await self.close_latch()
 
         # Move Z then X axis
@@ -448,7 +453,7 @@ class FlexStackerReader(Reader):
 
     async def get_motion_parameters(self) -> None:
         """Get the motion parameters used by the axis motors."""
-        self.move_params = {
+        self.motion_params = {
             axis: await self._driver.get_motion_params(axis) for axis in StackerAxis
         }
 
