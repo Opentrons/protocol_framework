@@ -5,12 +5,12 @@ inputs:
     description: "Branch name"
     required: true
   token:
-    description: 'A Github Token (must have write:packages scope)'
+    description: "A Github Token (must have write:packages scope)"
     required: true
 outputs:
   image:
     description: "Full image name with tag"
-    value: ${{ steps.build.outputs.image }}
+    value: ghcr.io/opentrons/opentrons-ci:${{ inputs.branch }}
 
 runs:
   using: "composite"
@@ -24,8 +24,20 @@ runs:
 
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
+      with:
+        install: true
+        driver-opts: network=host
 
-    - name: Build and push
+    - name: Cache Docker Buildx Layers
+      uses: actions/cache@v3
+      with:
+        path: /tmp/.buildx-cache
+        key: buildx-${{ inputs.branch }}
+        restore-keys: |
+          buildx-${{ inputs.branch }}
+          buildx-edge
+    
+    - name: Build and push with cache
       id: build
       uses: docker/build-push-action@v6
       with:
@@ -33,6 +45,10 @@ runs:
         target: ci
         push: true
         tags: ghcr.io/opentrons/opentrons-ci:${{ inputs.branch }}
-        cache-from: type=registry,ref=ghcr.io/opentrons/opentrons-ci
-        cache-to: type=registry,ref=ghcr.io/opentrons/opentrons-ci
+        cache-from: |
+          type=local,src=/tmp/.buildx-cache
+          type=registry,ref=ghcr.io/opentrons/opentrons-ci:cache
+        cache-to: |
+          type=local,dest=/tmp/.buildx-cache,mode=max
+          type=registry,ref=ghcr.io/opentrons/opentrons-ci:cache,mode=max
         secrets: GIT_AUTH_TOKEN=${{ inputs.token }}
