@@ -119,7 +119,7 @@ export type SetupCreateCommand =
   | LoadLiquidCreateCommand
   | MoveLabwareCreateCommand
   | LoadLidCreateCommand
-  | LoadLidRunTimeCommand
+  | LoadLidStackCreateCommand
 
 export type LabwareLocation =
   | 'offDeck'
