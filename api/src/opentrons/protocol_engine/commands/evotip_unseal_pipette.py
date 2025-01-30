@@ -144,7 +144,7 @@ class EvotipUnsealPipette(
 
     commandType: EvotipUnsealPipetteCommandType = "evotipUnsealPipette"
     params: EvotipUnsealPipetteParams
-    result: Optional[EvotipUnsealPipetteResult]
+    result: Optional[EvotipUnsealPipetteResult] = None
 
     _ImplementationCls: Type[
         EvotipUnsealPipetteImplementation

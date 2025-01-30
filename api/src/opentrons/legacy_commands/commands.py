@@ -10,7 +10,7 @@ from opentrons.protocol_api.disposal_locations import TrashBin, WasteChute
 
 if TYPE_CHECKING:
     from opentrons.protocol_api import InstrumentContext
-    from opentrons.protocol_api.labware import Labware, Well
+    from opentrons.protocol_api.labware import Well
 
 
 def home(mount: str) -> command_types.HomeCommand:

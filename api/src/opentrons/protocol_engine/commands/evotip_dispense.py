@@ -3,7 +3,6 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING, Optional, Type, Union
 from typing_extensions import Literal
-from pydantic import Field
 
 from opentrons.protocol_engine.errors import UnsupportedLabwareForActionError
 from .pipetting_common import (
@@ -139,7 +138,7 @@ class EvotipDispense(
 
     commandType: EvotipDispenseCommandType = "evotipDispense"
     params: EvotipDispenseParams
-    result: Optional[EvotipDispenseResult]
+    result: Optional[EvotipDispenseResult] = None
 
     _ImplementationCls: Type[
         EvotipDispenseImplementation

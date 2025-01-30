@@ -25,7 +25,6 @@ from .command import (
     DefinedErrorData,
     SuccessData,
 )
-from .pipetting_common import aspirate_in_place
 
 from opentrons.hardware_control import HardwareControlAPI
 from opentrons.hardware_control.types import Axis
@@ -48,6 +47,8 @@ _EJECTOR_PUSH_MM_DEFAULT = 7.0
 
 
 class TipPickUpParams(BaseModel):
+    """Payload used to specify press-tip parameters for a seal command."""
+
     prepDistance: float = Field(
         default=0, description="The distance to move down to fit the tips on."
     )
@@ -131,6 +132,9 @@ class EvotipSealPipetteImplementation(
         tip_pick_up_params: TipPickUpParams,
         mount: MountType,
     ) -> None:
+        
+        """A relative press-fit pick up command using gantry moves."""
+
         prep_distance = tip_pick_up_params.prepDistance
         press_distance = tip_pick_up_params.pressDistance
         retract_distance = -1 * (prep_distance + press_distance)
@@ -159,6 +163,8 @@ class EvotipSealPipetteImplementation(
         tip_pick_up_params: TipPickUpParams,
         mount: MountType,
     ) -> None:
+        """A cam action pick up command using gantry moves."""
+
         prep_distance = tip_pick_up_params.prepDistance
         press_distance = tip_pick_up_params.pressDistance
         ejector_push_mm = tip_pick_up_params.ejectorPushMm
@@ -312,7 +318,7 @@ class EvotipSealPipette(
 
     commandType: EvotipSealPipetteCommandType = "evotipSealPipette"
     params: EvotipSealPipetteParams
-    result: Optional[EvotipSealPipetteResult]
+    result: Optional[EvotipSealPipetteResult] = None
 
     _ImplementationCls: Type[
         EvotipSealPipetteImplementation

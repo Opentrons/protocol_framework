@@ -20,9 +20,6 @@ from opentrons.protocol_engine.commands.evotip_unseal_pipette import (
     EvotipUnsealPipetteResult,
     EvotipUnsealPipetteImplementation,
 )
-from opentrons.protocol_engine.commands.pipetting_common import (
-    TipPhysicallyAttachedError,
-)
 from opentrons.protocol_engine.commands.movement_common import StallOrCollisionError
 from opentrons.protocol_engine.errors.exceptions import TipAttachedError
 from opentrons.protocol_engine.resources.model_utils import ModelUtils
