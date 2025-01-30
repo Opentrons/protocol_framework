@@ -11,6 +11,10 @@ This internal release, pulled from the `edge` branch, contains features being de
 - Python API version bumped to 2.23
 - Added liquid classes and new transfer functions
 
+### Bug Fixes In This Release (list in progress):
+- Fixed `InstrumentContext.name` so that it returns the correct API-specific names of Flex pipettes.
+
+
 ## Internal Release 2.3.0-alpha.2
 
 This internal release, pulled from the `edge` branch, contains features being developed for 8.3.0. It's for internal testing only.
