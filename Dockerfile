@@ -79,6 +79,17 @@ RUN bash -c " \
     python --version && \
     make setup -j\
     "
+# Create initialization script
+RUN echo '#!/bin/bash\n\
+    source $NVS_HOME/nvs.sh\n\
+    export PATH="$PYENV_ROOT/bin:$PATH"\n\
+    eval "$(pyenv init --path)"\n\
+    eval "$(pyenv init -)"\n\
+    nvs use 22.11.0\n\
+    exec "$@"' > /entrypoint.sh && chmod +x /entrypoint.sh
+
+ENTRYPOINT ["/entrypoint.sh"]
+CMD ["/bin/bash"]
 
 FROM base AS dev
 
@@ -89,13 +100,13 @@ EXPOSE 3195
 
 # Create initialization script
 RUN echo '#!/bin/bash\n\
-source $NVS_HOME/nvs.sh\n\
-export PATH="$PYENV_ROOT/bin:$PATH"\n\
-eval "$(pyenv init --path)"\n\
-eval "$(pyenv init -)"\n\
-nvs use 22.11.0\n\
-make setup -j\n\
-exec "$@"' > /entrypoint.sh && chmod +x /entrypoint.sh
+    source $NVS_HOME/nvs.sh\n\
+    export PATH="$PYENV_ROOT/bin:$PATH"\n\
+    eval "$(pyenv init --path)"\n\
+    eval "$(pyenv init -)"\n\
+    nvs use 22.11.0\n\
+    make setup -j\n\
+    exec "$@"' > /entrypoint.sh && chmod +x /entrypoint.sh
 
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["/bin/bash"]
