@@ -45,7 +45,7 @@ from .command import (
 from ..errors.error_occurrence import ErrorOccurrence
 
 if TYPE_CHECKING:
-    from ..execution import MovementHandler, PipettingHandler
+    from ..execution import MovementHandler, PipettingHandler, GantryMover
     from ..resources import ModelUtils
     from ..state.state import StateView
 
@@ -125,6 +125,7 @@ class _ExecuteCommonResult(NamedTuple):
 async def _execute_common(  # noqa: C901
     state_view: StateView,
     movement: MovementHandler,
+    gantry_mover: GantryMover,
     pipetting: PipettingHandler,
     model_utils: ModelUtils,
     params: _CommonParams,
@@ -181,7 +182,7 @@ async def _execute_common(  # noqa: C901
     if isinstance(move_result, DefinedErrorData):
         return move_result
     try:
-        current_position = await movement._gantry_mover.get_position(params.pipetteId)
+        current_position = await gantry_mover.get_position(params.pipetteId)
         z_pos = await pipetting.liquid_probe_in_place(
             pipette_id=pipette_id,
             labware_id=labware_id,
@@ -237,12 +238,14 @@ class LiquidProbeImplementation(
         self,
         state_view: StateView,
         movement: MovementHandler,
+        gantry_mover: GantryMover,
         pipetting: PipettingHandler,
         model_utils: ModelUtils,
         **kwargs: object,
     ) -> None:
         self._state_view = state_view
         self._movement = movement
+        self._gantry_mover = gantry_mover
         self._pipetting = pipetting
         self._model_utils = model_utils
 
@@ -265,6 +268,7 @@ class LiquidProbeImplementation(
         result = await _execute_common(
             state_view=self._state_view,
             movement=self._movement,
+            gantry_mover=self._gantry_mover,
             pipetting=self._pipetting,
             model_utils=self._model_utils,
             params=params,
@@ -331,12 +335,14 @@ class TryLiquidProbeImplementation(
         self,
         state_view: StateView,
         movement: MovementHandler,
+        gantry_mover: GantryMover,
         pipetting: PipettingHandler,
         model_utils: ModelUtils,
         **kwargs: object,
     ) -> None:
         self._state_view = state_view
         self._movement = movement
+        self._gantry_mover = gantry_mover
         self._pipetting = pipetting
         self._model_utils = model_utils
 
@@ -350,6 +356,7 @@ class TryLiquidProbeImplementation(
         result = await _execute_common(
             state_view=self._state_view,
             movement=self._movement,
+            gantry_mover=self._gantry_mover,
             pipetting=self._pipetting,
             model_utils=self._model_utils,
             params=params,
