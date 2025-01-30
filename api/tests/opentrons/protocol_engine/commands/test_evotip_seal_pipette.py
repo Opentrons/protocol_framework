@@ -8,7 +8,6 @@ from unittest.mock import sentinel
 
 from opentrons.protocols.models import LabwareDefinition
 
-from opentrons_shared_data.labware import load_definition
 from opentrons_shared_data.errors.exceptions import StallOrCollisionDetectedError
 
 from opentrons.types import MountType, Point
@@ -37,18 +36,18 @@ from opentrons.protocol_engine.execution import (
     PipettingHandler,
 )
 from opentrons.hardware_control import HardwareControlAPI
-from opentrons.protocol_engine.resources import labware_validation
 import json
 from opentrons_shared_data import load_shared_data
 
 
 @pytest.fixture
 def evotips_definition() -> LabwareDefinition:
+    """A fixturee of the evotips definition."""
     # TODO (chb 2025-01-29): When we migrate all labware to v3 we can clean this up
     return LabwareDefinition.model_validate(
         json.loads(
             load_shared_data(
-                f"labware/definitions/3/evotips_opentrons_96_labware/1.json"
+                "labware/definitions/3/evotips_opentrons_96_labware/1.json"
             )
         )
     )

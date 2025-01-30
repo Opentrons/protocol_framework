@@ -351,6 +351,7 @@ class HardwareGantryMover(GantryMover):
             critical_point: A critical point override for axes
             speed: Optional speed parameter for the move.
             relative_move: Whether the axis map needs to be converted from a relative to absolute move.
+            expect_stalls: Whether it is expected that the move triggers a stall error.
         """
         try:
             pos_hw = self._convert_axis_map_for_hw(axis_map)
