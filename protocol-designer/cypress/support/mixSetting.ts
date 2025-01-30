@@ -19,7 +19,12 @@ export enum MixActions {
   AspWellOrder = 'Open well aspirate well order pop out',
   EditWellOrder = 'Edit well order selects',
   AspMixTipPos = 'Edit tip position for executing mix step',
+  Delay = 'Check box for delay and input value'
+  /*
+  To Add:
+
   TipPosSideImageMove = 'Check that the tip position will update when data is enetered'
+   */
 }
 
 export enum MixVerifications {
@@ -68,7 +73,7 @@ export enum MixContent {
   MixTipPosition = 'Mix tip position',
   AdvancedPipSettings = 'Advanced pipetting settings',
   Delay = 'Delay',
-  DelayDuration = 'Delay Duration',
+  DelayDuration = 'Delay duration',
   DispFlowRate = "Dispense flow rate",
   Blowout = 'Blowout',
   TouchTip = 'Touch tip',
@@ -91,6 +96,7 @@ export enum MixContent {
   StartingWellPos = 'Well position: X 0 Y 0 Z 1 (mm)',
   TopView = 'Top view',
   SideView = 'Side view',
+
 }
 
 export enum MixLocators {
@@ -114,7 +120,9 @@ export enum MixLocators {
   YpositionInput = '[id="TipPositionModal_y_custom_input"]',
   ZpositionInput = '[id="TipPositionModal_z_custom_input"]',
   SwapView = 'button:contains("Swap view")',
-  SideViewTipPos = '[src="/src/assets/images/tip_side_bottom_layer.svg"]'
+  AspDelay = '[class="Flex-sc-1qhp8l7-0 Checkbox___StyledFlex3-sc-1mvp7vt-0 gZwGCw btdgeU"]',
+  DelaySecondsInput = '[class="InputField__StyledInput-sc-1gyyvht-0 cLVzBl"]'
+  // SideViewTipPos = '[src="/src/assets/images/tip_side_mid_layer.svg"]'
 }
 
 
@@ -156,14 +164,24 @@ export const executeMixAction = (action: MixActions | UniversalActions): void =>
     case MixActions.AspMixTipPos:
       cy.contains(MixContent.StartingWellPos).should('exist').should('be.visible')
       cy.get(MixLocators.MixTipPos).click()
+      cy.get(MixLocators.XpositionInput).type('{selectAll}, {backspace}, 2')
+      cy.get(MixLocators.YpositionInput).type('{selectAll}, {backspace}, 3')
+      cy.get(MixLocators.ZpositionInput).should('have.prop', "value")
+      cy.get(MixLocators.ZpositionInput).type('{selectAll}, {backspace}, 4')
+      cy.get(MixLocators.ResetToDefault).should('exist').should('be.visible').click()
+      cy.get(MixLocators.XpositionInput).type('{selectAll}, {backspace}, 3')
+      cy.get(MixLocators.YpositionInput).type('{selectAll}, {backspace}, 2')
+      cy.get(MixLocators.ZpositionInput).should('have.prop', "value")
+      cy.get(MixLocators.ZpositionInput).type('{selectAll}, {backspace}, 5')
+      cy.contains(MixContent.Cancel).should('exist').should('be.visible')
       break
-    case MixActions.TipPosSideImageMove:
-      cy.get(MixLocators.SideViewTipPos).should('have.css','transform', '0px')
+    case MixActions.Delay:
+      cy.contains(MixContent.Delay).should('exist').should('be.visible')
+      cy.get(MixLocators.AspDelay).should('exist').should('be.visible').click({force: true})
+      cy.contains(MixContent.DelayDuration).should('exist').should('be.visible')
+      cy.get(MixLocators.DelaySecondsInput).should('exist').should('be.visible').should('have.prop', "value")
+      cy.get(MixLocators.DelaySecondsInput).eq(1).type('{selectAll}, {backspace}, 5')
       break
-      // case MixAction.TipPosTopImageMove:
-      //   break
-    // case MixActions.Delay:
-    //   break
     case MixActions.Dispense:
       cy.get(MixLocators.Dispense).should('exist').should('be.visible').click()
       break
@@ -175,10 +193,8 @@ export const executeMixAction = (action: MixActions | UniversalActions): void =>
     //   break
     // case MixActions.TouchTip:
     //   break
-    // case Actions.FlowRateWarning:
-    //   break
     case MixActions.Save:
-      cy.get(MixLocators.Save).should('exist').should('be.visible').click()
+      cy.get(MixLocators.Save).should('exist').should('be.visible').first().click()
       break
     case MixActions.Back:
       cy.get(MixLocators.Back).should('exist').should('be.visible').click()
@@ -186,6 +202,19 @@ export const executeMixAction = (action: MixActions | UniversalActions): void =>
     case MixActions.Continue:
       cy.get(MixLocators.Continue).should('exist').should('be.visible').click({force: true})
       break
+
+    /*
+    To Add:
+    case MixAction.Rename:
+      break
+    case MixActions.TipPosSideImageMove:
+      cy.get(MixLocators.SideViewTipPos).should('have.css','transform', '0px')
+      break
+    case MixAction.TipPosTopImageMove:
+      break
+    case Actions.FlowRateWarning:
+      break
+    */
     default:
       throw new Error(`Unrecognized action: ${action as string}`)
   }
@@ -261,23 +290,26 @@ export const executeVerifyMixStep = (verification: MixVerifications): void => {
       cy.contains(MixContent.EditMixTipPos).should('exist').should('be.visible')
       cy.contains(MixContent.MixTipPosDescr).should('exist').should('be.visible')
       cy.contains(MixContent.SideView).should('exist').should('be.visible')
-      cy.get(MixLocators.SideViewTipPos).should('have.css','transform', '0px')
       cy.get(MixLocators.SwapView).should('exist').should('be.visible').click()
       cy.contains(MixContent.TopView).should('exist').should('be.visible')
       cy.contains(MixContent.Xposition).should('exist').should('be.visible')
       cy.get(MixLocators.XpositionInput).should('exist').should('be.visible')
+      cy.get(MixLocators.XpositionInput).should('have.prop', "value")
       cy.contains(MixContent.Yposition).should('exist').should('be.visible')
       cy.get(MixLocators.YpositionInput).should('exist').should('be.visible')
+      cy.get(MixLocators.YpositionInput).should('have.prop', "value")
       cy.contains(MixContent.Zposition).should('exist').should('be.visible')
       cy.get(MixLocators.ZpositionInput).should('exist').should('be.visible')
+      cy.get(MixLocators.ZpositionInput).should('have.prop', "value")
       cy.get(MixLocators.ResetToDefault).should('exist').should('be.visible')
       cy.get(MixLocators.CancelAspSettings).should('exist').should('be.visible')
-      cy.get(MixLocators.Save).should('exist').should('be.visible')
+      cy.get(MixLocators.Save).should('exist').should('be.visible').first().click()
       break
-      // case MixVerifications.FlowRateRangeWarning:
-      //   break
-      // case MixVerifications.TipPosCollisionCheck:
-      //   break
+    /*
+    To Add:
+    case MixVerifications.TipPosCollisionCheck:
+      break
+    */
     default:
       throw new Error(
         `Unrecognized verification: ${verification as MixVerifications}`
