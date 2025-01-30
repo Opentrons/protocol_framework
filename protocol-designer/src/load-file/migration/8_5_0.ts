@@ -72,6 +72,10 @@ export const migrateFile = (
         dispense_touchTip_mmFromBottom,
         aspirate_labware,
         dispense_labware,
+        aspirate_submerge_delay_seconds,
+        dispense_submerge_delay_seconds,
+        aspirate_submerge_speed,
+        dispense_submerge_speed,
         ...rest
       } = form
       const matchingAspirateLabwareWellDepth = getMigratedPositionFromTop(
@@ -111,8 +115,8 @@ export const migrateFile = (
                   1
                 ),
           aspirate_submerge_delay_seconds: null,
-          aspirate_submerge_speed: null,
           dispense_submerge_delay_seconds: null,
+          aspirate_submerge_speed: null,
           dispense_submerge_speed: null,
         },
       }
