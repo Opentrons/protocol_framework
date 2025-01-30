@@ -111,8 +111,8 @@ export const migrateFile = (
                   1
                 ),
           aspirate_submerge_delay_seconds: null,
-          dispense_submerge_delay_seconds: null,
           aspirate_submerge_speed: null,
+          dispense_submerge_delay_seconds: null,
           dispense_submerge_speed: null,
         },
       }
