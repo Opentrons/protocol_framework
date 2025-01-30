@@ -2008,7 +2008,7 @@ class InstrumentContext(publisher.CommandPublisher):
 
         From API v2.15 to v2.22, this property returned an internal name for Flex pipettes.
         From API v2.23 onwards, this behavior is fixed so that this property returns
-        the API-specific names of Flex pipettes.
+        the Python Protocol API load names of Flex pipettes.
         """
         return self._core.get_pipette_name()
 
