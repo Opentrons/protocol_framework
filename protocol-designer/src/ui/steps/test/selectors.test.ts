@@ -448,6 +448,7 @@ describe('_getSavedMultiSelectFieldValues', () => {
         },
         blowout_z_offset: {
           isIndeterminate: false,
+          value: undefined,
         },
         aspirate_wells: {
           isIndeterminate: true,
@@ -516,6 +517,10 @@ describe('_getSavedMultiSelectFieldValues', () => {
           value: -1,
           isIndeterminate: false,
         },
+        aspirate_submerge_delay_seconds: {
+          isIndeterminate: false,
+          value: undefined,
+        },
         aspirate_submerge_speed: {
           isIndeterminate: false,
           value: undefined,
@@ -580,6 +585,10 @@ describe('_getSavedMultiSelectFieldValues', () => {
         dispense_touchTip_mmFromTop: {
           value: -1,
           isIndeterminate: false,
+        },
+        dispense_submerge_delay_seconds: {
+          isIndeterminate: false,
+          value: undefined,
         },
         dispense_submerge_speed: {
           isIndeterminate: false,
