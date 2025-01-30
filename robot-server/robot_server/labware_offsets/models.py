@@ -1,7 +1,8 @@
 """Request/response models for the `/labwareOffsets` endpoints."""
 
 from datetime import datetime
-from typing import Literal, Annotated
+import enum
+from typing import Literal, Annotated, Final, TypeAlias
 
 from pydantic import BaseModel, Field
 
@@ -13,6 +14,26 @@ from opentrons.protocol_engine.types.labware_offset_location import (
 )
 
 from robot_server.errors.error_responses import ErrorDetails
+
+
+class _DoNotFilter(enum.Enum):
+    DO_NOT_FILTER = enum.auto()
+
+
+DO_NOT_FILTER: Final = _DoNotFilter.DO_NOT_FILTER
+"""A sentinel value for when a filter should not be applied.
+
+This is different from filtering on `None`, which returns only entries where the
+value is equal to `None`.
+"""
+
+
+DoNotFilterType: TypeAlias = Literal[_DoNotFilter.DO_NOT_FILTER]
+"""The type of `DO_NOT_FILTER`, as `NoneType` is to `None`.
+
+Unfortunately, mypy doesn't let us write `Literal[DO_NOT_FILTER]`. Use this instead.
+"""
+
 
 # This is redefined here so we can add stuff to it easily
 StoredLabwareOffsetLocationSequenceComponents = Annotated[

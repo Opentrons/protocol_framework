@@ -16,10 +16,12 @@ from opentrons.protocol_engine.types import ModuleModel
 from robot_server.labware_offsets.store import (
     LabwareOffsetStore,
     LabwareOffsetNotFoundError,
+)
+from robot_server.labware_offsets.models import (
+    StoredLabwareOffset,
     DoNotFilterType,
     DO_NOT_FILTER,
 )
-from robot_server.labware_offsets.models import StoredLabwareOffset
 
 
 @pytest.fixture
