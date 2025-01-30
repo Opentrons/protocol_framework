@@ -48,11 +48,8 @@ describe('Redesigned Mixing Steps - Happy Path', () => {
       MixVerifications.AspWellOrder,
       MixActions.AspMixTipPos,
       MixVerifications.AspMixTipPos,
-      // MixActions.TipPosSideImageMove,
-      // MixActions.TipPosTopImageMove,
-      // MixVerification.TipPosCollisionCheck:
-      // MixActions.Delay,
-      // Actions.FlowRateWarning, //for asp
+      MixActions.Delay,
+      // MixActions.Save,
       // MixActions.Back,
       // MixActions.Dispense,
       // MixVerifications.PartTwoDisp,
@@ -60,13 +57,17 @@ describe('Redesigned Mixing Steps - Happy Path', () => {
       // MixActions.Delay,
       // MixActions.Blowout,
       // MixActions.TouchTip,
-      // Actions.FlowRateWarning, //for disp
-
+      
     ]
     runSteps(steps)
   });
 });
 
 /*
-NEED TO ADD RENAME
+To Add:
+MixActions.TipPosSideImageMove,
+MixActions.Rename,
+MixActions.TipPosTopImageMove,
+MixVerification.TipPosCollisionCheck,
+MixActions.FlowRateWarning, **for asp and disp
 */
