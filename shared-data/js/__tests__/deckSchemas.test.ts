@@ -12,8 +12,8 @@ import deckSchemaV6 from '../../deck/schemas/6.json'
 const fixtureGlob = path.join(__dirname, '../../deck/fixtures/3/*.json')
 const defGlob = path.join(__dirname, '../../deck/definitions/3/*.json')
 const defV4Glob = path.join(__dirname, '../../deck/definitions/4/*.json')
-const defV5Glob = path.join(__dirname, '../../deck/definitions/5/*.json*')
-const defV6Glob = path.join(__dirname, '../../deck/definitions/6/*.json*')
+const defV5Glob = path.join(__dirname, '../../deck/definitions/5/*.json')
+const defV6Glob = path.join(__dirname, '../../deck/definitions/6/*.json')
 
 const ajv = new Ajv({ allErrors: true, jsonPointers: true })
 
