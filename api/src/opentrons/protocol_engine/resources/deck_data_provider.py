@@ -1,4 +1,5 @@
 """Deck data resource provider."""
+
 from dataclasses import dataclass
 from typing import List, Optional, cast
 from typing_extensions import final
@@ -9,7 +10,7 @@ from opentrons_shared_data.deck import (
     load as load_deck,
     DEFAULT_DECK_DEFINITION_VERSION,
 )
-from opentrons_shared_data.deck.types import DeckDefinitionV5
+from opentrons_shared_data.deck.types import DeckDefinitionV6
 from opentrons_shared_data.labware.labware_definition import LabwareDefinition
 from opentrons.types import DeckSlotName
 
@@ -44,10 +45,10 @@ class DeckDataProvider:
         self._deck_type = deck_type
         self._labware_data = labware_data or LabwareDataProvider()
 
-    async def get_deck_definition(self) -> DeckDefinitionV5:
+    async def get_deck_definition(self) -> DeckDefinitionV6:
         """Get a labware definition given the labware's identification."""
 
-        def sync() -> DeckDefinitionV5:
+        def sync() -> DeckDefinitionV6:
             return load_deck(
                 name=self._deck_type.value, version=DEFAULT_DECK_DEFINITION_VERSION
             )
@@ -57,7 +58,7 @@ class DeckDataProvider:
     async def get_deck_fixed_labware(
         self,
         load_fixed_trash: bool,
-        deck_definition: DeckDefinitionV5,
+        deck_definition: DeckDefinitionV6,
         deck_configuration: Optional[DeckConfigurationType] = None,
     ) -> List[DeckFixedLabware]:
         """Get a list of all labware fixtures from a given deck definition."""

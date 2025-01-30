@@ -13,7 +13,7 @@ from decoy import Decoy
 from typing import Dict, Set, Optional, cast
 
 from opentrons_shared_data.robot.types import RobotType
-from opentrons_shared_data.deck.types import DeckDefinitionV5
+from opentrons_shared_data.deck.types import DeckDefinitionV6
 from opentrons.types import Point, DeckSlotName
 
 from opentrons.protocol_engine.errors import (
@@ -54,7 +54,7 @@ def get_addressable_area_view(
     potential_cutout_fixtures_by_cutout_id: Optional[
         Dict[str, Set[PotentialCutoutFixture]]
     ] = None,
-    deck_definition: Optional[DeckDefinitionV5] = None,
+    deck_definition: Optional[DeckDefinitionV6] = None,
     deck_configuration: Optional[DeckConfigurationType] = None,
     robot_type: RobotType = "OT-3 Standard",
     use_simulated_deck_config: bool = False,
@@ -64,7 +64,7 @@ def get_addressable_area_view(
         loaded_addressable_areas_by_name=loaded_addressable_areas_by_name or {},
         potential_cutout_fixtures_by_cutout_id=potential_cutout_fixtures_by_cutout_id
         or {},
-        deck_definition=deck_definition or cast(DeckDefinitionV5, {"otId": "fake"}),
+        deck_definition=deck_definition or cast(DeckDefinitionV6, {"otId": "fake"}),
         robot_definition={
             "displayName": "OT-3",
             "robotType": "OT-3 Standard",
@@ -399,7 +399,7 @@ def test_get_slot_definition() -> None:
 
 def test_get_slot_definition_raises_with_bad_slot_name(decoy: Decoy) -> None:
     """It should raise a SlotDoesNotExistError if a bad slot name is given."""
-    deck_definition = cast(DeckDefinitionV5, {"otId": "fake"})
+    deck_definition = cast(DeckDefinitionV6, {"otId": "fake"})
     subject = get_addressable_area_view(
         deck_definition=deck_definition,
     )

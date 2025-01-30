@@ -1,11 +1,12 @@
 """Tests for the top-level StateStore/StateView."""
+
 from typing import Any, Callable, Union
 from datetime import datetime
 
 import pytest
 from decoy import Decoy
 
-from opentrons_shared_data.deck.types import DeckDefinitionV5
+from opentrons_shared_data.deck.types import DeckDefinitionV6
 from opentrons.util.change_notifier import ChangeNotifier
 
 from opentrons.protocol_engine.actions import PlayAction
@@ -33,7 +34,7 @@ def engine_config() -> Config:
 @pytest.fixture
 def subject(
     change_notifier: ChangeNotifier,
-    ot2_standard_deck_def: DeckDefinitionV5,
+    ot2_standard_deck_def: DeckDefinitionV6,
     engine_config: Config,
 ) -> StateStore:
     """Get a StateStore test subject."""
