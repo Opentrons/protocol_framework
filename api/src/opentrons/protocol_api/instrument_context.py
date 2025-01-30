@@ -1723,8 +1723,6 @@ class InstrumentContext(publisher.CommandPublisher):
         tip will perform a `pick up` action but there will be no tip tracking
         associated with the pipette.
 
-        See :ref:`resin_tip_seal` for examples.
-
         :param location: A location containing resin tips, must be a Labware or a Well.
 
         :type location: :py:class:`~.types.Location`
@@ -1754,8 +1752,6 @@ class InstrumentContext(publisher.CommandPublisher):
         """Release resin tips from the pipette.
 
         The location provided should be a valid location to drop resin tips.
-
-        See :ref:`resin_tip_unseal` for examples.
 
         :param location: A location containing that can accept tips.
 
@@ -1798,8 +1794,6 @@ class InstrumentContext(publisher.CommandPublisher):
         The location provided should contain resin tips labware as well as a
         receptical for dispensed liquid. Dispensing from tip will perform a
         `dispense` action of the specified volume at a desired flow rate.
-
-        See :ref:`resin_tip_dispense` for examples.
 
         :param location: A location containing resin tips.
         :type location: :py:class:`~.types.Location`
