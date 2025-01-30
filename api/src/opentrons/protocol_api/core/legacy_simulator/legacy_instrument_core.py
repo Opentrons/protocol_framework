@@ -297,7 +297,6 @@ class LegacyInstrumentCoreSimulator(AbstractInstrument[LegacyWellCore]):
         well_core: WellCore,
         volume: Optional[float] = None,
         flow_rate: Optional[float] = None,
-        push_out: Optional[float] = None,
     ) -> None:
         raise APIVersionError(api_element="Dispensing liquid from resin tips.")
 

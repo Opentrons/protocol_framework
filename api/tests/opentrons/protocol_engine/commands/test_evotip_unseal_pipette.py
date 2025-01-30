@@ -26,7 +26,9 @@ from opentrons.protocol_engine.resources.model_utils import ModelUtils
 from opentrons.protocol_engine.state import update_types
 from opentrons.protocol_engine.state.state import StateView
 from opentrons.protocol_engine.execution import MovementHandler, GantryMover, TipHandler
-
+from opentrons.protocols.models import LabwareDefinition
+import json
+from opentrons_shared_data import load_shared_data
 
 from opentrons.types import Point
 
@@ -82,6 +84,19 @@ def test_drop_tip_params_default_origin() -> None:
     )
 
 
+@pytest.fixture
+def evotips_definition() -> LabwareDefinition:
+    """A fixturee of the evotips definition."""
+    # TODO (chb 2025-01-29): When we migrate all labware to v3 we can clean this up
+    return LabwareDefinition.model_validate(
+        json.loads(
+            load_shared_data(
+                "labware/definitions/3/evotips_opentrons_96_labware/1.json"
+            )
+        )
+    )
+
+
 async def test_drop_tip_implementation(
     decoy: Decoy,
     mock_state_view: StateView,
@@ -89,6 +104,7 @@ async def test_drop_tip_implementation(
     mock_tip_handler: TipHandler,
     mock_model_utils: ModelUtils,
     gantry_mover: GantryMover,
+    evotips_definition: LabwareDefinition,
 ) -> None:
     """A DropTip command should have an execution implementation."""
     subject = EvotipUnsealPipetteImplementation(
@@ -104,6 +120,9 @@ async def test_drop_tip_implementation(
         labwareId="123",
         wellName="A3",
         wellLocation=DropTipWellLocation(offset=WellOffset(x=1, y=2, z=3)),
+    )
+    decoy.when(mock_state_view.labware.get_definition("123")).then_return(
+        evotips_definition
     )
 
     decoy.when(
@@ -154,90 +173,14 @@ async def test_drop_tip_implementation(
             ),
         ),
     )
-
     decoy.verify(
-        await mock_tip_handler.drop_tip(pipette_id="abc", home_after=True),
-        times=1,
-    )
-
-
-async def test_drop_tip_with_alternating_locations(
-    decoy: Decoy,
-    mock_state_view: StateView,
-    mock_movement_handler: MovementHandler,
-    mock_tip_handler: TipHandler,
-    mock_model_utils: ModelUtils,
-    gantry_mover: GantryMover,
-) -> None:
-    """It should drop tip at random location within the labware every time."""
-    subject = EvotipUnsealPipetteImplementation(
-        state_view=mock_state_view,
-        movement=mock_movement_handler,
-        tip_handler=mock_tip_handler,
-        model_utils=mock_model_utils,
-        gantry_mover=gantry_mover,
-    )
-    params = EvotipUnsealPipetteParams(
-        pipetteId="abc",
-        labwareId="123",
-        wellName="A3",
-        wellLocation=DropTipWellLocation(offset=WellOffset(x=1, y=2, z=3)),
-    )
-    drop_location = DropTipWellLocation(
-        origin=DropTipWellOrigin.DEFAULT, offset=WellOffset(x=10, y=20, z=30)
-    )
-    decoy.when(
-        mock_state_view.geometry.get_next_tip_drop_location(
-            labware_id="123", well_name="A3", pipette_id="abc"
-        )
-    ).then_return(drop_location)
-
-    decoy.when(
-        mock_state_view.pipettes.get_is_partially_configured(pipette_id="abc")
-    ).then_return(False)
-
-    decoy.when(
-        mock_state_view.geometry.get_checked_tip_drop_location(
+        await mock_tip_handler.drop_tip(
             pipette_id="abc",
-            labware_id="123",
-            well_location=drop_location,
-            partially_configured=False,
-        )
-    ).then_return(WellLocation(offset=WellOffset(x=4, y=5, z=6)))
-
-    decoy.when(
-        await mock_movement_handler.move_to_well(
-            pipette_id="abc",
-            labware_id="123",
-            well_name="A3",
-            well_location=WellLocation(offset=WellOffset(x=4, y=5, z=6)),
-            current_well=None,
-            force_direct=False,
-            minimum_z_height=None,
-            speed=None,
-            operation_volume=None,
-        )
-    ).then_return(Point(x=111, y=222, z=333))
-
-    result = await subject.execute(params)
-    assert result == SuccessData(
-        public=EvotipUnsealPipetteResult(position=DeckPoint(x=111, y=222, z=333)),
-        state_update=update_types.StateUpdate(
-            pipette_location=update_types.PipetteLocationUpdate(
-                pipette_id="abc",
-                new_location=update_types.Well(
-                    labware_id="123",
-                    well_name="A3",
-                ),
-                new_deck_point=DeckPoint(x=111, y=222, z=333),
-            ),
-            pipette_tip_state=update_types.PipetteTipStateUpdate(
-                pipette_id="abc", tip_geometry=None
-            ),
-            pipette_aspirated_fluid=update_types.PipetteUnknownFluidUpdate(
-                pipette_id="abc"
-            ),
+            home_after=None,
+            do_not_ignore_tip_presence=False,
+            ignore_plunger=True,
         ),
+        times=1,
     )
 
 
@@ -248,6 +191,7 @@ async def test_tip_attached_error(
     mock_tip_handler: TipHandler,
     mock_model_utils: ModelUtils,
     gantry_mover: GantryMover,
+    evotips_definition: LabwareDefinition,
 ) -> None:
     """A Evotip Unseal command should have an execution implementation."""
     subject = EvotipUnsealPipetteImplementation(
@@ -264,6 +208,9 @@ async def test_tip_attached_error(
         wellName="A3",
         wellLocation=DropTipWellLocation(offset=WellOffset(x=1, y=2, z=3)),
     )
+    decoy.when(mock_state_view.labware.get_definition("123")).then_return(
+        evotips_definition
+    )
 
     decoy.when(
         mock_state_view.pipettes.get_is_partially_configured(pipette_id="abc")
@@ -292,7 +239,12 @@ async def test_tip_attached_error(
         )
     ).then_return(Point(x=111, y=222, z=333))
     decoy.when(
-        await mock_tip_handler.drop_tip(pipette_id="abc", home_after=None)
+        await mock_tip_handler.drop_tip(
+            pipette_id="abc",
+            home_after=None,
+            do_not_ignore_tip_presence=False,
+            ignore_plunger=True,
+        )
     ).then_raise(TipAttachedError("Egads!"))
 
     decoy.when(mock_model_utils.generate_id()).then_return("error-id")
@@ -300,43 +252,8 @@ async def test_tip_attached_error(
         datetime(year=1, month=2, day=3)
     )
 
-    result = await subject.execute(params)
-
-    assert result == DefinedErrorData(
-        public=StallOrCollisionError.model_construct(
-            id="error-id",
-            createdAt=datetime(year=1, month=2, day=3),
-            wrappedErrors=[matchers.Anything()],
-            errorInfo={"retryLocation": (111, 222, 333)},
-        ),
-        state_update=update_types.StateUpdate(
-            pipette_location=update_types.PipetteLocationUpdate(
-                pipette_id="abc",
-                new_location=update_types.Well(
-                    labware_id="123",
-                    well_name="A3",
-                ),
-                new_deck_point=DeckPoint(x=111, y=222, z=333),
-            ),
-            pipette_aspirated_fluid=update_types.PipetteUnknownFluidUpdate(
-                pipette_id="abc"
-            ),
-        ),
-        state_update_if_false_positive=update_types.StateUpdate(
-            pipette_tip_state=update_types.PipetteTipStateUpdate(
-                pipette_id="abc",
-                tip_geometry=None,
-            ),
-            pipette_location=update_types.PipetteLocationUpdate(
-                pipette_id="abc",
-                new_location=update_types.Well(
-                    labware_id="123",
-                    well_name="A3",
-                ),
-                new_deck_point=DeckPoint(x=111, y=222, z=333),
-            ),
-        ),
-    )
+    with pytest.raises(TipAttachedError):
+        await subject.execute(params)
 
 
 async def test_stall_error(
@@ -346,6 +263,7 @@ async def test_stall_error(
     mock_tip_handler: TipHandler,
     mock_model_utils: ModelUtils,
     gantry_mover: GantryMover,
+    evotips_definition: LabwareDefinition,
 ) -> None:
     """A DropTip command should have an execution implementation."""
     subject = EvotipUnsealPipetteImplementation(
@@ -361,6 +279,9 @@ async def test_stall_error(
         labwareId="123",
         wellName="A3",
         wellLocation=DropTipWellLocation(offset=WellOffset(x=1, y=2, z=3)),
+    )
+    decoy.when(mock_state_view.labware.get_definition("123")).then_return(
+        evotips_definition
     )
 
     decoy.when(

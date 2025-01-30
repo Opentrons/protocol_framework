@@ -204,7 +204,6 @@ class AbstractInstrument(ABC, Generic[WellCoreType]):
         well_core: WellCoreType,
         volume: Optional[float] = None,
         flow_rate: Optional[float] = None,
-        push_out: Optional[float] = None,
     ) -> None:
         ...
 

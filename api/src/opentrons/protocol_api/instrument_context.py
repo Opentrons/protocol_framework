@@ -1792,7 +1792,6 @@ class InstrumentContext(publisher.CommandPublisher):
         location: types.Location,
         volume: Optional[float] = None,
         rate: Optional[float] = None,
-        push_out: Optional[float] = None,
     ) -> InstrumentContext:
         """Dispense a volume from resin tips into a labware.
 
@@ -1813,12 +1812,6 @@ class InstrumentContext(publisher.CommandPublisher):
                      a pipette dispenses liquid. The speed in µL/s is calculated as
                      ``rate`` multiplied by :py:attr:`flow_rate.dispense<flow_rate>`.
         :type rate: float
-
-        :param push_out: Continue past the plunger bottom to help ensure all liquid
-                         leaves the tip. Measured in µL. The default value is ``None``.
-
-                         See :ref:`push-out-dispense` for details.
-        :type push_out: float
 
         """
         well: Optional[labware.Well] = None
@@ -1863,7 +1856,6 @@ class InstrumentContext(publisher.CommandPublisher):
                 well_core=well._core,
                 volume=volume,
                 flow_rate=rate,
-                push_out=push_out,
             )
         return self
 
