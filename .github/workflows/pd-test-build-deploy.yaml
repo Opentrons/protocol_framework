@@ -45,6 +45,9 @@ jobs:
       contents: read
       packages: write
     steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Build Container
         id: container
         uses: ./.github/actions/container/ci

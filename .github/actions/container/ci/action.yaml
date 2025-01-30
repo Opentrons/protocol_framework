@@ -33,12 +33,6 @@ runs:
           buildx-${{ inputs.git_ref }}
           buildx-edge
 
-    - uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
-        sparse-checkout: ci-docker
-        sparse-checkout-cone-mode: false
-
     - name: 'Fix actions/checkout odd handling of tags'
       if: startsWith(inputs.git_ref, 'refs/tags')
       shell: bash
