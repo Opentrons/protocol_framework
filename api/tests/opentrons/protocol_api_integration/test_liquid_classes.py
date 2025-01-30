@@ -1,23 +1,17 @@
 """Tests for the APIs around liquid classes."""
 import pytest
-from decoy import Decoy
-from opentrons_shared_data.robot.types import RobotTypeEnum
 
 from opentrons.protocol_api import ProtocolContext
-from opentrons.config import feature_flags as ff
 
 
 @pytest.mark.ot3_only
 @pytest.mark.parametrize(
-    "simulated_protocol_context", [("2.20", "Flex")], indirect=True
+    "simulated_protocol_context", [("2.23", "Flex")], indirect=True
 )
 def test_liquid_class_creation_and_property_fetching(
-    decoy: Decoy,
-    mock_feature_flags: None,
     simulated_protocol_context: ProtocolContext,
 ) -> None:
     """It should create the liquid class and provide access to its properties."""
-    decoy.when(ff.allow_liquid_classes(RobotTypeEnum.FLEX)).then_return(True)
     pipette_load_name = "flex_8channel_50"
     simulated_protocol_context.load_instrument(pipette_load_name, mount="left")
     tiprack = simulated_protocol_context.load_labware(
@@ -51,12 +45,3 @@ def test_liquid_class_creation_and_property_fetching(
 
     with pytest.raises(ValueError, match="Liquid class definition not found"):
         simulated_protocol_context.define_liquid_class("non-existent-liquid")
-
-
-@pytest.mark.parametrize(
-    "simulated_protocol_context", [("2.20", "OT-2")], indirect=True
-)
-def test_liquid_class_feature_flag(simulated_protocol_context: ProtocolContext) -> None:
-    """It should raise a not implemented error without the allowLiquidClass flag set."""
-    with pytest.raises(NotImplementedError):
-        simulated_protocol_context.define_liquid_class("water")

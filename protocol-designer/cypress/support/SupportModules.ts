@@ -46,7 +46,7 @@ export const executeModSteps = (action: ModActions): void => {
         .click({ force: true })
       break
     case ModActions.AddTemperatureStep:
-      cy.contains('button', 'Temperature').click()
+      cy.contains('button', 'Temperature').click({ force: true })
       break
     case ModActions.ActivateTempdeck:
       cy.contains(ModContent.DecativeTempDeck)
@@ -72,7 +72,7 @@ export const executeModSteps = (action: ModActions): void => {
         .click()
       break
     case ModActions.SaveButtonTempdeck:
-      cy.contains(ModContent.Save).click()
+      cy.contains(ModContent.Save).click({ force: true })
       break
     default:
       throw new Error(`Unrecognized action: ${action as string}`)
