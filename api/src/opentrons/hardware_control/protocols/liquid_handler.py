@@ -186,7 +186,7 @@ class LiquidHandler(
         self,
         mount: MountArgType,
         home_after: bool = True,
-        ignore_plunger: Optional[bool] = False,
+        ignore_plunger: bool = False,
     ) -> None:
         ...
 

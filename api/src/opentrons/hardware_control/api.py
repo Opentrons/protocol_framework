@@ -1252,7 +1252,7 @@ class API(
         self,
         mount: top_types.Mount,
         home_after: bool = True,
-        ignore_plunger: Optional[bool] = False,
+        ignore_plunger: bool = False,
     ) -> None:
         spec, _ = self.plan_check_drop_tip(mount, home_after)
 
