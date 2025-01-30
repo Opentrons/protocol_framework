@@ -108,7 +108,7 @@ class _RequiredAddressableArea(TypedDict):
     displayName: str
 
 
-class AddressableArea(_RequiredAddressableArea, total=False):
+class AddressableAreaV4(_RequiredAddressableArea, total=False):
     compatibleModuleTypes: List[ModuleType]
     matingSurfaceUnitVector: List[Union[Literal[1], Literal[-1]]]
     ableToDropTips: bool
@@ -150,7 +150,7 @@ class LocationsV3(TypedDict):
 
 
 class LocationsV4(TypedDict):
-    addressableAreas: List[AddressableArea]
+    addressableAreas: List[AddressableAreaV4]
     calibrationPoints: List[CalibrationPoint]
     cutouts: List[Cutout]
     legacyFixtures: List[Fixture]
