@@ -1008,7 +1008,12 @@ class InstrumentCore(AbstractInstrument[WellCore, LabwareCore]):
         source_dest_per_volume_step = tx_commons.expand_for_volume_constraints(
             volumes=[volume for _ in range(len(source))],
             targets=zip(source, dest),
-            max_volume=self.get_max_volume(),
+            max_volume=min(
+                self.get_max_volume(),
+                tip_racks[0][1]
+                .get_well_core("A1")
+                .get_max_volume(),  # Assuming all tips in tiprack are of same volume
+            ),
         )
 
         def _drop_tip() -> None:
