@@ -780,6 +780,10 @@ describe('_getSavedMultiSelectFieldValues', () => {
           isIndeterminate: false,
           value: 1,
         },
+        aspirate_submerge_delay_seconds: {
+          isIndeterminate: false,
+          value: undefined,
+        },
         aspirate_submerge_speed: {
           isIndeterminate: false,
           value: undefined,
@@ -835,6 +839,10 @@ describe('_getSavedMultiSelectFieldValues', () => {
         dispense_touchTip_mmFromBottom: {
           isIndeterminate: false,
           value: 1,
+        },
+        dispense_submerge_delay_seconds: {
+          isIndeterminate: false,
+          value: undefined,
         },
         dispense_submerge_speed: {
           isIndeterminate: false,

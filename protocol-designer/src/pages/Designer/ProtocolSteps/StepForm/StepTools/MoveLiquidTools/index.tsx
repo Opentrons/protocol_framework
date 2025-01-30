@@ -376,10 +376,10 @@ export function MoveLiquidTools(props: StepFormProps): JSX.Element {
                   showTooltip={false}
                   padding="0"
                   title={t('protocol_steps:delay_duration')}
-                  {...propsForFields[`${tab}_delay_seconds`]}
+                  {...propsForFields[`${tab}_submerge_delay_seconds`]}
                   units={t('application:units.seconds')}
                   errorToShow={getFormLevelError(
-                    `${tab}_delay_seconds`,
+                    `${tab}_submerge_delay_seconds`,
                     mappedErrorsToField
                   )}
                 />

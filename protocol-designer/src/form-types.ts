@@ -254,6 +254,7 @@ export interface HydratedMoveLiquidFormData extends AnnotationFields {
   aspirate_mix_times?: number | null
   aspirate_mix_volume?: number | null
   aspirate_mmFromBottom?: number | null
+  aspirate_submerge_delay_seconds?: number | null
   aspirate_submerge_speed?: number | null
   aspirate_touchTip_mmFromBottom?: number | null
   aspirate_wells_grouped?: boolean | null
@@ -269,6 +270,7 @@ export interface HydratedMoveLiquidFormData extends AnnotationFields {
   dispense_mix_times?: number | null
   dispense_mix_volume?: number | null
   dispense_mmFromBottom?: number | null
+  dispense_submerge_delay_seconds?: number | null
   dispense_submerge_speed?: number | null
   dispense_touchTip_mmFromBottom?: number | null
   dispense_x_position?: number | null
