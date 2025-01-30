@@ -42,7 +42,7 @@ from opentrons.protocol_engine.types import (
 from opentrons.protocol_engine.errors.exceptions import TipNotAttachedError
 from opentrons.protocol_engine.clients import SyncClient as EngineClient
 from opentrons.protocols.api_support.definitions import MAX_SUPPORTED_VERSION
-from opentrons_shared_data.pipette.types import PipetteNameType, PIPETTE_API_NAMES_MAP
+from opentrons_shared_data.pipette.types import PIPETTE_API_NAMES_MAP
 from opentrons_shared_data.errors.exceptions import (
     UnsupportedHardwareCommand,
 )
