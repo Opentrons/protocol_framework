@@ -187,6 +187,9 @@ EXPECTED_STATEMENTS_LATEST = [
        FOREIGN KEY(offset_id) REFERENCES labware_offset_with_sequence (row_id)
     )
     """,
+    """
+    CREATE INDEX ix_labware_offset_sequence_components_offset_id ON labware_offset_sequence_components (offset_id)
+    """,
 ]
 
 EXPECTED_STATEMENTS_V10 = EXPECTED_STATEMENTS_LATEST
