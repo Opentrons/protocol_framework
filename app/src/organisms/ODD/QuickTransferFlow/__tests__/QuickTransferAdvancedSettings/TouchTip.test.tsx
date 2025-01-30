@@ -148,7 +148,7 @@ describe('TouchTip', () => {
         error: 'Value must be between -25 to 0',
         readOnly: true,
         type: 'number',
-        value: -98,
+        value: '-98',
       },
       {}
     )
@@ -174,7 +174,7 @@ describe('TouchTip', () => {
         error: 'Value must be between -100 to 0',
         readOnly: true,
         type: 'number',
-        value: 1,
+        value: '1',
       },
       {}
     )
@@ -214,7 +214,7 @@ describe('TouchTip', () => {
         error: null,
         readOnly: true,
         type: 'number',
-        value: -25,
+        value: '-25',
       },
       {}
     )
@@ -238,7 +238,7 @@ describe('TouchTip', () => {
         error: null,
         readOnly: true,
         type: 'number',
-        value: -8,
+        value: '-8',
       },
       {}
     )
