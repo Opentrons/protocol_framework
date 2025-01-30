@@ -320,8 +320,6 @@ async def test_liquid_not_found_error(
             operation_volume=None,
         ),
     ).then_return(position)
-    # print(movement)
-    # decoy.when(await movement._gantry_mover.get_position("pipette-id")).then_return({"x":0, "y":0, "z":0})
     decoy.when(
         await pipetting.liquid_probe_in_place(
             pipette_id=pipette_id,
