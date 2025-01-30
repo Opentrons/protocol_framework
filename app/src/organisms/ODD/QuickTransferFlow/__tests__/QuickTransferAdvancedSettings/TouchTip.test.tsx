@@ -113,8 +113,8 @@ describe('TouchTip', () => {
         title: 'Touch tip position from top of well (mm)',
         error: null,
         readOnly: true,
-        type: 'number',
-        value: null,
+        type: 'text',
+        value: '',
       },
       {}
     )
@@ -147,7 +147,7 @@ describe('TouchTip', () => {
         title: 'Touch tip position from top of well (mm)',
         error: 'Value must be between -25 to 0',
         readOnly: true,
-        type: 'number',
+        type: 'text',
         value: '-98',
       },
       {}
@@ -173,7 +173,7 @@ describe('TouchTip', () => {
         title: 'Touch tip position from top of well (mm)',
         error: 'Value must be between -100 to 0',
         readOnly: true,
-        type: 'number',
+        type: 'text',
         value: '1',
       },
       {}
@@ -213,7 +213,7 @@ describe('TouchTip', () => {
         title: 'Touch tip position from top of well (mm)',
         error: null,
         readOnly: true,
-        type: 'number',
+        type: 'text',
         value: '-25',
       },
       {}
@@ -237,7 +237,7 @@ describe('TouchTip', () => {
         title: 'Touch tip position from top of well (mm)',
         error: null,
         readOnly: true,
-        type: 'number',
+        type: 'text',
         value: '-8',
       },
       {}
