@@ -1180,10 +1180,11 @@ class InstrumentCore(AbstractInstrument[WellCore, LabwareCore]):
         Return: List of liquid and air gap pairs in tip.
         """
         aspirate_props = transfer_properties.aspirate
+        # TODO (spp, 2025-01-30): check if check_valid_volume_parameters is necessary and is enough.
         tx_commons.check_valid_volume_parameters(
             disposal_volume=0,  # No disposal volume for 1-to-1 transfer
             air_gap=aspirate_props.retract.air_gap_by_volume.get_for_volume(volume),
-            max_volume=self.get_max_volume(),
+            max_volume=self.get_working_volume(),
         )
         source_loc, source_well = source
         aspirate_point = (
