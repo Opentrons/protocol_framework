@@ -1858,6 +1858,147 @@ class InstrumentContext(publisher.CommandPublisher):
 
         return self
 
+    @requires_version(2, 22)
+    def resin_tip_seal(
+        self,
+        location: Union[labware.Well, labware.Labware],
+    ) -> InstrumentContext:
+        """Seal resin tips onto the pipette.
+
+        The location provided should contain resin tips. Sealing the
+        tip will perform a `pick up` action but there will be no tip tracking
+        associated with the pipette.
+
+        :param location: A location containing resin tips, must be a Labware or a Well.
+
+        :type location: :py:class:`~.types.Location`
+        """
+        if isinstance(location, labware.Labware):
+            well = location.wells()[0]
+        else:
+            well = location
+
+        with publisher.publish_context(
+            broker=self.broker,
+            command=cmds.seal(
+                instrument=self,
+                location=well,
+            ),
+        ):
+            self._core.resin_tip_seal(
+                location=well.top(), well_core=well._core, in_place=False
+            )
+        return self
+
+    @requires_version(2, 22)
+    def resin_tip_unseal(
+        self,
+        location: Union[labware.Well, labware.Labware],
+    ) -> InstrumentContext:
+        """Release resin tips from the pipette.
+
+        The location provided should be a valid location to drop resin tips.
+
+        :param location: A location containing that can accept tips.
+
+        :type location: :py:class:`~.types.Location`
+
+        :param home_after:
+            Whether to home the pipette after dropping the tip. If not specified
+            defaults to ``True`` on a Flex. The plunger will not home on an unseal.
+
+            When ``False``, the pipette does not home its plunger. This can save a few
+            seconds, but is not recommended. Homing helps the robot track the pipette's
+            position.
+
+        """
+        if isinstance(location, labware.Labware):
+            well = location.wells()[0]
+        else:
+            well = location
+
+        with publisher.publish_context(
+            broker=self.broker,
+            command=cmds.unseal(
+                instrument=self,
+                location=well,
+            ),
+        ):
+            self._core.resin_tip_unseal(location=well.top(), well_core=well._core)
+
+        return self
+
+    @requires_version(2, 22)
+    def resin_tip_dispense(
+        self,
+        location: types.Location,
+        volume: Optional[float] = None,
+        rate: Optional[float] = None,
+    ) -> InstrumentContext:
+        """Dispense a volume from resin tips into a labware.
+
+        The location provided should contain resin tips labware as well as a
+        receptical for dispensed liquid. Dispensing from tip will perform a
+        `dispense` action of the specified volume at a desired flow rate.
+
+        :param location: A location containing resin tips.
+        :type location: :py:class:`~.types.Location`
+
+        :param volume: Will default to maximum, recommended to use the default.
+                       The volume, in µL, that the pipette will prepare to handle.
+        :type volume: float
+
+        :param rate: Will default to 10.0, recommended to use the default. How quickly
+                     a pipette dispenses liquid. The speed in µL/s is calculated as
+                     ``rate`` multiplied by :py:attr:`flow_rate.dispense<flow_rate>`.
+        :type rate: float
+
+        """
+        well: Optional[labware.Well] = None
+        last_location = self._get_last_location_by_api_version()
+
+        try:
+            target = validation.validate_location(
+                location=location, last_location=last_location
+            )
+        except validation.NoLocationError as e:
+            raise RuntimeError(
+                "If dispense is called without an explicit location, another"
+                " method that moves to a location (such as move_to or "
+                "aspirate) must previously have been called so the robot "
+                "knows where it is."
+            ) from e
+
+        if isinstance(target, validation.WellTarget):
+            well = target.well
+            if target.location:
+                move_to_location = target.location
+            elif well.parent._core.is_fixed_trash():
+                move_to_location = target.well.top()
+            else:
+                move_to_location = target.well.bottom(
+                    z=self._well_bottom_clearances.dispense
+                )
+        else:
+            raise RuntimeError(
+                "A well must be specified when using `resin_tip_dispense`."
+            )
+
+        with publisher.publish_context(
+            broker=self.broker,
+            command=cmds.resin_tip_dispense(
+                instrument=self,
+                flow_rate=rate,
+            ),
+        ):
+            self._core.resin_tip_dispense(
+                move_to_location,
+                well_core=well._core,
+                volume=volume,
+                flow_rate=rate,
+            )
+        return self
+
     @requires_version(2, 18)
     def _retract(
         self,
