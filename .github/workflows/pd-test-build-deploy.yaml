@@ -11,6 +11,7 @@ on:
       - 'components/**'
       - 'package.json'
       - '.github/workflows/pd-test-build-deploy.yaml'
+      - '.github/actions/container/ci/action.yaml'
   push:
     paths:
       - 'protocol-designer/**'
@@ -19,6 +20,7 @@ on:
       - 'components/**'
       - 'package.json'
       - '.github/workflows/pd-test-build-deploy.yaml'
+      - '.github/actions/container/ci/action.yaml'
     branches:
       - '**'
     tags:
@@ -42,32 +44,30 @@ jobs:
     permissions:
       contents: read
       packages: write
-    outputs:
-      image: ${{ steps.container.outputs.image }}
     steps:
-      - uses: 'actions/checkout@v4'
-        with:
-          fetch-depth: 0
-        # https://github.com/actions/checkout/issues/290
-      - name: 'Fix actions/checkout odd handling of tags'
-        if: startsWith(github.ref, 'refs/tags')
-        run: |
-          git fetch -f origin ${{ github.ref }}:${{ github.ref }}
-          git checkout ${{ github.ref }}
       - name: Build Container
         id: container
         uses: ./.github/actions/container/ci
         with:
-          branch: ${{ github.ref_name }}
+          git_ref: ${{ github.ref_name }}
           token: ${{ secrets.GITHUB_TOKEN }}
 
   js-unit-test:
       needs: setup
       runs-on: 'ubuntu-22.04'
       steps:
-        - name: Run Tests in Container
+        - name: 'Run tests and generate coverage'
           run: |
-            docker run --rm ghcr.io/opentrons/opentrons-ci:${{ github.ref_name }} make -C protocol-designer test-cov
+            docker run --rm --tty \
+              -v $PWD/coverage:/coverage \
+              ghcr.io/opentrons/opentrons-ci:${{ github.ref_name }} \
+              make -C protocol-designer test-cov
+
+        - name: 'Upload coverage report'
+          uses: codecov/codecov-action@v3
+          with:
+            files: ./coverage/lcov.info
+            flags: protocol-designer
 
   # e2e-test:
   #   name: 'pd e2e tests'

@@ -60,7 +60,7 @@ setup-py-toolchain:
 	$(OT_PYTHON) -m pip install --upgrade pip
 	$(OT_PYTHON) -m pip install pipenv==2023.12.1
 
-# front-end dependecies handled by yarn
+# front-end dependencies handled by yarn
 .PHONY: setup-js
 setup-js:
 setup-js: setup-py-toolchain

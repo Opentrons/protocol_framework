@@ -1,16 +1,12 @@
 name: "Build CI Container"
 description: "Builds and publishes the CI container"
 inputs:
-  branch:
-    description: "Branch name"
+  git_ref:
+    description: "The Git Ref to build the container for"
     required: true
   token:
     description: "A Github Token (must have write:packages scope)"
     required: true
-outputs:
-  image:
-    description: "Full image name with tag"
-    value: ghcr.io/opentrons/opentrons-ci:${{ inputs.branch }}
 
 runs:
   using: "composite"
@@ -29,22 +25,37 @@ runs:
         driver-opts: network=host
 
     - name: Cache Docker Buildx Layers
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: /tmp/.buildx-cache
-        key: buildx-${{ inputs.branch }}
+        key: buildx-${{ inputs.git_ref }}
         restore-keys: |
-          buildx-${{ inputs.branch }}
+          buildx-${{ inputs.git_ref }}
           buildx-edge
-    
+
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        sparse-checkout: ci-docker
+        sparse-checkout-cone-mode: false
+
+    - name: 'Fix actions/checkout odd handling of tags'
+      if: startsWith(inputs.git_ref, 'refs/tags')
+      shell: bash
+      run: |
+        git fetch -f origin ${{ inputs.git_ref }}:${{ inputs.git_ref }}
+        git checkout ${{ inputs.git_ref }}
+
     - name: Build and push with cache
       id: build
       uses: docker/build-push-action@v6
       with:
-        context: .
+        context: ci-docker
+        build-args: |
+          GIT_REF=${{ inputs.git_ref }}
         target: ci
         push: true
-        tags: ghcr.io/opentrons/opentrons-ci:${{ inputs.branch }}
+        tags: ghcr.io/opentrons/opentrons-ci:${{ inputs.git_ref }}
         cache-from: |
           type=local,src=/tmp/.buildx-cache
           type=registry,ref=ghcr.io/opentrons/opentrons-ci:cache
