@@ -28,7 +28,6 @@ from .types import (
     LabwareOffset,
     LegacyLabwareOffsetCreate,
     LabwareOffsetCreate,
-    LegacyLabwareOffsetCreate,
     LabwareOffsetVector,
     LegacyLabwareOffsetLocation,
     LabwareOffsetLocationSequence,

@@ -65,15 +65,11 @@ def _upmigrate_stored_offsets(connection: sqlalchemy.engine.Connection) -> None:
     offsets = connection.execute(sqlalchemy.select(schema_9.labware_offset_table))
 
     for offset in offsets:
-        new_row = (
-            connection.execute(
-                sqlalchemy.insert(schema_10.labware_offset_table).values(
-                    _v9_offset_to_v10_offset(offset)
-                )
+        new_row = connection.execute(
+            sqlalchemy.insert(schema_10.labware_offset_table).values(
+                _v9_offset_to_v10_offset(offset)
             )
-            .one()
-            .row_id
-        )
+        ).lastrowid
         connection.execute(
             sqlalchemy.insert(
                 schema_10.labware_offset_location_sequence_components_table
@@ -86,7 +82,7 @@ def _upmigrate_stored_offsets(connection: sqlalchemy.engine.Connection) -> None:
 def _v9_offset_to_v10_offset(v9_offset: sqlalchemy.engine.Row) -> dict[str, object]:
     return dict(
         offset_id=v9_offset.offset_id,
-        definition_uri=v9_offset.definitionUri,
+        definition_uri=v9_offset.definition_uri,
         vector_x=v9_offset.vector_x,
         vector_y=v9_offset.vector_y,
         vector_z=v9_offset.vector_z,
