@@ -1,13 +1,23 @@
 """Request/response models for the `/labwareOffsets` endpoints."""
 
 from datetime import datetime
-from typing import Literal
+from typing import Literal, Annotated
 
 from pydantic import BaseModel, Field
 
-from opentrons.protocol_engine import LabwareOffsetVector, LabwareOffsetLocationSequence
+from opentrons.protocol_engine import (
+    LabwareOffsetVector,
+)
+from opentrons.protocol_engine.types.labware_offset_location import (
+    LabwareOffsetLocationSequenceComponentsUnion,
+)
 
 from robot_server.errors.error_responses import ErrorDetails
+
+# This is redefined here so we can add stuff to it easily
+StoredLabwareOffsetLocationSequenceComponents = Annotated[
+    LabwareOffsetLocationSequenceComponentsUnion, Field(discriminator="kind")
+]
 
 
 class StoredLabwareOffsetCreate(BaseModel):
@@ -15,9 +25,10 @@ class StoredLabwareOffsetCreate(BaseModel):
 
     definitionUri: str = Field(..., description="The URI for the labware's definition.")
 
-    locationSequence: LabwareOffsetLocationSequence = Field(
+    locationSequence: list[StoredLabwareOffsetLocationSequenceComponents] = Field(
         ...,
         description="Where the labware is located on the robot. Can represent all locations, but may not be present for older runs.",
+        min_length=1,
     )
     vector: LabwareOffsetVector = Field(
         ...,
@@ -35,7 +46,7 @@ class StoredLabwareOffset(BaseModel):
     createdAt: datetime = Field(..., description="When this labware offset was added.")
     definitionUri: str = Field(..., description="The URI for the labware's definition.")
 
-    locationSequence: LabwareOffsetLocationSequence = Field(
+    locationSequence: list[StoredLabwareOffsetLocationSequenceComponents] = Field(
         ...,
         description="Where the labware is located on the robot. Can represent all locations, but may not be present for older runs.",
         min_length=1,
