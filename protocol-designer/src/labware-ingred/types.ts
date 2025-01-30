@@ -1,5 +1,5 @@
 import type { CutoutId, ModuleModel } from '@opentrons/shared-data'
-import type { DeckSlot, LocationLiquidState } from '@opentrons/step-generation'
+import type { DeckSlot, LiquidEntity, LocationLiquidState } from '@opentrons/step-generation'
 // TODO Ian 2018-02-19 make these shared in component library, standardize with Run App
 //  ===== LABWARE ===========
 export interface DisplayLabware {
@@ -25,23 +25,16 @@ export type WellContentsByLabware = Record<string, ContentsByWell>
 // TODO(ND: 12/17/2024): add migration for liquids in >8.3.0
 export type OrderedLiquids = Array<{
   ingredientId: string
-  name?: string | null
+  displayName?: string | null
   displayColor?: string | null
   liquidClass?: string | null
 }>
 // TODO: Ian 2018-10-15 audit & rename these confusing types
-export interface LiquidGroup {
-  name: string | null
-  description: string | null
-  displayColor: string
-  liquidClass: string | null
-  serialize: boolean
+
+export type IngredInputs = LiquidEntity & {
+  volume?: number | null
 }
-export type IngredInputs = LiquidGroup & {
-  volume?: number | null | undefined
-}
-export type IngredGroupAccessor = keyof IngredInputs
-export type LiquidGroupsById = Record<string, LiquidGroup>
+export type LiquidGroupsById = Record<string, LiquidEntity>
 export type AllIngredGroupFields = Record<string, IngredInputs>
 
 export type Fixture =

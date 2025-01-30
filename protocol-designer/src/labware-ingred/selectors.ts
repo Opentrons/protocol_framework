@@ -5,7 +5,7 @@ import max from 'lodash/max'
 import reduce from 'lodash/reduce'
 import type { Selector } from 'reselect'
 import type { DropdownOption } from '@opentrons/components'
-import type { LabwareLiquidState } from '@opentrons/step-generation'
+import type { LabwareLiquidState, LiquidEntity } from '@opentrons/step-generation'
 import type { CutoutId } from '@opentrons/shared-data'
 import type {
   RootState,
@@ -18,7 +18,6 @@ import type {
 import type {
   AllIngredGroupFields,
   IngredInputs,
-  LiquidGroup,
   OrderedLiquids,
   ZoomedIntoSlotInfoState,
 } from './types'
@@ -54,7 +53,7 @@ const getLiquidNamesById: Selector<
 > = createSelector(
   getLiquidGroupsById,
   ingredGroups =>
-    mapValues(ingredGroups, (ingred: LiquidGroup) => ingred.name) as Record<
+    mapValues(ingredGroups, (ingred: LiquidEntity) => ingred.displayName) as Record<
       string,
       string
     >
@@ -66,7 +65,7 @@ const getLiquidSelectionOptions: Selector<
   return Object.keys(liquidGroupsById).map(id => ({
     // NOTE: if these fallbacks are used, it's a bug
     name: liquidGroupsById[id]
-      ? liquidGroupsById[id].name || `(Unnamed Liquid: ${String(id)})`
+      ? liquidGroupsById[id].displayName || `(Unnamed Liquid: ${String(id)})`
       : 'Missing Liquid',
     value: id,
   }))
@@ -111,7 +110,7 @@ const allIngredientNamesIds: Selector<
 > = createSelector(getLiquidGroupsById, ingreds => {
   return Object.keys(ingreds).map(ingredId => ({
     ingredientId: ingredId,
-    name: ingreds[ingredId].name,
+    name: ingreds[ingredId].displayName,
     displayColor: ingreds[ingredId].displayColor,
     liquidClass: ingreds[ingredId].liquidClass,
   }))

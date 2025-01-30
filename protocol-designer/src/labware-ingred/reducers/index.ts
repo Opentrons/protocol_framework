@@ -296,6 +296,7 @@ export const ingredients: Reducer<IngredientsState, any> = handleActions(
     LOAD_FILE: (
       state: IngredientsState,
       action: LoadFileAction
+      //  TODO: get this info from loadLiquid
     ): IngredientsState => getPDMetadata(action.payload.file).ingredients,
   },
   {}
@@ -351,6 +352,7 @@ export const ingredLocations: Reducer<LocationsState, any> = handleActions(
     LOAD_FILE: (
       state: LocationsState,
       action: LoadFileAction
+      //  TODO: get this info from loadLiquid
     ): LocationsState => getPDMetadata(action.payload.file).ingredLocations,
   },
   {}
