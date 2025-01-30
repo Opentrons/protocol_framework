@@ -203,9 +203,7 @@ export interface EditLiquidGroupAction {
 }
 // NOTE: with no ID, a new one is assigned
 export const editLiquidGroup: (
-  args: IngredInputs & {
-    liquidGroupId: string | null | undefined
-  }
+  args: IngredInputs
 ) => ThunkAction<EditLiquidGroupAction> = args => (dispatch, getState) => {
   const { liquidGroupId, ...payloadArgs } = args // NOTE: separate liquidGroupId for flow to understand unpacking :/
 

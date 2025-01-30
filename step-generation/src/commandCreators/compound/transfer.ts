@@ -46,6 +46,7 @@ export const transfer: CommandCreator<TransferArgs> = (
   invariantContext,
   prevRobotState
 ) => {
+  console.log('invariantcontext', invariantContext)
   /**
     Transfer will iterate through a set of 1 or more source and destination wells.
     For each pair, it will aspirate from the source well, then dispense into the destination well.

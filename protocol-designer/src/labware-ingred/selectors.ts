@@ -5,7 +5,10 @@ import max from 'lodash/max'
 import reduce from 'lodash/reduce'
 import type { Selector } from 'reselect'
 import type { DropdownOption } from '@opentrons/components'
-import type { LabwareLiquidState, LiquidEntity } from '@opentrons/step-generation'
+import type {
+  LabwareLiquidState,
+  LiquidEntity,
+} from '@opentrons/step-generation'
 import type { CutoutId } from '@opentrons/shared-data'
 import type {
   RootState,
@@ -18,17 +21,16 @@ import type {
 import type {
   AllIngredGroupFields,
   IngredInputs,
-  OrderedLiquids,
   ZoomedIntoSlotInfoState,
 } from './types'
 import type { BaseState, DeckSlot } from './../types'
+
 // TODO: Ian 2019-02-15 no RootSlice, use BaseState
 interface RootSlice {
   labwareIngred: RootState
 }
 
 const rootSelector = (state: RootSlice): RootState => state.labwareIngred
-
 // NOTE: not intended for UI use! Use getLabwareNicknamesById for the string.
 const getLabwareNameInfo: Selector<RootSlice, ContainersState> = createSelector(
   rootSelector,
@@ -53,10 +55,10 @@ const getLiquidNamesById: Selector<
 > = createSelector(
   getLiquidGroupsById,
   ingredGroups =>
-    mapValues(ingredGroups, (ingred: LiquidEntity) => ingred.displayName) as Record<
-      string,
-      string
-    >
+    mapValues(
+      ingredGroups,
+      (ingred: LiquidEntity) => ingred.displayName
+    ) as Record<string, string>
 )
 const getLiquidSelectionOptions: Selector<
   RootSlice,
@@ -104,17 +106,7 @@ const allIngredientGroupFields: Selector<
     {}
   )
 )
-const allIngredientNamesIds: Selector<
-  RootSlice,
-  OrderedLiquids
-> = createSelector(getLiquidGroupsById, ingreds => {
-  return Object.keys(ingreds).map(ingredId => ({
-    ingredientId: ingredId,
-    name: ingreds[ingredId].displayName,
-    displayColor: ingreds[ingredId].displayColor,
-    liquidClass: ingreds[ingredId].liquidClass,
-  }))
-})
+
 const getLabwareSelectionMode: Selector<RootSlice, boolean> = createSelector(
   rootSelector,
   rootState => {
@@ -181,7 +173,6 @@ const getIsNewProtocol: Selector<RootSlice, boolean> = createSelector(
 // TODO: prune selectors
 export const selectors = {
   rootSelector,
-  getLiquidGroupsById,
   getLiquidsByLabwareId,
   getLiquidNamesById,
   getLabwareSelectionMode,
@@ -194,7 +185,6 @@ export const selectors = {
   getSelectedLiquidGroupState,
   getDrillDownLabwareId,
   allIngredientGroupFields,
-  allIngredientNamesIds,
   selectedAddLabwareSlot,
   getDeckHasLiquid,
   getLiquidDisplayColors,

@@ -27,10 +27,12 @@ import { getFileMetadata, getRobotType } from './fileFields'
 import { getInitialRobotState, getRobotStateTimeline } from './commands'
 import { getLoadCommands } from './utils'
 
+import type { SecondOrderCommandAnnotation } from '@opentrons/shared-data/commandAnnotation/types'
 import type {
   PipetteEntity,
   LabwareEntities,
   PipetteEntities,
+  LiquidEntities,
 } from '@opentrons/step-generation'
 import type {
   CommandAnnotationV1Mixin,
@@ -43,10 +45,22 @@ import type {
   ProtocolBase,
   ProtocolFile,
 } from '@opentrons/shared-data'
+import type { DismissedWarningState } from '../../dismiss/reducers'
 import type { LabwareDefByDefURI } from '../../labware-defs'
 import type { Selector } from '../../types'
-import type { DesignerApplicationData } from '../../load-file/migration/utils/getLoadLiquidCommands'
-import type { SecondOrderCommandAnnotation } from '@opentrons/shared-data/commandAnnotation/types'
+
+export interface DesignerApplicationDataV8 {
+  ingredients: LiquidEntities
+  ingredLocations: {
+    [labwareId: string]: {
+      [wellName: string]: { [liquidId: string]: { volume: number } }
+    }
+  }
+  savedStepForms: Record<string, any>
+  orderedStepIds: string[]
+  pipetteTiprackAssignments: Record<string, string[]>
+  dismissedWarnings: DismissedWarningState
+}
 
 // TODO: BC: 2018-02-21 uncomment this assert, causes test failures
 // console.assert(!isEmpty(process.env.OT_PD_VERSION), 'Could not find application version!')
@@ -92,7 +106,7 @@ export const createFile: Selector<ProtocolFile> = createSelector(
   getRobotStateTimeline,
   getRobotType,
   dismissSelectors.getAllDismissedWarnings,
-  ingredSelectors.getLiquidGroupsById,
+  stepFormSelectors.getLiquidEntities,
   ingredSelectors.getLiquidsByLabwareId,
   stepFormSelectors.getSavedStepForms,
   stepFormSelectors.getOrderedStepIds,
@@ -108,7 +122,7 @@ export const createFile: Selector<ProtocolFile> = createSelector(
     robotStateTimeline,
     robotType,
     dismissedWarnings,
-    ingredients,
+    liquidEntities,
     ingredLocations,
     savedStepForms,
     orderedStepIds,
@@ -127,7 +141,7 @@ export const createFile: Selector<ProtocolFile> = createSelector(
       moduleEntities,
       labwareEntities,
       labwareNicknamesById,
-      ingredients,
+      liquidEntities,
       ingredLocations
     )
 
@@ -159,7 +173,7 @@ export const createFile: Selector<ProtocolFile> = createSelector(
             p.tiprackDefURI
         ),
         dismissedWarnings,
-        ingredients,
+        ingredients: liquidEntities,
         ingredLocations,
         savedStepForms,
         orderedStepIds: savedOrderedStepIds,
@@ -167,12 +181,12 @@ export const createFile: Selector<ProtocolFile> = createSelector(
     }
 
     const liquids: ProtocolFile['liquids'] = reduce(
-      ingredients,
+      liquidEntities,
       (acc, liquidData, liquidId) => {
         return {
           ...acc,
           [liquidId]: {
-            displayName: liquidData.name,
+            displayName: liquidData.displayName,
             description: liquidData.description ?? '',
             displayColor: liquidData.displayColor ?? swatchColors(liquidId),
           },
@@ -253,7 +267,7 @@ export const createFile: Selector<ProtocolFile> = createSelector(
       commandAnnotations,
     }
 
-    const protocolBase: ProtocolBase<DesignerApplicationData> = {
+    const protocolBase: ProtocolBase<DesignerApplicationDataV8> = {
       $otSharedSchema: '#/protocol/schemas/8',
       schemaVersion: 8,
       metadata: {

@@ -125,7 +125,7 @@ export interface LiquidEntity {
   displayColor: string
   description: string | null
   pythonName: string
-  liquidId: string
+  liquidGroupId: string
   liquidClass?: string
 }
 
