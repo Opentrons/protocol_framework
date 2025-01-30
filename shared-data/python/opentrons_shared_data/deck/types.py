@@ -20,7 +20,10 @@ DeckSchemaVersion1 = Literal[1]
 DeckSchema = NewType("DeckSchema", Dict[str, Any])
 
 DeckSchemaId = Literal[
-    "opentronsDeckSchemaV3", "opentronsDeckSchemaV4", "opentronsDeckSchemaV4"
+    "opentronsDeckSchemaV3",
+    "opentronsDeckSchemaV4",
+    "opentronsDeckSchemaV5",
+    "opentronsDeckSchemaV6",
 ]
 RobotModel = Union[Literal["OT-2 Standard"], Literal["OT-3 Standard"]]
 
