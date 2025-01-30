@@ -70,7 +70,7 @@ jobs:
         - name: 'Upload coverage report'
           uses: codecov/codecov-action@v3
           with:
-            files: ./coverage/lcov.info
+            directory: ./coverage
             flags: protocol-designer
 
   # e2e-test:
