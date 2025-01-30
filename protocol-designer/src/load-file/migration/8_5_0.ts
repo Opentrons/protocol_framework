@@ -99,14 +99,16 @@ export const migrateFile = (
               ? null
               : floor(
                   aspirate_touchTip_mmFromBottom -
-                    matchingAspirateLabwareWellDepth
+                    matchingAspirateLabwareWellDepth,
+                  1
                 ),
           dispense_touchTip_mmfromTop:
             dispense_touchTip_mmFromBottom == null
               ? null
               : floor(
                   dispense_touchTip_mmFromBottom -
-                    matchingDispenseLabwareWellDepth
+                    matchingDispenseLabwareWellDepth,
+                  1
                 ),
         },
       }
