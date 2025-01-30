@@ -62,13 +62,15 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
 
   js-unit-test:
-    needs: ['setup']
-    runs-on: 'ubuntu-22.04'
-    steps:
-      - name: Run Tests
-        run: |
-          docker run --rm ${{ needs.setup.outputs.image }} \
-          make -C protocol-designer test-cov
+      runs-on: 'ubuntu-22.04'
+      steps:
+        - name: Pull Prebuilt Container Image
+          run: |
+            docker pull ghcr.io/opentrons/opentrons-ci:${{ github.ref_name }}
+        - name: Run Tests in Container
+          run: |
+            docker run --rm ghcr.io/opentrons/opentrons-ci:${{ github.ref_name }} \
+            make -C protocol-designer test-cov
 
   # e2e-test:
   #   name: 'pd e2e tests'

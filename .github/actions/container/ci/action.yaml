@@ -32,6 +32,6 @@ runs:
         context: .
         push: true
         tags: ghcr.io/opentrons/opentrons-ci:${{ inputs.branch }}
-        cache-from: type=registry,ref=ghcr.io/opentrons/opentrons-ci:latest
-        cache-to: type=registry,ref=ghcr.io/opentrons/opentrons-ci:latest
+        cache-from: type=registry,ref=ghcr.io/opentrons/opentrons-ci
+        cache-to: type=registry,ref=ghcr.io/opentrons/opentrons-ci
         secrets: GIT_AUTH_TOKEN=${{ inputs.token }}
