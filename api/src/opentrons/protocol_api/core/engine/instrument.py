@@ -735,11 +735,7 @@ class InstrumentCore(AbstractInstrument[WellCore, LabwareCore]):
         # https://opentrons.atlassian.net/browse/RLIQ-251
         pipette = self._engine_client.state.pipettes.get(self._pipette_id)
         if self._protocol_core.api_version < _FLEX_PIPETTE_NAMES_FIXED_IN:
-            return (
-                pipette.pipetteName.value
-                if isinstance(pipette.pipetteName, PipetteNameType)
-                else pipette.pipetteName
-            )
+            return pipette.pipetteName.value
         else:
             name = next(
                 (
