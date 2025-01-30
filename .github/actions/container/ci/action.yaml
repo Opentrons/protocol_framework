@@ -25,14 +25,28 @@ runs:
         driver-opts: network=host
 
     - name: Cache Docker Buildx Layers
+      id: cache
       uses: actions/cache@v4
       with:
-        path: /tmp/.buildx-cache
-        key: buildx-${{ inputs.git_ref }}
-        restore-keys: |
-          buildx-${{ inputs.git_ref }}
-          buildx-edge
+        path: |
+          node
+          python
+        key: cache-${{ inputs.git_ref }}
+        restore-keys: buildx-edge
 
+    - name: inject cache into docker
+      uses: reproducible-containers/buildkit-cache-dance@v3.1.2
+      with:
+        cache-map: |
+          {
+            "node": "/root/.cache/yarn",
+            "python": "/root/.cache/pip"
+          }
+        skip-extraction: ${{ steps.cache.outputs.cache-hit }}
+
+    # Checkout already happened so that we may use this action.
+    # Make sure we're on the right ref In case it was a tag.
+    # So that we are using the Dockerfile on that inputs.git_ref
     - name: 'Fix actions/checkout odd handling of tags'
       if: startsWith(inputs.git_ref, 'refs/tags')
       shell: bash
@@ -50,10 +64,6 @@ runs:
         target: ci
         push: true
         tags: ghcr.io/opentrons/opentrons-ci:${{ inputs.git_ref }}
-        cache-from: |
-          type=local,src=/tmp/.buildx-cache
-          type=registry,ref=ghcr.io/opentrons/opentrons-ci:cache
-        cache-to: |
-          type=local,dest=/tmp/.buildx-cache,mode=max
-          type=registry,ref=ghcr.io/opentrons/opentrons-ci:cache,mode=max
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
         secrets: GIT_AUTH_TOKEN=${{ inputs.token }}

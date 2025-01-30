@@ -115,20 +115,10 @@ ENV GIT_REF=${GIT_REF}
 
 WORKDIR /opentrons
 
-# Use a BuildKit cache mount. If `/tmp/git-repo` already exists, fetch & checkout.
-RUN --mount=type=cache,id=opentrons-git-cache,target=/tmp/git-repo \
-    set -eux; \
-    if [ -d /tmp/git-repo/.git ]; then \
-      echo "Using cached Opentrons/opentrons repo in /tmp/git-repo"; \
-    else \
-      git clone https://github.com/Opentrons/opentrons.git /tmp/git-repo; \
-    fi && \
-    cd /tmp/git-repo; \
-    git fetch --all; \
-    git fetch --tags --force; \
-    git fetch origin "${GIT_REF}"; \
-    git checkout "${GIT_REF}"; \
-    cp -r /tmp/git-repo/. /opentrons
+RUN git clone https://github.com/Opentrons/opentrons.git . \
+    && git fetch --tags --force \
+    && git fetch origin "${GIT_REF}" \
+    && git checkout "${GIT_REF}"
 
 RUN --mount=type=cache,target=/root/.cache/yarn \
     bash -c "\
