@@ -45,7 +45,7 @@ export const getSelectedLabwareOffsetDetails = (
 
   return (
     offsetDetails?.find(offset =>
-      isEqual(offset.workingOffset, selectedLabware?.offsetLocationDetails)
+      isEqual(offset.locationDetails, selectedLabware?.offsetLocationDetails)
     ) ?? null
   )
 }

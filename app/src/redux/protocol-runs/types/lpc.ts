@@ -54,11 +54,10 @@ export interface LPCLabwareOffsetAppliedLocationDetails
   slotName: string
 }
 
-// TODO(jh, 01-23-25): Revisit working/existing/initialOffsets once API rework becomes more finalized.
 export interface OffsetDetails {
   existingOffset: ExistingOffset | null
   workingOffset: WorkingOffset | null
-  locationDetails: LPCLabwareOffsetAppliedLocationDetails
+  locationDetails: OffsetLocationDetails
 }
 
 export interface LabwareDetails {
@@ -148,6 +147,11 @@ export interface FinalPositionAction {
   payload: PositionParams & { runId: string }
 }
 
+export interface ApplyOffsetAction {
+  type: 'APPLY_OFFSET'
+  payload: { runId: string; labwareUri: LabwareURI }
+}
+
 export type LPCWizardAction =
   | StartLPCAction
   | FinishLPCAction
@@ -156,5 +160,6 @@ export type LPCWizardAction =
   | ClearSelectedLabwareAction
   | InitialPositionAction
   | FinalPositionAction
+  | ApplyOffsetAction
   | ProceedStepAction
   | GoBackStepAction

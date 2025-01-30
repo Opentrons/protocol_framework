@@ -8,6 +8,7 @@ import {
   SET_SELECTED_LABWARE,
   CLEAR_SELECTED_LABWARE,
   SET_SELECTED_LABWARE_NAME,
+  APPLY_OFFSET,
 } from '../constants'
 
 import type {
@@ -23,6 +24,7 @@ import type {
   ClearSelectedLabwareAction,
   SelectedLabwareNameAction,
   OffsetLocationDetails,
+  ApplyOffsetAction,
 } from '../types'
 
 export const proceedStep = (runId: string): ProceedStepAction => ({
@@ -80,6 +82,14 @@ export const setFinalPosition = (
 ): FinalPositionAction => ({
   type: SET_FINAL_POSITION,
   payload: { ...params, runId },
+})
+
+export const applyOffset = (
+  runId: string,
+  labwareUri: string
+): ApplyOffsetAction => ({
+  type: APPLY_OFFSET,
+  payload: { runId, labwareUri },
 })
 
 export const startLPC = (

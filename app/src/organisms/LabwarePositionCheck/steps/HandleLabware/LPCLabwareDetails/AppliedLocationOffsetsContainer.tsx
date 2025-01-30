@@ -6,19 +6,20 @@ import {
   Flex,
   StyledText,
   ListButton,
+  DeckInfoLabel,
   SPACING,
   getLabwareDisplayLocation,
   JUSTIFY_SPACE_BETWEEN,
+  DIRECTION_COLUMN,
 } from '@opentrons/components'
 import { FLEX_ROBOT_TYPE } from '@opentrons/shared-data'
 
 import {
-  selectSelectedLabwareDisplayName,
   selectSelectedLabwareInfo,
+  selectSelectedLwInitialPosition,
   selectSelectedOffsetDetails,
   setSelectedLabware,
 } from '/app/redux/protocol-runs'
-import { InterventionInfo } from '/app/molecules/InterventionModal/InterventionContent'
 
 import type { State } from '/app/redux/types'
 import type { LPCWizardContentProps } from '/app/organisms/LabwarePositionCheck/types'
@@ -42,6 +43,8 @@ export function AppliedLocationOffsetsContainer(
           offsetDetail={offset}
         />
       ))}
+      {/* Gives extra scrollable space. */}
+      <Flex css={BOX_STYLE} />
     </Flex>
   )
 }
@@ -58,12 +61,12 @@ function LabwareLocationItemContainer(
   return (
     <Flex css={LOCATION_ITEM_CONTAINER_STYLE}>
       <Flex css={HEADER_STYLE}>
-        <StyledText>{t('slot_location')}</StyledText>
-        <StyledText>{t('offsets')}</StyledText>
+        <StyledText oddStyle="smallBodyTextSemiBold">
+          {t('slot_location')}
+        </StyledText>
+        <StyledText oddStyle="smallBodyTextSemiBold">{t('offsets')}</StyledText>
       </Flex>
       <LabwareLocationItem {...props} />
-      {/* Gives extra scrollable space. */}
-      <Flex css={BOX_STYLE} />
     </Flex>
   )
 }
@@ -71,47 +74,61 @@ function LabwareLocationItemContainer(
 function LabwareLocationItem({
   runId,
   offsetDetail,
+  commandUtils,
 }: LabwareLocationItemProps): JSX.Element {
   const { t: commandTextT } = useTranslation('protocol_command_text')
+  const { toggleRobotMoving, handleCheckItemsPrepModules } = commandUtils
   const dispatch = useDispatch()
 
   const { protocolData } = useSelector(
     (state: State) => state.protocolRuns[runId]?.lpc as LPCWizardState
   )
-  const displayName = useSelector(selectSelectedLabwareDisplayName(runId))
   const selectedLw = useSelector(
     selectSelectedLabwareInfo(runId)
   ) as SelectedLabwareInfo
+  const initialPosition = useSelector(selectSelectedLwInitialPosition(runId))
 
   const slotCopy = getLabwareDisplayLocation({
     t: commandTextT,
     loadedModules: protocolData.modules,
     loadedLabwares: protocolData.labware,
     robotType: FLEX_ROBOT_TYPE,
-    location: { slotName: offsetDetail.locationDetails.slotName },
+    location: { slotName: offsetDetail.locationDetails.slotName as string },
     detailLevel: 'slot-only',
   })
 
   const handleOnClick = (): void => {
-    dispatch(
-      setSelectedLabware(runId, selectedLw.uri, offsetDetail.locationDetails)
-    )
+    void toggleRobotMoving(true)
+      .then(() => {
+        dispatch(
+          setSelectedLabware(
+            runId,
+            selectedLw.uri,
+            offsetDetail.locationDetails
+          )
+        )
+      })
+      .then(() =>
+        handleCheckItemsPrepModules(
+          offsetDetail.locationDetails,
+          initialPosition
+        )
+      )
+      .finally(() => toggleRobotMoving(false))
   }
 
   return (
     <ListButton type="noActive" onClick={handleOnClick}>
       <Flex css={BUTTON_TEXT_STYLE}>
-        <InterventionInfo
-          type="location"
-          labwareName={displayName}
-          currentLocationProps={{ deckLabel: slotCopy }}
-        />
+        {/* TODO(jh, 01-30-31): Add a new detail level to getLabwareDisplayLocation instead of slicing. */}
+        <DeckInfoLabel deckLabel={slotCopy.slice(-2)} />
       </Flex>
     </ListButton>
   )
 }
 
 const APPLIED_LOCATION_CONTAINER_STYLE = css`
+  flex-direction: ${DIRECTION_COLUMN};
   grid-gap: ${SPACING.spacing24};
 `
 
@@ -121,6 +138,7 @@ const HEADER_STYLE = css`
 `
 
 const LOCATION_ITEM_CONTAINER_STYLE = css`
+  flex-direction: ${DIRECTION_COLUMN};
   grid-gap: ${SPACING.spacing8};
 `
 

@@ -51,6 +51,8 @@ export const DetachProbe = ({
   const pipette = useSelector(selectActivePipette(runId))
   const channels = useSelector(selectActivePipetteChannelCount(runId))
 
+  // TODO(jh, 01-30-25): This will break the flows, but currently, DetachProbe is inaccessible.
+  //  This onClick behavior should be tied directly to the "exit" button.
   useEffect(() => {
     void toggleRobotMoving(true)
       .then(() => handleValidMoveToMaintenancePosition(pipette))

@@ -1,33 +1,20 @@
 import { createSelector } from 'reselect'
 
-import {
-  getIsTiprack,
-  getLabwareDisplayName,
-  getVectorDifference,
-  getVectorSum,
-  IDENTITY_VECTOR,
-} from '@opentrons/shared-data'
+import { getIsTiprack, getLabwareDisplayName } from '@opentrons/shared-data'
 
 import {
   getItemLabwareDef,
   getSelectedLabwareOffsetDetails,
-  getOffsetDetailsForAllLabware,
   getSelectedLabwareDefFrom,
-} from './transforms'
+} from '../transforms'
 
 import type { Selector } from 'reselect'
-import type {
-  LabwareOffsetLocation,
-  VectorOffset,
-  LabwareOffset,
-} from '@opentrons/api-client'
-import type { State } from '../../../types'
+import type { LabwareOffsetLocation, VectorOffset } from '@opentrons/api-client'
+import type { State } from '/app/redux/types'
 import type { Coordinates, LabwareDefinition2 } from '@opentrons/shared-data'
 import type {
-  LabwareDetails,
   LPCFlowType,
   LPCLabwareInfo,
-  OffsetDetails,
   SelectedLabwareInfo,
 } from '/app/redux/protocol-runs'
 
@@ -48,23 +35,6 @@ export const selectSelectedLabwareInfo = (
     selectedLabware => selectedLabware ?? null
   )
 
-export const selectSelectedOffsetDetails = (
-  runId: string
-): Selector<State, OffsetDetails[]> =>
-  createSelector(
-    (state: State) =>
-      state.protocolRuns[runId]?.lpc?.labwareInfo.selectedLabware?.uri,
-    (state: State) => state.protocolRuns[runId]?.lpc?.labwareInfo.labware,
-    (uri, lw) => {
-      if (uri == null || lw == null) {
-        console.warn('Failed to access labware details.')
-        return []
-      } else {
-        return lw[uri].offsetDetails ?? []
-      }
-    }
-  )
-
 export const selectSelectedLwInitialPosition = (
   runId: string
 ): Selector<State, VectorOffset | null> =>
@@ -81,76 +51,12 @@ export const selectSelectedLwInitialPosition = (
     }
   )
 
-export const selectSelectedLwExistingOffset = (
-  runId: string
-): Selector<State, VectorOffset> =>
-  createSelector(
-    (state: State) => getSelectedLabwareOffsetDetails(runId, state),
-    details => {
-      const existingVector = details?.existingOffset?.vector
-
-      if (existingVector == null) {
-        console.warn('No existing offset vector found for active labware')
-        return IDENTITY_VECTOR
-      } else {
-        return existingVector ?? IDENTITY_VECTOR
-      }
-    }
-  )
-
 export interface SelectOffsetsToApplyResult {
   definitionUri: string
   location: LabwareOffsetLocation
   vector: Coordinates
 }
 
-export const selectOffsetsToApply = (
-  runId: string
-): Selector<State, SelectOffsetsToApplyResult[]> =>
-  createSelector(
-    (state: State) => getOffsetDetailsForAllLabware(runId, state),
-    (state: State) => state.protocolRuns[runId]?.lpc?.protocolData,
-    (allDetails, protocolData): SelectOffsetsToApplyResult[] => {
-      if (protocolData == null) {
-        console.warn('LPC state not initalized before selector use.')
-        return []
-      }
-
-      return allDetails.flatMap(
-        ({ workingOffset, existingOffset, locationDetails }) => {
-          const definitionUri = locationDetails.definitionUri
-          const { initialPosition, finalPosition } = workingOffset ?? {}
-
-          if (
-            finalPosition == null ||
-            initialPosition == null ||
-            definitionUri == null ||
-            existingOffset == null
-          ) {
-            console.error(
-              `Cannot generate offsets for labware with incomplete details. ID: ${locationDetails.labwareId}`
-            )
-            return []
-          }
-
-          const existingOffsetVector = existingOffset.vector
-          const finalVector = getVectorSum(
-            existingOffsetVector,
-            getVectorDifference(finalPosition, initialPosition)
-          )
-          return [
-            {
-              definitionUri,
-              location: { ...locationDetails },
-              vector: finalVector,
-            },
-          ]
-        }
-      )
-    }
-  )
-
-// TOME TODO: You can break your selectors down into files along  offsets, maybe booleans, etc.
 export const selectSelectedLabwareFlowType = (
   runId: string
 ): Selector<State, LPCFlowType | null> =>
@@ -229,33 +135,6 @@ export const selectActiveAdapterDisplayName = (
     }
   )
 
-// TODO(jh, 01-29-25): Revisit this once "View Offsets" is refactored out of LPC.
-export const selectLabwareOffsetsForAllLw = (
-  runId: string
-): Selector<State, LabwareOffset[]> =>
-  createSelector(
-    (state: State) => state.protocolRuns[runId]?.lpc?.labwareInfo.labware,
-    (labware): LabwareOffset[] => {
-      if (labware == null) {
-        console.warn('Labware info not initialized in state')
-        return []
-      }
-
-      return Object.values(labware).flatMap((details: LabwareDetails) =>
-        details.offsetDetails.map(offsetDetail => ({
-          id: details.id,
-          createdAt: offsetDetail?.existingOffset?.createdAt ?? '',
-          definitionUri: offsetDetail.locationDetails.definitionUri,
-          location: {
-            slotName: offsetDetail.locationDetails.slotName,
-            moduleModel: offsetDetail.locationDetails.moduleModel,
-            definitionUri: offsetDetail.locationDetails.definitionUri,
-          },
-          vector: offsetDetail?.existingOffset?.vector ?? IDENTITY_VECTOR,
-        }))
-      )
-    }
-  )
 export const selectSelectedLabwareDef = (
   runId: string
 ): Selector<State, LabwareDefinition2 | null> =>

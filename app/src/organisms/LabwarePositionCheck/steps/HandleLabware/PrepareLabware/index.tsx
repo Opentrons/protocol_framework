@@ -44,15 +44,15 @@ interface PrepareSpaceProps extends LPCWizardContentProps {
   header: ReactNode
   body: ReactNode
   confirmPlacement: () => void
-  labwareInfo: SelectedLabwareInfo
+  selectedLwInfo: SelectedLabwareInfo
 }
 
-export function PrepareSpace({
+export function PrepareLabware({
   runId,
   header,
   body,
   confirmPlacement,
-  labwareInfo,
+  selectedLwInfo,
 }: PrepareSpaceProps): JSX.Element {
   const { i18n, t } = useTranslation(['labware_position_check', 'shared'])
   const { protocolData, deckConfig } = useSelector(
@@ -61,8 +61,8 @@ export function PrepareSpace({
   const isOnDevice = useSelector(getIsOnDevice)
   const labwareDef = useSelector(
     selectSelectedLabwareDef(runId)
-  ) as LabwareDefinition2 // CheckItem always has lwId on step.
-  const offsetLocationDetails = labwareInfo.offsetLocationDetails as OffsetLocationDetails
+  ) as LabwareDefinition2
+  const offsetLocationDetails = selectedLwInfo.offsetLocationDetails as OffsetLocationDetails
   const { moduleModel } = offsetLocationDetails
 
   return (

@@ -2,7 +2,13 @@ import { css } from 'styled-components'
 import { useTranslation } from 'react-i18next'
 import { useDispatch, useSelector } from 'react-redux'
 
-import { Flex, StyledText, SPACING, ListButton } from '@opentrons/components'
+import {
+  Flex,
+  StyledText,
+  SPACING,
+  ListButton,
+  DIRECTION_COLUMN,
+} from '@opentrons/components'
 
 import {
   selectAllLabwareInfo,
@@ -56,6 +62,7 @@ function LabwareItem({ uri, info, runId }: LabwareItemProps): JSX.Element {
 }
 
 const LIST_STYLE = css`
+  flex-direction: ${DIRECTION_COLUMN};
   grid-gap: ${SPACING.spacing8};
 `
 

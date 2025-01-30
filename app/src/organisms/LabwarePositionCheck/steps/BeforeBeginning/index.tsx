@@ -20,7 +20,6 @@ import {
 } from '/app/redux/protocol-runs'
 
 import type { State } from '/app/redux/types'
-import type { LPCWizardState } from '/app/redux/protocol-runs'
 import type { LPCWizardContentProps } from '/app/organisms/LabwarePositionCheck/types'
 
 // TODO(BC, 09/01/23): replace updated support article link for LPC on OT-2/Flex
@@ -36,8 +35,8 @@ export function BeforeBeginning({
   const activePipette = useSelector(selectActivePipette(runId))
   const existingOffsets = useSelector(selectLabwareOffsetsForAllLw(runId))
   const { protocolName, labwareDefs } = useSelector(
-    (state: State) => state.protocolRuns[runId]?.lpc as LPCWizardState
-  )
+    (state: State) => state.protocolRuns[runId]?.lpc
+  ) ?? { protocolName: '', labwareDefs: [] }
   const { handleStartLPC, toggleRobotMoving } = commandUtils
 
   const requiredEquipmentList = [

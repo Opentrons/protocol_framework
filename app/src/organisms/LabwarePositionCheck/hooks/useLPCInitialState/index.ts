@@ -29,7 +29,6 @@ export function useLPCInitialState({
       steps: {
         currentStepIndex: 0,
         totalStepCount: LPC_STEPS.length,
-        // TOME TODO: make a selector for the current step!
         all: LPC_STEPS,
       },
     }

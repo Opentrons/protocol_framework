@@ -12,9 +12,8 @@ import {
 import { ProbeNotAttached } from '/app/organisms/PipetteWizardFlows/ProbeNotAttached'
 import { GenericWizardTile } from '/app/molecules/GenericWizardTile'
 import {
-  type OffsetLocationDetails,
   selectActivePipette,
-  selectActivePipetteChannelCount, type SelectedLabwareInfo, selectSelectedLabwareInfo, selectSelectedLwInitialPosition,
+  selectActivePipetteChannelCount,
 } from '/app/redux/protocol-runs'
 import { getIsOnDevice } from '/app/redux/config'
 
@@ -49,17 +48,11 @@ export function AttachProbe({
   const pipette = useSelector(selectActivePipette(runId))
   const {
     handleProbeAttachment,
-    handleCheckItemsPrepModules,
     toggleRobotMoving,
     setShowUnableToDetect,
     unableToDetect,
   } = commandUtils
   const channels = useSelector(selectActivePipetteChannelCount(runId))
-  const initialPosition = useSelector(selectSelectedLwInitialPosition(runId))
-  const lwInfo = useSelector(
-    selectSelectedLabwareInfo(runId)
-  ) as SelectedLabwareInfo
-  const offsetLocationDetails = lwInfo.offsetLocationDetails as OffsetLocationDetails
 
   const { probeLocation, probeVideoSrc } = ((): {
     probeLocation: string
@@ -86,8 +79,7 @@ export function AttachProbe({
 
   const handleProceed = (): void => {
     void toggleRobotMoving(true)
-      .then(() =>  handleProbeAttachment(pipette, proceed))
-      .then(() => handleCheckItemsPrepModules(offsetLocationDetails, initialPosition))
+      .then(() => handleProbeAttachment(pipette, proceed))
       .finally(() => toggleRobotMoving(false))
   }
 

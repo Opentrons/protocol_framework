@@ -64,7 +64,7 @@ interface JogToWellProps extends LPCWizardContentProps {
   handleJog: Jog
 }
 
-export function JogToWell(props: JogToWellProps): JSX.Element {
+export function EditOffset(props: JogToWellProps): JSX.Element {
   const {
     runId,
     header,

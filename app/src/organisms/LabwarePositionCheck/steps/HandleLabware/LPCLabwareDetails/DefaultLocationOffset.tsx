@@ -25,8 +25,12 @@ export function DefaultLocationOffset(
     <ListButton type="noActive">
       <Flex css={BUTTON_ALL_CONTENT_STYLE}>
         <Flex css={BUTTON_LEFT_CONTENT_STYLE}>
-          <StyledText>{t('default_labware_offset')}</StyledText>
-          <Tag type="default" text={t('no_offset_data')} />
+          <StyledText oddStyle="level4HeaderSemiBold">
+            {t('default_labware_offset')}
+          </StyledText>
+          <Flex>
+            <Tag type="default" text={t('no_offset_data')} />
+          </Flex>
         </Flex>
         <PrimaryButton disabled={true}>
           <Flex css={BUTTON_TEXT_CONTAINER_STYLE}>
@@ -42,6 +46,7 @@ export function DefaultLocationOffset(
 const BUTTON_ALL_CONTENT_STYLE = css`
   grid-gap: ${SPACING.spacing24};
   justify-content: ${JUSTIFY_SPACE_BETWEEN};
+  width: 100%;
 `
 
 const BUTTON_LEFT_CONTENT_STYLE = css`
@@ -50,6 +55,7 @@ const BUTTON_LEFT_CONTENT_STYLE = css`
 `
 
 const BUTTON_TEXT_CONTAINER_STYLE = css`
+  grid-gap: ${SPACING.spacing8};
   justify-content: ${JUSTIFY_SPACE_BETWEEN};
   align-items: ${ALIGN_CENTER};
 `

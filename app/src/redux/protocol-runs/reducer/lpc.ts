@@ -8,6 +8,7 @@ import {
   GO_BACK_STEP,
   SET_SELECTED_LABWARE_NAME,
   CLEAR_SELECTED_LABWARE,
+  APPLY_OFFSET,
 } from '../constants'
 import { updateOffsetsForURI } from './transforms'
 
@@ -123,6 +124,13 @@ export function LPCReducer(
             },
           },
         }
+      }
+
+      case APPLY_OFFSET: {
+        // TODO(jh, 01-30-25): Update the existing offset in the store, and clear the
+        //  the working offset state. This will break the legacy LPC "apply all offsets"
+        //  functionality, so this must be implemented simultaneously with the API changes.
+        break
       }
 
       case FINISH_LPC:
