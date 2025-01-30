@@ -4,6 +4,7 @@ import type { StepFieldName } from '../../form-types'
 import type { DeckSlot, ThunkAction } from '../../types'
 import type { Fixture, IngredInputs } from '../types'
 import type { CutoutId, ModuleModel } from '@opentrons/shared-data'
+import { getLiquidEntities } from '../../step-forms/selectors'
 
 // ===== Labware selector actions =====
 export interface OpenAddLabwareModalAction {
@@ -124,33 +125,65 @@ export const removeWellsContents: (
   type: 'REMOVE_WELLS_CONTENTS',
   payload,
 })
+
+export interface EditMultipleLiquidGroupsAction {
+  type: 'EDIT_MULTIPLE_LIQUID_GROUPS'
+  payload: Record<string, IngredInputs> // Updated liquid groups
+}
+
 export interface DeleteLiquidGroupAction {
   type: 'DELETE_LIQUID_GROUP'
   payload: string // liquid group id
 }
 export const deleteLiquidGroup: (
   liquidGroupId: string
-) => ThunkAction<DeleteLiquidGroupAction> = liquidGroupId => (
-  dispatch,
-  getState
-) => {
-  const allLiquidGroupsOnDeck = selectors.getLiquidGroupsOnDeck(getState())
-  const liquidIsOnDeck = allLiquidGroupsOnDeck.includes(liquidGroupId)
-  // TODO: Ian 2018-10-22 we will eventually want to replace
-  // this window.confirm with a modal
-  const okToDelete = liquidIsOnDeck
-    ? global.confirm(
-        'This liquid has been placed on the deck, are you sure you want to delete it?'
-      )
-    : true
+) => ThunkAction<
+  DeleteLiquidGroupAction | EditMultipleLiquidGroupsAction
+> = liquidGroupId => (dispatch, getState) => {
+  const allLiquidGroups = selectors.getLiquidGroupsOnDeck(getState())
+  const liquidEntities = getLiquidEntities(getState())
+  const liquidGroupIdNum = parseInt(liquidGroupId)
+  const allLiquidGroupIds = Object.keys(allLiquidGroups)
+    .map(id => parseInt(id))
+    .sort((a, b) => a - b)
 
-  if (okToDelete) {
-    return dispatch({
-      type: 'DELETE_LIQUID_GROUP',
-      payload: liquidGroupId,
-    })
-  }
+  if (!allLiquidGroupIds.includes(liquidGroupIdNum)) return
+
+  const okToDelete = global.confirm(
+    'This liquid has been placed on the deck, are you sure you want to delete it?'
+  )
+
+  if (!okToDelete) return
+
+  dispatch({
+    type: 'DELETE_LIQUID_GROUP',
+    payload: liquidGroupId,
+  })
+
+  const updatedLiquidGroups: Record<string, IngredInputs> = {}
+  console.log('liquidGroupIdNum', liquidGroupIdNum)
+  const filteredGroupIds = allLiquidGroupIds
+    .filter(id => id !== liquidGroupIdNum)
+    .sort((a, b) => a - b)
+
+  console.log('filteredGroupIds', filteredGroupIds)
+  filteredGroupIds.forEach((oldId, index) => {
+    const liquid = liquidEntities[oldId]
+    if (liquid) {
+      updatedLiquidGroups[index.toString()] = {
+        ...liquid,
+        liquidGroupId: index.toString(),
+        pythonName: `liquid_${index}`,
+      }
+    }
+  })
+  console.log('updatedLiquidGroups', updatedLiquidGroups)
+  dispatch({
+    type: 'EDIT_MULTIPLE_LIQUID_GROUPS',
+    payload: updatedLiquidGroups,
+  })
 }
+
 // NOTE: assumes you want to set a uniform volume of the same liquid in one labware
 export interface SetWellContentsPayload {
   liquidGroupId: string
