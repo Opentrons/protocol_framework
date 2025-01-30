@@ -59,18 +59,10 @@ jobs:
       needs: setup
       runs-on: 'ubuntu-22.04'
       steps:
-        - name: Cache Docker Buildx Layers
-          uses: actions/cache@v4
-          with:
-            path: /tmp/.buildx-cache
-            key: buildx-${{ github.ref_name }}
-            restore-keys: |
-              buildx-${{ github.ref_name }}
-              buildx-edge
         - name: 'Run tests and generate coverage'
           run: |
             docker run --rm --tty \
-              --env ${{ env.CI }} \
+              --env CI=${{ env.CI }} \
               -v $PWD/coverage:/coverage \
               ghcr.io/opentrons/opentrons-ci:${{ github.ref_name }} \
               make -C protocol-designer test-cov
