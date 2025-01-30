@@ -387,6 +387,19 @@ class TouchTipIncompatibleArgumentsError(ProtocolEngineError):
         super().__init__(ErrorCodes.GENERAL_ERROR, message, details, wrapping)
 
 
+class UnsupportedLabwareForActionError(ProtocolEngineError):
+    """Raised when trying to use an unsupported labware for a command."""
+
+    def __init__(
+        self,
+        message: Optional[str] = None,
+        details: Optional[Dict[str, Any]] = None,
+        wrapping: Optional[Sequence[EnumeratedError]] = None,
+    ) -> None:
+        """Build a UnsupportedLabwareForActionError."""
+        super().__init__(ErrorCodes.GENERAL_ERROR, message, details, wrapping)
+
+
 class WellDoesNotExistError(ProtocolEngineError):
     """Raised when referencing a well that does not exist."""
 

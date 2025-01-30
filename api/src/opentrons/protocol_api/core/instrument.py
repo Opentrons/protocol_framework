@@ -181,6 +181,33 @@ class AbstractInstrument(ABC, Generic[WellCoreType]):
         ...
 
     @abstractmethod
+    def resin_tip_seal(
+        self,
+        location: types.Location,
+        well_core: WellCoreType,
+        in_place: Optional[bool] = False,
+    ) -> None:
+        ...
+
+    @abstractmethod
+    def resin_tip_unseal(
+        self,
+        location: types.Location,
+        well_core: WellCoreType,
+    ) -> None:
+        ...
+
+    @abstractmethod
+    def resin_tip_dispense(
+        self,
+        location: types.Location,
+        well_core: WellCoreType,
+        volume: Optional[float] = None,
+        flow_rate: Optional[float] = None,
+    ) -> None:
+        ...
+
+    @abstractmethod
     def get_mount(self) -> types.Mount:
         ...
 
