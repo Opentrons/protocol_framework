@@ -108,7 +108,7 @@ export function DefineLiquidsModal(
     displayColor: selectedIngredFields?.displayColor ?? swatchColors(liquidId),
     liquidClass: selectedIngredFields?.liquidClass ?? '',
     description: selectedIngredFields?.description ?? '',
-    pythonName: `liquid_${liquidGroupId ?? nextGroupId}`,
+    pythonName: `liquid_${parseInt(liquidGroupId ?? nextGroupId) + 1}`,
     liquidGroupId: liquidGroupId ?? nextGroupId,
   }
 

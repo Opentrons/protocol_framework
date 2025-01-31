@@ -142,16 +142,18 @@ export const deleteLiquidGroup: (
 > = liquidGroupId => (dispatch, getState) => {
   const allLiquidGroups = selectors.getLiquidGroupsOnDeck(getState())
   const liquidEntities = getLiquidEntities(getState())
-  const liquidGroupIdNum = parseInt(liquidGroupId)
-  const allLiquidGroupIds = Object.keys(allLiquidGroups).map(id => parseInt(id))
 
-  if (!allLiquidGroupIds.includes(liquidGroupIdNum)) return
+  if (!Object.keys(allLiquidGroups).includes(liquidGroupId)) {
+    return
+  }
 
   const okToDelete = global.confirm(
     'This liquid has been placed on the deck, are you sure you want to delete it?'
   )
 
-  if (!okToDelete) return
+  if (!okToDelete) {
+    return
+  }
 
   //  delete the group that the user wants to delete
   dispatch({
@@ -160,9 +162,7 @@ export const deleteLiquidGroup: (
   })
 
   const updatedLiquidGroups: Record<string, IngredInputs> = {}
-  const filteredGroupIds = allLiquidGroupIds.filter(
-    id => id !== liquidGroupIdNum
-  )
+  const filteredGroupIds = allLiquidGroups.filter(id => id !== liquidGroupId)
 
   //  renumber subsequent liquid ids, if they exist
   filteredGroupIds.forEach((oldId, index) => {
@@ -172,7 +172,7 @@ export const deleteLiquidGroup: (
       updatedLiquidGroups[stringIndex] = {
         ...liquid,
         liquidGroupId: stringIndex,
-        pythonName: `liquid_${index}`,
+        pythonName: `liquid_${index + 1}`,
       }
     }
   })

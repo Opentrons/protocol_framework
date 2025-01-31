@@ -44,7 +44,7 @@ describe('SlotOverflowMenu', () => {
         displayName: 'mockname',
         liquidGroupId: '0',
         description: null,
-        pythonName: 'python_0',
+        pythonName: 'liquid_1',
       },
     })
   })

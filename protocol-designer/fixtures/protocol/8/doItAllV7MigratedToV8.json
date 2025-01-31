@@ -39,14 +39,14 @@
           "displayName": "Water",
           "displayColor": "#b925ff",
           "description": null,
-          "pythonName": "liquid_0",
+          "pythonName": "liquid_1",
           "liquidGroupId": "0"
         },
         "1": {
           "displayName": "Samples",
           "displayColor": "#ffd600",
           "description": null,
-          "pythonName": "liquid_1",
+          "pythonName": "liquid_2",
           "liquidGroupId": "1"
         }
       },

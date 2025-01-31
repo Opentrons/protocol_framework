@@ -37,13 +37,13 @@
           "displayColor": "#b925ff",
           "description": null,
           "pythonName": "liquid_0",
-          "liquidGroupId": "0"
+          "liquidGroupId": "1"
         },
         "1": {
           "displayName": "sample",
           "displayColor": "#ffd600",
           "description": null,
-          "liquidGroupId": "1",
+          "liquidGroupId": "2",
           "pythonName": "liquid_1"
         }
       },

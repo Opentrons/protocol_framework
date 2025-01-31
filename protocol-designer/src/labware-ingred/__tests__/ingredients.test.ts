@@ -20,14 +20,14 @@ describe('DUPLICATE_LABWARE action', () => {
         description: '',
         displayColor: '#b925ff',
         liquidGroupId: '0',
-        pythonName: 'python_0',
+        pythonName: 'liquid_1',
       },
       ingred4: {
         displayName: 'Other Ingred',
         description: '',
         displayColor: '#ffd600',
         liquidGroupId: '1',
-        pythonName: 'liquid_1',
+        pythonName: 'liquid_2',
       },
     }
 

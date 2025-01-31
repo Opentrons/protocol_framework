@@ -49,7 +49,8 @@ import type { DismissedWarningState } from '../../dismiss/reducers'
 import type { LabwareDefByDefURI } from '../../labware-defs'
 import type { Selector } from '../../types'
 
-export interface DesignerApplicationDataV8 {
+//  DesignerApplication type for version 8_5
+export interface DesignerApplicationDataV8_5 {
   ingredients: LiquidEntities
   ingredLocations: {
     [labwareId: string]: {
@@ -267,7 +268,7 @@ export const createFile: Selector<ProtocolFile> = createSelector(
       commandAnnotations,
     }
 
-    const protocolBase: ProtocolBase<DesignerApplicationDataV8> = {
+    const protocolBase: ProtocolBase<DesignerApplicationDataV8_5> = {
       $otSharedSchema: '#/protocol/schemas/8',
       schemaVersion: 8,
       metadata: {

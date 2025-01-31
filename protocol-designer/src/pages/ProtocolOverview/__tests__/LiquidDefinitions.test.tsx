@@ -25,14 +25,14 @@ const mockAllIngredientGroupFields: LiquidEntities = {
     displayColor: '#b925ff',
     description: 'Immer fisch Hergestllter EtOH',
     liquidGroupId: '0',
-    pythonName: 'python_0',
+    pythonName: 'liquid_1',
   },
   '1': {
     displayName: '10mM Tris pH8,5',
     displayColor: '#ffd600',
     description: null,
     liquidGroupId: '1',
-    pythonName: 'python_1',
+    pythonName: 'liquid_2',
   },
   '2': {
     displayName: 'Amplicon PCR sample + AMPure XP beads',
@@ -40,7 +40,7 @@ const mockAllIngredientGroupFields: LiquidEntities = {
     description: '25µl Amplicon PCR + 20 µl AMPure XP beads',
     liquidClass: 'Water',
     liquidGroupId: '2',
-    pythonName: 'python_2',
+    pythonName: 'liquid_3',
   },
 }
 
