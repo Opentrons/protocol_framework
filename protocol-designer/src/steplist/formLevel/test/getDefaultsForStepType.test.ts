@@ -136,7 +136,6 @@ describe('getDefaultsForStepType', () => {
       expect(getDefaultsForStepType('magnet')).toEqual({
         moduleId: null,
         magnetAction: null,
-        moduleModel: null,
         engageHeight: null,
       })
     })

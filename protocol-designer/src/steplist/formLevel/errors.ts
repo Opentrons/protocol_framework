@@ -21,9 +21,9 @@ import { getTimeFromForm } from '../utils/getTimeFromForm'
 
 import type { ReactNode } from 'react'
 import type { LabwareDefinition2, PipetteV2Specs } from '@opentrons/shared-data'
-import type { LabwareEntities, PipetteEntity } from '@opentrons/step-generation'
+import type { PipetteEntity } from '@opentrons/step-generation'
 import type { StepFieldName } from '../../form-types'
-import { ModuleEntities } from '../../step-forms'
+import type { ModuleEntities } from '../../step-forms'
 /*******************
  ** Error Messages **
  ********************/

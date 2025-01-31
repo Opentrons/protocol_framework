@@ -329,7 +329,6 @@ export type HydratedMagnetFormData = AnnotationFields & {
   id: string
   magnetAction: MagnetAction
   moduleId: string
-  moduleModel: string
   stepDetails: string | null
   stepType: 'magnet'
 }

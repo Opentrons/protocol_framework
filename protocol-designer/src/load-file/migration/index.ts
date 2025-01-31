@@ -13,7 +13,6 @@ import { migrateFile as migrateFileEight } from './8_0_0'
 import { migrateFile as migrateFileEightOne } from './8_1_0'
 import { migrateFile as migrateFileEightTwo } from './8_2_0'
 import { migrateFile as migrateFileEightTwoPointTwo } from './8_2_2'
-import { migrateFile as migrateFileEightFour } from './8_4_0'
 
 import type { PDProtocolFile } from '../../file-types'
 
@@ -59,8 +58,6 @@ const allMigrationsByVersion: MigrationsByVersion = {
   '8.2.0': migrateFileEightTwo,
   // @ts-expect-error
   '8.2.2': migrateFileEightTwoPointTwo,
-  // @ts-expect-error
-  '8.4.0': migrateFileEightFour,
 }
 export const migration = (
   file: any

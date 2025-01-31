@@ -133,7 +133,6 @@ describe('form casting', () => {
       stepName: 'magnet',
       stepDetails: '',
       moduleId: 'someModuleId',
-      moduleModel: 'magneticModuleV1',
       magnetAction: 'engage',
       engageHeight: '12',
     }

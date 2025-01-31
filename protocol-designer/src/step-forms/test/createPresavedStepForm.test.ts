@@ -244,7 +244,6 @@ describe('createPresavedStepForm', () => {
       id: stepId,
       stepType: 'magnet',
       moduleId: 'someMagneticModuleId',
-      moduleModel: 'magneticModuleV2',
       engageHeight: EXAMPLE_ENGAGE_HEIGHT,
       magnetAction: 'engage',
       // Default values
@@ -274,7 +273,6 @@ describe('createPresavedStepForm', () => {
       stepType: 'magnet',
       moduleId: 'someMagneticModuleId',
       engageHeight: EXAMPLE_ENGAGE_HEIGHT,
-      moduleModel: 'magneticModuleV2',
       magnetAction: 'disengage',
       stepName: 'magnet',
       stepDetails: '',
@@ -301,7 +299,6 @@ describe('createPresavedStepForm', () => {
       id: stepId,
       stepType: 'magnet',
       moduleId: 'someMagneticModuleId',
-      moduleModel: 'magneticModuleV2',
       engageHeight: EXAMPLE_ENGAGE_HEIGHT,
       magnetAction: 'engage',
       stepName: 'magnet',

@@ -20,7 +20,6 @@ import {
 import {
   _getPipetteEntitiesRootState,
   _getLabwareEntitiesRootState,
-  _getModuleEntitiesRootState,
   _getInitialDeckSetupRootState,
 } from '../selectors'
 import { handleFormChange } from '../../steplist/formLevel/handleFormChange'
@@ -1547,10 +1546,6 @@ describe('unsavedForm reducer', () => {
       // @ts-expect-error(sa, 2021-6-14): not a valid LabwareEntities Type
       'labwareEntitiesPlaceholder'
     )
-    vi.mocked(_getModuleEntitiesRootState).mockReturnValue(
-      // @ts-expect-error(sa, 2021-6-14): not a valid ModuleEntities Type
-      'moduleEntitiesPlaceholder'
-    )
     const result = unsavedForm(rootState, action)
     expect(vi.mocked(_getPipetteEntitiesRootState).mock.calls).toEqual([
       [rootState],
@@ -1564,7 +1559,6 @@ describe('unsavedForm reducer', () => {
         rootState.unsavedForm,
         'pipetteEntitiesPlaceholder',
         'labwareEntitiesPlaceholder',
-        'moduleEntitiesPlaceholder',
       ],
     ])
     expect(result).toEqual({
@@ -1603,10 +1597,6 @@ describe('unsavedForm reducer', () => {
       // @ts-expect-error(sa, 2021-6-14): not a valid LabwareEntities Type
       'labwareEntitiesPlaceholder'
     )
-    vi.mocked(_getModuleEntitiesRootState).mockReturnValue(
-      // @ts-expect-error(sa, 2021-6-14): not a valid PipetteEntities Type
-      'moduleEntitiesPlaceholder'
-    )
     const result = unsavedForm(rootState, action)
     expect(vi.mocked(_getPipetteEntitiesRootState).mock.calls).toEqual([
       [rootState],
@@ -1622,7 +1612,6 @@ describe('unsavedForm reducer', () => {
         rootState.unsavedForm,
         'pipetteEntitiesPlaceholder',
         'labwareEntitiesPlaceholder',
-        'moduleEntitiesPlaceholder',
       ],
     ])
     expect(result).toEqual({
@@ -1685,7 +1674,6 @@ describe('unsavedForm reducer', () => {
           stepType: 'moveLiquid',
           pipetteEntities: 'pipetteEntitiesPlaceholder',
           labwareEntities: 'labwareEntitiesPlaceholder',
-          moduleEntities: 'moduleEntitiesPlaceholder',
           savedStepForms: 'savedStepFormsValue',
           orderedStepIds: 'orderedStepIdsValue',
           initialDeckSetup: 'initalDeckSetupValue',

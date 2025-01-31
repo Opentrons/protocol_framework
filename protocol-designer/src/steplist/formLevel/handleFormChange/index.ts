@@ -12,13 +12,11 @@ import type {
 } from '@opentrons/step-generation'
 import type { FormData } from '../../../form-types'
 import type { FormPatch } from '../../actions/types'
-import type { ModuleEntities } from '../../../step-forms'
 export function handleFormChange(
   patch: FormPatch,
   rawForm: FormData | null | undefined,
   pipetteEntities: PipetteEntities,
-  labwareEntities: LabwareEntities,
-  moduleEntities: ModuleEntities
+  labwareEntities: LabwareEntities
 ): FormPatch {
   if (rawForm == null) {
     return patch
@@ -45,11 +43,7 @@ export function handleFormChange(
   }
 
   if (rawForm.stepType === 'magnet') {
-    const dependentFieldsPatch = dependentFieldsUpdateMagnet(
-      patch,
-      rawForm,
-      moduleEntities
-    )
+    const dependentFieldsPatch = dependentFieldsUpdateMagnet(patch, rawForm)
     return { ...patch, ...dependentFieldsPatch }
   }
 
