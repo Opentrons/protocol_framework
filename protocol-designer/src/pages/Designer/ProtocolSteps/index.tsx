@@ -43,7 +43,7 @@ import {
 import { TimelineAlerts } from '../../../organisms'
 import { DraggableSidebar } from './DraggableSidebar'
 
-const CONTENT_MAX_WIDTH = '44.6704375rem'
+const CONTENT_MAX_WIDTH = '46.9375rem'
 
 export function ProtocolSteps(): JSX.Element {
   const { i18n, t } = useTranslation('starting_deck_state')
@@ -52,7 +52,7 @@ export function ProtocolSteps(): JSX.Element {
   const hoveredTerminalItem = useSelector(getHoveredTerminalItemId)
   const isMultiSelectMode = useSelector(getIsMultiSelectMode)
   const selectedSubstep = useSelector(getSelectedSubstep)
-  const enableHoyKeyDisplay = useSelector(getEnableHotKeysDisplay)
+  const enableHotKeyDisplay = useSelector(getEnableHotKeysDisplay)
   const tab = useSelector(getDesignerTab)
   const leftString = t('onDeck')
   const rightString = t('offDeck')
@@ -82,27 +82,34 @@ export function ProtocolSteps(): JSX.Element {
     <Flex
       backgroundColor={COLORS.grey10}
       height="calc(100vh - 4rem)"
-      minHeight={FLEX_MAX_CONTENT}
+      // minHeight={FLEX_MAX_CONTENT}
+      // minHeight="100%"
       width="100%"
-      padding={SPACING.spacing12}
-      gridGap={SPACING.spacing16}
+
+      // gridGap={SPACING.spacing16}
     >
-      <Flex flex="1" height="100%">
+      <Flex height="100%" padding={SPACING.spacing12}>
         <DraggableSidebar setTargetWidth={setTargetWidth} />
       </Flex>
       <Flex
+        id="main flex"
         alignItems={ALIGN_CENTER}
         flexDirection={DIRECTION_COLUMN}
         gridGap={SPACING.spacing16}
         flex="2.85"
         paddingTop={showTimelineAlerts ? '0' : SPACING.spacing24}
-        position={POSITION_RELATIVE}
-        backgroundColor={COLORS.red40}
+        // position={POSITION_RELATIVE}
+        paddingX="1.75rem"
+        height="100%"
       >
         <Flex
           flexDirection={DIRECTION_COLUMN}
-          gridGap={SPACING.spacing16}
+          gridGap={SPACING.spacing24}
+          // width="100%"
           width={CONTENT_MAX_WIDTH}
+          id="bigger flex"
+          height="100%"
+          justifyContent={JUSTIFY_CENTER}
         >
           {showTimelineAlerts ? (
             <TimelineAlerts
@@ -112,7 +119,10 @@ export function ProtocolSteps(): JSX.Element {
               gridGap={SPACING.spacing4}
             />
           ) : null}
-          <Flex justifyContent={JUSTIFY_SPACE_BETWEEN}>
+          <Flex
+            justifyContent={JUSTIFY_SPACE_BETWEEN}
+            alignItems={ALIGN_CENTER}
+          >
             {currentStep != null && hoveredTerminalItem == null ? (
               <StyledText desktopStyle="headingSmallBold">
                 {i18n.format(currentStep.stepName, 'capitalize')}
@@ -137,7 +147,11 @@ export function ProtocolSteps(): JSX.Element {
               }}
             />
           </Flex>
-          <Flex flexDirection={DIRECTION_COLUMN} gridGap={SPACING.spacing16}>
+          <Flex
+            flexDirection={DIRECTION_COLUMN}
+            gridGap={SPACING.spacing16}
+            id="container for deck setup"
+          >
             {deckView === leftString ? (
               <DeckSetupContainer tab="protocolSteps" />
             ) : (
@@ -151,7 +165,7 @@ export function ProtocolSteps(): JSX.Element {
             ) : null}
           </Flex>
         </Flex>
-        {enableHoyKeyDisplay ? (
+        {enableHotKeyDisplay ? (
           <Flex
             position={POSITION_FIXED}
             left={`calc(1.5rem + ${targetWidth}px)`}
@@ -180,7 +194,10 @@ export function ProtocolSteps(): JSX.Element {
       {formData == null && selectedSubstep ? (
         <SubStepsToolbox stepId={selectedSubstep} />
       ) : null}
-      <StepForm />
+      <Flex padding={SPACING.spacing12}>
+        <StepForm />
+      </Flex>
+
       {isMultiSelectMode ? <BatchEditToolbox /> : null}
     </Flex>
   )

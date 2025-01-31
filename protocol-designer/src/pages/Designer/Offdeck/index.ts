@@ -1,1 +1,1 @@
-export * from './Offdeck'
+export * from './OffDeck'

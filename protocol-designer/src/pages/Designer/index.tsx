@@ -4,11 +4,13 @@ import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import {
   ALIGN_END,
+  ALIGN_STRETCH,
   COLORS,
   DIRECTION_COLUMN,
   FLEX_MAX_CONTENT,
   Flex,
   INFO_TOAST,
+  JUSTIFY_FLEX_END,
   SPACING,
   ToggleGroup,
   useOnClickOutside,
@@ -126,7 +128,9 @@ export function Designer(): JSX.Element {
 
   const deckViewItems =
     deckView === leftString ? (
-      <DeckSetupContainer tab={tab} />
+      <Flex height="100%" width="100%" css={{ outline: 'solid 1px red' }}>
+        <DeckSetupContainer tab={tab} />
+      </Flex>
     ) : (
       <OffDeck tab={tab} />
     )
@@ -159,7 +163,11 @@ export function Designer(): JSX.Element {
           }}
         />
       ) : null}
-      <Flex flexDirection={DIRECTION_COLUMN} minHeight={FLEX_MAX_CONTENT}>
+      <Flex
+        flexDirection={DIRECTION_COLUMN}
+        // minHeight={FLEX_MAX_CONTENT}
+        height="100%"
+      >
         <DesignerNavigation
           hasZoomInSlot={zoomIn.slot != null || zoomIn.cutout != null}
           hasTrashEntity={hasTrashEntity}
@@ -178,16 +186,24 @@ export function Designer(): JSX.Element {
                 : `${SPACING.spacing60} ${SPACING.spacing40}`
             }
             // height="calc(100vh - 64px)"
+            height="100%"
+            id="outer flex"
           >
             <Flex
               flexDirection={DIRECTION_COLUMN}
               gridGap={SPACING.spacing24}
-              // height="100%"
-              backgroundColor={COLORS.red40}
-              css={{ outline: 'solid 1px green' }}
+              height="100%"
+              // backgroundColor="red"
+              // css={{ outline: 'solid 2px green' }}
             >
               {zoomIn.slot == null ? (
-                <Flex alignSelf={ALIGN_END}>
+                <Flex
+                  justifyContent={JUSTIFY_FLEX_END}
+                  alignSelf={ALIGN_STRETCH}
+                  // backgroundColor={COLORS.yellow35}
+                  width="100%"
+                  // css={{ outline: 'solid 1px purple' }}
+                >
                   <ToggleGroup
                     selectedValue={deckView}
                     leftText={leftString}
