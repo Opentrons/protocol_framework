@@ -354,6 +354,12 @@ export function DeckSetupTools(props: DeckSetupToolsProps): JSX.Element | null {
         dispatch(createDeckFixture(selectedFixture, cutout))
       }
     }
+    if (
+      matchingLabwareFor4thColumn != null &&
+      selectedFixture !== 'stagingArea'
+    ) {
+      dispatch(deleteContainer({ labwareId: matchingLabwareFor4thColumn.id }))
+    }
     if (selectedModuleModel != null) {
       //  create module
       const moduleType = getModuleType(selectedModuleModel)
