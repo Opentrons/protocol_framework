@@ -64,7 +64,7 @@ import {
 import type { FormWarning, FormWarningType } from './warnings'
 import type { HydratedFormData, StepType } from '../../form-types'
 import type { FormError } from './errors'
-import { ModuleEntities } from '@opentrons/step-generation'
+import type { ModuleEntities } from '@opentrons/step-generation'
 export { handleFormChange } from './handleFormChange'
 export { createBlankForm } from './createBlankForm'
 export { getDefaultsForStepType } from './getDefaultsForStepType'
@@ -79,7 +79,10 @@ export { getNextDefaultEngageHeight } from './getNextDefaultEngageHeight'
 export { stepFormToArgs } from './stepFormToArgs'
 export type { FormError, FormWarning, FormWarningType }
 interface FormHelpers {
-  getErrors?: (arg: HydratedFormData, moduleEntities: ModuleEntities) => FormError[]
+  getErrors?: (
+    arg: HydratedFormData,
+    moduleEntities: ModuleEntities
+  ) => FormError[]
   getWarnings?: (arg: unknown) => FormWarning[]
 }
 const stepFormHelperMap: Partial<Record<StepType, FormHelpers>> = {
