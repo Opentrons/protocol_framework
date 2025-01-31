@@ -301,6 +301,7 @@ export function DeckSetupTools(props: DeckSetupToolsProps): JSX.Element | null {
           createdLabwareForSlot.labwareDefURI !== selectedLabwareDefUri ||
           //  if nested labware changes but labware doesn't, still delete both
           (createdLabwareForSlot.labwareDefURI === selectedLabwareDefUri &&
+            selectedNestedLabwareDefUri != null &&
             createdNestedLabwareForSlot?.labwareDefURI !==
               selectedNestedLabwareDefUri))
       ) {
