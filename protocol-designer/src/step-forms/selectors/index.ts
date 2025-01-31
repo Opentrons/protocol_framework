@@ -555,8 +555,11 @@ export const getBatchEditFormHasUnsavedChanges: Selector<
   boolean
 > = createSelector(getBatchEditFieldChanges, changes => !isEmpty(changes))
 
-const _formLevelErrors = (hydratedForm: HydratedFormData): StepFormErrors => {
-  return getFormErrors(hydratedForm.stepType, hydratedForm)
+const _formLevelErrors = (
+  hydratedForm: HydratedFormData,
+  moduleEntities: ModuleEntities
+): StepFormErrors => {
+  return getFormErrors(hydratedForm.stepType, hydratedForm, moduleEntities)
 }
 
 const _dynamicFieldFormErrors = (
@@ -638,7 +641,10 @@ export const _hasFormLevelErrors = (
   hydratedForm: HydratedFormData,
   invariantContext: InvariantContext
 ): boolean => {
-  if (_formLevelErrors(hydratedForm).length > 0) return true
+  if (
+    _formLevelErrors(hydratedForm, invariantContext.moduleEntities).length > 0
+  )
+    return true
 
   if (
     hydratedForm.stepType === 'thermocycler' &&
@@ -727,13 +733,20 @@ export const getDynamicFieldFormErrorsForUnsavedForm: Selector<
 export const getFormLevelErrorsForUnsavedForm: Selector<
   BaseState,
   StepFormErrors
-> = createSelector(getHydratedUnsavedForm, hydratedForm => {
-  if (!hydratedForm) return []
+> = createSelector(
+  getHydratedUnsavedForm,
+  getInvariantContext,
+  (hydratedForm, invariantContext) => {
+    if (!hydratedForm) return []
 
-  const errors = _formLevelErrors(hydratedForm)
+    const errors = _formLevelErrors(
+      hydratedForm,
+      invariantContext.moduleEntities
+    )
 
-  return errors
-})
+    return errors
+  }
+)
 export const getCurrentFormCanBeSaved: Selector<
   BaseState,
   boolean

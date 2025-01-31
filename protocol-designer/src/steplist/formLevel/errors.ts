@@ -23,6 +23,7 @@ import type { ReactNode } from 'react'
 import type { LabwareDefinition2, PipetteV2Specs } from '@opentrons/shared-data'
 import type { LabwareEntities, PipetteEntity } from '@opentrons/step-generation'
 import type { StepFieldName } from '../../form-types'
+import { ModuleEntities } from '../../step-forms'
 /*******************
  ** Error Messages **
  ********************/
@@ -411,7 +412,7 @@ export interface HydratedFormData {
 
 export type FormErrorChecker = (
   arg: HydratedFormData,
-  labwareEntities?: LabwareEntities
+  moduleEntities?: ModuleEntities
 ) => FormError | null
 // TODO: test these
 
@@ -676,9 +677,14 @@ export const newLabwareLocationRequired = (
     : null
 }
 export const engageHeightRangeExceeded = (
-  fields: HydratedFormData
+  fields: HydratedFormData,
+  moduleEntities?: ModuleEntities
 ): FormError | null => {
-  const { magnetAction, engageHeight, moduleModel } = fields
+  const { magnetAction, engageHeight, moduleId } = fields
+  if (moduleEntities == null) {
+    return null
+  }
+  const moduleModel = moduleEntities[moduleId].model
   const engageHeightCast = Number(engageHeight)
   if (magnetAction === 'engage') {
     if (moduleModel === MAGNETIC_MODULE_V1) {
@@ -921,14 +927,13 @@ export const fileNameRequired = (
  ********************/
 type ComposeErrors = (
   ...errorCheckers: FormErrorChecker[]
-) => (arg: HydratedFormData) => FormError[]
+) => (arg: HydratedFormData, moduleEntities?: ModuleEntities) => FormError[]
 export const composeErrors: ComposeErrors = (
   ...errorCheckers: FormErrorChecker[]
-) => value =>
-  errorCheckers.reduce<FormError[]>((acc, errorChecker) => {
-    const possibleError = errorChecker(value)
-    return possibleError ? [...acc, possibleError] : acc
-  }, [])
+) => (formData: HydratedFormData, moduleEntities?: ModuleEntities) =>
+  errorCheckers
+    .map(checker => checker(formData, moduleEntities))
+    .filter((error): error is FormError => error !== null)
 
 export const getIsOutOfRange = (
   value: any,
