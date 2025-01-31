@@ -302,12 +302,21 @@ async def liquid_probe(
     p_pass_distance = float(max_p_distance - p_prep_distance)
     max_z_distance = (p_pass_distance / plunger_speed) * mount_speed
 
+    # TODO: pass `mount_speed` (the final target Z speed) into my cool new function
+    #       and it will return:
+    #          a) the distance (millimeters)
+    #          b) the time (seconds)
+
+    # also move the Z down too
+    # at known acceleration
+    # and move plunger however long enough so that Z reaches target speed
+    # hopefully plunger doesn't move too far
     lower_plunger = create_step(
-        distance={tool: float64(p_prep_distance)},
-        velocity={tool: float64(plunger_speed)},
-        acceleration={},
-        duration=float64(plunger_impulse_time),
-        present_nodes=[tool],
+        distance={tool: float64(p_prep_distance), head_node: float64(33.216)},  # distance
+        velocity={tool: float64(plunger_speed), head_node: float64(5.0)},  # discontinuity
+        acceleration={head_node: float64(150.0)},  # acceleration
+        duration=float64(plunger_impulse_time),  # 0.633 seconds (in default_ot3.py)
+        present_nodes=[tool, head_node],
     )
 
     sensor_group = _build_pass_step(
@@ -333,11 +342,12 @@ async def liquid_probe(
     sensor_runner = MoveGroupRunner(move_groups=[[lower_plunger], [sensor_group]])
 
     # Only raise the z a little so we don't do a huge slow travel
+    slower_mount_speed = 5.0  # TODO: delete this (sigler)
     raise_z = create_step(
         distance={head_node: float64(z_offset_for_plunger_prep)},
-        velocity={head_node: float64(-1 * mount_speed)},
+        velocity={head_node: float64(-1 * slower_mount_speed)},
         acceleration={},
-        duration=float64(max_z_distance / mount_speed),
+        duration=float64(z_offset_for_plunger_prep / slower_mount_speed),
         present_nodes=[head_node],
     )
 
