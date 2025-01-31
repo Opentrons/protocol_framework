@@ -5,7 +5,7 @@ import styled from 'styled-components'
 import {
   ALIGN_CENTER,
   ALIGN_START,
-  ALIGN_STRETCH,
+  // ALIGN_STRETCH,
   BORDERS,
   Box,
   COLORS,
@@ -13,13 +13,13 @@ import {
   EmptySelectorButton,
   Flex,
   JUSTIFY_CENTER,
-  JUSTIFY_START,
+  // JUSTIFY_START,
   LabwareRender,
   OVERFLOW_AUTO,
   RobotWorkSpace,
   SPACING,
   StyledText,
-  WRAP,
+  // WRAP,
 } from '@opentrons/components'
 import * as wellContentsSelectors from '../../../top-selectors/well-contents'
 import { selectors } from '../../../labware-ingred/selectors'
