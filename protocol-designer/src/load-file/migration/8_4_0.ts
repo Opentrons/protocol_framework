@@ -27,7 +27,6 @@ export const migrateFile = (
     }
     return acc
   }, {})
-  console.log(magneticModuleModelById)
   const savedMagnetSteps = Object.values(savedStepForms).reduce((acc, form) => {
     if (form.stepType === 'magnet') {
       const { id, moduleId } = form
