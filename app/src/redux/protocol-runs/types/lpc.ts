@@ -13,6 +13,7 @@ type LabwareId = string
 export type LPCStep = keyof typeof LPC_STEP
 
 export type LPCFlowType = 'default' | 'location-specific'
+export type LPCOffsetKind = 'default' | 'location-specific' | 'hardcoded'
 
 export interface StepInfo {
   currentStepIndex: number
@@ -37,6 +38,7 @@ export interface PositionParams {
 }
 
 interface LPCLabwareOffsetDetails {
+  kind: LPCOffsetKind
   labwareId: string
   definitionUri: string
   moduleModel?: ModuleModel
@@ -47,11 +49,13 @@ interface LPCLabwareOffsetDetails {
 export interface LPCLabwareOffsetDefaultDetails
   extends LPCLabwareOffsetDetails {
   slotName: null
+  kind: 'default'
 }
 
 export interface LPCLabwareOffsetAppliedLocationDetails
   extends LPCLabwareOffsetDetails {
   slotName: string
+  kind: 'location-specific'
 }
 
 export interface OffsetDetails {

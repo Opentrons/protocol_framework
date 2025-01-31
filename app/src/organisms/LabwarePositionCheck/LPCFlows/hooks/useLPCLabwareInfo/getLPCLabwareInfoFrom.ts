@@ -86,6 +86,7 @@ function getOffsetDetailsForLabware({
         ...location,
         ...restInfo,
         definitionUri,
+        kind: 'location-specific',
       },
     }
   })

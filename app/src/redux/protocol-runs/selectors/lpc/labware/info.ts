@@ -70,7 +70,7 @@ export const selectSelectedLabwareFlowType = (
       if (selectedLabware?.offsetLocationDetails == null) {
         return null
       } else {
-        if (selectedLabware.offsetLocationDetails.slotName == null) {
+        if (selectedLabware.offsetLocationDetails.kind === 'default') {
           return 'default'
         } else {
           return 'location-specific'
