@@ -311,10 +311,21 @@ async def liquid_probe(
     # at known acceleration
     # and move plunger however long enough so that Z reaches target speed
     # hopefully plunger doesn't move too far
+    z_acceleration = 150.0
+    z_discontinuity = 5.0
+    prep_mount_mm = (pow(mount_speed, 2) - pow(z_discontinuity, 2)) / (2 * z_acceleration)
+
+    print(f"prep_plunger_mm={p_prep_distance},"
+          f"prep_mount_mm={prep_mount_mm},"
+          f"plunger_speed={plunger_speed},"
+          f"mount_discontinuity={z_discontinuity},"
+          f"mount_acceleration={z_acceleration},"
+          f"mount_seconds_to_acceleration={plunger_impulse_time},"
+          f"mount_speed={mount_speed}")
     lower_plunger = create_step(
-        distance={tool: float64(p_prep_distance), head_node: float64(33.216)},  # distance
-        velocity={tool: float64(plunger_speed), head_node: float64(5.0)},  # discontinuity
-        acceleration={head_node: float64(150.0)},  # acceleration
+        distance={tool: float64(p_prep_distance), head_node: float64(prep_mount_mm)},  # distance
+        velocity={tool: float64(plunger_speed), head_node: float64(z_discontinuity)},  # discontinuity
+        acceleration={head_node: float64(z_acceleration)},  # acceleration
         duration=float64(plunger_impulse_time),  # 0.633 seconds (in default_ot3.py)
         present_nodes=[tool, head_node],
     )
@@ -342,12 +353,11 @@ async def liquid_probe(
     sensor_runner = MoveGroupRunner(move_groups=[[lower_plunger], [sensor_group]])
 
     # Only raise the z a little so we don't do a huge slow travel
-    slower_mount_speed = 5.0  # TODO: delete this (sigler)
     raise_z = create_step(
         distance={head_node: float64(z_offset_for_plunger_prep)},
-        velocity={head_node: float64(-1 * slower_mount_speed)},
+        velocity={head_node: float64(-1 * z_discontinuity)},
         acceleration={},
-        duration=float64(z_offset_for_plunger_prep / slower_mount_speed),
+        duration=float64(z_offset_for_plunger_prep / z_discontinuity),
         present_nodes=[head_node],
     )
 

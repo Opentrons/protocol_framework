@@ -2770,9 +2770,13 @@ class OT3API(
             )
 
         load_max_z = self.config.motion_settings.default_max_speed[self.gantry_load][OT3AxisKind.Z]
-        assert z_top_speed < load_max_z, \
+        load_accel_z = self.config.motion_settings.acceleration[self.gantry_load][OT3AxisKind.Z]
+        load_disc_z = self.config.motion_settings.max_speed_discontinuity[self.gantry_load][OT3AxisKind.Z]
+        assert z_top_speed <= load_max_z, \
             f"{self.gantry_load} unable to move Z at {z_top_speed} (max is {load_max_z})"
         probe_settings.mount_speed = z_top_speed
+        accel_seconds = (z_top_speed - load_disc_z) / load_accel_z  # t = (v_f - v_i) / a
+        probe_settings.plunger_impulse_time = accel_seconds
 
         starting_position = await self.gantry_position(checked_mount, refresh=True)
 
@@ -2822,6 +2826,7 @@ class OT3API(
         #  starting_position.z + z_distance of pass - pos.z should be < max_z_dist
         # due to rounding errors this can get caught in an infinite loop when the distance is almost equal
         # so we check to see if they're within 0.01 which is 1/5th the minimum movement distance from move_utils.py
+        height = 0.0
         while (starting_position.z - current_position.z) < (max_z_dist - 0.01):
             await prep_plunger_for_probe_move(
                 position=current_position,
@@ -2868,9 +2873,9 @@ class OT3API(
         await self.move_to(checked_mount, starting_position + top_types.Point(z=2))
         await self.prepare_for_aspirate(checked_mount)
         await self.move_to(checked_mount, starting_position)
-        if error is not None:
-            # if we never found liquid raise an error
-            raise error
+        # if error is not None:
+        #     # if we never found liquid raise an error
+        #     raise error
         return height
 
     async def capacitive_probe(
