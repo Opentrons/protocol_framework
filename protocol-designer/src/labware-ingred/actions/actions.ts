@@ -143,9 +143,7 @@ export const deleteLiquidGroup: (
   const allLiquidGroups = selectors.getLiquidGroupsOnDeck(getState())
   const liquidEntities = getLiquidEntities(getState())
   const liquidGroupIdNum = parseInt(liquidGroupId)
-  const allLiquidGroupIds = Object.keys(allLiquidGroups)
-    .map(id => parseInt(id))
-    .sort((a, b) => a - b)
+  const allLiquidGroupIds = Object.keys(allLiquidGroups).map(id => parseInt(id))
 
   if (!allLiquidGroupIds.includes(liquidGroupIdNum)) return
 
@@ -162,17 +160,18 @@ export const deleteLiquidGroup: (
   })
 
   const updatedLiquidGroups: Record<string, IngredInputs> = {}
-  const filteredGroupIds = allLiquidGroupIds
-    .filter(id => id !== liquidGroupIdNum)
-    .sort((a, b) => a - b)
+  const filteredGroupIds = allLiquidGroupIds.filter(
+    id => id !== liquidGroupIdNum
+  )
 
   //  renumber subsequent liquid ids, if they exist
   filteredGroupIds.forEach((oldId, index) => {
     const liquid = liquidEntities[oldId]
+    const stringIndex = index.toString()
     if (liquid != null) {
-      updatedLiquidGroups[index.toString()] = {
+      updatedLiquidGroups[stringIndex] = {
         ...liquid,
-        liquidGroupId: index.toString(),
+        liquidGroupId: stringIndex,
         pythonName: `liquid_${index}`,
       }
     }
