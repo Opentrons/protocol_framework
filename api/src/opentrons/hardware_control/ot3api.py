@@ -2724,6 +2724,7 @@ class OT3API(
         probe: Optional[InstrumentProbeType] = None,
         force_both_sensors: bool = False,
         response_queue: Optional[PipetteSensorResponseQueue] = None,
+        z_top_speed: float = 100.0,
     ) -> float:
         """Search for and return liquid level height.
 
@@ -2767,6 +2768,11 @@ class OT3API(
             probe_settings.plunger_speed = min(
                 max_plunger_speed, probe_settings.plunger_speed
             )
+
+        load_max_z = self.config.motion_settings.default_max_speed[self.gantry_load][OT3AxisKind.Z]
+        assert z_top_speed < load_max_z, \
+            f"{self.gantry_load} unable to move Z at {z_top_speed} (max is {load_max_z})"
+        probe_settings.mount_speed = z_top_speed
 
         starting_position = await self.gantry_position(checked_mount, refresh=True)
 
