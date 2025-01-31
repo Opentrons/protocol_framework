@@ -79,9 +79,9 @@ class SearchQueryBuilder:
         return statement
 
     def do_active_filter(self, active: bool) -> Self:
-        """Filter to only active=active rows."""
+        """Filter to only rows that are active (active=True) or inactive (active=False)."""
         self._current_base_filter_statement = self._current_base_filter_statement.where(
-            labware_offset_table.c.active == True  # noqa: E712
+            labware_offset_table.c.active == active
         )
         return self
 
