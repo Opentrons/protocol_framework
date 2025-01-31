@@ -357,7 +357,8 @@ export function DeckSetupTools(props: DeckSetupToolsProps): JSX.Element | null {
     }
     if (
       matchingLabwareFor4thColumn != null &&
-      selectedFixture !== 'stagingArea'
+      selectedFixture !== 'stagingArea' &&
+      selectedFixture !== 'wasteChuteAndStagingArea'
     ) {
       dispatch(deleteContainer({ labwareId: matchingLabwareFor4thColumn.id }))
     }
