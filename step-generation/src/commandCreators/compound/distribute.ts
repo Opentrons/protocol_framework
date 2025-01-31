@@ -241,30 +241,6 @@ export const distribute: CommandCreator<DistributeArgs> = (
                   }),
                 ]
               : []),
-            curryCommandCreator(dispense, {
-              pipetteId: args.pipette,
-              volume: aspirateAirGapVolume,
-              labwareId: args.destLabware,
-              wellName: firstDestWell,
-              flowRate: dispenseFlowRateUlSec,
-              wellLocation: {
-                origin: 'bottom',
-                offset: {
-                  z: airGapOffsetDestWell,
-                  x: 0,
-                  y: 0,
-                },
-              },
-              nozzles,
-              tipRack: args.tipRack,
-            }),
-            ...(dispenseDelay != null
-              ? [
-                  curryCommandCreator(delay, {
-                    seconds: dispenseDelay.seconds,
-                  }),
-                ]
-              : []),
           ]
         : []
       const dispenseCommands = flatMap(

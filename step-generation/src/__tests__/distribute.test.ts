@@ -22,7 +22,6 @@ import {
   makeAspirateHelper,
   makeContext,
   makeDispenseHelper,
-  makeDispenseAirGapHelper,
   makeTouchTipHelper,
   pickUpTipHelper,
   SOURCE_LABWARE,
@@ -37,16 +36,6 @@ import {
   DEST_WELL_BLOWOUT_DESTINATION,
 } from '../utils/misc'
 
-const dispenseAirGapHelper = makeDispenseAirGapHelper({
-  wellLocation: {
-    origin: 'bottom',
-    offset: {
-      x: 0,
-      y: 0,
-      z: 11.54,
-    },
-  },
-})
 const aspirateHelper = makeAspirateHelper()
 const dispenseHelper = makeDispenseHelper()
 const touchTipHelper = makeTouchTipHelper()
@@ -450,8 +439,6 @@ describe('advanced settings: volume, mix, pre-wet tip, tip touch, tip position',
       makeMoveToWellHelper('A1'),
       makeAirGapHelper(5),
       delayCommand(12),
-
-      dispenseAirGapHelper('A2', 5),
       dispenseHelper('A2', 100),
       dispenseHelper('A3', 100),
 
@@ -460,7 +447,6 @@ describe('advanced settings: volume, mix, pre-wet tip, tip touch, tip position',
       makeMoveToWellHelper('A1'),
       makeAirGapHelper(5),
       delayCommand(12),
-      dispenseAirGapHelper('A4', 5),
       dispenseHelper('A4', 100),
       dispenseHelper('A5', 100),
     ])
@@ -488,14 +474,12 @@ describe('advanced settings: volume, mix, pre-wet tip, tip touch, tip position',
       aspirateHelper('A1', 200),
       makeMoveToWellHelper('A1'),
       makeAirGapHelper(5),
-      dispenseAirGapHelper('A2', 5),
       dispenseHelper('A2', 100),
       dispenseHelper('A3', 100),
 
       aspirateHelper('A1', 200),
       makeMoveToWellHelper('A1'),
       makeAirGapHelper(5),
-      dispenseAirGapHelper('A4', 5),
       dispenseHelper('A4', 100),
       dispenseHelper('A5', 100),
     ])
@@ -524,9 +508,6 @@ describe('advanced settings: volume, mix, pre-wet tip, tip touch, tip position',
       aspirateHelper('A1', 200),
       makeMoveToWellHelper('A1'),
       makeAirGapHelper(5),
-
-      dispenseAirGapHelper('A2', 5),
-      delayCommand(12),
       dispenseHelper('A2', 100),
       ...delayWithOffset('A2', DEST_LABWARE),
       dispenseHelper('A3', 100),
@@ -535,9 +516,6 @@ describe('advanced settings: volume, mix, pre-wet tip, tip touch, tip position',
       aspirateHelper('A1', 200),
       makeMoveToWellHelper('A1'),
       makeAirGapHelper(5),
-
-      dispenseAirGapHelper('A4', 5),
-      delayCommand(12),
       dispenseHelper('A4', 100),
       ...delayWithOffset('A4', DEST_LABWARE),
       dispenseHelper('A5', 100),
@@ -928,8 +906,6 @@ describe('advanced settings: volume, mix, pre-wet tip, tip touch, tip position',
         makeAirGapHelper(31),
         delayCommand(11),
         // dispense #1
-        dispenseAirGapHelper('B1', 31),
-        delayCommand(12),
         dispenseHelper('B1', 45),
         ...delayWithOffset('B1', DEST_LABWARE),
         // touch tip (disp #1)
@@ -976,8 +952,6 @@ describe('advanced settings: volume, mix, pre-wet tip, tip touch, tip position',
         makeAirGapHelper(31),
         delayCommand(11),
         // dispense #1
-        dispenseAirGapHelper('A2', 31),
-        delayCommand(12),
         dispenseHelper('A2', 100),
         ...delayWithOffset('A2', DEST_LABWARE),
         // touch tip (disp #1)
@@ -1008,8 +982,6 @@ describe('advanced settings: volume, mix, pre-wet tip, tip touch, tip position',
         makeMoveToWellHelper('A1'),
         makeAirGapHelper(31),
         delayCommand(11),
-        dispenseAirGapHelper('A4', 31),
-        delayCommand(12),
         // dispense #3
         dispenseHelper('A4', 100),
         ...delayWithOffset('A4', DEST_LABWARE),
@@ -1059,8 +1031,6 @@ describe('advanced settings: volume, mix, pre-wet tip, tip touch, tip position',
         makeAirGapHelper(31),
         delayCommand(11),
         // dispense #1
-        dispenseAirGapHelper('A2', 31),
-        delayCommand(12),
         dispenseHelper('A2', 100),
         ...delayWithOffset('A2', DEST_LABWARE),
         // touch tip (disp #1)
@@ -1098,8 +1068,6 @@ describe('advanced settings: volume, mix, pre-wet tip, tip touch, tip position',
         makeAirGapHelper(31),
         delayCommand(11),
         // dispense #3
-        dispenseAirGapHelper('A4', 31),
-        delayCommand(12),
         dispenseHelper('A4', 100),
         ...delayWithOffset('A4', DEST_LABWARE),
         // touch tip (disp #3)
@@ -1149,8 +1117,6 @@ describe('advanced settings: volume, mix, pre-wet tip, tip touch, tip position',
         makeAirGapHelper(31),
         delayCommand(11),
         // dispense #1
-        dispenseAirGapHelper('A2', 31),
-        delayCommand(12),
         dispenseHelper('A2', 100),
         ...delayWithOffset('A2', DEST_LABWARE),
         // touch tip (disp #1)
@@ -1181,8 +1147,6 @@ describe('advanced settings: volume, mix, pre-wet tip, tip touch, tip position',
         makeAirGapHelper(31),
         delayCommand(11),
         // dispense #3
-        dispenseAirGapHelper('A4', 31),
-        delayCommand(12),
         dispenseHelper('A4', 100),
         ...delayWithOffset('A4', DEST_LABWARE),
         // touch tip (disp #3)
@@ -1229,8 +1193,6 @@ describe('advanced settings: volume, mix, pre-wet tip, tip touch, tip position',
         makeAirGapHelper(31),
         delayCommand(11),
         // dispense #1
-        dispenseAirGapHelper('A2', 31),
-        delayCommand(12),
         dispenseHelper('A2', 100),
         ...delayWithOffset('A2', DEST_LABWARE),
         // touch tip (disp #1)
@@ -1262,8 +1224,6 @@ describe('advanced settings: volume, mix, pre-wet tip, tip touch, tip position',
         makeAirGapHelper(31),
         delayCommand(11),
         // dispense #3
-        dispenseAirGapHelper('A4', 31),
-        delayCommand(12),
         dispenseHelper('A4', 100),
         ...delayWithOffset('A4', DEST_LABWARE),
         // touch tip (disp #3)
@@ -1314,8 +1274,6 @@ describe('advanced settings: volume, mix, pre-wet tip, tip touch, tip position',
         makeAirGapHelper(31),
         delayCommand(11),
         // dispense #1
-        dispenseAirGapHelper('A2', 31),
-        delayCommand(12),
         dispenseHelper('A2', 100),
         ...delayWithOffset('A2', DEST_LABWARE),
         // touch tip (disp #1)
@@ -1355,8 +1313,6 @@ describe('advanced settings: volume, mix, pre-wet tip, tip touch, tip position',
         makeAirGapHelper(31),
         delayCommand(11),
         // dispense #3
-        dispenseAirGapHelper('A4', 31),
-        delayCommand(12),
         dispenseHelper('A4', 100),
         ...delayWithOffset('A4', DEST_LABWARE),
         // touch tip (disp #3)
@@ -1406,8 +1362,6 @@ describe('advanced settings: volume, mix, pre-wet tip, tip touch, tip position',
         makeAirGapHelper(31),
         delayCommand(11),
         // dispense #1
-        dispenseAirGapHelper('A2', 31),
-        delayCommand(12),
         dispenseHelper('A2', 100),
         ...delayWithOffset('A2', DEST_LABWARE),
         // touch tip (disp #1)
@@ -1439,8 +1393,6 @@ describe('advanced settings: volume, mix, pre-wet tip, tip touch, tip position',
         makeAirGapHelper(31),
         delayCommand(11),
         // dispense #3
-        dispenseAirGapHelper('A4', 31),
-        delayCommand(12),
         dispenseHelper('A4', 100),
         ...delayWithOffset('A4', DEST_LABWARE),
         // touch tip (disp #3)
@@ -1488,8 +1440,6 @@ describe('advanced settings: volume, mix, pre-wet tip, tip touch, tip position',
         makeAirGapHelper(31),
         delayCommand(11),
         // dispense #1
-        dispenseAirGapHelper('A2', 31),
-        delayCommand(12),
         dispenseHelper('A2', 100),
         ...delayWithOffset('A2', DEST_LABWARE),
         // touch tip (disp #1)
@@ -1521,8 +1471,6 @@ describe('advanced settings: volume, mix, pre-wet tip, tip touch, tip position',
         makeAirGapHelper(31),
         delayCommand(11),
         // dispense #3
-        dispenseAirGapHelper('A4', 31),
-        delayCommand(12),
         dispenseHelper('A4', 100),
         ...delayWithOffset('A4', DEST_LABWARE),
         // touch tip (disp #3)
@@ -1573,8 +1521,6 @@ describe('advanced settings: volume, mix, pre-wet tip, tip touch, tip position',
         makeAirGapHelper(31),
         delayCommand(11),
         // dispense #1
-        dispenseAirGapHelper('A2', 31),
-        delayCommand(12),
         dispenseHelper('A2', 100),
         ...delayWithOffset('A2', DEST_LABWARE),
         // touch tip (disp #1)
@@ -1614,8 +1560,6 @@ describe('advanced settings: volume, mix, pre-wet tip, tip touch, tip position',
         makeAirGapHelper(31),
         delayCommand(11),
         // dispense #3
-        dispenseAirGapHelper('A4', 31),
-        delayCommand(12),
         dispenseHelper('A4', 100),
         ...delayWithOffset('A4', DEST_LABWARE),
         // touch tip (disp #3)
@@ -1665,8 +1609,6 @@ describe('advanced settings: volume, mix, pre-wet tip, tip touch, tip position',
         makeAirGapHelper(31),
         delayCommand(11),
         // dispense #1
-        dispenseAirGapHelper('A2', 31),
-        delayCommand(12),
         dispenseHelper('A2', 100),
         ...delayWithOffset('A2', DEST_LABWARE),
         // touch tip (disp #1)
@@ -1698,8 +1640,6 @@ describe('advanced settings: volume, mix, pre-wet tip, tip touch, tip position',
         makeAirGapHelper(31),
         delayCommand(11),
         // dispense #3
-        dispenseAirGapHelper('A4', 31),
-        delayCommand(12),
         dispenseHelper('A4', 100),
         ...delayWithOffset('A4', DEST_LABWARE),
         // touch tip (disp #3)

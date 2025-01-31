@@ -26,7 +26,6 @@ import {
   aspirate,
   configureForVolume,
   delay,
-  dispense,
   dropTip,
   moveToWell,
   touchTip,
@@ -417,30 +416,6 @@ export const transfer: CommandCreator<TransferArgs> = (
                     ? [
                         curryCommandCreator(delay, {
                           seconds: aspirateDelay.seconds,
-                        }),
-                      ]
-                    : []),
-                  curryCommandCreator(dispense, {
-                    pipetteId: args.pipette,
-                    volume: aspirateAirGapVolume,
-                    labwareId: args.destLabware,
-                    wellName: destinationWell,
-                    flowRate: dispenseFlowRateUlSec,
-                    wellLocation: {
-                      origin: 'bottom',
-                      offset: {
-                        z: airGapOffsetDestWell,
-                        x: 0,
-                        y: 0,
-                      },
-                    },
-                    tipRack: args.tipRack,
-                    nozzles: args.nozzles,
-                  }),
-                  ...(dispenseDelay != null
-                    ? [
-                        curryCommandCreator(delay, {
-                          seconds: dispenseDelay.seconds,
                         }),
                       ]
                     : []),
