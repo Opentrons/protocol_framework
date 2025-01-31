@@ -27,7 +27,7 @@ import { selectDesignerTab } from '../../file-data/actions'
 import { getDesignerTab, getFileMetadata } from '../../file-data/selectors'
 import { DeckSetupContainer } from './DeckSetup'
 import { selectors } from '../../labware-ingred/selectors'
-import { OffDeck } from './Offdeck'
+import { OffDeck } from './OffDeck'
 import { LiquidsOverflowMenu } from './LiquidsOverflowMenu'
 import { ProtocolSteps } from './ProtocolSteps'
 

@@ -31,7 +31,7 @@ import {
   getHoveredTerminalItemId,
 } from '../../../ui/steps/selectors'
 import { DeckSetupContainer } from '../DeckSetup'
-import { OffDeck } from '../Offdeck'
+import { OffDeck } from '../OffDeck'
 import { SubStepsToolbox } from './Timeline'
 import { StepForm } from './StepForm'
 import { StepSummary } from './StepSummary'
