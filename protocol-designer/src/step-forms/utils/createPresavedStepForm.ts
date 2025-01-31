@@ -27,6 +27,7 @@ import type {
   Timeline,
   AdditionalEquipmentEntities,
   AbsorbanceReaderState,
+  ModuleEntities,
 } from '@opentrons/step-generation'
 import type { FormData, StepType, StepIdType } from '../../form-types'
 import type { InitialDeckSetup } from '../types'
@@ -37,12 +38,12 @@ import {
   ABSORBANCE_READER_INITIALIZE,
   ABSORBANCE_READER_LID,
 } from '../../constants'
-
 export interface CreatePresavedStepFormArgs {
   stepId: StepIdType
   stepType: StepType
   pipetteEntities: PipetteEntities
   labwareEntities: LabwareEntities
+  moduleEntities: ModuleEntities
   savedStepForms: SavedStepFormState
   orderedStepIds: OrderedStepIdsState
   initialDeckSetup: InitialDeckSetup
@@ -56,6 +57,7 @@ const _patchDefaultPipette = (args: {
   labwareEntities: LabwareEntities
   orderedStepIds: OrderedStepIdsState
   pipetteEntities: PipetteEntities
+  moduleEntities: ModuleEntities
   savedStepForms: SavedStepFormState
 }): FormUpdater => formData => {
   const {
@@ -63,6 +65,7 @@ const _patchDefaultPipette = (args: {
     labwareEntities,
     orderedStepIds,
     pipetteEntities,
+    moduleEntities,
     savedStepForms,
   } = args
   const defaultPipetteId = getNextDefaultPipetteId(
@@ -84,7 +87,8 @@ const _patchDefaultPipette = (args: {
       },
       formData,
       pipetteEntities,
-      labwareEntities
+      labwareEntities,
+      moduleEntities
     )
     return updatedFields
   }
@@ -96,8 +100,14 @@ const _patchDefaultDropTipLocation = (args: {
   additionalEquipmentEntities: AdditionalEquipmentEntities
   labwareEntities: LabwareEntities
   pipetteEntities: PipetteEntities
+  moduleEntities: ModuleEntities
 }): FormUpdater => formData => {
-  const { additionalEquipmentEntities, labwareEntities, pipetteEntities } = args
+  const {
+    additionalEquipmentEntities,
+    labwareEntities,
+    pipetteEntities,
+    moduleEntities,
+  } = args
   const trashBin = Object.values(additionalEquipmentEntities).find(
     aE => aE.name === 'trashBin'
   )
@@ -119,7 +129,8 @@ const _patchDefaultDropTipLocation = (args: {
       },
       formData,
       pipetteEntities,
-      labwareEntities
+      labwareEntities,
+      moduleEntities
     )
     return updatedFields
   }
@@ -130,9 +141,10 @@ const _patchDefaultDropTipLocation = (args: {
 const _patchDefaultLabwareLocations = (args: {
   labwareEntities: LabwareEntities
   pipetteEntities: PipetteEntities
+  moduleEntities: ModuleEntities
   stepType: StepType
 }): FormUpdater => formData => {
-  const { labwareEntities, pipetteEntities, stepType } = args
+  const { labwareEntities, pipetteEntities, moduleEntities, stepType } = args
 
   const formHasMoveLabware =
     formData && 'labware' in formData && stepType === 'moveLabware'
@@ -160,7 +172,8 @@ const _patchDefaultLabwareLocations = (args: {
       { aspirate_labware: filteredLabware[0].id ?? null },
       formData,
       pipetteEntities,
-      labwareEntities
+      labwareEntities,
+      moduleEntities
     )
   }
 
@@ -169,7 +182,8 @@ const _patchDefaultLabwareLocations = (args: {
       { labware: filteredLabware[0].id ?? null },
       formData,
       pipetteEntities,
-      labwareEntities
+      labwareEntities,
+      moduleEntities
     )
   }
 
@@ -178,7 +192,8 @@ const _patchDefaultLabwareLocations = (args: {
       { labware: filteredMoveLabware[0].id },
       formData,
       pipetteEntities,
-      labwareEntities
+      labwareEntities,
+      moduleEntities
     )
   }
 
@@ -197,8 +212,9 @@ const _patchDefaultMagnetFields = (args: {
     return null
   }
 
-  const moduleId =
-    getModuleOnDeckByType(initialDeckSetup, MAGNETIC_MODULE_TYPE)?.id || null
+  const module = getModuleOnDeckByType(initialDeckSetup, MAGNETIC_MODULE_TYPE)
+  const moduleId = module?.id ?? null
+  const moduleModel = module?.model ?? null
   const magnetAction = getNextDefaultMagnetAction(
     savedStepForms,
     orderedStepIds
@@ -225,6 +241,7 @@ const _patchDefaultMagnetFields = (args: {
     moduleId,
     magnetAction,
     engageHeight,
+    moduleModel,
   }
 }
 
@@ -398,6 +415,7 @@ export const createPresavedStepForm = ({
   labwareEntities,
   orderedStepIds,
   pipetteEntities,
+  moduleEntities,
   savedStepForms,
   stepId,
   stepType,
@@ -412,12 +430,14 @@ export const createPresavedStepForm = ({
   const updateDefaultDropTip = _patchDefaultDropTipLocation({
     labwareEntities,
     pipetteEntities,
+    moduleEntities,
     additionalEquipmentEntities,
   })
 
   const updateDefaultLabwareLocations = _patchDefaultLabwareLocations({
     labwareEntities,
     pipetteEntities,
+    moduleEntities,
     stepType,
   })
 
@@ -427,6 +447,7 @@ export const createPresavedStepForm = ({
     orderedStepIds,
     pipetteEntities,
     savedStepForms,
+    moduleEntities,
   })
 
   const updateMagneticModuleId = _patchDefaultMagnetFields({

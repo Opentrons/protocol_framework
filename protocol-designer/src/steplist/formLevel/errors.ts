@@ -113,10 +113,14 @@ const ENGAGE_HEIGHT_REQUIRED: FormError = {
 const ENGAGE_HEIGHT_MIN_EXCEEDED: FormError = {
   title: 'Specified distance is below module minimum',
   dependentFields: ['magnetAction', 'engageHeight'],
+  showAtForm: false,
+  showAtField: true,
 }
 const ENGAGE_HEIGHT_MAX_EXCEEDED: FormError = {
   title: 'Specified distance is above module maximum',
   dependentFields: ['magnetAction', 'engageHeight'],
+  showAtForm: false,
+  showAtField: true,
 }
 const MODULE_ID_REQUIRED: FormError = {
   title:
@@ -674,25 +678,25 @@ export const newLabwareLocationRequired = (
 export const engageHeightRangeExceeded = (
   fields: HydratedFormData
 ): FormError | null => {
-  const { magnetAction, engageHeight } = fields
-  const moduleEntity = fields.meta?.module
-  const model = moduleEntity?.model
-
+  const { magnetAction, engageHeight, moduleModel } = fields
+  const engageHeightCast = Number(engageHeight)
   if (magnetAction === 'engage') {
-    if (model === MAGNETIC_MODULE_V1) {
-      if (engageHeight < MIN_ENGAGE_HEIGHT_V1) {
+    if (moduleModel === MAGNETIC_MODULE_V1) {
+      if (engageHeightCast < MIN_ENGAGE_HEIGHT_V1) {
         return ENGAGE_HEIGHT_MIN_EXCEEDED
-      } else if (engageHeight > MAX_ENGAGE_HEIGHT_V1) {
+      } else if (engageHeightCast > MAX_ENGAGE_HEIGHT_V1) {
         return ENGAGE_HEIGHT_MAX_EXCEEDED
       }
-    } else if (model === MAGNETIC_MODULE_V2) {
-      if (engageHeight < MIN_ENGAGE_HEIGHT_V2) {
+    } else if (moduleModel === MAGNETIC_MODULE_V2) {
+      if (engageHeightCast < MIN_ENGAGE_HEIGHT_V2) {
         return ENGAGE_HEIGHT_MIN_EXCEEDED
-      } else if (engageHeight > MAX_ENGAGE_HEIGHT_V2) {
+      } else if (engageHeightCast > MAX_ENGAGE_HEIGHT_V2) {
         return ENGAGE_HEIGHT_MAX_EXCEEDED
       }
     } else {
-      console.warn(`unhandled model for engageHeightRangeExceeded: ${model}`)
+      console.warn(
+        `unhandled model for engageHeightRangeExceeded: ${moduleModel}`
+      )
     }
   }
 

@@ -35,6 +35,7 @@ import {
   _getLabwareEntitiesRootState,
   _getInitialDeckSetupRootState,
   _getAdditionalEquipmentEntitiesRootState,
+  _getModuleEntitiesRootState,
 } from '../selectors'
 import {
   createPresavedStepForm,
@@ -150,6 +151,7 @@ export const unsavedForm = (
         stepId: action.payload.id,
         pipetteEntities: _getPipetteEntitiesRootState(rootState),
         labwareEntities: _getLabwareEntitiesRootState(rootState),
+        moduleEntities: _getModuleEntitiesRootState(rootState),
         savedStepForms: rootState.savedStepForms,
         orderedStepIds: rootState.orderedStepIds,
         initialDeckSetup: _getInitialDeckSetupRootState(rootState),
@@ -165,7 +167,8 @@ export const unsavedForm = (
         action.payload.update,
         unsavedFormState,
         _getPipetteEntitiesRootState(rootState),
-        _getLabwareEntitiesRootState(rootState)
+        _getLabwareEntitiesRootState(rootState),
+        _getModuleEntitiesRootState(rootState)
       )
       // @ts-expect-error (IL, 2020-02-24): address in #3161, underspecified form fields may be overwritten in type-unsafe manner
       return { ...unsavedFormState, ...fieldUpdate }
@@ -176,7 +179,8 @@ export const unsavedForm = (
         action.payload.update,
         unsavedFormState,
         _getPipetteEntitiesRootState(rootState),
-        _getLabwareEntitiesRootState(rootState)
+        _getLabwareEntitiesRootState(rootState),
+        _getModuleEntitiesRootState(rootState)
       )
       // @ts-expect-error (IL, 2020-02-24): address in #3161, underspecified form fields may be overwritten in type-unsafe manner
       return { ...unsavedFormState, ...fieldUpdate }
@@ -224,7 +228,8 @@ export const unsavedForm = (
             },
             unsavedFormState,
             _getPipetteEntitiesRootState(rootState),
-            _getLabwareEntitiesRootState(rootState)
+            _getLabwareEntitiesRootState(rootState),
+            _getModuleEntitiesRootState(rootState)
           ),
         }
       }
@@ -589,7 +594,8 @@ export const savedStepForms = (
                   },
                   acc,
                   _getPipetteEntitiesRootState(rootState),
-                  _getLabwareEntitiesRootState(rootState)
+                  _getLabwareEntitiesRootState(rootState),
+                  _getModuleEntitiesRootState(rootState)
                 ),
               }
             } else {
@@ -627,7 +633,8 @@ export const savedStepForms = (
                 },
                 form,
                 _getPipetteEntitiesRootState(rootState),
-                _getLabwareEntitiesRootState(rootState)
+                _getLabwareEntitiesRootState(rootState),
+                _getModuleEntitiesRootState(rootState)
               ),
             }
           }
@@ -694,7 +701,8 @@ export const savedStepForms = (
           },
           prevStepForm,
           _getPipetteEntitiesRootState(rootState),
-          _getLabwareEntitiesRootState(rootState)
+          _getLabwareEntitiesRootState(rootState),
+          _getModuleEntitiesRootState(rootState)
         )
         return {
           ...acc,
@@ -738,7 +746,8 @@ export const savedStepForms = (
             action.payload.update,
             previousForm,
             _getPipetteEntitiesRootState(rootState),
-            _getLabwareEntitiesRootState(rootState)
+            _getLabwareEntitiesRootState(rootState),
+            _getModuleEntitiesRootState(rootState)
           ),
         },
       }
@@ -837,7 +846,8 @@ export const savedStepForms = (
             fieldsToUpdate,
             prevStepForm,
             _getPipetteEntitiesRootState(rootState),
-            _getLabwareEntitiesRootState(rootState)
+            _getLabwareEntitiesRootState(rootState),
+            _getModuleEntitiesRootState(rootState)
           )
           return {
             ...acc,

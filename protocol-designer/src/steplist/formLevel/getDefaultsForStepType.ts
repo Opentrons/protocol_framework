@@ -138,6 +138,7 @@ export function getDefaultsForStepType(
         engageHeight: null,
         magnetAction: null,
         moduleId: null,
+        moduleModel: null,
       }
 
     case 'temperature':
