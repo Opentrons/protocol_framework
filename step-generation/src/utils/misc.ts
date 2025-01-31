@@ -112,7 +112,7 @@ export function splitLiquid(
   sourceLiquidState: LocationLiquidState
 ): SourceAndDest {
   const totalSourceVolume = getLocationTotalVolume(sourceLiquidState)
-  console.log('volume in splitLiquid', volume)
+
   if (totalSourceVolume === 0) {
     // Splitting from empty source
     return {

@@ -67,7 +67,11 @@ function _getNextRobotStateAndWarningsSingleCommand(
       break
 
     case 'dispense':
-      forDispense(command.params, invariantContext, robotStateAndWarnings)
+      if (command.meta?.isAirGap === true) {
+        break
+      } else {
+        forDispense(command.params, invariantContext, robotStateAndWarnings)
+      }
       break
 
     case 'blowout':

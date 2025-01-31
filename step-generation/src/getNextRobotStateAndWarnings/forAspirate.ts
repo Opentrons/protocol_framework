@@ -31,7 +31,7 @@ export function forAspirate(
     labwareDef,
     params.wellName
   )
-  console.log('volume in forAspirate', volume)
+
   console.assert(
     // @ts-expect-error (sa, 2021-05-03): this assert is unnecessary
     uniq(wellsForTips).length === allWellsShared ? 1 : wellsForTips.length,
