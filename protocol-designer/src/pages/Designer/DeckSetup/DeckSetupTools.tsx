@@ -422,7 +422,9 @@ export function DeckSetupTools(props: DeckSetupToolsProps): JSX.Element | null {
         //  if nested labware changes but labware doesn't, still create both both
         (createdLabwareForSlot.labwareDefURI === selectedLabwareDefUri &&
           createdNestedLabwareForSlot?.labwareDefURI !==
-            selectedNestedLabwareDefUri))
+            selectedNestedLabwareDefUri &&
+          (createdNestedLabwareForSlot?.labwareDefURI != null ||
+            selectedNestedLabwareDefUri != null)))
     ) {
       //   create adapter + labware on module
       dispatch(
