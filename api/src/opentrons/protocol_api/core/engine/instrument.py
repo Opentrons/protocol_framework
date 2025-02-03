@@ -1126,7 +1126,7 @@ class InstrumentCore(AbstractInstrument[WellCore, LabwareCore]):
     ) -> None:
         pass
 
-    def consolidate_liquid(
+    def consolidate_liquid(  # noqa: C901
         self,
         liquid_class: LiquidClass,
         volume: float,
@@ -1136,7 +1136,140 @@ class InstrumentCore(AbstractInstrument[WellCore, LabwareCore]):
         tip_racks: List[Tuple[Location, LabwareCore]],
         trash_location: Union[Location, TrashBin, WasteChute],
     ) -> None:
-        pass
+        # TODO BOILERPLATE BELOW
+        if not tip_racks:
+            raise RuntimeError(
+                "No tipracks found for pipette in order to perform transfer"
+            )
+        tiprack_uri_for_transfer_props = tip_racks[0][1].get_uri()
+        transfer_props = liquid_class.get_for(
+            pipette=self.get_pipette_name(), tip_rack=tiprack_uri_for_transfer_props
+        )
+        # TODO: use the ID returned by load_liquid_class in command annotations
+        self.load_liquid_class(
+            name=liquid_class.name,
+            transfer_properties=transfer_props,
+            tiprack_uri=tiprack_uri_for_transfer_props,
+        )
+        # TODO BOILER PLATE ABOVE
+
+        # TODO: add multi-channel pipette handling here
+        source_per_volume_step = tx_commons.expand_for_volume_constraints(
+            volumes=[volume for _ in range(len(source))],
+            targets=source,
+            max_volume=min(
+                self.get_max_volume(),
+                tip_racks[0][1]
+                .get_well_core("A1")
+                .get_max_volume(),  # Assuming all tips in tiprack are of same volume
+            ),
+        )
+
+        # TODO BOILERPLATE BELOW
+        def _drop_tip() -> None:
+            if isinstance(trash_location, (TrashBin, WasteChute)):
+                self.drop_tip_in_disposal_location(
+                    disposal_location=trash_location,
+                    home_after=False,
+                    alternate_tip_drop=True,
+                )
+            elif isinstance(trash_location, Location):
+                self.drop_tip(
+                    location=trash_location,
+                    well_core=trash_location.labware.as_well()._core,  # type: ignore[arg-type]
+                    home_after=False,
+                    alternate_drop_location=True,
+                )
+
+        def _pick_up_tip() -> None:
+            next_tip = self.get_next_tip(
+                tip_racks=[core for loc, core in tip_racks],
+                starting_well=None,
+            )
+            if next_tip is None:
+                raise RuntimeError(
+                    f"No tip available among {tip_racks} for this transfer."
+                )
+            (
+                tiprack_loc,
+                tiprack_uri,
+                tip_well,
+            ) = self._get_location_and_well_core_from_next_tip_info(next_tip, tip_racks)
+            if tiprack_uri != tiprack_uri_for_transfer_props:
+                raise RuntimeError(
+                    f"Tiprack {tiprack_uri} does not match the tiprack designated "
+                    f"for this transfer- {tiprack_uri_for_transfer_props}."
+                )
+            self.pick_up_tip(
+                location=tiprack_loc,
+                well_core=tip_well,
+                presses=None,
+                increment=None,
+            )
+
+        # TODO BOILER PLATE ABOVE
+
+        if new_tip == TransferTipPolicyV2.ONCE:
+            _pick_up_tip()
+
+        prev_src: Optional[Tuple[Location, WellCore]] = None
+        tip_contents = [
+            tx_comps_executor.LiquidAndAirGapPair(
+                liquid=0,
+                air_gap=0,
+            )
+        ]
+        air_gap_volume = (
+            transfer_props.aspirate.retract.air_gap_by_volume.get_for_volume(volume)
+        )
+        next_step_volume, next_source = next(source_per_volume_step)
+        is_last_step = False
+        while not is_last_step:
+            total_dispense_volume = 0.0
+            vol_aspirate_combo = []
+            # Take air gap into account because there will be a final air gap before the dispense
+            while total_dispense_volume + air_gap_volume < self.get_max_volume():
+                total_dispense_volume += next_step_volume
+                vol_aspirate_combo.append((next_step_volume, next_source))
+                try:
+                    next_step_volume, next_source = next(source_per_volume_step)
+                except StopIteration:
+                    is_last_step = True
+                    break
+
+            if new_tip == TransferTipPolicyV2.ALWAYS:
+                if prev_src is not None:
+                    _drop_tip()
+                _pick_up_tip()
+                tip_contents = [
+                    tx_comps_executor.LiquidAndAirGapPair(
+                        liquid=0,
+                        air_gap=0,
+                    )
+                ]
+            for step_volume, step_source in vol_aspirate_combo:
+                tip_contents = self.aspirate_liquid_class(
+                    volume=step_volume,
+                    source=step_source,
+                    transfer_properties=transfer_props,
+                    transfer_type=tx_comps_executor.TransferType.MANY_TO_ONE,
+                    tip_contents=tip_contents,
+                )
+            tip_contents = self.dispense_liquid_class(
+                volume=total_dispense_volume,
+                dest=dest,
+                source=None,  # TODO Should we have a source for this? Should it be an error if blowout is source?
+                transfer_properties=transfer_props,
+                transfer_type=tx_comps_executor.TransferType.MANY_TO_ONE,
+                tip_contents=tip_contents,
+                add_final_air_gap=False
+                if is_last_step and new_tip == TransferTipPolicyV2.NEVER
+                else True,
+                trash_location=trash_location,
+            )
+            prev_src = next_source
+            if new_tip != TransferTipPolicyV2.NEVER:
+                _drop_tip()
 
     def _get_location_and_well_core_from_next_tip_info(
         self,

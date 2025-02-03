@@ -1720,6 +1720,10 @@ class InstrumentContext(publisher.CommandPublisher):
                 )
             else:
                 tip_racks = [self._last_tip_picked_up_from.parent]
+        elif valid_new_tip == TransferTipPolicyV2.PER_SOURCE:
+            raise RuntimeError(
+                'Tip transfer policy "per source" incompatible with consolidate.'
+            )
         else:
             tip_racks = self._tip_racks
         if self.current_volume != 0:
