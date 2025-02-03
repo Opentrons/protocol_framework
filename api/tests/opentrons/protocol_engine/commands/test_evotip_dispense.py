@@ -100,7 +100,11 @@ async def test_evotip_dispense_implementation(
 
     decoy.when(
         await pipetting.dispense_in_place(
-            pipette_id="pipette-id-abc123", volume=100.0, flow_rate=456.0, push_out=None, correction_volume=0,
+            pipette_id="pipette-id-abc123",
+            volume=100.0,
+            flow_rate=456.0,
+            push_out=None,
+            correction_volume=0,
         )
     ).then_return(100)
 
