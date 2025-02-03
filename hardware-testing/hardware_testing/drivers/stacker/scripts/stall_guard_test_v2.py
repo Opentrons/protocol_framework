@@ -44,7 +44,7 @@ async def force_func(fg_var, sg_value, trial, axis, timer):
         if trial == 1:
             fields = ["Time(s)", "Force(N)", "SG Value", "Trials"]
             writer.writerow(fields)
-        while t < 40:
+        while t < 10:
             t = timer.elasped_time()
             fg_reading = await fg_var.read_force()
             data = [t, fg_reading, sg_value, trial]
@@ -70,9 +70,8 @@ def build_arg_parser():
     return arg_parser
 
 async def main(args) -> None:
-    force_gauge = mark10.Mark10(None).create('/dev/ttyUSB0')
+    force_gauge = mark10.Mark10.create('/dev/ttyUSB0')
     force_gauge.connect()
-    await force_gauge.read_force()
     t = Timer()
     if args.axis.lower() == 'x':
         test_axis = StackerAxis.X
@@ -92,7 +91,7 @@ async def main(args) -> None:
     await stacker.home_axis(StackerAxis.Z, Direction.RETRACT)
     await stacker.home_axis(StackerAxis.X, Direction.RETRACT)
     await stacker.close_latch()
-    result = None
+
     for c in range(1, args.cycles+1):
         move_task = asyncio.create_task(move(stacker, StackerAxis.X, Direction.EXTEND, 202))
         fg_task = asyncio.create_task(force_func(force_gauge, sg_value, c, test_axis, t))
@@ -100,7 +99,6 @@ async def main(args) -> None:
         try:
             await asyncio.gather(move_task, fg_task)
         except Exception as e:
-            print(f'results: {results}')
             print(e)
         await asyncio.sleep(1)
         await stacker._driver.set_stallguard_threshold(StackerAxis.X, False, sg_value)
