@@ -1,0 +1,46 @@
+name: 'Setup JS Environment'
+description: >
+  Composite action to fix tag handling in checkout,
+  setup Node.js, install udev for USB detection, cache Yarn/NPM caches,
+  and perform JS setup.
+
+inputs:
+  cache_bust_secret:
+    description: 'Secret used to bust the yarn cache'
+    required: true
+
+runs:
+  using: 'composite'
+  steps:
+    - name: 'Fix actions/checkout odd handling of tags'
+      if: startsWith(github.ref, 'refs/tags')
+      shell: bash
+      run: |
+        git fetch -f origin ${{ github.ref }}:${{ github.ref }}
+        git checkout ${{ github.ref }}
+
+    - name: 'Setup Node'
+      uses: actions/setup-node@v4
+      with:
+        node-version: '22.11.0'
+
+    - name: 'Install udev for USB-detection'
+      shell: bash
+      run: sudo apt-get update && sudo apt-get install libudev-dev
+
+    - name: 'Cache Yarn and NPM caches'
+      uses: actions/cache@v4
+      with:
+        path: |
+          ${{ github.workspace }}/.yarn-cache
+          ${{ github.workspace }}/.npm-cache
+        key: js-${{ inputs.cache_bust_secret }}-${{ runner.os }}-yarn-${{ hashFiles('yarn.lock') }}
+        restore-keys: |
+          js-${{ inputs.cache_bust_secret }}-${{ runner.os }}-yarn-
+
+    - name: 'Setup JS'
+      shell: bash
+      run: |
+        npm config set cache ./.npm-cache
+        yarn config set cache-folder ./.yarn-cache
+        make setup-js

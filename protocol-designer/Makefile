@@ -8,7 +8,7 @@ PATH := $(shell cd .. && yarn bin):$(PATH)
 
 benchmark_output := $(shell node -e 'console.log(new Date());')
 
-# These variables can be overriden when make is invoked to customize the
+# These variables can be overridden when make is invoked to customize the
 # behavior of jest
 tests ?=
 cov_opts ?= --coverage=true
@@ -60,9 +60,9 @@ serve: all
 # end to end tests
 .PHONY: test-e2e
 test-e2e: clean-downloads
-	concurrently --no-color --kill-others --success first --names "protocol-designer-server,protocol-designer-tests" \
+	concurrently --kill-others --success first --names "protocol-designer-server,protocol-designer-tests" \
 	"$(MAKE) dev" \
-	"wait-on http://localhost:5178/ && cypress run --browser chrome --headless --record false"
+	"wait-on http://localhost:5178/ && cypress run --browser chrome --headless --record false --quiet"
 
 .PHONY: test
 test:
