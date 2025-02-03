@@ -1,4 +1,5 @@
 """ProtocolEngine shared test fixtures."""
+
 from __future__ import annotations
 
 import pytest
@@ -152,6 +153,14 @@ def adapter_def() -> LabwareDefinition:
     """Get the definition of Opentrons 96 PCR adapter."""
     return LabwareDefinition.model_validate(
         load_definition("opentrons_96_pcr_adapter", 1)
+    )
+
+
+@pytest.fixture(scope="session")
+def lid_stack_def() -> LabwareDefinition:
+    """Get the definition of the opentrons tiprack lid."""
+    return LabwareDefinition.model_validate(
+        load_definition("protocol_engine_lid_stack_object", 1, schema=3)
     )
 
 
