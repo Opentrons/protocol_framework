@@ -132,7 +132,7 @@ class LoadLid(BaseCommand[LoadLidParams, LoadLidResult, ErrorOccurrence]):
 
     commandType: LoadLidCommandType = "loadLid"
     params: LoadLidParams
-    result: Optional[LoadLidResult]
+    result: Optional[LoadLidResult] = None
 
     _ImplementationCls: Type[LoadLidImplementation] = LoadLidImplementation
 

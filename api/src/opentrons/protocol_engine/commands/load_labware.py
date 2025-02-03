@@ -226,6 +226,11 @@ class LoadLabwareImplementation(
                 module_id=params.location.moduleId,
                 labware_id=loaded_labware.labware_id,
             )
+
+        self._state_view.labware.raise_if_labware_cannot_be_ondeck(
+            location=params.location, labware_definition=loaded_labware.definition
+        )
+
         return SuccessData(
             public=LoadLabwareResult(
                 labwareId=loaded_labware.labware_id,
