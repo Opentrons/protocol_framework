@@ -419,7 +419,7 @@ export function DeckSetupTools(props: DeckSetupToolsProps): JSX.Element | null {
       selectedModuleModel != null &&
       selectedLabwareDefUri != null &&
       (createdLabwareForSlot?.labwareDefURI !== selectedLabwareDefUri ||
-        //  if nested labware changes but labware doesn't, still create both both
+        //  if nested labware changes but labware doesn't, still create both
         (createdLabwareForSlot.labwareDefURI === selectedLabwareDefUri &&
           createdNestedLabwareForSlot?.labwareDefURI !==
             selectedNestedLabwareDefUri &&
