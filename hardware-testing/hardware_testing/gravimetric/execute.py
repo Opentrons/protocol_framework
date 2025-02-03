@@ -7,6 +7,10 @@ from opentrons.protocol_api.core.engine.transfer_components_executor import (
     TransferType,
     LiquidAndAirGapPair,
 )
+from opentrons_shared_data.liquid_classes.liquid_class_definition import (
+    PositionReference,
+    Coordinate,
+)
 from opentrons.types import Location, Point
 from hardware_testing.data import ui, dump_data_to_file
 from hardware_testing.data.csv_report import CSVReport
@@ -35,6 +39,7 @@ from .liquid_class.pipetting import (
     aspirate_with_liquid_class,
     dispense_with_liquid_class,
     PipettingCallbacks,
+    _get_approach_submerge_retract_heights,
 )
 from .liquid_class.defaults import get_liquid_class, set_liquid_class
 from .liquid_class.interactive import interactively_build_liquid_class
@@ -306,7 +311,7 @@ def _run_trial(
         lc_name = SupportedLiquid.from_string(trial.cfg.liquid).name_with_dilution(
             trial.cfg.dilution
         )
-        liquid_class_root = trial.ctx.define_liquid_class(lc_name)
+        liquid_class_root = trial.ctx.define_liquid_class(lc_name.lower())
         pip_load_name = (
             f"flex_{trial.pipette.channels}channel_{int(trial.pipette.max_volume)}"
         )
@@ -393,6 +398,29 @@ def _run_trial(
         )
     _PREV_TRIAL_GRAMS = m_data_init
 
+    # FIXME: Liquid-height tracking in API is not yet implemented in this script
+    #        so for now we are still using the custom liquid-height code here, and
+    #        tell the API's liquid-class to move the correct submerge depth (relative to well-bottom)
+    def _calculate_meniscus_relative_offsets(is_aspirate: bool) -> None:
+        approach, submerge, retract = _get_approach_submerge_retract_heights(
+            trial.well,
+            trial.liquid_tracker,
+            submerge_mm=-1.5,  # FIXME: use variable
+            retract_mm=3.0,  # FIXME: use variable
+            mix=None,
+            aspirate=trial.volume if is_aspirate else None,
+            dispense=trial.volume if not is_aspirate else None,
+            blank=trial.blank,
+            channel_count=trial.channel_count,
+        )
+        _asp_or_disp = getattr(liquid_class, "aspirate" if is_aspirate else "dispense")
+        _asp_or_disp.position_reference = PositionReference.WELL_BOTTOM
+        _asp_or_disp.submerge.position_reference = PositionReference.WELL_BOTTOM
+        _asp_or_disp.retract.position_reference = PositionReference.WELL_BOTTOM
+        _asp_or_disp.offset.z = submerge
+        _asp_or_disp.submerge.offset.z = approach
+        _asp_or_disp.retract.offset.z = retract
+
     # RUN ASPIRATE
     if use_old_method:
         aspirate_with_liquid_class(
@@ -421,6 +449,9 @@ def _run_trial(
             transfer_properties=liquid_class,
             transfer_type=TransferType.ONE_TO_ONE,
             tip_contents=[LiquidAndAirGapPair(liquid=0, air_gap=assumed_air_gap)],
+        )
+        trial.liquid_tracker.update_affected_wells(
+            trial.well, aspirate=trial.volume, channels=trial.channel_count
         )
     if not trial.recorder.is_simulator:
         trial.pipette._retract()  # retract to top of gantry
@@ -462,6 +493,9 @@ def _run_trial(
             tip_contents=tip_contents,
             add_final_air_gap=True,
             trash_location=trial.pipette.trash_container,
+        )
+        trial.liquid_tracker.update_affected_wells(
+            trial.well, dispense=trial.volume, channels=trial.channel_count
         )
     if not trial.recorder.is_simulator:
         trial.pipette._retract()  # retract to top of gantry
@@ -799,7 +833,8 @@ def run(cfg: config.GravimetricConfig, resources: TestResources) -> None:  # noq
             actual_asp_list_all = []
             actual_disp_list_all = []
             ui.print_title(f"{volume} uL")
-            resources.pipette.configure_for_volume(volume)
+            if cfg.use_old_method:
+                resources.pipette.configure_for_volume(volume)
             trial_asp_dict: Dict[int, List[float]] = {
                 trial: [] for trial in range(cfg.trials)
             }

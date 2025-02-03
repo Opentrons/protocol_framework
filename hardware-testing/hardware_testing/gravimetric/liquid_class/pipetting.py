@@ -55,23 +55,14 @@ def _check_aspirate_dispense_args(
 def _get_approach_submerge_retract_heights(
     well: Well,
     liquid_tracker: LiquidTracker,
-    liquid_class: LiquidClassSettings,
+    submerge_mm: float,
+    retract_mm: float,
     mix: Optional[float],
     aspirate: Optional[float],
     dispense: Optional[float],
     blank: bool,
     channel_count: int,
 ) -> Tuple[float, float, float]:
-    assert liquid_class.aspirate.submerge_mm is not None
-    assert liquid_class.aspirate.retract_mm is not None
-    assert liquid_class.dispense.submerge_mm is not None
-    assert liquid_class.dispense.retract_mm is not None
-    if aspirate:
-        liq_submerge = liquid_class.aspirate.submerge_mm
-        liq_retract = liquid_class.aspirate.retract_mm
-    else:
-        liq_submerge = liquid_class.dispense.submerge_mm
-        liq_retract = liquid_class.dispense.retract_mm
 
     liquid_before, liquid_after = liquid_tracker.get_before_and_after_heights(
         well,
@@ -84,16 +75,16 @@ def _get_approach_submerge_retract_heights(
         liquid_before = well.depth + (well.depth - liquid_before)
         liquid_after = well.depth + (well.depth - liquid_after)
 
-    if dispense and liq_submerge > 0:
+    if dispense and submerge_mm > 0:
         # guarantee NON-contact dispensing does not touch liquid
-        submerge = liquid_after + liq_submerge
+        submerge = liquid_after + submerge_mm
     else:
         # guarantee CONTACT dispensing and aspirates stay submerged
-        submerge = min(liquid_before, liquid_after) + liq_submerge
+        submerge = min(liquid_before, liquid_after) + submerge_mm
     # also make sure it doesn't hit the well's bottom
     submerge = max(submerge, config.LABWARE_BOTTOM_CLEARANCE)
-    approach = max(liquid_before + liq_retract, submerge)
-    retract = max(liquid_after + liq_retract, submerge)
+    approach = max(liquid_before + retract_mm, submerge)
+    retract = max(liquid_after + retract_mm, submerge)
     return approach, submerge, retract
 
 
@@ -199,10 +190,17 @@ def _pipette_with_liquid_settings(  # noqa: C901
     #  3. RETRACT
 
     # CALCULATE TIP HEIGHTS FOR EACH PHASE
+    if aspirate:
+        defined_submerge_mm = liquid_class.aspirate.submerge_mm
+        defined_retract_mm = liquid_class.aspirate.retract_mm
+    else:
+        defined_submerge_mm = liquid_class.dispense.submerge_mm
+        defined_retract_mm = liquid_class.dispense.retract_mm
     approach_mm, submerge_mm, retract_mm = _get_approach_submerge_retract_heights(
         well,
         liquid_tracker,
-        liquid_class,
+        defined_submerge_mm,
+        defined_retract_mm,
         mix,
         aspirate,
         dispense,

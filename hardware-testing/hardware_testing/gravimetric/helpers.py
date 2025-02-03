@@ -196,8 +196,7 @@ def _sense_liquid_height(
 ) -> float:
     if ctx.is_simulating():
         return well.depth - 1.0
-    height = pipette.measure_liquid_height(well)
-    return height - well.bottom().point.z
+    return pipette.measure_liquid_height(well)
 
 
 def _calculate_average(volume_list: List[float]) -> float:
