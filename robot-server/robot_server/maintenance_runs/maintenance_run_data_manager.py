@@ -1,9 +1,11 @@
 """Manage current maintenance run data."""
+
 from datetime import datetime
-from typing import List, Optional, Callable
+from typing import Optional, Callable, Sequence
 
 from opentrons.protocol_engine import (
     EngineStatus,
+    LegacyLabwareOffsetCreate,
     LabwareOffsetCreate,
     StateSummary,
     CommandSlice,
@@ -24,7 +26,7 @@ def _build_run(
     created_at: datetime,
     state_summary: Optional[StateSummary],
 ) -> MaintenanceRun:
-    state_summary = state_summary or StateSummary.construct(
+    state_summary = state_summary or StateSummary.model_construct(
         status=EngineStatus.IDLE,
         errors=[],
         labware=[],
@@ -34,9 +36,10 @@ def _build_run(
         liquids=[],
         wells=[],
         files=[],
+        liquidClasses=[],
         hasEverEnteredErrorRecovery=False,
     )
-    return MaintenanceRun.construct(
+    return MaintenanceRun.model_construct(
         id=run_id,
         createdAt=created_at,
         status=state_summary.status,
@@ -50,6 +53,7 @@ def _build_run(
         completedAt=state_summary.completedAt,
         startedAt=state_summary.startedAt,
         liquids=state_summary.liquids,
+        liquidClasses=state_summary.liquidClasses,
         hasEverEnteredErrorRecovery=state_summary.hasEverEnteredErrorRecovery,
     )
 
@@ -85,7 +89,7 @@ class MaintenanceRunDataManager:
         self,
         run_id: str,
         created_at: datetime,
-        labware_offsets: List[LabwareOffsetCreate],
+        labware_offsets: Sequence[LabwareOffsetCreate | LegacyLabwareOffsetCreate],
         deck_configuration: DeckConfigurationType,
         notify_publishers: Callable[[], None],
     ) -> MaintenanceRun:

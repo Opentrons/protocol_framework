@@ -1,4 +1,4 @@
-import styled from 'styled-components'
+import styled, { css } from 'styled-components'
 import {
   ALIGN_CENTER,
   COLORS,
@@ -21,13 +21,7 @@ interface RobotMotionLoaderProps {
 export function RobotMotionLoader(props: RobotMotionLoaderProps): JSX.Element {
   const { header, body } = props
   return (
-    <Flex
-      flexDirection={DIRECTION_COLUMN}
-      justifyContent={JUSTIFY_CENTER}
-      alignItems={ALIGN_CENTER}
-      minHeight="29.5rem"
-      gridGap={SPACING.spacing24}
-    >
+    <Flex css={CONTAINER_STYLE}>
       <Icon name="ot-spinner" spin size={SIZE_4} color={COLORS.grey50} />
       {header != null ? <LoadingText>{header}</LoadingText> : null}
       {body != null ? <LegacyStyledText as="p">{body}</LegacyStyledText> : null}
@@ -49,4 +43,12 @@ const LoadingText = styled.h1`
   @media ${RESPONSIVENESS.touchscreenMediaQuerySpecs} {
     ${TYPOGRAPHY.level4HeaderSemiBold}
   }
+`
+
+const CONTAINER_STYLE = css`
+  flex-direction: ${DIRECTION_COLUMN};
+  justify-content: ${JUSTIFY_CENTER};
+  align-items: ${ALIGN_CENTER};
+  min-height: 29.5rem;
+  grid-gap: ${SPACING.spacing24};
 `

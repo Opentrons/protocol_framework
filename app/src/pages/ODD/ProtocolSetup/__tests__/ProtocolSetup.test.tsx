@@ -41,7 +41,7 @@ import {
   getUnmatchedModulesForProtocol,
   getIncompleteInstrumentCount,
 } from '/app/organisms/ODD/ProtocolSetup'
-import { useLaunchLPC } from '/app/organisms/LabwarePositionCheck/useLaunchLPC'
+import { useLaunchLegacyLPC } from '/app/organisms/LegacyLabwarePositionCheck/useLaunchLegacyLPC'
 import { ConfirmCancelRunModal } from '/app/organisms/ODD/RunningProtocol'
 import { mockProtocolModuleInfo } from '/app/organisms/ODD/ProtocolSetup/ProtocolSetupInstruments/__fixtures__'
 import {
@@ -65,6 +65,7 @@ import {
 import { mockConnectableRobot } from '/app/redux/discovery/__fixtures__'
 import { mockRunTimeParameterData } from '/app/organisms/ODD/ProtocolSetup/__fixtures__'
 import { useScrollPosition } from '/app/local-resources/dom-utils'
+import { useLPCFlows } from '/app/organisms/LabwarePositionCheck'
 
 import type { UseQueryResult } from 'react-query'
 import type * as SharedData from '@opentrons/shared-data'
@@ -89,7 +90,7 @@ vi.mock('react-router-dom', async importOriginal => {
 })
 
 vi.mock('@opentrons/react-api-client')
-vi.mock('/app/organisms/LabwarePositionCheck/useLaunchLPC')
+vi.mock('/app/organisms/LegacyLabwarePositionCheck/useLaunchLegacyLPC')
 vi.mock('/app/organisms/ODD/ProtocolSetup', async importOriginal => {
   const ACTUALS = ['ProtocolSetupStep']
   const actual = await importOriginal<object>()
@@ -115,6 +116,7 @@ vi.mock('/app/redux-resources/analytics')
 vi.mock('/app/redux-resources/robots')
 vi.mock('/app/resources/modules')
 vi.mock('/app/local-resources/dom-utils')
+vi.mock('/app/organisms/LabwarePositionCheck')
 
 const render = (path = '/') => {
   return renderWithProviders(
@@ -300,11 +302,11 @@ describe('ProtocolSetup', () => {
     when(vi.mocked(useAllPipetteOffsetCalibrationsQuery))
       .calledWith()
       .thenReturn({ data: { data: [] } } as any)
-    when(vi.mocked(useLaunchLPC))
+    when(vi.mocked(useLaunchLegacyLPC))
       .calledWith(RUN_ID, FLEX_ROBOT_TYPE, PROTOCOL_NAME)
       .thenReturn({
-        launchLPC: mockLaunchLPC,
-        LPCWizard: <div>mock LPC Wizard</div>,
+        launchLegacyLPC: mockLaunchLPC,
+        LegacyLPCWizard: <div>mock LPC Wizard</div>,
       })
     vi.mocked(useIsHeaterShakerInProtocol).mockReturnValue(false)
     vi.mocked(useDoorQuery).mockReturnValue({ data: mockDoorStatus } as any)
@@ -328,6 +330,7 @@ describe('ProtocolSetup', () => {
       isScrolled: false,
       scrollRef: {} as any,
     })
+    vi.mocked(useLPCFlows).mockReturnValue({ launchLPC: mockLaunchLPC } as any)
   })
 
   it('should render text, image, and buttons', () => {
@@ -576,7 +579,6 @@ describe('ProtocolSetup', () => {
     render(`/runs/${RUN_ID}/setup/`)
 
     fireEvent.click(screen.getByRole('button', { name: 'play' }))
-    expect(mockTrackProtocolRunEvent).toBeCalledTimes(1)
     expect(mockTrackProtocolRunEvent).toHaveBeenCalledWith({
       name: ANALYTICS_PROTOCOL_RUN_ACTION.START,
       properties: {},

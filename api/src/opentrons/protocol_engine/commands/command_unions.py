@@ -3,7 +3,7 @@
 from collections.abc import Collection
 from typing import Annotated, Type, Union, get_type_hints
 
-from pydantic import Field
+from pydantic import Field, TypeAdapter
 
 from opentrons.util.get_union_elements import get_union_elements
 
@@ -13,8 +13,10 @@ from .pipetting_common import (
     LiquidNotFoundError,
     TipPhysicallyAttachedError,
 )
+from .movement_common import StallOrCollisionError
 
 from . import absorbance_reader
+from . import flex_stacker
 from . import heater_shaker
 from . import magnetic_module
 from . import temperature_module
@@ -22,6 +24,7 @@ from . import thermocycler
 
 from . import calibration
 from . import unsafe
+from . import robot
 
 from .set_rail_lights import (
     SetRailLights,
@@ -29,6 +32,14 @@ from .set_rail_lights import (
     SetRailLightsCreate,
     SetRailLightsParams,
     SetRailLightsResult,
+)
+
+from .air_gap_in_place import (
+    AirGapInPlace,
+    AirGapInPlaceParams,
+    AirGapInPlaceCreate,
+    AirGapInPlaceResult,
+    AirGapInPlaceCommandType,
 )
 
 from .aspirate import (
@@ -45,6 +56,14 @@ from .aspirate_in_place import (
     AspirateInPlaceCreate,
     AspirateInPlaceResult,
     AspirateInPlaceCommandType,
+)
+
+from .aspirate_while_tracking import (
+    AspirateWhileTracking,
+    AspirateWhileTrackingParams,
+    AspirateWhileTrackingCreate,
+    AspirateWhileTrackingResult,
+    AspirateWhileTrackingCommandType,
 )
 
 from .comment import (
@@ -69,6 +88,14 @@ from .dispense import (
     DispenseCreate,
     DispenseResult,
     DispenseCommandType,
+)
+
+from .dispense_while_tracking import (
+    DispenseWhileTracking,
+    DispenseWhileTrackingParams,
+    DispenseWhileTrackingCreate,
+    DispenseWhileTrackingResult,
+    DispenseWhileTrackingCommandType,
 )
 
 from .dispense_in_place import (
@@ -127,6 +154,14 @@ from .load_liquid import (
     LoadLiquidCommandType,
 )
 
+from .load_liquid_class import (
+    LoadLiquidClass,
+    LoadLiquidClassParams,
+    LoadLiquidClassCreate,
+    LoadLiquidClassResult,
+    LoadLiquidClassCommandType,
+)
+
 from .load_module import (
     LoadModule,
     LoadModuleParams,
@@ -141,6 +176,22 @@ from .load_pipette import (
     LoadPipetteCreate,
     LoadPipetteResult,
     LoadPipetteCommandType,
+)
+
+from .load_lid_stack import (
+    LoadLidStack,
+    LoadLidStackParams,
+    LoadLidStackCreate,
+    LoadLidStackResult,
+    LoadLidStackCommandType,
+)
+
+from .load_lid import (
+    LoadLid,
+    LoadLidParams,
+    LoadLidCreate,
+    LoadLidResult,
+    LoadLidCommandType,
 )
 
 from .move_labware import (
@@ -305,6 +356,14 @@ from .get_tip_presence import (
     GetTipPresenceCommandType,
 )
 
+from .get_next_tip import (
+    GetNextTip,
+    GetNextTipCreate,
+    GetNextTipParams,
+    GetNextTipResult,
+    GetNextTipCommandType,
+)
+
 from .liquid_probe import (
     LiquidProbe,
     LiquidProbeParams,
@@ -320,12 +379,15 @@ from .liquid_probe import (
 
 Command = Annotated[
     Union[
+        AirGapInPlace,
         Aspirate,
         AspirateInPlace,
+        AspirateWhileTracking,
         Comment,
         Custom,
         Dispense,
         DispenseInPlace,
+        DispenseWhileTracking,
         BlowOut,
         BlowOutInPlace,
         ConfigureForVolume,
@@ -337,8 +399,11 @@ Command = Annotated[
         LoadLabware,
         ReloadLabware,
         LoadLiquid,
+        LoadLiquidClass,
         LoadModule,
         LoadPipette,
+        LoadLidStack,
+        LoadLid,
         MoveLabware,
         MoveRelative,
         MoveToCoordinates,
@@ -355,6 +420,7 @@ Command = Annotated[
         SetStatusBar,
         VerifyTipPresence,
         GetTipPresence,
+        GetNextTip,
         LiquidProbe,
         TryLiquidProbe,
         heater_shaker.WaitForTemperature,
@@ -383,6 +449,9 @@ Command = Annotated[
         absorbance_reader.OpenLid,
         absorbance_reader.Initialize,
         absorbance_reader.ReadAbsorbance,
+        flex_stacker.Configure,
+        flex_stacker.Retrieve,
+        flex_stacker.Store,
         calibration.CalibrateGripper,
         calibration.CalibratePipette,
         calibration.CalibrateModule,
@@ -393,12 +462,19 @@ Command = Annotated[
         unsafe.UnsafeEngageAxes,
         unsafe.UnsafeUngripLabware,
         unsafe.UnsafePlaceLabware,
+        robot.MoveTo,
+        robot.MoveAxesRelative,
+        robot.MoveAxesTo,
+        robot.openGripperJaw,
+        robot.closeGripperJaw,
     ],
     Field(discriminator="commandType"),
 ]
 
 CommandParams = Union[
+    AirGapInPlaceParams,
     AspirateParams,
+    AspirateWhileTrackingParams,
     AspirateInPlaceParams,
     CommentParams,
     ConfigureForVolumeParams,
@@ -406,6 +482,7 @@ CommandParams = Union[
     CustomParams,
     DispenseParams,
     DispenseInPlaceParams,
+    DispenseWhileTrackingParams,
     BlowOutParams,
     BlowOutInPlaceParams,
     DropTipParams,
@@ -413,8 +490,11 @@ CommandParams = Union[
     HomeParams,
     RetractAxisParams,
     LoadLabwareParams,
+    LoadLidStackParams,
+    LoadLidParams,
     ReloadLabwareParams,
     LoadLiquidParams,
+    LoadLiquidClassParams,
     LoadModuleParams,
     LoadPipetteParams,
     MoveLabwareParams,
@@ -433,6 +513,7 @@ CommandParams = Union[
     SetStatusBarParams,
     VerifyTipPresenceParams,
     GetTipPresenceParams,
+    GetNextTipParams,
     LiquidProbeParams,
     TryLiquidProbeParams,
     heater_shaker.WaitForTemperatureParams,
@@ -461,6 +542,9 @@ CommandParams = Union[
     absorbance_reader.OpenLidParams,
     absorbance_reader.InitializeParams,
     absorbance_reader.ReadAbsorbanceParams,
+    flex_stacker.ConfigureParams,
+    flex_stacker.RetrieveParams,
+    flex_stacker.StoreParams,
     calibration.CalibrateGripperParams,
     calibration.CalibratePipetteParams,
     calibration.CalibrateModuleParams,
@@ -471,10 +555,17 @@ CommandParams = Union[
     unsafe.UnsafeEngageAxesParams,
     unsafe.UnsafeUngripLabwareParams,
     unsafe.UnsafePlaceLabwareParams,
+    robot.MoveAxesRelativeParams,
+    robot.MoveAxesToParams,
+    robot.MoveToParams,
+    robot.openGripperJawParams,
+    robot.closeGripperJawParams,
 ]
 
 CommandType = Union[
+    AirGapInPlaceCommandType,
     AspirateCommandType,
+    AspirateWhileTrackingCommandType,
     AspirateInPlaceCommandType,
     CommentCommandType,
     ConfigureForVolumeCommandType,
@@ -482,6 +573,7 @@ CommandType = Union[
     CustomCommandType,
     DispenseCommandType,
     DispenseInPlaceCommandType,
+    DispenseWhileTrackingCommandType,
     BlowOutCommandType,
     BlowOutInPlaceCommandType,
     DropTipCommandType,
@@ -491,8 +583,11 @@ CommandType = Union[
     LoadLabwareCommandType,
     ReloadLabwareCommandType,
     LoadLiquidCommandType,
+    LoadLiquidClassCommandType,
     LoadModuleCommandType,
     LoadPipetteCommandType,
+    LoadLidStackCommandType,
+    LoadLidCommandType,
     MoveLabwareCommandType,
     MoveRelativeCommandType,
     MoveToCoordinatesCommandType,
@@ -509,6 +604,7 @@ CommandType = Union[
     SetStatusBarCommandType,
     VerifyTipPresenceCommandType,
     GetTipPresenceCommandType,
+    GetNextTipCommandType,
     LiquidProbeCommandType,
     TryLiquidProbeCommandType,
     heater_shaker.WaitForTemperatureCommandType,
@@ -537,6 +633,9 @@ CommandType = Union[
     absorbance_reader.OpenLidCommandType,
     absorbance_reader.InitializeCommandType,
     absorbance_reader.ReadAbsorbanceCommandType,
+    flex_stacker.ConfigureCommandType,
+    flex_stacker.RetrieveCommandType,
+    flex_stacker.StoreCommandType,
     calibration.CalibrateGripperCommandType,
     calibration.CalibratePipetteCommandType,
     calibration.CalibrateModuleCommandType,
@@ -547,11 +646,18 @@ CommandType = Union[
     unsafe.UnsafeEngageAxesCommandType,
     unsafe.UnsafeUngripLabwareCommandType,
     unsafe.UnsafePlaceLabwareCommandType,
+    robot.MoveAxesRelativeCommandType,
+    robot.MoveAxesToCommandType,
+    robot.MoveToCommandType,
+    robot.openGripperJawCommandType,
+    robot.closeGripperJawCommandType,
 ]
 
 CommandCreate = Annotated[
     Union[
+        AirGapInPlaceCreate,
         AspirateCreate,
+        AspirateWhileTrackingCreate,
         AspirateInPlaceCreate,
         CommentCreate,
         ConfigureForVolumeCreate,
@@ -559,6 +665,7 @@ CommandCreate = Annotated[
         CustomCreate,
         DispenseCreate,
         DispenseInPlaceCreate,
+        DispenseWhileTrackingCreate,
         BlowOutCreate,
         BlowOutInPlaceCreate,
         DropTipCreate,
@@ -568,8 +675,11 @@ CommandCreate = Annotated[
         LoadLabwareCreate,
         ReloadLabwareCreate,
         LoadLiquidCreate,
+        LoadLiquidClassCreate,
         LoadModuleCreate,
         LoadPipetteCreate,
+        LoadLidStackCreate,
+        LoadLidCreate,
         MoveLabwareCreate,
         MoveRelativeCreate,
         MoveToCoordinatesCreate,
@@ -586,6 +696,7 @@ CommandCreate = Annotated[
         SetStatusBarCreate,
         VerifyTipPresenceCreate,
         GetTipPresenceCreate,
+        GetNextTipCreate,
         LiquidProbeCreate,
         TryLiquidProbeCreate,
         heater_shaker.WaitForTemperatureCreate,
@@ -614,6 +725,9 @@ CommandCreate = Annotated[
         absorbance_reader.OpenLidCreate,
         absorbance_reader.InitializeCreate,
         absorbance_reader.ReadAbsorbanceCreate,
+        flex_stacker.ConfigureCreate,
+        flex_stacker.RetrieveCreate,
+        flex_stacker.StoreCreate,
         calibration.CalibrateGripperCreate,
         calibration.CalibratePipetteCreate,
         calibration.CalibrateModuleCreate,
@@ -624,12 +738,26 @@ CommandCreate = Annotated[
         unsafe.UnsafeEngageAxesCreate,
         unsafe.UnsafeUngripLabwareCreate,
         unsafe.UnsafePlaceLabwareCreate,
+        robot.MoveAxesRelativeCreate,
+        robot.MoveAxesToCreate,
+        robot.MoveToCreate,
+        robot.openGripperJawCreate,
+        robot.closeGripperJawCreate,
     ],
     Field(discriminator="commandType"),
 ]
 
+# Each time a TypeAdapter is instantiated, it will construct a new validator and
+# serializer. To improve performance, TypeAdapters are instantiated once.
+# See https://docs.pydantic.dev/latest/concepts/performance/#typeadapter-instantiated-once
+CommandCreateAdapter: TypeAdapter[CommandCreate] = TypeAdapter(CommandCreate)
+
+CommandAdapter: TypeAdapter[Command] = TypeAdapter(Command)
+
 CommandResult = Union[
+    AirGapInPlaceResult,
     AspirateResult,
+    AspirateWhileTrackingResult,
     AspirateInPlaceResult,
     CommentResult,
     ConfigureForVolumeResult,
@@ -637,6 +765,7 @@ CommandResult = Union[
     CustomResult,
     DispenseResult,
     DispenseInPlaceResult,
+    DispenseWhileTrackingResult,
     BlowOutResult,
     BlowOutInPlaceResult,
     DropTipResult,
@@ -646,8 +775,11 @@ CommandResult = Union[
     LoadLabwareResult,
     ReloadLabwareResult,
     LoadLiquidResult,
+    LoadLiquidClassResult,
     LoadModuleResult,
     LoadPipetteResult,
+    LoadLidStackResult,
+    LoadLidResult,
     MoveLabwareResult,
     MoveRelativeResult,
     MoveToCoordinatesResult,
@@ -664,6 +796,7 @@ CommandResult = Union[
     SetStatusBarResult,
     VerifyTipPresenceResult,
     GetTipPresenceResult,
+    GetNextTipResult,
     LiquidProbeResult,
     TryLiquidProbeResult,
     heater_shaker.WaitForTemperatureResult,
@@ -692,6 +825,9 @@ CommandResult = Union[
     absorbance_reader.OpenLidResult,
     absorbance_reader.InitializeResult,
     absorbance_reader.ReadAbsorbanceResult,
+    flex_stacker.ConfigureResult,
+    flex_stacker.RetrieveResult,
+    flex_stacker.StoreResult,
     calibration.CalibrateGripperResult,
     calibration.CalibratePipetteResult,
     calibration.CalibrateModuleResult,
@@ -702,6 +838,11 @@ CommandResult = Union[
     unsafe.UnsafeEngageAxesResult,
     unsafe.UnsafeUngripLabwareResult,
     unsafe.UnsafePlaceLabwareResult,
+    robot.MoveAxesRelativeResult,
+    robot.MoveAxesToResult,
+    robot.MoveToResult,
+    robot.openGripperJawResult,
+    robot.closeGripperJawResult,
 ]
 
 
@@ -712,6 +853,7 @@ CommandDefinedErrorData = Union[
     DefinedErrorData[OverpressureError],
     DefinedErrorData[LiquidNotFoundError],
     DefinedErrorData[GripperMovementError],
+    DefinedErrorData[StallOrCollisionError],
 ]
 
 

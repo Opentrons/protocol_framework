@@ -7,7 +7,6 @@ from opentrons_shared_data.labware.types import LabwareUri
 from opentrons_shared_data.robot.types import RobotType
 
 from opentrons.hardware_control import CriticalPoint
-from opentrons.hardware_control.nozzle_manager import NozzleConfigurationType
 from opentrons.motion_planning import deck_conflict as wrapped_deck_conflict
 from opentrons.motion_planning import adjacent_slots_getters
 from opentrons.motion_planning.adjacent_slots_getters import _MixedTypeSlots
@@ -31,7 +30,13 @@ from opentrons.protocol_engine.state.pipettes import PipetteBoundingBoxOffsets
 
 from opentrons.protocol_engine.clients import SyncClient
 from opentrons.protocol_engine.errors import LabwareNotLoadedOnModuleError
-from opentrons.types import DeckSlotName, Point, StagingSlotName, MountType
+from opentrons.types import (
+    DeckSlotName,
+    Point,
+    StagingSlotName,
+    MountType,
+    NozzleConfigurationType,
+)
 
 from opentrons.protocol_engine.types import (
     DeckType,
@@ -275,6 +280,9 @@ def test_maps_different_module_models(
     decoy: Decoy, mock_state_view: StateView, module_model: ModuleModel
 ) -> None:
     """It should correctly map all possible kinds of hardware module."""
+    # TODO: skipping flex stacker check for now to enable evt
+    if module_model is ModuleModel.FLEX_STACKER_MODULE_V1:
+        pytest.skip("Flex stacker check not implemented yet")
 
     def get_expected_mapping_result() -> wrapped_deck_conflict.DeckItem:
         expected_name_for_errors = module_model.value

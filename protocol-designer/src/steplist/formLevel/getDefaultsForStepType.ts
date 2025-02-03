@@ -1,10 +1,11 @@
 import {
+  ABSORBANCE_READER_COLOR_BY_WAVELENGTH,
   DEFAULT_CHANGE_TIP_OPTION,
-  DEFAULT_MM_FROM_BOTTOM_DISPENSE,
-  DEFAULT_WELL_ORDER_FIRST_OPTION,
-  DEFAULT_WELL_ORDER_SECOND_OPTION,
   DEFAULT_DELAY_SECONDS,
   DEFAULT_MM_BLOWOUT_OFFSET_FROM_TOP,
+  DEFAULT_MM_OFFSET_FROM_BOTTOM,
+  DEFAULT_WELL_ORDER_FIRST_OPTION,
+  DEFAULT_WELL_ORDER_SECOND_OPTION,
 } from '../../constants'
 import type { StepType, StepFieldName } from '../../form-types'
 export function getDefaultsForStepType(
@@ -30,9 +31,9 @@ export function getDefaultsForStepType(
         dropTip_location: null,
         dropTip_wellNames: undefined,
         labware: null,
-        mix_mmFromBottom: DEFAULT_MM_FROM_BOTTOM_DISPENSE,
+        mix_mmFromBottom: DEFAULT_MM_OFFSET_FROM_BOTTOM,
         mix_touchTip_checkbox: false,
-        mix_touchTip_mmFromBottom: null,
+        mix_touchTip_mmFromTop: null,
         mix_wellOrder_first: DEFAULT_WELL_ORDER_FIRST_OPTION,
         mix_wellOrder_second: DEFAULT_WELL_ORDER_SECOND_OPTION,
         mix_x_position: 0,
@@ -60,8 +61,10 @@ export function getDefaultsForStepType(
         aspirate_mix_times: null,
         aspirate_mix_volume: null,
         aspirate_mmFromBottom: null,
+        aspirate_submerge_delay_seconds: null,
+        aspirate_submerge_speed: null,
         aspirate_touchTip_checkbox: false,
-        aspirate_touchTip_mmFromBottom: null,
+        aspirate_touchTip_mmFromTop: null,
         aspirate_wellOrder_first: DEFAULT_WELL_ORDER_FIRST_OPTION,
         aspirate_wellOrder_second: DEFAULT_WELL_ORDER_SECOND_OPTION,
         aspirate_wells_grouped: false,
@@ -84,8 +87,10 @@ export function getDefaultsForStepType(
         dispense_mix_times: null,
         dispense_mix_volume: null,
         dispense_mmFromBottom: null,
+        dispense_submerge_delay_seconds: null,
+        dispense_submerge_speed: null,
         dispense_touchTip_checkbox: false,
-        dispense_touchTip_mmFromBottom: null,
+        dispense_touchTip_mmFromTop: null,
         dispense_wellOrder_first: DEFAULT_WELL_ORDER_FIRST_OPTION,
         dispense_wellOrder_second: DEFAULT_WELL_ORDER_SECOND_OPTION,
         dispense_wells: [],
@@ -120,11 +125,7 @@ export function getDefaultsForStepType(
       return {
         moduleId: null,
         pauseAction: null,
-        // TODO: (nd: 10/23/2024) remove individual time unit fields
-        pauseHour: null,
         pauseMessage: '',
-        pauseMinute: null,
-        pauseSecond: null,
         pauseTemperature: null,
         pauseTime: null,
       }
@@ -152,9 +153,6 @@ export function getDefaultsForStepType(
     case 'heaterShaker':
       return {
         heaterShakerSetTimer: null,
-        // TODO: (nd: 10/23/2024) remove individual time unit fields
-        heaterShakerTimerMinutes: null,
-        heaterShakerTimerSeconds: null,
         heaterShakerTimer: null,
         latchOpen: false,
         moduleId: null,
@@ -180,9 +178,19 @@ export function getDefaultsForStepType(
         profileItemsById: {},
         profileTargetLidTemp: null,
         profileVolume: null,
-        thermocyclerFormType: null,
+        thermocyclerFormType: 'thermocyclerState',
       }
-
+    case 'absorbanceReader':
+      return {
+        absorbanceReaderFormType: null,
+        fileName: null,
+        lidOpen: null,
+        mode: 'single',
+        moduleId: null,
+        referenceWavelength: null,
+        referenceWavelengthActive: false,
+        wavelengths: [Object.keys(ABSORBANCE_READER_COLOR_BY_WAVELENGTH)[0]], // default to first known wavelength
+      }
     default:
       return {}
   }

@@ -110,7 +110,6 @@ export function useRecoveryFullCommandText(
 ): string | null {
   const { commandTextData, stepNumber } = props
 
-  // TODO TOME: I think you are looking one command to far, for some reason.
   const relevantCmdIdx = stepNumber ?? -1
   const relevantCmd = commandTextData?.commands[relevantCmdIdx - 1] ?? null
 
@@ -171,6 +170,7 @@ function handleRecoveryOptionAction<T>(
     case RECOVERY_MAP.RETRY_NEW_TIPS.ROUTE:
     case RECOVERY_MAP.RETRY_STEP.ROUTE:
     case RECOVERY_MAP.MANUAL_REPLACE_AND_RETRY.ROUTE:
+    case RECOVERY_MAP.HOME_AND_RETRY.ROUTE:
       return currentStepReturnVal
     default: {
       return null

@@ -1,13 +1,14 @@
 """Tests for /runs routes dealing with labware offsets and definitions."""
+
 import pytest
 from datetime import datetime
 from decoy import Decoy
 
 from opentrons_shared_data.labware.types import LabwareDefinition as LabwareDefDict
+from opentrons_shared_data.labware.labware_definition import LabwareDefinition
 
 from opentrons.types import DeckSlotName
 from opentrons.protocol_engine import EngineStatus, types as pe_types
-from opentrons.protocols.models import LabwareDefinition
 
 from robot_server.errors.error_responses import ApiError
 from robot_server.service.json_api import RequestModel, SimpleBody
@@ -40,6 +41,7 @@ def run() -> Run:
         labwareOffsets=[],
         protocolId=None,
         liquids=[],
+        liquidClasses=[],
         outputFileIds=[],
         hasEverEnteredErrorRecovery=False,
     )
@@ -48,7 +50,7 @@ def run() -> Run:
 @pytest.fixture()
 def labware_definition(minimal_labware_def: LabwareDefDict) -> LabwareDefinition:
     """Create a labware definition fixture."""
-    return LabwareDefinition.parse_obj(minimal_labware_def)
+    return LabwareDefinition.model_validate(minimal_labware_def)
 
 
 async def test_add_labware_offset(
@@ -57,9 +59,9 @@ async def test_add_labware_offset(
     run: Run,
 ) -> None:
     """It should add the labware offset to the engine, assuming the run is current."""
-    labware_offset_request = pe_types.LabwareOffsetCreate(
+    labware_offset_request = pe_types.LegacyLabwareOffsetCreate(
         definitionUri="namespace_1/load_name_1/123",
-        location=pe_types.LabwareOffsetLocation(slotName=DeckSlotName.SLOT_1),
+        location=pe_types.LegacyLabwareOffsetLocation(slotName=DeckSlotName.SLOT_1),
         vector=pe_types.LabwareOffsetVector(x=1, y=2, z=3),
     )
 
@@ -67,7 +69,7 @@ async def test_add_labware_offset(
         id="labware-offset-id",
         createdAt=datetime(year=2022, month=2, day=2),
         definitionUri="labware-definition-uri",
-        location=pe_types.LabwareOffsetLocation(slotName=DeckSlotName.SLOT_1),
+        location=pe_types.LegacyLabwareOffsetLocation(slotName=DeckSlotName.SLOT_1),
         vector=pe_types.LabwareOffsetVector(x=0, y=0, z=0),
     )
 
@@ -91,11 +93,11 @@ async def test_add_labware_offset_not_current(
     run: Run,
 ) -> None:
     """It should 409 if the run is not current."""
-    not_current_run = run.copy(update={"current": False})
+    not_current_run = run.model_copy(update={"current": False})
 
-    labware_offset_request = pe_types.LabwareOffsetCreate(
+    labware_offset_request = pe_types.LegacyLabwareOffsetCreate(
         definitionUri="namespace_1/load_name_1/123",
-        location=pe_types.LabwareOffsetLocation(slotName=DeckSlotName.SLOT_1),
+        location=pe_types.LegacyLabwareOffsetLocation(slotName=DeckSlotName.SLOT_1),
         vector=pe_types.LabwareOffsetVector(x=1, y=2, z=3),
     )
 
@@ -140,7 +142,7 @@ async def test_add_labware_definition_not_current(
     labware_definition: LabwareDefinition,
 ) -> None:
     """It should 409 if the run is not current."""
-    not_current_run = run.copy(update={"current": False})
+    not_current_run = run.model_copy(update={"current": False})
 
     with pytest.raises(ApiError) as exc_info:
         await add_labware_definition(
@@ -161,8 +163,8 @@ async def test_get_run_labware_definition(
         mock_run_data_manager.get_run_loaded_labware_definitions(run_id="run-id")
     ).then_return(
         [
-            SD_LabwareDefinition.construct(namespace="test_1"),  # type: ignore[call-arg]
-            SD_LabwareDefinition.construct(namespace="test_2"),  # type: ignore[call-arg]
+            SD_LabwareDefinition.model_construct(namespace="test_1"),  # type: ignore[call-arg]
+            SD_LabwareDefinition.model_construct(namespace="test_2"),  # type: ignore[call-arg]
         ]
     )
 
@@ -171,7 +173,7 @@ async def test_get_run_labware_definition(
     )
 
     assert result.content.data == [
-        SD_LabwareDefinition.construct(namespace="test_1"),  # type: ignore[call-arg]
-        SD_LabwareDefinition.construct(namespace="test_2"),  # type: ignore[call-arg]
+        SD_LabwareDefinition.model_construct(namespace="test_1"),  # type: ignore[call-arg]
+        SD_LabwareDefinition.model_construct(namespace="test_2"),  # type: ignore[call-arg]
     ]
     assert result.status_code == 200

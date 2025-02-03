@@ -1,6 +1,8 @@
 from typing import Optional
 from typing_extensions import Protocol
 
+from opentrons.types import Point
+from opentrons.hardware_control.types import CriticalPoint
 from .types import MountArgType, CalibrationType, ConfigType
 
 from .instrument_configurer import InstrumentConfigurer
@@ -16,6 +18,22 @@ class LiquidHandler(
     Calibratable[CalibrationType],
     Protocol[CalibrationType, MountArgType, ConfigType],
 ):
+    def critical_point_for(
+        self,
+        mount: MountArgType,
+        cp_override: Optional[CriticalPoint] = None,
+    ) -> Point:
+        """
+        Determine the current critical point for the specified mount.
+
+        :param mount: A robot mount that the instrument is on.
+        :param cp_override: The critical point override to use.
+
+        If no critical point override is specified, the robot defaults to nozzle location `A1` or the mount critical point.
+        :return: Point.
+        """
+        ...
+
     async def update_nozzle_configuration_for_mount(
         self,
         mount: MountArgType,
@@ -80,6 +98,7 @@ class LiquidHandler(
         mount: MountArgType,
         volume: Optional[float] = None,
         rate: float = 1.0,
+        correction_volume: float = 0.0,
     ) -> None:
         """
         Aspirate a volume of liquid (in microliters/uL) using this pipette
@@ -99,6 +118,7 @@ class LiquidHandler(
         volume : [float] The number of microliters to aspirate
         rate : [float] Set plunger speed for this aspirate, where
             speed = rate * aspirate_speed
+        correction_volume : Correction volume in uL for the specified aspirate volume
         """
         ...
 
@@ -108,6 +128,7 @@ class LiquidHandler(
         volume: Optional[float] = None,
         rate: float = 1.0,
         push_out: Optional[float] = None,
+        correction_volume: float = 0.0,
     ) -> None:
         """
         Dispense a volume of liquid in microliters(uL) using this pipette
@@ -118,6 +139,7 @@ class LiquidHandler(
         volume : [float] The number of microliters to dispense
         rate : [float] Set plunger speed for this dispense, where
             speed = rate * dispense_speed
+        correction_volume : Correction volume in uL for the specified dispense volume
         """
         ...
 

@@ -47,6 +47,25 @@ const mockPipettes = [
   } as PipetteOnDeck,
 ]
 
+const mock96Pipette = [
+  {
+    mount: 'left',
+    id: 'mock-96channels',
+    name: 'p1000_96',
+    tiprackDefURI: ['opentrons/opentrons_flex_96_filtertiprack_1000ul/1'],
+    tiprackLabwareDef: [
+      {
+        metadata: {
+          displayName: 'Opentrons Flex 96 Filter Tip Rack 1000 µL',
+          displayCategory: 'tipRack',
+          displayVolumeUnits: 'µL',
+          tags: [],
+        },
+      } as any,
+    ],
+  } as PipetteOnDeck,
+]
+
 const mockAdditionalEquipment = {
   'mock:gripper': {
     name: 'gripper',
@@ -77,9 +96,9 @@ describe('InstrumentsInfo', () => {
     screen.getByText('Instruments')
     screen.getByText('Robot type')
     screen.getAllByText('Opentrons Flex')
-    screen.getByText('Left pipette')
-    screen.getByText('Right pipette')
-    screen.getByText('Extension mount')
+    screen.getByText('Left Mount')
+    screen.getByText('Right Mount')
+    screen.getByText('Extension Mount')
     expect(screen.getAllByText('N/A').length).toBe(3)
   })
 
@@ -91,9 +110,9 @@ describe('InstrumentsInfo', () => {
     }
     render(props)
 
-    screen.getByText('Flex 1-Channel 50 μL')
+    screen.getByText('Flex 1-Channel 50 µL')
     screen.getByText('Opentrons Flex 96 Tip Rack 50 µL')
-    screen.getByText('Flex 8-Channel 50 μL')
+    screen.getByText('Flex 8-Channel 50 µL')
     screen.getByText('Opentrons Flex 96 Filter Tip Rack 50 µL')
     screen.getByText('Opentrons Flex Gripper')
   })
@@ -102,5 +121,14 @@ describe('InstrumentsInfo', () => {
     render(props)
     fireEvent.click(screen.getByText('Edit'))
     expect(mockSetShowEditInstrumentsModal).toHaveBeenCalled()
+  })
+
+  it('should render left + right mount when 96 channels is selected', () => {
+    props = {
+      ...props,
+      pipettesOnDeck: mock96Pipette,
+    }
+    render(props)
+    screen.getByText('Left + Right Mount')
   })
 })

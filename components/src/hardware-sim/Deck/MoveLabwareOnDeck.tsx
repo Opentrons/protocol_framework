@@ -1,4 +1,4 @@
-import * as React from 'react'
+import { useLayoutEffect, useMemo, useRef, useState } from 'react'
 import styled from 'styled-components'
 import { animated, useSpring, easings } from '@react-spring/web'
 import {
@@ -22,6 +22,8 @@ import type {
   DeckDefinition,
   DeckConfiguration,
 } from '@opentrons/shared-data'
+
+import type { ReactNode } from 'react'
 import type { StyleProps } from '../../primitives'
 
 const getModulePosition = (
@@ -62,7 +64,7 @@ function getLabwareCoordinates({
   loadedModules: LoadedModule[]
   loadedLabware: LoadedLabware[]
 }): Coordinates | null {
-  if (location === 'offDeck') {
+  if (location === 'offDeck' || location === 'systemLocation') {
     return null
   } else if ('labwareId' in location) {
     const loadedAdapter = loadedLabware.find(l => l.id === location.labwareId)
@@ -71,6 +73,7 @@ function getLabwareCoordinates({
 
     if (
       loadedAdapterLocation === 'offDeck' ||
+      loadedAdapterLocation === 'systemLocation' ||
       'labwareId' in loadedAdapterLocation
     )
       return null
@@ -136,7 +139,7 @@ interface MoveLabwareOnDeckProps extends StyleProps {
   loadedModules: LoadedModule[]
   loadedLabware: LoadedLabware[]
   deckConfig: DeckConfiguration
-  backgroundItems?: React.ReactNode
+  backgroundItems?: ReactNode
   deckFill?: string
 }
 export function MoveLabwareOnDeck(
@@ -153,12 +156,11 @@ export function MoveLabwareOnDeck(
     backgroundItems = null,
     ...styleProps
   } = props
-  const deckDef = React.useMemo(() => getDeckDefFromRobotType(robotType), [
-    robotType,
-  ])
+  const deckDef = useMemo(() => getDeckDefFromRobotType(robotType), [robotType])
 
   const initialSlotId =
     initialLabwareLocation === 'offDeck' ||
+    initialLabwareLocation === 'systemLocation' ||
     !('slotName' in initialLabwareLocation)
       ? deckDef.locations.addressableAreas[1].id
       : initialLabwareLocation.slotName
@@ -191,7 +193,10 @@ export function MoveLabwareOnDeck(
       loadedLabware,
     }) ?? offDeckPosition
 
+  const shouldReset = usePositionChangeReset(initialPosition, finalPosition)
+
   const springProps = useSpring({
+    reset: shouldReset,
     config: { duration: 1000, easing: easings.easeInOutSine },
     from: {
       ...initialPosition,
@@ -245,6 +250,37 @@ export function MoveLabwareOnDeck(
   )
 }
 
+function usePositionChangeReset(
+  initialPosition: { x: number; y: number },
+  finalPosition: { x: number; y: number }
+): boolean {
+  const [shouldReset, setShouldReset] = useState(false)
+
+  useLayoutEffect(() => {
+    if (shouldReset) {
+      setShouldReset(false)
+      return
+    }
+
+    const isNewPosition =
+      previousInitialRef.current?.x !== initialPosition.x ||
+      previousInitialRef.current?.y !== initialPosition.y ||
+      previousFinalRef.current?.x !== finalPosition.x ||
+      previousFinalRef.current?.y !== finalPosition.y
+
+    if (isNewPosition) {
+      setShouldReset(true)
+    }
+
+    previousInitialRef.current = initialPosition
+    previousFinalRef.current = finalPosition
+  }, [initialPosition, finalPosition])
+
+  const previousInitialRef = useRef(initialPosition)
+  const previousFinalRef = useRef(finalPosition)
+
+  return shouldReset
+}
 /**
  * These animated components needs to be split out because react-spring and styled-components don't play nice
  * @see https://github.com/pmndrs/react-spring/issues/1515 */

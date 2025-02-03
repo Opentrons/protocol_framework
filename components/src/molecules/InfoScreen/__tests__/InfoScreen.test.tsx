@@ -1,4 +1,3 @@
-import type * as React from 'react'
 import { screen } from '@testing-library/react'
 import { describe, it, expect, beforeEach } from 'vitest'
 
@@ -6,12 +5,14 @@ import { renderWithProviders } from '../../../testing/utils'
 import { BORDERS, COLORS } from '../../../helix-design-system'
 import { InfoScreen } from '..'
 
-const render = (props: React.ComponentProps<typeof InfoScreen>) => {
+import type { ComponentProps } from 'react'
+
+const render = (props: ComponentProps<typeof InfoScreen>) => {
   return renderWithProviders(<InfoScreen {...props} />)
 }
 
 describe('InfoScreen', () => {
-  let props: React.ComponentProps<typeof InfoScreen>
+  let props: ComponentProps<typeof InfoScreen>
 
   beforeEach(() => {
     props = {
@@ -36,5 +37,21 @@ describe('InfoScreen', () => {
     expect(screen.getByLabelText('alert')).toHaveStyle(
       `color: ${COLORS.grey60}`
     )
+    expect(screen.getByTestId('InfoScreen')).toHaveStyle(`height: 100%`)
+  })
+
+  it('should render set height, subContent and backgroundColor', () => {
+    props = {
+      ...props,
+      subContent: 'mock sub content',
+      backgroundColor: COLORS.blue50,
+      height: '10rem',
+    }
+    render(props)
+    screen.getByText('mock sub content')
+    expect(screen.getByTestId('InfoScreen')).toHaveStyle(
+      `background-color: ${COLORS.blue50}`
+    )
+    expect(screen.getByTestId('InfoScreen')).toHaveStyle(`height: 10rem`)
   })
 })

@@ -1,36 +1,38 @@
 """ProtocolEngine class definition."""
+
 from contextlib import AsyncExitStack
 from logging import getLogger
 from typing import Dict, Optional, Union, AsyncGenerator, Callable
-from opentrons.protocol_engine.actions.actions import (
-    ResumeFromRecoveryAction,
-    SetErrorRecoveryPolicyAction,
-)
 
-from opentrons.protocols.models import LabwareDefinition
-from opentrons.hardware_control import HardwareControlAPI
-from opentrons.hardware_control.modules import AbstractModule as HardwareModuleAPI
-from opentrons.hardware_control.types import PauseType as HardwarePauseType
 from opentrons_shared_data.errors import (
     ErrorCodes,
     EnumeratedError,
 )
+from opentrons_shared_data.labware.labware_definition import LabwareDefinition
 
+from opentrons.hardware_control import HardwareControlAPI
+from opentrons.hardware_control.modules import AbstractModule as HardwareModuleAPI
+from opentrons.hardware_control.types import PauseType as HardwarePauseType
+
+from .actions.actions import (
+    ResumeFromRecoveryAction,
+    SetErrorRecoveryPolicyAction,
+)
 from .errors import ProtocolCommandFailedError, ErrorOccurrence, CommandNotAllowedError
 from .errors.exceptions import EStopActivatedError
 from .error_recovery_policy import ErrorRecoveryPolicy
-from . import commands, slot_standardization
+from . import commands, slot_standardization, labware_offset_standardization
 from .resources import ModelUtils, ModuleDataProvider, FileProvider
 from .types import (
     LabwareOffset,
     LabwareOffsetCreate,
+    LegacyLabwareOffsetCreate,
     LabwareUri,
     ModuleModel,
     Liquid,
     HexColor,
     PostRunHardwareState,
     DeckConfigurationType,
-    AddressableAreaLocation,
 )
 from .execution import (
     QueueWorker,
@@ -427,7 +429,7 @@ class ProtocolEngine:
             post_run_hardware_state: The state in which to leave the gantry and motors in
                 after the run is over.
         """
-        if self._state_store.commands.state.stopped_by_estop:
+        if self._state_store.commands.get_is_stopped_by_estop():
             # This handles the case where the E-stop was pressed while we were *not* in the middle
             # of some hardware interaction that would raise it as an exception. For example, imagine
             # we were paused between two commands, or imagine we were executing a waitForDuration.
@@ -517,15 +519,21 @@ class ProtocolEngine:
             )
         )
 
-    def add_labware_offset(self, request: LabwareOffsetCreate) -> LabwareOffset:
+    def add_labware_offset(
+        self, request: LabwareOffsetCreate | LegacyLabwareOffsetCreate
+    ) -> LabwareOffset:
         """Add a new labware offset and return it.
 
         The added offset will apply to subsequent `LoadLabwareCommand`s.
 
         To retrieve offsets later, see `.state_view.labware`.
         """
-        request = slot_standardization.standardize_labware_offset(
-            request, self.state_view.config.robot_type
+        internal_request = (
+            labware_offset_standardization.standardize_labware_offset_create(
+                request,
+                self.state_view.config.robot_type,
+                self.state_view.addressable_areas.deck_definition,
+            )
         )
 
         labware_offset_id = self._model_utils.generate_id()
@@ -534,7 +542,7 @@ class ProtocolEngine:
             AddLabwareOffsetAction(
                 labware_offset_id=labware_offset_id,
                 created_at=created_at,
-                request=request,
+                request=internal_request,
             )
         )
         return self.state_view.labware.get_labware_offset(
@@ -565,15 +573,17 @@ class ProtocolEngine:
             description=(description or ""),
             displayColor=color,
         )
+        validated_liquid = self._state_store.liquid.validate_liquid_allowed(
+            liquid=liquid
+        )
 
-        self._action_dispatcher.dispatch(AddLiquidAction(liquid=liquid))
-        return liquid
+        self._action_dispatcher.dispatch(AddLiquidAction(liquid=validated_liquid))
+        return validated_liquid
 
     def add_addressable_area(self, addressable_area_name: str) -> None:
         """Add an addressable area to state."""
-        area = AddressableAreaLocation(addressableAreaName=addressable_area_name)
         self._action_dispatcher.dispatch(
-            AddAddressableAreaAction(addressable_area=area)
+            AddAddressableAreaAction(addressable_area_name)
         )
 
     def reset_tips(self, labware_id: str) -> None:

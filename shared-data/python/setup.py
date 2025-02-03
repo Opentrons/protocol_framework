@@ -33,6 +33,7 @@ DATA_SUBDIRS = [
     "command",
     "commandAnnotation",
     "liquid",
+    "liquid-class",
 ]
 DATA_TYPES = ["definitions", "schemas"]
 DEST_BASE_PATH = "data"
@@ -141,9 +142,9 @@ DESCRIPTION = (
 )
 PACKAGES = find_packages(where=".", exclude=["tests", "tests.*"])
 INSTALL_REQUIRES = [
-    "jsonschema>=3.0.1,<4.18.0",
+    "jsonschema>=4.0.0,<5",
     "typing-extensions>=4.0.0,<5",
-    "pydantic>=1.10.9,<2.0.0",
+    "pydantic>=2.0.0,<3.0.0",
 ]
 
 

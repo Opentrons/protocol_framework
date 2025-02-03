@@ -4,26 +4,19 @@ import { useNavigate } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 import { format } from 'date-fns'
 import { css } from 'styled-components'
-import { createPortal } from 'react-dom'
 
 import {
   ALIGN_CENTER,
-  Btn,
+  COLORS,
   DIRECTION_COLUMN,
   EndUserAgreementFooter,
   Flex,
-  JUSTIFY_END,
   JUSTIFY_FLEX_END,
   JUSTIFY_SPACE_BETWEEN,
   LargeButton,
-  Modal,
   NO_WRAP,
-  PrimaryButton,
-  SecondaryButton,
   SPACING,
   StyledText,
-  ToggleGroup,
-  TYPOGRAPHY,
   WRAP,
 } from '@opentrons/components'
 import { OT2_ROBOT_TYPE } from '@opentrons/shared-data'
@@ -31,34 +24,36 @@ import { OT2_ROBOT_TYPE } from '@opentrons/shared-data'
 import {
   getAdditionalEquipmentEntities,
   getInitialDeckSetup,
+  getLiquidEntities,
 } from '../../step-forms/selectors'
 import { selectors as fileSelectors } from '../../file-data'
 import { selectors as stepFormSelectors } from '../../step-forms'
 import { actions as loadFileActions } from '../../load-file'
-import { selectors as labwareIngredSelectors } from '../../labware-ingred/selectors'
 import {
-  getUnusedEntities,
-  getUnusedStagingAreas,
-  getUnusedTrash,
-} from '../../components/FileSidebar/utils'
+  getEnablePythonExport,
+  getEnableTimelineScrubber,
+} from '../../feature-flags/selectors'
+import { selectors as labwareIngredSelectors } from '../../labware-ingred/selectors'
 import { MaterialsListModal } from '../../organisms/MaterialsListModal'
-import { BUTTON_LINK_STYLE, LINE_CLAMP_TEXT_STYLE } from '../../atoms'
-import { getMainPagePortalEl } from '../../components/portals/MainPageModalPortal'
+import { LINE_CLAMP_TEXT_STYLE, COLUMN_STYLE } from '../../atoms'
+import { useBlockingHint } from '../../organisms/BlockingHintModal/useBlockingHint'
 import {
   EditProtocolMetadataModal,
   EditInstrumentsModal,
-  SlotDetailsContainer,
 } from '../../organisms'
-import { DeckThumbnail } from './DeckThumbnail'
-import { OffDeckThumbnail } from './OffdeckThumbnail'
 import { getWarningContent } from './UnusedModalContent'
 import { ProtocolMetadata } from './ProtocolMetadata'
 import { InstrumentsInfo } from './InstrumentsInfo'
 import { LiquidDefinitions } from './LiquidDefinitions'
 import { StepsInfo } from './StepsInfo'
-
+import { StartingDeck } from './StartingDeck'
+import {
+  getUnusedEntities,
+  getUnusedStagingAreas,
+  getUnusedTrash,
+} from './utils'
+import { ScrubberContainer } from './ScrubberContainer'
 import type { CreateCommand } from '@opentrons/shared-data'
-import type { DeckSlot } from '@opentrons/step-generation'
 import type { ThunkDispatch } from '../../types'
 
 const DATE_ONLY_FORMAT = 'MMMM dd, yyyy'
@@ -83,12 +78,15 @@ export function ProtocolOverview(): JSX.Element {
     'alert',
     'shared',
     'starting_deck_State',
+    'modules',
   ])
   const navigate = useNavigate()
   const [
     showEditInstrumentsModal,
     setShowEditInstrumentsModal,
   ] = useState<boolean>(false)
+  const enablePythonExport = useSelector(getEnablePythonExport)
+  const enableTimelineScrubber = useSelector(getEnableTimelineScrubber)
   const [showEditMetadataModal, setShowEditMetadataModal] = useState<boolean>(
     false
   )
@@ -102,27 +100,18 @@ export function ProtocolOverview(): JSX.Element {
     labwareIngredSelectors.allIngredientGroupFields
   )
   const dispatch: ThunkDispatch<any> = useDispatch()
-  const [hover, setHover] = useState<DeckSlot | string | null>(null)
   const [showMaterialsListModal, setShowMaterialsListModal] = useState<boolean>(
     false
   )
   const fileData = useSelector(fileSelectors.createFile)
   const savedStepForms = useSelector(stepFormSelectors.getSavedStepForms)
   const additionalEquipment = useSelector(getAdditionalEquipmentEntities)
-  const liquidsOnDeck = useSelector(
-    labwareIngredSelectors.allIngredientNamesIds
-  )
-  const leftString = t('starting_deck_state:onDeck')
-  const rightString = t('starting_deck_state:offDeck')
-
-  const [deckView, setDeckView] = useState<
-    typeof leftString | typeof rightString
-  >(leftString)
+  const liquids = useSelector(getLiquidEntities)
 
   useEffect(() => {
     if (formValues?.created == null) {
-      console.warn(
-        'formValues was refreshed while on the overview page, redirecting to landing page'
+      console.log(
+        'formValues was possibly refreshed while on the overview page, redirecting to landing page'
       )
       navigate('/')
     }
@@ -134,7 +123,6 @@ export function ProtocolOverview(): JSX.Element {
     additionalEquipmentOnDeck,
     pipettes,
   } = initialDeckSetup
-  const isOffDeckHover = hover != null && labwaresOnDeck[hover] != null
 
   const nonLoadCommands =
     fileData?.commands.filter(
@@ -143,8 +131,10 @@ export function ProtocolOverview(): JSX.Element {
   const gripperInUse =
     fileData?.commands.find(
       command =>
-        command.commandType === 'moveLabware' &&
-        command.params.strategy === 'usingGripper'
+        (command.commandType === 'moveLabware' &&
+          command.params.strategy === 'usingGripper') ||
+        command.commandType === 'absorbanceReader/closeLid' ||
+        command.commandType === 'absorbanceReader/openLid'
     ) != null
   const noCommands = fileData != null ? nonLoadCommands.length === 0 : true
   const modulesWithoutStep = getUnusedEntities(
@@ -215,9 +205,18 @@ export function ProtocolOverview(): JSX.Element {
       })
     : null
 
-  const cancelModal = (): void => {
-    setShowExportWarningModal(false)
-  }
+  const exportWarningModal = useBlockingHint({
+    hintKey: warning?.hintKey ?? null,
+    enabled: showExportWarningModal,
+    content: warning?.content,
+    handleCancel: () => {
+      setShowExportWarningModal(false)
+    },
+    handleContinue: () => {
+      setShowExportWarningModal(false)
+      dispatch(loadFileActions.saveProtocolFile())
+    },
+  })
 
   return (
     <Fragment>
@@ -235,37 +234,7 @@ export function ProtocolOverview(): JSX.Element {
           }}
         />
       ) : null}
-      {showExportWarningModal &&
-        createPortal(
-          <Modal
-            title={warning && warning.heading}
-            onClose={cancelModal}
-            titleElement1={warning?.titleElement}
-            childrenPadding={SPACING.spacing24}
-            footer={
-              <Flex
-                justifyContent={JUSTIFY_END}
-                gridGap={SPACING.spacing8}
-                padding={`0 ${SPACING.spacing24} ${SPACING.spacing24}`}
-              >
-                <SecondaryButton onClick={cancelModal}>
-                  {t('shared:cancel')}
-                </SecondaryButton>
-                <PrimaryButton
-                  onClick={() => {
-                    setShowExportWarningModal(false)
-                    dispatch(loadFileActions.saveProtocolFile())
-                  }}
-                >
-                  {t('alert:continue_with_export')}
-                </PrimaryButton>
-              </Flex>
-            }
-          >
-            {warning && warning.content}
-          </Modal>,
-          getMainPagePortalEl()
-        )}
+      {exportWarningModal}
       {showMaterialsListModal ? (
         <MaterialsListModal
           hardware={Object.values(modulesOnDeck)}
@@ -275,7 +244,7 @@ export function ProtocolOverview(): JSX.Element {
               : []
           }
           labware={Object.values(labwaresOnDeck)}
-          liquids={liquidsOnDeck}
+          liquids={liquids}
           setShowMaterialsListModal={setShowMaterialsListModal}
         />
       ) : null}
@@ -315,19 +284,35 @@ export function ProtocolOverview(): JSX.Element {
               }}
               whiteSpace={NO_WRAP}
               height="3.5rem"
+              // ToDo (kk:2024/11/07 this will be updated in the future)
+              css={css`
+                border: 2px solid ${COLORS.blue50};
+              `}
             />
             <LargeButton
               buttonText={t('export_protocol')}
               onClick={() => {
-                if (hasWarning) {
-                  setShowExportWarningModal(true)
-                } else {
-                  dispatch(loadFileActions.saveProtocolFile())
-                }
+                setShowExportWarningModal(true)
               }}
               iconName="arrow-right"
               whiteSpace={NO_WRAP}
+              height="3.5rem"
             />
+            {enablePythonExport ? (
+              <LargeButton
+                buttonType="stroke"
+                buttonText="Export python"
+                onClick={() => {
+                  console.log('wire this up')
+                }}
+                whiteSpace={NO_WRAP}
+                height="3.5rem"
+                iconName="arrow-right"
+                css={css`
+                  border: 2px solid ${COLORS.blue50};
+                `}
+              />
+            ) : null}
           </Flex>
         </Flex>
         <Flex gridGap={SPACING.spacing80} flexWrap={WRAP}>
@@ -357,61 +342,11 @@ export function ProtocolOverview(): JSX.Element {
             css={COLUMN_STYLE}
             gridGap={SPACING.spacing12}
           >
-            <Flex
-              justifyContent={JUSTIFY_SPACE_BETWEEN}
-              alignItems={ALIGN_CENTER}
-            >
-              <Flex gridGap="1.875rem" alignItems={ALIGN_CENTER}>
-                <StyledText desktopStyle="headingSmallBold">
-                  {t('starting_deck')}
-                </StyledText>
-                <Flex padding={SPACING.spacing4}>
-                  <Btn
-                    data-testid="Materials_list"
-                    textDecoration={TYPOGRAPHY.textDecorationUnderline}
-                    onClick={() => {
-                      setShowMaterialsListModal(true)
-                    }}
-                    css={BUTTON_LINK_STYLE}
-                  >
-                    <StyledText desktopStyle="bodyDefaultRegular">
-                      {t('materials_list')}
-                    </StyledText>
-                  </Btn>
-                </Flex>
-              </Flex>
-              <ToggleGroup
-                selectedValue={deckView}
-                leftText={leftString}
-                rightText={rightString}
-                leftClick={() => {
-                  setDeckView(leftString)
-                }}
-                rightClick={() => {
-                  setDeckView(rightString)
-                }}
-              />
-            </Flex>
-            <Flex
-              flexDirection={DIRECTION_COLUMN}
-              gridGap={SPACING.spacing32}
-              alignItems={ALIGN_CENTER}
-            >
-              {deckView === leftString ? (
-                <DeckThumbnail hoverSlot={hover} setHoverSlot={setHover} />
-              ) : (
-                <OffDeckThumbnail
-                  hover={hover}
-                  setHover={setHover}
-                  width="100%"
-                />
-              )}
-              <SlotDetailsContainer
-                robotType={robotType}
-                slot={isOffDeckHover ? 'offDeck' : hover}
-                offDeckLabwareId={isOffDeckHover ? hover : null}
-              />
-            </Flex>
+            {enableTimelineScrubber ? <ScrubberContainer /> : null}
+            <StartingDeck
+              robotType={robotType}
+              setShowMaterialsListModal={setShowMaterialsListModal}
+            />
           </Flex>
         </Flex>
       </Flex>
@@ -419,11 +354,3 @@ export function ProtocolOverview(): JSX.Element {
     </Fragment>
   )
 }
-
-const MIN_OVERVIEW_WIDTH = '64rem'
-const COLUMN_GRID_GAP = '5rem'
-const COLUMN_STYLE = css`
-  flex-direction: ${DIRECTION_COLUMN};
-  min-width: calc((${MIN_OVERVIEW_WIDTH} - ${COLUMN_GRID_GAP}) * 0.5);
-  flex: 1;
-`

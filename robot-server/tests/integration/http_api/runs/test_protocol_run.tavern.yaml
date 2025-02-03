@@ -47,6 +47,7 @@ stages:
           outputFileIds: []
           protocolId: '{protocol_id}'
           liquids: []
+          liquidClasses: []
       save:
         json:
           original_run_data: data
@@ -104,6 +105,9 @@ stages:
           definitionUri: opentrons/biorad_96_wellplate_200ul_pcr/1
           location:
             slotName: '1'
+          locationSequence:
+            - kind: 'onAddressableArea'
+              addressableAreaName: '1'
           vector:
             x: 1.11
             y: 2.22
@@ -240,6 +244,7 @@ stages:
           createdAt: !re_fullmatch "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d+(Z|([+-]\\d{2}:\\d{2}))"
           startedAt: !re_fullmatch "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d+(Z|([+-]\\d{2}:\\d{2}))"
           liquids: []
+          liquidClasses: []
           runTimeParameters: []
           outputFileIds: []
           completedAt: !re_fullmatch "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d+(Z|([+-]\\d{2}:\\d{2}))"
@@ -262,6 +267,9 @@ stages:
               definitionUri: opentrons/biorad_96_wellplate_200ul_pcr/1
               location:
                 slotName: '1'
+              locationSequence:
+                - kind: 'onAddressableArea'
+                  addressableAreaName: '1'
               vector:
                 x: 1.11
                 y: 2.22

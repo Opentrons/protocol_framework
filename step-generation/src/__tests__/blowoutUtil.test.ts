@@ -22,15 +22,15 @@ import {
   getInitialRobotStateStandard,
 } from '../fixtures'
 import type { RobotState, InvariantContext } from '../types'
-import type { BlowoutParams } from '@opentrons/shared-data/protocol/types/schemaV3'
+import type { BlowoutParams } from '@opentrons/shared-data'
 vi.mock('../utils/curryCommandCreator')
 
 let blowoutArgs: {
-  pipette: BlowoutParams['pipette']
+  pipette: BlowoutParams['pipetteId']
   sourceLabwareId: string
-  sourceWell: BlowoutParams['well']
+  sourceWell: BlowoutParams['wellName']
   destLabwareId: string
-  destWell: BlowoutParams['well']
+  destWell: BlowoutParams['wellName']
   blowoutLocation: string | null | undefined
   flowRate: number
   offsetFromTopMm: number
@@ -68,6 +68,7 @@ describe('blowoutUtil', () => {
       wellName: blowoutArgs.sourceWell,
       flowRate: blowoutArgs.flowRate,
       wellLocation: {
+        origin: 'top',
         offset: {
           z: expect.any(Number),
         },
@@ -96,6 +97,7 @@ describe('blowoutUtil', () => {
     expect(curryCommandCreator).toHaveBeenCalledWith(moveToAddressableArea, {
       addressableAreaName: ONE_CHANNEL_WASTE_CHUTE_ADDRESSABLE_AREA,
       pipetteId: blowoutArgs.pipette,
+      offset: { x: 0, y: 0, z: 0 },
     })
     expect(curryCommandCreator).toHaveBeenCalledWith(blowOutInPlace, {
       flowRate: 2.3,
@@ -113,6 +115,7 @@ describe('blowoutUtil', () => {
       wellName: blowoutArgs.destWell,
       flowRate: blowoutArgs.flowRate,
       wellLocation: {
+        origin: 'top',
         offset: {
           z: expect.any(Number),
         },
@@ -130,6 +133,7 @@ describe('blowoutUtil', () => {
       wellName: 'A1',
       flowRate: blowoutArgs.flowRate,
       wellLocation: {
+        origin: 'top',
         offset: {
           z: expect.any(Number),
         },

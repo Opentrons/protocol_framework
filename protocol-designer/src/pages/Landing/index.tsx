@@ -17,7 +17,7 @@ import {
   StyledText,
   TYPOGRAPHY,
 } from '@opentrons/components'
-import { BUTTON_LINK_STYLE } from '../../atoms'
+import { LINK_BUTTON_STYLE } from '../../atoms'
 import { AnnouncementModal } from '../../organisms'
 import { actions as loadFileActions } from '../../load-file'
 import { getFileMetadata } from '../../file-data/selectors'
@@ -25,9 +25,14 @@ import { toggleNewProtocolModal } from '../../navigation/actions'
 import { useKitchen } from '../../organisms/Kitchen/hooks'
 import { getHasOptedIn } from '../../analytics/selectors'
 import { useAnnouncements } from '../../organisms/AnnouncementModal/announcements'
-import { getLocalStorageItem, localStorageAnnouncementKey } from '../../persist'
+import {
+  getLocalStorageItem,
+  localStorageAnnouncementKey,
+  setLocalStorageItem,
+} from '../../persist'
 import welcomeImage from '../../assets/images/welcome_page.png'
 
+import type { ChangeEvent, ComponentProps } from 'react'
 import type { ThunkDispatch } from '../../types'
 
 export function Landing(): JSX.Element {
@@ -38,7 +43,7 @@ export function Landing(): JSX.Element {
   const [showAnnouncementModal, setShowAnnouncementModal] = useState<boolean>(
     false
   )
-  const hasOptedIn = useSelector(getHasOptedIn)
+  const { hasOptedIn, appVersion } = useSelector(getHasOptedIn)
   const { bakeToast, eatToast } = useKitchen()
   const announcements = useAnnouncements()
   const lastAnnouncement = announcements[announcements.length - 1]
@@ -51,7 +56,11 @@ export function Landing(): JSX.Element {
     hasOptedIn != null
 
   useEffect(() => {
-    if (userHasNotSeenAnnouncement) {
+    if (
+      userHasNotSeenAnnouncement &&
+      appVersion != null &&
+      hasOptedIn != null
+    ) {
       const toastId = bakeToast(
         t('learn_more', { version: process.env.OT_PD_VERSION }) as string,
         INFO_TOAST,
@@ -59,6 +68,9 @@ export function Landing(): JSX.Element {
           heading: t('updated_protocol_designer'),
           closeButton: true,
           linkText: t('view_release_notes'),
+          onClose: () => {
+            setLocalStorageItem(localStorageAnnouncementKey, announcementKey)
+          },
           onLinkClick: () => {
             eatToast(toastId)
             setShowAnnouncementModal(true)
@@ -68,7 +80,7 @@ export function Landing(): JSX.Element {
         }
       )
     }
-  }, [userHasNotSeenAnnouncement])
+  }, [userHasNotSeenAnnouncement, appVersion, hasOptedIn])
 
   useEffect(() => {
     if (metadata?.created != null) {
@@ -77,9 +89,7 @@ export function Landing(): JSX.Element {
     }
   }, [metadata, navigate])
 
-  const loadFile = (
-    fileChangeEvent: React.ChangeEvent<HTMLInputElement>
-  ): void => {
+  const loadFile = (fileChangeEvent: ChangeEvent<HTMLInputElement>): void => {
     dispatch(loadFileActions.loadProtocolFile(fileChangeEvent))
   }
 
@@ -94,7 +104,8 @@ export function Landing(): JSX.Element {
         />
       ) : null}
       <Flex
-        backgroundColor={COLORS.grey20}
+        data-cy="landing-page"
+        backgroundColor={COLORS.grey10}
         flexDirection={DIRECTION_COLUMN}
         alignItems={ALIGN_CENTER}
         justifyContent={JUSTIFY_CENTER}
@@ -127,7 +138,7 @@ export function Landing(): JSX.Element {
             </StyledText>
           </Flex>
         </Flex>
-        <StyledNavLink to={'/createNew'}>
+        <StyledNavLink to="/createNew">
           <LargeButton
             onClick={() => {
               dispatch(toggleNewProtocolModal(true))
@@ -136,12 +147,12 @@ export function Landing(): JSX.Element {
           />
         </StyledNavLink>
         <StyledLabel>
-          <Flex css={BUTTON_LINK_STYLE}>
+          <Flex css={LINK_BUTTON_STYLE}>
             <StyledText desktopStyle="bodyLargeRegular">
-              {t('edit_existing')}
+              {t('import_existing_protocol')}
             </StyledText>
           </Flex>
-          <input type="file" onChange={loadFile}></input>
+          <input type="file" onChange={loadFile} />
         </StyledLabel>
       </Flex>
       <EndUserAgreementFooter />
@@ -164,7 +175,7 @@ const ButtonText = styled.span`
   font-weight: ${TYPOGRAPHY.fontWeightSemiBold};
 `
 
-const StyledNavLink = styled(NavLink)<React.ComponentProps<typeof NavLink>>`
+const StyledNavLink = styled(NavLink)<ComponentProps<typeof NavLink>>`
   color: ${COLORS.white};
   text-decoration: none;
 `

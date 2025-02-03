@@ -6,6 +6,7 @@ from opentrons.protocol_engine.types import (
     RunTimeParameter,
     PrimitiveRunTimeParamValuesType,
     CSVRunTimeParamFilesType,
+    CommandAnnotation,
 )
 from opentrons_shared_data.robot.types import RobotType
 from pydantic import BaseModel, Field
@@ -19,6 +20,7 @@ from opentrons.protocol_engine import (
     LoadedModule,
     LoadedPipette,
     Liquid,
+    LiquidClassRecordWithId,
 )
 
 
@@ -139,9 +141,9 @@ class CompletedAnalysis(BaseModel):
 
     # Fields that should match local analysis:
     robotType: Optional[RobotType] = Field(
-        # robotType is deliberately typed as a Literal instead of an Enum.
-        # It's a bad idea at the moment to store enums in robot-server's database.
-        # https://opentrons.atlassian.net/browse/RSS-98
+        # robotType was typed as a Literal instead of an Enum because it was a bad idea
+        # at the time to store enums in robot-server's database
+        # (https://opentrons.atlassian.net/browse/RSS-98).
         default=None,  # default=None to fit objects that were stored before this field existed.
         description=(
             "The type of robot that this protocol can run on."
@@ -185,6 +187,10 @@ class CompletedAnalysis(BaseModel):
         default_factory=list,
         description="Liquids used by the protocol",
     )
+    liquidClasses: List[LiquidClassRecordWithId] = Field(
+        default_factory=list,
+        description="Liquid classes used by the protocol",
+    )
     errors: List[ErrorOccurrence] = Field(
         ...,
         description=(
@@ -192,6 +198,10 @@ class CompletedAnalysis(BaseModel):
             " For historical reasons, this is an array,"
             " but it won't have more than one element."
         ),
+    )
+    commandAnnotations: List[CommandAnnotation] = Field(
+        default_factory=list,
+        description="Optional annotations for commands in this run.",
     )
 
 

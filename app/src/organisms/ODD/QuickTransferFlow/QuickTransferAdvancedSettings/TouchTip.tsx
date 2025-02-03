@@ -1,4 +1,4 @@
-import * as React from 'react'
+import { useState, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { createPortal } from 'react-dom'
 
@@ -8,8 +8,8 @@ import {
   DIRECTION_COLUMN,
   Flex,
   InputField,
-  RadioButton,
   POSITION_FIXED,
+  RadioButton,
   SPACING,
 } from '@opentrons/components'
 
@@ -21,6 +21,7 @@ import { i18n } from '/app/i18n'
 import { useTrackEventWithRobotSerial } from '/app/redux-resources/analytics'
 import { NumericalKeyboard } from '/app/atoms/SoftwareKeyboard'
 
+import type { Dispatch } from 'react'
 import type {
   QuickTransferSummaryState,
   QuickTransferSummaryAction,
@@ -30,7 +31,7 @@ import type {
 interface TouchTipProps {
   onBack: () => void
   state: QuickTransferSummaryState
-  dispatch: React.Dispatch<QuickTransferSummaryAction>
+  dispatch: Dispatch<QuickTransferSummaryAction>
   kind: FlowRateKind
 }
 
@@ -38,18 +39,20 @@ export function TouchTip(props: TouchTipProps): JSX.Element {
   const { kind, onBack, state, dispatch } = props
   const { t } = useTranslation('quick_transfer')
   const { trackEventWithRobotSerial } = useTrackEventWithRobotSerial()
-  const keyboardRef = React.useRef(null)
+  const keyboardRef = useRef(null)
 
-  const [touchTipIsEnabled, setTouchTipIsEnabled] = React.useState<boolean>(
+  const [touchTipIsEnabled, setTouchTipIsEnabled] = useState<boolean>(
     kind === 'aspirate'
       ? state.touchTipAspirate != null
       : state.touchTipDispense != null
   )
-  const [currentStep, setCurrentStep] = React.useState<number>(1)
-  const [position, setPosition] = React.useState<number | null>(
-    kind === 'aspirate'
-      ? state.touchTipAspirate ?? null
-      : state.touchTipDispense ?? null
+  const [currentStep, setCurrentStep] = useState<number>(1)
+  const touchTipAspirate =
+    state.touchTipAspirate != null ? state.touchTipAspirate.toString() : null
+  const touchTipDispense =
+    state.touchTipDispense != null ? state.touchTipDispense.toString() : null
+  const [position, setPosition] = useState<string | null>(
+    kind === 'aspirate' ? touchTipAspirate : touchTipDispense
   )
 
   const touchTipAction =
@@ -93,7 +96,10 @@ export function TouchTip(props: TouchTipProps): JSX.Element {
         setCurrentStep(2)
       }
     } else if (currentStep === 2) {
-      dispatch({ type: touchTipAction, position: position ?? undefined })
+      dispatch({
+        type: touchTipAction,
+        position: position != null ? parseInt(position) : undefined,
+      })
       trackEventWithRobotSerial({
         name: ANALYTICS_QUICK_TRANSFER_SETTING_SAVED,
         properties: {
@@ -129,10 +135,13 @@ export function TouchTip(props: TouchTipProps): JSX.Element {
   }
 
   // the allowed range for touch tip is half the height of the well to 1x the height
-  const positionRange = { min: Math.round(wellHeight / 2), max: wellHeight }
+  const positionRange = { min: -Math.round(wellHeight / 2), max: 0 }
   const positionError =
     position !== null &&
-    (position < positionRange.min || position > positionRange.max)
+    (position === '-' ||
+      position.indexOf('-') !== position.lastIndexOf('-') ||
+      Number(position) < positionRange.min ||
+      Number(position) > positionRange.max)
       ? t(`value_out_of_range`, {
           min: positionRange.min,
           max: Math.floor(positionRange.max),
@@ -196,8 +205,8 @@ export function TouchTip(props: TouchTipProps): JSX.Element {
             marginTop={SPACING.spacing68}
           >
             <InputField
-              type="number"
-              value={position}
+              type="text"
+              value={String(position ?? '')}
               title={t('touch_tip_position_mm')}
               error={positionError}
               readOnly
@@ -210,10 +219,11 @@ export function TouchTip(props: TouchTipProps): JSX.Element {
             borderRadius="0"
           >
             <NumericalKeyboard
+              hasHyphen
               keyboardRef={keyboardRef}
               initialValue={String(position ?? '')}
               onChange={e => {
-                setPosition(Number(e))
+                setPosition(e)
               }}
             />
           </Flex>

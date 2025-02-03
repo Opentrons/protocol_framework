@@ -1,8 +1,10 @@
 """In-memory storage of ProtocolEngine instances."""
+
 import asyncio
 import logging
-from typing import List, Optional, Callable, Dict
+from typing import Dict, List, Optional, Callable, Mapping, Sequence
 
+from opentrons.types import NozzleMapInterface
 from opentrons.protocol_engine.errors.exceptions import EStopActivatedError
 from opentrons.protocol_engine.types import (
     PostRunHardwareState,
@@ -16,7 +18,6 @@ from opentrons_shared_data.robot.types import RobotTypeEnum
 
 from opentrons.config import feature_flags
 from opentrons.hardware_control import HardwareControlAPI
-from opentrons.hardware_control.nozzle_manager import NozzleMap
 from opentrons.hardware_control.types import (
     EstopState,
     HardwareEvent,
@@ -32,6 +33,7 @@ from opentrons.protocol_runner.run_orchestrator import ParseMode
 from opentrons.protocol_engine import (
     DeckType,
     LabwareOffsetCreate,
+    LegacyLabwareOffsetCreate,
     StateSummary,
     CommandSlice,
     CommandErrorSlice,
@@ -191,7 +193,7 @@ class RunOrchestratorStore:
     async def create(
         self,
         run_id: str,
-        labware_offsets: List[LabwareOffsetCreate],
+        labware_offsets: Sequence[LabwareOffsetCreate | LegacyLabwareOffsetCreate],
         initial_error_recovery_policy: error_recovery_policy.ErrorRecoveryPolicy,
         deck_configuration: DeckConfigurationType,
         file_provider: FileProvider,
@@ -288,11 +290,15 @@ class RunOrchestratorStore:
         run_data = self.run_orchestrator.get_state_summary()
         commands = self.run_orchestrator.get_all_commands()
         run_time_parameters = self.run_orchestrator.get_run_time_parameters()
+        command_annotations = self.run_orchestrator.get_command_annotations()
 
         self._run_orchestrator = None
 
         return RunResult(
-            state_summary=run_data, commands=commands, parameters=run_time_parameters
+            state_summary=run_data,
+            commands=commands,
+            parameters=run_time_parameters,
+            command_annotations=command_annotations,
         )
 
     # todo(mm, 2024-11-15): Are all of these pass-through methods helpful?
@@ -330,7 +336,7 @@ class RunOrchestratorStore:
         """Get loaded labware definitions."""
         return self.run_orchestrator.get_loaded_labware_definitions()
 
-    def get_nozzle_maps(self) -> Dict[str, NozzleMap]:
+    def get_nozzle_maps(self) -> Mapping[str, NozzleMapInterface]:
         """Get the current nozzle map keyed by pipette id."""
         return self.run_orchestrator.get_nozzle_maps()
 
@@ -403,7 +409,9 @@ class RunOrchestratorStore:
         """Get whether the run has started."""
         return self.run_orchestrator.run_has_started()
 
-    def add_labware_offset(self, request: LabwareOffsetCreate) -> LabwareOffset:
+    def add_labware_offset(
+        self, request: LabwareOffsetCreate | LegacyLabwareOffsetCreate
+    ) -> LabwareOffset:
         """Add a new labware offset to state."""
         return self.run_orchestrator.add_labware_offset(request)
 

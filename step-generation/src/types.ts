@@ -14,21 +14,15 @@ import type {
   LabwareLocation,
   PipetteMount as Mount,
   PipetteV2Specs,
+  ShakeSpeedParams,
+  LabwareMovementStrategy,
 } from '@opentrons/shared-data'
-import type {
-  AtomicProfileStep,
-  EngageMagnetParams,
-  ModuleOnlyParams,
-} from '@opentrons/shared-data/protocol/types/schemaV4'
-import type { Command } from '@opentrons/shared-data/protocol/types/schemaV5Addendum'
+import type { AtomicProfileStep } from '@opentrons/shared-data/protocol/types/schemaV4'
 import type {
   TEMPERATURE_DEACTIVATED,
   TEMPERATURE_AT_TARGET,
   TEMPERATURE_APPROACHING_TARGET,
 } from './constants'
-import type { ShakeSpeedParams } from '@opentrons/shared-data/protocol/types/schemaV6/command/module'
-
-export type { Command }
 
 // Copied from PD
 export type DeckSlot = string
@@ -75,8 +69,16 @@ export interface MagneticBlockState {
   type: typeof MAGNETIC_BLOCK_TYPE
 }
 
+export interface Initialization {
+  mode: 'single' | 'multi'
+  wavelengths: number[]
+  referenceWavelength?: number
+}
+
 export interface AbsorbanceReaderState {
   type: typeof ABSORBANCE_READER_TYPE
+  lidOpen: boolean | null
+  initialization: Initialization | null
 }
 
 export type ModuleState =
@@ -116,6 +118,19 @@ export interface NormalizedPipetteById {
     id: string
     tiprackDefURI: string[]
   }
+}
+
+export interface LiquidEntity {
+  displayName: string
+  displayColor: string
+  description: string | null
+  pythonName: string
+  liquidGroupId: string
+  liquidClass?: string
+}
+
+export interface LiquidEntities {
+  [liquidId: string]: LiquidEntity
 }
 
 export type AdditionalEquipmentName =
@@ -193,7 +208,7 @@ export type SharedTransferLikeArgs = CommonArgs & {
   /** Touch tip after every aspirate */
   touchTipAfterAspirate: boolean
   /** Optional offset for touch tip after aspirate (if null, use PD default) */
-  touchTipAfterAspirateOffsetMmFromBottom: number
+  touchTipAfterAspirateOffsetMmFromTop: number
   /** changeTip is interpreted differently by different Step types */
   changeTip: ChangeTipOptions
   /** Delay after every aspirate */
@@ -217,7 +232,7 @@ export type SharedTransferLikeArgs = CommonArgs & {
   /** Touch tip in destination well after dispense */
   touchTipAfterDispense: boolean
   /** Optional offset for touch tip after dispense (if null, use PD default) */
-  touchTipAfterDispenseOffsetMmFromBottom: number
+  touchTipAfterDispenseOffsetMmFromTop: number
   /** Flow rate in uL/sec for all dispenses */
   dispenseFlowRateUlSec: number
   /** offset from bottom of well in mm */
@@ -293,7 +308,7 @@ export type MixArgs = CommonArgs & {
   times: number
   /** Touch tip after mixing */
   touchTip: boolean
-  touchTipMmFromBottom: number
+  touchTipMmFromTop: number
   /** change tip: see comments in step-generation/mix.js */
   changeTip: ChangeTipOptions
   /** drop tip location entity id */
@@ -303,15 +318,12 @@ export type MixArgs = CommonArgs & {
   blowoutFlowRateUlSec: number
   blowoutOffsetFromTopMm: number
 
-  /** offset from bottom of well in mm */
-  aspirateOffsetFromBottomMm: number
-  dispenseOffsetFromBottomMm: number
+  /**  z offset from bottom of well in mm */
+  offsetFromBottomMm: number
   /** x offset */
-  aspirateXOffset: number
-  dispenseXOffset: number
+  xOffset: number
   /** y offset */
-  aspirateYOffset: number
-  dispenseYOffset: number
+  yOffset: number
   /** flow rates in uL/sec */
   aspirateFlowRateUlSec: number
   dispenseFlowRateUlSec: number
@@ -323,7 +335,7 @@ export type MixArgs = CommonArgs & {
 export type PauseArgs = CommonArgs & {
   commandCreatorFnName: 'delay'
   message?: string
-  wait: number | true
+  seconds?: number
   pauseTemperature?: number | null
   meta:
     | {
@@ -335,34 +347,35 @@ export type PauseArgs = CommonArgs & {
     | undefined
 }
 
-export interface WaitForTemperatureArgs {
-  module: string | null
+export interface WaitForTemperatureArgs extends CommonArgs {
+  moduleId: string
   commandCreatorFnName: 'waitForTemperature'
-  temperature: number
+  celsius: number
   message?: string
 }
 
-export type EngageMagnetArgs = EngageMagnetParams & {
-  module: string
+export type EngageMagnetArgs = CommonArgs & {
+  height: number
+  moduleId: string
   commandCreatorFnName: 'engageMagnet'
   message?: string
 }
 
-export type DisengageMagnetArgs = ModuleOnlyParams & {
-  module: string
+export type DisengageMagnetArgs = CommonArgs & {
+  moduleId: string
   commandCreatorFnName: 'disengageMagnet'
   message?: string
 }
 
-export interface SetTemperatureArgs {
-  module: string | null
+export interface SetTemperatureArgs extends CommonArgs {
+  moduleId: string
   commandCreatorFnName: 'setTemperature'
-  targetTemperature: number
+  celsius: number
   message?: string
 }
 
-export interface DeactivateTemperatureArgs {
-  module: string | null
+export interface DeactivateTemperatureArgs extends CommonArgs {
+  moduleId: string
   commandCreatorFnName: 'deactivateTemperature'
   message?: string
 }
@@ -373,8 +386,8 @@ export type SetShakeSpeedArgs = ShakeSpeedParams & {
   message?: string
 }
 
-export interface HeaterShakerArgs {
-  module: string | null
+export interface HeaterShakerArgs extends CommonArgs {
+  moduleId: string | null
   rpm: number | null
   commandCreatorFnName: 'heaterShaker'
   targetTemperature: number | null
@@ -407,7 +420,7 @@ interface ProfileCycleItem {
 export type ProfileItem = ProfileStepItem | ProfileCycleItem
 
 export interface ThermocyclerProfileStepArgs {
-  module: string
+  moduleId: string
   commandCreatorFnName: THERMOCYCLER_PROFILE
   blockTargetTempHold: number | null
   lidOpenHold: boolean
@@ -422,7 +435,7 @@ export interface ThermocyclerProfileStepArgs {
 }
 
 export interface ThermocyclerStateStepArgs {
-  module: string
+  moduleId: string
   commandCreatorFnName: THERMOCYCLER_STATE
   blockTargetTemp: number | null
   lidTargetTemp: number | null
@@ -430,11 +443,38 @@ export interface ThermocyclerStateStepArgs {
   message?: string
 }
 
+export interface AbsorbanceReaderInitializeArgs extends CommonArgs {
+  moduleId: string
+  commandCreatorFnName: 'absorbanceReaderInitialize'
+  measureMode: 'single' | 'multi'
+  sampleWavelengths: number[]
+  referenceWavelength?: number | null
+  message?: string
+}
+
+export interface AbsorbanceReaderReadArgs extends CommonArgs {
+  moduleId: string
+  commandCreatorFnName: 'absorbanceReaderRead'
+  fileName: string | null
+  message?: string
+}
+
+export interface AbsorbanceReaderLidArgs extends CommonArgs {
+  moduleId: string
+  commandCreatorFnName: 'absorbanceReaderOpenLid' | 'absorbanceReaderCloseLid'
+  message?: string
+}
+
+export type AbsorbanceReaderArgs =
+  | AbsorbanceReaderInitializeArgs
+  | AbsorbanceReaderReadArgs
+  | AbsorbanceReaderLidArgs
+
 export interface MoveLabwareArgs extends CommonArgs {
   commandCreatorFnName: 'moveLabware'
-  labware: string
-  useGripper: boolean
+  labwareId: string
   newLocation: LabwareLocation
+  strategy: LabwareMovementStrategy
 }
 
 export interface CommentArgs extends CommonArgs {
@@ -443,6 +483,9 @@ export interface CommentArgs extends CommonArgs {
 }
 
 export type CommandCreatorArgs =
+  | AbsorbanceReaderInitializeArgs
+  | AbsorbanceReaderReadArgs
+  | AbsorbanceReaderLidArgs
   | ConsolidateArgs
   | DistributeArgs
   | MixArgs
@@ -485,6 +528,7 @@ export interface InvariantContext {
   moduleEntities: ModuleEntities
   pipetteEntities: PipetteEntities
   additionalEquipmentEntities: AdditionalEquipmentEntities
+  liquidEntities: LiquidEntities
   config: Config
 }
 
@@ -531,6 +575,9 @@ export interface TimelineFrame {
 export type RobotState = TimelineFrame // legacy name alias
 
 export type ErrorType =
+  | 'ABSORBANCE_READER_LID_CLOSED'
+  | 'ABSORBANCE_READER_NO_GRIPPER'
+  | 'ABSORBANCE_READER_NO_INITIALIZATION'
   | 'CANNOT_MOVE_WITH_GRIPPER'
   | 'DROP_TIP_LOCATION_DOES_NOT_EXIST'
   | 'EQUIPMENT_DOES_NOT_EXIST'
@@ -586,6 +633,7 @@ export interface CommandsAndRobotState {
   commands: CreateCommand[]
   robotState: RobotState
   warnings?: CommandCreatorWarning[]
+  python?: string
 }
 
 export interface CommandCreatorErrorResponse {
@@ -596,6 +644,7 @@ export interface CommandCreatorErrorResponse {
 export interface CommandsAndWarnings {
   commands: CreateCommand[]
   warnings?: CommandCreatorWarning[]
+  python?: string
 }
 export type CommandCreatorResult =
   | CommandsAndWarnings

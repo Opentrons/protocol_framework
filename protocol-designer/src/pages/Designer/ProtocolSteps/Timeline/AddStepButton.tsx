@@ -1,27 +1,37 @@
-import * as React from 'react'
+import { useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
+import { css } from 'styled-components'
+
 import {
-  useHoverTooltip,
-  TOOLTIP_TOP,
-  TOOLTIP_FIXED,
-  Tooltip,
+  ALIGN_CENTER,
+  BORDERS,
   COLORS,
   DIRECTION_COLUMN,
+  DISPLAY_FLEX,
   Flex,
-  POSITION_ABSOLUTE,
-  BORDERS,
+  Icon,
+  JUSTIFY_CENTER,
   NO_WRAP,
-  useOnClickOutside,
+  POSITION_ABSOLUTE,
   SecondaryButton,
+  SPACING,
+  StyledText,
+  TOOLTIP_FIXED,
+  TOOLTIP_TOP,
+  Tooltip,
+  useHoverTooltip,
+  useOnClickOutside,
 } from '@opentrons/components'
 import {
+  ABSORBANCE_READER_TYPE,
   HEATERSHAKER_MODULE_TYPE,
   MAGNETIC_MODULE_TYPE,
   TEMPERATURE_MODULE_TYPE,
   THERMOCYCLER_MODULE_TYPE,
 } from '@opentrons/shared-data'
+
 import {
   actions as stepsActions,
   getIsMultiSelectMode,
@@ -30,19 +40,24 @@ import {
   selectors as stepFormSelectors,
   getIsModuleOnDeck,
 } from '../../../../step-forms'
-import { getEnableComment } from '../../../../feature-flags/selectors'
-import { getMainPagePortalEl } from '../../../../components/portals/MainPageModalPortal'
 import {
   CLOSE_UNSAVED_STEP_FORM,
   ConfirmDeleteModal,
-} from '../../../../components/modals/ConfirmDeleteModal'
+  getMainPagePortalEl,
+} from '../../../../organisms'
+import { getEnableComment } from '../../../../feature-flags/selectors'
 import { AddStepOverflowButton } from './AddStepOverflowButton'
 
+import type { MouseEvent } from 'react'
 import type { ThunkDispatch } from 'redux-thunk'
 import type { BaseState } from '../../../../types'
 import type { StepType } from '../../../../form-types'
 
-export function AddStepButton(): JSX.Element {
+interface AddStepButtonProps {
+  hasText: boolean
+}
+
+export function AddStepButton({ hasText }: AddStepButtonProps): JSX.Element {
   const { t } = useTranslation(['tooltip', 'button'])
   const enableComment = useSelector(getEnableComment)
   const dispatch = useDispatch<ThunkDispatch<BaseState, any, any>>()
@@ -58,45 +73,32 @@ export function AddStepButton(): JSX.Element {
   )
   const isStepCreationDisabled = useSelector(getIsMultiSelectMode)
   const modules = useSelector(stepFormSelectors.getInitialDeckSetup).modules
-  const [
-    showStepOverflowMenu,
-    setShowStepOverflowMenu,
-  ] = React.useState<boolean>(false)
+  const [showStepOverflowMenu, setShowStepOverflowMenu] = useState<boolean>(
+    false
+  )
   const overflowWrapperRef = useOnClickOutside<HTMLDivElement>({
     onClickOutside: () => {
       setShowStepOverflowMenu(false)
     },
   })
-  const [
-    enqueuedStepType,
-    setEnqueuedStepType,
-  ] = React.useState<StepType | null>(null)
+  const [enqueuedStepType, setEnqueuedStepType] = useState<StepType | null>(
+    null
+  )
 
   const getSupportedSteps = (): Array<
     Exclude<StepType, 'manualIntervention'>
-  > =>
-    enableComment
-      ? [
-          'comment',
-          'moveLabware',
-          'moveLiquid',
-          'mix',
-          'pause',
-          'heaterShaker',
-          'magnet',
-          'temperature',
-          'thermocycler',
-        ]
-      : [
-          'moveLabware',
-          'moveLiquid',
-          'mix',
-          'pause',
-          'heaterShaker',
-          'magnet',
-          'temperature',
-          'thermocycler',
-        ]
+  > => [
+    'absorbanceReader',
+    'comment',
+    'moveLabware',
+    'moveLiquid',
+    'mix',
+    'pause',
+    'heaterShaker',
+    'magnet',
+    'temperature',
+    'thermocycler',
+  ]
   const isStepTypeEnabled: Record<
     Exclude<StepType, 'manualIntervention'>,
     boolean
@@ -110,16 +112,15 @@ export function AddStepButton(): JSX.Element {
     temperature: getIsModuleOnDeck(modules, TEMPERATURE_MODULE_TYPE),
     thermocycler: getIsModuleOnDeck(modules, THERMOCYCLER_MODULE_TYPE),
     heaterShaker: getIsModuleOnDeck(modules, HEATERSHAKER_MODULE_TYPE),
+    absorbanceReader: getIsModuleOnDeck(modules, ABSORBANCE_READER_TYPE),
   }
 
-  const addStep = (
-    stepType: StepType
-  ): ReturnType<typeof stepsActions.addAndSelectStepWithHints> =>
-    dispatch(stepsActions.addAndSelectStepWithHints({ stepType }))
+  const addStep = (stepType: StepType): ReturnType<any> =>
+    dispatch(stepsActions.addAndSelectStep({ stepType }))
 
   const items = getSupportedSteps()
     .filter(stepType => isStepTypeEnabled[stepType])
-    .map(stepType => (
+    .map((stepType, index, array) => (
       <AddStepOverflowButton
         key={stepType}
         stepType={stepType}
@@ -131,6 +132,8 @@ export function AddStepButton(): JSX.Element {
           }
           setShowStepOverflowMenu(false)
         }}
+        isFirstStep={index === 0}
+        isLastStep={index === array.length - 1}
       />
     ))
 
@@ -156,17 +159,9 @@ export function AddStepButton(): JSX.Element {
 
       {showStepOverflowMenu ? (
         <Flex
-          position={POSITION_ABSOLUTE}
-          zIndex={5}
+          css={STEP_OVERFLOW_MENU_STYLE}
           ref={overflowWrapperRef}
-          left="19.5rem"
-          whiteSpace={NO_WRAP}
-          bottom="4.2rem"
-          borderRadius={BORDERS.borderRadius8}
-          boxShadow="0px 1px 3px rgba(0, 0, 0, 0.2)"
-          backgroundColor={COLORS.white}
-          flexDirection={DIRECTION_COLUMN}
-          onClick={(e: React.MouseEvent) => {
+          onClick={(e: MouseEvent) => {
             e.preventDefault()
             e.stopPropagation()
           }}
@@ -181,6 +176,10 @@ export function AddStepButton(): JSX.Element {
         </Tooltip>
       )}
       <SecondaryButton
+        display={DISPLAY_FLEX}
+        justifyContent={JUSTIFY_CENTER}
+        alignItems={ALIGN_CENTER}
+        gridGap={SPACING.spacing10}
         width="100%"
         {...targetProps}
         id="AddStepButton"
@@ -189,8 +188,21 @@ export function AddStepButton(): JSX.Element {
         }}
         disabled={isStepCreationDisabled}
       >
-        {t('button:add_step')}
+        <Icon name="plus" size="1rem" />
+        {hasText ? <StyledText>{t('button:add_step')}</StyledText> : null}
       </SecondaryButton>
     </>
   )
 }
+
+const STEP_OVERFLOW_MENU_STYLE = css`
+  position: ${POSITION_ABSOLUTE};
+  z-index: 5;
+  right: -8.05rem;
+  white-space: ${NO_WRAP};
+  bottom: 1rem;
+  border-radius: ${BORDERS.borderRadius8};
+  box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.2);
+  background-color: ${COLORS.white};
+  flex-direction: ${DIRECTION_COLUMN};
+`

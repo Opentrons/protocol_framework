@@ -12,14 +12,6 @@
     "title": "Allow all tip rack options",
     "description": "Enable selection of all tip racks for each pipette."
   },
-  "OT_PD_ENABLE_ABSORBANCE_READER": {
-    "title": "Enable absorbance plate reader",
-    "description": "Enable absorbance plate reader support."
-  },
-  "OT_PD_ENABLE_REDESIGN": {
-    "title": "Enable redesign",
-    "description": "A whole new world."
-  },
   "OT_PD_ENABLE_COMMENT": {
     "title": "Enable comment step",
     "description": "You can add comments anywhere between timeline steps."
@@ -29,7 +21,23 @@
     "description": "You can choose which tip to pick up and where to drop tip."
   },
   "OT_PD_ENABLE_HOT_KEYS_DISPLAY": {
-    "title": "Timeline editing tips",
-    "description": "Show tips for working with steps next to the protocol timeline"
+    "title": "Timeline editing guidance",
+    "description": "Show information about working with steps next to the protocol timeline"
+  },
+  "OT_PD_ENABLE_REACT_SCAN": {
+    "title": "Enable React Scan",
+    "description": "Enable React Scan support for components rendering check"
+  },
+  "OT_PD_ENABLE_LIQUID_CLASSES": {
+    "title": "Enable liquid classes",
+    "description": "Enable liquid classes support"
+  },
+  "OT_PD_ENABLE_TIMELINE_SCRUBBER": {
+    "title": "Enable timeline scrubber",
+    "description": "See the protocol timeline visualization in overview"
+  },
+  "OT_PD_ENABLE_PYTHON_EXPORT": {
+    "title": "Enable exporting python",
+    "description": "Enables the ability to export python for pd/python interop"
   }
 }

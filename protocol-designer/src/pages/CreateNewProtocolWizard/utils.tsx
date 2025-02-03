@@ -1,26 +1,39 @@
 import {
-  MAGNETIC_BLOCK_TYPE,
-  STAGING_AREA_CUTOUTS,
-  THERMOCYCLER_MODULE_TYPE,
+  ABSORBANCE_READER_V1,
   getLabwareDefURI,
   getLabwareDisplayName,
   getPipetteSpecsV2,
+  HEATERSHAKER_MODULE_V1,
+  MAGNETIC_BLOCK_TYPE,
+  MAGNETIC_BLOCK_V1,
+  MAGNETIC_MODULE_V1,
+  MAGNETIC_MODULE_V2,
+  TEMPERATURE_MODULE_V1,
+  TEMPERATURE_MODULE_V2,
+  THERMOCYCLER_MODULE_TYPE,
+  THERMOCYCLER_MODULE_V1,
+  THERMOCYCLER_MODULE_V2,
   WASTE_CHUTE_CUTOUT,
 } from '@opentrons/shared-data'
 import wasteChuteImage from '../../assets/images/waste_chute.png'
 import trashBinImage from '../../assets/images/flex_trash_bin.png'
 import stagingAreaImage from '../../assets/images/staging_area.png'
+import { STAGING_AREA_CUTOUTS_ORDERED } from '../../constants'
+
 import type {
   CutoutId,
   LabwareDefByDefURI,
   LabwareDefinition2,
+  ModuleModel,
   PipetteName,
 } from '@opentrons/shared-data'
 import type { DropdownOption } from '@opentrons/components'
 import type { AdditionalEquipment, WizardFormState } from './types'
 
-const TOTAL_MODULE_SLOTS = 8
-const MIDDLE_SLOT_NUM = 4
+const NUM_SLOTS_OUTER = 8
+const NUM_SLOTS_MIDDLE = 4
+const NUM_SLOTS_COLUMN3 = 4
+const NUM_SLOTS_MAGNETIC_BLOCK = 12
 
 export const getNumOptions = (length: number): DropdownOption[] => {
   return Array.from({ length }, (_, i) => ({
@@ -31,46 +44,110 @@ export const getNumOptions = (length: number): DropdownOption[] => {
 
 export const getNumSlotsAvailable = (
   modules: WizardFormState['modules'],
-  additionalEquipment: WizardFormState['additionalEquipment']
+  additionalEquipment: WizardFormState['additionalEquipment'],
+  type: ModuleModel | AdditionalEquipment
+  // @ts-expect-error flex stacker not yet supported in PD
 ): number => {
-  const additionalEquipmentLength = additionalEquipment.length
+  const additionalEquipmentLength = additionalEquipment.filter(
+    ae => ae !== 'gripper'
+  ).length
+
   const hasTC = Object.values(modules || {}).some(
     module => module.type === THERMOCYCLER_MODULE_TYPE
   )
-  const numStagingAreas = additionalEquipment.filter(ae => ae === 'stagingArea')
-    ?.length
+
+  const numStagingAreas =
+    additionalEquipment.filter(ae => ae === 'stagingArea')?.length || 0
+
   const hasWasteChute = additionalEquipment.some(ae => ae === 'wasteChute')
 
   const magneticBlocks = Object.values(modules || {}).filter(
     module => module.type === MAGNETIC_BLOCK_TYPE
   )
-  let filteredModuleLength = modules != null ? Object.keys(modules).length : 0
+  const magneticBlockCount = magneticBlocks.length
+  const moduleCount = modules != null ? Object.keys(modules).length : 0
+  let filteredModuleLength = moduleCount
+  if (magneticBlockCount <= NUM_SLOTS_MIDDLE) {
+    // Subtract magnetic blocks directly if their count is ≤ 4
+    filteredModuleLength -= magneticBlockCount
+  } else {
+    // Subtract the excess magnetic blocks beyond 4
+    const extraMagneticBlocks = magneticBlockCount - NUM_SLOTS_MIDDLE
+    filteredModuleLength -= extraMagneticBlocks
+  }
   if (hasTC) {
-    filteredModuleLength = filteredModuleLength + 1
+    filteredModuleLength += 1
   }
-  if (magneticBlocks.length > 0) {
-    //  once blocks exceed 4, then we dont' want to subtract the amount available
-    //  because block can go into the center slots where all other modules/trashes can not
-    const numBlocks =
-      magneticBlocks.length > 4 ? MIDDLE_SLOT_NUM : magneticBlocks.length
-    filteredModuleLength = filteredModuleLength - numBlocks
-  }
-
-  const hasGripper = additionalEquipment.some(equipment =>
-    equipment.includes('gripper')
-  )
 
   let filteredAdditionalEquipmentLength = additionalEquipmentLength
-  if (hasGripper) {
-    filteredAdditionalEquipmentLength = filteredAdditionalEquipmentLength - 1
+  if (numStagingAreas >= 1 && hasWasteChute && type !== 'stagingArea') {
+    filteredAdditionalEquipmentLength -= 1
   }
-  if (numStagingAreas === MIDDLE_SLOT_NUM && hasWasteChute) {
-    filteredAdditionalEquipmentLength = filteredAdditionalEquipmentLength - 1
+  switch (type) {
+    case 'gripper': {
+      return 0
+    }
+
+    //  these modules don't support MoaM
+    case ABSORBANCE_READER_V1:
+    case THERMOCYCLER_MODULE_V1:
+    case TEMPERATURE_MODULE_V1:
+    case MAGNETIC_MODULE_V1:
+    case MAGNETIC_MODULE_V2: {
+      return 1
+    }
+
+    case THERMOCYCLER_MODULE_V2: {
+      if (filteredModuleLength + filteredAdditionalEquipmentLength > 7) {
+        return 0
+      } else {
+        return 2
+      }
+    }
+
+    case 'trashBin':
+    case HEATERSHAKER_MODULE_V1:
+    case TEMPERATURE_MODULE_V2: {
+      return (
+        NUM_SLOTS_OUTER -
+        (filteredModuleLength + filteredAdditionalEquipmentLength)
+      )
+    }
+
+    case 'stagingArea': {
+      const modulesWithColumn3 =
+        modules !== null
+          ? Object.values(modules).filter(module => module.slot?.includes('3'))
+              .length
+          : 0
+      const fixtureSlotsWithColumn3 =
+        additionalEquipment !== null
+          ? additionalEquipment.filter(slot => slot.includes('3')).length
+          : 0
+      return NUM_SLOTS_COLUMN3 - modulesWithColumn3 - fixtureSlotsWithColumn3
+    }
+
+    case 'wasteChute': {
+      const adjustmentForStagingArea = numStagingAreas >= 1 ? 1 : 0
+      return (
+        NUM_SLOTS_OUTER -
+        (filteredModuleLength +
+          filteredAdditionalEquipmentLength -
+          adjustmentForStagingArea)
+      )
+    }
+
+    case MAGNETIC_BLOCK_V1: {
+      const filteredAdditionalEquipmentForMagneticBlockLength = additionalEquipment.filter(
+        ae => ae !== 'gripper' && ae !== 'stagingArea'
+      )?.length
+      return (
+        NUM_SLOTS_MAGNETIC_BLOCK -
+        (filteredModuleLength +
+          filteredAdditionalEquipmentForMagneticBlockLength)
+      )
+    }
   }
-  return (
-    TOTAL_MODULE_SLOTS -
-    (filteredModuleLength + filteredAdditionalEquipmentLength)
-  )
 }
 
 interface EquipmentProps {
@@ -216,7 +293,21 @@ export const getTrashSlot = (values: WizardFormState): string => {
     equipment.includes('stagingArea')
   )
 
-  const cutouts = stagingAreas.map((_, index) => STAGING_AREA_CUTOUTS[index])
+  // when plate reader is present, cutoutB3 is not available for StagingArea
+  const hasPlateReader =
+    modules !== null
+      ? Object.values(modules).some(
+          module => module.model === ABSORBANCE_READER_V1
+        )
+      : false
+  const cutouts = stagingAreas.map((_, index) =>
+    hasPlateReader
+      ? STAGING_AREA_CUTOUTS_ORDERED.filter(cutout => cutout !== 'cutoutB3')[
+          index
+        ]
+      : STAGING_AREA_CUTOUTS_ORDERED[index]
+  )
+
   const hasWasteChute = additionalEquipment.find(equipment =>
     equipment.includes('wasteChute')
   )

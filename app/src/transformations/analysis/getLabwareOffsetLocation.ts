@@ -2,7 +2,7 @@ import {
   getModuleInitialLoadInfo,
   getLabwareLocation,
 } from '/app/transformations/commands'
-import type { LabwareOffsetLocation } from '@opentrons/api-client'
+import type { LegacyLabwareOffsetLocation } from '@opentrons/api-client'
 import type {
   LoadedModule,
   LoadedLabware,
@@ -17,10 +17,10 @@ export const getLabwareOffsetLocation = (
   commands: ProtocolAnalysisOutput['commands'],
   modules: LoadedModule[],
   labware: LoadedLabware[]
-): LabwareOffsetLocation | null => {
+): LegacyLabwareOffsetLocation | null => {
   const labwareLocation = getLabwareLocation(labwareId, commands)
 
-  if (labwareLocation === 'offDeck') {
+  if (labwareLocation === 'offDeck' || labwareLocation === 'systemLocation') {
     return null
   } else if ('moduleId' in labwareLocation) {
     const module = modules.find(
@@ -34,7 +34,11 @@ export const getLabwareOffsetLocation = (
     return { slotName, moduleModel }
   } else if ('labwareId' in labwareLocation) {
     const adapter = labware.find(lw => lw.id === labwareLocation.labwareId)
-    if (adapter == null || adapter.location === 'offDeck') {
+    if (
+      adapter == null ||
+      adapter.location === 'offDeck' ||
+      adapter.location === 'systemLocation'
+    ) {
       return null
     } else if ('slotName' in adapter.location) {
       return {

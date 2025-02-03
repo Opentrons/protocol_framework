@@ -1,4 +1,5 @@
 """Request and response models for maintenance run resources."""
+
 from datetime import datetime
 from pydantic import BaseModel, Field
 from typing import List, Optional
@@ -11,7 +12,9 @@ from opentrons.protocol_engine import (
     LoadedModule,
     LabwareOffset,
     LabwareOffsetCreate,
+    LegacyLabwareOffsetCreate,
     Liquid,
+    LiquidClassRecordWithId,
 )
 from robot_server.service.json_api import ResourceModel
 
@@ -67,6 +70,10 @@ class MaintenanceRun(ResourceModel):
         ...,
         description="Liquids loaded to the run.",
     )
+    liquidClasses: List[LiquidClassRecordWithId] = Field(
+        ...,
+        description="Liquid classes loaded to the run.",
+    )
     labwareOffsets: List[LabwareOffset] = Field(
         ...,
         description="Labware offsets to apply as labware are loaded.",
@@ -84,7 +91,7 @@ class MaintenanceRun(ResourceModel):
 class MaintenanceRunCreate(BaseModel):
     """Create request data for a new maintenance run."""
 
-    labwareOffsets: List[LabwareOffsetCreate] = Field(
+    labwareOffsets: List[LegacyLabwareOffsetCreate | LabwareOffsetCreate] = Field(
         default_factory=list,
         description="Labware offsets to apply as labware are loaded.",
     )

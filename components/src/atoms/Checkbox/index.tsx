@@ -1,4 +1,3 @@
-import type * as React from 'react'
 import { css } from 'styled-components'
 import { COLORS, BORDERS } from '../../helix-design-system'
 import { Flex } from '../../primitives'
@@ -6,6 +5,7 @@ import { Icon } from '../../icons'
 import {
   ALIGN_CENTER,
   CURSOR_AUTO,
+  CURSOR_DEFAULT,
   CURSOR_POINTER,
   DIRECTION_ROW,
   FLEX_MAX_CONTENT,
@@ -13,7 +13,8 @@ import {
 } from '../../styles'
 import { RESPONSIVENESS, SPACING } from '../../ui-style-constants'
 import { StyledText } from '../StyledText'
-import { truncateString } from '../../utils'
+
+import type { MouseEventHandler } from 'react'
 
 export interface CheckboxProps {
   /** checkbox is checked if value is true */
@@ -21,7 +22,7 @@ export interface CheckboxProps {
   /** label text that describes the option */
   labelText: string
   /** callback click/tap handler */
-  onClick: React.MouseEventHandler
+  onClick: MouseEventHandler
   /** html tabindex property */
   tabIndex?: number
   /** if disabled is true, mouse events will not trigger onClick callback */
@@ -41,7 +42,6 @@ export function Checkbox(props: CheckboxProps): JSX.Element {
     width = FLEX_MAX_CONTENT,
     type = 'round',
   } = props
-  const truncatedLabel = truncateString(labelText, 25)
 
   const CHECKBOX_STYLE = css`
     width: ${width};
@@ -50,7 +50,7 @@ export function Checkbox(props: CheckboxProps): JSX.Element {
     align-items: ${ALIGN_CENTER};
     flex-direction: ${DIRECTION_ROW};
     color: ${isChecked ? COLORS.white : COLORS.black90};
-    background-color: ${isChecked ? COLORS.blue50 : COLORS.blue35};
+    background-color: ${isChecked ? COLORS.blue50 : COLORS.blue30};
     border-radius: ${type === 'round'
       ? BORDERS.borderRadiusFull
       : BORDERS.borderRadius8};
@@ -67,8 +67,15 @@ export function Checkbox(props: CheckboxProps): JSX.Element {
       outline-offset: 2px;
     }
     &:disabled {
-      background-color: ${COLORS.grey35};
-      color: ${COLORS.grey50};
+      background-color: ${COLORS.grey30};
+      color: ${COLORS.grey40};
+      cursor: ${CURSOR_DEFAULT};
+    }
+    &:disabled:hover {
+      background-color: ${COLORS.grey30}; /* Prevent hover from overriding */
+    }
+    &:hover {
+      background-color: ${isChecked ? COLORS.blue55 : COLORS.blue35};
     }
 
     @media ${RESPONSIVENESS.touchscreenMediaQuerySpecs} {
@@ -89,9 +96,9 @@ export function Checkbox(props: CheckboxProps): JSX.Element {
       css={CHECKBOX_STYLE}
     >
       <StyledText desktopStyle="bodyDefaultRegular" oddStyle="bodyTextSemiBold">
-        {truncatedLabel}
+        {labelText}
       </StyledText>
-      <Check isChecked={isChecked} />
+      <Check isChecked={isChecked} disabled={disabled} />
     </Flex>
   )
 }
@@ -99,9 +106,10 @@ export function Checkbox(props: CheckboxProps): JSX.Element {
 interface CheckProps {
   isChecked: boolean
   color?: string
+  disabled?: boolean
 }
 export function Check(props: CheckProps): JSX.Element {
-  const { isChecked, color = COLORS.white } = props
+  const { isChecked, color = COLORS.white, disabled = false } = props
   return isChecked ? (
     <Flex css={CHECK_STYLE}>
       <Icon name="ot-checkbox" color={color} />
@@ -109,7 +117,7 @@ export function Check(props: CheckProps): JSX.Element {
   ) : (
     <Flex
       css={CHECK_STYLE}
-      border={`2px solid ${COLORS.black90}`}
+      border={`2px solid ${disabled ? COLORS.grey40 : COLORS.black90}`}
       borderRadius={BORDERS.borderRadius4}
     />
   )

@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next'
 
 import {
+  ALIGN_CENTER,
   Btn,
   COLORS,
   DIRECTION_COLUMN,
@@ -14,7 +15,7 @@ import {
 } from '@opentrons/components'
 import { getPipetteSpecsV2, FLEX_ROBOT_TYPE } from '@opentrons/shared-data'
 
-import { BUTTON_LINK_STYLE } from '../../atoms'
+import { LINK_BUTTON_STYLE } from '../../atoms'
 
 import type { PipetteName, RobotType } from '@opentrons/shared-data'
 import type { AdditionalEquipmentEntities } from '@opentrons/step-generation'
@@ -40,17 +41,22 @@ export function InstrumentsInfo({
     equipment => equipment?.name === 'gripper'
   )
 
-  const pipetteInfo = (pipette?: PipetteOnDeck): JSX.Element | string => {
+  const has96Channel = leftPipette?.name === 'p1000_96' && rightPipette == null
+
+  const pipetteInfo = (pipette?: PipetteOnDeck): JSX.Element => {
     const pipetteName =
       pipette != null
         ? getPipetteSpecsV2(pipette.name as PipetteName)?.displayName
         : t('na')
-    const tipsInfo = pipette?.tiprackLabwareDef
-      ? pipette.tiprackLabwareDef.map(labware => labware.metadata.displayName)
-      : t('na')
+    const tipsInfo =
+      pipette?.tiprackLabwareDef != null
+        ? pipette.tiprackLabwareDef.map(labware => labware.metadata.displayName)
+        : t('na')
 
     if (pipetteName === t('na') || tipsInfo === t('na')) {
-      return t('na')
+      return (
+        <StyledText desktopStyle="bodyDefaultRegular">{t('na')}</StyledText>
+      )
     }
 
     return (
@@ -72,7 +78,7 @@ export function InstrumentsInfo({
 
   return (
     <Flex flexDirection={DIRECTION_COLUMN} gridGap={SPACING.spacing12}>
-      <Flex justifyContent={JUSTIFY_SPACE_BETWEEN}>
+      <Flex justifyContent={JUSTIFY_SPACE_BETWEEN} alignItems={ALIGN_CENTER}>
         <StyledText desktopStyle="headingSmallBold">
           {t('instruments')}
         </StyledText>
@@ -82,7 +88,7 @@ export function InstrumentsInfo({
             onClick={() => {
               setShowEditInstrumentsModal(true)
             }}
-            css={BUTTON_LINK_STYLE}
+            css={LINK_BUTTON_STYLE}
           >
             <StyledText desktopStyle="bodyDefaultRegular">
               {t('edit')}
@@ -96,7 +102,6 @@ export function InstrumentsInfo({
             type="large"
             description={
               <Flex minWidth="13.75rem">
-                {' '}
                 <StyledText
                   desktopStyle="bodyDefaultRegular"
                   color={COLORS.grey60}
@@ -123,37 +128,31 @@ export function InstrumentsInfo({
                   desktopStyle="bodyDefaultRegular"
                   color={COLORS.grey60}
                 >
-                  {t('left_pip')}
+                  {has96Channel ? t('left_right_mount') : t('left_mount')}
                 </StyledText>
               </Flex>
             }
-            content={
-              <StyledText desktopStyle="bodyDefaultRegular">
-                {pipetteInfo(leftPipette)}
-              </StyledText>
-            }
+            content={pipetteInfo(leftPipette)}
           />
         </ListItem>
-        <ListItem type="noActive" key={`ProtocolOverview_right`}>
-          <ListItemDescriptor
-            type="large"
-            description={
-              <Flex minWidth="13.75rem">
-                <StyledText
-                  desktopStyle="bodyDefaultRegular"
-                  color={COLORS.grey60}
-                >
-                  {t('right_pip')}
-                </StyledText>
-              </Flex>
-            }
-            content={
-              <StyledText desktopStyle="bodyDefaultRegular">
-                {pipetteInfo(rightPipette)}
-              </StyledText>
-            }
-          />
-        </ListItem>
+        {!has96Channel ? (
+          <ListItem type="noActive" key={`ProtocolOverview_right`}>
+            <ListItemDescriptor
+              type="large"
+              description={
+                <Flex minWidth="13.75rem">
+                  <StyledText
+                    desktopStyle="bodyDefaultRegular"
+                    color={COLORS.grey60}
+                  >
+                    {t('right_mount')}
+                  </StyledText>
+                </Flex>
+              }
+              content={pipetteInfo(rightPipette)}
+            />
+          </ListItem>
+        ) : null}
         {robotType === FLEX_ROBOT_TYPE ? (
           <ListItem type="noActive" key={`ProtocolOverview_gripper`}>
             <ListItemDescriptor

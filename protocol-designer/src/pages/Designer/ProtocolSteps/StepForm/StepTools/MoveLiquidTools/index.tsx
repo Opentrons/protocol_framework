@@ -1,15 +1,24 @@
 import { useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
-import { useState } from 'react'
 import {
+  ALIGN_CENTER,
+  COLORS,
   DIRECTION_COLUMN,
   Divider,
   Flex,
+  Icon,
+  ListItem,
   SPACING,
   StyledText,
   Tabs,
+  Tooltip,
+  useHoverTooltip,
 } from '@opentrons/components'
-import { getEnableReturnTip } from '../../../../../../feature-flags/selectors'
+import { getTrashOrLabware } from '@opentrons/step-generation'
+import {
+  getEnableLiquidClasses,
+  getEnableReturnTip,
+} from '../../../../../../feature-flags/selectors'
 import {
   getAdditionalEquipmentEntities,
   getLabwareEntities,
@@ -40,6 +49,8 @@ import {
 } from '../../PipetteFields'
 import {
   getBlowoutLocationOptionsForForm,
+  getFormErrorsMappedToField,
+  getFormLevelError,
   getLabwareFieldForPositioningField,
 } from '../../utils'
 import type { StepFieldName } from '../../../../../../form-types'
@@ -50,13 +61,22 @@ const makeAddFieldNamePrefix = (prefix: string) => (
 ): StepFieldName => `${prefix}_${fieldName}`
 
 export function MoveLiquidTools(props: StepFormProps): JSX.Element {
-  const { toolboxStep, propsForFields, formData, visibleFormErrors } = props
-  const { t, i18n } = useTranslation(['protocol_steps', 'form'])
+  const {
+    toolboxStep,
+    propsForFields,
+    formData,
+    visibleFormErrors,
+    setShowFormErrors,
+    tab,
+    setTab,
+  } = props
+  const [targetProps, tooltipProps] = useHoverTooltip()
+  const { t, i18n } = useTranslation(['protocol_steps', 'form', 'tooltip'])
   const { path } = formData
-  const [tab, setTab] = useState<'aspirate' | 'dispense'>('aspirate')
   const additionalEquipmentEntities = useSelector(
     getAdditionalEquipmentEntities
   )
+  const enableLiquidClasses = useSelector(getEnableLiquidClasses)
   const enableReturnTip = useSelector(getEnableReturnTip)
   const labwares = useSelector(getLabwareEntities)
   const pipettes = useSelector(getPipetteEntities)
@@ -88,11 +108,29 @@ export function MoveLiquidTools(props: StepFormProps): JSX.Element {
     additionalEquipmentEntities[String(propsForFields.dispense_labware.value)]
       ?.name === 'trashBin'
 
+  const destinationLabwareType =
+    formData.dispense_labware != null
+      ? getTrashOrLabware(
+          labwares,
+          additionalEquipmentEntities,
+          formData.dispense_labware as string
+        )
+      : null
+  const isDestinationTrash =
+    destinationLabwareType != null
+      ? ['trashBin', 'wasteChute'].includes(destinationLabwareType)
+      : false
+  const dispenseMixDisabledTooltipText = t(
+    `tooltip:step_fields.moveLiquid.disabled.${
+      isDestinationTrash ? 'dispense_mix_checkbox' : 'dispense_mix_checkbox_2'
+    }`
+  )
   const aspirateTab = {
     text: t('aspirate'),
     isActive: tab === 'aspirate',
     onClick: () => {
       setTab('aspirate')
+      setShowFormErrors?.(false)
     },
   }
   const dispenseTab = {
@@ -101,53 +139,86 @@ export function MoveLiquidTools(props: StepFormProps): JSX.Element {
     isActive: tab === 'dispense',
     onClick: () => {
       setTab('dispense')
+      setShowFormErrors?.(false)
     },
   }
   const hideWellOrderField =
     tab === 'dispense' && (isWasteChuteSelected || isTrashBinSelected)
 
+  const mappedErrorsToField = getFormErrorsMappedToField(visibleFormErrors)
+
   return toolboxStep === 0 ? (
-    <Flex flexDirection={DIRECTION_COLUMN}>
+    <Flex
+      flexDirection={DIRECTION_COLUMN}
+      gridGap={SPACING.spacing12}
+      paddingY={SPACING.spacing16}
+    >
       <PipetteField {...propsForFields.pipette} />
-      <Divider marginY="0" />
-      {is96Channel ? <PartialTipField {...propsForFields.nozzles} /> : null}
+      {is96Channel ? (
+        <>
+          <Divider marginY="0" />
+          <PartialTipField {...propsForFields.nozzles} />
+        </>
+      ) : null}
       <Divider marginY="0" />
       <TiprackField
         {...propsForFields.tipRack}
         pipetteId={propsForFields.pipette.value}
       />
       <Divider marginY="0" />
-      <VolumeField {...propsForFields.volume} />
-      <Divider marginY="0" />
-      <LabwareField {...propsForFields.aspirate_labware} />
-      <Divider marginY="0" />
-      <WellSelectionField
-        {...propsForFields.aspirate_wells}
-        labwareId={String(propsForFields.aspirate_labware.value)}
-        pipetteId={formData.pipette}
-        nozzles={String(propsForFields.nozzles.value) ?? null}
-        hasFormError={
-          visibleFormErrors?.some(error =>
-            error.dependentFields.includes('aspirate_labware')
-          ) ?? false
-        }
-      />
-      <Divider marginY="0" />
-      <LabwareField {...propsForFields.dispense_labware} />
-      <Divider marginY="0" />
-      {isDisposalLocation ? null : (
+      <Flex flexDirection={DIRECTION_COLUMN} gridGap={SPACING.spacing12}>
+        <LabwareField
+          {...propsForFields.aspirate_labware}
+          errorToShow={getFormLevelError(
+            'aspirate_labware',
+            mappedErrorsToField
+          )}
+        />
         <WellSelectionField
-          {...propsForFields.dispense_wells}
-          labwareId={String(propsForFields.dispense_labware.value)}
+          {...propsForFields.aspirate_wells}
+          labwareId={String(propsForFields.aspirate_labware.value)}
           pipetteId={formData.pipette}
           nozzles={String(propsForFields.nozzles.value) ?? null}
           hasFormError={
             visibleFormErrors?.some(error =>
-              error.dependentFields.includes('dispense_wells')
+              error.dependentFields.includes('aspirate_wells')
             ) ?? false
           }
+          errorToShow={getFormLevelError('aspirate_wells', mappedErrorsToField)}
         />
-      )}
+      </Flex>
+      <Divider marginY="0" />
+      <Flex flexDirection={DIRECTION_COLUMN} gridGap={SPACING.spacing12}>
+        <LabwareField
+          {...propsForFields.dispense_labware}
+          errorToShow={getFormLevelError(
+            'dispense_labware',
+            mappedErrorsToField
+          )}
+        />
+        {isDisposalLocation ? null : (
+          <WellSelectionField
+            {...propsForFields.dispense_wells}
+            labwareId={String(propsForFields.dispense_labware.value)}
+            pipetteId={formData.pipette}
+            nozzles={String(propsForFields.nozzles.value) ?? null}
+            hasFormError={
+              visibleFormErrors?.some(error =>
+                error.dependentFields.includes('dispense_wells')
+              ) ?? false
+            }
+            errorToShow={getFormLevelError(
+              'dispense_wells',
+              mappedErrorsToField
+            )}
+          />
+        )}
+      </Flex>
+      <Divider marginY="0" />
+      <VolumeField
+        {...propsForFields.volume}
+        errorToShow={getFormLevelError('volume', mappedErrorsToField)}
+      />
       <Divider marginY="0" />
       <PathField
         {...propsForFields.path}
@@ -159,6 +230,8 @@ export function MoveLiquidTools(props: StepFormProps): JSX.Element {
         pipette={formData.pipette}
         volume={formData.volume}
         tipRack={formData.tipRack}
+        isDisposalLocation={isDisposalLocation}
+        title={t('pipette_path')}
       />
       <Divider marginY="0" />
       <ChangeTipField
@@ -167,14 +240,15 @@ export function MoveLiquidTools(props: StepFormProps): JSX.Element {
         dispenseWells={formData.dispense_wells}
         path={formData.path}
         stepType={formData.stepType}
+        isDisposalLocation={isDisposalLocation}
+        tooltipContent={null}
       />
-      <Divider marginY="0" />
       {enableReturnTip ? (
         <>
+          <Divider marginY="0" />
           <PickUpTipField {...propsForFields.pickUpTip_location} />
           {userSelectedPickUpTipLocation ? (
             <>
-              <Divider marginY="0" />
               <TipWellSelectionField
                 {...propsForFields.pickUpTip_wellNames}
                 nozzles={String(propsForFields.nozzles.value) ?? null}
@@ -186,7 +260,10 @@ export function MoveLiquidTools(props: StepFormProps): JSX.Element {
         </>
       ) : null}
       <Divider marginY="0" />
-      <DropTipField {...propsForFields.dropTip_location} />
+      <DropTipField
+        {...propsForFields.dropTip_location}
+        tooltipContent={null}
+      />
       {userSelectedDropTipLocation && enableReturnTip ? (
         <>
           <Divider marginY="0" />
@@ -198,24 +275,27 @@ export function MoveLiquidTools(props: StepFormProps): JSX.Element {
           />
         </>
       ) : null}
-      <Divider marginY="0" />
     </Flex>
   ) : (
-    <Flex flexDirection={DIRECTION_COLUMN} width="100%">
-      <Flex padding={SPACING.spacing16}>
+    <Flex
+      flexDirection={DIRECTION_COLUMN}
+      width="100%"
+      paddingY={SPACING.spacing16}
+      gridGap={SPACING.spacing12}
+    >
+      <Flex padding={`0 ${SPACING.spacing16}`}>
         <Tabs tabs={[aspirateTab, dispenseTab]} />
       </Flex>
       <Divider marginY="0" />
-      <Flex padding={SPACING.spacing16} width="100%">
-        <FlowRateField
-          key={`${addFieldNamePrefix('flowRate')}_flowRateField`}
-          {...propsForFields[addFieldNamePrefix('flowRate')]}
-          pipetteId={formData.pipette}
-          flowRateType={tab}
-          volume={propsForFields.volume?.value ?? 0}
-          tiprack={propsForFields.tipRack.value}
-        />
-      </Flex>
+      <FlowRateField
+        key={`${addFieldNamePrefix('flowRate')}_flowRateField`}
+        {...propsForFields[addFieldNamePrefix('flowRate')]}
+        pipetteId={formData.pipette}
+        flowRateType={tab}
+        volume={propsForFields.volume?.value ?? 0}
+        tiprack={propsForFields.tipRack.value}
+        showTooltip={false}
+      />
       <Divider marginY="0" />
       {hideWellOrderField ? null : (
         <WellsOrderField
@@ -247,11 +327,72 @@ export function MoveLiquidTools(props: StepFormProps): JSX.Element {
           ]
         }
       />
+      {enableLiquidClasses ? (
+        <>
+          <Divider marginY="0" />
+          <Flex
+            flexDirection={DIRECTION_COLUMN}
+            gridGap={SPACING.spacing8}
+            padding={`0 ${SPACING.spacing16}`}
+          >
+            <Flex gridGap={SPACING.spacing8} alignItems={ALIGN_CENTER}>
+              <StyledText
+                desktopStyle="bodyDefaultRegular"
+                color={COLORS.grey60}
+              >
+                {t('protocol_steps:submerge')}
+              </StyledText>
+              <Flex {...targetProps}>
+                <Icon
+                  name="information"
+                  size="1rem"
+                  color={COLORS.grey60}
+                  data-testid="information_icon"
+                />
+              </Flex>
+              <Tooltip tooltipProps={tooltipProps}>
+                {t(`tooltip:step_fields.defaults.${tab}_submerge`)}
+              </Tooltip>
+            </Flex>
+            <ListItem type="noActive">
+              <Flex
+                padding={SPACING.spacing12}
+                width="100%"
+                flexDirection={DIRECTION_COLUMN}
+                gridGap={SPACING.spacing8}
+              >
+                <InputStepFormField
+                  showTooltip={false}
+                  padding="0"
+                  title={t('protocol_steps:submerge_speed')}
+                  {...propsForFields[`${tab}_submerge_speed`]}
+                  units={t('application:units.millimeterPerSec')}
+                  errorToShow={getFormLevelError(
+                    `${tab}_submerge_speed`,
+                    mappedErrorsToField
+                  )}
+                />
+                <InputStepFormField
+                  showTooltip={false}
+                  padding="0"
+                  title={t('protocol_steps:delay_duration')}
+                  {...propsForFields[`${tab}_submerge_delay_seconds`]}
+                  units={t('application:units.seconds')}
+                  errorToShow={getFormLevelError(
+                    `${tab}_submerge_delay_seconds`,
+                    mappedErrorsToField
+                  )}
+                />
+              </Flex>
+            </ListItem>
+          </Flex>
+        </>
+      ) : null}
       <Divider marginY="0" />
       <Flex
         flexDirection={DIRECTION_COLUMN}
-        padding={SPACING.spacing12}
-        gridGap={SPACING.spacing8}
+        gridGap={SPACING.spacing4}
+        padding={`0 ${SPACING.spacing16}`}
       >
         <StyledText desktopStyle="bodyDefaultSemiBold">
           {t('protocol_steps:advanced_settings')}
@@ -265,6 +406,7 @@ export function MoveLiquidTools(props: StepFormProps): JSX.Element {
             checkboxValue={propsForFields.preWetTip.value}
             isChecked={propsForFields.preWetTip.value === true}
             checkboxUpdateValue={propsForFields.preWetTip.updateValue}
+            tooltipText={propsForFields.preWetTip.tooltipContent}
           />
         ) : null}
         <CheckboxExpandStepFormField
@@ -276,6 +418,16 @@ export function MoveLiquidTools(props: StepFormProps): JSX.Element {
           isChecked={propsForFields[`${tab}_mix_checkbox`].value === true}
           checkboxUpdateValue={
             propsForFields[`${tab}_mix_checkbox`].updateValue
+          }
+          tooltipText={
+            tab === 'dispense'
+              ? dispenseMixDisabledTooltipText
+              : propsForFields.aspirate_mix_checkbox.tooltipContent
+          }
+          disabled={
+            tab === 'dispense'
+              ? isDestinationTrash || formData.path === 'multiDispense'
+              : formData.path === 'multiAspirate'
           }
         >
           {formData[`${tab}_mix_checkbox`] === true ? (
@@ -290,6 +442,10 @@ export function MoveLiquidTools(props: StepFormProps): JSX.Element {
                 title={t('protocol_steps:mix_volume')}
                 {...propsForFields[`${tab}_mix_volume`]}
                 units={t('application:units.microliter')}
+                errorToShow={getFormLevelError(
+                  `${tab}_mix_volume`,
+                  mappedErrorsToField
+                )}
               />
               <InputStepFormField
                 showTooltip={false}
@@ -297,6 +453,10 @@ export function MoveLiquidTools(props: StepFormProps): JSX.Element {
                 title={t('protocol_steps:mix_times')}
                 {...propsForFields[`${tab}_mix_times`]}
                 units={t('application:units.times')}
+                errorToShow={getFormLevelError(
+                  `${tab}_mix_times`,
+                  mappedErrorsToField
+                )}
               />
             </Flex>
           ) : null}
@@ -311,6 +471,7 @@ export function MoveLiquidTools(props: StepFormProps): JSX.Element {
           checkboxUpdateValue={
             propsForFields[`${tab}_delay_checkbox`].updateValue
           }
+          tooltipText={propsForFields[`${tab}_delay_checkbox`].tooltipContent}
         >
           {formData[`${tab}_delay_checkbox`] === true ? (
             <Flex
@@ -324,6 +485,10 @@ export function MoveLiquidTools(props: StepFormProps): JSX.Element {
                 title={t('protocol_steps:delay_duration')}
                 {...propsForFields[`${tab}_delay_seconds`]}
                 units={t('application:units.seconds')}
+                errorToShow={getFormLevelError(
+                  `${tab}_delay_seconds`,
+                  mappedErrorsToField
+                )}
               />
               <PositionField
                 prefix={tab}
@@ -349,6 +514,11 @@ export function MoveLiquidTools(props: StepFormProps): JSX.Element {
             checkboxValue={propsForFields.blowout_checkbox.value}
             isChecked={propsForFields.blowout_checkbox.value === true}
             checkboxUpdateValue={propsForFields.blowout_checkbox.updateValue}
+            tooltipText={propsForFields.blowout_checkbox.tooltipContent}
+            disabled={
+              formData.path === 'multiDispense' &&
+              formData.disposalVolume_checkbox
+            }
           >
             {formData.blowout_checkbox === true ? (
               <Flex
@@ -362,6 +532,7 @@ export function MoveLiquidTools(props: StepFormProps): JSX.Element {
                     path: formData.path,
                     stepType: formData.stepType,
                   })}
+                  padding="0"
                 />
                 <FlowRateField
                   key="blowout_flowRate"
@@ -370,6 +541,7 @@ export function MoveLiquidTools(props: StepFormProps): JSX.Element {
                   flowRateType="blowout"
                   volume={propsForFields.volume?.value ?? 0}
                   tiprack={propsForFields.tipRack.value}
+                  padding="0"
                 />
                 <BlowoutOffsetField
                   {...propsForFields.blowout_z_offset}
@@ -391,16 +563,19 @@ export function MoveLiquidTools(props: StepFormProps): JSX.Element {
           checkboxUpdateValue={
             propsForFields[`${tab}_touchTip_checkbox`].updateValue
           }
+          tooltipText={
+            propsForFields[`${tab}_touchTip_checkbox`].tooltipContent
+          }
         >
           {formData[`${tab}_touchTip_checkbox`] === true ? (
             <PositionField
               prefix={tab}
               propsForFields={propsForFields}
-              zField={`${tab}_touchTip_mmFromBottom`}
+              zField={`${tab}_touchTip_mmFromTop`}
               labwareId={
                 formData[
                   getLabwareFieldForPositioningField(
-                    addFieldNamePrefix('touchTip_mmFromBottom')
+                    addFieldNamePrefix('touchTip_mmFromTop')
                   )
                 ]
               }
@@ -417,6 +592,7 @@ export function MoveLiquidTools(props: StepFormProps): JSX.Element {
           checkboxUpdateValue={
             propsForFields[`${tab}_airGap_checkbox`].updateValue
           }
+          tooltipText={propsForFields[`${tab}_airGap_checkbox`].tooltipContent}
         >
           {formData[`${tab}_airGap_checkbox`] === true ? (
             <InputStepFormField
@@ -425,6 +601,10 @@ export function MoveLiquidTools(props: StepFormProps): JSX.Element {
               title={t('protocol_steps:air_gap_volume')}
               {...propsForFields[`${tab}_airGap_volume`]}
               units={t('application:units.microliter')}
+              errorToShow={getFormLevelError(
+                `${tab}_airGap_volume`,
+                mappedErrorsToField
+              )}
             />
           ) : null}
         </CheckboxExpandStepFormField>

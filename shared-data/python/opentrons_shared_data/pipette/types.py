@@ -64,6 +64,7 @@ class PipetteModelType(enum.Enum):
     p10 = "p10"
     p20 = "p20"
     p50 = "p50"
+    p200 = "p200"
     p300 = "p300"
     p1000 = "p1000"
 
@@ -108,6 +109,22 @@ class Quirks(enum.Enum):
     dropTipShake = "dropTipShake"
     doubleDropTip = "doubleDropTip"
     needsUnstick = "needsUnstick"
+    highSpeed = "highSpeed"
+
+
+class PipetteOEMType(enum.Enum):
+    OT = "ot"  # opentrons type
+    EM = "em"  # Emulsifying Pipette
+
+    @classmethod
+    def get_oem_from_quirks(cls, quirks: List[Quirks]) -> "PipetteOEMType":
+        """Return an oem type if true based on the quirks."""
+        return cls.EM if Quirks.highSpeed in quirks else cls.OT
+
+    @classmethod
+    def get_oem_from_model_str(cls, model_str: str) -> "PipetteOEMType":
+        """Return an oem type if true based on the model string."""
+        return cls.EM if "multi_em" in model_str else cls.OT
 
 
 class AvailableUnits(enum.Enum):
@@ -197,7 +214,6 @@ TypeOverrides = Mapping[str, Union[float, bool, None]]
 
 OverrideType = Dict[str, Union[Dict[str, QuirkConfig], MutableConfig, str]]
 
-
 PipetteName = Literal[
     "p10_single",
     "p10_multi",
@@ -215,7 +231,9 @@ PipetteName = Literal[
     "p1000_single_gen2",
     "p1000_single_flex",
     "p1000_multi_flex",
+    "p1000_multi_em_flex",
     "p1000_96",
+    "p200_96",
 ]
 
 
@@ -240,7 +258,35 @@ class PipetteNameType(str, enum.Enum):
     P1000_SINGLE_GEN2 = "p1000_single_gen2"
     P1000_SINGLE_FLEX = "p1000_single_flex"
     P1000_MULTI_FLEX = "p1000_multi_flex"
+    P1000_MULTI_EM = "p1000_multi_em_flex"
     P1000_96 = "p1000_96"
+    P200_96 = "p200_96"
+
+
+# Mapping of public Python Protocol API pipette load names
+# to names used by the internal Opentrons system
+# TODO (spp, 2025-01-02): make the API load name a part of the pipette's definition
+PIPETTE_API_NAMES_MAP = {
+    "p10_single": PipetteNameType.P10_SINGLE,
+    "p10_multi": PipetteNameType.P10_MULTI,
+    "p20_single_gen2": PipetteNameType.P20_SINGLE_GEN2,
+    "p20_multi_gen2": PipetteNameType.P20_MULTI_GEN2,
+    "p50_single": PipetteNameType.P50_SINGLE,
+    "p50_multi": PipetteNameType.P50_MULTI,
+    "p300_single": PipetteNameType.P300_SINGLE,
+    "p300_multi": PipetteNameType.P300_MULTI,
+    "p300_single_gen2": PipetteNameType.P300_SINGLE_GEN2,
+    "p300_multi_gen2": PipetteNameType.P300_MULTI_GEN2,
+    "p1000_single": PipetteNameType.P1000_SINGLE,
+    "p1000_single_gen2": PipetteNameType.P1000_SINGLE_GEN2,
+    "flex_1channel_50": PipetteNameType.P50_SINGLE_FLEX,
+    "flex_8channel_50": PipetteNameType.P50_MULTI_FLEX,
+    "flex_1channel_1000": PipetteNameType.P1000_SINGLE_FLEX,
+    "flex_8channel_1000": PipetteNameType.P1000_MULTI_FLEX,
+    "flex_8channel_1000_em": PipetteNameType.P1000_MULTI_EM,
+    "flex_96channel_1000": PipetteNameType.P1000_96,
+    "flex_96channel_200": PipetteNameType.P200_96,
+}
 
 
 # Generic NewType for models because we get new ones frequently and theres

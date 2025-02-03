@@ -13,11 +13,14 @@ interface NewFormArgs {
 //  TODO(jr, 1/17/24): add to i18n
 const getStepType = (stepType: StepType): string => {
   switch (stepType) {
+    case 'absorbanceReader': {
+      return 'absorbance plate reader'
+    }
     case 'heaterShaker': {
       return 'heater-shaker'
     }
     case 'moveLabware': {
-      return 'move labware'
+      return 'move'
     }
     case 'moveLiquid': {
       return 'transfer'

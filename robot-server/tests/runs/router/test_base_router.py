@@ -1,4 +1,5 @@
 """Tests for base /runs routes."""
+
 from opentrons.hardware_control import HardwareControlAPI
 from opentrons_shared_data.robot.types import RobotTypeEnum
 import pytest
@@ -6,9 +7,8 @@ from datetime import datetime
 from decoy import Decoy
 from pathlib import Path
 
-from opentrons.types import DeckSlotName, Point
+from opentrons.types import DeckSlotName, Point, NozzleConfigurationType
 from opentrons.protocol_engine import (
-    LabwareOffsetCreate,
     types as pe_types,
     errors as pe_errors,
     CommandErrorSlice,
@@ -16,7 +16,7 @@ from opentrons.protocol_engine import (
 )
 from opentrons.protocol_reader import ProtocolSource, JsonProtocolConfig
 
-from opentrons.hardware_control.nozzle_manager import NozzleConfigurationType, NozzleMap
+from opentrons.hardware_control.nozzle_manager import NozzleMap
 
 from robot_server.data_files.data_files_store import (
     DataFilesStore,
@@ -100,11 +100,11 @@ def mock_data_files_directory(decoy: Decoy) -> Path:
 
 
 @pytest.fixture
-def labware_offset_create() -> LabwareOffsetCreate:
+def labware_offset_create() -> pe_types.LegacyLabwareOffsetCreate:
     """Get a labware offset create request value object."""
-    return pe_types.LabwareOffsetCreate(
+    return pe_types.LegacyLabwareOffsetCreate(
         definitionUri="namespace_1/load_name_1/123",
-        location=pe_types.LabwareOffsetLocation(slotName=DeckSlotName.SLOT_1),
+        location=pe_types.LegacyLabwareOffsetLocation(slotName=DeckSlotName.SLOT_1),
         vector=pe_types.LabwareOffsetVector(x=1, y=2, z=3),
     )
 
@@ -113,7 +113,7 @@ async def test_create_run(
     decoy: Decoy,
     mock_run_data_manager: RunDataManager,
     mock_run_auto_deleter: RunAutoDeleter,
-    labware_offset_create: pe_types.LabwareOffsetCreate,
+    labware_offset_create: pe_types.LegacyLabwareOffsetCreate,
     mock_deck_configuration_store: DeckConfigurationStore,
     mock_file_provider_wrapper: FileProviderWrapper,
     mock_protocol_store: ProtocolStore,
@@ -137,6 +137,7 @@ async def test_create_run(
         labwareOffsets=[],
         status=pe_types.EngineStatus.IDLE,
         liquids=[],
+        liquidClasses=[],
         outputFileIds=[],
         hasEverEnteredErrorRecovery=False,
     )
@@ -225,6 +226,7 @@ async def test_create_protocol_run(
         labwareOffsets=[],
         status=pe_types.EngineStatus.IDLE,
         liquids=[],
+        liquidClasses=[],
         outputFileIds=[],
         hasEverEnteredErrorRecovery=False,
     )
@@ -393,6 +395,7 @@ async def test_get_run_data_from_url(
         labware=[],
         labwareOffsets=[],
         liquids=[],
+        liquidClasses=[],
         outputFileIds=[],
         hasEverEnteredErrorRecovery=False,
     )
@@ -441,6 +444,7 @@ async def test_get_run() -> None:
         labware=[],
         labwareOffsets=[],
         liquids=[],
+        liquidClasses=[],
         outputFileIds=[],
         hasEverEnteredErrorRecovery=False,
     )
@@ -488,6 +492,7 @@ async def test_get_runs_not_empty(
         labware=[],
         labwareOffsets=[],
         liquids=[],
+        liquidClasses=[],
         outputFileIds=[],
         hasEverEnteredErrorRecovery=False,
     )
@@ -505,6 +510,7 @@ async def test_get_runs_not_empty(
         labware=[],
         labwareOffsets=[],
         liquids=[],
+        liquidClasses=[],
         outputFileIds=[],
         hasEverEnteredErrorRecovery=False,
     )
@@ -585,6 +591,7 @@ async def test_update_run_to_not_current(
         labware=[],
         labwareOffsets=[],
         liquids=[],
+        liquidClasses=[],
         outputFileIds=[],
         hasEverEnteredErrorRecovery=False,
     )
@@ -621,6 +628,7 @@ async def test_update_current_none_noop(
         labware=[],
         labwareOffsets=[],
         liquids=[],
+        liquidClasses=[],
         outputFileIds=[],
         hasEverEnteredErrorRecovery=False,
     )
@@ -711,13 +719,7 @@ async def test_get_run_commands_errors(
         )
     ).then_raise(RunNotCurrentError("oh no!"))
 
-    error = pe_errors.ErrorOccurrence(
-        id="error-id",
-        errorType="PrettyBadError",
-        createdAt=datetime(year=2024, month=4, day=4),
-        detail="Things are not looking good.",
-    )
-    decoy.when(mock_run_data_manager.get_command_errors("run-id")).then_return([error])
+    decoy.when(mock_run_data_manager.get_command_errors_count("run-id")).then_return(1)
 
     with pytest.raises(ApiError):
         result = await get_run_commands_error(
@@ -739,7 +741,7 @@ async def test_get_run_commands_errors_raises_no_run(
         createdAt=datetime(year=2024, month=4, day=4),
         detail="Things are not looking good.",
     )
-    decoy.when(mock_run_data_manager.get_command_errors("run-id")).then_return([error])
+    decoy.when(mock_run_data_manager.get_command_errors_count("run-id")).then_return(1)
 
     command_error_slice = CommandErrorSlice(
         cursor=1, total_length=3, commands_errors=[error]
@@ -774,7 +776,7 @@ async def test_get_run_commands_errors_raises_no_run(
 
 @pytest.mark.parametrize(
     "error_list, expected_cursor_result",
-    [([], 0), ([pe_errors.ErrorOccurrence.construct(id="error-id")], 1)],
+    [([], 0), ([pe_errors.ErrorOccurrence.model_construct(id="error-id")], 1)],
 )
 async def test_get_run_commands_errors_defualt_cursor(
     decoy: Decoy,
@@ -783,10 +785,7 @@ async def test_get_run_commands_errors_defualt_cursor(
     expected_cursor_result: int,
 ) -> None:
     """It should return a list of all commands errors in a run."""
-    print(error_list)
-    decoy.when(mock_run_data_manager.get_command_errors("run-id")).then_return(
-        error_list
-    )
+    decoy.when(mock_run_data_manager.get_command_errors_count("run-id")).then_return(1)
 
     command_error_slice = CommandErrorSlice(
         cursor=expected_cursor_result, total_length=3, commands_errors=error_list
@@ -865,7 +864,7 @@ async def test_get_current_state_success(
     )
 
     assert result.status_code == 200
-    assert result.content.data == RunCurrentState.construct(
+    assert result.content.data == RunCurrentState.model_construct(
         estopEngaged=False,
         activeNozzleLayouts={
             "mock-pipette-id": ActiveNozzleLayout(
@@ -875,6 +874,7 @@ async def test_get_current_state_success(
             )
         },
         tipStates={"mock-pipette-id": TipState(hasTip=True)},
+        placeLabwareState=None,
     )
     assert result.content.links == CurrentStateLinks(
         lastCompleted=CommandLinkNoMeta(

@@ -1,4 +1,5 @@
 """Request and response models for run resources."""
+
 from datetime import datetime
 
 from enum import Enum
@@ -16,8 +17,10 @@ from opentrons.protocol_engine import (
     LoadedLabware,
     LoadedModule,
     LabwareOffset,
+    LegacyLabwareOffsetCreate,
     LabwareOffsetCreate,
     Liquid,
+    LiquidClassRecordWithId,
     CommandNote,
 )
 from opentrons.protocol_engine.types import (
@@ -134,6 +137,10 @@ class Run(ResourceModel):
         ...,
         description="Liquids loaded to the run.",
     )
+    liquidClasses: List[LiquidClassRecordWithId] = Field(
+        ...,
+        description="Liquid classes loaded to the run.",
+    )
     labwareOffsets: List[LabwareOffset] = Field(
         ...,
         description="Labware offsets to apply as labware are loaded.",
@@ -215,6 +222,10 @@ class BadRun(ResourceModel):
         ...,
         description="Liquids loaded to the run.",
     )
+    liquidClasses: List[LiquidClassRecordWithId] = Field(
+        ...,
+        description="Liquid classes loaded to the run.",
+    )
     labwareOffsets: List[LabwareOffset] = Field(
         ...,
         description="Labware offsets to apply as labware are loaded.",
@@ -256,7 +267,7 @@ class RunCreate(BaseModel):
         None,
         description="Protocol resource ID that this run will be using, if applicable.",
     )
-    labwareOffsets: List[LabwareOffsetCreate] = Field(
+    labwareOffsets: List[LegacyLabwareOffsetCreate | LabwareOffsetCreate] = Field(
         default_factory=list,
         description="Labware offsets to apply as labware are loaded.",
     )

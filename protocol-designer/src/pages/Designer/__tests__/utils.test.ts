@@ -7,7 +7,7 @@ import {
   WASTE_CHUTE_CUTOUT,
   fixture96Plate,
 } from '@opentrons/shared-data'
-import { getSlotInformation } from '../utils'
+import { getSlotInformation, formatTime } from '../utils'
 import type { LabwareDefinition2 } from '@opentrons/shared-data'
 import type { AdditionalEquipmentName } from '@opentrons/step-generation'
 import type { AllTemporalPropertiesForTimelineFrame } from '../../../step-forms'
@@ -117,6 +117,7 @@ describe('getSlotInformation', () => {
     expect(
       getSlotInformation({ deckSetup: mockOt2DeckSetup, slot: '1' })
     ).toEqual({
+      matchingLabwareFor4thColumn: null,
       createdModuleForSlot: mockHS,
       createdLabwareForSlot: mockLabOnDeck1,
       createdNestedLabwareForSlot: mockLabOnDeck2,
@@ -128,6 +129,7 @@ describe('getSlotInformation', () => {
     expect(
       getSlotInformation({ deckSetup: mockOt2DeckSetup, slot: '2' })
     ).toEqual({
+      matchingLabwareFor4thColumn: null,
       createdLabwareForSlot: mockLabOnDeck3,
       createFixtureForSlots: [],
       slotPosition: null,
@@ -142,12 +144,17 @@ describe('getSlotInformation', () => {
     }
     expect(
       getSlotInformation({ deckSetup: mockDeckSetup, slot: 'A1' })
-    ).toEqual({ slotPosition: null, createFixtureForSlots: [] })
+    ).toEqual({
+      matchingLabwareFor4thColumn: null,
+      slotPosition: null,
+      createFixtureForSlots: [],
+    })
   })
   it('renders a trashbin for a Flex on slot A3', () => {
     expect(
       getSlotInformation({ deckSetup: mockFlex2DeckSetup, slot: 'A3' })
     ).toEqual({
+      matchingLabwareFor4thColumn: null,
       slotPosition: null,
       createFixtureForSlots: [mockTrash],
       preSelectedFixture: 'trashBin',
@@ -157,6 +164,7 @@ describe('getSlotInformation', () => {
     expect(
       getSlotInformation({ deckSetup: mockFlex2DeckSetup, slot: 'D1' })
     ).toEqual({
+      matchingLabwareFor4thColumn: null,
       slotPosition: null,
       createdModuleForSlot: mockHSFlex,
       createdLabwareForSlot: mockLabOnDeck1,
@@ -168,6 +176,7 @@ describe('getSlotInformation', () => {
     expect(
       getSlotInformation({ deckSetup: mockFlex2DeckSetup, slot: 'D3' })
     ).toEqual({
+      matchingLabwareFor4thColumn: mockLabOnStagingArea,
       slotPosition: null,
       createFixtureForSlots: [mockWasteChute, mockStagingArea],
       preSelectedFixture: 'wasteChuteAndStagingArea',
@@ -177,10 +186,29 @@ describe('getSlotInformation', () => {
     expect(
       getSlotInformation({ deckSetup: mockFlex2DeckSetup, slot: 'D4' })
     ).toEqual({
+      matchingLabwareFor4thColumn: null,
       slotPosition: null,
       createdLabwareForSlot: mockLabOnStagingArea,
       createFixtureForSlots: [mockWasteChute, mockStagingArea],
       preSelectedFixture: 'wasteChuteAndStagingArea',
     })
+  })
+})
+
+describe('formatTime', () => {
+  it('input is 3:3:3 and output is 03:03:03', () => {
+    expect(formatTime('3:3:3')).toEqual('03:03:03')
+  })
+  it('input is 3:3 and output is 03:03', () => {
+    expect(formatTime('3:3')).toEqual('03:03')
+  })
+  it('input is 30:12 and output is 30:12', () => {
+    expect(formatTime('30:12')).toEqual('30:12')
+  })
+  it('input is 12:23:34 and output is 12:23:34', () => {
+    expect(formatTime('12:23:34')).toEqual('12:23:34')
+  })
+  it('input is 0:03 and output is 00:03', () => {
+    expect(formatTime('0:03')).toEqual('00:03')
   })
 })

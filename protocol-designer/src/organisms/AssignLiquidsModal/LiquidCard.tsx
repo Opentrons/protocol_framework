@@ -1,24 +1,31 @@
 import { useState } from 'react'
-import { useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
 import {
   ALIGN_CENTER,
-  BORDERS,
+  ALIGN_FLEX_END,
+  Btn,
   COLORS,
   DIRECTION_COLUMN,
   Divider,
   Flex,
   Icon,
   LiquidIcon,
-  ListItem,
+  ListButton,
   SPACING,
   StyledText,
+  TEXT_DECORATION_UNDERLINE,
+  Tag,
 } from '@opentrons/components'
 
+import { LINE_CLAMP_TEXT_STYLE } from '../../atoms'
+import { getEnableLiquidClasses } from '../../feature-flags/selectors'
+import { removeWellsContents } from '../../labware-ingred/actions'
 import { selectors as labwareIngredSelectors } from '../../labware-ingred/selectors'
 import { getLabwareEntities } from '../../step-forms/selectors'
 import * as wellContentsSelectors from '../../top-selectors/well-contents'
 
+import type { SelectedContainerId } from '../../labware-ingred/reducers'
 import type { LiquidInfo } from './LiquidToolbox'
 
 interface LiquidCardProps {
@@ -27,8 +34,9 @@ interface LiquidCardProps {
 
 export function LiquidCard(props: LiquidCardProps): JSX.Element {
   const { info } = props
-  const { name, color, liquidIndex } = info
+  const { name, color, liquidClassDisplayName, liquidIndex } = info
   const { t } = useTranslation('liquids')
+  const dispatch = useDispatch()
   const [isExpanded, setIsExpanded] = useState<boolean>(false)
   const labwareId = useSelector(labwareIngredSelectors.getSelectedLabwareId)
   const labwareEntities = useSelector(getLabwareEntities)
@@ -41,6 +49,7 @@ export function LiquidCard(props: LiquidCardProps): JSX.Element {
   const allWellContentsForActiveItem = useSelector(
     wellContentsSelectors.getAllWellContentsForActiveItem
   )
+  const enableLiquidClasses = useSelector(getEnableLiquidClasses)
   const wellContents =
     allWellContentsForActiveItem != null && labwareId != null
       ? allWellContentsForActiveItem[labwareId]
@@ -71,68 +80,132 @@ export function LiquidCard(props: LiquidCardProps): JSX.Element {
     {}
   )
 
+  const handleClearLiquid = (
+    labwareId: SelectedContainerId,
+    wells: string[]
+  ): void => {
+    if (labwareId != null) {
+      dispatch(
+        removeWellsContents({
+          labwareId,
+          wells,
+        })
+      )
+    } else {
+      console.error('Could not clear selected liquid - no labware ID')
+    }
+  }
+
   return (
-    <ListItem type="noActive" flexDirection={DIRECTION_COLUMN} key={name}>
+    <ListButton
+      type="noActive"
+      flexDirection={DIRECTION_COLUMN}
+      key={name}
+      onClick={() => {
+        setIsExpanded(prev => !prev)
+      }}
+      padding="0"
+    >
       <Flex
+        flexDirection={DIRECTION_COLUMN}
         padding={SPACING.spacing12}
-        alignItems={ALIGN_CENTER}
-        gridGap={SPACING.spacing16}
+        gridGap={SPACING.spacing4}
       >
-        <LiquidIcon color={color ?? ''} size="medium" />
-        <Flex flexDirection={DIRECTION_COLUMN} width="12.375rem">
-          <StyledText desktopStyle="bodyDefaultSemiBold">{name}</StyledText>
-          <StyledText desktopStyle="bodyDefaultRegular">
-            {info.liquidIndex != null
-              ? liquidsWithDescriptions[info.liquidIndex].description
-              : null}
-          </StyledText>
+        <Flex alignItems={ALIGN_CENTER} gridGap={SPACING.spacing16}>
+          <LiquidIcon color={color} size="medium" />
+          <Flex
+            flexDirection={DIRECTION_COLUMN}
+            width="12.375rem"
+            gridGap={SPACING.spacing4}
+          >
+            <StyledText
+              desktopStyle="bodyDefaultSemiBold"
+              css={LINE_CLAMP_TEXT_STYLE(3)}
+            >
+              {name}
+            </StyledText>
+            {liquidClassDisplayName != null && enableLiquidClasses ? (
+              <Tag
+                text={liquidClassDisplayName}
+                type="default"
+                shrinkToContent
+              />
+            ) : null}
+            <StyledText
+              desktopStyle="bodyDefaultRegular"
+              css={LINE_CLAMP_TEXT_STYLE(3)}
+            >
+              {info.liquidIndex != null
+                ? liquidsWithDescriptions[info.liquidIndex].description
+                : null}
+            </StyledText>
+          </Flex>
+          <Flex>
+            <Icon
+              name={isExpanded ? 'chevron-up' : 'chevron-down'}
+              size="2rem"
+            />
+          </Flex>
         </Flex>
-        <Flex
-          cursor="pointer"
+        <Btn
           onClick={() => {
-            setIsExpanded(!isExpanded)
+            if (labwareId != null) {
+              handleClearLiquid(labwareId, fullWellsByLiquid[info.liquidIndex])
+            }
           }}
+          alignSelf={ALIGN_FLEX_END}
         >
-          <Icon name={isExpanded ? 'chevron-up' : 'chevron-down'} size="2rem" />
-        </Flex>
+          <StyledText
+            desktopStyle="bodyDefaultRegular"
+            textDecoration={TEXT_DECORATION_UNDERLINE}
+          >
+            {t('delete')}
+          </StyledText>
+        </Btn>
       </Flex>
       {isExpanded ? (
-        <Flex flexDirection={DIRECTION_COLUMN} padding={SPACING.spacing16}>
-          <Flex gridGap={SPACING.spacing4} color={COLORS.grey60}>
-            <StyledText width="50%" desktopStyle="bodyDefaultRegular">
-              {t('well')}
-            </StyledText>
-            <Flex width="50%">
-              <StyledText desktopStyle="bodyDefaultRegular">
-                {t('microliters')}
+        <>
+          <Divider borderColor={COLORS.grey40} />
+          <Flex
+            flexDirection={DIRECTION_COLUMN}
+            padding={`${SPACING.spacing8} ${SPACING.spacing12} ${SPACING.spacing12}`}
+          >
+            <Flex gridGap={SPACING.spacing4} color={COLORS.grey60}>
+              <StyledText width="50%" desktopStyle="bodyDefaultRegular">
+                {t('well')}
               </StyledText>
+              <Flex width="50%">
+                <StyledText desktopStyle="bodyDefaultRegular">
+                  {t('microliters')}
+                </StyledText>
+              </Flex>
             </Flex>
-          </Flex>
-          <Divider borderColor={COLORS.grey35} />
-          {info.liquidIndex != null
-            ? fullWellsByLiquid[info.liquidIndex]
-                .sort((a, b) =>
-                  orderedWells.indexOf(b) > orderedWells.indexOf(a) ? -1 : 1
-                )
-                .map((wellName, wellliquidIndex) => {
-                  const volume =
-                    wellContents != null
-                      ? wellContents[wellName].ingreds[liquidIndex].volume
-                      : 0
-                  return (
-                    <>
-                      <WellContents wellName={wellName} volume={volume} />
-                      {wellliquidIndex <
-                      fullWellsByLiquid[liquidIndex].length - 1 ? (
-                        <Divider borderColor={COLORS.grey35} />
-                      ) : null}
-                    </>
+            <Divider borderColor={COLORS.grey40} />
+            {info.liquidIndex != null
+              ? fullWellsByLiquid[info.liquidIndex]
+                  .sort((a, b) =>
+                    orderedWells.indexOf(b) > orderedWells.indexOf(a) ? -1 : 1
                   )
-                })
-            : null}
-        </Flex>
+                  .map((wellName, wellliquidIndex) => {
+                    const volume =
+                      wellContents != null
+                        ? wellContents[wellName].ingreds[liquidIndex].volume
+                        : 0
+                    return (
+                      <>
+                        <WellContents wellName={wellName} volume={volume} />
+                        {wellliquidIndex <
+                        fullWellsByLiquid[liquidIndex].length - 1 ? (
+                          <Divider borderColor={COLORS.grey40} />
+                        ) : null}
+                      </>
+                    )
+                  })
+              : null}
+          </Flex>
+        </>
       ) : null}
-    </ListItem>
+    </ListButton>
   )
 }
 
@@ -146,17 +219,12 @@ function WellContents(props: WellContentsProps): JSX.Element {
   const { t } = useTranslation('liquids')
 
   return (
-    <Flex gridGap={SPACING.spacing4}>
+    <Flex gridGap={SPACING.spacing4} alignItems={ALIGN_CENTER}>
       <StyledText width="50%" desktopStyle="bodyDefaultRegular">
         {wellName}
       </StyledText>
       <Flex width="50%">
-        <StyledText
-          desktopStyle="bodyDefaultRegular"
-          backgroundColor={`${COLORS.black90}${COLORS.opacity20HexCode}`}
-          padding={`${SPACING.spacing2} ${SPACING.spacing8}`}
-          borderRadius={BORDERS.borderRadius4}
-        >{`${volume} ${t('microliters')}`}</StyledText>
+        <Tag text={`${volume} ${t('microliters')}`} type="default" />
       </Flex>
     </Flex>
   )

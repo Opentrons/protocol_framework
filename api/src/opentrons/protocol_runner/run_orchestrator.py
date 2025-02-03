@@ -1,11 +1,13 @@
 """Engine/Runner provider."""
+
 from __future__ import annotations
 
 import enum
-from typing import Optional, Union, List, Dict, AsyncGenerator
+from typing import Optional, Union, List, Dict, AsyncGenerator, Mapping
 
 from anyio import move_on_after
 
+from opentrons.types import NozzleMapInterface
 from opentrons_shared_data.labware.types import LabwareUri
 from opentrons_shared_data.labware.labware_definition import LabwareDefinition
 from opentrons_shared_data.errors import GeneralError
@@ -14,7 +16,6 @@ from opentrons_shared_data.robot.types import RobotType
 from . import protocol_runner, RunResult, JsonRunner, PythonAndLegacyRunner
 from ..hardware_control import HardwareControlAPI
 from ..hardware_control.modules import AbstractModule as HardwareModuleAPI
-from ..hardware_control.nozzle_manager import NozzleMap
 from ..protocol_engine import (
     ProtocolEngine,
     CommandCreate,
@@ -31,11 +32,13 @@ from ..protocol_engine.types import (
     PostRunHardwareState,
     EngineStatus,
     LabwareOffsetCreate,
+    LegacyLabwareOffsetCreate,
     LabwareOffset,
     DeckConfigurationType,
     RunTimeParameter,
     PrimitiveRunTimeParamValuesType,
     CSVRuntimeParamPaths,
+    CommandAnnotation,
 )
 from ..protocol_engine.error_recovery_policy import ErrorRecoveryPolicy
 
@@ -253,6 +256,14 @@ class RunOrchestrator:
             else self._protocol_runner.run_time_parameters
         )
 
+    def get_command_annotations(self) -> List[CommandAnnotation]:
+        """Get the list of command annotations defined in the protocol, if any."""
+        return (
+            []
+            if self._protocol_runner is None
+            else self._protocol_runner.command_annotations
+        )
+
     def get_current_command(self) -> Optional[CommandPointer]:
         """Get the "current" command, if any."""
         return self._protocol_engine.state_view.commands.get_current()
@@ -336,7 +347,9 @@ class RunOrchestrator:
         """Get whether the run has stopped."""
         return self._protocol_engine.state_view.commands.get_is_stopped()
 
-    def add_labware_offset(self, request: LabwareOffsetCreate) -> LabwareOffset:
+    def add_labware_offset(
+        self, request: LabwareOffsetCreate | LegacyLabwareOffsetCreate
+    ) -> LabwareOffset:
         """Add a new labware offset to state."""
         return self._protocol_engine.add_labware_offset(request)
 
@@ -414,7 +427,7 @@ class RunOrchestrator:
         """Get engine deck type."""
         return self._protocol_engine.state_view.config.deck_type
 
-    def get_nozzle_maps(self) -> Dict[str, NozzleMap]:
+    def get_nozzle_maps(self) -> Mapping[str, NozzleMapInterface]:
         """Get current nozzle maps keyed by pipette id."""
         return self._protocol_engine.state_view.tips.get_pipette_nozzle_maps()
 

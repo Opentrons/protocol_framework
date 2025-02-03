@@ -1,16 +1,14 @@
 """Test load labware commands."""
 import inspect
 from typing import Optional
-from opentrons.protocol_engine.state.update_types import (
-    LoadedLabwareUpdate,
-    StateUpdate,
-)
-import pytest
+from unittest.mock import sentinel
 
+import pytest
 from decoy import Decoy
 
+from opentrons_shared_data.labware.labware_definition import LabwareDefinition
+
 from opentrons.types import DeckSlotName
-from opentrons.protocols.models import LabwareDefinition
 
 from opentrons.protocol_engine.errors import (
     LabwareIsNotAllowedInLocationError,
@@ -18,12 +16,29 @@ from opentrons.protocol_engine.errors import (
 )
 
 from opentrons.protocol_engine.types import (
+    AddressableAreaLocation,
     DeckSlotLocation,
+    LabwareLocation,
     OnLabwareLocation,
+    ModuleLocation,
+    ModuleModel,
+    LoadedModule,
+    OFF_DECK_LOCATION,
 )
 from opentrons.protocol_engine.execution import LoadedLabwareData, EquipmentHandler
 from opentrons.protocol_engine.resources import labware_validation
 from opentrons.protocol_engine.state.state import StateView
+from opentrons.protocol_engine.state.update_types import (
+    AddressableAreaUsedUpdate,
+    LoadedLabwareUpdate,
+    FlexStackerStateUpdate,
+    FlexStackerLoadHopperLabware,
+    StateUpdate,
+)
+from opentrons.protocol_engine.state.module_substates import (
+    FlexStackerSubState,
+    FlexStackerId,
+)
 
 from opentrons.protocol_engine.commands.command import SuccessData
 from opentrons.protocol_engine.commands.load_labware import (
@@ -42,33 +57,40 @@ def patch_mock_labware_validation(
         monkeypatch.setattr(labware_validation, name, decoy.mock(func=func))
 
 
-@pytest.mark.parametrize("display_name", [("My custom display name"), (None)])
-async def test_load_labware_implementation(
+@pytest.mark.parametrize("display_name", ["My custom display name", None])
+@pytest.mark.parametrize(
+    ("location", "expected_addressable_area_name"),
+    [
+        (DeckSlotLocation(slotName=DeckSlotName.SLOT_3), "3"),
+        (AddressableAreaLocation(addressableAreaName="3"), "3"),
+    ],
+)
+async def test_load_labware_on_slot_or_addressable_area(
     decoy: Decoy,
     well_plate_def: LabwareDefinition,
     equipment: EquipmentHandler,
     state_view: StateView,
     display_name: Optional[str],
+    location: LabwareLocation,
+    expected_addressable_area_name: str,
 ) -> None:
     """A LoadLabware command should have an execution implementation."""
     subject = LoadLabwareImplementation(equipment=equipment, state_view=state_view)
 
     data = LoadLabwareParams(
-        location=DeckSlotLocation(slotName=DeckSlotName.SLOT_3),
+        location=location,
         loadName="some-load-name",
         namespace="opentrons-test",
         version=1,
         displayName=display_name,
     )
 
-    decoy.when(
-        state_view.geometry.ensure_location_not_occupied(
-            DeckSlotLocation(slotName=DeckSlotName.SLOT_3)
-        )
-    ).then_return(DeckSlotLocation(slotName=DeckSlotName.SLOT_4))
+    decoy.when(state_view.geometry.ensure_location_not_occupied(location)).then_return(
+        sentinel.validated_empty_location
+    )
     decoy.when(
         await equipment.load_labware(
-            location=DeckSlotLocation(slotName=DeckSlotName.SLOT_4),
+            location=sentinel.validated_empty_location,
             load_name="some-load-name",
             namespace="opentrons-test",
             version=1,
@@ -99,9 +121,12 @@ async def test_load_labware_implementation(
                 labware_id="labware-id",
                 definition=well_plate_def,
                 offset_id="labware-offset-id",
-                new_location=DeckSlotLocation(slotName=DeckSlotName.SLOT_4),
+                new_location=sentinel.validated_empty_location,
                 display_name=display_name,
-            )
+            ),
+            addressable_area_used=AddressableAreaUsedUpdate(
+                addressable_area_name=expected_addressable_area_name
+            ),
         ),
     )
 
@@ -220,3 +245,80 @@ async def test_load_labware_raises_if_location_occupied(
 
     with pytest.raises(LocationIsOccupiedError):
         await subject.execute(data)
+
+
+@pytest.mark.parametrize("display_name", ["My custom display name", None])
+async def test_load_labware_in_flex_stacker(
+    decoy: Decoy,
+    well_plate_def: LabwareDefinition,
+    equipment: EquipmentHandler,
+    state_view: StateView,
+    display_name: Optional[str],
+) -> None:
+    """A LoadLabware command should have an execution implementation."""
+    subject = LoadLabwareImplementation(equipment=equipment, state_view=state_view)
+
+    data = LoadLabwareParams(
+        location=ModuleLocation(moduleId="some-module-id"),
+        loadName="some-load-name",
+        namespace="opentrons-test",
+        version=1,
+        displayName=display_name,
+    )
+
+    decoy.when(state_view.modules.get("some-module-id")).then_return(
+        LoadedModule(
+            id="some-module-id",
+            model=ModuleModel.FLEX_STACKER_MODULE_V1,
+        )
+    )
+    decoy.when(
+        state_view.modules.get_flex_stacker_substate("some-module-id")
+    ).then_return(
+        FlexStackerSubState(
+            module_id=FlexStackerId("some-module-id"),
+            in_static_mode=False,
+            hopper_labware_ids=[],
+        )
+    )
+
+    decoy.when(
+        await equipment.load_labware(
+            location=OFF_DECK_LOCATION,
+            load_name="some-load-name",
+            namespace="opentrons-test",
+            version=1,
+            labware_id=None,
+        )
+    ).then_return(
+        LoadedLabwareData(
+            labware_id="labware-id",
+            definition=well_plate_def,
+            offsetId="labware-offset-id",
+        )
+    )
+
+    result = await subject.execute(data)
+
+    assert result == SuccessData(
+        public=LoadLabwareResult(
+            labwareId="labware-id",
+            definition=well_plate_def,
+            offsetId="labware-offset-id",
+        ),
+        state_update=StateUpdate(
+            loaded_labware=LoadedLabwareUpdate(
+                labware_id="labware-id",
+                definition=well_plate_def,
+                offset_id="labware-offset-id",
+                new_location=OFF_DECK_LOCATION,
+                display_name=display_name,
+            ),
+            flex_stacker_state_update=FlexStackerStateUpdate(
+                module_id="some-module-id",
+                hopper_labware_update=FlexStackerLoadHopperLabware(
+                    labware_id="labware-id"
+                ),
+            ),
+        ),
+    )

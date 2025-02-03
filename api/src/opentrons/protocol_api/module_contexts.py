@@ -29,6 +29,7 @@ from .core.common import (
     HeaterShakerCore,
     MagneticBlockCore,
     AbsorbanceReaderCore,
+    FlexStackerCore,
 )
 from .core.core_map import LoadedCoreMap
 from .core.engine import ENGINE_CORE_API_VERSION
@@ -125,6 +126,7 @@ class ModuleContext(CommandPublisher):
         namespace: Optional[str] = None,
         version: Optional[int] = None,
         adapter: Optional[str] = None,
+        lid: Optional[str] = None,
     ) -> Labware:
         """Load a labware onto the module using its load parameters.
 
@@ -180,6 +182,19 @@ class ModuleContext(CommandPublisher):
             version=version,
             location=load_location,
         )
+        if lid is not None:
+            if self._api_version < validation.LID_STACK_VERSION_GATE:
+                raise APIVersionError(
+                    api_element="Loading a lid on a Labware",
+                    until_version="2.23",
+                    current_version=f"{self._api_version}",
+                )
+            self._protocol_core.load_lid(
+                load_name=lid,
+                location=labware_core,
+                namespace=namespace,
+                version=version,
+            )
 
         if isinstance(self._core, LegacyModuleCore):
             labware = self._core.add_labware_core(cast(LegacyLabwareCore, labware_core))
@@ -608,7 +623,7 @@ class ThermocyclerContext(ModuleContext):
         .. note::
 
             The Thermocycler will proceed to the next command immediately after
-            ``temperature`` has been reached.
+            ``temperature`` is reached.
 
         """
         self._core.set_target_lid_temperature(celsius=temperature)
@@ -625,28 +640,18 @@ class ThermocyclerContext(ModuleContext):
         """Execute a Thermocycler profile, defined as a cycle of
         ``steps``, for a given number of ``repetitions``.
 
-        :param steps: List of unique steps that make up a single cycle.
-                      Each list item should be a dictionary that maps to
-                      the parameters of the :py:meth:`set_block_temperature`
-                      method with a ``temperature`` key, and either or both of
+        :param steps: List of steps that make up a single cycle.
+                      Each list item should be a dictionary that maps to the parameters
+                      of the :py:meth:`set_block_temperature` method. The dictionary's
+                      keys must be ``temperature`` and one or both of
                       ``hold_time_seconds`` and ``hold_time_minutes``.
         :param repetitions: The number of times to repeat the cycled steps.
         :param block_max_volume: The greatest volume of liquid contained in any
                                  individual well of the loaded labware, in µL.
                                  If not specified, the default is 25 µL.
 
-        .. note::
-
-            Unlike with :py:meth:`set_block_temperature`, either or both of
-            ``hold_time_minutes`` and ``hold_time_seconds`` must be defined
-            and for each step.
-
-        .. note::
-
-            Before API Version 2.21, Thermocycler profiles run with this command
-            would be listed in the app as having a number of repetitions equal to
-            their step count. At or above API Version 2.21, the structure of the
-            Thermocycler cycles is preserved.
+        .. versionchanged:: 2.21
+            Fixed run log listing number of steps instead of number of repetitions.
 
         """
         repetitions = validation.ensure_thermocycler_repetition_count(repetitions)
@@ -1094,3 +1099,92 @@ class AbsorbanceReaderContext(ModuleContext):
         :returns: A dictionary of wavelengths to dictionary of values ordered by well name.
         """
         return self._core.read(filename=export_filename)
+
+
+class FlexStackerContext(ModuleContext):
+    """An object representing a connected Flex Stacker module.
+
+    It should not be instantiated directly; instead, it should be
+    created through :py:meth:`.ProtocolContext.load_module`.
+
+    .. versionadded:: 2.23
+    """
+
+    _core: FlexStackerCore
+
+    @requires_version(2, 23)
+    def load_labware_to_hopper(
+        self,
+        load_name: str,
+        quantity: int,
+        label: Optional[str] = None,
+        namespace: Optional[str] = None,
+        version: Optional[int] = None,
+        lid: Optional[str] = None,
+    ) -> None:
+        """Load one or more labware onto the flex stacker."""
+        self._protocol_core.load_labware_to_flex_stacker_hopper(
+            module_core=self._core,
+            load_name=load_name,
+            quantity=quantity,
+            label=label,
+            namespace=namespace,
+            version=version,
+            lid=lid,
+        )
+
+    @requires_version(2, 23)
+    def enter_static_mode(self) -> None:
+        """Enter static mode.
+
+        In static mode, the Flex Stacker will not move labware between the hopper and
+        the deck, and can be used as a staging slot area.
+        """
+        self._core.set_static_mode(static=True)
+
+    @requires_version(2, 23)
+    def exit_static_mode(self) -> None:
+        """End static mode.
+
+        In static mode, the Flex Stacker will not move labware between the hopper and
+        the deck, and can be used as a staging slot area.
+        """
+        self._core.set_static_mode(static=False)
+
+    @property
+    @requires_version(2, 23)
+    def serial_number(self) -> str:
+        """Get the module's unique hardware serial number."""
+        return self._core.get_serial_number()
+
+    @requires_version(2, 23)
+    def retrieve(self) -> Labware:
+        """Release and return a labware at the bottom of the labware stack."""
+        self._core.retrieve()
+        labware_core = self._protocol_core.get_labware_on_module(self._core)
+        # the core retrieve command should have already raised the error
+        # if labware_core is None, this is just to satisfy the type checker
+        assert labware_core is not None, "Retrieve failed to return labware"
+        # check core map first
+        try:
+            labware = self._core_map.get(labware_core)
+        except KeyError:
+            # If the labware is not already in the core map,
+            # create a new Labware object
+            labware = Labware(
+                core=labware_core,
+                api_version=self._api_version,
+                protocol_core=self._protocol_core,
+                core_map=self._core_map,
+            )
+            self._core_map.add(labware_core, labware)
+        return labware
+
+    @requires_version(2, 23)
+    def store(self, labware: Labware) -> None:
+        """Store a labware at the bottom of the labware stack.
+
+        :param labware: The labware object to store.
+        """
+        assert labware._core is not None
+        self._core.store()

@@ -1,4 +1,3 @@
-import type * as React from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   Chip,
@@ -8,6 +7,7 @@ import {
   InfoScreen,
   JUSTIFY_SPACE_BETWEEN,
   SPACING,
+  getLabwareDefinitionsFromCommands,
   StyledText,
 } from '@opentrons/components'
 
@@ -16,17 +16,18 @@ import { useToaster } from '/app/organisms/ToasterOven'
 import { ODDBackButton } from '/app/molecules/ODDBackButton'
 import { FloatingActionButton, SmallButton } from '/app/atoms/buttons'
 import type { SetupScreens } from '../types'
-import { TerseOffsetTable } from '/app/organisms/LabwarePositionCheck/ResultsSummary'
-import { getLabwareDefinitionsFromCommands } from '/app/local-resources/labware'
+import { TerseOffsetTable } from '/app/organisms/TerseOffsetTable'
 import {
   useNotifyRunQuery,
   useMostRecentCompletedAnalysis,
 } from '/app/resources/runs'
 import { getLatestCurrentOffsets } from '/app/transformations/runs'
 
+import type { Dispatch, SetStateAction } from 'react'
+
 export interface ProtocolSetupOffsetsProps {
   runId: string
-  setSetupScreen: React.Dispatch<React.SetStateAction<SetupScreens>>
+  setSetupScreen: Dispatch<SetStateAction<SetupScreens>>
   lpcDisabledReason: string | null
   launchLPC: () => void
   LPCWizard: JSX.Element | null
@@ -75,9 +76,11 @@ export function ProtocolSetupOffsets({
   const nonIdentityOffsets = getLatestCurrentOffsets(sortedOffsets)
   return (
     <>
-      {LPCWizard}
-      {LPCWizard == null && (
-        <>
+      {LPCWizard ?? (
+        <Flex
+          flexDirection={DIRECTION_COLUMN}
+          padding={`${SPACING.spacing32} ${SPACING.spacing40} ${SPACING.spacing40}`}
+        >
           <Flex
             flexDirection={DIRECTION_ROW}
             justifyContent={JUSTIFY_SPACE_BETWEEN}
@@ -136,7 +139,7 @@ export function ProtocolSetupOffsets({
               }
             }}
           />
-        </>
+        </Flex>
       )}
     </>
   )

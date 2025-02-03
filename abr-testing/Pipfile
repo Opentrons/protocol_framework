@@ -19,6 +19,8 @@ slack-sdk = "*"
 pandas = "*"
 pandas-stubs = "*"
 paramiko = "*"
+prettier = "*"
+pydantic = "==2.9.0"
 
 [dev-packages]
 atomicwrites = "==1.4.1"

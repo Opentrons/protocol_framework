@@ -99,6 +99,8 @@ test-photometric-multi:
 test-photometric:
 	$(python) -m hardware_testing.gravimetric --photometric --simulate --pipette 1000 --channels 96 --tip 50 --trials 1
 	$(python) -m hardware_testing.gravimetric --photometric --simulate --pipette 1000 --channels 96 --tip 200 --trials 1
+	$(python) -m hardware_testing.gravimetric --photometric --simulate --pipette 200 --channels 96 --tip 50 --trials 1
+	$(python) -m hardware_testing.gravimetric --photometric --simulate --pipette 200 --channels 96 --tip 20 --trials 1
 
 .PHONY: test-gravimetric-single
 test-gravimetric-single:
@@ -121,6 +123,8 @@ test-gravimetric-multi:
 .PHONY: test-gravimetric-96
 test-gravimetric-96:
 	$(python) -m hardware_testing.gravimetric --simulate --pipette 1000 --channels 96 --trials 2 --no-blank
+	$(python) -m hardware_testing.gravimetric --simulate --pipette 200 --channels 96 --trials 2 --no-blank
+	$(python) -m hardware_testing.gravimetric --simulate --pipette 200 --channels 96 --trials 1 --no-blank --increment --tip 20
 
 .PHONY: test-gravimetric
 test-gravimetric:
@@ -138,6 +142,7 @@ test-production-qc:
 	$(python) -m hardware_testing.production_qc.robot_assembly_qc_ot3 --simulate
 	$(python) -m hardware_testing.production_qc.gripper_assembly_qc_ot3 --simulate
 	$(python) -m hardware_testing.production_qc.ninety_six_assembly_qc_ot3 --simulate
+	$(python) -m hardware_testing.production_qc.ninety_six_assembly_qc_ot3 --simulate --pipette 200
 	$(python) -m hardware_testing.production_qc.stress_test_qc_ot3 --simulate
 	$(python) -m hardware_testing.production_qc.firmware_check --simulate
 	$(python) -m hardware_testing.production_qc.belt_calibration_ot3 --simulate
@@ -162,6 +167,10 @@ test-liquid-sense:
 
 .PHONY: test-integration
 test-integration: test-production-qc test-examples test-scripts test-gravimetric
+
+.PHONY: test-stacker
+test-stacker:
+	$(python) -m hardware_testing.modules.flex_stacker_evt_qc --simulate
 
 .PHONY: lint
 lint:
@@ -221,6 +230,11 @@ push-no-restart-ot3: sdist Pipfile.lock
 
 .PHONY: push-ot3
 push-ot3: push-no-restart-ot3 push-plot-webpage-ot3 push-description-ot3 push-labware-ot3
+
+.PHONE: open-dev-app
+open-dev-app:
+	cd .. && $(MAKE) -C app dev
+
 
 .PHONY: push-all
 push-all: clean wheel push-no-restart push-plot-webpage-ot3

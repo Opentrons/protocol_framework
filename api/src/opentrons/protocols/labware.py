@@ -2,13 +2,14 @@ from __future__ import annotations
 
 import logging
 import json
-
+import os
 from pathlib import Path
-from typing import Any, AnyStr, Dict, Optional, Union
+from typing import Any, AnyStr, Dict, Optional, Union, List
 
 import jsonschema  # type: ignore
 
 from opentrons_shared_data import load_shared_data, get_shared_data_root
+from opentrons.protocols.api_support.util import ModifiedList
 from opentrons.protocols.api_support.constants import (
     OPENTRONS_NAMESPACE,
     CUSTOM_NAMESPACE,
@@ -59,6 +60,29 @@ def get_labware_definition(
         pass
 
     return _get_standard_labware_definition(load_name, namespace, version)
+
+
+def get_all_labware_definitions(schema_version: str = "2") -> List[str]:
+    """
+    Return a list of standard and custom labware definitions with load_name +
+        name_space + version existing on the robot
+    """
+    labware_list = ModifiedList()
+
+    def _check_for_subdirectories(path: Union[str, Path, os.DirEntry[str]]) -> None:
+        with os.scandir(path) as top_path:
+            for sub_dir in top_path:
+                if sub_dir.is_dir():
+                    labware_list.append(sub_dir.name)
+
+    # check for standard labware
+    _check_for_subdirectories(
+        get_shared_data_root() / STANDARD_DEFS_PATH / schema_version
+    )
+    # check for custom labware
+    for namespace in os.scandir(USER_DEFS_PATH):
+        _check_for_subdirectories(namespace)
+    return labware_list
 
 
 def save_definition(
@@ -114,14 +138,24 @@ def verify_definition(
     :raises jsonschema.ValidationError: If the definition is not valid.
     :returns: The parsed definition
     """
-    schema_body = load_shared_data("labware/schemas/2.json").decode("utf-8")
-    labware_schema_v2 = json.loads(schema_body)
+    schemata_by_version = {
+        2: json.loads(load_shared_data("labware/schemas/2.json").decode("utf-8")),
+        3: json.loads(load_shared_data("labware/schemas/3.json").decode("utf-8")),
+    }
 
     if isinstance(contents, dict):
         to_return = contents
     else:
         to_return = json.loads(contents)
-    jsonschema.validate(to_return, labware_schema_v2)
+    try:
+        schema_version = to_return["schemaVersion"]
+        schema = schemata_by_version[schema_version]
+    except KeyError:
+        raise RuntimeError(
+            f'Invalid or unknown labware schema version {to_return.get("schemaVersion", None)}'
+        )
+    jsonschema.validate(to_return, schema)
+
     # we can type ignore this because if it passes the jsonschema it has
     # the correct structure
     return to_return  # type: ignore[return-value]
@@ -176,7 +210,6 @@ def _get_labware_definition_from_bundle(
 def _get_standard_labware_definition(
     load_name: str, namespace: Optional[str] = None, version: Optional[int] = None
 ) -> LabwareDefinition:
-
     if version is None:
         checked_version = 1
     else:

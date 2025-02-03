@@ -21,6 +21,33 @@ import {
   shakeTimeRequired,
   pauseTimeRequired,
   pauseTemperatureRequired,
+  newLabwareLocationRequired,
+  labwareToMoveRequired,
+  pauseModuleRequired,
+  aspirateLabwareRequired,
+  dispenseLabwareRequired,
+  aspirateMixVolumeRequired,
+  aspirateMixTimesRequired,
+  aspirateDelayDurationRequired,
+  aspirateAirGapVolumeRequired,
+  dispenseMixTimesRequired,
+  dispenseDelayDurationRequired,
+  dispenseAirGapVolumeRequired,
+  dispenseMixVolumeRequired,
+  blowoutLocationRequired,
+  aspirateWellsRequired,
+  dispenseWellsRequired,
+  mixWellsRequired,
+  mixLabwareRequired,
+  volumeRequired,
+  timesRequired,
+  pauseActionRequired,
+  wavelengthRequired,
+  referenceWavelengthRequired,
+  fileNameRequired,
+  wavelengthOutOfRange,
+  referenceWavelengthOutOfRange,
+  absorbanceReaderModuleIdRequired,
 } from './errors'
 
 import {
@@ -35,7 +62,7 @@ import {
 } from './warnings'
 
 import type { FormWarning, FormWarningType } from './warnings'
-import type { HydratedFormdata, StepType } from '../../form-types'
+import type { HydratedFormData, StepType } from '../../form-types'
 import type { FormError } from './errors'
 export { handleFormChange } from './handleFormChange'
 export { createBlankForm } from './createBlankForm'
@@ -51,10 +78,20 @@ export { getNextDefaultEngageHeight } from './getNextDefaultEngageHeight'
 export { stepFormToArgs } from './stepFormToArgs'
 export type { FormError, FormWarning, FormWarningType }
 interface FormHelpers {
-  getErrors?: (arg: HydratedFormdata) => FormError[]
+  getErrors?: (arg: HydratedFormData) => FormError[]
   getWarnings?: (arg: unknown) => FormWarning[]
 }
 const stepFormHelperMap: Partial<Record<StepType, FormHelpers>> = {
+  absorbanceReader: {
+    getErrors: composeErrors(
+      wavelengthRequired,
+      referenceWavelengthRequired,
+      fileNameRequired,
+      wavelengthOutOfRange,
+      referenceWavelengthOutOfRange,
+      absorbanceReaderModuleIdRequired
+    ),
+  },
   heaterShaker: {
     getErrors: composeErrors(
       shakeSpeedRequired,
@@ -63,20 +100,52 @@ const stepFormHelperMap: Partial<Record<StepType, FormHelpers>> = {
     ),
   },
   mix: {
-    getErrors: composeErrors(incompatibleLabware, volumeTooHigh),
+    getErrors: composeErrors(
+      incompatibleLabware,
+      volumeTooHigh,
+      mixWellsRequired,
+      mixLabwareRequired,
+      volumeRequired,
+      timesRequired,
+      aspirateDelayDurationRequired,
+      dispenseDelayDurationRequired,
+      blowoutLocationRequired
+    ),
     getWarnings: composeWarnings(
       belowPipetteMinimumVolume,
       mixTipPositionInTube
     ),
   },
   pause: {
-    getErrors: composeErrors(pauseTimeRequired, pauseTemperatureRequired),
+    getErrors: composeErrors(
+      pauseActionRequired,
+      pauseTimeRequired,
+      pauseTemperatureRequired,
+      pauseModuleRequired
+    ),
+  },
+  moveLabware: {
+    getErrors: composeErrors(labwareToMoveRequired, newLabwareLocationRequired),
   },
   moveLiquid: {
     getErrors: composeErrors(
       incompatibleAspirateLabware,
       incompatibleDispenseLabware,
-      wellRatioMoveLiquid
+      wellRatioMoveLiquid,
+      volumeRequired,
+      aspirateLabwareRequired,
+      dispenseLabwareRequired,
+      aspirateMixTimesRequired,
+      aspirateMixVolumeRequired,
+      aspirateDelayDurationRequired,
+      aspirateAirGapVolumeRequired,
+      dispenseMixTimesRequired,
+      dispenseMixVolumeRequired,
+      dispenseDelayDurationRequired,
+      dispenseAirGapVolumeRequired,
+      blowoutLocationRequired,
+      aspirateWellsRequired,
+      dispenseWellsRequired
     ),
     getWarnings: composeWarnings(
       belowPipetteMinimumVolume,
@@ -111,11 +180,10 @@ const stepFormHelperMap: Partial<Record<StepType, FormHelpers>> = {
 }
 export const getFormErrors = (
   stepType: StepType,
-  formData: HydratedFormdata
+  formData: HydratedFormData
 ): FormError[] => {
   const formErrorGetter =
-    // @ts-expect-error(sa, 2021-6-20): not a valid type narrow
-    stepFormHelperMap[stepType] && stepFormHelperMap[stepType].getErrors
+    stepFormHelperMap[stepType] && stepFormHelperMap[stepType]?.getErrors
   const errors = formErrorGetter != null ? formErrorGetter(formData) : []
   return errors
 }
@@ -124,8 +192,7 @@ export const getFormWarnings = (
   formData: unknown
 ): FormWarning[] => {
   const formWarningGetter =
-    // @ts-expect-error(sa, 2021-6-20): not a valid type narrow
-    stepFormHelperMap[stepType] && stepFormHelperMap[stepType].getWarnings
+    stepFormHelperMap[stepType] && stepFormHelperMap[stepType]?.getWarnings
   const warnings = formWarningGetter != null ? formWarningGetter(formData) : []
   return warnings
 }

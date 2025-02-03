@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import without from 'lodash/without'
-import { THERMOCYCLER_MODULE_V2 } from '@opentrons/shared-data'
+import { FLEX_ROBOT_TYPE } from '@opentrons/shared-data'
 import {
   ALIGN_CENTER,
   BORDERS,
@@ -9,7 +9,6 @@ import {
   EmptySelectorButton,
   Flex,
   ListItem,
-  ListItemCustomize,
   SPACING,
   StyledText,
   TYPOGRAPHY,
@@ -23,6 +22,7 @@ import {
   getNumSlotsAvailable,
 } from './utils'
 import { HandleEnter } from '../../atoms/HandleEnter'
+import { PDListItemCustomize as ListItemCustomize } from './PDListItemCustomize'
 
 import type { DropdownBorder } from '@opentrons/components'
 import type { AdditionalEquipment, WizardTileProps } from './types'
@@ -39,13 +39,7 @@ export function SelectFixtures(props: WizardTileProps): JSX.Element | null {
   const additionalEquipment = watch('additionalEquipment')
   const modules = watch('modules')
   const { t } = useTranslation(['create_new_protocol', 'shared'])
-  const numSlotsAvailable = getNumSlotsAvailable(modules, additionalEquipment)
 
-  const hasTC =
-    modules != null &&
-    Object.values(modules).some(
-      module => module.model === THERMOCYCLER_MODULE_V2
-    )
   const hasTrash = additionalEquipment.some(
     ae => ae === 'trashBin' || ae === 'wasteChute'
   )
@@ -70,11 +64,21 @@ export function SelectFixtures(props: WizardTileProps): JSX.Element | null {
   return (
     <HandleEnter onEnter={handleProceed}>
       <WizardBody
+        robotType={FLEX_ROBOT_TYPE}
         stepNumber={5}
         header={t('add_fixtures')}
         subHeader={t('fixtures_replace')}
         disabled={!hasTrash}
         goBack={() => {
+          // Note this is avoid the following case issue.
+          // https://github.com/Opentrons/opentrons/pull/17344#pullrequestreview-2576591908
+          setValue(
+            'additionalEquipment',
+            additionalEquipment.filter(
+              ae => ae === 'gripper' || ae === 'trashBin'
+            )
+          )
+
           goBack(1)
         }}
         proceed={handleProceed}
@@ -87,25 +91,33 @@ export function SelectFixtures(props: WizardTileProps): JSX.Element | null {
               </StyledText>
             ) : null}
             <Flex gridGap={SPACING.spacing4} flexWrap={WRAP}>
-              {filteredAdditionalEquipment.map(equipment => (
-                <EmptySelectorButton
-                  disabled={numSlotsAvailable === 0}
-                  key={equipment}
-                  textAlignment={TYPOGRAPHY.textAlignLeft}
-                  iconName="plus"
-                  text={t(`${equipment}`)}
-                  onClick={() => {
-                    if (numSlotsAvailable === 0) {
-                      makeSnackbar(t('slots_limit_reached') as string)
-                    } else {
-                      setValue('additionalEquipment', [
-                        ...additionalEquipment,
-                        equipment,
-                      ])
-                    }
-                  }}
-                />
-              ))}
+              {filteredAdditionalEquipment.map(equipment => {
+                const numSlotsAvailable = getNumSlotsAvailable(
+                  modules,
+                  additionalEquipment,
+                  equipment
+                )
+
+                return (
+                  <EmptySelectorButton
+                    disabled={numSlotsAvailable === 0}
+                    key={equipment}
+                    textAlignment={TYPOGRAPHY.textAlignLeft}
+                    iconName="plus"
+                    text={t(`${equipment}`)}
+                    onClick={() => {
+                      if (numSlotsAvailable === 0) {
+                        makeSnackbar(t('slots_limit_reached') as string)
+                      } else {
+                        setValue('additionalEquipment', [
+                          ...additionalEquipment,
+                          equipment,
+                        ])
+                      }
+                    }}
+                  />
+                )
+              })}
             </Flex>
           </Flex>
           <Flex flexDirection={DIRECTION_COLUMN} gridGap={SPACING.spacing12}>
@@ -117,6 +129,11 @@ export function SelectFixtures(props: WizardTileProps): JSX.Element | null {
                 const numStagingAreas = filteredAdditionalEquipmentWithoutGripper.filter(
                   additionalEquipment => additionalEquipment === 'stagingArea'
                 )?.length
+                const numSlotsAvailable = getNumSlotsAvailable(
+                  modules,
+                  additionalEquipment,
+                  ae
+                )
 
                 const dropdownProps = {
                   currentOption: {
@@ -127,11 +144,18 @@ export function SelectFixtures(props: WizardTileProps): JSX.Element | null {
                   filterOptions: getNumOptions(
                     numSlotsAvailable >= MAX_SLOTS
                       ? MAX_SLOTS
-                      : numSlotsAvailable + numStagingAreas - (hasTC ? 1 : 0)
+                      : numSlotsAvailable
                   ),
                   onClick: (value: string) => {
                     const inputNum = parseInt(value)
-                    let updatedStagingAreas = [...additionalEquipment]
+                    const currentStagingAreas = additionalEquipment.filter(
+                      additional => additional === 'stagingArea'
+                    )
+                    const otherEquipment = additionalEquipment.filter(
+                      additional => additional !== 'stagingArea'
+                    )
+                    let updatedStagingAreas = currentStagingAreas
+                    // let updatedStagingAreas = [...additionalEquipment]
 
                     if (inputNum > numStagingAreas) {
                       const difference = inputNum - numStagingAreas
@@ -140,13 +164,16 @@ export function SelectFixtures(props: WizardTileProps): JSX.Element | null {
                         ...Array(difference).fill(ae),
                       ]
                     } else {
-                      updatedStagingAreas = updatedStagingAreas.slice(
+                      updatedStagingAreas = currentStagingAreas.slice(
                         0,
                         inputNum
                       )
                     }
 
-                    setValue('additionalEquipment', updatedStagingAreas)
+                    setValue('additionalEquipment', [
+                      ...otherEquipment,
+                      ...updatedStagingAreas,
+                    ])
                   },
                 }
                 return (

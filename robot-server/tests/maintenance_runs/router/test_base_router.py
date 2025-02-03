@@ -1,10 +1,11 @@
 """Tests for base /runs routes."""
+
 import pytest
 from datetime import datetime
 from decoy import Decoy
 
 from opentrons.types import DeckSlotName
-from opentrons.protocol_engine import LabwareOffsetCreate, types as pe_types
+from opentrons.protocol_engine import types as pe_types
 
 from robot_server.errors.error_responses import ApiError
 from robot_server.service.json_api import (
@@ -44,11 +45,11 @@ def mock_notify_publishers() -> None:
 
 
 @pytest.fixture
-def labware_offset_create() -> LabwareOffsetCreate:
+def labware_offset_create() -> pe_types.LegacyLabwareOffsetCreate:
     """Get a labware offset create request value object."""
-    return pe_types.LabwareOffsetCreate(
+    return pe_types.LegacyLabwareOffsetCreate(
         definitionUri="namespace_1/load_name_1/123",
-        location=pe_types.LabwareOffsetLocation(slotName=DeckSlotName.SLOT_1),
+        location=pe_types.LegacyLabwareOffsetLocation(slotName=DeckSlotName.SLOT_1),
         vector=pe_types.LabwareOffsetVector(x=1, y=2, z=3),
     )
 
@@ -75,6 +76,7 @@ async def test_create_run(
         labwareOffsets=[],
         status=pe_types.EngineStatus.IDLE,
         liquids=[],
+        liquidClasses=[],
         hasEverEnteredErrorRecovery=False,
     )
 
@@ -150,6 +152,7 @@ async def test_get_run_data_from_url(
         labware=[],
         labwareOffsets=[],
         liquids=[],
+        liquidClasses=[],
         hasEverEnteredErrorRecovery=False,
     )
 
@@ -200,6 +203,7 @@ async def test_get_run() -> None:
         labware=[],
         labwareOffsets=[],
         liquids=[],
+        liquidClasses=[],
         hasEverEnteredErrorRecovery=False,
     )
 
@@ -226,6 +230,7 @@ async def test_get_current_run(
         labware=[],
         labwareOffsets=[],
         liquids=[],
+        liquidClasses=[],
         hasEverEnteredErrorRecovery=False,
     )
     decoy.when(mock_maintenance_run_data_manager.current_run_id).then_return(

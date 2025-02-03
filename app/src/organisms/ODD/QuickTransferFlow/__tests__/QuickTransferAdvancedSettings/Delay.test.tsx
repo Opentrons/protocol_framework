@@ -1,4 +1,3 @@
-import type * as React from 'react'
 import { fireEvent, screen } from '@testing-library/react'
 import { describe, it, expect, afterEach, vi, beforeEach } from 'vitest'
 
@@ -8,6 +7,8 @@ import { renderWithProviders } from '/app/__testing-utils__'
 import { i18n } from '/app/i18n'
 import { useTrackEventWithRobotSerial } from '/app/redux-resources/analytics'
 import { Delay } from '../../QuickTransferAdvancedSettings/Delay'
+
+import type { ComponentProps } from 'react'
 import type { QuickTransferSummaryState } from '../../types'
 
 vi.mock('/app/redux-resources/analytics')
@@ -21,7 +22,7 @@ vi.mock('@opentrons/components', async importOriginal => {
   }
 })
 
-const render = (props: React.ComponentProps<typeof Delay>) => {
+const render = (props: ComponentProps<typeof Delay>) => {
   return renderWithProviders(<Delay {...props} />, {
     i18nInstance: i18n,
   })
@@ -29,7 +30,7 @@ const render = (props: React.ComponentProps<typeof Delay>) => {
 let mockTrackEventWithRobotSerial: any
 
 describe('Delay', () => {
-  let props: React.ComponentProps<typeof Delay>
+  let props: ComponentProps<typeof Delay>
 
   beforeEach(() => {
     props = {
@@ -131,7 +132,7 @@ describe('Delay', () => {
     expect(vi.mocked(InputField)).toHaveBeenCalledWith(
       {
         title: 'Delay duration (seconds)',
-        error: 'Value must be between 1-9999999999',
+        error: 'Value must be between 1 to 9999999999',
         readOnly: true,
         type: 'number',
         value: 0,
@@ -157,7 +158,7 @@ describe('Delay', () => {
     expect(vi.mocked(InputField)).toHaveBeenCalledWith(
       {
         title: 'Delay position from bottom of well (mm)',
-        error: 'Value must be between 1-100',
+        error: 'Value must be between 1 to 100',
         readOnly: true,
         type: 'number',
         value: 0,
@@ -187,7 +188,7 @@ describe('Delay', () => {
     expect(vi.mocked(InputField)).toHaveBeenCalledWith(
       {
         title: 'Delay position from bottom of well (mm)',
-        error: 'Value must be between 1-400',
+        error: 'Value must be between 1 to 400',
         readOnly: true,
         type: 'number',
         value: 0,

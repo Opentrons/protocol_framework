@@ -327,7 +327,7 @@ export interface AbsorbanceReaderInitializeCreateCommand
 export interface AbsorbanceReaderReadCreateCommand
   extends CommonCommandCreateInfo {
   commandType: 'absorbanceReader/read'
-  params: ModuleOnlyParams
+  params: { moduleId: string; fileName?: string | null }
 }
 export interface EngageMagnetParams {
   moduleId: string

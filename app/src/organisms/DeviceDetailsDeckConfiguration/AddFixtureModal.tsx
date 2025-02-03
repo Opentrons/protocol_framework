@@ -1,4 +1,4 @@
-import * as React from 'react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { css } from 'styled-components'
 
@@ -7,15 +7,15 @@ import {
   BORDERS,
   Btn,
   COLORS,
+  CURSOR_DEFAULT,
   DIRECTION_COLUMN,
   DIRECTION_ROW,
   Flex,
   JUSTIFY_SPACE_BETWEEN,
   LegacyStyledText,
-  SPACING,
   Modal,
+  SPACING,
   TYPOGRAPHY,
-  CURSOR_DEFAULT,
 } from '@opentrons/components'
 import {
   useModulesQuery,
@@ -25,11 +25,11 @@ import {
   getCutoutDisplayName,
   getFixtureDisplayName,
   ABSORBANCE_READER_CUTOUTS,
-  ABSORBANCE_READER_V1,
   ABSORBANCE_READER_V1_FIXTURE,
+  ABSORBANCE_READER_V1,
   HEATER_SHAKER_CUTOUTS,
-  HEATERSHAKER_MODULE_V1,
   HEATERSHAKER_MODULE_V1_FIXTURE,
+  HEATERSHAKER_MODULE_V1,
   MAGNETIC_BLOCK_V1_FIXTURE,
   SINGLE_CENTER_CUTOUTS,
   SINGLE_LEFT_CUTOUTS,
@@ -38,8 +38,8 @@ import {
   STAGING_AREA_RIGHT_SLOT_FIXTURE,
   STAGING_AREA_SLOT_WITH_MAGNETIC_BLOCK_V1_FIXTURE,
   TEMPERATURE_MODULE_CUTOUTS,
-  TEMPERATURE_MODULE_V2,
   TEMPERATURE_MODULE_V2_FIXTURE,
+  TEMPERATURE_MODULE_V2,
   THERMOCYCLER_MODULE_CUTOUTS,
   THERMOCYCLER_MODULE_V2,
   THERMOCYCLER_V2_FRONT_FIXTURE,
@@ -47,6 +47,10 @@ import {
   TRASH_BIN_ADAPTER_FIXTURE,
   WASTE_CHUTE_CUTOUT,
   WASTE_CHUTE_FIXTURES,
+  FLEX_STACKER_MODULE_V1,
+  FLEX_STACKER_V1_FIXTURE,
+  FLEX_STACKER_WITH_WASTE_CHUTE_ADAPTER_COVERED_FIXTURE,
+  FLEX_STACKER_WTIH_WASTE_CHUTE_ADAPTER_NO_COVER_FIXTURE,
 } from '@opentrons/shared-data'
 
 import { ODD_FOCUS_VISIBLE } from '/app/atoms/buttons/constants'
@@ -54,6 +58,7 @@ import { TertiaryButton } from '/app/atoms/buttons'
 import { OddModal } from '/app/molecules/OddModal'
 import { useNotifyDeckConfigurationQuery } from '/app/resources/deck_configuration/'
 
+import type { MouseEventHandler } from 'react'
 import type {
   CutoutConfig,
   CutoutId,
@@ -101,9 +106,7 @@ export function AddFixtureModal({
     // only show provided options if given as props
     initialStage = 'providedOptions'
   }
-  const [optionStage, setOptionStage] = React.useState<OptionStage>(
-    initialStage
-  )
+  const [optionStage, setOptionStage] = useState<OptionStage>(initialStage)
 
   const modalHeader: OddModalHeaderBaseProps = {
     title: t('add_to_slot', {
@@ -250,6 +253,52 @@ export function AddFixtureModal({
         ]
       }
     }
+    if (
+      cutoutId === 'cutoutD3' &&
+      unconfiguredMods.some(m => m.moduleModel === FLEX_STACKER_MODULE_V1)
+    ) {
+      const unconfiguredFlexStackers: CutoutConfig[][] = []
+      unconfiguredMods
+        .filter(mod => mod.moduleModel === FLEX_STACKER_MODULE_V1)
+        .forEach(mod => {
+          unconfiguredFlexStackers.push([
+            {
+              cutoutId,
+              cutoutFixtureId: FLEX_STACKER_V1_FIXTURE,
+              opentronsModuleSerialNumber: mod.serialNumber,
+            },
+          ])
+          unconfiguredFlexStackers.push([
+            {
+              cutoutId,
+              cutoutFixtureId: FLEX_STACKER_WITH_WASTE_CHUTE_ADAPTER_COVERED_FIXTURE,
+              opentronsModuleSerialNumber: mod.serialNumber,
+            },
+          ])
+          unconfiguredFlexStackers.push([
+            {
+              cutoutId,
+              cutoutFixtureId: FLEX_STACKER_WTIH_WASTE_CHUTE_ADAPTER_NO_COVER_FIXTURE,
+              opentronsModuleSerialNumber: mod.serialNumber,
+            },
+          ])
+        })
+      availableOptions.push(...unconfiguredFlexStackers)
+    } else if (
+      STAGING_AREA_CUTOUTS.includes(cutoutId) &&
+      unconfiguredMods.some(m => m.moduleModel === FLEX_STACKER_MODULE_V1)
+    ) {
+      const unconfiguredFlexStackers = unconfiguredMods
+        .filter(mod => mod.moduleModel === FLEX_STACKER_MODULE_V1)
+        .map(mod => [
+          {
+            cutoutId,
+            cutoutFixtureId: FLEX_STACKER_V1_FIXTURE,
+            opentronsModuleSerialNumber: mod.serialNumber,
+          },
+        ])
+      availableOptions = [...availableOptions, ...unconfiguredFlexStackers]
+    }
   } else if (optionStage === 'wasteChuteOptions') {
     availableOptions = WASTE_CHUTE_FIXTURES.map(fixture => [
       {
@@ -316,22 +365,30 @@ export function AddFixtureModal({
     closeModal()
   }
 
-  const fixtureOptions = availableOptions.map(cutoutConfigs => (
-    <FixtureOption
-      key={cutoutConfigs[0].cutoutFixtureId}
-      optionName={getFixtureDisplayName(
-        cutoutConfigs[0].cutoutFixtureId,
-        (modulesData?.data ?? []).find(
-          m => m.serialNumber === cutoutConfigs[0].opentronsModuleSerialNumber
-        )?.usbPort.port
-      )}
-      buttonText={t('add')}
-      onClickHandler={() => {
-        handleAddFixture(cutoutConfigs)
-      }}
-      isOnDevice={isOnDevice}
-    />
-  ))
+  const fixtureOptions = availableOptions.map(cutoutConfigs => {
+    const usbPort = (modulesData?.data ?? []).find(
+      m => m.serialNumber === cutoutConfigs[0].opentronsModuleSerialNumber
+    )?.usbPort
+    const portDisplay =
+      usbPort?.hubPort != null
+        ? `${usbPort.port}.${usbPort.hubPort}`
+        : usbPort?.port
+
+    return (
+      <FixtureOption
+        key={cutoutConfigs[0].cutoutFixtureId}
+        optionName={getFixtureDisplayName(
+          cutoutConfigs[0].cutoutFixtureId,
+          portDisplay
+        )}
+        buttonText={t('add')}
+        onClickHandler={() => {
+          handleAddFixture(cutoutConfigs)
+        }}
+        isOnDevice={isOnDevice}
+      />
+    )
+  })
 
   return (
     <>
@@ -370,8 +427,8 @@ export function AddFixtureModal({
               }}
               aria-label="back"
               paddingX={SPACING.spacing16}
-              marginTop={'1.44rem'}
-              marginBottom={'0.56rem'}
+              marginTop="1.44rem"
+              marginBottom="0.56rem"
             >
               <LegacyStyledText css={GO_BACK_BUTTON_STYLE}>
                 {t('shared:go_back')}
@@ -425,7 +482,7 @@ const GO_BACK_BUTTON_STYLE = css`
 `
 
 interface FixtureOptionProps {
-  onClickHandler: React.MouseEventHandler
+  onClickHandler: MouseEventHandler
   optionName: string
   buttonText: string
   isOnDevice: boolean

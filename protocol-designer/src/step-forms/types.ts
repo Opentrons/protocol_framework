@@ -62,8 +62,18 @@ export interface HeaterShakerModuleState {
 export interface MagneticBlockState {
   type: typeof MAGNETIC_BLOCK_TYPE
 }
+
+export type InitializationMode = 'single' | 'multi'
+export interface Initialization {
+  mode: InitializationMode
+  wavelengths: number[]
+  referenceWavelength?: number
+}
+
 export interface AbsorbanceReaderState {
   type: typeof ABSORBANCE_READER_TYPE
+  lidOpen: boolean | null
+  initialization: Initialization | null
 }
 export interface ModuleTemporalProperties {
   slot: DeckSlot

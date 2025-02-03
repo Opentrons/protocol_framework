@@ -307,9 +307,6 @@ const stepFieldHelperMap: Record<StepFieldName, StepFieldHelpers> = {
     maskValue: composeMaskers(maskToFloat, trimDecimals(1)),
     castValue: Number,
   },
-  setTemperature: {
-    getErrors: composeErrors(requiredField),
-  },
   targetTemperature: {
     getErrors: composeErrors(
       minFieldValue(MIN_TEMP_MODULE_TEMP),
@@ -419,12 +416,15 @@ const stepFieldHelperMap: Record<StepFieldName, StepFieldHelpers> = {
   },
   aspirate_flowRate: {
     maskValue: composeMaskers(trimDecimals(1)),
+    castValue: numberOrNull,
   },
   dispense_flowRate: {
     maskValue: composeMaskers(trimDecimals(1)),
+    castValue: numberOrNull,
   },
   mix_flowRate: {
     maskValue: composeMaskers(trimDecimals(1)),
+    castValue: numberOrNull,
   },
 }
 const profileFieldHelperMap: Record<string, StepFieldHelpers> = {
