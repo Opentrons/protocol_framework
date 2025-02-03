@@ -3409,7 +3409,6 @@ def test_validate_dispense_volume_into_well_meniscus(
         )
 
 
-<<<<<<< HEAD
 def test_get_latest_volume_information(
     decoy: Decoy,
     mock_labware_view: LabwareView,

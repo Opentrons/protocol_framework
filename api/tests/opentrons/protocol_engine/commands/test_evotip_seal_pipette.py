@@ -6,7 +6,7 @@ from datetime import datetime
 from decoy import Decoy, matchers
 from unittest.mock import sentinel
 
-from opentrons.protocols.models import LabwareDefinition
+from opentrons_shared_data.labware.labware_definition import LabwareDefinition
 
 from opentrons_shared_data.errors.exceptions import StallOrCollisionDetectedError
 

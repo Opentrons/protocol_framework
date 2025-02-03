@@ -11,6 +11,7 @@ from .pipetting_common import (
     DispenseVolumeMixin,
     BaseLiquidHandlingResult,
     dispense_in_place,
+    DEFAULT_CORRECTION_VOLUME,
 )
 from .movement_common import (
     LiquidHandlingWellLocationMixin,
@@ -115,6 +116,7 @@ class EvotipDispenseImplementation(
             },
             pipetting=self._pipetting,
             model_utils=self._model_utils,
+            correction_volume=params.correctionVolume or DEFAULT_CORRECTION_VOLUME,
         )
         if isinstance(result, DefinedErrorData):
             # TODO (chb, 2025-01-29): Remove this and the OverpressureError returns once disabled for this function
