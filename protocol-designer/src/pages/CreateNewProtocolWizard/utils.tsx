@@ -55,26 +55,34 @@ interface ModuleCounts {
 }
 
 const countModules = (modules: WizardFormState['modules']): ModuleCounts => {
-  const magneticBlockCount = Object.values(modules || {}).filter(
-    module => module.type === MAGNETIC_BLOCK_TYPE
-  ).length
-  const heaterShakerCount = Object.values(modules || {}).filter(
-    module => module.type === HEATERSHAKER_MODULE_TYPE
-  ).length
-  const temperatureCount = Object.values(modules || {}).filter(
-    module => module.type === TEMPERATURE_MODULE_TYPE
-  ).length
-  const plateReaderCount = Object.values(modules || {}).filter(
-    module => module.type === ABSORBANCE_READER_TYPE
-  ).length
-  return {
-    magneticBlockCount,
-    heaterShakerCount,
-    temperatureCount,
-    plateReaderCount,
-  }
+  return Object.values(modules || {}).reduce(
+    (acc, module) => {
+      switch (module.type) {
+        case MAGNETIC_BLOCK_TYPE:
+          acc.magneticBlockCount += 1
+          break
+        case HEATERSHAKER_MODULE_TYPE:
+          acc.heaterShakerCount += 1
+          break
+        case TEMPERATURE_MODULE_TYPE:
+          acc.temperatureCount += 1
+          break
+        case ABSORBANCE_READER_TYPE:
+          acc.plateReaderCount += 1
+          break
+        default:
+          break
+      }
+      return acc
+    },
+    {
+      magneticBlockCount: 0,
+      heaterShakerCount: 0,
+      temperatureCount: 0,
+      plateReaderCount: 0,
+    }
+  )
 }
-
 export const getNumSlotsAvailable = (
   modules: WizardFormState['modules'],
   additionalEquipment: WizardFormState['additionalEquipment'],
