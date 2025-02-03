@@ -5,6 +5,7 @@ import {
   SOURCE_LABWARE,
   DEFAULT_BLOWOUT_WELL,
   DEST_LABWARE,
+  AIR_GAP_META,
 } from './data'
 import { ONE_CHANNEL_WASTE_CHUTE_ADDRESSABLE_AREA } from '@opentrons/shared-data'
 
@@ -246,6 +247,7 @@ export const makeDispenseAirGapHelper: MakeDispenseAirGapHelper<AspDispAirgapPar
     volume,
     ...params,
   },
+  meta: AIR_GAP_META,
 })
 const _defaultTouchTipParams = {
   pipetteId: DEFAULT_PIPETTE,
