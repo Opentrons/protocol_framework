@@ -15,6 +15,7 @@ import {
   getModuleDef2,
   getPositionFromSlotId,
 } from '@opentrons/shared-data'
+import { getLabwareSlot } from '@opentrons/step-generation'
 import { getInitialDeckSetup } from '../../../step-forms/selectors'
 import { LabwareOnDeck as LabwareOnDeckComponent } from '../../../organisms'
 import { lightFill, darkFill } from './DeckSetupContainer'
@@ -62,10 +63,8 @@ export const FixtureRender = (props: FixtureRenderProps): JSX.Element => {
     return (
       <>
         {adjacentLabwares.map(adjacentLabware => {
-          const slotPosition = getPositionFromSlotId(
-            adjacentLabware.slot,
-            deckDef
-          )
+          const slot = getLabwareSlot(adjacentLabware.id, labware, modules)
+          const slotPosition = getPositionFromSlotId(slot, deckDef)
           return (
             <LabwareOnDeckComponent
               key={adjacentLabware.id}
