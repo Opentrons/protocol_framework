@@ -24,7 +24,7 @@ runs:
     - name: 'Install udev for USB-detection'
       if: runner.os == 'Linux'
       shell: bash
-      run: sudo apt update && apt-get install libudev-dev
+      run: sudo apt-get update && sudo apt-get install libudev-dev
 
     - name: 'Setup JS'
       shell: bash
