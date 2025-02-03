@@ -345,7 +345,7 @@ export function MoveLiquidTools(props: StepFormProps): JSX.Element {
               <Flex {...targetProps}>
                 <Icon
                   name="information"
-                  size={SPACING.spacing12}
+                  size="1rem"
                   color={COLORS.grey60}
                   data-testid="information_icon"
                 />
