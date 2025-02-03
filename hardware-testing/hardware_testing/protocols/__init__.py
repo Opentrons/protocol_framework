@@ -1,6 +1,6 @@
 """Protocols."""
 from opentrons.protocol_api import ParameterContext
-
+from itertools import zip_longest
 from opentrons.protocols.labware import get_all_labware_definitions
 from typing import List
 from opentrons.protocols.parameters.types import ParameterChoice
@@ -128,4 +128,26 @@ def create_tube_volume_parameter(parameters: ParameterContext) -> None:
         minimum=15,
         maximum=50,
         unit="mL",
+    )
+
+
+def create_dye_source_well_parameter(parameters: ParameterContext) -> None:
+    """Create parameter for well number."""
+    rows = ["A", "B", "C", "D", "E", "F", "G", "H"]
+    cols = list(range(13))[1:]
+    list_of_wells: List[ParameterChoice] = []
+    for col in cols:
+        for row in rows:
+            well = row + str(col)
+            list_of_wells.append(
+                {
+                    "display_name": well,
+                    "value": well,
+                }
+            )
+    parameters.add_str(
+        variable_name="dye_source_well",
+        display_name="Dye Source Well",
+        default="A1",
+        choices=list_of_wells,
     )
