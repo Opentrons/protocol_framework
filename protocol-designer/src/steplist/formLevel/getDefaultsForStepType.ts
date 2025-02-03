@@ -135,6 +135,7 @@ export function getDefaultsForStepType(
         labwareLocationUpdate: {},
         moduleLocationUpdate: {},
         pipetteLocationUpdate: {},
+        additionalEquipmentLocationUpdate: {},
       }
 
     case 'magnet':

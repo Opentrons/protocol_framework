@@ -19,7 +19,11 @@ import {
 } from '@opentrons/shared-data'
 import { rootReducer as labwareDefsRootReducer } from '../../labware-defs'
 import { getCutoutIdByAddressableArea, uuid } from '../../utils'
-import { INITIAL_DECK_SETUP_STEP_ID, SPAN7_8_10_11_SLOT } from '../../constants'
+import {
+  GRIPPER_LOCATION,
+  INITIAL_DECK_SETUP_STEP_ID,
+  SPAN7_8_10_11_SLOT,
+} from '../../constants'
 import { getPDMetadata } from '../../file-types'
 import {
   getDefaultsForStepType,
@@ -243,6 +247,7 @@ export const initialDeckSetupStepForm: FormData = {
   labwareLocationUpdate: {},
   pipetteLocationUpdate: {},
   moduleLocationUpdate: {},
+  additionalEquipmentLocationUpdate: {},
 }
 export const initialSavedStepFormsState: SavedStepFormState = {
   [INITIAL_DECK_SETUP_STEP_ID]: initialDeckSetupStepForm,
@@ -371,6 +376,70 @@ export const savedStepForms = (
         ...getDefaultsForStepType(stepForm.stepType),
         ...stepForm,
       }))
+    }
+    case 'CREATE_DECK_FIXTURE': {
+      const { id, location } = action.payload
+      const prevInitialDeckSetupStep =
+        savedStepForms[INITIAL_DECK_SETUP_STEP_ID]
+      return {
+        ...savedStepForms,
+        [INITIAL_DECK_SETUP_STEP_ID]: {
+          ...prevInitialDeckSetupStep,
+          additionalEquipmentLocationUpdate: {
+            ...prevInitialDeckSetupStep.additionalEquipmentLocationUpdate,
+            [id]: location,
+          },
+        },
+      }
+    }
+    case 'DELETE_DECK_FIXTURE': {
+      const { id } = action.payload
+      return mapValues(
+        savedStepForms,
+        (form: FormData): FormData => {
+          return {
+            ...form,
+            additionalEquipmentLocationUpdate: omit(
+              form.additionalEquipmentLocationUpdate,
+              id
+            ),
+          }
+        }
+      )
+    }
+    case 'TOGGLE_IS_GRIPPER_REQUIRED': {
+      const { id } = action.payload
+      const prevInitialDeckSetupStep =
+        savedStepForms[INITIAL_DECK_SETUP_STEP_ID]
+      const gripperKey = Object.entries(
+        prevInitialDeckSetupStep.additionalEquipmentLocationUpdate
+      ).find(([_, value]) => value === GRIPPER_LOCATION)?.[0]
+
+      if (gripperKey == null) {
+        return {
+          ...savedStepForms,
+          [INITIAL_DECK_SETUP_STEP_ID]: {
+            ...prevInitialDeckSetupStep,
+            additionalEquipmentLocationUpdate: {
+              ...prevInitialDeckSetupStep.additionalEquipmentLocationUpdate,
+              [id]: GRIPPER_LOCATION,
+            },
+          },
+        }
+      } else {
+        return mapValues(
+          savedStepForms,
+          (form: FormData): FormData => {
+            return {
+              ...form,
+              additionalEquipmentLocationUpdate: omit(
+                form.additionalEquipmentLocationUpdate,
+                gripperKey
+              ),
+            }
+          }
+        )
+      }
     }
     case 'DUPLICATE_LABWARE':
     case 'CREATE_CONTAINER': {
@@ -663,6 +732,8 @@ export const savedStepForms = (
           (form.stepType === 'magnet' ||
             form.stepType === 'temperature' ||
             form.stepType === 'heaterShaker' ||
+            form.stepType === 'absorbanceReader' ||
+            form.stepType === 'thermocycler' ||
             form.stepType === 'pause') &&
           form.moduleId === moduleId
         ) {
@@ -1160,7 +1231,7 @@ export const additionalEquipmentInvariantProperties = handleActions<NormalizedAd
       const unoccupiedSlotForTrash = hasWasteChuteCommands
         ? ''
         : getUnoccupiedSlotForTrash(
-            file,
+            file.commands,
             hasWasteChuteCommands,
             stagingAreaSlotNames
           )
@@ -1390,12 +1461,13 @@ export const additionalEquipmentInvariantProperties = handleActions<NormalizedAd
         }
       }
     },
-
+    //  @ts-expect-error
     TOGGLE_IS_GRIPPER_REQUIRED: (
-      state: NormalizedAdditionalEquipmentById
+      state: NormalizedAdditionalEquipmentById,
+      action: ToggleIsGripperRequiredAction
     ): NormalizedAdditionalEquipmentById => {
       let updatedEquipment = { ...state }
-      const gripperId = `${uuid()}:gripper`
+      const id = action.payload.id
       const gripperKey = Object.keys(updatedEquipment).find(
         key => updatedEquipment[key].name === 'gripper'
       )
@@ -1405,9 +1477,9 @@ export const additionalEquipmentInvariantProperties = handleActions<NormalizedAd
       } else {
         updatedEquipment = {
           ...updatedEquipment,
-          [gripperId]: {
+          [id]: {
             name: 'gripper' as const,
-            id: gripperId,
+            id,
           },
         }
       }
