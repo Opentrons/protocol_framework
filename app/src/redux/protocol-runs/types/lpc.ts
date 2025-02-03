@@ -79,7 +79,7 @@ export interface SelectedLabwareInfo {
   id: LabwareId
   /* Indicates the type of LPC offset flow the user is performing, a "default" flow, a "location-specific" flow, or no active flow.
    * There is no `slotName` when a user performs the default offset flow.
-   * Until the user is in a default or location-specific offset flow, there is no location. * */
+   * Until the user is in a default or location-specific offset flow, there are no location details. */
   offsetLocationDetails: OffsetLocationDetails | null
 }
 
