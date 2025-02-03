@@ -294,7 +294,7 @@ export const ingredients: Reducer<IngredientsState, any> = handleActions(
       const liquidGroupId = action.payload
       return omit(state, liquidGroupId)
     },
-    EDIT_MULTIPLE_LIQUID_GROUPS: (
+    EDIT_MULTIPLE_LIQUID_GROUPS_PYTHON_NAME: (
       state: IngredientsState,
       action: EditMultipleLiquidGroupsAction
     ): IngredientsState => {

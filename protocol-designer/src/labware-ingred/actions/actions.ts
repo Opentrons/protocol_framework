@@ -127,8 +127,8 @@ export const removeWellsContents: (
 })
 
 export interface EditMultipleLiquidGroupsAction {
-  type: 'EDIT_MULTIPLE_LIQUID_GROUPS'
-  payload: Record<string, IngredInputs> // Updated liquid groups
+  type: 'EDIT_MULTIPLE_LIQUID_GROUPS_PYTHON_NAME'
+  payload: Record<string, IngredInputs> // Updated liquid group pythonName
 }
 
 export interface DeleteLiquidGroupAction {
@@ -142,55 +142,40 @@ export const deleteLiquidGroup: (
 > = liquidGroupId => (dispatch, getState) => {
   const allLiquidGroups = selectors.getLiquidGroupsOnDeck(getState())
   const liquidEntities = getLiquidEntities(getState())
+  const liquidIsOnDeck = allLiquidGroups.includes(liquidGroupId)
 
   if (!Object.keys(allLiquidGroups).includes(liquidGroupId)) {
     return
   }
 
-  const okToDelete = global.confirm(
-    'This liquid has been placed on the deck, are you sure you want to delete it?'
-  )
+  const okToDelete = liquidIsOnDeck
+    ? global.confirm(
+        'This liquid has been placed on the deck, are you sure you want to delete it?'
+      )
+    : true
 
   if (!okToDelete) {
     return
   }
 
-  //  delete the group that the user wants to delete
-  dispatch({
-    type: 'DELETE_LIQUID_GROUP',
-    payload: liquidGroupId,
-  })
+  // filter out the deleted group and create an updated liquid entities object
+  const { [liquidGroupId]: _, ...remainingLiquidEntities } = liquidEntities
 
-  const updatedLiquidGroups: Record<string, IngredInputs> = {}
-  const filteredGroupIds = allLiquidGroups.filter(id => id !== liquidGroupId)
-
-  //  renumber subsequent liquid ids, if they exist
-  filteredGroupIds.forEach((oldId, index) => {
-    const liquid = liquidEntities[oldId]
-    const stringIndex = index.toString()
-    if (liquid != null) {
-      updatedLiquidGroups[stringIndex] = {
-        ...liquid,
-        liquidGroupId: stringIndex,
+  const updatedLiquidGroupPythonName = Object.keys(remainingLiquidEntities)
+    .sort() //  sort to ensure correct order
+    .reduce<Record<string, IngredInputs>>((acc, oldId, index) => {
+      acc[oldId] = {
+        ...remainingLiquidEntities[oldId],
         pythonName: `liquid_${index + 1}`,
       }
-    }
-  })
-  dispatch({
-    type: 'EDIT_MULTIPLE_LIQUID_GROUPS',
-    payload: updatedLiquidGroups,
-  })
+      return acc
+    }, {})
 
-  // ensure any lingering groups are deleted
-  const maxExpectedId = filteredGroupIds.length - 1
-  Object.keys(liquidEntities).forEach(id => {
-    const idNum = parseInt(id)
-    if (idNum > maxExpectedId) {
-      dispatch({
-        type: 'DELETE_LIQUID_GROUP',
-        payload: id,
-      })
-    }
+  //  delete user selected group, then update pythonName for rest of liquids
+  dispatch({ type: 'DELETE_LIQUID_GROUP', payload: liquidGroupId })
+  dispatch({
+    type: 'EDIT_MULTIPLE_LIQUID_GROUPS_PYTHON_NAME',
+    payload: updatedLiquidGroupPythonName,
   })
 }
 
