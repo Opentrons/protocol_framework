@@ -65,7 +65,6 @@
   "firmware_updated_successfully": "Firmware updated successfully",
   "fixture": "Fixture",
   "flex_stacker_door_status": "Door status: {{status}}",
-  "have_not_run_description": "After you run some protocols, they will appear here.",
   "have_not_run": "No recent runs",
   "have_not_run_description": "After you run some protocols, they will appear here.",
   "heater": "Heater",
