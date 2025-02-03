@@ -51,8 +51,6 @@ jobs:
       - name: 'Checkout Repository'
         uses: actions/checkout@v4
       - uses: ./.github/actions/js/setup
-        with:
-          cache_bust_secret: ${{ secrets.GH_CACHE_VERSION }}
       - name: 'run unit tests'
         run: make -C protocol-designer test-cov
       - name: 'Upload coverage report'
@@ -69,8 +67,6 @@ jobs:
         - name: 'Checkout Repository'
           uses: actions/checkout@v4
         - uses: ./.github/actions/js/setup
-          with:
-            cache_bust_secret: ${{ secrets.GH_CACHE_VERSION }}
         - name: 'run test-e2e'
           run: make -C protocol-designer test-e2e
 
@@ -83,8 +79,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/js/setup
-        with:
-          cache_bust_secret: ${{ secrets.GH_CACHE_VERSION }}
       - name: 'build PD'
         env:
           OT_PD_MIXPANEL_ID: ${{ secrets.OT_PD_MIXPANEL_ID }}

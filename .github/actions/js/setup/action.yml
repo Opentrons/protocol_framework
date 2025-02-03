@@ -4,10 +4,7 @@ description: >
   setup Node.js, install udev for USB detection, cache Yarn/NPM caches,
   and perform JS setup.
 
-inputs:
-  cache_bust_secret:
-    description: 'Secret used to bust caches'
-    required: true
+inputs: {}
 
 runs:
   using: 'composite'
@@ -19,7 +16,6 @@ runs:
       with:
         node-version: '22.11.0'
         cache: 'yarn'
-        cache-dependency-path: './yarn.lock'
 
     - name: 'Install udev for USB-detection'
       if: runner.os == 'Linux'
@@ -29,6 +25,4 @@ runs:
     - name: 'Setup JS'
       shell: bash
       run: |
-        npm config set cache ./.npm-cache
-        yarn config set cache-folder ./.yarn-cache
         make setup-js
