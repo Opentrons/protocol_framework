@@ -26,9 +26,9 @@ from opentrons.protocol_engine.resources.model_utils import ModelUtils
 from opentrons.protocol_engine.state import update_types
 from opentrons.protocol_engine.state.state import StateView
 from opentrons.protocol_engine.execution import MovementHandler, GantryMover, TipHandler
-from opentrons.protocols.models import LabwareDefinition
-
-from opentrons_shared_data.labware import load_definition
+from opentrons_shared_data.labware.labware_definition import LabwareDefinition
+import json
+from opentrons_shared_data import load_shared_data
 
 from opentrons.types import Point
 

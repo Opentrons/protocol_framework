@@ -16,7 +16,7 @@ from opentrons.protocol_engine.execution import (
     MovementHandler,
 )
 
-from opentrons.protocols.models import LabwareDefinition
+from opentrons_shared_data.labware.labware_definition import LabwareDefinition
 from opentrons.protocol_engine.commands.command import SuccessData
 from opentrons.protocol_engine.commands.evotip_dispense import (
     EvotipDispenseParams,
@@ -100,7 +100,7 @@ async def test_evotip_dispense_implementation(
 
     decoy.when(
         await pipetting.dispense_in_place(
-            pipette_id="pipette-id-abc123", volume=100.0, flow_rate=456.0, push_out=None
+            pipette_id="pipette-id-abc123", volume=100.0, flow_rate=456.0, push_out=None, correction_volume=0,
         )
     ).then_return(100)
 
