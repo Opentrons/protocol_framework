@@ -33,6 +33,13 @@ runs:
       shell: bash
       run: sudo apt-get update && sudo apt-get install libudev-dev
 
+    - name: 'Clean APT Archives so caching works'
+      if: runner.os == 'Linux'
+      shell: bash
+      run: |
+        sudo rm -f /var/cache/apt/archives/lock
+        sudo rm -rf /var/cache/apt/archives/partial
+
     - name: 'Cache Yarn and NPM caches'
       uses: actions/cache@v4
       with:

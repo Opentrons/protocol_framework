@@ -12,6 +12,8 @@ on:
       - 'package.json'
       - '.github/workflows/pd-test-build-deploy.yaml'
       - '.github/actions/js/setup/action.yml'
+      - '.github/actions/git/resolve-tag/action.yml'
+      - '.github/actions/environment/complex-variables/action.yml'
   push:
     paths:
       - 'protocol-designer/**'
@@ -21,6 +23,8 @@ on:
       - 'package.json'
       - '.github/workflows/pd-test-build-deploy.yaml'
       - '.github/actions/js/setup/action.yml'
+      - '.github/actions/git/resolve-tag/action.yml'
+      - '.github/actions/environment/complex-variables/action.yml'
     branches:
       - '**'
     tags:
