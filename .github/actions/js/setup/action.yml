@@ -12,8 +12,8 @@ inputs:
 runs:
   using: 'composite'
   steps:
-    - uses: .github/actions/git/force-tag
-    - uses: .github/actions/environment/complex-variables
+    - uses: ./.github/actions/git/resolve-tag
+    - uses: ./.github/actions/environment/complex-variables
     - name: 'Setup Node'
       uses: actions/setup-node@v4
       with:

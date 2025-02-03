@@ -103,9 +103,9 @@ jobs:
       - name: 'Checkout Repository'
         uses: actions/checkout@v4
 
-      - uses: .github/actions/git/resolve-tag
+      - uses: ./.github/actions/git/resolve-tag
 
-      - uses: .github/actions/environment/complex-variables
+      - uses: ./.github/actions/environment/complex-variables
 
       - name: 'download PD build'
         uses: 'actions/download-artifact@v4'
