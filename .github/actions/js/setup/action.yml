@@ -1,12 +1,12 @@
 name: 'Setup JS Environment'
 description: >
   Composite action to fix tag handling in checkout,
-  setup Node.js, install udev for USB detection, cache Yarn/NPM caches,
+  setup Node.js, install udev for USB detection, cache Yarn/NPM caches and APT packages,
   and perform JS setup.
 
 inputs:
   cache_bust_secret:
-    description: 'Secret used to bust the yarn cache'
+    description: 'Secret used to bust caches'
     required: true
 
 runs:
@@ -19,12 +19,30 @@ runs:
         git fetch -f origin ${{ github.ref }}:${{ github.ref }}
         git checkout ${{ github.ref }}
 
+    - name: 'set complex environment variables'
+      id: 'set-vars'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const { buildComplexEnvVars } = require(`${process.env.GITHUB_WORKSPACE}/.github/workflows/utils.js`)
+          buildComplexEnvVars(core, context)
+
     - name: 'Setup Node'
       uses: actions/setup-node@v4
       with:
         node-version: '22.11.0'
 
+    - name: 'Cache APT packages'
+      if: runner.os == 'Linux'
+      uses: actions/cache@v4
+      with:
+        path: /var/cache/apt/archives
+        key: apt-${{ inputs.cache_bust_secret }}-${{ runner.os }}-archives
+        restore-keys: |
+          apt-${{ inputs.cache_bust_secret }}-${{ runner.os }}-archives
+
     - name: 'Install udev for USB-detection'
+      if: runner.os == 'Linux'
       shell: bash
       run: sudo apt-get update && sudo apt-get install libudev-dev
 
