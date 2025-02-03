@@ -269,7 +269,7 @@ def test_current_liquid_volume(
             labware_id="labware-id", well_name="well-name"
         )
     ).then_return(fake_volume)
-    assert subject.get_well_volume() == fake_volume
+    assert subject.get_liquid_volume() == fake_volume
 
     # make sure that WellCore propagates a LiquidVolumeUnknownError
     decoy.when(
@@ -279,7 +279,7 @@ def test_current_liquid_volume(
     ).then_raise(LiquidVolumeUnknownError())
 
     with pytest.raises(LiquidVolumeUnknownError):
-        subject.get_well_volume()
+        subject.get_liquid_volume()
 
 
 @pytest.mark.parametrize("operation_volume", [0.0, 100, -100, 2, -4, 5])

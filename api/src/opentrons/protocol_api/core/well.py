@@ -95,7 +95,7 @@ class AbstractWellCore(ABC):
         """Get the current liquid height."""
 
     @abstractmethod
-    def get_well_volume(self) -> float:
+    def get_liquid_volume(self) -> float:
         """Get the current volume within a well."""
 
 

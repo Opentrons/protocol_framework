@@ -180,7 +180,7 @@ class WellCore(AbstractWellCore):
             labware_id=labware_id, well_name=well_name
         )
 
-    def get_well_volume(self) -> float:
+    def get_liquid_volume(self) -> float:
         """Return the current volume in a well."""
         labware_id = self.labware_id
         well_name = self._name

@@ -309,9 +309,9 @@ class Well:
         return self._core.current_liquid_height()
 
     @requires_version(2, 21)
-    def current_well_volume(self) -> float:
+    def current_liquid_volume(self) -> float:
         """Get the current liquid volume in a well."""
-        return self._core.get_well_volume()
+        return self._core.get_liquid_volume()
 
     @requires_version(2, 21)
     def estimate_liquid_height_after_pipetting(self, operation_volume: float) -> float:
