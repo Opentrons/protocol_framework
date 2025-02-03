@@ -37,5 +37,12 @@
   },
   "namespace": "opentrons",
   "version": 1,
-  "schemaVersion": 3
+  "schemaVersion": 3,
+  "stackingOffsetWithLabware": {
+    "opentrons_flex_deck_riser": {
+      "x": 0,
+      "y": 0,
+      "z": 34
+    }
+  }
 }

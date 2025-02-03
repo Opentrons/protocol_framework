@@ -2,11 +2,10 @@ import chunk from 'lodash/chunk'
 import flatMap from 'lodash/flatMap'
 import {
   COLUMN,
-  getWellDepth,
   LOW_VOLUME_PIPETTES,
   GRIPPER_WASTE_CHUTE_ADDRESSABLE_AREA,
+  getWellDepth,
 } from '@opentrons/shared-data'
-import { AIR_GAP_OFFSET_FROM_TOP } from '../../constants'
 import * as errorCreators from '../../errorCreators'
 import { getPipetteWithTipMaxVol } from '../../robotStateSelectors'
 import { movableTrashCommandsUtil } from '../../utils/movableTrashCommandsUtil'
@@ -15,30 +14,32 @@ import {
   curryCommandCreator,
   reduceCommandCreators,
   wasteChuteCommandsUtil,
-  getTrashOrLabware,
   airGapHelper,
   dispenseLocationHelper,
   moveHelper,
   getIsSafePipetteMovement,
   getWasteChuteAddressableAreaNamePip,
   getHasWasteChute,
+  getTrashOrLabware,
 } from '../../utils'
 import {
+  airGapInPlace,
   aspirate,
   configureForVolume,
   delay,
   dropTip,
   moveToWell,
-  replaceTip,
   touchTip,
 } from '../atomic'
 import { mixUtil } from './mix'
+import { replaceTip } from './replaceTip'
 
 import type {
   ConsolidateArgs,
   CommandCreator,
   CurriedCommandCreator,
 } from '../../types'
+import { AIR_GAP_OFFSET_FROM_TOP } from '../../constants'
 
 export const consolidate: CommandCreator<ConsolidateArgs> = (
   args,
@@ -178,7 +179,6 @@ export const consolidate: CommandCreator<ConsolidateArgs> = (
   )
 
   const destinationWell = args.destWell
-
   const destLabwareDef =
     trashOrLabware === 'labware'
       ? invariantContext.labwareEntities[args.destLabware].def
@@ -221,27 +221,28 @@ export const consolidate: CommandCreator<ConsolidateArgs> = (
             getWellDepth(sourceLabwareDef, sourceWell) + AIR_GAP_OFFSET_FROM_TOP
           const airGapAfterAspirateCommands = aspirateAirGapVolume
             ? [
-                curryCommandCreator(aspirate, {
-                  pipette: args.pipette,
+                curryCommandCreator(moveToWell, {
+                  pipetteId: args.pipette,
+                  labwareId: args.sourceLabware,
+                  wellName: sourceWell,
+                  wellLocation: {
+                    origin: 'bottom',
+                    offset: {
+                      z: airGapOffsetSourceWell,
+                      x: 0,
+                      y: 0,
+                    },
+                  },
+                }),
+                curryCommandCreator(airGapInPlace, {
+                  pipetteId: args.pipette,
                   volume: aspirateAirGapVolume,
-                  labware: args.sourceLabware,
-                  well: sourceWell,
                   flowRate: aspirateFlowRateUlSec,
-                  offsetFromBottomMm: airGapOffsetSourceWell,
-                  isAirGap: true,
-                  tipRack: args.tipRack,
-                  xOffset: 0,
-                  yOffset: 0,
-                  nozzles,
                 }),
                 ...(aspirateDelay != null
                   ? [
                       curryCommandCreator(delay, {
-                        commandCreatorFnName: 'delay',
-                        description: null,
-                        name: null,
-                        meta: null,
-                        wait: aspirateDelay.seconds,
+                        seconds: aspirateDelay.seconds,
                       }),
                     ]
                   : []),
@@ -251,47 +252,55 @@ export const consolidate: CommandCreator<ConsolidateArgs> = (
             aspirateDelay != null
               ? [
                   curryCommandCreator(moveToWell, {
-                    pipette: args.pipette,
-                    labware: args.sourceLabware,
-                    well: sourceWell,
-                    offset: {
-                      x: 0,
-                      y: 0,
-                      z: aspirateDelay.mmFromBottom,
+                    pipetteId: args.pipette,
+                    labwareId: args.sourceLabware,
+                    wellName: sourceWell,
+                    wellLocation: {
+                      origin: 'bottom',
+                      offset: {
+                        x: 0,
+                        y: 0,
+                        z: aspirateDelay.mmFromBottom,
+                      },
                     },
                   }),
                   curryCommandCreator(delay, {
-                    commandCreatorFnName: 'delay',
-                    description: null,
-                    name: null,
-                    meta: null,
-                    wait: aspirateDelay.seconds,
+                    seconds: aspirateDelay.seconds,
                   }),
                 ]
               : []
           const touchTipAfterAspirateCommand = args.touchTipAfterAspirate
             ? [
                 curryCommandCreator(touchTip, {
-                  pipette: args.pipette,
-                  labware: args.sourceLabware,
-                  well: sourceWell,
-                  offsetFromBottomMm:
-                    args.touchTipAfterAspirateOffsetMmFromBottom,
+                  pipetteId: args.pipette,
+                  labwareId: args.sourceLabware,
+                  wellName: sourceWell,
+                  wellLocation: {
+                    origin: 'bottom',
+                    offset: {
+                      z: args.touchTipAfterAspirateOffsetMmFromBottom,
+                    },
+                  },
                 }),
               ]
             : []
 
           return [
             curryCommandCreator(aspirate, {
-              pipette: args.pipette,
+              pipetteId: args.pipette,
               volume: args.volume,
-              labware: args.sourceLabware,
-              well: sourceWell,
+              labwareId: args.sourceLabware,
+              wellName: sourceWell,
               flowRate: aspirateFlowRateUlSec,
-              offsetFromBottomMm: aspirateOffsetFromBottomMm,
+              wellLocation: {
+                origin: 'bottom',
+                offset: {
+                  z: aspirateOffsetFromBottomMm,
+                  x: aspirateXOffset,
+                  y: aspirateYOffset,
+                },
+              },
               tipRack: args.tipRack,
-              xOffset: aspirateXOffset,
-              yOffset: aspirateYOffset,
               nozzles,
             }),
             ...delayAfterAspirateCommands,
@@ -320,11 +329,15 @@ export const consolidate: CommandCreator<ConsolidateArgs> = (
         args.touchTipAfterDispense && destinationWell != null
           ? [
               curryCommandCreator(touchTip, {
-                pipette: args.pipette,
-                labware: args.destLabware,
-                well: destinationWell,
-                offsetFromBottomMm:
-                  args.touchTipAfterDispenseOffsetMmFromBottom,
+                pipetteId: args.pipette,
+                labwareId: args.destLabware,
+                wellName: destinationWell,
+                wellLocation: {
+                  origin: 'bottom',
+                  offset: {
+                    z: args.touchTipAfterDispenseOffsetMmFromBottom,
+                  },
+                },
               }),
             ]
           : []
@@ -336,17 +349,14 @@ export const consolidate: CommandCreator<ConsolidateArgs> = (
               well: sourceWellChunk[0],
               volume: mixFirstAspirate.volume,
               times: mixFirstAspirate.times,
-              aspirateOffsetFromBottomMm,
-              dispenseOffsetFromBottomMm: aspirateOffsetFromBottomMm,
+              offsetFromBottomMm: aspirateOffsetFromBottomMm,
               aspirateFlowRateUlSec,
               dispenseFlowRateUlSec,
               aspirateDelaySeconds: aspirateDelay?.seconds,
               dispenseDelaySeconds: dispenseDelay?.seconds,
               tipRack: args.tipRack,
-              aspirateXOffset,
-              aspirateYOffset,
-              dispenseXOffset,
-              dispenseYOffset,
+              xOffset: aspirateXOffset,
+              yOffset: aspirateYOffset,
               nozzles,
             })
           : []
@@ -357,17 +367,14 @@ export const consolidate: CommandCreator<ConsolidateArgs> = (
             well: sourceWellChunk[0],
             volume: args.volume,
             times: 1,
-            aspirateOffsetFromBottomMm,
-            dispenseOffsetFromBottomMm: aspirateOffsetFromBottomMm,
+            offsetFromBottomMm: aspirateOffsetFromBottomMm,
             aspirateFlowRateUlSec,
             dispenseFlowRateUlSec,
             aspirateDelaySeconds: aspirateDelay?.seconds,
             dispenseDelaySeconds: dispenseDelay?.seconds,
             tipRack: args.tipRack,
-            aspirateXOffset,
-            aspirateYOffset,
-            dispenseXOffset,
-            dispenseYOffset,
+            xOffset: aspirateXOffset,
+            yOffset: aspirateYOffset,
             nozzles,
           })
         : []
@@ -380,17 +387,14 @@ export const consolidate: CommandCreator<ConsolidateArgs> = (
               well: destinationWell,
               volume: mixInDestination.volume,
               times: mixInDestination.times,
-              aspirateOffsetFromBottomMm: dispenseOffsetFromBottomMm,
-              dispenseOffsetFromBottomMm,
+              offsetFromBottomMm: dispenseOffsetFromBottomMm,
               aspirateFlowRateUlSec,
               dispenseFlowRateUlSec,
               aspirateDelaySeconds: aspirateDelay?.seconds,
               dispenseDelaySeconds: dispenseDelay?.seconds,
               tipRack: args.tipRack,
-              aspirateXOffset,
-              aspirateYOffset,
-              dispenseXOffset,
-              dispenseYOffset,
+              xOffset: dispenseXOffset,
+              yOffset: dispenseYOffset,
               nozzles,
             })
           : []
@@ -434,11 +438,7 @@ export const consolidate: CommandCreator<ConsolidateArgs> = (
                 zOffset: dispenseDelay.mmFromBottom,
               }),
               curryCommandCreator(delay, {
-                commandCreatorFnName: 'delay',
-                description: null,
-                name: null,
-                meta: null,
-                wait: dispenseDelay.seconds,
+                seconds: dispenseDelay.seconds,
               }),
             ]
           : []
@@ -467,17 +467,11 @@ export const consolidate: CommandCreator<ConsolidateArgs> = (
                 destWell: destinationWell,
                 flowRate: aspirateFlowRateUlSec,
                 offsetFromBottomMm: airGapOffsetDestWell,
-                tipRack: args.tipRack,
-                nozzles,
               }),
               ...(aspirateDelay != null
                 ? [
                     curryCommandCreator(delay, {
-                      commandCreatorFnName: 'delay',
-                      description: null,
-                      name: null,
-                      meta: null,
-                      wait: aspirateDelay.seconds,
+                      seconds: aspirateDelay.seconds,
                     }),
                   ]
                 : []),

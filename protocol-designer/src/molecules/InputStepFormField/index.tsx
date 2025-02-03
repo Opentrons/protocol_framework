@@ -52,6 +52,9 @@ export function InputStepFormField(
         name={name}
         error={formLevelError ?? errorToShow}
         onBlur={onFieldBlur}
+        onClick={e => {
+          e.stopPropagation()
+        }}
         onFocus={onFieldFocus}
         onChange={e => {
           updateValue(e.currentTarget.value)

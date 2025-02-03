@@ -11,6 +11,9 @@ import {
   isAddressableAreaStandardSlot,
   MOVABLE_TRASH_ADDRESSABLE_AREAS,
   FLEX_MODULE_ADDRESSABLE_AREAS,
+  FLEX_STACKER_ADDRESSABLE_AREAS,
+  TC_MODULE_LOCATION_OT2,
+  TC_MODULE_LOCATION_OT3,
 } from '@opentrons/shared-data'
 import { COLUMN_4_SLOTS, getHasWasteChute } from '@opentrons/step-generation'
 import {
@@ -159,14 +162,13 @@ export const getUnoccupiedLabwareLocationOptions: Selector<
             : 'unknown module'
         const moduleSlotInfo = modSlot ?? 'unknown slot'
         const adapterSlotInfo = adapterSlot ?? 'unknown adapter'
-
         return labwareOnAdapter == null && isAdapter
           ? [
               ...acc,
               {
                 name:
                   modIdWithAdapter != null
-                    ? `${moduleSlotInfo} on ${moduleUnderAdapter} with ${adapterDisplayName}`
+                    ? `${moduleUnderAdapter} on ${moduleSlotInfo} with ${adapterDisplayName}`
                     : `${adapterSlotInfo} with ${adapterDisplayName}`,
                 value: labwareId,
               },
@@ -181,14 +183,21 @@ export const getUnoccupiedLabwareLocationOptions: Selector<
         const moduleHasLabware = Object.entries(labware).some(
           ([lwId, lwOnDeck]) => lwOnDeck.slot === modId
         )
+        const type = moduleEntities[modId].type
+        const slot = modOnDeck.slot
+        let tcLocations
+        if (type === THERMOCYCLER_MODULE_TYPE) {
+          tcLocations =
+            slot === '7' ? TC_MODULE_LOCATION_OT2 : TC_MODULE_LOCATION_OT3
+        }
         return moduleHasLabware
           ? acc
           : [
               ...acc,
               {
-                name: `${modOnDeck.slot} on ${getModuleDisplayName(
+                name: `${getModuleDisplayName(
                   moduleEntities[modId].model
-                )}`,
+                )} on ${tcLocations != null ? tcLocations : slot}`,
                 value: modId,
               },
             ]
@@ -226,7 +235,8 @@ export const getUnoccupiedLabwareLocationOptions: Selector<
           !isTrashSlot &&
           !WASTE_CHUTE_ADDRESSABLE_AREAS.includes(slotId) &&
           !notSelectedStagingAreaAddressableAreas.includes(slotId) &&
-          !FLEX_MODULE_ADDRESSABLE_AREAS.includes(slotId)
+          !FLEX_MODULE_ADDRESSABLE_AREAS.includes(slotId) &&
+          !FLEX_STACKER_ADDRESSABLE_AREAS.includes(slotId)
         )
       })
       .map(slotId => ({ name: slotId, value: slotId }))

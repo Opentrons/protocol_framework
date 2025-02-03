@@ -13,7 +13,7 @@ import {
 } from '@opentrons/shared-data'
 import { reduceCommandCreators, wasteChuteCommandsUtil } from './index'
 import {
-  aspirate,
+  airGapInPlace,
   dispense,
   moveToAddressableArea,
   moveToWell,
@@ -301,6 +301,7 @@ export const blowoutUtil = (args: {
         wellName: well,
         flowRate,
         wellLocation: {
+          origin: 'top',
           offset: {
             z: offsetFromTopMm,
           },
@@ -518,14 +519,19 @@ export const dispenseLocationHelper: CommandCreator<DispenseLocationHelperArgs> 
   ) {
     commands = [
       curryCommandCreator(dispense, {
-        pipette: pipetteId,
+        pipetteId,
         volume,
-        labware: destinationId,
-        well,
+        labwareId: destinationId,
+        wellName: well,
         flowRate,
-        offsetFromBottomMm,
-        xOffset,
-        yOffset,
+        wellLocation: {
+          origin: 'bottom',
+          offset: {
+            z: offsetFromBottomMm,
+            x: xOffset,
+            y: yOffset,
+          },
+        },
         tipRack,
         nozzles,
       }),
@@ -580,11 +586,13 @@ export const moveHelper: CommandCreator<MoveHelperArgs> = (
   if (trashOrLabware === 'labware' && well != null) {
     commands = [
       curryCommandCreator(moveToWell, {
-        pipette: pipetteId,
-        labware: destinationId,
-
-        well,
-        offset: { x: 0, y: 0, z: zOffset },
+        pipetteId: pipetteId,
+        labwareId: destinationId,
+        wellName: well,
+        wellLocation: {
+          origin: 'bottom',
+          offset: { x: 0, y: 0, z: zOffset },
+        },
       }),
     ]
   } else if (trashOrLabware === 'wasteChute') {
@@ -596,6 +604,7 @@ export const moveHelper: CommandCreator<MoveHelperArgs> = (
         addressableAreaName: getWasteChuteAddressableAreaNamePip(
           pipetteChannels
         ),
+        offset: { x: 0, y: 0, z: 0 },
       }),
     ]
   } else {
@@ -616,10 +625,8 @@ interface AirGapArgs {
   destWell: string | null
   flowRate: number
   offsetFromBottomMm: number
-  tipRack: string
   pipetteId: string
   volume: number
-  nozzles: NozzleConfigurationStyle | null
   blowOutLocation?: string | null
   sourceId?: string
   sourceWell?: string
@@ -636,11 +643,9 @@ export const airGapHelper: CommandCreator<AirGapArgs> = (
     flowRate,
     offsetFromBottomMm,
     pipetteId,
-    tipRack,
     sourceId,
     sourceWell,
     volume,
-    nozzles,
   } = args
 
   const trashOrLabware = getTrashOrLabware(
@@ -665,36 +670,45 @@ export const airGapHelper: CommandCreator<AirGapArgs> = (
       })
 
       commands = [
-        curryCommandCreator(aspirate, {
-          pipette: pipetteId,
+        curryCommandCreator(moveToWell, {
+          pipetteId,
+          labwareId: dispenseAirGapLabware,
+          wellName: dispenseAirGapWell,
+          wellLocation: {
+            origin: 'bottom',
+            offset: {
+              z: offsetFromBottomMm,
+              x: 0,
+              y: 0,
+            },
+          },
+        }),
+        curryCommandCreator(airGapInPlace, {
+          pipetteId,
           volume,
-          labware: dispenseAirGapLabware,
-          well: dispenseAirGapWell,
           flowRate,
-          offsetFromBottomMm,
-          isAirGap: true,
-          tipRack,
-          xOffset: 0,
-          yOffset: 0,
-          nozzles,
         }),
       ]
       //  when aspirating out of multi wells for consolidate
     } else {
       commands = [
-        curryCommandCreator(aspirate, {
-          pipette: pipetteId,
+        curryCommandCreator(moveToWell, {
+          pipetteId,
+          labwareId: destinationId,
+          wellName: destWell,
+          wellLocation: {
+            origin: 'bottom',
+            offset: {
+              z: offsetFromBottomMm,
+              x: 0,
+              y: 0,
+            },
+          },
+        }),
+        curryCommandCreator(airGapInPlace, {
+          pipetteId,
           volume,
-          labware: destinationId,
-          well: destWell,
           flowRate,
-          offsetFromBottomMm,
-          isAirGap: true,
-          tipRack,
-          //  NOTE: airgap aspirates happen at default x/y offset
-          xOffset: 0,
-          yOffset: 0,
-          nozzles,
         }),
       ]
     }

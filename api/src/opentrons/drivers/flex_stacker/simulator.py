@@ -1,9 +1,11 @@
-from typing import Optional
+from typing import List, Optional
 
 from opentrons.util.async_helpers import ensure_yield
 
-from .abstract import AbstractStackerDriver
+from .abstract import AbstractFlexStackerDriver
 from .types import (
+    LEDColor,
+    MoveResult,
     StackerAxis,
     PlatformStatus,
     Direction,
@@ -14,7 +16,7 @@ from .types import (
 )
 
 
-class SimulatingDriver(AbstractStackerDriver):
+class SimulatingDriver(AbstractFlexStackerDriver):
     """FLEX Stacker driver simulator."""
 
     def __init__(self, serial_number: Optional[str] = None) -> None:
@@ -60,10 +62,26 @@ class SimulatingDriver(AbstractStackerDriver):
         """Set Serial Number."""
         return True
 
-    @ensure_yield
-    async def stop_motor(self) -> bool:
-        """Stop motor movement."""
+    async def enable_motors(self, axis: List[StackerAxis]) -> bool:
+        """Enables the axis motor if present, disables it otherwise."""
         return True
+
+    @ensure_yield
+    async def stop_motors(self) -> bool:
+        """Stop all motor movement."""
+        return True
+
+    async def set_run_current(self, axis: StackerAxis, current: float) -> bool:
+        """Set axis peak run current in amps."""
+        return True
+
+    async def set_ihold_current(self, axis: StackerAxis, current: float) -> bool:
+        """Set axis hold current in amps."""
+        return True
+
+    async def get_motion_params(self, axis: StackerAxis) -> MoveParams:
+        """Get the motion parameters used by the given axis motor."""
+        return MoveParams(axis, 1, 1, 1)
 
     @ensure_yield
     async def get_limit_switch(self, axis: StackerAxis, direction: Direction) -> bool:
@@ -78,12 +96,15 @@ class SimulatingDriver(AbstractStackerDriver):
         """Get limit switch statuses for all axes."""
         return self._limit_switch_status
 
-    @ensure_yield
-    async def get_platform_sensor_status(self) -> PlatformStatus:
+    async def get_platform_sensor(self, direction: Direction) -> bool:
         """Get platform sensor status.
 
-        :return: True if platform is detected, False otherwise
+        :return: True if platform is present, False otherwise
         """
+        return True
+
+    async def get_platform_status(self) -> PlatformStatus:
+        """Get platform status."""
         return self._platform_sensor_status
 
     @ensure_yield
@@ -97,13 +118,27 @@ class SimulatingDriver(AbstractStackerDriver):
     @ensure_yield
     async def move_in_mm(
         self, axis: StackerAxis, distance: float, params: MoveParams | None = None
-    ) -> bool:
-        """Move axis."""
-        return True
+    ) -> MoveResult:
+        """Move axis by the given distance in mm."""
+        return MoveResult.NO_ERROR
 
     @ensure_yield
     async def move_to_limit_switch(
         self, axis: StackerAxis, direction: Direction, params: MoveParams | None = None
-    ) -> bool:
+    ) -> MoveResult:
         """Move until limit switch is triggered."""
+        return MoveResult.NO_ERROR
+
+    async def home_axis(self, axis: StackerAxis, direction: Direction) -> bool:
+        """Home axis."""
         return True
+
+    async def set_led(
+        self, power: float, color: LEDColor | None = None, external: bool | None = None
+    ) -> bool:
+        """Set LED color."""
+        return True
+
+    async def enter_programming_mode(self) -> None:
+        """Reboot into programming mode"""
+        pass

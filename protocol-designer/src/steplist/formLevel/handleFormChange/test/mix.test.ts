@@ -5,7 +5,7 @@ import {
   fixture_tiprack_10_ul,
   fixture_tiprack_300_ul,
 } from '@opentrons/shared-data/labware/fixtures/2'
-import { DEFAULT_MM_FROM_BOTTOM_DISPENSE } from '../../../../constants'
+import { DEFAULT_MM_OFFSET_FROM_BOTTOM } from '../../../../constants'
 import { dependentFieldsUpdateMix } from '../dependentFieldsUpdateMix'
 import type { LabwareDefinition2 } from '@opentrons/shared-data'
 import type {
@@ -132,7 +132,7 @@ describe('well selection should update', () => {
     expect(handleFormHelper(patch, form)).toEqual({
       ...patch,
       wells: ['A1'],
-      mix_mmFromBottom: DEFAULT_MM_FROM_BOTTOM_DISPENSE,
+      mix_mmFromBottom: DEFAULT_MM_OFFSET_FROM_BOTTOM,
       mix_touchTip_mmFromBottom: null,
       mix_touchTip_checkbox: false,
     })
@@ -145,7 +145,7 @@ describe('well selection should update', () => {
     expect(handleFormHelper(patch, trashLabwareForm)).toEqual({
       ...patch,
       wells: [],
-      mix_mmFromBottom: DEFAULT_MM_FROM_BOTTOM_DISPENSE,
+      mix_mmFromBottom: DEFAULT_MM_OFFSET_FROM_BOTTOM,
       mix_touchTip_mmFromBottom: null,
       mix_touchTip_checkbox: false,
     })
