@@ -72,7 +72,7 @@ jobs:
 
   build-pd:
     timeout-minutes: 20
-    name: 'build and deploy protocol designer'
+    name: 'build protocol designer'
     needs: ['unit-test', 'e2e-test']
     runs-on: 'ubuntu-24.04'
     if: github.event_name != 'pull_request'

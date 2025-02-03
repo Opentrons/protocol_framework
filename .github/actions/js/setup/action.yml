@@ -23,10 +23,10 @@ runs:
       if: runner.os == 'Linux'
       uses: actions/cache@v4
       with:
-        path: /var/cache/apt/archives
-        key: apt-${{ inputs.cache_bust_secret }}-${{ runner.os }}-archives
+        path: /var/cache/apt
+        key: apt-${{ inputs.cache_bust_secret }}-${{ runner.os }}
         restore-keys: |
-          apt-${{ inputs.cache_bust_secret }}-${{ runner.os }}-archives
+          apt-${{ inputs.cache_bust_secret }}-${{ runner.os }}
 
     - name: 'Install udev for USB-detection'
       if: runner.os == 'Linux'
