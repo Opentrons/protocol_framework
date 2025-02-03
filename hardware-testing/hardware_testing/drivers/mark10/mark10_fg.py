@@ -3,7 +3,7 @@ from serial import Serial  # type: ignore[import]
 from abc import ABC, abstractmethod
 from time import time
 from typing import Tuple
-
+import asyncio
 
 class Mark10Base(ABC):
     """Base Class if Mark10 Force Gauge Driver."""
@@ -93,17 +93,28 @@ class Mark10(Mark10Base):
         """Disconnect."""
         self._force_guage.close()
 
-    def read_force(self, timeout: float = 1.0) -> float:
+    async def _write(self, data: bytes) -> None:
+        """Non-blocking write operation."""
+        # Offload write to another thread to avoid blocking the event loop
+        await asyncio.to_thread(self._force_guage.write, data)
+
+    async def _readline(self) -> str:
+        """Non-blocking read operation."""
+        # Offload readline to another thread to avoid blocking the event loop
+        return await asyncio.to_thread(self._force_guage.readline)
+
+    async def read_force(self, timeout: float = 1.0) -> float:
         """Get Force in Newtons."""
-        self._force_guage.write("?\r\n".encode("utf-8"))
+        await self._write("?\r\n".encode("utf-8"))
         start_time = time()
         while time() < start_time + timeout:
-            # return "12.3 N"
-            line = self._force_guage.readline().decode("utf-8").strip()
+            # Read the line asynchronously
+            line = await self._readline()
+            line = line.decode("utf-8").strip()
             try:
                 force_val, units = line.split(" ")
                 if units != "N":
-                    self._force_guage.write("N\r\n")  # Set force gauge units to Newtons
+                    await self._write("N\r\n")  # Set force gauge units to Newtons
                     print(f'Setting gauge units from {units} to "N" (newtons)')
                     continue
                 else:
