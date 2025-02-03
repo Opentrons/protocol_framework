@@ -1,5 +1,6 @@
 """Main FastAPI application."""
 import contextlib
+import memray
 from typing import AsyncGenerator, Optional
 from pathlib import Path
 
@@ -87,34 +88,35 @@ async def _lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
         yield  # Start handling HTTP requests.
 
 
-app = FastAPI(
-    title="Opentrons HTTP API Spec",
-    description=(
-        "This OpenAPI spec describes the HTTP API for Opentrons "
-        "robots. It may be retrieved from a robot on port 31950 at "
-        "/openapi. Some schemas used in requests and responses use "
-        "the `x-patternProperties` key to mean the JSON Schema "
-        "`patternProperties` behavior."
-    ),
-    version=__version__,
-    exception_handlers=exception_handlers,
-    # Disable documentation hosting via Swagger UI, normally at /docs.
-    # We instead focus on the docs hosted by ReDoc, at /redoc.
-    docs_url=None,
-    lifespan=_lifespan,
-)
+with memray.Tracker("TESTMEM.bin", follow_fork=True, trace_threads=True, native=True):
+    app = FastAPI(
+        title="Opentrons HTTP API Spec",
+        description=(
+            "This OpenAPI spec describes the HTTP API for Opentrons "
+            "robots. It may be retrieved from a robot on port 31950 at "
+            "/openapi. Some schemas used in requests and responses use "
+            "the `x-patternProperties` key to mean the JSON Schema "
+            "`patternProperties` behavior."
+        ),
+        version=__version__,
+        exception_handlers=exception_handlers,
+        # Disable documentation hosting via Swagger UI, normally at /docs.
+        # We instead focus on the docs hosted by ReDoc, at /redoc.
+        docs_url=None,
+        lifespan=_lifespan,
+    )
 
-# cors
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=("*"),
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+    # cors
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=("*"),
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
 
-# main router
-router.install_on_app(app)
+    # main router
+    router.install_on_app(app)
 
 
 def _get_persistence_directory(settings: RobotServerSettings) -> Optional[Path]:
