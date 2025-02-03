@@ -82,32 +82,24 @@ export function ProtocolSteps(): JSX.Element {
     <Flex
       backgroundColor={COLORS.grey10}
       height="calc(100vh - 4rem)"
-      // minHeight={FLEX_MAX_CONTENT}
-      // minHeight="100%"
       width="100%"
-
-      // gridGap={SPACING.spacing16}
     >
       <Flex height="100%" padding={SPACING.spacing12}>
         <DraggableSidebar setTargetWidth={setTargetWidth} />
       </Flex>
       <Flex
-        id="main flex"
         alignItems={ALIGN_CENTER}
         flexDirection={DIRECTION_COLUMN}
         gridGap={SPACING.spacing16}
         flex="2.85"
         paddingTop={showTimelineAlerts ? '0' : SPACING.spacing24}
-        // position={POSITION_RELATIVE}
         paddingX="1.75rem"
         height="100%"
       >
         <Flex
           flexDirection={DIRECTION_COLUMN}
           gridGap={SPACING.spacing24}
-          // width="100%"
           width={CONTENT_MAX_WIDTH}
-          id="bigger flex"
           height="100%"
           justifyContent={JUSTIFY_CENTER}
         >
@@ -147,11 +139,7 @@ export function ProtocolSteps(): JSX.Element {
               }}
             />
           </Flex>
-          <Flex
-            flexDirection={DIRECTION_COLUMN}
-            gridGap={SPACING.spacing16}
-            id="container for deck setup"
-          >
+          <Flex flexDirection={DIRECTION_COLUMN} gridGap={SPACING.spacing16}>
             {deckView === leftString ? (
               <DeckSetupContainer tab="protocolSteps" />
             ) : (

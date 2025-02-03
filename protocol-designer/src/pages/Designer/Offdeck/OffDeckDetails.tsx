@@ -5,7 +5,6 @@ import styled from 'styled-components'
 import {
   ALIGN_CENTER,
   ALIGN_START,
-  // ALIGN_STRETCH,
   BORDERS,
   Box,
   COLORS,
@@ -13,13 +12,11 @@ import {
   EmptySelectorButton,
   Flex,
   JUSTIFY_CENTER,
-  // JUSTIFY_START,
   LabwareRender,
   OVERFLOW_AUTO,
   RobotWorkSpace,
   SPACING,
   StyledText,
-  // WRAP,
 } from '@opentrons/components'
 import * as wellContentsSelectors from '../../../top-selectors/well-contents'
 import { selectors } from '../../../labware-ingred/selectors'
@@ -39,6 +36,7 @@ import type { DeckSetupTabType } from '../types'
 
 const OFF_DECK_MAP_WIDTH = '41.625rem'
 const OFF_DECK_MAP_HEIGHT = '45.5rem'
+const OFF_DECK_MAP_HEIGHT_FOR_STEP = '31.4rem'
 const ZERO_SLOT_POSITION: CoordinateTuple = [0, 0, 0]
 interface OffDeckDetailsProps extends DeckSetupTabType {
   addLabware: () => void
@@ -60,7 +58,7 @@ export function OffDeckDetails(props: OffDeckDetailsProps): JSX.Element {
     wellContentsSelectors.getAllWellContentsForActiveItem
   )
   const containerWidth = tab === 'startingDeck' ? '100vw' : '75vw'
-  console.log('containerWidth', containerWidth)
+
   const paddingLeftWithHover =
     hoverSlot == null
       ? `calc((${containerWidth} - (${SPACING.spacing24}  * 2) - ${OFF_DECK_MAP_WIDTH}) / 2)`
@@ -78,11 +76,10 @@ export function OffDeckDetails(props: OffDeckDetailsProps): JSX.Element {
       borderRadius={BORDERS.borderRadius12}
       width="100%"
       height="100%"
-      // height="65vh"
       padding={padding}
       gridGap={SPACING.spacing24}
       alignItems={ALIGN_CENTER}
-      id="container"
+      justifyContent={JUSTIFY_CENTER}
     >
       {hoverSlot != null ? (
         <Flex width={stepDetailsContainerWidth} height="6.25rem">
@@ -96,8 +93,11 @@ export function OffDeckDetails(props: OffDeckDetailsProps): JSX.Element {
       <Flex
         flex="0 0 auto"
         width={OFF_DECK_MAP_WIDTH}
-        // height="100%"
-        height={OFF_DECK_MAP_HEIGHT}
+        height={
+          tab === 'startingDeck'
+            ? OFF_DECK_MAP_HEIGHT
+            : OFF_DECK_MAP_HEIGHT_FOR_STEP
+        }
         alignItems={ALIGN_CENTER}
         borderRadius={SPACING.spacing12}
         padding={`${SPACING.spacing16} ${SPACING.spacing40}`}
@@ -105,7 +105,6 @@ export function OffDeckDetails(props: OffDeckDetailsProps): JSX.Element {
         overflowY={OVERFLOW_AUTO}
         flexDirection={DIRECTION_COLUMN}
         gridGap={SPACING.spacing40}
-        id="grey box"
       >
         <Flex
           justifyContent={JUSTIFY_CENTER}
@@ -116,22 +115,7 @@ export function OffDeckDetails(props: OffDeckDetailsProps): JSX.Element {
             {i18n.format(t('off_deck_labware'), 'upperCase')}
           </StyledText>
         </Flex>
-
-        {/* <Flex
-          flexWrap={WRAP}
-          id="wrapper"
-          columnGap={SPACING.spacing32}
-          rowGap={SPACING.spacing40}
-          // gap={`${SPACING.spacing40} ${SPACING.spacing32}`}
-          justifyContent={JUSTIFY_START}
-          alignItems={ALIGN_STRETCH}
-        > */}
-        <LabwareWrapper
-          // justifyContent={
-          //   offDeckLabware.length < 3 ? JUSTIFY_CENTER : JUSTIFY_START
-          // }
-          id="LabwareWrapper"
-        >
+        <LabwareWrapper>
           {tab === 'startingDeck' ? (
             <Flex width="9.5625rem" height="6.375rem">
               <EmptySelectorButton
@@ -162,7 +146,6 @@ export function OffDeckDetails(props: OffDeckDetailsProps): JSX.Element {
                 id={lw.id}
                 flexDirection={DIRECTION_COLUMN}
                 key={lw.id}
-                // paddingRight={SPACING.spacing32}
                 paddingBottom={
                   isLabwareSelectionSelected || highlighted ? '0px' : '0px'
                 }
@@ -220,37 +203,12 @@ export function OffDeckDetails(props: OffDeckDetailsProps): JSX.Element {
               </Flex>
             )
           })}
-
           <HighlightOffdeckSlot position={ZERO_SLOT_POSITION} />
-
-          {/* {tab === 'startingDeck' ? (
-            <Flex width="9.5625rem" height="6.375rem" id="add button">
-              <EmptySelectorButton
-                onClick={addLabware}
-                text={t('add_labware')}
-                textAlignment="middle"
-                iconName="plus"
-              />
-            </Flex>
-          ) : null} */}
         </LabwareWrapper>
       </Flex>
     </Flex>
   )
 }
-
-// const LabwareWrapper = styled(Flex)`
-//   /* flex: 0 0 auto; */
-//   flex-wrap: ${WRAP};
-//   column-gap: ${SPACING.spacing32};
-//   row-gap: ${SPACING.spacing40};
-//   justify-content: ${JUSTIFY_CENTER};
-//   align-items: ${ALIGN_STRETCH};
-
-//   & > :last-child {
-//     justify-content: ${JUSTIFY_START};
-//   }
-// `
 
 const LabwareWrapper = styled(Box)`
   display: grid;

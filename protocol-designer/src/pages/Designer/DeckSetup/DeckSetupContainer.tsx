@@ -6,15 +6,15 @@ import {
   BORDERS,
   Box,
   COLORS,
-  DIRECTION_COLUMN,
   DeckFromLayers,
+  DIRECTION_COLUMN,
   Flex,
   FlexTrash,
   JUSTIFY_CENTER,
   RobotCoordinateSpaceWithRef,
-  SPACING,
   SingleSlotFixture,
   SlotLabels,
+  SPACING,
   StagingAreaFixture,
   WasteChuteFixture,
   WasteChuteStagingAreaFixture,
@@ -59,6 +59,9 @@ import type { Fixture } from './constants'
 
 const WASTE_CHUTE_SPACE = 30
 const DETAILS_HOVER_SPACE = 60
+// Note (02/02/25:kk) the size is different from the design but the product team requested keep the current size
+const STARTING_DECK_VIEW_MIN_WIDTH = '75%'
+
 const OT2_STANDARD_DECK_VIEW_LAYER_BLOCK_LIST: string[] = [
   'calibrationMarkings',
   'fixedBase',
@@ -213,24 +216,24 @@ export function DeckSetupContainer(props: DeckSetupTabType): JSX.Element {
     aa => isAddressableAreaStandardSlot(aa.id, deckDef)
   )
 
-  // console.log('ViewBox Adjusted:', viewBoxAdjusted)
-  // console.log('ViewBox Numerical:', viewBoxNumerical)
-  // console.log('Deck Map Ratio:', deckMapRatio)
-  // console.log('viewBox', viewBox)
+  let containerPadding = '0'
+  if (!isZoomed) {
+    if (tab === 'startingDeck') {
+      containerPadding = SPACING.spacing40
+    } else {
+      containerPadding = SPACING.spacing60
+    }
+  }
 
   return (
-    // <Flex height="100%" css={{ outline: 'solid 1px red' }}>
     <>
       <Flex
         backgroundColor={COLORS.white}
         borderRadius={BORDERS.borderRadius12}
         width="100%"
-        // height={tab === 'protocolSteps' ? '65.75vh' : '100%'}
-        // height="65.75vh"
         height="100%"
         flexDirection={DIRECTION_COLUMN}
-        padding={isZoomed ? '0' : SPACING.spacing40}
-        id="deck setup top flex"
+        padding={containerPadding}
       >
         <Flex
           width="100%"
@@ -238,35 +241,35 @@ export function DeckSetupContainer(props: DeckSetupTabType): JSX.Element {
           alignItems={ALIGN_CENTER}
           justifyContent={JUSTIFY_CENTER}
           gridGap={SPACING.spacing12}
-          id="svg flex"
         >
-          {zoomIn.slot == null ? (
-            <Flex justifyContent={JUSTIFY_CENTER}>
+          {zoomIn.slot == null && tab === 'startingDeck' ? (
+            <Box width="20%">
               {hoverSlot != null &&
               breakPointSize !== 'small' &&
               LEFT_SLOTS.includes(hoverSlot) ? (
                 <SlotDetailsContainer robotType={robotType} slot={hoverSlot} />
               ) : null}
-            </Flex>
+            </Box>
           ) : null}
-          <Flex width="100%" height="100%" id="before robot coordinate space">
+          <Flex
+            width="100%"
+            height="100%"
+            alignItems={ALIGN_CENTER}
+            justifyContent={JUSTIFY_CENTER}
+          >
             <RobotCoordinateSpaceWithRef
               height="100%"
               width={
                 zoomIn.slot != null || tab === 'protocolSteps' ? '100%' : '50%'
               }
-              minWidth={tab === 'protocolSteps' ? 'auto' : '30rem'}
+              minWidth={
+                tab === 'protocolSteps' ? 'auto' : STARTING_DECK_VIEW_MIN_WIDTH
+              }
               deckDef={deckDef}
               viewBox={viewBoxAdjusted}
               outline="auto"
               zoomed={zoomIn.slot != null}
               borderRadius={BORDERS.borderRadius12}
-              style={{
-                // marginLeft: SPACING.spacing16,
-                transform: `translateX(${
-                  deckDef?.cornerOffsetFromOrigin[0] * -0.2
-                }px) scale(1, -1)`,
-              }}
             >
               {() => (
                 <>
@@ -394,7 +397,7 @@ export function DeckSetupContainer(props: DeckSetupTabType): JSX.Element {
               )}
             </RobotCoordinateSpaceWithRef>
           </Flex>
-          {zoomIn.slot == null ? (
+          {zoomIn.slot == null && tab === 'startingDeck' ? (
             <Box width="20%">
               {hoverSlot != null &&
               breakPointSize !== 'small' &&

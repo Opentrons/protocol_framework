@@ -14,6 +14,8 @@ import {
   SPACING,
   ToggleGroup,
   useOnClickOutside,
+  JUSTIFY_CENTER,
+  ALIGN_CENTER,
 } from '@opentrons/components'
 import {
   selectDropdownItem,
@@ -128,7 +130,12 @@ export function Designer(): JSX.Element {
 
   const deckViewItems =
     deckView === leftString ? (
-      <Flex height="100%" width="100%" css={{ outline: 'solid 1px red' }}>
+      <Flex
+        height="100%"
+        width="100%"
+        justifyContent={JUSTIFY_CENTER}
+        alignItems={ALIGN_CENTER}
+      >
         <DeckSetupContainer tab={tab} />
       </Flex>
     ) : (
@@ -163,11 +170,7 @@ export function Designer(): JSX.Element {
           }}
         />
       ) : null}
-      <Flex
-        flexDirection={DIRECTION_COLUMN}
-        // minHeight={FLEX_MAX_CONTENT}
-        height="100%"
-      >
+      <Flex flexDirection={DIRECTION_COLUMN} height="100%">
         <DesignerNavigation
           hasZoomInSlot={zoomIn.slot != null || zoomIn.cutout != null}
           hasTrashEntity={hasTrashEntity}
@@ -185,24 +188,19 @@ export function Designer(): JSX.Element {
                 ? '0'
                 : `${SPACING.spacing60} ${SPACING.spacing40}`
             }
-            // height="calc(100vh - 64px)"
             height="100%"
-            id="outer flex"
+            width="100%"
           >
             <Flex
               flexDirection={DIRECTION_COLUMN}
               gridGap={SPACING.spacing24}
               height="100%"
-              // backgroundColor="red"
-              // css={{ outline: 'solid 2px green' }}
             >
               {zoomIn.slot == null ? (
                 <Flex
                   justifyContent={JUSTIFY_FLEX_END}
                   alignSelf={ALIGN_STRETCH}
-                  // backgroundColor={COLORS.yellow35}
                   width="100%"
-                  // css={{ outline: 'solid 1px purple' }}
                 >
                   <ToggleGroup
                     selectedValue={deckView}
