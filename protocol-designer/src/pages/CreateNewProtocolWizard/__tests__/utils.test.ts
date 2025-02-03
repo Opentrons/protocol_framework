@@ -15,6 +15,7 @@ import {
   THERMOCYCLER_MODULE_TYPE,
   THERMOCYCLER_MODULE_V1,
   THERMOCYCLER_MODULE_V2,
+  THERMOCYCLER,
 } from '@opentrons/shared-data'
 import { getNumSlotsAvailable, getTrashSlot } from '../utils'
 
@@ -287,7 +288,7 @@ describe('getNumSlotsAvailable', () => {
     )
     expect(result).toBe(1)
   })
-  it('should return 4 when there are 11 magnetic blocks for staging area', () => {
+  it('should return 0 when there are 11 magnetic blocks for staging area', () => {
     const mockModules = {
       0: {
         model: MAGNETIC_BLOCK_V1,
@@ -354,6 +355,35 @@ describe('getNumSlotsAvailable', () => {
     // Note: the return value is 0 because trashBin A3
     expect(result).toBe(0)
   })
+
+  it('should return 3 when slots in column 1 are occupied', () => {
+    const mockModules = {
+      0: {
+        model: TEMPERATURE_MODULE_V2,
+        type: TEMPERATURE_MODULE_TYPE,
+        slot: 'D1',
+      },
+      1: {
+        model: HEATERSHAKER_MODULE_V1,
+        type: HEATERSHAKER_MODULE_TYPE,
+        slot: 'C1',
+      },
+      2: {
+        model: THERMOCYCLER_MODULE_V2,
+        type: THERMOCYCLER_MODULE_TYPE,
+        slot: 'B1',
+      },
+    } as any
+    const mockAdditionalEquipment: AdditionalEquipment[] = ['trashBin']
+    const result = getNumSlotsAvailable(
+      mockModules,
+      mockAdditionalEquipment,
+      'stagingArea'
+    )
+
+    expect(result).toBe(3)
+  })
+
   it('should return 11 when there are 4 staging area for magnetic block', () => {
     const mockAdditionalEquipment: AdditionalEquipment[] = [
       'stagingArea',

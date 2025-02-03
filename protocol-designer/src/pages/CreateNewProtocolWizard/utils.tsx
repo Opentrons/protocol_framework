@@ -172,7 +172,8 @@ export const getNumSlotsAvailable = (
         thermocyclerModuleCount
 
       // if the following is more than 0, pd will need to keep one slot in column 3 for trash bin/waste chute
-      const requiredSlotInColumn3 = totalModules - NUM_SLOTS_COLUMN1 > 0 ? 1 : 0
+      const requiredSlotInColumn3 =
+        totalModules - NUM_SLOTS_COLUMN1 >= 0 ? 1 : 0
 
       // there is two cases pd considers
       // 1. stating area can slots in column 3 because trash bin can be a slot in column 1
