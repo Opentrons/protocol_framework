@@ -100,7 +100,7 @@ class Store(BaseCommand[StoreParams, StoreResult, ErrorOccurrence]):
 
     commandType: StoreCommandType = "flexStacker/store"
     params: StoreParams
-    result: Optional[StoreResult]
+    result: Optional[StoreResult] = None
 
     _ImplementationCls: Type[StoreImpl] = StoreImpl
 
