@@ -7,7 +7,6 @@ import styled from 'styled-components'
 import {
   ALIGN_CENTER,
   DIRECTION_COLUMN,
-  DISPLAY_FLEX,
   Flex,
   ListItem,
   NO_WRAP,
@@ -53,13 +52,13 @@ function StyledTrans(props: StyledTransProps): JSX.Element {
           text: (
             <StyledText
               desktopStyle="bodyDefaultRegular"
-              style={{ whiteSpace: 'nowrap' }}
+              style={{ whiteSpace: NO_WRAP }}
             />
           ),
           semiBoldText: (
             <StyledText
               desktopStyle="bodyDefaultSemiBold"
-              style={{ whiteSpace: 'nowrap' }}
+              style={{ whiteSpace: NO_WRAP }}
             />
           ),
           tag: <Tag type="default" text={tagText ?? ''} />,
@@ -454,8 +453,7 @@ export function StepSummary(props: StepSummaryProps): JSX.Element | null {
   ) : null
 }
 
-const StepSummaryContainer = styled.div`
-  display: ${DISPLAY_FLEX};
+const StepSummaryContainer = styled(Flex)`
   flex-wrap: ${WRAP};
   gap: ${SPACING.spacing20};
   row-gap: ${SPACING.spacing4};
