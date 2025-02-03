@@ -36,15 +36,17 @@
       },
       "ingredients": {
         "0": {
-          "name": "samples",
+          "displayName": "samples",
           "description": null,
-          "serialize": false,
+          "displayColor": "#b925ff",
+          "pythonName": "liquid_1",
           "liquidGroupId": "0"
         },
         "1": {
-          "name": "dna",
+          "displayName": "dna",
           "description": null,
-          "serialize": false,
+          "pythonName": "liquid_2",
+          "displayColor": "#ffd600",
           "liquidGroupId": "1"
         }
       },
@@ -119,6 +121,8 @@
           "aspirate_mix_times": 3,
           "aspirate_mix_volume": "2",
           "aspirate_mmFromBottom": 1,
+          "aspirate_submerge_delay_seconds": null,
+          "aspirate_submerge_speed": null,
           "aspirate_touchTip_checkbox": true,
           "aspirate_touchTip_mmFromTop": -12.8,
           "aspirate_wellOrder_first": "t2b",
@@ -143,6 +147,8 @@
           "dispense_mix_times": 2,
           "dispense_mix_volume": "3",
           "dispense_mmFromBottom": 2.5,
+          "dispense_submerge_delay_seconds": null,
+          "dispense_submerge_speed": null,
           "dispense_touchTip_checkbox": true,
           "dispense_touchTip_mmFromTop": null,
           "dispense_wellOrder_first": "b2t",
