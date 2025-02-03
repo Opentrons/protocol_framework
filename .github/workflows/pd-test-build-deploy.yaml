@@ -39,10 +39,10 @@ env:
   CI: true
 
 jobs:
-  test:
-    name: 'protocol designer tests'
+  unit-test:
+    name: 'protocol designer unit tests'
     runs-on: 'ubuntu-24.04'
-    timeout-minutes: 30
+    timeout-minutes: 20
     steps:
       - name: 'Checkout Repository'
         uses: actions/checkout@v4
@@ -56,17 +56,28 @@ jobs:
         with:
           flags: protocol-designer
           token: ${{ secrets.CODECOV_TOKEN }}
-      - name: 'run test-e2e'
-        run: make -C protocol-designer test-e2e
 
-  build-and-deploy-pd:
+  e2e-test:
+      name: 'protocol designer e2e tests'
+      runs-on: 'ubuntu-24.04'
+      timeout-minutes: 20
+      steps:
+        - name: 'Checkout Repository'
+          uses: actions/checkout@v4
+        - uses: ./.github/actions/js/setup
+          with:
+            cache_bust_secret: ${{ secrets.GH_CACHE_VERSION }}
+        - name: 'run test-e2e'
+          run: make -C protocol-designer test-e2e
+
+  build-pd:
+    timeout-minutes: 20
     name: 'build and deploy protocol designer'
-    needs: ['test']
+    needs: ['unit-test', 'e2e-test']
     runs-on: 'ubuntu-24.04'
     if: github.event_name != 'pull_request'
     steps:
-      - name: 'Checkout Repository'
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
       - uses: ./.github/actions/js/setup
         with:
           cache_bust_secret: ${{ secrets.GH_CACHE_VERSION }}
@@ -81,6 +92,20 @@ jobs:
         with:
           name: 'pd-artifact'
           path: protocol-designer/dist
+
+  deploy-pd:
+    timeout-minutes: 10
+    name: 'deploy protocol designer'
+    needs: ['build-pd']
+    runs-on: 'ubuntu-24.04'
+    if: github.event_name != 'pull_request'
+    steps:
+      - name: 'Checkout Repository'
+        uses: actions/checkout@v4
+
+      - uses: .github/actions/git/resolve-tag
+
+      - uses: .github/actions/environment/complex-variables
 
       - name: 'download PD build'
         uses: 'actions/download-artifact@v4'
