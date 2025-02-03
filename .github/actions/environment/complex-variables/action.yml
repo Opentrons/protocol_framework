@@ -1,5 +1,5 @@
 name: 'Set Complex Environment Variables'
-description: 'Composite action to set complex environment variables using github-script.'
+description: Composite action using github-script to set complex environment variables.
 inputs: {}
 runs:
   using: 'composite'

@@ -1,7 +1,9 @@
 name: 'Fix Checkout Tags'
-description: 'Composite action to fix actions/checkout odd handling of tags by fetching and checking out the exact tag reference. See https://github.com/actions/checkout/issues/290'
-inputs: {} # No inputs needed for this action
-
+description: >
+  Composite action to fix actions/checkout odd handling of tags
+  by fetching and checking out the exact tag reference.
+  See https://github.com/actions/checkout/issues/290
+inputs: {}
 runs:
   using: 'composite'
   steps:

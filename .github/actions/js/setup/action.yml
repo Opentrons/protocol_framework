@@ -1,7 +1,7 @@
 name: 'Setup JS Environment'
 description: >
   Composite action to fix tag handling in checkout,
-  setup Node.js, install udev for USB detection, cache Yarn/NPM caches and APT packages,
+  setup Node.js, install udev for USB detection, cache Yarn/NPM caches,
   and perform JS setup.
 
 inputs:
@@ -19,26 +19,10 @@ runs:
       with:
         node-version: '22.11.0'
 
-    - name: 'Cache APT packages'
-      if: runner.os == 'Linux'
-      uses: actions/cache@v4
-      with:
-        path: /var/cache/apt
-        key: apt-${{ inputs.cache_bust_secret }}-${{ runner.os }}
-        restore-keys: |
-          apt-${{ inputs.cache_bust_secret }}-${{ runner.os }}
-
     - name: 'Install udev for USB-detection'
       if: runner.os == 'Linux'
       shell: bash
-      run: sudo apt-get update && sudo apt-get install libudev-dev
-
-    - name: 'Clean APT Archives so caching works'
-      if: runner.os == 'Linux'
-      shell: bash
-      run: |
-        sudo rm -f /var/cache/apt/archives/lock
-        sudo rm -rf /var/cache/apt/archives/partial
+      run: sudo apt-get install libudev-dev
 
     - name: 'Cache Yarn and NPM caches'
       uses: actions/cache@v4
