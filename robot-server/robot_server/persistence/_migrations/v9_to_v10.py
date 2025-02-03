@@ -43,17 +43,9 @@ class Migration9to10(Migration):  # noqa: D101
             schema_10.labware_offset_location_sequence_components_table.create(
                 transaction
             )
-
-        # Then we upmigrate the data to the new tables
-        with sql_engine_ctx(
-            dest_dir / DB_FILE
-        ) as engine, engine.begin() as transaction:
+            # Then we upmigrate the data to the new tables
             _upmigrate_stored_offsets(transaction)
-
-        # Then, we drop the table with we don't care about anymore
-        with sql_engine_ctx(
-            dest_dir / DB_FILE
-        ) as engine, engine.begin() as transaction:
+            # Then, we drop the table with we don't care about anymore
             schema_9.labware_offset_table.drop(transaction)
 
 
