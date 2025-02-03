@@ -301,6 +301,7 @@ export function DeckSetupTools(props: DeckSetupToolsProps): JSX.Element | null {
           createdLabwareForSlot.labwareDefURI !== selectedLabwareDefUri ||
           //  if nested labware changes but labware doesn't, still delete both
           (createdLabwareForSlot.labwareDefURI === selectedLabwareDefUri &&
+            selectedNestedLabwareDefUri != null &&
             createdNestedLabwareForSlot?.labwareDefURI !==
               selectedNestedLabwareDefUri))
       ) {
@@ -353,6 +354,13 @@ export function DeckSetupTools(props: DeckSetupToolsProps): JSX.Element | null {
       } else {
         dispatch(createDeckFixture(selectedFixture, cutout))
       }
+    }
+    if (
+      matchingLabwareFor4thColumn != null &&
+      selectedFixture !== 'stagingArea' &&
+      selectedFixture !== 'wasteChuteAndStagingArea'
+    ) {
+      dispatch(deleteContainer({ labwareId: matchingLabwareFor4thColumn.id }))
     }
     if (selectedModuleModel != null) {
       //  create module
@@ -411,10 +419,12 @@ export function DeckSetupTools(props: DeckSetupToolsProps): JSX.Element | null {
       selectedModuleModel != null &&
       selectedLabwareDefUri != null &&
       (createdLabwareForSlot?.labwareDefURI !== selectedLabwareDefUri ||
-        //  if nested labware changes but labware doesn't, still create both both
+        //  if nested labware changes but labware doesn't, still create both
         (createdLabwareForSlot.labwareDefURI === selectedLabwareDefUri &&
           createdNestedLabwareForSlot?.labwareDefURI !==
-            selectedNestedLabwareDefUri))
+            selectedNestedLabwareDefUri &&
+          (createdNestedLabwareForSlot?.labwareDefURI != null ||
+            selectedNestedLabwareDefUri != null)))
     ) {
       //   create adapter + labware on module
       dispatch(
