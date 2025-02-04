@@ -679,10 +679,11 @@ if __name__ == "__main__":
         choices=[f"{c}{str(r + 1)}" for r in range(12) for c in "ABCDEFGH"],
         default="A1",
     )
+    parser.add_argument("--serial-log", action="store_true")
     args = parser.parse_args()
     run_args = RunArgs.build_run_args(args)
     config.NUM_BLANK_TRIALS = args.blank_trials
-    if not run_args.ctx.is_simulating():
+    if not run_args.ctx.is_simulating() and args.serial_log:
         serial_logger = subprocess.Popen(
             [
                 "python3 -m opentrons_hardware.scripts.can_mon > /data/testing_data/serial.log"
