@@ -55,6 +55,7 @@ import {
 } from '../../utils'
 import type { StepFieldName } from '../../../../../../form-types'
 import type { StepFormProps } from '../../types'
+import { MultiInputField } from './MultiInputField'
 
 const makeAddFieldNamePrefix = (prefix: string) => (
   fieldName: string
@@ -330,62 +331,31 @@ export function MoveLiquidTools(props: StepFormProps): JSX.Element {
       {enableLiquidClasses ? (
         <>
           <Divider marginY="0" />
-          <Flex
-            flexDirection={DIRECTION_COLUMN}
-            gridGap={SPACING.spacing8}
-            padding={`0 ${SPACING.spacing16}`}
-          >
-            <Flex gridGap={SPACING.spacing8} alignItems={ALIGN_CENTER}>
-              <StyledText
-                desktopStyle="bodyDefaultRegular"
-                color={COLORS.grey60}
-              >
-                {t('protocol_steps:submerge')}
-              </StyledText>
-              <Flex {...targetProps}>
-                <Icon
-                  name="information"
-                  size="1rem"
-                  color={COLORS.grey60}
-                  data-testid="information_icon"
-                />
-              </Flex>
-              <Tooltip tooltipProps={tooltipProps}>
-                {t(`tooltip:step_fields.defaults.${tab}_submerge`)}
-              </Tooltip>
-            </Flex>
-            <ListItem type="noActive">
-              <Flex
-                padding={SPACING.spacing12}
-                width="100%"
-                flexDirection={DIRECTION_COLUMN}
-                gridGap={SPACING.spacing8}
-              >
-                <InputStepFormField
-                  showTooltip={false}
-                  padding="0"
-                  title={t('protocol_steps:submerge_speed')}
-                  {...propsForFields[`${tab}_submerge_speed`]}
-                  units={t('application:units.millimeterPerSec')}
-                  errorToShow={getFormLevelError(
-                    `${tab}_submerge_speed`,
-                    mappedErrorsToField
-                  )}
-                />
-                <InputStepFormField
-                  showTooltip={false}
-                  padding="0"
-                  title={t('protocol_steps:delay_duration')}
-                  {...propsForFields[`${tab}_submerge_delay_seconds`]}
-                  units={t('application:units.seconds')}
-                  errorToShow={getFormLevelError(
-                    `${tab}_submerge_delay_seconds`,
-                    mappedErrorsToField
-                  )}
-                />
-              </Flex>
-            </ListItem>
-          </Flex>
+          <MultiInputField
+            name="submerge"
+            tooltipContent={t(`tooltip:step_fields.defaults.${tab}_submerge`)}
+            propsForFields={propsForFields}
+            fields={[
+              {
+                fieldTitle: 'protocol_steps:submerge_speed',
+                fieldKey: `${tab}_submerge_speed`,
+                units: 'application:units.millimeterPerSec',
+                errorToShow: getFormLevelError(
+                  `${tab}_submerge_speed`,
+                  mappedErrorsToField
+                ),
+              },
+              {
+                fieldTitle: 'protocol_steps:delay_duration',
+                fieldKey: `${tab}_submerge_delay_seconds`,
+                units: 'application:units.seconds',
+                errorToShow: getFormLevelError(
+                  `${tab}_submerge_delay_seconds`,
+                  mappedErrorsToField
+                ),
+              },
+            ]}
+          />
         </>
       ) : null}
       <Divider marginY="0" />
