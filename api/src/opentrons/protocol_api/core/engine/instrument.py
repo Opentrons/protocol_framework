@@ -1254,16 +1254,20 @@ class InstrumentCore(AbstractInstrument[WellCore, LabwareCore]):
         )
         # TODO BOILER PLATE ABOVE
 
+        max_volume = min(
+            self.get_max_volume(),
+            self._engine_client.state.geometry.get_nominal_tip_geometry(
+                pipette_id=self.pipette_id,
+                labware_id=tip_racks[0][1].labware_id,
+                well_name=None,
+            ).volume,
+        )
+
         # TODO: add multi-channel pipette handling here
         source_per_volume_step = tx_commons.expand_for_volume_constraints(
             volumes=[volume for _ in range(len(source))],
             targets=source,
-            max_volume=min(
-                self.get_max_volume(),
-                tip_racks[0][1]
-                .get_well_core("A1")
-                .get_max_volume(),  # Assuming all tips in tiprack are of same volume
-            ),
+            max_volume=max_volume,
         )
 
         # TODO BOILERPLATE BELOW
@@ -1320,16 +1324,20 @@ class InstrumentCore(AbstractInstrument[WellCore, LabwareCore]):
                 air_gap=0,
             )
         ]
-        air_gap_volume = (
-            transfer_props.aspirate.retract.air_gap_by_volume.get_for_volume(volume)
-        )
         next_step_volume, next_source = next(source_per_volume_step)
         is_last_step = False
         while not is_last_step:
             total_dispense_volume = 0.0
+            air_gap_volume = (
+                transfer_props.aspirate.retract.air_gap_by_volume.get_for_volume(
+                    next_step_volume
+                )
+            )
             vol_aspirate_combo = []
             # Take air gap into account because there will be a final air gap before the dispense
-            while total_dispense_volume + air_gap_volume < self.get_max_volume():
+            while (
+                total_dispense_volume + next_step_volume + air_gap_volume <= max_volume
+            ):
                 total_dispense_volume += next_step_volume
                 vol_aspirate_combo.append((next_step_volume, next_source))
                 try:
@@ -1337,6 +1345,11 @@ class InstrumentCore(AbstractInstrument[WellCore, LabwareCore]):
                 except StopIteration:
                     is_last_step = True
                     break
+                air_gap_volume = (
+                    transfer_props.aspirate.retract.air_gap_by_volume.get_for_volume(
+                        total_dispense_volume + next_step_volume
+                    )
+                )
 
             if new_tip == TransferTipPolicyV2.ALWAYS:
                 if prev_src is not None:
@@ -1369,8 +1382,8 @@ class InstrumentCore(AbstractInstrument[WellCore, LabwareCore]):
                 trash_location=trash_location,
             )
             prev_src = next_source
-            if new_tip != TransferTipPolicyV2.NEVER:
-                _drop_tip()
+        if new_tip != TransferTipPolicyV2.NEVER:
+            _drop_tip()
 
     def _get_location_and_well_core_from_next_tip_info(
         self,
