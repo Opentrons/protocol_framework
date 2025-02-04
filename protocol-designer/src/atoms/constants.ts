@@ -1,24 +1,33 @@
-import styled, { css } from 'styled-components'
+import { css } from 'styled-components'
 import {
-  BORDERS,
   COLORS,
   DIRECTION_COLUMN,
   Flex,
   OVERFLOW_HIDDEN,
-  SPACING,
-  TYPOGRAPHY,
 } from '@opentrons/components'
 import type { FlattenSimpleInterpolation } from 'styled-components'
 
-export const BUTTON_LINK_STYLE = css`
-  color: ${COLORS.grey60};
+export const LINK_BUTTON_STYLE = css`
+  color: ${COLORS.black90};
+
   &:hover {
+    color: ${COLORS.blue50};
+  }
+
+  &:focus-visible {
+    color: ${COLORS.blue50};
+    outline: 2px solid ${COLORS.blue50};
+    outline-offset: 0.25rem;
+  }
+
+  &:disabled {
     color: ${COLORS.grey40};
   }
 `
 
 export const LINE_CLAMP_TEXT_STYLE = (
-  lineClamp: number
+  lineClamp: number,
+  title?: boolean
 ): FlattenSimpleInterpolation => css`
   display: -webkit-box;
   -webkit-box-orient: vertical;
@@ -26,7 +35,9 @@ export const LINE_CLAMP_TEXT_STYLE = (
   text-overflow: ellipsis;
   word-wrap: break-word;
   -webkit-line-clamp: ${lineClamp};
-  word-break: break-all; // for a non word case like aaaaaaaa
+  word-break: ${title === true
+    ? 'normal'
+    : 'break-all'}; // normal for tile and break-all for a non word case like aaaaaaaa
 `
 
 const MIN_OVERVIEW_WIDTH = '64rem'
@@ -37,6 +48,7 @@ export const COLUMN_STYLE = css`
   flex: 1;
 `
 
+<<<<<<< HEAD
 export const DescriptionFieldContainer: any = styled(Flex)`
   border-radius: ${BORDERS.borderRadius4};
 
@@ -90,3 +102,6 @@ export const DescriptionField = styled.textarea`
     cursor: not-allowed;
   }
 `
+=======
+export const NAV_BAR_HEIGHT_REM = 4
+>>>>>>> edge

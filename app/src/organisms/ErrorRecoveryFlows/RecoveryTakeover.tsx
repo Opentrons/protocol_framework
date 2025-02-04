@@ -120,9 +120,17 @@ export function RecoveryTakeoverDesktop({
 }: RecoveryTakeoverProps): JSX.Element {
   const { t } = useTranslation('error_recovery')
 
+  const buildTitleHeadingDesktop = (): JSX.Element => {
+    return (
+      <StyledText desktopStyle="bodyLargeSemiBold">
+        {t('error_on_robot', { robot: robotName })}
+      </StyledText>
+    )
+  }
+
   return (
     <RecoveryInterventionModal
-      titleHeading={t('error_on_robot', { robot: robotName })}
+      titleHeading={buildTitleHeadingDesktop()}
       desktopType={'desktop-small'}
       isOnDevice={false}
     >

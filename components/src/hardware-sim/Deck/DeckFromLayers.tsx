@@ -15,6 +15,8 @@ import { ALL_OT2_DECK_LAYERS } from './constants'
 
 import type { RobotType } from '@opentrons/shared-data'
 
+export * from './OT2Layers'
+
 export interface DeckFromLayersProps {
   robotType: RobotType
   layerBlocklist: string[]

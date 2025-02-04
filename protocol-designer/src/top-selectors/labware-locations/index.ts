@@ -11,14 +11,16 @@ import {
   isAddressableAreaStandardSlot,
   MOVABLE_TRASH_ADDRESSABLE_AREAS,
   FLEX_MODULE_ADDRESSABLE_AREAS,
+  FLEX_STACKER_ADDRESSABLE_AREAS,
+  TC_MODULE_LOCATION_OT2,
+  TC_MODULE_LOCATION_OT3,
 } from '@opentrons/shared-data'
-import { COLUMN_4_SLOTS } from '@opentrons/step-generation'
+import { COLUMN_4_SLOTS, getHasWasteChute } from '@opentrons/step-generation'
 import {
   START_TERMINAL_ITEM_ID,
   END_TERMINAL_ITEM_ID,
   PRESAVED_STEP_ID,
 } from '../../steplist'
-import { getHasWasteChute } from '../../components/labware'
 import { selectors as stepFormSelectors } from '../../step-forms'
 import { getActiveItem } from '../../ui/steps'
 import { TERMINAL_ITEM_SELECTION_TYPE } from '../../ui/steps/reducers'
@@ -160,15 +162,14 @@ export const getUnoccupiedLabwareLocationOptions: Selector<
             : 'unknown module'
         const moduleSlotInfo = modSlot ?? 'unknown slot'
         const adapterSlotInfo = adapterSlot ?? 'unknown adapter'
-
         return labwareOnAdapter == null && isAdapter
           ? [
               ...acc,
               {
                 name:
                   modIdWithAdapter != null
-                    ? `${adapterDisplayName} on top of ${moduleUnderAdapter} in slot ${moduleSlotInfo}`
-                    : `${adapterDisplayName} on slot ${adapterSlotInfo}`,
+                    ? `${moduleUnderAdapter} on ${moduleSlotInfo} with ${adapterDisplayName}`
+                    : `${adapterSlotInfo} with ${adapterDisplayName}`,
                 value: labwareId,
               },
             ]
@@ -182,6 +183,13 @@ export const getUnoccupiedLabwareLocationOptions: Selector<
         const moduleHasLabware = Object.entries(labware).some(
           ([lwId, lwOnDeck]) => lwOnDeck.slot === modId
         )
+        const type = moduleEntities[modId].type
+        const slot = modOnDeck.slot
+        let tcLocations
+        if (type === THERMOCYCLER_MODULE_TYPE) {
+          tcLocations =
+            slot === '7' ? TC_MODULE_LOCATION_OT2 : TC_MODULE_LOCATION_OT3
+        }
         return moduleHasLabware
           ? acc
           : [
@@ -189,11 +197,7 @@ export const getUnoccupiedLabwareLocationOptions: Selector<
               {
                 name: `${getModuleDisplayName(
                   moduleEntities[modId].model
-                )} in slot ${
-                  modOnDeck.slot === 'span7_8_10_11'
-                    ? '7, 8, 10, 11'
-                    : modOnDeck.slot
-                }`,
+                )} on ${tcLocations != null ? tcLocations : slot}`,
                 value: modId,
               },
             ]
@@ -231,11 +235,12 @@ export const getUnoccupiedLabwareLocationOptions: Selector<
           !isTrashSlot &&
           !WASTE_CHUTE_ADDRESSABLE_AREAS.includes(slotId) &&
           !notSelectedStagingAreaAddressableAreas.includes(slotId) &&
-          !FLEX_MODULE_ADDRESSABLE_AREAS.includes(slotId)
+          !FLEX_MODULE_ADDRESSABLE_AREAS.includes(slotId) &&
+          !FLEX_STACKER_ADDRESSABLE_AREAS.includes(slotId)
         )
       })
       .map(slotId => ({ name: slotId, value: slotId }))
-    const offDeck = { name: 'Off-Deck', value: 'offDeck' }
+    const offDeck = { name: 'Off-deck', value: 'offDeck' }
     const wasteChuteSlot = {
       name: 'Waste Chute in D3',
       value: WASTE_CHUTE_CUTOUT,

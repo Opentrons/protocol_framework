@@ -1,43 +1,45 @@
-import {
-  Actions,
-  Verifications,
-  runCreateTest,
-  verifyCreateProtocolPage,
-} from '../support/createNew'
+import { SetupActions, SetupVerifications } from '../support/SetupSteps'
 import { UniversalActions } from '../support/universalActions'
+import '../support/commands'
+// Every test is goign to use StepsList
+// Now every test will be a list of some combination of support
+// typescript file list of actions for specific PD stuff and include StepsList for steps
+
+import { runSteps } from '../support/StepExecution'
+import type { StepsList } from '../support/StepExecution'
 
 describe('The Redesigned Create Protocol Landing Page', () => {
   beforeEach(() => {
     cy.visit('/')
+    cy.closeAnalyticsModal()
   })
 
   it('content and step 1 flow works', () => {
-    cy.clickCreateNew()
     cy.verifyCreateNewHeader()
-    verifyCreateProtocolPage()
-    const steps: Array<Actions | Verifications | UniversalActions> = [
-      Verifications.OnStep1,
-      Verifications.FlexSelected,
+    cy.clickCreateNew()
+    const steps: StepsList = [
+      SetupVerifications.OnStep1,
+      SetupVerifications.FlexSelected,
       UniversalActions.Snapshot,
-      Actions.SelectOT2,
-      Verifications.OT2Selected,
+      SetupActions.SelectOT2,
+      SetupVerifications.OT2Selected,
       UniversalActions.Snapshot,
-      Actions.SelectFlex,
-      Verifications.FlexSelected,
+      SetupActions.SelectFlex,
+      SetupVerifications.FlexSelected,
       UniversalActions.Snapshot,
-      Actions.Confirm,
-      Verifications.OnStep2,
-      Verifications.NinetySixChannel,
+      SetupActions.Confirm,
+      SetupVerifications.OnStep2,
+      SetupVerifications.NinetySixChannel,
       UniversalActions.Snapshot,
-      Actions.GoBack,
-      Verifications.OnStep1,
-      Actions.SelectOT2,
-      Actions.Confirm,
-      Verifications.OnStep2,
-      Verifications.NotNinetySixChannel,
+      SetupActions.GoBack,
+      SetupVerifications.OnStep1,
+      SetupActions.SelectOT2,
+      SetupActions.Confirm,
+      SetupVerifications.OnStep2,
+      SetupVerifications.NotNinetySixChannel,
       UniversalActions.Snapshot,
     ]
 
-    runCreateTest(steps)
+    runSteps(steps)
   })
 })

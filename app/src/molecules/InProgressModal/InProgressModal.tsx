@@ -1,5 +1,4 @@
-import type * as React from 'react'
-import { css } from 'styled-components'
+import styled from 'styled-components'
 import {
   ALIGN_CENTER,
   COLORS,
@@ -13,15 +12,17 @@ import {
   TYPOGRAPHY,
 } from '@opentrons/components'
 
+import type { ReactNode } from 'react'
+
 interface Props {
   //  optional override of the spinner
-  alternativeSpinner?: React.ReactNode
+  alternativeSpinner?: ReactNode
   description?: string
   body?: string
   children?: JSX.Element
 }
 
-const DESCRIPTION_STYLE = css`
+const StyledDescription = styled(LegacyStyledText)`
   ${TYPOGRAPHY.h1Default}
   margin-top: ${SPACING.spacing24};
   margin-bottom: ${SPACING.spacing8};
@@ -37,7 +38,8 @@ const DESCRIPTION_STYLE = css`
     line-height: ${TYPOGRAPHY.lineHeight42};
   }
 `
-const BODY_STYLE = css`
+
+const StyledBody = styled(LegacyStyledText)`
   ${TYPOGRAPHY.pRegular}
   text-align: ${TYPOGRAPHY.textAlignCenter};
 
@@ -46,7 +48,8 @@ const BODY_STYLE = css`
     color: ${COLORS.grey60}
   }
 `
-const MODAL_STYLE = css`
+
+const StyledModal = styled(Flex)`
   align-items: ${ALIGN_CENTER};
   flex-direction: ${DIRECTION_COLUMN};
   justify-content: ${JUSTIFY_CENTER};
@@ -58,7 +61,8 @@ const MODAL_STYLE = css`
     height: 100%;
   }
 `
-const SPINNER_STYLE = css`
+
+const StyledSpinner = styled(Icon)`
   color: ${COLORS.grey60};
   width: 5.125rem;
   height: 5.125rem;
@@ -68,11 +72,13 @@ const SPINNER_STYLE = css`
   }
 `
 
-const DESCRIPTION_CONTAINER_STYLE = css`
-  padding-x: 6.5625rem;
+const DescriptionContainer = styled(Flex)`
+  padding-left: 6.5625rem;
+  padding-right: 6.5625rem;
   gap: ${SPACING.spacing8};
   @media ${RESPONSIVENESS.touchscreenMediaQuerySpecs} {
-    padding-x: ${SPACING.spacing40};
+    padding-left: ${SPACING.spacing40};
+    padding-right: ${SPACING.spacing40};
     gap: ${SPACING.spacing4};
   }
 `
@@ -81,25 +87,20 @@ export function InProgressModal(props: Props): JSX.Element {
   const { alternativeSpinner, children, description, body } = props
 
   return (
-    <Flex css={MODAL_STYLE}>
+    <StyledModal>
       {alternativeSpinner ?? (
-        <Icon name="ot-spinner" aria-label="spinner" css={SPINNER_STYLE} spin />
+        <StyledSpinner name="ot-spinner" aria-label="spinner" spin />
       )}
-      <Flex
+      <DescriptionContainer
         flexDirection={DIRECTION_COLUMN}
         alignItems={ALIGN_CENTER}
-        css={DESCRIPTION_CONTAINER_STYLE}
       >
         {description != null && (
-          <LegacyStyledText css={DESCRIPTION_STYLE}>
-            {description}
-          </LegacyStyledText>
+          <StyledDescription>{description}</StyledDescription>
         )}
-        {body != null && (
-          <LegacyStyledText css={BODY_STYLE}>{body}</LegacyStyledText>
-        )}
-      </Flex>
+        {body != null && <StyledBody>{body}</StyledBody>}
+      </DescriptionContainer>
       {children}
-    </Flex>
+    </StyledModal>
   )
 }

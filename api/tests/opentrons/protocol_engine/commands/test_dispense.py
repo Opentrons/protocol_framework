@@ -99,7 +99,11 @@ async def test_dispense_implementation(
 
     decoy.when(
         await pipetting.dispense_in_place(
-            pipette_id="pipette-id-abc123", volume=50, flow_rate=1.23, push_out=None
+            pipette_id="pipette-id-abc123",
+            volume=50,
+            flow_rate=1.23,
+            push_out=None,
+            correction_volume=0,
         )
     ).then_return(42)
     decoy.when(
@@ -119,7 +123,7 @@ async def test_dispense_implementation(
                     labware_id="labware-id-abc123",
                     well_name="A3",
                 ),
-                new_deck_point=DeckPoint.construct(x=1, y=2, z=3),
+                new_deck_point=DeckPoint.model_construct(x=1, y=2, z=3),
             ),
             liquid_operated=update_types.LiquidOperatedUpdate(
                 labware_id="labware-id-abc123",
@@ -193,7 +197,11 @@ async def test_overpressure_error(
 
     decoy.when(
         await pipetting.dispense_in_place(
-            pipette_id=pipette_id, volume=50, flow_rate=1.23, push_out=None
+            pipette_id=pipette_id,
+            volume=50,
+            flow_rate=1.23,
+            push_out=None,
+            correction_volume=0,
         ),
     ).then_raise(PipetteOverpressureError())
 
@@ -203,7 +211,7 @@ async def test_overpressure_error(
     result = await subject.execute(data)
 
     assert result == DefinedErrorData(
-        public=OverpressureError.construct(
+        public=OverpressureError.model_construct(
             id=error_id,
             createdAt=error_timestamp,
             wrappedErrors=[matchers.Anything()],
@@ -216,7 +224,7 @@ async def test_overpressure_error(
                     labware_id="labware-id",
                     well_name="well-name",
                 ),
-                new_deck_point=DeckPoint.construct(x=1, y=2, z=3),
+                new_deck_point=DeckPoint.model_construct(x=1, y=2, z=3),
             ),
             liquid_operated=update_types.LiquidOperatedUpdate(
                 labware_id="labware-id",
@@ -234,7 +242,7 @@ async def test_overpressure_error(
                     labware_id="labware-id",
                     well_name="well-name",
                 ),
-                new_deck_point=DeckPoint.construct(x=1, y=2, z=3),
+                new_deck_point=DeckPoint.model_construct(x=1, y=2, z=3),
             ),
         ),
     )
@@ -288,7 +296,7 @@ async def test_stall_error(
     result = await subject.execute(data)
 
     assert result == DefinedErrorData(
-        public=StallOrCollisionError.construct(
+        public=StallOrCollisionError.model_construct(
             id=error_id,
             createdAt=error_timestamp,
             wrappedErrors=[matchers.Anything()],

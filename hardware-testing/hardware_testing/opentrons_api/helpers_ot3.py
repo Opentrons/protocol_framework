@@ -6,7 +6,17 @@ from enum import Enum
 from math import pi
 from subprocess import run, Popen
 from time import time
-from typing import Callable, Coroutine, Dict, List, Optional, Tuple, Union, cast
+from typing import (
+    Callable,
+    Coroutine,
+    Dict,
+    List,
+    Optional,
+    Tuple,
+    Union,
+    cast,
+    Sequence,
+)
 import atexit
 from opentrons_hardware.drivers.can_bus import DriverSettings, build, CanMessenger
 from opentrons_hardware.drivers.can_bus import settings as can_bus_settings
@@ -146,7 +156,7 @@ def _create_attached_instruments_dict(
 
 
 async def update_firmware(
-    api: OT3API, force: bool = False, subsystems: Optional[List[SubSystem]] = None
+    api: OT3API, force: bool = False, subsystems: Optional[Sequence[SubSystem]] = None
 ) -> None:
     """Update firmware of OT3."""
     if not api.is_simulator:
@@ -1137,6 +1147,8 @@ def clear_pipette_ul_per_mm(api: OT3API, mount: OT3Mount) -> None:
         pip_nominal_ul_per_mm = _ul_per_mm_of_shaft_diameter(1)
     elif "p1000" in pip.model.lower():
         pip_nominal_ul_per_mm = _ul_per_mm_of_shaft_diameter(4.5)
+    elif "p200" in pip.model.lower():
+        pip_nominal_ul_per_mm = _ul_per_mm_of_shaft_diameter(2)
     else:
         raise RuntimeError(f"unexpected pipette model: {pip.model}")
     # 10000 is an arbitrarily large volume that none of our pipettes can reach

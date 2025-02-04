@@ -17,13 +17,17 @@ import {
   TYPOGRAPHY,
 } from '@opentrons/components'
 import { stepIconsByType } from '../../../../form-types'
+import {
+  LINK_BUTTON_STYLE,
+  LINE_CLAMP_TEXT_STYLE,
+  NAV_BAR_HEIGHT_REM,
+} from '../../../../atoms'
 import { FormAlerts } from '../../../../organisms'
 import { useKitchen } from '../../../../organisms/Kitchen/hooks'
 import { RenameStepModal } from '../../../../organisms/RenameStepModal'
 import { getFormWarningsForSelectedStep } from '../../../../dismiss/selectors'
 import { getTimelineWarningsForSelectedStep } from '../../../../top-selectors/timelineWarnings'
 import { getRobotStateTimeline } from '../../../../file-data/selectors'
-import { BUTTON_LINK_STYLE, LINE_CLAMP_TEXT_STYLE } from '../../../../atoms'
 import { analyticsEvent } from '../../../../analytics/actions'
 import {
   getFormLevelErrorsForUnsavedForm,
@@ -34,6 +38,7 @@ import {
   FORM_WARNINGS_EVENT,
 } from '../../../../analytics/constants'
 import {
+  AbsorbanceReaderTools,
   CommentTools,
   HeaterShakerTools,
   MagnetTools,
@@ -44,6 +49,7 @@ import {
   TemperatureTools,
   ThermocyclerTools,
 } from './StepTools'
+import { useAbsorbanceReaderCommandType } from './hooks'
 import {
   getSaveStepSnackbarText,
   getVisibleFormErrors,
@@ -51,6 +57,8 @@ import {
   capitalizeFirstLetter,
   getIsErrorOnCurrentPage,
 } from './utils'
+
+import type { ComponentType } from 'react'
 import type { StepFieldName } from '../../../../steplist/fieldLevel'
 import type { FormData, StepType } from '../../../../form-types'
 import type { AnalyticsEvent } from '../../../../analytics/mixpanel'
@@ -61,9 +69,13 @@ import type {
   LiquidHandlingTab,
   StepFormProps,
 } from './types'
+import {
+  hoverSelection,
+  selectDropdownItem,
+} from '../../../../ui/steps/actions/actions'
 
 type StepFormMap = {
-  [K in StepType]?: React.ComponentType<StepFormProps> | null
+  [K in StepType]?: ComponentType<StepFormProps> | null
 }
 
 const STEP_FORM_MAP: StepFormMap = {
@@ -76,6 +88,7 @@ const STEP_FORM_MAP: StepFormMap = {
   thermocycler: ThermocyclerTools,
   heaterShaker: HeaterShakerTools,
   comment: CommentTools,
+  absorbanceReader: AbsorbanceReaderTools,
 }
 
 interface StepFormToolboxProps {
@@ -126,6 +139,10 @@ export function StepFormToolbox(props: StepFormToolboxProps): JSX.Element {
     dependentFields: error.dependentProfileFields,
   }))
   const timeline = useSelector(getRobotStateTimeline)
+  const moduleId = formData.moduleId
+  const enableReadOrInitialization = useAbsorbanceReaderCommandType(
+    moduleId as string | null
+  )
   const [toolboxStep, setToolboxStep] = useState<number>(0)
   const [showFormErrors, setShowFormErrors] = useState<boolean>(false)
   const [tab, setTab] = useState<LiquidHandlingTab>('aspirate')
@@ -193,6 +210,8 @@ export function StepFormToolbox(props: StepFormToolboxProps): JSX.Element {
   }
 
   const isMultiStepToolbox =
+    (formData.stepType === 'absorbanceReader' &&
+      enableReadOrInitialization != null) ||
     formData.stepType === 'moveLiquid' ||
     formData.stepType === 'mix' ||
     formData.stepType === 'thermocycler'
@@ -235,6 +254,8 @@ export function StepFormToolbox(props: StepFormToolboxProps): JSX.Element {
         })
       )
       dispatch(analyticsEvent(stepDuration))
+      dispatch(selectDropdownItem({ selection: null, mode: 'clear' }))
+      dispatch(hoverSelection({ id: null, text: null }))
     } else {
       setShowFormErrors(true)
       if (tab === 'aspirate' && isDispenseError && !isAspirateError) {
@@ -272,6 +293,8 @@ export function StepFormToolbox(props: StepFormToolboxProps): JSX.Element {
         />
       ) : null}
       <Toolbox
+        height="100%"
+        maxHeight={`calc(100vh - ${NAV_BAR_HEIGHT_REM}rem - 2 * ${SPACING.spacing12})`}
         position={POSITION_RELATIVE}
         subHeader={
           isMultiStepToolbox ? (
@@ -285,7 +308,7 @@ export function StepFormToolbox(props: StepFormToolboxProps): JSX.Element {
             onClick={() => {
               setIsRename(true)
             }}
-            css={BUTTON_LINK_STYLE}
+            css={LINK_BUTTON_STYLE}
             textDecoration={TYPOGRAPHY.textDecorationUnderline}
           >
             <StyledText desktopStyle="bodyDefaultRegular">
@@ -294,7 +317,16 @@ export function StepFormToolbox(props: StepFormToolboxProps): JSX.Element {
           </Btn>
         }
         childrenPadding="0"
-        onCloseClick={handleClose}
+        onCloseClick={() => {
+          handleClose()
+          dispatch(
+            selectDropdownItem({
+              selection: null,
+              mode: 'clear',
+            })
+          )
+          dispatch(hoverSelection({ id: null, text: null }))
+        }}
         closeButton={<Icon size="2rem" name="close" />}
         confirmButton={
           <Flex gridGap={SPACING.spacing8}>
@@ -322,7 +354,7 @@ export function StepFormToolbox(props: StepFormToolboxProps): JSX.Element {
             <Icon size="1rem" name={icon} minWidth="1rem" />
             <StyledText
               desktopStyle="bodyLargeSemiBold"
-              css={LINE_CLAMP_TEXT_STYLE(2)}
+              css={LINE_CLAMP_TEXT_STYLE(2, true)}
             >
               {capitalizeFirstLetter(String(formData.stepName))}
             </StyledText>

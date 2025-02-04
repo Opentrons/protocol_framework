@@ -9,6 +9,7 @@ import {
   Link as LinkComponent,
   SPACING,
   StyledText,
+  TEXT_DECORATION_UNDERLINE,
 } from '@opentrons/components'
 
 import magTempCombined from '../../assets/images/modules/magdeck_tempdeck_combined.png'
@@ -19,11 +20,10 @@ import heaterShaker from '../../assets/images/modules/heatershaker.png'
 import thermocyclerGen2 from '../../assets/images/modules/thermocycler_gen2.png'
 import liquidEnhancements from '../../assets/images/announcements/liquid-enhancements.gif'
 import opentronsFlex from '../../assets/images/OpentronsFlex.png'
-import deckConfigutation from '../../assets/images/deck_configuration.png'
+import deckConfiguration from '../../assets/images/deck_configuration.png'
+import absorbancePlateReaderImage from '../../assets/images/opentrons_absorbance_plate_reader.png'
 import { DOC_URL } from '../KnowledgeLink'
 import type { ReactNode } from 'react'
-
-import styles from './AnnouncementModal.module.css'
 
 export interface Announcement {
   announcementKey: string
@@ -32,6 +32,17 @@ export interface Announcement {
   message: ReactNode
 }
 
+const modulesDiagramsRow = css`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding-left: 19.294%;
+  padding-right: 19.294%;
+`
+const modulesDiagram = css`
+  width: 100%;
+  height: 100%;
+`
 const batchEditStyles = css`
   justify-content: ${JUSTIFY_SPACE_AROUND};
   padding: ${SPACING.spacing16};
@@ -44,16 +55,19 @@ const batchEditStyles = css`
 const PD = 'Protocol Designer'
 const APP = 'Opentrons App'
 const OPENTRONS_PD = 'Opentrons Protocol Designer'
+const OPENTRONS_ABSORBANCE_READER_URL =
+  'https://opentrons.com/products/opentrons-flex-absorbance-plate-reader-module-gen1'
 
 export const useAnnouncements = (): Announcement[] => {
   const { t } = useTranslation('modal')
+  const pdVersion = process.env.OT_PD_VERSION
 
   return [
     {
       announcementKey: 'modulesRequireRunAppUpdate',
       image: (
-        <div className={styles.modules_diagrams_row}>
-          <img className={styles.modules_diagram} src={magTempCombined} />
+        <div css={modulesDiagramsRow}>
+          <img css={modulesDiagram} src={magTempCombined} />
         </div>
       ),
       heading: t('announcements.header', { pd: PD }),
@@ -76,8 +90,16 @@ export const useAnnouncements = (): Announcement[] => {
     {
       announcementKey: 'thermocyclerSupport',
       image: (
-        <div className={styles.thermocycler_diagram_row}>
-          <img className={styles.modules_diagram} src={thermocycler} />
+        <div
+          css={css`
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 2rem;
+            padding: 0 25%;
+          `}
+        >
+          <img css={modulesDiagram} src={thermocycler} />
         </div>
       ),
       heading: t('announcements.header', { pd: PD }),
@@ -146,8 +168,8 @@ export const useAnnouncements = (): Announcement[] => {
     {
       announcementKey: 'heaterShakerSupport',
       image: (
-        <div className={styles.modules_diagrams_row}>
-          <img className={styles.modules_diagram} src={heaterShaker} />
+        <div css={modulesDiagramsRow}>
+          <img css={modulesDiagram} src={heaterShaker} />
         </div>
       ),
       heading: t('announcements.header', { pd: PD }),
@@ -172,8 +194,8 @@ export const useAnnouncements = (): Announcement[] => {
     {
       announcementKey: 'thermocyclerGen2Support',
       image: (
-        <div className={styles.modules_diagrams_row}>
-          <img className={styles.modules_diagram} src={thermocyclerGen2} />
+        <div css={modulesDiagramsRow}>
+          <img css={modulesDiagram} src={thermocyclerGen2} />
         </div>
       ),
       heading: t('announcements.header', { pd: PD }),
@@ -198,8 +220,15 @@ export const useAnnouncements = (): Announcement[] => {
     {
       announcementKey: 'liquidColorEnhancements',
       image: (
-        <div className={styles.modules_diagrams_color_enhancements}>
-          <img className={styles.modules_diagram} src={liquidEnhancements} />
+        <div
+          css={css`
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 6%;
+          `}
+        >
+          <img css={modulesDiagram} src={liquidEnhancements} />
         </div>
       ),
       heading: t('announcements.header', { pd: PD }),
@@ -252,7 +281,7 @@ export const useAnnouncements = (): Announcement[] => {
       announcementKey: 'deckConfigAnd96Channel8.0',
       image: (
         <Flex justifyContent={JUSTIFY_CENTER} paddingTop={SPACING.spacing8}>
-          <img width="340" src={deckConfigutation} />
+          <img width="340" src={deckConfiguration} />
         </Flex>
       ),
       heading: t('announcements.header', { pd: PD }),
@@ -307,7 +336,7 @@ export const useAnnouncements = (): Announcement[] => {
     {
       announcementKey: 'redesign8.2',
       image: <Flex />,
-      heading: t('announcements.redesign.body1'),
+      heading: t('announcements.redesign.body1', { version: pdVersion }),
       message: (
         <Flex gridGap={SPACING.spacing8} flexDirection={DIRECTION_COLUMN}>
           <StyledText desktopStyle="bodyDefaultRegular">
@@ -342,6 +371,86 @@ export const useAnnouncements = (): Announcement[] => {
                 ),
               }}
               i18nKey="announcements.redesign.body5"
+            />
+          </StyledText>
+        </Flex>
+      ),
+    },
+    {
+      announcementKey: 'absorbancePlateReader',
+      image: (
+        <Flex
+          justifyContent={JUSTIFY_CENTER}
+          paddingTop={SPACING.spacing8}
+          backgroundColor={COLORS.blue10}
+        >
+          <img width="100%" src={absorbancePlateReaderImage} />
+        </Flex>
+      ),
+      heading: t('announcements.absorbancePlateReaderSupport.heading', {
+        version: pdVersion,
+      }),
+      message: (
+        <Flex gridGap={SPACING.spacing4} flexDirection={DIRECTION_COLUMN}>
+          <StyledText desktopStyle="bodyDefaultSemiBold">
+            {t('announcements.absorbancePlateReaderSupport.body1', {
+              version: pdVersion,
+            })}
+          </StyledText>
+          <Flex flexDirection={DIRECTION_COLUMN}>
+            <StyledText desktopStyle="bodyDefaultRegular">
+              {t('announcements.absorbancePlateReaderSupport.body2')}
+            </StyledText>
+            <Flex marginLeft={SPACING.spacing16}>
+              <ul>
+                <li>
+                  <StyledText desktopStyle="bodyDefaultRegular">
+                    <Trans
+                      t={t}
+                      components={{
+                        link1: (
+                          <LinkComponent
+                            external
+                            href={OPENTRONS_ABSORBANCE_READER_URL}
+                            textDecoration={TEXT_DECORATION_UNDERLINE}
+                            color={COLORS.black90}
+                          />
+                        ),
+                      }}
+                      i18nKey="announcements.absorbancePlateReaderSupport.body3"
+                    />
+                  </StyledText>
+                </li>
+                <li>
+                  <StyledText desktopStyle="bodyDefaultRegular">
+                    {t('announcements.absorbancePlateReaderSupport.body4')}
+                  </StyledText>
+                </li>
+                <li>
+                  <StyledText desktopStyle="bodyDefaultRegular">
+                    {t('announcements.absorbancePlateReaderSupport.body5')}
+                  </StyledText>
+                </li>
+              </ul>
+            </Flex>
+          </Flex>
+          <StyledText desktopStyle="bodyDefaultRegular">
+            {t('announcements.absorbancePlateReaderSupport.body6')}
+          </StyledText>
+          <StyledText desktopStyle="bodyDefaultRegular">
+            <Trans
+              t={t}
+              components={{
+                link1: (
+                  <LinkComponent
+                    external
+                    href={DOC_URL}
+                    textDecoration={TEXT_DECORATION_UNDERLINE}
+                    color={COLORS.black90}
+                  />
+                ),
+              }}
+              i18nKey="announcements.absorbancePlateReaderSupport.body7"
             />
           </StyledText>
         </Flex>

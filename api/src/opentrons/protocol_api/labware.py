@@ -36,7 +36,6 @@ from opentrons.protocols.api_support.util import (
     UnsupportedAPIError,
 )
 
-
 # TODO(mc, 2022-09-02): re-exports provided for backwards compatibility
 # remove when their usage is no longer needed
 from opentrons.protocols.labware import (  # noqa: F401
@@ -49,7 +48,10 @@ from . import validation
 from ._liquid import Liquid
 from ._types import OffDeckType
 from .core import well_grid
-from .core.engine import ENGINE_CORE_API_VERSION, SET_OFFSET_RESTORED_API_VERSION
+from .core.engine import (
+    ENGINE_CORE_API_VERSION,
+    SET_OFFSET_RESTORED_API_VERSION,
+)
 from .core.labware import AbstractLabware
 from .core.module import AbstractModuleCore
 from .core.core_map import LoadedCoreMap
@@ -292,7 +294,7 @@ class Well:
         :param Liquid liquid: The liquid to load into the well.
         :param float volume: The volume of liquid to load, in µL.
 
-        .. deprecated:: 2.22
+        .. TODO: flag as deprecated in 2.22 docs
             In API version 2.22 and later, use :py:meth:`~Labware.load_liquid`, :py:meth:`~Labware.load_liquid_by_well`,
             or :py:meth:`~Labware.load_empty` to load liquid into a well.
         """
@@ -300,6 +302,32 @@ class Well:
             liquid=liquid,
             volume=volume,
         )
+
+    @requires_version(2, 21)
+    def current_liquid_height(self) -> float:
+        """Get the current liquid height in a well."""
+        return self._core.current_liquid_height()
+
+    @requires_version(2, 21)
+    def current_liquid_volume(self) -> float:
+        """Get the current liquid volume in a well."""
+        return self._core.get_liquid_volume()
+
+    @requires_version(2, 21)
+    def estimate_liquid_height_after_pipetting(self, operation_volume: float) -> float:
+        """Check the height of the liquid within a well.
+
+        :returns: The height, in mm, of the liquid from the deck.
+
+        :meta private:
+
+        This is intended for Opentrons internal use only and is not a guaranteed API.
+        """
+
+        projected_final_height = self._core.estimate_liquid_height_after_pipetting(
+            operation_volume=operation_volume,
+        )
+        return projected_final_height
 
     def _from_center_cartesian(self, x: float, y: float, z: float) -> Point:
         """
@@ -544,6 +572,7 @@ class Labware:
         self,
         name: str,
         label: Optional[str] = None,
+        lid: Optional[str] = None,
         namespace: Optional[str] = None,
         version: Optional[int] = None,
     ) -> Labware:
@@ -573,6 +602,20 @@ class Labware:
 
         self._core_map.add(labware_core, labware)
 
+        if lid is not None:
+            if self._api_version < validation.LID_STACK_VERSION_GATE:
+                raise APIVersionError(
+                    api_element="Loading a Lid on a Labware",
+                    until_version="2.23",
+                    current_version=f"{self._api_version}",
+                )
+            self._protocol_core.load_lid(
+                load_name=lid,
+                location=labware_core,
+                namespace=namespace,
+                version=version,
+            )
+
         return labware
 
     @requires_version(2, 15)
@@ -596,6 +639,65 @@ class Labware:
             version=load_params.version,
             label=label,
         )
+
+    @requires_version(2, 23)
+    def load_lid_stack(
+        self,
+        load_name: str,
+        quantity: int,
+        namespace: Optional[str] = None,
+        version: Optional[int] = None,
+    ) -> Labware:
+        """
+        Load a stack of Lids onto a valid Deck Location or Adapter.
+
+        :param str load_name: A string to use for looking up a lid definition.
+            You can find the ``load_name`` for any standard lid on the Opentrons
+            `Labware Library <https://labware.opentrons.com>`_.
+        :param int quantity: The quantity of lids to be loaded in the stack.
+        :param str namespace: The namespace that the lid labware definition belongs to.
+            If unspecified, the API will automatically search two namespaces:
+
+              - ``"opentrons"``, to load standard Opentrons labware definitions.
+              - ``"custom_beta"``, to load custom labware definitions created with the
+                `Custom Labware Creator <https://labware.opentrons.com/create>`__.
+
+            You might need to specify an explicit ``namespace`` if you have a custom
+            definition whose ``load_name`` is the same as an Opentrons-verified
+            definition, and you want to explicitly choose one or the other.
+
+        :param version: The version of the labware definition. You should normally
+            leave this unspecified to let ``load_lid_stack()`` choose a version
+            automatically.
+
+        :return: The initialized and loaded labware object representing the Lid Stack.
+        """
+        if self._api_version < validation.LID_STACK_VERSION_GATE:
+            raise APIVersionError(
+                api_element="Loading a Lid Stack",
+                until_version="2.23",
+                current_version=f"{self._api_version}",
+            )
+
+        load_location = self._core
+
+        load_name = validation.ensure_lowercase_name(load_name)
+
+        result = self._protocol_core.load_lid_stack(
+            load_name=load_name,
+            location=load_location,
+            quantity=quantity,
+            namespace=namespace,
+            version=version,
+        )
+
+        labware = Labware(
+            core=result,
+            api_version=self._api_version,
+            protocol_core=self._protocol_core,
+            core_map=self._core_map,
+        )
+        return labware
 
     def set_calibration(self, delta: Point) -> None:
         """

@@ -11,6 +11,7 @@ import { analyticsEvent } from '../../../../../analytics/actions'
 import {
   getCurrentFormHasUnsavedChanges,
   getCurrentFormIsPresaved,
+  getPipetteEntities,
   getSavedStepForms,
   getUnsavedForm,
 } from '../../../../../step-forms/selectors'
@@ -19,11 +20,14 @@ import {
   toggleViewSubstep,
 } from '../../../../../ui/steps/actions/actions'
 import { StepOverflowMenu } from '../StepOverflowMenu'
-import type * as React from 'react'
+
+import type { ComponentProps } from 'react'
 import type * as OpentronsComponents from '@opentrons/components'
 
 const mockConfirm = vi.fn()
 const mockCancel = vi.fn()
+const mockId = 'mockId'
+const mockId96 = '96MockId'
 
 vi.mock('../../../../../ui/steps')
 vi.mock('../../../../../step-forms/selectors')
@@ -43,7 +47,7 @@ vi.mock('@opentrons/components', async importOriginal => {
     })),
   }
 })
-const render = (props: React.ComponentProps<typeof StepOverflowMenu>) => {
+const render = (props: ComponentProps<typeof StepOverflowMenu>) => {
   return renderWithProviders(<StepOverflowMenu {...props} />, {
     i18nInstance: i18n,
   })[0]
@@ -51,7 +55,7 @@ const render = (props: React.ComponentProps<typeof StepOverflowMenu>) => {
 
 const moveLiquidStepId = 'mockId'
 describe('StepOverflowMenu', () => {
-  let props: React.ComponentProps<typeof StepOverflowMenu>
+  let props: ComponentProps<typeof StepOverflowMenu>
 
   beforeEach(() => {
     props = {
@@ -72,6 +76,16 @@ describe('StepOverflowMenu', () => {
       [moveLiquidStepId]: {
         stepType: 'moveLiquid',
         id: moveLiquidStepId,
+        pipette: mockId,
+      },
+    })
+    vi.mocked(getPipetteEntities).mockReturnValue({
+      [mockId]: {
+        name: 'p50_single_flex',
+        spec: {} as any,
+        id: mockId,
+        tiprackLabwareDef: [],
+        tiprackDefURI: ['mockDefURI1', 'mockDefURI2'],
       },
     })
   })
@@ -93,5 +107,26 @@ describe('StepOverflowMenu', () => {
     render({ ...props, multiSelectItemIds: ['abc', '123'] })
     screen.getByText('Duplicate steps')
     screen.getByText('Delete steps')
+  })
+
+  it('should not render view details button if pipette is 96-channel', () => {
+    vi.mocked(getSavedStepForms).mockReturnValue({
+      [moveLiquidStepId]: {
+        stepType: 'moveLiquid',
+        id: moveLiquidStepId,
+        pipette: mockId96,
+      },
+    })
+    vi.mocked(getPipetteEntities).mockReturnValue({
+      [mockId96]: {
+        name: 'p1000_96',
+        spec: {} as any,
+        id: mockId96,
+        tiprackLabwareDef: [],
+        tiprackDefURI: ['mockDefURI1_96'],
+      },
+    })
+    render(props)
+    expect(screen.queryByText('View details')).not.toBeInTheDocument()
   })
 })

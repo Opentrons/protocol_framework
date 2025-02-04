@@ -82,19 +82,12 @@ def _circular_frustum_polynomial_roots(
 
 
 def _volume_from_height_circular(
-    target_height: float,
-    total_frustum_height: float,
-    bottom_radius: float,
-    top_radius: float,
+    target_height: float, segment: ConicalFrustum
 ) -> float:
     """Find the volume given a height within a circular frustum."""
-    a, b, c = _circular_frustum_polynomial_roots(
-        bottom_radius=bottom_radius,
-        top_radius=top_radius,
-        total_frustum_height=total_frustum_height,
-    )
-    volume = a * (target_height**3) + b * (target_height**2) + c * target_height
-    return volume
+    heights = segment.height_to_volume_table.keys()
+    best_fit_height = min(heights, key=lambda x: abs(x - target_height))
+    return segment.height_to_volume_table[best_fit_height]
 
 
 def _volume_from_height_rectangular(
@@ -138,26 +131,12 @@ def _volume_from_height_squared_cone(
 
 
 def _height_from_volume_circular(
-    volume: float,
-    total_frustum_height: float,
-    bottom_radius: float,
-    top_radius: float,
+    target_volume: float, segment: ConicalFrustum
 ) -> float:
-    """Find the height given a volume within a circular frustum."""
-    a, b, c = _circular_frustum_polynomial_roots(
-        bottom_radius=bottom_radius,
-        top_radius=top_radius,
-        total_frustum_height=total_frustum_height,
-    )
-    d = volume * -1
-    x_intercept_roots = (a, b, c, d)
-
-    height_from_volume_roots = roots(x_intercept_roots)
-    height = _reject_unacceptable_heights(
-        potential_heights=list(height_from_volume_roots),
-        max_height=total_frustum_height,
-    )
-    return height
+    """Find the height given a volume within a squared cone segment."""
+    volumes = segment.volume_to_height_table.keys()
+    best_fit_volume = min(volumes, key=lambda x: abs(x - target_volume))
+    return segment.volume_to_height_table[best_fit_volume]
 
 
 def _height_from_volume_rectangular(
@@ -243,9 +222,7 @@ def _get_segment_capacity(segment: WellSegment) -> float:
             return (
                 _volume_from_height_circular(
                     target_height=section_height,
-                    total_frustum_height=section_height,
-                    bottom_radius=(segment.bottomDiameter / 2),
-                    top_radius=(segment.topDiameter / 2),
+                    segment=segment,
                 )
                 * segment.count
             )
@@ -264,9 +241,8 @@ def _get_segment_capacity(segment: WellSegment) -> float:
 def get_well_volumetric_capacity(
     well_geometry: InnerWellGeometry,
 ) -> List[Tuple[float, float]]:
-    """Return the total volumetric capacity of a well as a map of height borders to volume."""
-    # dictionary map of heights to volumetric capacities within their respective segment
-    # {top_height_0: volume_0, top_height_1: volume_1, top_height_2: volume_2}
+    """Return the volumetric capacity of a well as a list of pairs relating segment heights to volumes."""
+    #  [(top_height_0, section_0_volume), (top_height_1, section_1_volume), ...]
     well_volume = []
 
     # get the well segments sorted in ascending order
@@ -293,12 +269,7 @@ def height_at_volume_within_section(
                 radius_of_curvature=section.radiusOfCurvature,
             )
         case ConicalFrustum():
-            return _height_from_volume_circular(
-                volume=target_volume_relative,
-                top_radius=(section.bottomDiameter / 2),
-                bottom_radius=(section.topDiameter / 2),
-                total_frustum_height=section_height,
-            )
+            return _height_from_volume_circular(target_volume_relative, section)
         case CuboidalFrustum():
             return _height_from_volume_rectangular(
                 volume=target_volume_relative,
@@ -334,10 +305,7 @@ def volume_at_height_within_section(
         case ConicalFrustum():
             return (
                 _volume_from_height_circular(
-                    target_height=target_height_relative,
-                    total_frustum_height=section_height,
-                    bottom_radius=(section.bottomDiameter / 2),
-                    top_radius=(section.topDiameter / 2),
+                    target_height=target_height_relative, segment=section
                 )
                 * section.count
             )
@@ -427,7 +395,7 @@ def _find_height_in_partial_frustum(
         if (
             bottom_section_volume
             < target_volume
-            < (bottom_section_volume + section_volume)
+            <= (bottom_section_volume + section_volume)
         ):
             relative_target_volume = target_volume - bottom_section_volume
             section_height = section.topHeight - section.bottomHeight
@@ -448,13 +416,16 @@ def _find_height_in_partial_frustum(
 
 
 def find_height_at_well_volume(
-    target_volume: float, well_geometry: InnerWellGeometry
+    target_volume: float,
+    well_geometry: InnerWellGeometry,
+    raise_error_if_result_invalid: bool = True,
 ) -> float:
     """Find the height within a well, at a known volume."""
     volumetric_capacity = get_well_volumetric_capacity(well_geometry)
     max_volume = sum(row[1] for row in volumetric_capacity)
-    if target_volume < 0 or target_volume > max_volume:
-        raise InvalidLiquidHeightFound("Invalid target volume.")
+    if raise_error_if_result_invalid:
+        if target_volume < 0 or target_volume > max_volume:
+            raise InvalidLiquidHeightFound("Invalid target volume.")
 
     sorted_well = sorted(well_geometry.sections, key=lambda section: section.topHeight)
     # find the section the target volume is in and compute the height

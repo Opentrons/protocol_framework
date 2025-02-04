@@ -3,10 +3,12 @@ import { fireEvent, screen } from '@testing-library/react'
 import { describe, it, beforeEach, vi, afterEach, expect } from 'vitest'
 import { when } from 'vitest-when'
 
+import { useHoverTooltip } from '@opentrons/components'
+
 import { renderWithProviders } from '/app/__testing-utils__'
 import { i18n } from '/app/i18n'
 import { useLPCSuccessToast } from '../../../hooks/useLPCSuccessToast'
-import { LabwarePositionCheck } from '/app/organisms/LabwarePositionCheck'
+import { LegacyLabwarePositionCheck } from '/app/organisms/LegacyLabwarePositionCheck'
 import { getModuleTypesThatRequireExtraAttention } from '../../utils/getModuleTypesThatRequireExtraAttention'
 import { getIsLabwareOffsetCodeSnippetsOn } from '/app/redux/config'
 import { SetupLabwareList } from '../SetupLabwareList'
@@ -20,9 +22,16 @@ import {
   useUnmatchedModulesForProtocol,
 } from '/app/resources/runs'
 
+vi.mock('@opentrons/components', async () => {
+  const actual = await vi.importActual('@opentrons/components')
+  return {
+    ...actual,
+    useHoverTooltip: vi.fn(),
+  }
+})
 vi.mock('../SetupLabwareList')
 vi.mock('../SetupLabwareMap')
-vi.mock('/app/organisms/LabwarePositionCheck')
+vi.mock('/app/organisms/LegacyLabwarePositionCheck')
 vi.mock('../../utils/getModuleTypesThatRequireExtraAttention')
 vi.mock('/app/organisms/RunTimeControl/hooks')
 vi.mock('/app/redux/config')
@@ -59,7 +68,7 @@ describe('SetupLabware', () => {
       .calledWith(expect.anything())
       .thenReturn([])
 
-    vi.mocked(LabwarePositionCheck).mockReturnValue(
+    vi.mocked(LegacyLabwarePositionCheck).mockReturnValue(
       <div>mock Labware Position Check</div>
     )
     when(vi.mocked(useUnmatchedModulesForProtocol))
@@ -78,7 +87,6 @@ describe('SetupLabware', () => {
       .thenReturn({
         complete: true,
       })
-    when(vi.mocked(useRunHasStarted)).calledWith(RUN_ID).thenReturn(false)
     vi.mocked(getIsLabwareOffsetCodeSnippetsOn).mockReturnValue(false)
     vi.mocked(SetupLabwareMap).mockReturnValue(
       <div>mock setup labware map</div>
@@ -88,6 +96,8 @@ describe('SetupLabware', () => {
     )
     vi.mocked(useLPCDisabledReason).mockReturnValue(null)
     vi.mocked(useNotifyRunQuery).mockReturnValue({} as any)
+    vi.mocked(useHoverTooltip).mockReturnValue([{}, {}] as any)
+    vi.mocked(useRunHasStarted).mockReturnValue(false)
   })
 
   afterEach(() => {
@@ -98,8 +108,21 @@ describe('SetupLabware', () => {
     render()
     screen.getByText('mock setup labware list')
     screen.getByRole('button', { name: 'List View' })
+    screen.getByRole('button', { name: 'Confirm placements' })
     const mapView = screen.getByRole('button', { name: 'Map View' })
     fireEvent.click(mapView)
     screen.getByText('mock setup labware map')
+  })
+
+  it('disables the confirmation button if the run has already started', () => {
+    vi.mocked(useRunHasStarted).mockReturnValue(true)
+
+    render()
+
+    const btn = screen.getByRole('button', {
+      name: 'Confirm placements',
+    })
+
+    expect(btn).toBeDisabled()
   })
 })

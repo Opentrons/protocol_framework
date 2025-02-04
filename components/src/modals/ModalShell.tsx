@@ -1,9 +1,9 @@
-import type * as React from 'react'
 import styled from 'styled-components'
 import {
   ALIGN_CENTER,
   ALIGN_END,
   CURSOR_DEFAULT,
+  DISPLAY_FLEX,
   JUSTIFY_CENTER,
   JUSTIFY_END,
   OVERFLOW_AUTO,
@@ -15,18 +15,19 @@ import { BORDERS, COLORS } from '../helix-design-system'
 import { RESPONSIVENESS, SPACING } from '../ui-style-constants'
 import { styleProps } from '../primitives'
 
+import type { MouseEvent, MouseEventHandler, ReactNode } from 'react'
 import type { StyleProps } from '../primitives'
 
 export type Position = 'center' | 'bottomRight'
 export interface ModalShellProps extends StyleProps {
   /** Modal content */
-  children: React.ReactNode
+  children: ReactNode
   /** Optional close on outside click **/
-  onOutsideClick?: React.MouseEventHandler
+  onOutsideClick?: MouseEventHandler
   /** Optional sticky header */
-  header?: React.ReactNode
+  header?: ReactNode
   /** Optional sticky footer */
-  footer?: React.ReactNode
+  footer?: ReactNode
   /** Optional full page takeover */
   fullPage?: boolean
   /** Optional zIndex for the overlay */
@@ -69,7 +70,7 @@ export function ModalShell(props: ModalShellProps): JSX.Element {
       showOverlay={showOverlay}
       zIndex={zIndexOverlay}
       aria-label="BackgroundOverlay_ModalShell"
-      onClick={(e: React.MouseEvent) => {
+      onClick={(e: MouseEvent) => {
         e.stopPropagation()
         if (onOutsideClick != null) onOutsideClick(e)
       }}
@@ -78,7 +79,7 @@ export function ModalShell(props: ModalShellProps): JSX.Element {
         <ModalArea
           aria-label="ModalShell_ModalArea"
           isFullPage={fullPage}
-          onClick={(e: React.MouseEvent) => {
+          onClick={(e: MouseEvent) => {
             e.stopPropagation()
           }}
           {...styleProps}
@@ -110,7 +111,7 @@ const ContentArea = styled.div<{
   position: Position
   noPadding: boolean
 }>`
-  display: flex;
+  display: ${DISPLAY_FLEX};
   position: ${POSITION_ABSOLUTE};
   align-items: ${({ position }) =>
     position === 'center' ? ALIGN_CENTER : ALIGN_END};
@@ -137,6 +138,7 @@ const ModalArea = styled.div<
   box-shadow: ${BORDERS.smallDropShadow};
   height: ${({ isFullPage }) => (isFullPage ? '100%' : 'auto')};
   background-color: ${COLORS.white};
+
   @media ${RESPONSIVENESS.touchscreenMediaQuerySpecs} {
     border-radius: ${BORDERS.borderRadius16};
   }

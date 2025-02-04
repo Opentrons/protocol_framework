@@ -158,14 +158,22 @@ export function ProtocolWithLastRun({
     [RUN_STATUS_SUCCEEDED]: t('completed'),
     [RUN_STATUS_FAILED]: t('failed'),
   }
-  // TODO(BC, 2023-06-05): see if addSuffix false allow can remove usage of .replace here
-  const formattedLastRunTime = formatDistance(
-    new Date(runData.createdAt),
-    new Date(),
-    {
-      addSuffix: true,
+  const formattedLastRunTime =
+    runData.completedAt != null
+      ? formatDistance(new Date(runData.completedAt), new Date(), {
+          addSuffix: true,
+        }).replace('about ', '')
+      : null
+  const buildLastRunCopy = (): string => {
+    if (formattedLastRunTime != null) {
+      return i18n.format(
+        `${terminationTypeMap[runData.status] ?? ''} ${formattedLastRunTime}`,
+        'capitalize'
+      )
+    } else {
+      return ''
     }
-  ).replace('about ', '')
+  }
 
   return isProtocolFetching || isLookingForHardware ? (
     <Skeleton
@@ -226,10 +234,7 @@ export function ProtocolWithLastRun({
         lineHeight={TYPOGRAPHY.lineHeight28}
         color={COLORS.grey60}
       >
-        {i18n.format(
-          `${terminationTypeMap[runData.status] ?? ''} ${formattedLastRunTime}`,
-          'capitalize'
-        )}
+        {buildLastRunCopy()}
       </LegacyStyledText>
     </Flex>
   )

@@ -200,8 +200,8 @@ export function MixTools(props: StepFormProps): JSX.Element {
             }
             firstValue={formData.mix_wellOrder_first}
             secondValue={formData.mix_wellOrder_second}
-            firstName={'mix_wellOrder_first'}
-            secondName={'mix_wellOrder_second'}
+            firstName="mix_wellOrder_first"
+            secondName="mix_wellOrder_second"
           />
           <Divider marginY="0" />
           <PositionField
@@ -318,11 +318,11 @@ export function MixTools(props: StepFormProps): JSX.Element {
                 <PositionField
                   prefix={tab}
                   propsForFields={propsForFields}
-                  zField="mix_touchTip_mmFromBottom"
+                  zField="mix_touchTip_mmFromTop"
                   labwareId={
                     formData[
                       getLabwareFieldForPositioningField(
-                        'mix_touchTip_mmFromBottom'
+                        'mix_touchTip_mmFromTop'
                       )
                     ]
                   }

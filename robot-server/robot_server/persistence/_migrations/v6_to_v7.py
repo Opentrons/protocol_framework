@@ -10,13 +10,12 @@ Summary of changes from schema 6:
 import json
 from pathlib import Path
 from contextlib import ExitStack
-import shutil
-from typing import Any
 
 import sqlalchemy
 
+from ._util import add_column, copy_contents
 from ..database import sql_engine_ctx, sqlite_rowid
-from ..tables import DataFileSourceSQLEnum, schema_7
+from ..tables import schema_7
 from .._folder_migrator import Migration
 
 from ..file_and_directory_names import (
@@ -28,11 +27,7 @@ class Migration6to7(Migration):  # noqa: D101
     def migrate(self, source_dir: Path, dest_dir: Path) -> None:
         """Migrate the persistence directory from schema 6 to 7."""
         # Copy over all existing directories and files to new version
-        for item in source_dir.iterdir():
-            if item.is_dir():
-                shutil.copytree(src=item, dst=dest_dir / item.name)
-            else:
-                shutil.copy(src=item, dst=dest_dir / item.name)
+        copy_contents(source_dir=source_dir, dest_dir=dest_dir)
 
         dest_db_file = dest_dir / DB_FILE
 
@@ -43,16 +38,6 @@ class Migration6to7(Migration):  # noqa: D101
             schema_7.metadata.create_all(dest_engine)
 
             dest_transaction = exit_stack.enter_context(dest_engine.begin())
-
-            def add_column(
-                engine: sqlalchemy.engine.Engine,
-                table_name: str,
-                column: Any,
-            ) -> None:
-                column_type = column.type.compile(engine.dialect)
-                engine.execute(
-                    f"ALTER TABLE {table_name} ADD COLUMN {column.key} {column_type}"
-                )
 
             add_column(
                 dest_engine,
@@ -100,16 +85,8 @@ def _migrate_data_files_table_with_new_source_col(
     dest_transaction: sqlalchemy.engine.Connection,
 ) -> None:
     """Add a new 'source' column to data_files table."""
-    select_data_files = sqlalchemy.select(schema_7.data_files_table).order_by(
-        sqlite_rowid
-    )
-    insert_new_data = sqlalchemy.insert(schema_7.data_files_table)
-    for old_row in dest_transaction.execute(select_data_files).all():
-        dest_transaction.execute(
-            insert_new_data,
-            id=old_row.id,
-            name=old_row.name,
-            file_hash=old_row.file_hash,
-            created_at=old_row.created_at,
-            source=DataFileSourceSQLEnum.UPLOADED,
+    dest_transaction.execute(
+        sqlalchemy.update(schema_7.data_files_table).values(
+            {"source": schema_7.DataFileSourceSQLEnum.UPLOADED}
         )
+    )

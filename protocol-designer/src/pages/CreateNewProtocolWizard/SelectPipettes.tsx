@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import styled, { css } from 'styled-components'
 import { useDispatch, useSelector } from 'react-redux'
@@ -14,6 +14,7 @@ import {
   Box,
   Btn,
   Checkbox,
+  COLORS,
   CURSOR_POINTER,
   DIRECTION_COLUMN,
   DIRECTION_ROW,
@@ -37,7 +38,7 @@ import { setFeatureFlags } from '../../feature-flags/actions'
 import { createCustomTiprackDef } from '../../labware-defs/actions'
 import { useKitchen } from '../../organisms/Kitchen/hooks'
 import { IncompatibleTipsModal, PipetteInfoItem } from '../../organisms'
-import { BUTTON_LINK_STYLE } from '../../atoms'
+import { LINK_BUTTON_STYLE } from '../../atoms'
 import { WizardBody } from './WizardBody'
 import { PIPETTE_GENS, PIPETTE_TYPES, PIPETTE_VOLUMES } from './constants'
 import { getTiprackOptions } from './utils'
@@ -66,7 +67,7 @@ export function SelectPipettes(props: WizardTileProps): JSX.Element | null {
   const { makeSnackbar } = useKitchen()
   const allLabware = useSelector(getLabwareDefsByURI)
   const dispatch = useDispatch<ThunkDispatch<BaseState, any, any>>()
-  const [mount, setMount] = useState<PipetteMount | null>(null)
+  const [mount, setMount] = useState<PipetteMount>('left')
   const [page, setPage] = useState<'add' | 'overview'>('add')
   const [pipetteType, setPipetteType] = useState<PipetteType | null>(null)
   const [showIncompatibleTip, setIncompatibleTip] = useState<boolean>(false)
@@ -75,14 +76,13 @@ export function SelectPipettes(props: WizardTileProps): JSX.Element | null {
   const allowAllTipracks = useSelector(getAllowAllTipracks)
   const allPipetteOptions = getAllPipetteNames('maxVolume', 'channels')
   const robotType = fields.robotType
-  const defaultMount = mount ?? 'left'
   const has96Channel = pipettesByMount.left.pipetteName === 'p1000_96'
   const selectedPipetteName =
     pipetteType === '96' || pipetteGen === 'GEN1'
       ? `${pipetteVolume}_${pipetteType}`
       : `${pipetteVolume}_${pipetteType}_${pipetteGen.toLowerCase()}`
 
-  const selectedValues = pipettesByMount[defaultMount].tiprackDefURI ?? []
+  const selectedValues = pipettesByMount[mount].tiprackDefURI ?? []
 
   const resetFields = (): void => {
     setPipetteType(null)
@@ -90,20 +90,20 @@ export function SelectPipettes(props: WizardTileProps): JSX.Element | null {
     setPipetteVolume(null)
   }
 
-  //  initialize pipette name once all fields are filled out
-  useEffect(() => {
-    if (
-      (pipetteType != null &&
-        pipetteVolume != null &&
-        robotType === FLEX_ROBOT_TYPE) ||
-      (robotType === OT2_ROBOT_TYPE && pipetteGen != null)
-    ) {
-      setValue(
-        `pipettesByMount.${defaultMount}.pipetteName`,
-        selectedPipetteName
-      )
+  const ref = useRef<HTMLDivElement | null>(null)
+
+  const handleScrollToBottom = (): void => {
+    if (ref.current != null) {
+      ref.current.scrollIntoView({
+        behavior: 'smooth',
+        block: 'end',
+      })
     }
-  }, [pipetteType, pipetteGen, pipetteVolume, selectedPipetteName])
+  }
+
+  useEffect(() => {
+    handleScrollToBottom()
+  }, [pipetteType, pipetteVolume, pipetteGen])
 
   const noPipette =
     (pipettesByMount.left.pipetteName == null ||
@@ -112,8 +112,11 @@ export function SelectPipettes(props: WizardTileProps): JSX.Element | null {
       pipettesByMount.right.tiprackDefURI == null)
 
   const isDisabled =
-    (page === 'add' && pipettesByMount[defaultMount].tiprackDefURI == null) ||
-    noPipette
+    (page === 'add' &&
+      pipettesByMount[mount].tiprackDefURI == null &&
+      noPipette) ||
+    (pipettesByMount.left.tiprackDefURI == null &&
+      pipettesByMount.right.tiprackDefURI == null)
 
   const targetPipetteMount =
     pipettesByMount.left.pipetteName == null ||
@@ -127,15 +130,20 @@ export function SelectPipettes(props: WizardTileProps): JSX.Element | null {
         proceed(1)
       } else {
         setPage('overview')
+        setValue(`pipettesByMount.${mount}.pipetteName`, selectedPipetteName)
       }
     }
   }
 
+  const clearPipettes = (): void => {
+    resetFields()
+    setValue(`pipettesByMount.${mount}.pipetteName`, undefined)
+    setValue(`pipettesByMount.${mount}.tiprackDefURI`, undefined)
+  }
+
   const handleGoBack = (): void => {
     if (page === 'add') {
-      resetFields()
-      setValue(`pipettesByMount.${defaultMount}.pipetteName`, undefined)
-      setValue(`pipettesByMount.${defaultMount}.tiprackDefURI`, undefined)
+      clearPipettes()
       if (
         pipettesByMount.left.pipetteName != null ||
         pipettesByMount.left.tiprackDefURI != null ||
@@ -148,7 +156,8 @@ export function SelectPipettes(props: WizardTileProps): JSX.Element | null {
       }
     }
     if (page === 'overview') {
-      setPage('add')
+      clearPipettes()
+      goBack(1)
     }
   }
 
@@ -157,6 +166,16 @@ export function SelectPipettes(props: WizardTileProps): JSX.Element | null {
       setPage('overview')
     }
   }, [location])
+
+  const hasAPipette =
+    (mount === 'left' && pipettesByMount.right.pipetteName != null) ||
+    (mount === 'right' && pipettesByMount.left.pipetteName != null)
+  let subHeader
+  if (page === 'add' && noPipette) {
+    subHeader = t('which_pipette')
+  } else if (page === 'add' && hasAPipette) {
+    subHeader = t('which_pipette_second')
+  }
 
   return (
     <>
@@ -169,9 +188,10 @@ export function SelectPipettes(props: WizardTileProps): JSX.Element | null {
       ) : null}
       <HandleEnter onEnter={handleProceed}>
         <WizardBody
+          robotType={robotType}
           stepNumber={2}
           header={page === 'add' ? t('add_pipette') : t('robot_pipettes')}
-          subHeader={page === 'add' ? t('which_pipette') : undefined}
+          subHeader={subHeader}
           proceed={handleProceed}
           goBack={() => {
             handleGoBack()
@@ -184,6 +204,7 @@ export function SelectPipettes(props: WizardTileProps): JSX.Element | null {
               flexDirection={DIRECTION_COLUMN}
               overflowY={OVERFLOW_AUTO}
               gridGap={SPACING.spacing32}
+              ref={ref}
             >
               <Flex
                 flexDirection={DIRECTION_COLUMN}
@@ -195,8 +216,9 @@ export function SelectPipettes(props: WizardTileProps): JSX.Element | null {
                 <Flex gridGap={SPACING.spacing4} flexWrap={WRAP}>
                   {PIPETTE_TYPES[robotType].map(type => {
                     return type.value === '96' &&
-                      (pipettesByMount.left.pipetteName != null ||
-                        pipettesByMount.right.pipetteName != null) ? null : (
+                      (mount === 'right' ||
+                        (mount === 'left' &&
+                          pipettesByMount.right.pipetteName != null)) ? null : (
                       <RadioButton
                         key={`${type.label}_${type.value}`}
                         onChange={() => {
@@ -204,11 +226,11 @@ export function SelectPipettes(props: WizardTileProps): JSX.Element | null {
                           setPipetteGen('flex')
                           setPipetteVolume(null)
                           setValue(
-                            `pipettesByMount.${defaultMount}.pipetteName`,
+                            `pipettesByMount.${mount}.pipetteName`,
                             undefined
                           )
                           setValue(
-                            `pipettesByMount.${defaultMount}.tiprackDefURI`,
+                            `pipettesByMount.${mount}.tiprackDefURI`,
                             undefined
                           )
                         }}
@@ -344,7 +366,7 @@ export function SelectPipettes(props: WizardTileProps): JSX.Element | null {
 
                                     if (isCurrentlySelected) {
                                       setValue(
-                                        `pipettesByMount.${defaultMount}.tiprackDefURI`,
+                                        `pipettesByMount.${mount}.tiprackDefURI`,
                                         selectedValues.filter(v => v !== value)
                                       )
                                     } else {
@@ -357,7 +379,7 @@ export function SelectPipettes(props: WizardTileProps): JSX.Element | null {
                                         )
                                       } else {
                                         setValue(
-                                          `pipettesByMount.${defaultMount}.tiprackDefURI`,
+                                          `pipettesByMount.${mount}.tiprackDefURI`,
                                           [...selectedValues, value]
                                         )
                                       }
@@ -399,14 +421,16 @@ export function SelectPipettes(props: WizardTileProps): JSX.Element | null {
                                   TYPOGRAPHY.textDecorationUnderline
                                 }
                               >
-                                <StyledText
-                                  desktopStyle="bodyDefaultRegular"
-                                  padding={SPACING.spacing4}
-                                >
-                                  {allowAllTipracks
-                                    ? t('show_default_tips')
-                                    : t('show_all_tips')}
-                                </StyledText>
+                                <StyledLabel>
+                                  <StyledText
+                                    desktopStyle="bodyDefaultRegular"
+                                    padding={SPACING.spacing4}
+                                  >
+                                    {allowAllTipracks
+                                      ? t('show_default_tips')
+                                      : t('show_all_tips')}
+                                  </StyledText>
+                                </StyledLabel>
                               </Btn>
                             )}
                           </Box>
@@ -431,7 +455,7 @@ export function SelectPipettes(props: WizardTileProps): JSX.Element | null {
                 (pipettesByMount.left.tiprackDefURI == null &&
                   pipettesByMount.right.tiprackDefURI == null) ? null : (
                   <Btn
-                    css={BUTTON_LINK_STYLE}
+                    css={LINK_BUTTON_STYLE}
                     onClick={() => {
                       const leftPipetteName = pipettesByMount.left.pipetteName
                       const rightPipetteName = pipettesByMount.right.pipetteName
@@ -556,5 +580,8 @@ const StyledLabel = styled.label`
   cursor: ${CURSOR_POINTER};
   input[type='file'] {
     display: none;
+  }
+  &:hover {
+    color: ${COLORS.blue50};
   }
 `

@@ -5,21 +5,19 @@ import { renderWithProviders } from '/app/__testing-utils__'
 import { i18n } from '/app/i18n'
 import { useErrorRecoverySettingsToggle } from '/app/resources/errorRecovery'
 import { EnableErrorRecoveryMode } from '../EnableErrorRecoveryMode'
-import type * as React from 'react'
+import type { ComponentProps } from 'react'
 
 vi.mock('/app/resources/errorRecovery')
 
 const mockToggleERSettings = vi.fn()
-const render = (
-  props: React.ComponentProps<typeof EnableErrorRecoveryMode>
-) => {
+const render = (props: ComponentProps<typeof EnableErrorRecoveryMode>) => {
   return renderWithProviders(<EnableErrorRecoveryMode {...props} />, {
     i18nInstance: i18n,
   })
 }
 
 describe('EnableErrorRecoveryMode', () => {
-  let props: React.ComponentProps<typeof EnableErrorRecoveryMode>
+  let props: ComponentProps<typeof EnableErrorRecoveryMode>
 
   beforeEach(() => {
     props = { isRobotBusy: false }
@@ -32,7 +30,7 @@ describe('EnableErrorRecoveryMode', () => {
 
   it('should render text and toggle button', () => {
     render(props)
-    screen.getByText('Error Recovery Mode')
+    screen.getByText('Recovery mode')
     screen.getByText('Pause on protocol errors instead of canceling the run.')
     expect(
       screen.getByLabelText('enable_error_recovery_mode')

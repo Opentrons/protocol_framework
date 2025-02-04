@@ -21,9 +21,12 @@ import { OPEN_STEP_DETAILS_EVENT } from '../../../../analytics/constants'
 import {
   getBatchEditFormHasUnsavedChanges,
   getCurrentFormHasUnsavedChanges,
+  getPipetteEntities,
   getSavedStepForms,
   getUnsavedForm,
 } from '../../../../step-forms/selectors'
+
+import type { Dispatch, MutableRefObject, SetStateAction } from 'react'
 import type { ThunkDispatch } from 'redux-thunk'
 import type { BaseState } from '../../../../types'
 import type { StepIdType } from '../../../../form-types'
@@ -31,9 +34,9 @@ import type { AnalyticsEvent } from '../../../../analytics/mixpanel'
 
 interface StepOverflowMenuProps {
   stepId: string
-  menuRootRef: React.MutableRefObject<HTMLDivElement | null>
+  menuRootRef: MutableRefObject<HTMLDivElement | null>
   top: number
-  setOpenedOverflowMenuId: React.Dispatch<React.SetStateAction<string | null>>
+  setOpenedOverflowMenuId: Dispatch<SetStateAction<string | null>>
   handleEdit: () => void
   confirmDelete: () => void
   confirmMultiDelete: () => void
@@ -61,10 +64,16 @@ export function StepOverflowMenu(props: StepOverflowMenuProps): JSX.Element {
   const dispatch = useDispatch<ThunkDispatch<BaseState, any, any>>()
   const formData = useSelector(getUnsavedForm)
   const savedStepFormData = useSelector(getSavedStepForms)[stepId]
+  const pipetteEntities = useSelector(getPipetteEntities)
+
   const isPipetteStep =
     savedStepFormData.stepType === 'moveLiquid' ||
     savedStepFormData.stepType === 'mix'
-  const isThermocyclerProfile = savedStepFormData.stepType === 'thermocycler'
+  const isThermocyclerProfile =
+    savedStepFormData.stepType === 'thermocycler' &&
+    savedStepFormData.thermocyclerFormType === 'thermocyclerProfile'
+  const is96Channel =
+    pipetteEntities[savedStepFormData.pipette]?.name === 'p1000_96'
 
   const duplicateStep = (
     stepId: StepIdType
@@ -99,7 +108,7 @@ export function StepOverflowMenu(props: StepOverflowMenuProps): JSX.Element {
         boxShadow="0px 1px 3px rgba(0, 0, 0, 0.2)"
         backgroundColor={COLORS.white}
         flexDirection={DIRECTION_COLUMN}
-        onClick={(e: React.MouseEvent) => {
+        onClick={(e: MouseEvent) => {
           e.preventDefault()
           e.stopPropagation()
         }}
@@ -130,7 +139,8 @@ export function StepOverflowMenu(props: StepOverflowMenuProps): JSX.Element {
             {formData != null ? null : (
               <MenuItem onClick={handleEdit}>{t('edit_step')}</MenuItem>
             )}
-            {isPipetteStep || isThermocyclerProfile ? (
+            {/* Note the following 96-channel check is temp */}
+            {(isPipetteStep && !is96Channel) || isThermocyclerProfile ? (
               <MenuItem
                 disabled={formData != null}
                 onClick={() => {

@@ -15,6 +15,7 @@ import {
   POSITION_ABSOLUTE,
   ALIGN_FLEX_END,
   SPACING,
+  getLabwareDefinitionsFromCommands,
   useSwipe,
 } from '@opentrons/components'
 import {
@@ -57,7 +58,6 @@ import {
   useErrorRecoveryFlows,
   ErrorRecoveryFlows,
 } from '/app/organisms/ErrorRecoveryFlows'
-import { getLabwareDefinitionsFromCommands } from '/app/local-resources/labware'
 
 import type { OnDeviceRouteParams } from '/app/App/types'
 
@@ -122,7 +122,10 @@ export function RunningProtocol(): JSX.Element {
   const { trackProtocolRunEvent } = useTrackProtocolRunEvent(runId, robotName)
   const robotAnalyticsData = useRobotAnalyticsData(robotName)
   const robotType = useRobotType(robotName)
-  const { isERActive, failedCommand } = useErrorRecoveryFlows(runId, runStatus)
+  const { isERActive, failedCommand, runLwDefsByUri } = useErrorRecoveryFlows(
+    runId,
+    runStatus
+  )
   const {
     showModal: showIntervention,
     modalProps: interventionProps,
@@ -169,6 +172,7 @@ export function RunningProtocol(): JSX.Element {
           runStatus={runStatus}
           runId={runId}
           unvalidatedFailedCommand={failedCommand}
+          runLwDefsByUri={runLwDefsByUri}
           protocolAnalysis={robotSideAnalysis}
         />
       ) : null}

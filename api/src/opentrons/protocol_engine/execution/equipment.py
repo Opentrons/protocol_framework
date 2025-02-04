@@ -1,11 +1,12 @@
 """Equipment command side-effect logic."""
-from dataclasses import dataclass
-from typing import Optional, overload, Union
 
+from dataclasses import dataclass
+from typing import Optional, overload, Union, List
+
+from opentrons_shared_data.labware.labware_definition import LabwareDefinition
 from opentrons_shared_data.pipette.types import PipetteNameType
 
 from opentrons.calibration_storage.helpers import uri_from_details
-from opentrons.protocols.models import LabwareDefinition
 from opentrons.types import MountType
 from opentrons.hardware_control import HardwareControlAPI
 from opentrons.hardware_control.modules import (
@@ -15,6 +16,7 @@ from opentrons.hardware_control.modules import (
     TempDeck,
     Thermocycler,
     AbsorbanceReader,
+    FlexStacker,
 )
 from opentrons.hardware_control.nozzle_manager import NozzleMap
 from opentrons.protocol_engine.state.module_substates import (
@@ -23,6 +25,7 @@ from opentrons.protocol_engine.state.module_substates import (
     TemperatureModuleId,
     ThermocyclerModuleId,
     AbsorbanceReaderId,
+    FlexStackerId,
 )
 from ..errors import (
     FailedToLoadPipetteError,
@@ -40,10 +43,7 @@ from ..state.modules import HardwareModule
 from ..types import (
     LabwareLocation,
     DeckSlotLocation,
-    ModuleLocation,
-    OnLabwareLocation,
     LabwareOffset,
-    LabwareOffsetLocation,
     ModuleModel,
     ModuleDefinition,
     AddressableAreaLocation,
@@ -152,10 +152,6 @@ class EquipmentHandler:
         Returns:
             A LoadedLabwareData object.
         """
-        labware_id = (
-            labware_id if labware_id is not None else self._model_utils.generate_id()
-        )
-
         definition_uri = uri_from_details(
             load_name=load_name,
             namespace=namespace,
@@ -171,6 +167,10 @@ class EquipmentHandler:
                 namespace=namespace,
                 version=version,
             )
+
+        labware_id = (
+            labware_id if labware_id is not None else self._model_utils.generate_id()
+        )
 
         # Allow propagation of ModuleNotLoadedError.
         offset_id = self.find_applicable_labware_offset_id(
@@ -379,6 +379,86 @@ class EquipmentHandler:
             definition=attached_module.definition,
         )
 
+    async def load_lids(
+        self,
+        load_name: str,
+        namespace: str,
+        version: int,
+        location: LabwareLocation,
+        quantity: int,
+        labware_ids: Optional[List[str]] = None,
+    ) -> List[LoadedLabwareData]:
+        """Load one or many lid labware by assigning an identifier and pulling required data.
+
+        Args:
+            load_name: The lid labware's load name.
+            namespace: The lid labware's namespace.
+            version: The lid labware's version.
+            location: The deck location at which lid(s) will be placed.
+            quantity: The quantity of lids to load at a location.
+            labware_ids: An optional list of identifiers to assign the labware. If None,
+                an identifier will be generated.
+
+        Raises:
+            ModuleNotLoadedError: If `location` references a module ID
+                that doesn't point to a valid loaded module.
+
+        Returns:
+            A list of LoadedLabwareData objects.
+        """
+        definition_uri = uri_from_details(
+            load_name=load_name,
+            namespace=namespace,
+            version=version,
+        )
+        try:
+            # Try to use existing definition in state.
+            definition = self._state_store.labware.get_definition_by_uri(definition_uri)
+        except LabwareDefinitionDoesNotExistError:
+            definition = await self._labware_data_provider.get_labware_definition(
+                load_name=load_name,
+                namespace=namespace,
+                version=version,
+            )
+
+        stack_limit = definition.stackLimit if definition.stackLimit is not None else 1
+        if quantity > stack_limit:
+            raise ValueError(
+                f"Requested quantity {quantity} is greater than the stack limit of {stack_limit} provided by definition for {load_name}."
+            )
+
+        # Allow propagation of ModuleNotLoadedError.
+        if (
+            isinstance(location, DeckSlotLocation)
+            and definition.parameters.isDeckSlotCompatible is not None
+            and not definition.parameters.isDeckSlotCompatible
+        ):
+            raise ValueError(
+                f"Lid Labware {load_name} cannot be loaded onto a Deck Slot."
+            )
+
+        load_labware_data_list = []
+        ids = []
+        if labware_ids is not None:
+            if len(labware_ids) < quantity:
+                raise ValueError(
+                    f"Requested quantity {quantity} is greater than the number of labware lid IDs provided for {load_name}."
+                )
+            ids = labware_ids
+        else:
+            for i in range(quantity):
+                ids.append(self._model_utils.generate_id())
+        for id in ids:
+            load_labware_data_list.append(
+                LoadedLabwareData(
+                    labware_id=id,
+                    definition=definition,
+                    offsetId=None,
+                )
+            )
+
+        return load_labware_data_list
+
     async def configure_for_volume(
         self, pipette_id: str, volume: float, tip_overlap_version: Optional[str]
     ) -> LoadedConfigureForVolumeData:
@@ -513,6 +593,13 @@ class EquipmentHandler:
     ) -> Optional[AbsorbanceReader]:
         ...
 
+    @overload
+    def get_module_hardware_api(
+        self,
+        module_id: FlexStackerId,
+    ) -> Optional[FlexStacker]:
+        ...
+
     def get_module_hardware_api(self, module_id: str) -> Optional[AbstractModule]:
         """Get the hardware API for a given module."""
         use_virtual_modules = self._state_store.config.use_virtual_modules
@@ -544,8 +631,9 @@ class EquipmentHandler:
             or None if no labware offset will apply.
         """
         labware_offset_location = (
-            self._get_labware_offset_location_from_labware_location(labware_location)
+            self._state_store.geometry.get_projected_offset_location(labware_location)
         )
+
         if labware_offset_location is None:
             # No offset for off-deck location.
             # Returning None instead of raising an exception allows loading a labware
@@ -557,72 +645,6 @@ class EquipmentHandler:
             location=labware_offset_location,
         )
         return self._get_id_from_offset(offset)
-
-    def _get_labware_offset_location_from_labware_location(
-        self, labware_location: LabwareLocation
-    ) -> Optional[LabwareOffsetLocation]:
-        if isinstance(labware_location, DeckSlotLocation):
-            return LabwareOffsetLocation(slotName=labware_location.slotName)
-        elif isinstance(labware_location, ModuleLocation):
-            module_id = labware_location.moduleId
-            # Allow ModuleNotLoadedError to propagate.
-            # Note also that we match based on the module's requested model, not its
-            # actual model, to implement robot-server's documented HTTP API semantics.
-            module_model = self._state_store.modules.get_requested_model(
-                module_id=module_id
-            )
-
-            # If `module_model is None`, it probably means that this module was added by
-            # `ProtocolEngine.use_attached_modules()`, instead of an explicit
-            # `loadModule` command.
-            #
-            # This assert should never raise in practice because:
-            #   1. `ProtocolEngine.use_attached_modules()` is only used by
-            #      robot-server's "stateless command" endpoints, under `/commands`.
-            #   2. Those endpoints don't support loading labware, so this code will
-            #      never run.
-            #
-            # Nevertheless, if it does happen somehow, we do NOT want to pass the
-            # `None` value along to `LabwareView.find_applicable_labware_offset()`.
-            # `None` means something different there, which will cause us to return
-            # wrong results.
-            assert module_model is not None, (
-                "Can't find offsets for labware"
-                " that are loaded on modules"
-                " that were loaded with ProtocolEngine.use_attached_modules()."
-            )
-
-            module_location = self._state_store.modules.get_location(
-                module_id=module_id
-            )
-            slot_name = module_location.slotName
-            return LabwareOffsetLocation(slotName=slot_name, moduleModel=module_model)
-        elif isinstance(labware_location, OnLabwareLocation):
-            parent_labware_id = labware_location.labwareId
-            parent_labware_uri = self._state_store.labware.get_definition_uri(
-                parent_labware_id
-            )
-
-            base_location = self._state_store.labware.get_parent_location(
-                parent_labware_id
-            )
-            base_labware_offset_location = (
-                self._get_labware_offset_location_from_labware_location(base_location)
-            )
-            if base_labware_offset_location is None:
-                # No offset for labware sitting on labware off-deck
-                return None
-
-            # If labware is being stacked on itself, all labware in the stack will share a labware offset due to
-            # them sharing the same definitionUri in `LabwareOffsetLocation`. This will not be true for the
-            # bottom-most labware, which will have a `DeckSlotLocation` and have its definitionUri field empty.
-            return LabwareOffsetLocation(
-                slotName=base_labware_offset_location.slotName,
-                moduleModel=base_labware_offset_location.moduleModel,
-                definitionUri=parent_labware_uri,
-            )
-        else:  # Off deck
-            return None
 
     @staticmethod
     def _get_id_from_offset(labware_offset: Optional[LabwareOffset]) -> Optional[str]:

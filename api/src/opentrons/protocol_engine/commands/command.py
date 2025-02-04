@@ -14,10 +14,12 @@ from typing import (
     List,
     Type,
     Union,
+    Any,
+    Dict,
 )
 
 from pydantic import BaseModel, Field
-from pydantic.generics import GenericModel
+from pydantic.json_schema import SkipJsonSchema
 
 from opentrons.hardware_control import HardwareControlAPI
 from opentrons.protocol_engine.state.update_types import StateUpdate
@@ -62,8 +64,12 @@ class CommandIntent(str, enum.Enum):
     FIXIT = "fixit"
 
 
+def _pop_default(s: Dict[str, Any]) -> None:
+    s.pop("default", None)
+
+
 class BaseCommandCreate(
-    GenericModel,
+    BaseModel,
     # These type parameters need to be invariant because our fields are mutable.
     Generic[_ParamsT],
 ):
@@ -81,7 +87,7 @@ class BaseCommandCreate(
         ),
     )
     params: _ParamsT = Field(..., description="Command execution data payload")
-    intent: Optional[CommandIntent] = Field(
+    intent: CommandIntent | SkipJsonSchema[None] = Field(
         None,
         description=(
             "The reason the command was added. If not specified or `protocol`,"
@@ -94,14 +100,16 @@ class BaseCommandCreate(
             "Use setup commands for activities like pre-run calibration checks"
             " and module setup, like pre-heating."
         ),
+        json_schema_extra=_pop_default,
     )
-    key: Optional[str] = Field(
+    key: str | SkipJsonSchema[None] = Field(
         None,
         description=(
             "A key value, unique in this run, that can be used to track"
             " the same logical command across multiple runs of the same protocol."
             " If a value is not provided, one will be generated."
         ),
+        json_schema_extra=_pop_default,
     )
 
 
@@ -141,104 +149,6 @@ class DefinedErrorData(Generic[_ErrorT_co]):
     state_update_if_false_positive: StateUpdate = dataclasses.field(
         default_factory=StateUpdate
     )
-
-
-class BaseCommand(
-    GenericModel,
-    # These type parameters need to be invariant because our fields are mutable.
-    Generic[_ParamsT, _ResultT, _ErrorT],
-):
-    """Base command model.
-
-    You shouldn't use this class directly; instead, use or define
-    your own subclass per specific command type.
-    """
-
-    id: str = Field(
-        ...,
-        description="Unique identifier of this particular command instance",
-    )
-    createdAt: datetime = Field(..., description="Command creation timestamp")
-    commandType: str = Field(
-        ...,
-        description=(
-            "Specific command type that determines data requirements and "
-            "execution behavior"
-        ),
-    )
-    key: str = Field(
-        ...,
-        description=(
-            "An identifier representing this command as a step in a protocol."
-            " A command's `key` will be unique within a given run, but stable"
-            " across all runs that perform the same exact procedure. Thus,"
-            " `key` be used to compare/match commands across multiple runs"
-            " of the same protocol."
-        ),
-    )
-    status: CommandStatus = Field(..., description="Command execution status")
-    params: _ParamsT = Field(..., description="Command execution data payload")
-    result: Optional[_ResultT] = Field(
-        None,
-        description="Command execution result data, if succeeded",
-    )
-    error: Union[
-        _ErrorT,
-        # ErrorOccurrence here is for undefined errors not captured by _ErrorT.
-        ErrorOccurrence,
-        None,
-    ] = Field(
-        None,
-        description="Reference to error occurrence, if execution failed",
-    )
-    startedAt: Optional[datetime] = Field(
-        None,
-        description="Command execution start timestamp, if started",
-    )
-    completedAt: Optional[datetime] = Field(
-        None,
-        description="Command execution completed timestamp, if completed",
-    )
-    intent: Optional[CommandIntent] = Field(
-        None,
-        description=(
-            "The reason the command was added to the run."
-            " If not specified or `protocol`, it is part of the protocol itself."
-            " If `setup`, it was added as part of setup; for example,"
-            " a command that is part of a calibration procedure."
-        ),
-    )
-    notes: Optional[List[CommandNote]] = Field(
-        None,
-        description=(
-            "Information not critical to the execution of the command derived from either"
-            " the command's execution or the command's generation."
-        ),
-    )
-    failedCommandId: Optional[str] = Field(
-        None,
-        description=(
-            "FIXIT command use only. Reference of the failed command id we are trying to fix."
-        ),
-    )
-
-    _ImplementationCls: Type[
-        AbstractCommandImpl[
-            _ParamsT,
-            Union[
-                SuccessData[
-                    # Our _ImplementationCls must return public result data that can fit
-                    # in our `result` field:
-                    _ResultT,
-                ],
-                DefinedErrorData[
-                    # Our _ImplementationCls must return public error data that can fit
-                    # in our `error` field:
-                    _ErrorT,
-                ],
-            ],
-        ]
-    ]
 
 
 _ExecuteReturnT_co = TypeVar(
@@ -296,3 +206,103 @@ class AbstractCommandImpl(
           (in other words, an undefined error).
         """
         ...
+
+
+class BaseCommand(
+    BaseModel,
+    # These type parameters need to be invariant because our fields are mutable.
+    Generic[_ParamsT, _ResultT, _ErrorT],
+):
+    """Base command model.
+
+    You shouldn't use this class directly; instead, use or define
+    your own subclass per specific command type.
+    """
+
+    id: str = Field(
+        ...,
+        description="Unique identifier of this particular command instance",
+    )
+    createdAt: datetime = Field(..., description="Command creation timestamp")
+    commandType: str = Field(
+        ...,
+        description=(
+            "Specific command type that determines data requirements and "
+            "execution behavior"
+        ),
+    )
+    key: str = Field(
+        ...,
+        description=(
+            "An identifier representing this command as a step in a protocol."
+            " A command's `key` will be unique within a given run, but stable"
+            " across all runs that perform the same exact procedure. Thus,"
+            " `key` be used to compare/match commands across multiple runs"
+            " of the same protocol."
+        ),
+    )
+    status: CommandStatus = Field(..., description="Command execution status")
+    params: _ParamsT = Field(..., description="Command execution data payload")
+    result: Optional[_ResultT] = Field(
+        None,
+        description="Command execution result data, if succeeded",
+    )
+    error: Union[
+        _ErrorT,
+        # ErrorOccurrence here is a catch-all for undefined errors not captured by
+        # _ErrorT, or defined errors that don't parse into _ErrorT because, for example,
+        # they are from an older software version that was missing some fields.
+        ErrorOccurrence,
+        None,
+    ] = Field(
+        None,
+        description="Reference to error occurrence, if execution failed",
+    )
+    startedAt: Optional[datetime] = Field(
+        None,
+        description="Command execution start timestamp, if started",
+    )
+    completedAt: Optional[datetime] = Field(
+        None,
+        description="Command execution completed timestamp, if completed",
+    )
+    intent: Optional[CommandIntent] = Field(
+        None,
+        description=(
+            "The reason the command was added to the run."
+            " If not specified or `protocol`, it is part of the protocol itself."
+            " If `setup`, it was added as part of setup; for example,"
+            " a command that is part of a calibration procedure."
+        ),
+    )
+    notes: Optional[List[CommandNote]] = Field(
+        None,
+        description=(
+            "Information not critical to the execution of the command derived from either"
+            " the command's execution or the command's generation."
+        ),
+    )
+    failedCommandId: Optional[str] = Field(
+        None,
+        description=(
+            "FIXIT command use only. Reference of the failed command id we are trying to fix."
+        ),
+    )
+
+    _ImplementationCls: Type[
+        AbstractCommandImpl[
+            _ParamsT,
+            Union[
+                SuccessData[
+                    # Our _ImplementationCls must return public result data that can fit
+                    # in our `result` field:
+                    _ResultT,
+                ],
+                DefinedErrorData[
+                    # Our _ImplementationCls must return public error data that can fit
+                    # in our `error` field:
+                    _ErrorT,
+                ],
+            ],
+        ]
+    ]

@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
-from typing import Optional, Union, TYPE_CHECKING, Literal
+from typing import Optional, Union, TYPE_CHECKING, Literal, Any
 
 from pydantic import BaseModel, Field
+from pydantic.json_schema import SkipJsonSchema
 
 from opentrons_shared_data.errors import ErrorCodes
 from opentrons_shared_data.errors.exceptions import StallOrCollisionDetectedError
@@ -24,6 +25,10 @@ from .command import SuccessData, DefinedErrorData
 if TYPE_CHECKING:
     from ..execution.movement import MovementHandler
     from ..resources.model_utils import ModelUtils
+
+
+def _remove_default(s: dict[str, Any]) -> None:
+    s.pop("default", None)
 
 
 class WellLocationMixin(BaseModel):
@@ -63,13 +68,14 @@ class LiquidHandlingWellLocationMixin(BaseModel):
 class MovementMixin(BaseModel):
     """Mixin for command requests that move a pipette."""
 
-    minimumZHeight: Optional[float] = Field(
+    minimumZHeight: float | SkipJsonSchema[None] = Field(
         None,
         description=(
             "Optional minimal Z margin in mm."
             " If this is larger than the API's default safe Z margin,"
             " it will make the arc higher. If it's smaller, it will have no effect."
         ),
+        json_schema_extra=_remove_default,
     )
 
     forceDirect: bool = Field(
@@ -83,12 +89,13 @@ class MovementMixin(BaseModel):
         ),
     )
 
-    speed: Optional[float] = Field(
+    speed: float | SkipJsonSchema[None] = Field(
         None,
         description=(
             "Override the travel speed in mm/s."
             " This controls the straight linear speed of motion."
         ),
+        json_schema_extra=_remove_default,
     )
 
 
@@ -175,7 +182,7 @@ async def move_to_well(
             state_update=StateUpdate().clear_all_pipette_locations(),
         )
     else:
-        deck_point = DeckPoint.construct(x=position.x, y=position.y, z=position.z)
+        deck_point = DeckPoint.model_construct(x=position.x, y=position.y, z=position.z)
         return SuccessData(
             public=DestinationPositionResult(
                 position=deck_point,
@@ -215,7 +222,7 @@ async def move_relative(
             state_update=StateUpdate().clear_all_pipette_locations(),
         )
     else:
-        deck_point = DeckPoint.construct(x=position.x, y=position.y, z=position.z)
+        deck_point = DeckPoint.model_construct(x=position.x, y=position.y, z=position.z)
         return SuccessData(
             public=DestinationPositionResult(
                 position=deck_point,
@@ -265,17 +272,21 @@ async def move_to_addressable_area(
                     )
                 ],
             ),
-            state_update=StateUpdate().clear_all_pipette_locations(),
+            state_update=StateUpdate()
+            .clear_all_pipette_locations()
+            .set_addressable_area_used(addressable_area_name=addressable_area_name),
         )
     else:
-        deck_point = DeckPoint.construct(x=x, y=y, z=z)
+        deck_point = DeckPoint.model_construct(x=x, y=y, z=z)
         return SuccessData(
             public=DestinationPositionResult(position=deck_point),
-            state_update=StateUpdate().set_pipette_location(
+            state_update=StateUpdate()
+            .set_pipette_location(
                 pipette_id=pipette_id,
                 new_addressable_area_name=addressable_area_name,
                 new_deck_point=deck_point,
-            ),
+            )
+            .set_addressable_area_used(addressable_area_name=addressable_area_name),
         )
 
 
@@ -313,7 +324,7 @@ async def move_to_coordinates(
             state_update=StateUpdate().clear_all_pipette_locations(),
         )
     else:
-        deck_point = DeckPoint.construct(x=x, y=y, z=z)
+        deck_point = DeckPoint.model_construct(x=x, y=y, z=z)
 
         return SuccessData(
             public=DestinationPositionResult(position=DeckPoint(x=x, y=y, z=z)),

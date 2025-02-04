@@ -126,7 +126,7 @@ async def test_move_to_well_stall_defined_error(
     error_id = "error-id"
     error_timestamp = datetime(year=2020, month=1, day=2)
     decoy.when(
-        movement.move_to_well(
+        await movement.move_to_well(
             pipette_id="abc",
             labware_id="123",
             well_name="A3",
@@ -158,7 +158,7 @@ async def test_move_to_well_stall_defined_error(
     result = await subject.execute(data)
     assert isinstance(result, DefinedErrorData)
     assert result == DefinedErrorData(
-        public=StallOrCollisionError.construct(
+        public=StallOrCollisionError.model_construct(
             id=error_id, createdAt=error_timestamp, wrappedErrors=[matchers.Anything()]
         ),
         state_update=update_types.StateUpdate(pipette_location=update_types.CLEAR),

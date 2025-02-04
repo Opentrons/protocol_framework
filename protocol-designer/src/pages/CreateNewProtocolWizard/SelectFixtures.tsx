@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import without from 'lodash/without'
+import { FLEX_ROBOT_TYPE } from '@opentrons/shared-data'
 import {
   ALIGN_CENTER,
   BORDERS,
@@ -63,11 +64,21 @@ export function SelectFixtures(props: WizardTileProps): JSX.Element | null {
   return (
     <HandleEnter onEnter={handleProceed}>
       <WizardBody
+        robotType={FLEX_ROBOT_TYPE}
         stepNumber={5}
         header={t('add_fixtures')}
         subHeader={t('fixtures_replace')}
         disabled={!hasTrash}
         goBack={() => {
+          // Note this is avoid the following case issue.
+          // https://github.com/Opentrons/opentrons/pull/17344#pullrequestreview-2576591908
+          setValue(
+            'additionalEquipment',
+            additionalEquipment.filter(
+              ae => ae === 'gripper' || ae === 'trashBin'
+            )
+          )
+
           goBack(1)
         }}
         proceed={handleProceed}
@@ -133,11 +144,18 @@ export function SelectFixtures(props: WizardTileProps): JSX.Element | null {
                   filterOptions: getNumOptions(
                     numSlotsAvailable >= MAX_SLOTS
                       ? MAX_SLOTS
-                      : numSlotsAvailable + numStagingAreas
+                      : numSlotsAvailable
                   ),
                   onClick: (value: string) => {
                     const inputNum = parseInt(value)
-                    let updatedStagingAreas = [...additionalEquipment]
+                    const currentStagingAreas = additionalEquipment.filter(
+                      additional => additional === 'stagingArea'
+                    )
+                    const otherEquipment = additionalEquipment.filter(
+                      additional => additional !== 'stagingArea'
+                    )
+                    let updatedStagingAreas = currentStagingAreas
+                    // let updatedStagingAreas = [...additionalEquipment]
 
                     if (inputNum > numStagingAreas) {
                       const difference = inputNum - numStagingAreas
@@ -146,13 +164,16 @@ export function SelectFixtures(props: WizardTileProps): JSX.Element | null {
                         ...Array(difference).fill(ae),
                       ]
                     } else {
-                      updatedStagingAreas = updatedStagingAreas.slice(
+                      updatedStagingAreas = currentStagingAreas.slice(
                         0,
                         inputNum
                       )
                     }
 
-                    setValue('additionalEquipment', updatedStagingAreas)
+                    setValue('additionalEquipment', [
+                      ...otherEquipment,
+                      ...updatedStagingAreas,
+                    ])
                   },
                 }
                 return (

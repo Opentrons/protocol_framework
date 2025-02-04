@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import { Flex, InputField, SPACING } from '@opentrons/components'
 import type { Dispatch, SetStateAction } from 'react'
-import type { FieldProps } from '../../components/StepEditForm/types'
+import type { FieldProps } from '../../pages/Designer/ProtocolSteps/types'
 
 interface InputStepFormFieldProps extends FieldProps {
   title: string
@@ -52,6 +52,9 @@ export function InputStepFormField(
         name={name}
         error={formLevelError ?? errorToShow}
         onBlur={onFieldBlur}
+        onClick={e => {
+          e.stopPropagation()
+        }}
         onFocus={onFieldFocus}
         onChange={e => {
           updateValue(e.currentTarget.value)

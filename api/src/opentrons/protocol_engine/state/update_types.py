@@ -11,9 +11,11 @@ from opentrons.protocol_engine.resources import pipette_data_provider
 from opentrons.protocol_engine.types import (
     DeckPoint,
     LabwareLocation,
+    OnLabwareLocation,
     TipGeometry,
     AspiratedFluid,
     LiquidClassRecord,
+    ABSMeasureMode,
 )
 from opentrons.types import MountType
 from opentrons_shared_data.labware.labware_definition import LabwareDefinition
@@ -98,7 +100,7 @@ class LabwareLocationUpdate:
     new_location: LabwareLocation
     """The labware's new location."""
 
-    offset_id: typing.Optional[str]
+    offset_id: str | None
     """The ID of the labware's new offset, for its new location."""
 
 
@@ -112,12 +114,43 @@ class LoadedLabwareUpdate:
     new_location: LabwareLocation
     """The labware's initial location."""
 
-    offset_id: typing.Optional[str]
+    offset_id: str | None
     """The ID of the labware's offset."""
 
-    display_name: typing.Optional[str]
+    display_name: str | None
 
     definition: LabwareDefinition
+
+
+@dataclasses.dataclass
+class LoadedLidStackUpdate:
+    """An update that loads a new lid stack."""
+
+    stack_id: str
+    """The unique ID of the Lid Stack Object."""
+
+    stack_object_definition: LabwareDefinition
+    "The System-only Labware Definition of the Lid Stack Object"
+
+    stack_location: LabwareLocation
+    "The initial location of the Lid Stack Object."
+
+    new_locations_by_id: typing.Dict[str, OnLabwareLocation]
+    """Each lid's initial location keyed by Labware ID."""
+
+    definition: LabwareDefinition | None
+    "The Labware Definition of the Lid Labware(s) loaded."
+
+
+@dataclasses.dataclass
+class LabwareLidUpdate:
+    """An update that identifies a lid on a given parent labware."""
+
+    parent_labware_ids: typing.List[str]
+    """The unique IDs of the parent labwares."""
+
+    lid_ids: typing.List[str | None]
+    """The unique IDs of the new lids."""
 
 
 @dataclasses.dataclass
@@ -133,7 +166,7 @@ class LoadPipetteUpdate:
 
     pipette_name: PipetteNameType
     mount: MountType
-    liquid_presence_detection: typing.Optional[bool]
+    liquid_presence_detection: bool | None
 
 
 @dataclasses.dataclass
@@ -162,7 +195,7 @@ class PipetteTipStateUpdate:
     """Update pipette tip state."""
 
     pipette_id: str
-    tip_geometry: typing.Optional[TipGeometry]
+    tip_geometry: TipGeometry | None
 
 
 @dataclasses.dataclass
@@ -249,8 +282,67 @@ class PipetteEmptyFluidUpdate:
 class AbsorbanceReaderLidUpdate:
     """An update to an absorbance reader's lid location."""
 
-    module_id: str
     is_lid_on: bool
+
+
+@dataclasses.dataclass
+class AbsorbanceReaderDataUpdate:
+    """An update to an absorbance reader's lid location."""
+
+    read_result: typing.Dict[int, typing.Dict[str, float]]
+
+
+@dataclasses.dataclass(frozen=True)
+class AbsorbanceReaderInitializeUpdate:
+    """An update to an absorbance reader's initialization."""
+
+    measure_mode: ABSMeasureMode
+    sample_wave_lengths: typing.List[int]
+    reference_wave_length: typing.Optional[int]
+
+
+@dataclasses.dataclass
+class AbsorbanceReaderStateUpdate:
+    """An update to the absorbance reader module state."""
+
+    module_id: str
+    absorbance_reader_lid: AbsorbanceReaderLidUpdate | NoChangeType = NO_CHANGE
+    absorbance_reader_data: AbsorbanceReaderDataUpdate | NoChangeType = NO_CHANGE
+    initialize_absorbance_reader_update: AbsorbanceReaderInitializeUpdate | NoChangeType = (
+        NO_CHANGE
+    )
+
+
+@dataclasses.dataclass
+class FlexStackerLoadHopperLabware:
+    """An update to the Flex Stacker module static state."""
+
+    labware_id: str
+
+
+@dataclasses.dataclass
+class FlexStackerRetrieveLabware:
+    """An update to the Flex Stacker module static state."""
+
+    labware_id: str
+
+
+@dataclasses.dataclass
+class FlexStackerStoreLabware:
+    """An update to the Flex Stacker module static state."""
+
+    labware_id: str
+
+
+@dataclasses.dataclass
+class FlexStackerStateUpdate:
+    """An update to the Flex Stacker module state."""
+
+    module_id: str
+    in_static_mode: bool | NoChangeType = NO_CHANGE
+    hopper_labware_update: FlexStackerLoadHopperLabware | FlexStackerRetrieveLabware | FlexStackerStoreLabware | NoChangeType = (
+        NO_CHANGE
+    )
 
 
 @dataclasses.dataclass
@@ -259,6 +351,20 @@ class LiquidClassLoadedUpdate:
 
     liquid_class_id: str
     liquid_class_record: LiquidClassRecord
+
+
+@dataclasses.dataclass
+class FilesAddedUpdate:
+    """An update that adds a new data file."""
+
+    file_ids: list[str]
+
+
+@dataclasses.dataclass
+class AddressableAreaUsedUpdate:
+    """An update that says an addressable area has been used."""
+
+    addressable_area_name: str
 
 
 @dataclasses.dataclass
@@ -287,6 +393,10 @@ class StateUpdate:
 
     loaded_labware: LoadedLabwareUpdate | NoChangeType = NO_CHANGE
 
+    loaded_lid_stack: LoadedLidStackUpdate | NoChangeType = NO_CHANGE
+
+    labware_lid: LabwareLidUpdate | NoChangeType = NO_CHANGE
+
     tips_used: TipsUsedUpdate | NoChangeType = NO_CHANGE
 
     liquid_loaded: LiquidLoadedUpdate | NoChangeType = NO_CHANGE
@@ -295,9 +405,30 @@ class StateUpdate:
 
     liquid_operated: LiquidOperatedUpdate | NoChangeType = NO_CHANGE
 
-    absorbance_reader_lid: AbsorbanceReaderLidUpdate | NoChangeType = NO_CHANGE
+    absorbance_reader_state_update: AbsorbanceReaderStateUpdate | NoChangeType = (
+        NO_CHANGE
+    )
+
+    flex_stacker_state_update: FlexStackerStateUpdate | NoChangeType = NO_CHANGE
 
     liquid_class_loaded: LiquidClassLoadedUpdate | NoChangeType = NO_CHANGE
+
+    files_added: FilesAddedUpdate | NoChangeType = NO_CHANGE
+
+    addressable_area_used: AddressableAreaUsedUpdate | NoChangeType = NO_CHANGE
+
+    def append(self, other: Self) -> Self:
+        """Apply another `StateUpdate` "on top of" this one.
+
+        This object is mutated in-place, taking values from `other`.
+        If an attribute in `other` is `NO_CHANGE`, the value in this object is kept.
+        """
+        fields = dataclasses.fields(other)
+        for field in fields:
+            other_value = other.__dict__[field.name]
+            if other_value != NO_CHANGE:
+                self.__dict__[field.name] = other_value
+        return self
 
     @classmethod
     def reduce(cls: typing.Type[Self], *args: Self) -> Self:
@@ -306,22 +437,14 @@ class StateUpdate:
         State updates that are later in the parameter list are preferred to those that are earlier;
         NO_CHANGE is ignored.
         """
-        fields = dataclasses.fields(cls)
-        changes_dicts = [
-            {
-                field.name: update.__dict__[field.name]
-                for field in fields
-                if update.__dict__[field.name] != NO_CHANGE
-            }
-            for update in args
-        ]
-        changes = {}
-        for changes_dict in changes_dicts:
-            changes.update(changes_dict)
-        return cls(**changes)
+        accumulator = cls()
+        for arg in args:
+            accumulator.append(arg)
+        return accumulator
 
     # These convenience functions let the caller avoid the boilerplate of constructing a
-    # complicated dataclass tree.
+    # complicated dataclass tree, and allow chaining.
+
     @typing.overload
     def set_pipette_location(
         self: Self, *, pipette_id: str, new_deck_point: DeckPoint
@@ -374,7 +497,6 @@ class StateUpdate:
                 new_deck_point=new_deck_point,
             )
         else:
-
             self.pipette_location = PipetteLocationUpdate(
                 pipette_id=pipette_id,
                 new_location=Well(labware_id=new_labware_id, well_name=new_well_name),
@@ -406,8 +528,8 @@ class StateUpdate:
         self: Self,
         definition: LabwareDefinition,
         labware_id: str,
-        offset_id: typing.Optional[str],
-        display_name: typing.Optional[str],
+        offset_id: str | None,
+        display_name: str | None,
         location: LabwareLocation,
     ) -> Self:
         """Add a new labware to state. See `LoadedLabwareUpdate`."""
@@ -420,12 +542,42 @@ class StateUpdate:
         )
         return self
 
+    def set_loaded_lid_stack(
+        self: Self,
+        stack_id: str,
+        stack_object_definition: LabwareDefinition,
+        stack_location: LabwareLocation,
+        locations: typing.Dict[str, OnLabwareLocation],
+        labware_definition: LabwareDefinition | None,
+    ) -> Self:
+        """Add a new lid stack to state. See `LoadedLidStackUpdate`."""
+        self.loaded_lid_stack = LoadedLidStackUpdate(
+            stack_id=stack_id,
+            stack_object_definition=stack_object_definition,
+            stack_location=stack_location,
+            definition=labware_definition,
+            new_locations_by_id=locations,
+        )
+        return self
+
+    def set_lids(
+        self: Self,
+        parent_labware_ids: typing.List[str],
+        lid_ids: typing.List[str | None],
+    ) -> Self:
+        """Update the labware parent of a loaded or moved lid. See `LabwareLidUpdate`."""
+        self.labware_lid = LabwareLidUpdate(
+            parent_labware_ids=parent_labware_ids,
+            lid_ids=lid_ids,
+        )
+        return self
+
     def set_load_pipette(
         self: Self,
         pipette_id: str,
         pipette_name: PipetteNameType,
         mount: MountType,
-        liquid_presence_detection: typing.Optional[bool],
+        liquid_presence_detection: bool | None,
     ) -> Self:
         """Add a new pipette to state. See `LoadPipetteUpdate`."""
         self.loaded_pipette = LoadPipetteUpdate(
@@ -458,7 +610,7 @@ class StateUpdate:
         return self
 
     def update_pipette_tip_state(
-        self: Self, pipette_id: str, tip_geometry: typing.Optional[TipGeometry]
+        self: Self, pipette_id: str, tip_geometry: TipGeometry | None
     ) -> Self:
         """Update a pipette's tip state. See `PipetteTipStateUpdate`."""
         self.pipette_tip_state = PipetteTipStateUpdate(
@@ -551,7 +703,94 @@ class StateUpdate:
 
     def set_absorbance_reader_lid(self: Self, module_id: str, is_lid_on: bool) -> Self:
         """Update an absorbance reader's lid location. See `AbsorbanceReaderLidUpdate`."""
-        self.absorbance_reader_lid = AbsorbanceReaderLidUpdate(
-            module_id=module_id, is_lid_on=is_lid_on
+        assert self.absorbance_reader_state_update == NO_CHANGE
+        self.absorbance_reader_state_update = AbsorbanceReaderStateUpdate(
+            module_id=module_id,
+            absorbance_reader_lid=AbsorbanceReaderLidUpdate(is_lid_on=is_lid_on),
+        )
+        return self
+
+    def set_absorbance_reader_data(
+        self, module_id: str, read_result: typing.Dict[int, typing.Dict[str, float]]
+    ) -> Self:
+        """Update an absorbance reader's read data. See `AbsorbanceReaderReadDataUpdate`."""
+        assert self.absorbance_reader_state_update == NO_CHANGE
+        self.absorbance_reader_state_update = AbsorbanceReaderStateUpdate(
+            module_id=module_id,
+            absorbance_reader_data=AbsorbanceReaderDataUpdate(read_result=read_result),
+        )
+        return self
+
+    def initialize_absorbance_reader(
+        self,
+        module_id: str,
+        measure_mode: ABSMeasureMode,
+        sample_wave_lengths: typing.List[int],
+        reference_wave_length: typing.Optional[int],
+    ) -> Self:
+        """Initialize absorbance reader."""
+        assert self.absorbance_reader_state_update == NO_CHANGE
+        self.absorbance_reader_state_update = AbsorbanceReaderStateUpdate(
+            module_id=module_id,
+            initialize_absorbance_reader_update=AbsorbanceReaderInitializeUpdate(
+                measure_mode=measure_mode,
+                sample_wave_lengths=sample_wave_lengths,
+                reference_wave_length=reference_wave_length,
+            ),
+        )
+        return self
+
+    def set_addressable_area_used(self: Self, addressable_area_name: str) -> Self:
+        """Mark that an addressable area has been used. See `AddressableAreaUsedUpdate`."""
+        self.addressable_area_used = AddressableAreaUsedUpdate(
+            addressable_area_name=addressable_area_name
+        )
+        return self
+
+    def load_flex_stacker_hopper_labware(
+        self,
+        module_id: str,
+        labware_id: str,
+    ) -> Self:
+        """Add a labware definition to the engine."""
+        self.flex_stacker_state_update = FlexStackerStateUpdate(
+            module_id=module_id,
+            hopper_labware_update=FlexStackerLoadHopperLabware(labware_id=labware_id),
+        )
+        return self
+
+    def retrieve_flex_stacker_labware(
+        self,
+        module_id: str,
+        labware_id: str,
+    ) -> Self:
+        """Add a labware definition to the engine."""
+        self.flex_stacker_state_update = FlexStackerStateUpdate(
+            module_id=module_id,
+            hopper_labware_update=FlexStackerRetrieveLabware(labware_id=labware_id),
+        )
+        return self
+
+    def store_flex_stacker_labware(
+        self,
+        module_id: str,
+        labware_id: str,
+    ) -> Self:
+        """Add a labware definition to the engine."""
+        self.flex_stacker_state_update = FlexStackerStateUpdate(
+            module_id=module_id,
+            hopper_labware_update=FlexStackerStoreLabware(labware_id=labware_id),
+        )
+        return self
+
+    def update_flex_stacker_mode(
+        self,
+        module_id: str,
+        static_mode: bool,
+    ) -> Self:
+        """Update the mode of the Flex Stacker."""
+        self.flex_stacker_state_update = FlexStackerStateUpdate(
+            module_id=module_id,
+            in_static_mode=static_mode,
         )
         return self

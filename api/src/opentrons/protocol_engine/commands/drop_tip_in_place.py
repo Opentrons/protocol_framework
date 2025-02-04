@@ -1,7 +1,10 @@
 """Drop tip in place command request, result, and implementation models."""
 from __future__ import annotations
+
+from typing import TYPE_CHECKING, Optional, Type, Any
+
 from pydantic import Field, BaseModel
-from typing import TYPE_CHECKING, Optional, Type
+from pydantic.json_schema import SkipJsonSchema
 from typing_extensions import Literal
 
 from .command import (
@@ -18,22 +21,27 @@ from ..resources.model_utils import ModelUtils
 from ..state import update_types
 
 if TYPE_CHECKING:
-    from ..execution import TipHandler
+    from ..execution import TipHandler, GantryMover
 
 
 DropTipInPlaceCommandType = Literal["dropTipInPlace"]
 
 
+def _remove_default(s: dict[str, Any]) -> None:
+    s.pop("default", None)
+
+
 class DropTipInPlaceParams(PipetteIdMixin):
     """Payload required to drop a tip in place."""
 
-    homeAfter: Optional[bool] = Field(
+    homeAfter: bool | SkipJsonSchema[None] = Field(
         None,
         description=(
             "Whether to home this pipette's plunger after dropping the tip."
             " You should normally leave this unspecified to let the robot choose"
             " a safe default depending on its hardware."
         ),
+        json_schema_extra=_remove_default,
     )
 
 
@@ -57,14 +65,19 @@ class DropTipInPlaceImplementation(
         self,
         tip_handler: TipHandler,
         model_utils: ModelUtils,
+        gantry_mover: GantryMover,
         **kwargs: object,
     ) -> None:
         self._tip_handler = tip_handler
         self._model_utils = model_utils
+        self._gantry_mover = gantry_mover
 
     async def execute(self, params: DropTipInPlaceParams) -> _ExecuteReturn:
         """Drop a tip using the requested pipette."""
         state_update = update_types.StateUpdate()
+
+        retry_location = await self._gantry_mover.get_position(params.pipetteId)
+
         try:
             await self._tip_handler.drop_tip(
                 pipette_id=params.pipetteId, home_after=params.homeAfter
@@ -85,6 +98,7 @@ class DropTipInPlaceImplementation(
                         error=exception,
                     )
                 ],
+                errorInfo={"retryLocation": retry_location},
             )
             return DefinedErrorData(
                 public=error,
@@ -100,13 +114,13 @@ class DropTipInPlaceImplementation(
 
 
 class DropTipInPlace(
-    BaseCommand[DropTipInPlaceParams, DropTipInPlaceResult, ErrorOccurrence]
+    BaseCommand[DropTipInPlaceParams, DropTipInPlaceResult, TipPhysicallyAttachedError]
 ):
     """Drop tip in place command model."""
 
     commandType: DropTipInPlaceCommandType = "dropTipInPlace"
     params: DropTipInPlaceParams
-    result: Optional[DropTipInPlaceResult]
+    result: Optional[DropTipInPlaceResult] = None
 
     _ImplementationCls: Type[
         DropTipInPlaceImplementation

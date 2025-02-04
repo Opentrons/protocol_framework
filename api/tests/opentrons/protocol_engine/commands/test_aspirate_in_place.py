@@ -129,6 +129,7 @@ async def test_aspirate_in_place_implementation(
             volume=123,
             flow_rate=1.234,
             command_note_adder=mock_command_note_adder,
+            correction_volume=0.0,
         )
     ).then_return(123)
 
@@ -221,6 +222,7 @@ async def test_aspirate_raises_volume_error(
             volume=50,
             flow_rate=1.23,
             command_note_adder=mock_command_note_adder,
+            correction_volume=0,
         )
     ).then_raise(AssertionError("blah blah"))
 
@@ -292,6 +294,7 @@ async def test_overpressure_error(
             volume=50,
             flow_rate=1.23,
             command_note_adder=mock_command_note_adder,
+            correction_volume=0,
         ),
     ).then_raise(PipetteOverpressureError())
 
@@ -304,7 +307,7 @@ async def test_overpressure_error(
 
     if isinstance(location, CurrentWell):
         assert result == DefinedErrorData(
-            public=OverpressureError.construct(
+            public=OverpressureError.model_construct(
                 id=error_id,
                 createdAt=error_timestamp,
                 wrappedErrors=[matchers.Anything()],
@@ -323,7 +326,7 @@ async def test_overpressure_error(
         )
     else:
         assert result == DefinedErrorData(
-            public=OverpressureError.construct(
+            public=OverpressureError.model_construct(
                 id=error_id,
                 createdAt=error_timestamp,
                 wrappedErrors=[matchers.Anything()],

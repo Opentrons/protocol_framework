@@ -17,7 +17,12 @@ import { ConnectedStepInfo } from './ConnectedStepInfo'
 import type { Dispatch, SetStateAction } from 'react'
 import type { DragLayerMonitor, DropTargetMonitor } from 'react-dnd'
 import type { StepIdType } from '../../../../form-types'
-import type { ConnectedStepItemProps } from '../../../../containers/ConnectedStepItem'
+
+export interface ConnectedStepItemProps {
+  stepId: StepIdType
+  stepNumber: number
+  onStepContextMenu?: () => void
+}
 
 interface DragDropStepProps extends ConnectedStepItemProps {
   stepId: StepIdType
@@ -26,6 +31,7 @@ interface DragDropStepProps extends ConnectedStepItemProps {
   orderedStepIds: string[]
   openedOverflowMenuId?: string | null
   setOpenedOverflowMenuId?: Dispatch<SetStateAction<string | null>>
+  sidebarWidth: number
 }
 
 interface DropType {
@@ -41,6 +47,7 @@ function DragDropStep(props: DragDropStepProps): JSX.Element {
     stepNumber,
     openedOverflowMenuId,
     setOpenedOverflowMenuId,
+    sidebarWidth,
   } = props
   const stepRef = useRef<HTMLDivElement>(null)
 
@@ -89,6 +96,7 @@ function DragDropStep(props: DragDropStepProps): JSX.Element {
         stepNumber={stepNumber}
         stepId={stepId}
         dragHovered={hovered}
+        sidebarWidth={sidebarWidth}
       />
     </Box>
   )
@@ -97,9 +105,10 @@ function DragDropStep(props: DragDropStepProps): JSX.Element {
 interface DraggableStepsProps {
   orderedStepIds: StepIdType[]
   reorderSteps: (steps: StepIdType[]) => void
+  sidebarWidth: number
 }
 export function DraggableSteps(props: DraggableStepsProps): JSX.Element | null {
-  const { orderedStepIds, reorderSteps } = props
+  const { orderedStepIds, reorderSteps, sidebarWidth } = props
   const { t } = useTranslation('shared')
   const [openedOverflowMenuId, setOpenedOverflowMenuId] = useState<
     string | null
@@ -141,14 +150,21 @@ export function DraggableSteps(props: DraggableStepsProps): JSX.Element | null {
           orderedStepIds={orderedStepIds}
           openedOverflowMenuId={openedOverflowMenuId}
           setOpenedOverflowMenuId={setOpenedOverflowMenuId}
+          sidebarWidth={sidebarWidth}
         />
       ))}
-      <StepDragPreview />
+      <StepDragPreview sidebarWidth={sidebarWidth} />
     </Flex>
   )
 }
 
-function StepDragPreview(): JSX.Element | null {
+interface StepDragPreviewProps {
+  sidebarWidth: number
+}
+
+function StepDragPreview({
+  sidebarWidth,
+}: StepDragPreviewProps): JSX.Element | null {
   const [{ isDragging, itemType, item, currentOffset }] = useDrag(() => ({
     type: DND_TYPES.STEP_ITEM,
     collect: (monitor: DragLayerMonitor) => ({
@@ -177,6 +193,7 @@ function StepDragPreview(): JSX.Element | null {
       <StepContainer
         iconName={stepIconsByType[stepType]}
         title={stepName || ''}
+        sidebarWidth={sidebarWidth}
       />
     </Flex>
   )

@@ -113,6 +113,7 @@ export const PipetteWizardFlows = (
   const [createdMaintenanceRunId, setCreatedMaintenanceRunId] = useState<
     string | null
   >(null)
+  const [errorMessage, setShowErrorMessage] = useState<null | string>(null)
   // we should start checking for run deletion only after the maintenance run is created
   // and the useCurrentRun poll has returned that created id
   const [
@@ -143,6 +144,9 @@ export const PipetteWizardFlows = (
       onSuccess: response => {
         setCreatedMaintenanceRunId(response.data.id)
       },
+      onError: error => {
+        setShowErrorMessage(error.message)
+      },
     },
     host
   )
@@ -169,7 +173,6 @@ export const PipetteWizardFlows = (
     closeFlow,
   ])
 
-  const [errorMessage, setShowErrorMessage] = useState<null | string>(null)
   const [isExiting, setIsExiting] = useState<boolean>(false)
   const proceed = (): void => {
     if (!isCommandMutationLoading) {
@@ -278,13 +281,19 @@ export const PipetteWizardFlows = (
     />
   )
 
-  let onExit
-  if (currentStep == null) return null
-  let modalContent: JSX.Element = <div>UNASSIGNED STEP</div>
-  if (
+  if (currentStep == null) {
+    return null
+  }
+
+  const isFatalError =
     (isExiting && errorMessage != null) ||
-    maintenanceRunData?.data.status === RUN_STATUS_FAILED
-  ) {
+    maintenanceRunData?.data.status === RUN_STATUS_FAILED ||
+    (errorMessage != null && createdMaintenanceRunId == null)
+
+  let onExit: () => void
+  let modalContent: JSX.Element = <div>UNASSIGNED STEP</div>
+  // These flows often have custom error messaging, so this fallback modal is shown only in specific circumstances.
+  if (isFatalError) {
     modalContent = (
       <SimpleWizardBody
         isSuccess={false}
@@ -396,16 +405,12 @@ export const PipetteWizardFlows = (
     )
   }
 
-  let exitWizardButton = onExit
-  if (isCommandMutationLoading || isDeleteLoading) {
-    exitWizardButton = undefined
-  } else if (
-    (errorMessage != null && isExiting) ||
-    maintenanceRunData?.data.status === RUN_STATUS_FAILED
-  ) {
-    exitWizardButton = handleClose
-  } else if (showConfirmExit) {
-    exitWizardButton = handleCleanUpAndClose
+  const buildWizardOnExit = (): (() => void) => {
+    if (isFatalError || showConfirmExit) {
+      return handleCleanUpAndClose
+    } else {
+      return onExit
+    }
   }
 
   const progressBarForCalError =
@@ -413,13 +418,13 @@ export const PipetteWizardFlows = (
 
   const wizardHeader = (
     <WizardHeader
-      exitDisabled={isCommandMutationLoading || isFetchingPipettes}
       title={memoizedWizardTitle}
       currentStep={
         progressBarForCalError ? currentStepIndex - 1 : currentStepIndex
       }
       totalSteps={totalStepCount}
-      onExit={exitWizardButton}
+      onExit={buildWizardOnExit()}
+      exitDisabled={isCommandMutationLoading || isFetchingPipettes}
     />
   )
 

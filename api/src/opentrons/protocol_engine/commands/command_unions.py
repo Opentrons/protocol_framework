@@ -3,7 +3,7 @@
 from collections.abc import Collection
 from typing import Annotated, Type, Union, get_type_hints
 
-from pydantic import Field
+from pydantic import Field, TypeAdapter
 
 from opentrons.util.get_union_elements import get_union_elements
 
@@ -16,6 +16,7 @@ from .pipetting_common import (
 from .movement_common import StallOrCollisionError
 
 from . import absorbance_reader
+from . import flex_stacker
 from . import heater_shaker
 from . import magnetic_module
 from . import temperature_module
@@ -57,6 +58,14 @@ from .aspirate_in_place import (
     AspirateInPlaceCommandType,
 )
 
+from .aspirate_while_tracking import (
+    AspirateWhileTracking,
+    AspirateWhileTrackingParams,
+    AspirateWhileTrackingCreate,
+    AspirateWhileTrackingResult,
+    AspirateWhileTrackingCommandType,
+)
+
 from .comment import (
     Comment,
     CommentParams,
@@ -79,6 +88,14 @@ from .dispense import (
     DispenseCreate,
     DispenseResult,
     DispenseCommandType,
+)
+
+from .dispense_while_tracking import (
+    DispenseWhileTracking,
+    DispenseWhileTrackingParams,
+    DispenseWhileTrackingCreate,
+    DispenseWhileTrackingResult,
+    DispenseWhileTrackingCommandType,
 )
 
 from .dispense_in_place import (
@@ -159,6 +176,22 @@ from .load_pipette import (
     LoadPipetteCreate,
     LoadPipetteResult,
     LoadPipetteCommandType,
+)
+
+from .load_lid_stack import (
+    LoadLidStack,
+    LoadLidStackParams,
+    LoadLidStackCreate,
+    LoadLidStackResult,
+    LoadLidStackCommandType,
+)
+
+from .load_lid import (
+    LoadLid,
+    LoadLidParams,
+    LoadLidCreate,
+    LoadLidResult,
+    LoadLidCommandType,
 )
 
 from .move_labware import (
@@ -323,6 +356,14 @@ from .get_tip_presence import (
     GetTipPresenceCommandType,
 )
 
+from .get_next_tip import (
+    GetNextTip,
+    GetNextTipCreate,
+    GetNextTipParams,
+    GetNextTipResult,
+    GetNextTipCommandType,
+)
+
 from .liquid_probe import (
     LiquidProbe,
     LiquidProbeParams,
@@ -336,15 +377,41 @@ from .liquid_probe import (
     TryLiquidProbeCommandType,
 )
 
+from .evotip_seal_pipette import (
+    EvotipSealPipette,
+    EvotipSealPipetteParams,
+    EvotipSealPipetteCreate,
+    EvotipSealPipetteResult,
+    EvotipSealPipetteCommandType,
+)
+
+from .evotip_dispense import (
+    EvotipDispense,
+    EvotipDispenseParams,
+    EvotipDispenseCreate,
+    EvotipDispenseResult,
+    EvotipDispenseCommandType,
+)
+
+from .evotip_unseal_pipette import (
+    EvotipUnsealPipette,
+    EvotipUnsealPipetteParams,
+    EvotipUnsealPipetteCreate,
+    EvotipUnsealPipetteResult,
+    EvotipUnsealPipetteCommandType,
+)
+
 Command = Annotated[
     Union[
         AirGapInPlace,
         Aspirate,
         AspirateInPlace,
+        AspirateWhileTracking,
         Comment,
         Custom,
         Dispense,
         DispenseInPlace,
+        DispenseWhileTracking,
         BlowOut,
         BlowOutInPlace,
         ConfigureForVolume,
@@ -359,6 +426,8 @@ Command = Annotated[
         LoadLiquidClass,
         LoadModule,
         LoadPipette,
+        LoadLidStack,
+        LoadLid,
         MoveLabware,
         MoveRelative,
         MoveToCoordinates,
@@ -375,8 +444,12 @@ Command = Annotated[
         SetStatusBar,
         VerifyTipPresence,
         GetTipPresence,
+        GetNextTip,
         LiquidProbe,
         TryLiquidProbe,
+        EvotipSealPipette,
+        EvotipDispense,
+        EvotipUnsealPipette,
         heater_shaker.WaitForTemperature,
         heater_shaker.SetTargetTemperature,
         heater_shaker.DeactivateHeater,
@@ -403,6 +476,9 @@ Command = Annotated[
         absorbance_reader.OpenLid,
         absorbance_reader.Initialize,
         absorbance_reader.ReadAbsorbance,
+        flex_stacker.Configure,
+        flex_stacker.Retrieve,
+        flex_stacker.Store,
         calibration.CalibrateGripper,
         calibration.CalibratePipette,
         calibration.CalibrateModule,
@@ -416,6 +492,8 @@ Command = Annotated[
         robot.MoveTo,
         robot.MoveAxesRelative,
         robot.MoveAxesTo,
+        robot.openGripperJaw,
+        robot.closeGripperJaw,
     ],
     Field(discriminator="commandType"),
 ]
@@ -423,6 +501,7 @@ Command = Annotated[
 CommandParams = Union[
     AirGapInPlaceParams,
     AspirateParams,
+    AspirateWhileTrackingParams,
     AspirateInPlaceParams,
     CommentParams,
     ConfigureForVolumeParams,
@@ -430,6 +509,7 @@ CommandParams = Union[
     CustomParams,
     DispenseParams,
     DispenseInPlaceParams,
+    DispenseWhileTrackingParams,
     BlowOutParams,
     BlowOutInPlaceParams,
     DropTipParams,
@@ -437,6 +517,8 @@ CommandParams = Union[
     HomeParams,
     RetractAxisParams,
     LoadLabwareParams,
+    LoadLidStackParams,
+    LoadLidParams,
     ReloadLabwareParams,
     LoadLiquidParams,
     LoadLiquidClassParams,
@@ -458,8 +540,12 @@ CommandParams = Union[
     SetStatusBarParams,
     VerifyTipPresenceParams,
     GetTipPresenceParams,
+    GetNextTipParams,
     LiquidProbeParams,
     TryLiquidProbeParams,
+    EvotipSealPipetteParams,
+    EvotipDispenseParams,
+    EvotipUnsealPipetteParams,
     heater_shaker.WaitForTemperatureParams,
     heater_shaker.SetTargetTemperatureParams,
     heater_shaker.DeactivateHeaterParams,
@@ -486,6 +572,9 @@ CommandParams = Union[
     absorbance_reader.OpenLidParams,
     absorbance_reader.InitializeParams,
     absorbance_reader.ReadAbsorbanceParams,
+    flex_stacker.ConfigureParams,
+    flex_stacker.RetrieveParams,
+    flex_stacker.StoreParams,
     calibration.CalibrateGripperParams,
     calibration.CalibratePipetteParams,
     calibration.CalibrateModuleParams,
@@ -499,11 +588,14 @@ CommandParams = Union[
     robot.MoveAxesRelativeParams,
     robot.MoveAxesToParams,
     robot.MoveToParams,
+    robot.openGripperJawParams,
+    robot.closeGripperJawParams,
 ]
 
 CommandType = Union[
     AirGapInPlaceCommandType,
     AspirateCommandType,
+    AspirateWhileTrackingCommandType,
     AspirateInPlaceCommandType,
     CommentCommandType,
     ConfigureForVolumeCommandType,
@@ -511,6 +603,7 @@ CommandType = Union[
     CustomCommandType,
     DispenseCommandType,
     DispenseInPlaceCommandType,
+    DispenseWhileTrackingCommandType,
     BlowOutCommandType,
     BlowOutInPlaceCommandType,
     DropTipCommandType,
@@ -523,6 +616,8 @@ CommandType = Union[
     LoadLiquidClassCommandType,
     LoadModuleCommandType,
     LoadPipetteCommandType,
+    LoadLidStackCommandType,
+    LoadLidCommandType,
     MoveLabwareCommandType,
     MoveRelativeCommandType,
     MoveToCoordinatesCommandType,
@@ -539,8 +634,12 @@ CommandType = Union[
     SetStatusBarCommandType,
     VerifyTipPresenceCommandType,
     GetTipPresenceCommandType,
+    GetNextTipCommandType,
     LiquidProbeCommandType,
     TryLiquidProbeCommandType,
+    EvotipSealPipetteCommandType,
+    EvotipDispenseCommandType,
+    EvotipUnsealPipetteCommandType,
     heater_shaker.WaitForTemperatureCommandType,
     heater_shaker.SetTargetTemperatureCommandType,
     heater_shaker.DeactivateHeaterCommandType,
@@ -567,6 +666,9 @@ CommandType = Union[
     absorbance_reader.OpenLidCommandType,
     absorbance_reader.InitializeCommandType,
     absorbance_reader.ReadAbsorbanceCommandType,
+    flex_stacker.ConfigureCommandType,
+    flex_stacker.RetrieveCommandType,
+    flex_stacker.StoreCommandType,
     calibration.CalibrateGripperCommandType,
     calibration.CalibratePipetteCommandType,
     calibration.CalibrateModuleCommandType,
@@ -580,12 +682,15 @@ CommandType = Union[
     robot.MoveAxesRelativeCommandType,
     robot.MoveAxesToCommandType,
     robot.MoveToCommandType,
+    robot.openGripperJawCommandType,
+    robot.closeGripperJawCommandType,
 ]
 
 CommandCreate = Annotated[
     Union[
         AirGapInPlaceCreate,
         AspirateCreate,
+        AspirateWhileTrackingCreate,
         AspirateInPlaceCreate,
         CommentCreate,
         ConfigureForVolumeCreate,
@@ -593,6 +698,7 @@ CommandCreate = Annotated[
         CustomCreate,
         DispenseCreate,
         DispenseInPlaceCreate,
+        DispenseWhileTrackingCreate,
         BlowOutCreate,
         BlowOutInPlaceCreate,
         DropTipCreate,
@@ -605,6 +711,8 @@ CommandCreate = Annotated[
         LoadLiquidClassCreate,
         LoadModuleCreate,
         LoadPipetteCreate,
+        LoadLidStackCreate,
+        LoadLidCreate,
         MoveLabwareCreate,
         MoveRelativeCreate,
         MoveToCoordinatesCreate,
@@ -621,8 +729,12 @@ CommandCreate = Annotated[
         SetStatusBarCreate,
         VerifyTipPresenceCreate,
         GetTipPresenceCreate,
+        GetNextTipCreate,
         LiquidProbeCreate,
         TryLiquidProbeCreate,
+        EvotipSealPipetteCreate,
+        EvotipDispenseCreate,
+        EvotipUnsealPipetteCreate,
         heater_shaker.WaitForTemperatureCreate,
         heater_shaker.SetTargetTemperatureCreate,
         heater_shaker.DeactivateHeaterCreate,
@@ -649,6 +761,9 @@ CommandCreate = Annotated[
         absorbance_reader.OpenLidCreate,
         absorbance_reader.InitializeCreate,
         absorbance_reader.ReadAbsorbanceCreate,
+        flex_stacker.ConfigureCreate,
+        flex_stacker.RetrieveCreate,
+        flex_stacker.StoreCreate,
         calibration.CalibrateGripperCreate,
         calibration.CalibratePipetteCreate,
         calibration.CalibrateModuleCreate,
@@ -662,13 +777,23 @@ CommandCreate = Annotated[
         robot.MoveAxesRelativeCreate,
         robot.MoveAxesToCreate,
         robot.MoveToCreate,
+        robot.openGripperJawCreate,
+        robot.closeGripperJawCreate,
     ],
     Field(discriminator="commandType"),
 ]
 
+# Each time a TypeAdapter is instantiated, it will construct a new validator and
+# serializer. To improve performance, TypeAdapters are instantiated once.
+# See https://docs.pydantic.dev/latest/concepts/performance/#typeadapter-instantiated-once
+CommandCreateAdapter: TypeAdapter[CommandCreate] = TypeAdapter(CommandCreate)
+
+CommandAdapter: TypeAdapter[Command] = TypeAdapter(Command)
+
 CommandResult = Union[
     AirGapInPlaceResult,
     AspirateResult,
+    AspirateWhileTrackingResult,
     AspirateInPlaceResult,
     CommentResult,
     ConfigureForVolumeResult,
@@ -676,6 +801,7 @@ CommandResult = Union[
     CustomResult,
     DispenseResult,
     DispenseInPlaceResult,
+    DispenseWhileTrackingResult,
     BlowOutResult,
     BlowOutInPlaceResult,
     DropTipResult,
@@ -688,6 +814,8 @@ CommandResult = Union[
     LoadLiquidClassResult,
     LoadModuleResult,
     LoadPipetteResult,
+    LoadLidStackResult,
+    LoadLidResult,
     MoveLabwareResult,
     MoveRelativeResult,
     MoveToCoordinatesResult,
@@ -704,8 +832,12 @@ CommandResult = Union[
     SetStatusBarResult,
     VerifyTipPresenceResult,
     GetTipPresenceResult,
+    GetNextTipResult,
     LiquidProbeResult,
     TryLiquidProbeResult,
+    EvotipSealPipetteResult,
+    EvotipDispenseResult,
+    EvotipUnsealPipetteResult,
     heater_shaker.WaitForTemperatureResult,
     heater_shaker.SetTargetTemperatureResult,
     heater_shaker.DeactivateHeaterResult,
@@ -732,6 +864,9 @@ CommandResult = Union[
     absorbance_reader.OpenLidResult,
     absorbance_reader.InitializeResult,
     absorbance_reader.ReadAbsorbanceResult,
+    flex_stacker.ConfigureResult,
+    flex_stacker.RetrieveResult,
+    flex_stacker.StoreResult,
     calibration.CalibrateGripperResult,
     calibration.CalibratePipetteResult,
     calibration.CalibrateModuleResult,
@@ -745,6 +880,8 @@ CommandResult = Union[
     robot.MoveAxesRelativeResult,
     robot.MoveAxesToResult,
     robot.MoveToResult,
+    robot.openGripperJawResult,
+    robot.closeGripperJawResult,
 ]
 
 

@@ -10,7 +10,7 @@
   "batch_edit": "Batch edit",
   "batch_edits_saved": "Batch edits saved",
   "blowout_location": "Blowout location",
-  "blowout_position": "Blowout position from bottom",
+  "blowout_position": "Blowout position from top",
   "change_tips": "Change tips",
   "column": "Column",
   "default_flow_rate": "The default flow rate is {{flowRate}}",
@@ -27,7 +27,7 @@
   "duplicate": "Duplicate step",
   "edit_step": "Edit step",
   "engage_height": "Engage height",
-  "final_deck_state": "Final deck state",
+  "ending_deck": "Ending deck",
   "flow_type_title": "{{type}} flow rate",
   "from": "from",
   "heater_shaker": {
@@ -44,7 +44,7 @@
       "open": "open"
     }
   },
-  "heater_shaker_settings": "Heater-shaker settings",
+  "heater_shaker_settings": "Heater-Shaker Settings",
   "in": "in",
   "into": "into",
   "magnetic_module": {
@@ -73,6 +73,7 @@
   "multiAspirate": "Consolidate path",
   "multiDispense": "Distribute path",
   "new_location": "New location",
+  "no_tiprack": "No tiprack available",
   "off_deck": "Off-Deck",
   "pause": {
     "untilResume": "Pausing until manually told to resume",
@@ -104,8 +105,10 @@
   "shake": "Shake",
   "single": "Single path",
   "speed": "Speed",
-  "starting_deck_state": "Starting deck state",
+  "starting_deck": "Starting deck",
   "step_substeps": "{{stepType}} details",
+  "submerge": "Submerge",
+  "submerge_speed": "Submerge speed",
   "temperature": "Temperature",
   "temperature_module": {
     "active": "<semiBoldText>{{module}}</semiBoldText><text>set to</text><tag/>",
@@ -120,8 +123,8 @@
     "substep_settings": "<text>Set block temperature to</text><tagTemperature/><text>for</text><tagDuration/>",
     "thermocycler_profile": {
       "end_hold": {
-        "block": "<text>End at thermocycler block</text><tag/>",
-        "lid_position": "<text>Thermocycler lid</text><tag/>"
+        "block": "<text>End with block at</text><tag/>",
+        "lid_position": "<text>and lid</text><tag/>"
       },
       "lid_temperature": "<text>and lid temperature at</text><tag/>",
       "volume": "<text>Run thermocycler profile with</text><tag/>"
@@ -143,5 +146,6 @@
   "volume_per_well": "Volume per well",
   "well_name": "Well {{wellName}}",
   "well_order_title": "{{prefix}} well order",
-  "well_position": "Well position: X {{x}} Y {{y}} Z {{z}} (mm)"
+  "well_position": "Well position: X {{x}} Y {{y}} Z {{z}} (mm)",
+  "unknown_module": "Unknown module"
 }

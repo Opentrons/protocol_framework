@@ -17,7 +17,7 @@ import {
 import { getWellsDepth, getWellDimension } from '@opentrons/shared-data'
 import { TipPositionModal, ZTipPositionModal } from '../../../../../organisms'
 import { getIsDelayPositionField } from '../../../../../form-types'
-import { getDefaultMmFromBottom } from '../../../../../organisms/TipPositionModal/utils'
+import { getDefaultMmFromEdge } from '../../../../../organisms/TipPositionModal/utils'
 import { selectors as stepFormSelectors } from '../../../../../step-forms'
 import type {
   TipXOffsetFields,
@@ -105,15 +105,15 @@ export function PositionField(props: PositionFieldProps): JSX.Element {
   const mmFromBottom = typeof rawZValue === 'number' ? rawZValue : null
   if (wellDepthMm !== null) {
     // show default value for field in parens if no mmFromBottom value is selected
-    zValue =
-      mmFromBottom ?? getDefaultMmFromBottom({ name: zName, wellDepthMm })
+    zValue = mmFromBottom ?? getDefaultMmFromEdge({ name: zName })
   }
+
   let modal = (
     <ZTipPositionModal
       name={zName}
       closeModal={handleClose}
       wellDepthMm={wellDepthMm}
-      zValue={mmFromBottom}
+      zValue={zValue as number}
       updateValue={zUpdateValue}
       isIndeterminate={isIndeterminate}
     />
@@ -133,7 +133,7 @@ export function PositionField(props: PositionFieldProps): JSX.Element {
     const specs: PositionSpecs = {
       z: {
         name: zName,
-        value: mmFromBottom,
+        value: zValue as number,
         updateValue: zUpdateValue,
       },
       x: {
@@ -198,7 +198,7 @@ export function PositionField(props: PositionFieldProps): JSX.Element {
                   propsForFields[yField].value != null
                     ? Number(propsForFields[yField].value)
                     : 0,
-                z: mmFromBottom ?? 0,
+                z: zValue,
               })}
             </StyledText>
           </ListButton>
@@ -219,7 +219,6 @@ export function PositionField(props: PositionFieldProps): JSX.Element {
           isIndeterminate={isIndeterminate}
           units={t('units.millimeter')}
           id={`TipPositionField_${zName}`}
-          padding={padding}
         />
       )}
     </>

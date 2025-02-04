@@ -1,5 +1,4 @@
 """Tests for base /runs routes."""
-from typing import Dict
 
 from opentrons.hardware_control import HardwareControlAPI
 from opentrons_shared_data.robot.types import RobotTypeEnum
@@ -10,7 +9,6 @@ from pathlib import Path
 
 from opentrons.types import DeckSlotName, Point, NozzleConfigurationType
 from opentrons.protocol_engine import (
-    LabwareOffsetCreate,
     types as pe_types,
     errors as pe_errors,
     CommandErrorSlice,
@@ -27,7 +25,6 @@ from robot_server.data_files.data_files_store import (
 
 from robot_server.data_files.models import DataFileSource
 from robot_server.errors.error_responses import ApiError
-from robot_server.runs.error_recovery_models import ErrorRecoveryPolicy
 from robot_server.service.json_api import (
     RequestModel,
     SimpleBody,
@@ -53,6 +50,7 @@ from robot_server.runs.run_models import (
     ActiveNozzleLayout,
     CommandLinkNoMeta,
     NozzleLayoutConfig,
+    TipState,
 )
 from robot_server.runs.run_orchestrator_store import RunConflictError
 from robot_server.runs.run_data_manager import (
@@ -68,7 +66,6 @@ from robot_server.runs.router.base_router import (
     get_runs,
     remove_run,
     update_run,
-    put_error_recovery_policy,
     get_run_commands_error,
     get_current_state,
     CurrentStateLinks,
@@ -103,37 +100,20 @@ def mock_data_files_directory(decoy: Decoy) -> Path:
 
 
 @pytest.fixture
-def labware_offset_create() -> LabwareOffsetCreate:
+def labware_offset_create() -> pe_types.LegacyLabwareOffsetCreate:
     """Get a labware offset create request value object."""
-    return pe_types.LabwareOffsetCreate(
+    return pe_types.LegacyLabwareOffsetCreate(
         definitionUri="namespace_1/load_name_1/123",
-        location=pe_types.LabwareOffsetLocation(slotName=DeckSlotName.SLOT_1),
+        location=pe_types.LegacyLabwareOffsetLocation(slotName=DeckSlotName.SLOT_1),
         vector=pe_types.LabwareOffsetVector(x=1, y=2, z=3),
     )
-
-
-@pytest.fixture
-def mock_nozzle_maps() -> Dict[str, NozzleMap]:
-    """Get mock NozzleMaps."""
-    return {
-        "mock-pipette-id": NozzleMap(
-            configuration=NozzleConfigurationType.FULL,
-            columns={"1": ["A1"]},
-            rows={"A": ["A1"]},
-            map_store={"A1": Point(0, 0, 0)},
-            starting_nozzle="A1",
-            valid_map_key="mock-key",
-            full_instrument_map_store={},
-            full_instrument_rows={},
-        )
-    }
 
 
 async def test_create_run(
     decoy: Decoy,
     mock_run_data_manager: RunDataManager,
     mock_run_auto_deleter: RunAutoDeleter,
-    labware_offset_create: pe_types.LabwareOffsetCreate,
+    labware_offset_create: pe_types.LegacyLabwareOffsetCreate,
     mock_deck_configuration_store: DeckConfigurationStore,
     mock_file_provider_wrapper: FileProviderWrapper,
     mock_protocol_store: ProtocolStore,
@@ -157,6 +137,7 @@ async def test_create_run(
         labwareOffsets=[],
         status=pe_types.EngineStatus.IDLE,
         liquids=[],
+        liquidClasses=[],
         outputFileIds=[],
         hasEverEnteredErrorRecovery=False,
     )
@@ -245,6 +226,7 @@ async def test_create_protocol_run(
         labwareOffsets=[],
         status=pe_types.EngineStatus.IDLE,
         liquids=[],
+        liquidClasses=[],
         outputFileIds=[],
         hasEverEnteredErrorRecovery=False,
     )
@@ -413,6 +395,7 @@ async def test_get_run_data_from_url(
         labware=[],
         labwareOffsets=[],
         liquids=[],
+        liquidClasses=[],
         outputFileIds=[],
         hasEverEnteredErrorRecovery=False,
     )
@@ -461,6 +444,7 @@ async def test_get_run() -> None:
         labware=[],
         labwareOffsets=[],
         liquids=[],
+        liquidClasses=[],
         outputFileIds=[],
         hasEverEnteredErrorRecovery=False,
     )
@@ -508,6 +492,7 @@ async def test_get_runs_not_empty(
         labware=[],
         labwareOffsets=[],
         liquids=[],
+        liquidClasses=[],
         outputFileIds=[],
         hasEverEnteredErrorRecovery=False,
     )
@@ -525,6 +510,7 @@ async def test_get_runs_not_empty(
         labware=[],
         labwareOffsets=[],
         liquids=[],
+        liquidClasses=[],
         outputFileIds=[],
         hasEverEnteredErrorRecovery=False,
     )
@@ -605,6 +591,7 @@ async def test_update_run_to_not_current(
         labware=[],
         labwareOffsets=[],
         liquids=[],
+        liquidClasses=[],
         outputFileIds=[],
         hasEverEnteredErrorRecovery=False,
     )
@@ -641,6 +628,7 @@ async def test_update_current_none_noop(
         labware=[],
         labwareOffsets=[],
         liquids=[],
+        liquidClasses=[],
         outputFileIds=[],
         hasEverEnteredErrorRecovery=False,
     )
@@ -719,44 +707,6 @@ async def test_update_to_current_missing(
     assert exc_info.value.content["errors"][0]["id"] == "RunNotFound"
 
 
-async def test_create_policies(
-    decoy: Decoy, mock_run_data_manager: RunDataManager
-) -> None:
-    """It should call RunDataManager create run policies."""
-    policies = decoy.mock(cls=ErrorRecoveryPolicy)
-    await put_error_recovery_policy(
-        runId="rud-id",
-        request_body=RequestModel(data=policies),
-        run_data_manager=mock_run_data_manager,
-    )
-    decoy.verify(
-        mock_run_data_manager.set_error_recovery_rules(
-            run_id="rud-id", rules=policies.policyRules
-        )
-    )
-
-
-async def test_create_policies_raises_not_active_run(
-    decoy: Decoy, mock_run_data_manager: RunDataManager
-) -> None:
-    """It should raise that the run is not current."""
-    policies = decoy.mock(cls=ErrorRecoveryPolicy)
-    decoy.when(
-        mock_run_data_manager.set_error_recovery_rules(
-            run_id="rud-id", rules=policies.policyRules
-        )
-    ).then_raise(RunNotCurrentError())
-    with pytest.raises(ApiError) as exc_info:
-        await put_error_recovery_policy(
-            runId="rud-id",
-            request_body=RequestModel(data=policies),
-            run_data_manager=mock_run_data_manager,
-        )
-
-    assert exc_info.value.status_code == 409
-    assert exc_info.value.content["errors"][0]["id"] == "RunStopped"
-
-
 async def test_get_run_commands_errors(
     decoy: Decoy, mock_run_data_manager: RunDataManager
 ) -> None:
@@ -769,13 +719,7 @@ async def test_get_run_commands_errors(
         )
     ).then_raise(RunNotCurrentError("oh no!"))
 
-    error = pe_errors.ErrorOccurrence(
-        id="error-id",
-        errorType="PrettyBadError",
-        createdAt=datetime(year=2024, month=4, day=4),
-        detail="Things are not looking good.",
-    )
-    decoy.when(mock_run_data_manager.get_command_errors("run-id")).then_return([error])
+    decoy.when(mock_run_data_manager.get_command_errors_count("run-id")).then_return(1)
 
     with pytest.raises(ApiError):
         result = await get_run_commands_error(
@@ -797,7 +741,7 @@ async def test_get_run_commands_errors_raises_no_run(
         createdAt=datetime(year=2024, month=4, day=4),
         detail="Things are not looking good.",
     )
-    decoy.when(mock_run_data_manager.get_command_errors("run-id")).then_return([error])
+    decoy.when(mock_run_data_manager.get_command_errors_count("run-id")).then_return(1)
 
     command_error_slice = CommandErrorSlice(
         cursor=1, total_length=3, commands_errors=[error]
@@ -832,7 +776,7 @@ async def test_get_run_commands_errors_raises_no_run(
 
 @pytest.mark.parametrize(
     "error_list, expected_cursor_result",
-    [([], 0), ([pe_errors.ErrorOccurrence.construct(id="error-id")], 1)],
+    [([], 0), ([pe_errors.ErrorOccurrence.model_construct(id="error-id")], 1)],
 )
 async def test_get_run_commands_errors_defualt_cursor(
     decoy: Decoy,
@@ -841,10 +785,7 @@ async def test_get_run_commands_errors_defualt_cursor(
     expected_cursor_result: int,
 ) -> None:
     """It should return a list of all commands errors in a run."""
-    print(error_list)
-    decoy.when(mock_run_data_manager.get_command_errors("run-id")).then_return(
-        error_list
-    )
+    decoy.when(mock_run_data_manager.get_command_errors_count("run-id")).then_return(1)
 
     command_error_slice = CommandErrorSlice(
         cursor=expected_cursor_result, total_length=3, commands_errors=error_list
@@ -876,7 +817,6 @@ async def test_get_current_state_success(
     decoy: Decoy,
     mock_run_data_manager: RunDataManager,
     mock_hardware_api: HardwareControlAPI,
-    mock_nozzle_maps: Dict[str, NozzleMap],
 ) -> None:
     """It should return different state from the current run.
 
@@ -885,8 +825,23 @@ async def test_get_current_state_success(
     """
     run_id = "test-run-id"
 
+    decoy.when(mock_run_data_manager.get_tip_attached(run_id=run_id)).then_return(
+        {"mock-pipette-id": True}
+    )
+
     decoy.when(mock_run_data_manager.get_nozzle_maps(run_id=run_id)).then_return(
-        mock_nozzle_maps
+        {
+            "mock-pipette-id": NozzleMap(
+                configuration=NozzleConfigurationType.FULL,
+                columns={"1": ["A1"]},
+                rows={"A": ["A1"]},
+                map_store={"A1": Point(0, 0, 0)},
+                starting_nozzle="A1",
+                valid_map_key="mock-key",
+                full_instrument_map_store={},
+                full_instrument_rows={},
+            )
+        }
     )
     command_pointer = CommandPointer(
         command_id="command-id",
@@ -909,7 +864,7 @@ async def test_get_current_state_success(
     )
 
     assert result.status_code == 200
-    assert result.content.data == RunCurrentState.construct(
+    assert result.content.data == RunCurrentState.model_construct(
         estopEngaged=False,
         activeNozzleLayouts={
             "mock-pipette-id": ActiveNozzleLayout(
@@ -918,6 +873,8 @@ async def test_get_current_state_success(
                 config=NozzleLayoutConfig.FULL,
             )
         },
+        tipStates={"mock-pipette-id": TipState(hasTip=True)},
+        placeLabwareState=None,
     )
     assert result.content.links == CurrentStateLinks(
         lastCompleted=CommandLinkNoMeta(
@@ -935,7 +892,7 @@ async def test_get_current_state_run_not_current(
     """It should raise RunStopped when the run is not current."""
     run_id = "non-current-run-id"
 
-    decoy.when(mock_run_data_manager.get_nozzle_maps(run_id=run_id)).then_raise(
+    decoy.when(mock_run_data_manager.get(run_id=run_id)).then_raise(
         RunNotCurrentError("Run is not current")
     )
 

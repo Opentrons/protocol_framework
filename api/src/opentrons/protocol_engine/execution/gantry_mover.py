@@ -114,6 +114,7 @@ class GantryMover(TypingProtocol):
         critical_point: Optional[Dict[MotorAxis, float]] = None,
         speed: Optional[float] = None,
         relative_move: bool = False,
+        expect_stalls: bool = False,
     ) -> Dict[MotorAxis, float]:
         """Move a set of axes a given distance."""
         ...
@@ -159,6 +160,12 @@ class GantryMover(TypingProtocol):
         """Find a mount axis in the axis_map if it exists otherwise default to left mount."""
         ...
 
+    def motor_axes_to_present_hardware_axes(
+        self, motor_axes: List[MotorAxis]
+    ) -> List[HardwareAxis]:
+        """Transform a list of engine axes into a list of hardware axes, filtering out non-present axes."""
+        ...
+
 
 class HardwareGantryMover(GantryMover):
     """Hardware API based gantry movement handler."""
@@ -166,6 +173,18 @@ class HardwareGantryMover(GantryMover):
     def __init__(self, hardware_api: HardwareControlAPI, state_view: StateView) -> None:
         self._hardware_api = hardware_api
         self._state_view = state_view
+
+    def motor_axes_to_present_hardware_axes(
+        self, motor_axes: List[MotorAxis]
+    ) -> List[HardwareAxis]:
+        """Get hardware axes from engine axes while filtering out non-present axes."""
+        return [
+            self.motor_axis_to_hardware_axis(motor_axis)
+            for motor_axis in motor_axes
+            if self._hardware_api.axis_is_present(
+                self.motor_axis_to_hardware_axis(motor_axis)
+            )
+        ]
 
     def motor_axis_to_hardware_axis(self, motor_axis: MotorAxis) -> HardwareAxis:
         """Transform an engine motor axis into a hardware axis."""
@@ -323,6 +342,7 @@ class HardwareGantryMover(GantryMover):
         critical_point: Optional[Dict[MotorAxis, float]] = None,
         speed: Optional[float] = None,
         relative_move: bool = False,
+        expect_stalls: bool = False,
     ) -> Dict[MotorAxis, float]:
         """Move a set of axes a given distance.
 
@@ -331,6 +351,7 @@ class HardwareGantryMover(GantryMover):
             critical_point: A critical point override for axes
             speed: Optional speed parameter for the move.
             relative_move: Whether the axis map needs to be converted from a relative to absolute move.
+            expect_stalls: Whether it is expected that the move triggers a stall error.
         """
         try:
             pos_hw = self._convert_axis_map_for_hw(axis_map)
@@ -367,6 +388,7 @@ class HardwareGantryMover(GantryMover):
             await self._hardware_api.move_axes(
                 position=absolute_pos,
                 speed=speed,
+                expect_stalls=expect_stalls,
             )
 
         except PositionUnknownError as e:
@@ -570,6 +592,7 @@ class VirtualGantryMover(GantryMover):
         critical_point: Optional[Dict[MotorAxis, float]] = None,
         speed: Optional[float] = None,
         relative_move: bool = False,
+        expect_stalls: bool = False,
     ) -> Dict[MotorAxis, float]:
         """Move the give axes map. No-op in virtual implementation."""
         mount = self.pick_mount_from_axis_map(axis_map)
@@ -642,6 +665,14 @@ class VirtualGantryMover(GantryMover):
     async def prepare_for_mount_movement(self, mount: Mount) -> None:
         """Retract the 'idle' mount if necessary."""
         pass
+
+    def motor_axes_to_present_hardware_axes(
+        self, motor_axes: List[MotorAxis]
+    ) -> List[HardwareAxis]:
+        """Get present hardware axes from a list of engine axes. In simulation, all axes are present."""
+        return [
+            self.motor_axis_to_hardware_axis(motor_axis) for motor_axis in motor_axes
+        ]
 
 
 def create_gantry_mover(

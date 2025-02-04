@@ -283,6 +283,19 @@ class LabwareCannotBeStackedError(ProtocolEngineError):
         super().__init__(ErrorCodes.GENERAL_ERROR, message, details, wrapping)
 
 
+class LabwareCannotSitOnDeckError(ProtocolEngineError):
+    """Raised when a labware is incompatible with a deck slot."""
+
+    def __init__(
+        self,
+        message: Optional[str] = None,
+        details: Optional[Dict[str, Any]] = None,
+        wrapping: Optional[Sequence[EnumeratedError]] = None,
+    ) -> None:
+        """Build a LabwareCannotSitOnDeckError."""
+        super().__init__(ErrorCodes.GENERAL_ERROR, message, details, wrapping)
+
+
 class LabwareIsInStackError(ProtocolEngineError):
     """Raised when trying to move to or physically interact with a labware that has another labware on top."""
 
@@ -361,6 +374,32 @@ class TouchTipDisabledError(ProtocolEngineError):
         super().__init__(ErrorCodes.GENERAL_ERROR, message, details, wrapping)
 
 
+class TouchTipIncompatibleArgumentsError(ProtocolEngineError):
+    """Raised when touch tip is used with both a custom radius and a mmFromEdge argument."""
+
+    def __init__(
+        self,
+        message: Optional[str] = None,
+        details: Optional[Dict[str, Any]] = None,
+        wrapping: Optional[Sequence[EnumeratedError]] = None,
+    ) -> None:
+        """Build a TouchTipIncompatibleArgumentsError."""
+        super().__init__(ErrorCodes.GENERAL_ERROR, message, details, wrapping)
+
+
+class UnsupportedLabwareForActionError(ProtocolEngineError):
+    """Raised when trying to use an unsupported labware for a command."""
+
+    def __init__(
+        self,
+        message: Optional[str] = None,
+        details: Optional[Dict[str, Any]] = None,
+        wrapping: Optional[Sequence[EnumeratedError]] = None,
+    ) -> None:
+        """Build a UnsupportedLabwareForActionError."""
+        super().__init__(ErrorCodes.GENERAL_ERROR, message, details, wrapping)
+
+
 class WellDoesNotExistError(ProtocolEngineError):
     """Raised when referencing a well that does not exist."""
 
@@ -417,6 +456,19 @@ class ModuleNotConnectedError(ProtocolEngineError):
         wrapping: Optional[Sequence[EnumeratedError]] = None,
     ) -> None:
         """Build a ModuleNotConnectedError."""
+        super().__init__(ErrorCodes.GENERAL_ERROR, message, details, wrapping)
+
+
+class OffsetLocationInvalidError(ProtocolEngineError):
+    """Raised when encountering an invalid labware offset location sequence."""
+
+    def __init__(
+        self,
+        message: Optional[str] = None,
+        details: Optional[Dict[str, Any]] = None,
+        wrapping: Optional[Sequence[EnumeratedError]] = None,
+    ) -> None:
+        """Build an OffsetLocationSequenceDoesNotTerminateAtAnAddressableAreaError."""
         super().__init__(ErrorCodes.GENERAL_ERROR, message, details, wrapping)
 
 
@@ -786,6 +838,19 @@ class InvalidBlockVolumeError(ProtocolEngineError):
         super().__init__(ErrorCodes.GENERAL_ERROR, message, details, wrapping)
 
 
+class InvalidWavelengthError(ProtocolEngineError):
+    """Raised when attempting to set an invalid absorbance wavelength."""
+
+    def __init__(
+        self,
+        message: Optional[str] = None,
+        details: Optional[Dict[str, Any]] = None,
+        wrapping: Optional[Sequence[EnumeratedError]] = None,
+    ) -> None:
+        """Build a InvalidWavelengthError."""
+        super().__init__(ErrorCodes.GENERAL_ERROR, message, details, wrapping)
+
+
 class InvalidHoldTimeError(ProtocolEngineError):
     """An error raised when attempting to set an invalid temperature hold time."""
 
@@ -1059,6 +1124,19 @@ class LiquidHeightUnknownError(ProtocolEngineError):
         wrapping: Optional[Sequence[EnumeratedError]] = None,
     ) -> None:
         """Build a LiquidHeightUnknownError."""
+        super().__init__(ErrorCodes.GENERAL_ERROR, message, details, wrapping)
+
+
+class LiquidVolumeUnknownError(ProtocolEngineError):
+    """Raised when attempting to report an unknown liquid volume."""
+
+    def __init__(
+        self,
+        message: Optional[str] = None,
+        details: Optional[Dict[str, Any]] = None,
+        wrapping: Optional[Sequence[EnumeratedError]] = None,
+    ) -> None:
+        """Build a LiquidVolumeUnknownError."""
         super().__init__(ErrorCodes.GENERAL_ERROR, message, details, wrapping)
 
 

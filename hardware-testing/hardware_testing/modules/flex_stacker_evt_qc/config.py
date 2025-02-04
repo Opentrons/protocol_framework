@@ -10,6 +10,8 @@ from . import (
     test_z_axis,
     test_x_axis,
     test_l_axis,
+    test_door_switch,
+    test_estop,
 )
 
 
@@ -20,6 +22,8 @@ class TestSection(enum.Enum):
     Z_AXIS = "Z_AXIS"
     L_AXIS = "L_AXIS"
     X_AXIS = "X_AXIS"
+    DOOR_SWITCH = "DOOR_SWITCH"
+    ESTOP = "ESTOP"
 
 
 @dataclass
@@ -40,12 +44,20 @@ TESTS = [
         test_z_axis.run,
     ),
     (
+        TestSection.X_AXIS,
+        test_x_axis.run,
+    ),
+    (
         TestSection.L_AXIS,
         test_l_axis.run,
     ),
     (
-        TestSection.X_AXIS,
-        test_x_axis.run,
+        TestSection.ESTOP,
+        test_estop.run,
+    ),
+    (
+        TestSection.DOOR_SWITCH,
+        test_door_switch.run,
     ),
 ]
 
@@ -64,12 +76,20 @@ def build_report(test_name: str) -> CSVReport:
                 lines=test_z_axis.build_csv_lines(),
             ),
             CSVSection(
+                title=TestSection.X_AXIS.value,
+                lines=test_x_axis.build_csv_lines(),
+            ),
+            CSVSection(
                 title=TestSection.L_AXIS.value,
                 lines=test_l_axis.build_csv_lines(),
             ),
             CSVSection(
-                title=TestSection.X_AXIS.value,
-                lines=test_x_axis.build_csv_lines(),
+                title=TestSection.ESTOP.value,
+                lines=test_estop.build_csv_lines(),
+            ),
+            CSVSection(
+                title=TestSection.DOOR_SWITCH.value,
+                lines=test_door_switch.build_csv_lines(),
             ),
         ],
     )

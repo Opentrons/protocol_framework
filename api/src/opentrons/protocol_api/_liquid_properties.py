@@ -1,15 +1,19 @@
 from dataclasses import dataclass
 from numpy import interp
-from typing import Optional, Dict, Sequence, Union, Tuple
+from typing import Optional, Dict, Sequence, Tuple, List
 
 from opentrons_shared_data.liquid_classes.liquid_class_definition import (
     AspirateProperties as SharedDataAspirateProperties,
     SingleDispenseProperties as SharedDataSingleDispenseProperties,
     MultiDispenseProperties as SharedDataMultiDispenseProperties,
     DelayProperties as SharedDataDelayProperties,
+    DelayParams as SharedDataDelayParams,
     TouchTipProperties as SharedDataTouchTipProperties,
+    LiquidClassTouchTipParams as SharedDataTouchTipParams,
     MixProperties as SharedDataMixProperties,
+    MixParams as SharedDataMixParams,
     BlowoutProperties as SharedDataBlowoutProperties,
+    BlowoutParams as SharedDataBlowoutParams,
     ByTipTypeSetting as SharedByTipTypeSetting,
     Submerge as SharedDataSubmerge,
     RetractAspirate as SharedDataRetractAspirate,
@@ -23,12 +27,9 @@ from . import validation
 
 
 class LiquidHandlingPropertyByVolume:
-    def __init__(self, properties_by_volume: Dict[str, float]) -> None:
-        self._default = properties_by_volume["default"]
+    def __init__(self, by_volume_property: Sequence[Tuple[float, float]]) -> None:
         self._properties_by_volume: Dict[float, float] = {
-            float(volume): value
-            for volume, value in properties_by_volume.items()
-            if volume != "default"
+            float(volume): value for volume, value in by_volume_property
         }
         # Volumes need to be sorted for proper interpolation of non-defined volumes, and the
         # corresponding values need to be in the same order for them to be interpolated correctly
@@ -36,18 +37,21 @@ class LiquidHandlingPropertyByVolume:
         self._sorted_values: Tuple[float, ...] = ()
         self._sort_volume_and_values()
 
-    @property
-    def default(self) -> float:
-        """Get the default value not associated with any volume for this property."""
-        return self._default
-
-    def as_dict(self) -> Dict[Union[float, str], float]:
+    def as_dict(self) -> Dict[float, float]:
         """Get a dictionary representation of all set volumes and values along with the default."""
-        return self._properties_by_volume | {"default": self._default}
+        return self._properties_by_volume
+
+    def as_list_of_tuples(self) -> List[Tuple[float, float]]:
+        """Get as list of tuples."""
+        return list(self._properties_by_volume.items())
 
     def get_for_volume(self, volume: float) -> float:
         """Get a value by volume for this property. Volumes not defined will be interpolated between set volumes."""
         validated_volume = validation.ensure_positive_float(volume)
+        if len(self._properties_by_volume) == 0:
+            raise ValueError(
+                "No properties found for any volumes. Cannot interpolate for the given volume."
+            )
         try:
             return self._properties_by_volume[validated_volume]
         except KeyError:
@@ -66,9 +70,9 @@ class LiquidHandlingPropertyByVolume:
         """Remove an existing volume and value from the property."""
         try:
             del self._properties_by_volume[volume]
-            self._sort_volume_and_values()
         except KeyError:
             raise KeyError(f"No value set for volume {volume} uL")
+        self._sort_volume_and_values()
 
     def _sort_volume_and_values(self) -> None:
         """Sort volume in increasing order along with corresponding values in matching order."""
@@ -79,7 +83,10 @@ class LiquidHandlingPropertyByVolume:
         )
 
 
-@dataclass
+# We use slots for this dataclass (and the rest of liquid properties) to prevent dynamic creation of attributes
+# not defined in the class, not for any performance reasons. This is so that mistyping properties when overriding
+# values will cause the protocol to fail analysis, rather than silently passing.
+@dataclass(slots=True)
 class DelayProperties:
 
     _enabled: bool
@@ -105,8 +112,16 @@ class DelayProperties:
         validated_duration = validation.ensure_positive_float(new_duration)
         self._duration = validated_duration
 
+    def as_shared_data_model(self) -> SharedDataDelayProperties:
+        return SharedDataDelayProperties(
+            enable=self._enabled,
+            params=SharedDataDelayParams(duration=self.duration)
+            if self.duration is not None
+            else None,
+        )
 
-@dataclass
+
+@dataclass(slots=True)
 class TouchTipProperties:
 
     _enabled: bool
@@ -145,7 +160,7 @@ class TouchTipProperties:
     @mm_to_edge.setter
     def mm_to_edge(self, new_mm: float) -> None:
         validated_mm = validation.ensure_float(new_mm)
-        self._z_offset = validated_mm
+        self._mm_to_edge = validated_mm
 
     @property
     def speed(self) -> Optional[float]:
@@ -156,8 +171,29 @@ class TouchTipProperties:
         validated_speed = validation.ensure_positive_float(new_speed)
         self._speed = validated_speed
 
+    def _get_shared_data_params(self) -> Optional[SharedDataTouchTipParams]:
+        """Get the touch tip params in schema v1 shape."""
+        if (
+            self._z_offset is not None
+            and self._mm_to_edge is not None
+            and self._speed is not None
+        ):
+            return SharedDataTouchTipParams(
+                zOffset=self._z_offset,
+                mmToEdge=self._mm_to_edge,
+                speed=self._speed,
+            )
+        else:
+            return None
 
-@dataclass
+    def as_shared_data_model(self) -> SharedDataTouchTipProperties:
+        return SharedDataTouchTipProperties(
+            enable=self._enabled,
+            params=self._get_shared_data_params(),
+        )
+
+
+@dataclass(slots=True)
 class MixProperties:
 
     _enabled: bool
@@ -193,8 +229,24 @@ class MixProperties:
         validated_volume = validation.ensure_positive_float(new_volume)
         self._volume = validated_volume
 
+    def _get_shared_data_params(self) -> Optional[SharedDataMixParams]:
+        """Get the mix params in schema v1 shape."""
+        if self._repetitions is not None and self._volume is not None:
+            return SharedDataMixParams(
+                repetitions=self._repetitions,
+                volume=self._volume,
+            )
+        else:
+            return None
 
-@dataclass
+    def as_shared_data_model(self) -> SharedDataMixProperties:
+        return SharedDataMixProperties(
+            enable=self._enabled,
+            params=self._get_shared_data_params(),
+        )
+
+
+@dataclass(slots=True)
 class BlowoutProperties:
 
     _enabled: bool
@@ -231,8 +283,24 @@ class BlowoutProperties:
         validated_flow_rate = validation.ensure_positive_float(new_flow_rate)
         self._flow_rate = validated_flow_rate
 
+    def _get_shared_data_params(self) -> Optional[SharedDataBlowoutParams]:
+        """Get the mix params in schema v1 shape."""
+        if self._location is not None and self._flow_rate is not None:
+            return SharedDataBlowoutParams(
+                location=self._location,
+                flowRate=self._flow_rate,
+            )
+        else:
+            return None
 
-@dataclass
+    def as_shared_data_model(self) -> SharedDataBlowoutProperties:
+        return SharedDataBlowoutProperties(
+            enable=self._enabled,
+            params=self._get_shared_data_params(),
+        )
+
+
+@dataclass(slots=True)
 class SubmergeRetractCommon:
 
     _position_reference: PositionReference
@@ -271,12 +339,18 @@ class SubmergeRetractCommon:
         return self._delay
 
 
-@dataclass
+@dataclass(slots=True)
 class Submerge(SubmergeRetractCommon):
-    ...
+    def as_shared_data_model(self) -> SharedDataSubmerge:
+        return SharedDataSubmerge(
+            positionReference=self._position_reference,
+            offset=self._offset,
+            speed=self._speed,
+            delay=self._delay.as_shared_data_model(),
+        )
 
 
-@dataclass
+@dataclass(slots=True)
 class RetractAspirate(SubmergeRetractCommon):
 
     _air_gap_by_volume: LiquidHandlingPropertyByVolume
@@ -290,8 +364,18 @@ class RetractAspirate(SubmergeRetractCommon):
     def touch_tip(self) -> TouchTipProperties:
         return self._touch_tip
 
+    def as_shared_data_model(self) -> SharedDataRetractAspirate:
+        return SharedDataRetractAspirate(
+            positionReference=self._position_reference,
+            offset=self._offset,
+            speed=self._speed,
+            airGapByVolume=self._air_gap_by_volume.as_list_of_tuples(),
+            touchTip=self._touch_tip.as_shared_data_model(),
+            delay=self._delay.as_shared_data_model(),
+        )
 
-@dataclass
+
+@dataclass(slots=True)
 class RetractDispense(SubmergeRetractCommon):
 
     _air_gap_by_volume: LiquidHandlingPropertyByVolume
@@ -310,14 +394,26 @@ class RetractDispense(SubmergeRetractCommon):
     def blowout(self) -> BlowoutProperties:
         return self._blowout
 
+    def as_shared_data_model(self) -> SharedDataRetractDispense:
+        return SharedDataRetractDispense(
+            positionReference=self._position_reference,
+            offset=self._offset,
+            speed=self._speed,
+            airGapByVolume=self._air_gap_by_volume.as_list_of_tuples(),
+            blowout=self._blowout.as_shared_data_model(),
+            touchTip=self._touch_tip.as_shared_data_model(),
+            delay=self._delay.as_shared_data_model(),
+        )
 
-@dataclass
+
+@dataclass(slots=True)
 class BaseLiquidHandlingProperties:
 
     _submerge: Submerge
     _position_reference: PositionReference
     _offset: Coordinate
     _flow_rate_by_volume: LiquidHandlingPropertyByVolume
+    _correction_by_volume: LiquidHandlingPropertyByVolume
     _delay: DelayProperties
 
     @property
@@ -346,11 +442,15 @@ class BaseLiquidHandlingProperties:
         return self._flow_rate_by_volume
 
     @property
+    def correction_by_volume(self) -> LiquidHandlingPropertyByVolume:
+        return self._correction_by_volume
+
+    @property
     def delay(self) -> DelayProperties:
         return self._delay
 
 
-@dataclass
+@dataclass(slots=True)
 class AspirateProperties(BaseLiquidHandlingProperties):
 
     _retract: RetractAspirate
@@ -374,8 +474,21 @@ class AspirateProperties(BaseLiquidHandlingProperties):
     def mix(self) -> MixProperties:
         return self._mix
 
+    def as_shared_data_model(self) -> SharedDataAspirateProperties:
+        return SharedDataAspirateProperties(
+            submerge=self._submerge.as_shared_data_model(),
+            retract=self._retract.as_shared_data_model(),
+            positionReference=self._position_reference,
+            offset=self._offset,
+            flowRateByVolume=self._flow_rate_by_volume.as_list_of_tuples(),
+            preWet=self._pre_wet,
+            mix=self._mix.as_shared_data_model(),
+            delay=self._delay.as_shared_data_model(),
+            correctionByVolume=self._correction_by_volume.as_list_of_tuples(),
+        )
 
-@dataclass
+
+@dataclass(slots=True)
 class SingleDispenseProperties(BaseLiquidHandlingProperties):
 
     _retract: RetractDispense
@@ -394,8 +507,21 @@ class SingleDispenseProperties(BaseLiquidHandlingProperties):
     def mix(self) -> MixProperties:
         return self._mix
 
+    def as_shared_data_model(self) -> SharedDataSingleDispenseProperties:
+        return SharedDataSingleDispenseProperties(
+            submerge=self._submerge.as_shared_data_model(),
+            retract=self._retract.as_shared_data_model(),
+            positionReference=self._position_reference,
+            offset=self._offset,
+            flowRateByVolume=self._flow_rate_by_volume.as_list_of_tuples(),
+            mix=self._mix.as_shared_data_model(),
+            pushOutByVolume=self._push_out_by_volume.as_list_of_tuples(),
+            delay=self._delay.as_shared_data_model(),
+            correctionByVolume=self._correction_by_volume.as_list_of_tuples(),
+        )
 
-@dataclass
+
+@dataclass(slots=True)
 class MultiDispenseProperties(BaseLiquidHandlingProperties):
 
     _retract: RetractDispense
@@ -414,8 +540,21 @@ class MultiDispenseProperties(BaseLiquidHandlingProperties):
     def disposal_by_volume(self) -> LiquidHandlingPropertyByVolume:
         return self._disposal_by_volume
 
+    def as_shared_data_model(self) -> SharedDataMultiDispenseProperties:
+        return SharedDataMultiDispenseProperties(
+            submerge=self._submerge.as_shared_data_model(),
+            retract=self._retract.as_shared_data_model(),
+            positionReference=self._position_reference,
+            offset=self._offset,
+            flowRateByVolume=self._flow_rate_by_volume.as_list_of_tuples(),
+            conditioningByVolume=self._conditioning_by_volume.as_list_of_tuples(),
+            disposalByVolume=self._disposal_by_volume.as_list_of_tuples(),
+            delay=self._delay.as_shared_data_model(),
+            correctionByVolume=self._correction_by_volume.as_list_of_tuples(),
+        )
 
-@dataclass
+
+@dataclass(slots=True)
 class TransferProperties:
     _aspirate: AspirateProperties
     _dispense: SingleDispenseProperties
@@ -547,6 +686,9 @@ def build_aspirate_properties(
         _flow_rate_by_volume=LiquidHandlingPropertyByVolume(
             aspirate_properties.flowRateByVolume
         ),
+        _correction_by_volume=LiquidHandlingPropertyByVolume(
+            aspirate_properties.correctionByVolume
+        ),
         _pre_wet=aspirate_properties.preWet,
         _mix=_build_mix_properties(aspirate_properties.mix),
         _delay=_build_delay_properties(aspirate_properties.delay),
@@ -563,6 +705,9 @@ def build_single_dispense_properties(
         _offset=single_dispense_properties.offset,
         _flow_rate_by_volume=LiquidHandlingPropertyByVolume(
             single_dispense_properties.flowRateByVolume
+        ),
+        _correction_by_volume=LiquidHandlingPropertyByVolume(
+            single_dispense_properties.correctionByVolume
         ),
         _mix=_build_mix_properties(single_dispense_properties.mix),
         _push_out_by_volume=LiquidHandlingPropertyByVolume(
@@ -584,6 +729,9 @@ def build_multi_dispense_properties(
         _offset=multi_dispense_properties.offset,
         _flow_rate_by_volume=LiquidHandlingPropertyByVolume(
             multi_dispense_properties.flowRateByVolume
+        ),
+        _correction_by_volume=LiquidHandlingPropertyByVolume(
+            multi_dispense_properties.correctionByVolume
         ),
         _conditioning_by_volume=LiquidHandlingPropertyByVolume(
             multi_dispense_properties.conditioningByVolume

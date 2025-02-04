@@ -15,6 +15,8 @@ export * from './createLabwareOffset'
 export * from './createLabwareDefinition'
 export * from './constants'
 export * from './updateErrorRecoveryPolicy'
+export * from './getErrorRecoveryPolicy'
+export * from './getRunLoadedLabwareDefintions'
 
 export * from './types'
 export type { CreateRunData } from './createRun'

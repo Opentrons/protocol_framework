@@ -1,4 +1,3 @@
-import type * as React from 'react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import '@testing-library/jest-dom/vitest'
 import { screen } from '@testing-library/react'
@@ -14,9 +13,11 @@ import { selectors } from '../../../../labware-ingred/selectors'
 import { getInitialDeckSetup } from '../../../../step-forms/selectors'
 import { getCustomLabwareDefsByURI } from '../../../../labware-defs/selectors'
 import { getDesignerTab } from '../../../../file-data/selectors'
-import { LabwareOnDeck } from '../../../../components/DeckSetup/LabwareOnDeck'
+import { LabwareOnDeck } from '../../../../organisms'
 import { FixtureRender } from '../FixtureRender'
 import { SelectedHoveredItems } from '../SelectedHoveredItems'
+
+import type { ComponentProps } from 'react'
 import type * as OpentronsComponents from '@opentrons/components'
 import type { LabwareDefinition2 } from '@opentrons/shared-data'
 
@@ -25,7 +26,7 @@ vi.mock('../../../../step-forms/selectors')
 vi.mock('../FixtureRender')
 vi.mock('../../../../labware-ingred/selectors')
 vi.mock('../../../../labware-defs/selectors')
-vi.mock('../../../../components/DeckSetup/LabwareOnDeck')
+vi.mock('../../../../organisms')
 vi.mock('@opentrons/components', async importOriginal => {
   const actual = await importOriginal<typeof OpentronsComponents>()
   return {
@@ -34,12 +35,12 @@ vi.mock('@opentrons/components', async importOriginal => {
   }
 })
 
-const render = (props: React.ComponentProps<typeof SelectedHoveredItems>) => {
+const render = (props: ComponentProps<typeof SelectedHoveredItems>) => {
   return renderWithProviders(<SelectedHoveredItems {...props} />)[0]
 }
 
 describe('SelectedHoveredItems', () => {
-  let props: React.ComponentProps<typeof SelectedHoveredItems>
+  let props: ComponentProps<typeof SelectedHoveredItems>
 
   beforeEach(() => {
     props = {
@@ -157,7 +158,7 @@ describe('SelectedHoveredItems', () => {
       screen.getAllByText(
         'Fixture Opentrons Universal Flat Heater-Shaker Adapter'
       )
-    ).toHaveLength(3)
+    ).toHaveLength(2)
   })
   it('renders nothing when there is a hovered module but selected fixture', () => {
     props.hoveredModule = HEATERSHAKER_MODULE_V1

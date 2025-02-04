@@ -27,10 +27,13 @@ import type {
   GRIPPER_V1_3,
   EXTENSION,
   MAGNETIC_BLOCK_V1,
+  FLEX_STACKER_MODULE_V1,
+  FLEX_STACKER_MODULE_TYPE,
 } from './constants'
 import type { RunTimeCommand, LabwareLocation } from '../command/types'
 import type { AddressableAreaName, CutoutFixtureId, CutoutId } from '../deck'
 import type { PipetteName } from './pipettes'
+import type { CommandAnnotation } from '../commandAnnotation/types'
 
 export type RobotType = 'OT-2 Standard' | 'OT-3 Standard'
 
@@ -87,6 +90,7 @@ export type LabwareDisplayCategory =
   | 'other'
   | 'adapter'
   | 'lid'
+  | 'system'
 export type LabwareVolumeUnits = 'µL' | 'mL' | 'L'
 
 // TODO(mc, 2019-05-29): Remove this enum in favor of string + exported
@@ -237,6 +241,7 @@ export type LabwareRoles =
   | 'fixture'
   | 'maintenance'
   | 'lid'
+  | 'system'
 
 // NOTE: must be synced with shared-data/labware/schemas/2.json
 export interface LabwareDefinition2 {
@@ -288,6 +293,7 @@ export type ModuleType =
   | typeof HEATERSHAKER_MODULE_TYPE
   | typeof MAGNETIC_BLOCK_TYPE
   | typeof ABSORBANCE_READER_TYPE
+  | typeof FLEX_STACKER_MODULE_TYPE
 
 // ModuleModel corresponds to top-level keys in shared-data/module/definitions/2
 export type MagneticModuleModel =
@@ -308,6 +314,8 @@ export type MagneticBlockModel = typeof MAGNETIC_BLOCK_V1
 
 export type AbsorbanceReaderModel = typeof ABSORBANCE_READER_V1
 
+export type FlexStackerModuleModel = typeof FLEX_STACKER_MODULE_V1
+
 export type ModuleModel =
   | MagneticModuleModel
   | TemperatureModuleModel
@@ -315,6 +323,7 @@ export type ModuleModel =
   | HeaterShakerModuleModel
   | MagneticBlockModel
   | AbsorbanceReaderModel
+  | FlexStackerModuleModel
 
 export type GripperModel =
   | typeof GRIPPER_V1
@@ -692,6 +701,106 @@ export interface Liquid {
   displayColor?: string
 }
 
+// TODO(ND, 12/17/2024): investigate why typescript doesn't allow Array<[number, number]>
+type LiquidHandlingPropertyByVolume = number[][]
+type PositionReference =
+  | 'well-bottom'
+  | 'well-top'
+  | 'well-center'
+  | 'liquid-meniscus'
+type BlowoutLocation = 'source' | 'destination' | 'trash'
+interface DelayParams {
+  duration: number
+}
+interface DelayProperties {
+  enable: boolean
+  params?: DelayParams
+}
+interface TouchTipParams {
+  zOffset: number
+  mmToEdge: number
+  speed: number
+}
+interface TouchTipProperties {
+  enable: boolean
+  params?: TouchTipParams
+}
+
+interface MixParams {
+  repetitions: number
+  volume: number
+}
+interface MixProperties {
+  enable: boolean
+  params?: MixParams
+}
+interface BlowoutParams {
+  location: BlowoutLocation
+  flowRate: number
+}
+interface BlowoutProperties {
+  enable: boolean
+  params?: BlowoutParams
+}
+interface Submerge {
+  positionReference: PositionReference
+  offset: Coordinates
+  speed: number
+  delay: DelayProperties
+}
+interface BaseRetract {
+  positionReference: PositionReference
+  offset: Coordinates
+  speed: number
+  airGapByVolume: LiquidHandlingPropertyByVolume
+  touchTip: TouchTipProperties
+  delay: DelayProperties
+}
+type RetractAspirate = BaseRetract
+interface RetractDispense extends BaseRetract {
+  blowout: BlowoutProperties
+}
+interface BaseLiquidHandlingProperties<RetractType> {
+  submerge: Submerge
+  retract: RetractType
+  positionReference: PositionReference
+  offset: Coordinates
+  flowRateByVolume: LiquidHandlingPropertyByVolume
+  correctionByVolume: LiquidHandlingPropertyByVolume
+  delay: DelayProperties
+}
+interface AspirateProperties
+  extends BaseLiquidHandlingProperties<RetractAspirate> {
+  preWet: boolean
+  mix: MixProperties
+}
+interface SingleDispenseProperties
+  extends BaseLiquidHandlingProperties<RetractDispense> {
+  mix: MixProperties
+  pushOutByVolume: LiquidHandlingPropertyByVolume
+}
+interface MultiDispenseProperties {
+  conditioningByVolume: LiquidHandlingPropertyByVolume
+  disposalByVolume: LiquidHandlingPropertyByVolume
+}
+interface ByTipTypeSetting {
+  tiprack: string
+  aspirate: AspirateProperties
+  singleDispense: SingleDispenseProperties
+  multiDispense?: MultiDispenseProperties
+}
+interface ByPipetteSetting {
+  pipetteModel: string
+  byTipType: ByTipTypeSetting[]
+}
+export interface LiquidClass {
+  liquidClassName: string
+  displayName: string
+  schemaVersion: number
+  namespace: string
+  byPipette: ByPipetteSetting[]
+}
+
 export interface AnalysisError {
   id: string
   detail: string
@@ -802,6 +911,7 @@ export interface CompletedProtocolAnalysis {
   errors: AnalysisError[]
   robotType?: RobotType | null
   runTimeParameters?: RunTimeParameter[]
+  commandAnnotations?: CommandAnnotation[]
 }
 
 export interface ResourceFile {

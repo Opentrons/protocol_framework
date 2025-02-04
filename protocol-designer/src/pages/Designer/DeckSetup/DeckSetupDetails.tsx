@@ -16,12 +16,11 @@ import {
   THERMOCYCLER_MODULE_TYPE,
 } from '@opentrons/shared-data'
 import { getSlotIdsBlockedBySpanningForThermocycler } from '../../../step-forms'
-import { LabwareOnDeck } from '../../../components/DeckSetup/LabwareOnDeck'
 import { selectors } from '../../../labware-ingred/selectors'
-import { SlotWarning } from '../../../components/DeckSetup/SlotWarning'
 import { getStagingAreaAddressableAreas } from '../../../utils'
 import { editSlotInfo } from '../../../labware-ingred/actions'
 import { getRobotType } from '../../../file-data/selectors'
+import { LabwareOnDeck } from '../../../organisms'
 import { getSlotInformation } from '../utils'
 import { HighlightLabware } from '../HighlightLabware'
 import { DeckItemHover } from './DeckItemHover'
@@ -29,6 +28,8 @@ import { SlotOverflowMenu } from './SlotOverflowMenu'
 import { HoveredItems } from './HoveredItems'
 import { SelectedHoveredItems } from './SelectedHoveredItems'
 import { getAdjacentLabware } from './utils'
+import { SlotWarning } from './SlotWarning'
+import { HighlightItems } from './HighlightItems'
 
 import type { ComponentProps, Dispatch, SetStateAction } from 'react'
 import type { ThermocyclerVizProps } from '@opentrons/components'
@@ -258,17 +259,19 @@ export function DeckSetupDetails(props: DeckSetupDetailsProps): JSX.Element {
               ) : null}
 
               {labwareLoadedOnModule == null ? (
-                <DeckItemHover
-                  isSelected={selectedZoomInSlot != null}
-                  hover={hover}
-                  setHover={setHover}
-                  setShowMenuListForId={setShowMenuListForId}
-                  menuListId={menuListId}
-                  slotBoundingBox={labwareInterfaceBoundingBox}
-                  slotPosition={[0, 0, 0]}
-                  itemId={slotId}
-                  tab={tab}
-                />
+                <>
+                  <DeckItemHover
+                    isSelected={selectedZoomInSlot != null}
+                    hover={hover}
+                    setHover={setHover}
+                    setShowMenuListForId={setShowMenuListForId}
+                    menuListId={menuListId}
+                    slotBoundingBox={labwareInterfaceBoundingBox}
+                    slotPosition={[0, 0, 0]}
+                    itemId={slotId}
+                    tab={tab}
+                  />
+                </>
               ) : null}
             </Module>
           </Fragment>
@@ -430,6 +433,9 @@ export function DeckSetupDetails(props: DeckSetupDetailsProps): JSX.Element {
           </Fragment>
         )
       })}
+
+      {/* highlight items from Protocol steps */}
+      <HighlightItems robotType={robotType} deckDef={deckDef} />
 
       {/* selected hardware + labware */}
       <SelectedHoveredItems

@@ -12,11 +12,11 @@ import { useNavigate } from 'react-router-dom'
 import {
   FLEX_ROBOT_TYPE,
   getAreSlotsAdjacent,
+  ABSORBANCE_READER_MODELS,
   HEATERSHAKER_MODULE_TYPE,
   MAGNETIC_BLOCK_TYPE,
   MAGNETIC_MODULE_TYPE,
   OT2_ROBOT_TYPE,
-  STAGING_AREA_CUTOUTS,
   TEMPERATURE_MODULE_TYPE,
   THERMOCYCLER_MODULE_TYPE,
   WASTE_CHUTE_CUTOUT,
@@ -29,7 +29,10 @@ import * as labwareDefSelectors from '../../labware-defs/selectors'
 import * as labwareDefActions from '../../labware-defs/actions'
 import * as labwareIngredActions from '../../labware-ingred/actions'
 import { actions as steplistActions } from '../../steplist'
-import { INITIAL_DECK_SETUP_STEP_ID } from '../../constants'
+import {
+  INITIAL_DECK_SETUP_STEP_ID,
+  STAGING_AREA_CUTOUTS_ORDERED,
+} from '../../constants'
 import { actions as stepFormActions } from '../../step-forms'
 import { createModuleWithNoSlot } from '../../modules'
 import {
@@ -45,6 +48,7 @@ import { SelectFixtures } from './SelectFixtures'
 import { AddMetadata } from './AddMetadata'
 import { getTrashSlot } from './utils'
 
+import type { Dispatch, SetStateAction } from 'react'
 import type { ThunkDispatch } from 'redux-thunk'
 import type { NormalizedPipette } from '@opentrons/step-generation'
 import type { BaseState } from '../../types'
@@ -280,14 +284,20 @@ export function CreateNewProtocolWizard(): JSX.Element | null {
     const stagingAreas = values.additionalEquipment.filter(
       equipment => equipment === 'stagingArea'
     )
+
     if (stagingAreas.length > 0) {
+      // Note: when plate reader is present, cutoutB3 is not available for StagingArea
+      const hasPlateReader = modules.some(
+        module => module.model === ABSORBANCE_READER_MODELS[0]
+      )
       stagingAreas.forEach((_, index) => {
-        return dispatch(
-          createDeckFixture(
-            'stagingArea',
-            STAGING_AREA_CUTOUTS.reverse()[index]
-          )
-        )
+        const stagingAreaCutout = hasPlateReader
+          ? STAGING_AREA_CUTOUTS_ORDERED.filter(
+              cutout => cutout !== 'cutoutB3'
+            )[index]
+          : STAGING_AREA_CUTOUTS_ORDERED[index]
+
+        return dispatch(createDeckFixture('stagingArea', stagingAreaCutout))
       })
     }
 
@@ -391,7 +401,7 @@ interface CreateFileFormProps {
   createProtocolFile: (values: WizardFormState) => void
   goBack: () => void
   proceed: () => void
-  setWizardSteps: React.Dispatch<React.SetStateAction<WizardStep[]>>
+  setWizardSteps: Dispatch<SetStateAction<WizardStep[]>>
   analyticsStartTime: Date
 }
 

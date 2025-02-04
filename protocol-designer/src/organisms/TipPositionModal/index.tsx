@@ -1,4 +1,4 @@
-import * as React from 'react'
+import { useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
 import {
@@ -17,14 +17,15 @@ import {
   InputField,
   TYPOGRAPHY,
 } from '@opentrons/components'
-import { getMainPagePortalEl } from '../../components/portals/MainPageModalPortal'
 import { getIsTouchTipField } from '../../form-types'
-import { BUTTON_LINK_STYLE } from '../../atoms'
+import { LINK_BUTTON_STYLE } from '../../atoms'
+import { getMainPagePortalEl } from '../Portal'
 import { TOO_MANY_DECIMALS, PERCENT_RANGE_TO_SHOW_WARNING } from './constants'
 import * as utils from './utils'
 import { TipPositionTopView } from './TipPositionTopView'
 import { TipPositionSideView } from './TipPositionSideView'
 
+import type { ChangeEvent } from 'react'
 import type { StepFieldName } from '../../form-types'
 
 type Offset = 'x' | 'y' | 'z'
@@ -64,7 +65,7 @@ export function TipPositionModal(
     'shared',
     'application',
   ])
-  const [view, setView] = React.useState<'top' | 'side'>('side')
+  const [view, setView] = useState<'top' | 'side'>('side')
   const zSpec = specs.z
   const ySpec = specs.y
   const xSpec = specs.x
@@ -75,23 +76,22 @@ export function TipPositionModal(
     )
   }
 
-  const defaultMmFromBottom = utils.getDefaultMmFromBottom({
+  const defaultMmFromBottom = utils.getDefaultMmFromEdge({
     name: zSpec.name,
-    wellDepthMm,
   })
 
-  const [zValue, setZValue] = React.useState<string | null>(
+  const [zValue, setZValue] = useState<string | null>(
     zSpec?.value == null ? String(defaultMmFromBottom) : String(zSpec?.value)
   )
-  const [yValue, setYValue] = React.useState<string | null>(
+  const [yValue, setYValue] = useState<string | null>(
     ySpec?.value == null ? null : String(ySpec?.value)
   )
-  const [xValue, setXValue] = React.useState<string | null>(
+  const [xValue, setXValue] = useState<string | null>(
     xSpec?.value == null ? null : String(xSpec?.value)
   )
 
   // in this modal, pristinity hides the OUT_OF_BOUNDS error only.
-  const [isPristine, setPristine] = React.useState<boolean>(true)
+  const [isPristine, setPristine] = useState<boolean>(true)
   const getMinMaxMmFromBottom = (): {
     maxMmFromBottom: number
     minMmFromBottom: number
@@ -179,9 +179,7 @@ export function TipPositionModal(
     }
   }
 
-  const handleZInputFieldChange = (
-    e: React.ChangeEvent<HTMLInputElement>
-  ): void => {
+  const handleZInputFieldChange = (e: ChangeEvent<HTMLInputElement>): void => {
     handleZChange(e.currentTarget.value)
     setPristine(false)
   }
@@ -200,9 +198,7 @@ export function TipPositionModal(
     }
   }
 
-  const handleXInputFieldChange = (
-    e: React.ChangeEvent<HTMLInputElement>
-  ): void => {
+  const handleXInputFieldChange = (e: ChangeEvent<HTMLInputElement>): void => {
     handleXChange(e.currentTarget.value)
     setPristine(false)
   }
@@ -221,9 +217,7 @@ export function TipPositionModal(
     }
   }
 
-  const handleYInputFieldChange = (
-    e: React.ChangeEvent<HTMLInputElement>
-  ): void => {
+  const handleYInputFieldChange = (e: ChangeEvent<HTMLInputElement>): void => {
     handleYChange(e.currentTarget.value)
     setPristine(false)
   }
@@ -257,7 +251,7 @@ export function TipPositionModal(
               setYValue('0')
               setZValue('1')
             }}
-            css={BUTTON_LINK_STYLE}
+            css={LINK_BUTTON_STYLE}
           >
             {t('shared:reset_to_default')}
           </Btn>
@@ -331,7 +325,7 @@ export function TipPositionModal(
               </StyledText>
               <Btn
                 fontWeight={TYPOGRAPHY.fontWeightSemiBold}
-                css={BUTTON_LINK_STYLE}
+                css={LINK_BUTTON_STYLE}
                 onClick={() => {
                   setView(view === 'side' ? 'top' : 'side')
                 }}

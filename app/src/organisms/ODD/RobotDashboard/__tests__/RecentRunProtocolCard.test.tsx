@@ -1,4 +1,3 @@
-import type * as React from 'react'
 import { fireEvent, screen } from '@testing-library/react'
 import { formatDistance } from 'date-fns'
 import { MemoryRouter } from 'react-router-dom'
@@ -26,6 +25,7 @@ import { useCloneRun, useNotifyAllRunsQuery } from '/app/resources/runs'
 import { useRerunnableStatusText } from '../hooks'
 import { RecentRunProtocolCard } from '../'
 
+import type { ComponentProps } from 'react'
 import type { NavigateFunction } from 'react-router-dom'
 import type { ProtocolHardware } from '/app/transformations/commands'
 
@@ -87,7 +87,7 @@ const missingBoth = [
 const mockRunData = {
   id: RUN_ID,
   createdAt: '2022-05-03T21:36:12.494778+00:00',
-  completedAt: 'thistime',
+  completedAt: '2023-05-03T21:36:12.494778+00:00',
   startedAt: 'thistime',
   protocolId: 'mockProtocolId',
   status: RUN_STATUS_FAILED,
@@ -103,7 +103,7 @@ const mockBadRunData = {
 
 const mockCloneRun = vi.fn()
 
-const render = (props: React.ComponentProps<typeof RecentRunProtocolCard>) => {
+const render = (props: ComponentProps<typeof RecentRunProtocolCard>) => {
   return renderWithProviders(
     <MemoryRouter>
       <RecentRunProtocolCard {...props} />
@@ -120,7 +120,7 @@ const mockTrackProtocolRunEvent = vi.fn(
 )
 
 describe('RecentRunProtocolCard', () => {
-  let props: React.ComponentProps<typeof RecentRunProtocolCard>
+  let props: ComponentProps<typeof RecentRunProtocolCard>
 
   beforeEach(() => {
     props = {
@@ -169,7 +169,7 @@ describe('RecentRunProtocolCard', () => {
   it('should render text', () => {
     render(props)
     const lastRunTime = formatDistance(
-      new Date(mockRunData.createdAt),
+      new Date(mockRunData.completedAt),
       new Date(),
       {
         addSuffix: true,

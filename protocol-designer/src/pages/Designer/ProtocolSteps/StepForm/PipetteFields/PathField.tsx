@@ -17,6 +17,8 @@ import SINGLE_IMAGE from '../../../../../assets/images/path_single_transfers.svg
 import MULTI_DISPENSE_IMAGE from '../../../../../assets/images/path_multi_dispense.svg'
 import MULTI_ASPIRATE_IMAGE from '../../../../../assets/images/path_multi_aspirate.svg'
 import { getDisabledPathMap } from './utils'
+
+import type { ChangeEvent, ReactNode } from 'react'
 import type { PathOption } from '../../../../../form-types'
 import type { FieldProps } from '../types'
 import type { DisabledPathMap, ValuesForPath } from './utils'
@@ -60,14 +62,14 @@ interface PathButtonProps {
   disabled: boolean
   selected: boolean
   subtitle: string
-  onClick: (e: React.ChangeEvent<HTMLInputElement>) => void
+  onClick: (e: ChangeEvent<HTMLInputElement>) => void
   path: PathOption
   id?: string
-  children?: React.ReactNode
+  children?: ReactNode
 }
 
 function PathButton(props: PathButtonProps): JSX.Element {
-  const { disabled, onClick, id, path, selected, subtitle } = props
+  const { disabled, onClick, path, selected, subtitle } = props
   const [targetProps, tooltipProps] = useHoverTooltip({
     placement: TOOLTIP_TOP_START,
   })
@@ -77,14 +79,18 @@ function PathButton(props: PathButtonProps): JSX.Element {
     <Tooltip tooltipProps={tooltipProps} maxWidth="24.5rem">
       <Flex gridGap={SPACING.spacing8} flexDirection={DIRECTION_COLUMN}>
         <Box>{t(`step_edit_form.field.path.title.${path}`)}</Box>
-        <img src={PATH_ANIMATION_IMAGES[path]} width="361px" />
+        <img
+          src={PATH_ANIMATION_IMAGES[path]}
+          width="361px"
+          alt="path animation"
+        />
         <Box>{subtitle}</Box>
       </Flex>
     </Tooltip>
   )
 
   return (
-    <Flex {...targetProps} key={id}>
+    <Flex {...targetProps} flexDirection={DIRECTION_COLUMN}>
       {tooltip}
       <RadioButton
         width="100%"

@@ -21,7 +21,7 @@ import { useProtocolQuery } from '@opentrons/react-api-client'
 import { useLPCSuccessToast } from '../../hooks/useLPCSuccessToast'
 import { useStoredProtocolAnalysis } from '/app/resources/analysis'
 import { CurrentOffsetsTable } from './CurrentOffsetsTable'
-import { useLaunchLPC } from '/app/organisms/LabwarePositionCheck/useLaunchLPC'
+import { useLaunchLegacyLPC } from '/app/organisms/LegacyLabwarePositionCheck/useLaunchLegacyLPC'
 import { getLatestCurrentOffsets } from '/app/transformations/runs'
 import {
   useNotifyRunQuery,
@@ -29,6 +29,8 @@ import {
   useLPCDisabledReason,
 } from '/app/resources/runs'
 import { useRobotType } from '/app/redux-resources/robots'
+import { useLPCFlows, LPCFlows } from '/app/organisms/LabwarePositionCheck'
+
 import type { LabwareOffset } from '@opentrons/api-client'
 
 interface SetupLabwarePositionCheckProps {
@@ -36,12 +38,19 @@ interface SetupLabwarePositionCheckProps {
   setOffsetsConfirmed: (confirmed: boolean) => void
   robotName: string
   runId: string
+  isNewLPC: boolean
 }
 
 export function SetupLabwarePositionCheck(
   props: SetupLabwarePositionCheckProps
 ): JSX.Element {
-  const { robotName, runId, setOffsetsConfirmed, offsetsConfirmed } = props
+  const {
+    robotName,
+    runId,
+    setOffsetsConfirmed,
+    offsetsConfirmed,
+    isNewLPC,
+  } = props
   const { t, i18n } = useTranslation('protocol_setup')
 
   const robotType = useRobotType(robotName)
@@ -88,7 +97,16 @@ export function SetupLabwarePositionCheck(
 
   const { setIsShowingLPCSuccessToast } = useLPCSuccessToast()
 
-  const { launchLPC, LPCWizard } = useLaunchLPC(runId, robotType, protocolName)
+  const { launchLegacyLPC, LegacyLPCWizard } = useLaunchLegacyLPC(
+    runId,
+    robotType,
+    protocolName
+  )
+  const { launchLPC, lpcProps, showLPC } = useLPCFlows({
+    runId,
+    robotType,
+    protocolName,
+  })
 
   const nonIdentityOffsets = getLatestCurrentOffsets(sortedOffsets)
 
@@ -143,9 +161,8 @@ export function SetupLabwarePositionCheck(
         ) : null}
         <PrimaryButton
           textTransform={TYPOGRAPHY.textTransformCapitalize}
-          title={t('run_labware_position_check')}
           onClick={() => {
-            launchLPC()
+            isNewLPC ? launchLPC() : launchLegacyLPC()
             setIsShowingLPCSuccessToast(false)
           }}
           id="LabwareSetup_checkLabwarePositionsButton"
@@ -160,7 +177,8 @@ export function SetupLabwarePositionCheck(
           </Tooltip>
         ) : null}
       </Flex>
-      {LPCWizard}
+      {isNewLPC ? null : LegacyLPCWizard}
+      {showLPC && <LPCFlows {...lpcProps} />}
     </Flex>
   )
 }

@@ -20,6 +20,7 @@ from opentrons_shared_data.pipette.pipette_definition import (
     PipetteConfigurations,
     SupportedTipsDefinition,
     PipetteBoundingBoxOffsetDefinition,
+    AvailableSensorDefinition,
 )
 from opentrons_shared_data.gripper import (
     GripperModel,
@@ -102,6 +103,7 @@ class PipetteDict(InstrumentDict):
     lld_settings: Optional[Dict[str, Dict[str, float]]]
     plunger_positions: Dict[str, float]
     shaft_ul_per_mm: float
+    available_sensors: AvailableSensorDefinition
 
 
 class PipetteStateDict(TypedDict):

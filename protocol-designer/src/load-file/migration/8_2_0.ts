@@ -2,7 +2,7 @@ import { OT2_ROBOT_TYPE } from '@opentrons/shared-data'
 import { PAUSE_UNTIL_TIME } from '../../constants'
 
 import type { ProtocolFile } from '@opentrons/shared-data'
-import type { PauseForm } from '../../form-types'
+import type { HydratedPauseFormData } from '../../form-types'
 import type { DesignerApplicationData } from './utils/getLoadLiquidCommands'
 
 const getTimeFromIndividualUnits = (
@@ -10,8 +10,11 @@ const getTimeFromIndividualUnits = (
   minutes: any,
   hours?: any
 ): string => {
-  const hoursString = hours !== undefined ? `${hours ?? 0}:` : ''
-  return `${hoursString}${minutes ?? 0}:${seconds ?? 0}`
+  const pad = (num: number): string => String(num).padStart(2, '0')
+  const hoursString = hours !== undefined ? `${pad(Number(hours) ?? 0)}:` : ''
+  return `${hoursString}${pad(Number(minutes) ?? 0)}:${pad(
+    Number(seconds) ?? 0
+  )}`
 }
 
 export const migrateFile = (
@@ -39,7 +42,7 @@ export const migrateFile = (
         pauseAction,
       } = form
       const pauseFormIndividualTimeUnitsRemoved = Object.keys(
-        form as PauseForm
+        form as HydratedPauseFormData
       ).reduce(
         (accInner, key) =>
           !['pauseSecond', 'pauseMinute', 'pauseHour'].includes(key)

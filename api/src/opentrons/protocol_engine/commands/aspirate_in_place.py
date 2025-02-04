@@ -13,6 +13,7 @@ from .pipetting_common import (
     BaseLiquidHandlingResult,
     OverpressureError,
     aspirate_in_place,
+    DEFAULT_CORRECTION_VOLUME,
 )
 from .command import (
     AbstractCommandImpl,
@@ -84,7 +85,6 @@ class AspirateInPlaceImplementation(
         ready_to_aspirate = self._pipetting.get_is_ready_to_aspirate(
             pipette_id=params.pipetteId,
         )
-
         if not ready_to_aspirate:
             raise PipetteNotReadyToAspirateError(
                 "Pipette cannot aspirate in place because of a previous blow out."
@@ -109,6 +109,7 @@ class AspirateInPlaceImplementation(
             command_note_adder=self._command_note_adder,
             pipetting=self._pipetting,
             model_utils=self._model_utils,
+            correction_volume=params.correctionVolume or DEFAULT_CORRECTION_VOLUME,
         )
         if isinstance(result, DefinedErrorData):
             if (
@@ -166,7 +167,7 @@ class AspirateInPlace(
 
     commandType: AspirateInPlaceCommandType = "aspirateInPlace"
     params: AspirateInPlaceParams
-    result: Optional[AspirateInPlaceResult]
+    result: Optional[AspirateInPlaceResult] = None
 
     _ImplementationCls: Type[
         AspirateInPlaceImplementation

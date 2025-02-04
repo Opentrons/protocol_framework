@@ -22,16 +22,17 @@ import {
   getHasWasteChute,
 } from '../../utils'
 import {
+  airGapInPlace,
   aspirate,
   configureForVolume,
   delay,
   dispense,
   dropTip,
   moveToWell,
-  replaceTip,
   touchTip,
 } from '../atomic'
 import { mixUtil } from './mix'
+import { replaceTip } from './replaceTip'
 
 import type {
   TransferArgs,
@@ -39,6 +40,7 @@ import type {
   CommandCreator,
   CommandCreatorError,
 } from '../../types'
+
 export const transfer: CommandCreator<TransferArgs> = (
   args,
   invariantContext,
@@ -263,7 +265,7 @@ export const transfer: CommandCreator<TransferArgs> = (
             ? [
                 curryCommandCreator(configureForVolume, {
                   pipetteId: args.pipette,
-                  volume: chunksPerSubTransfer,
+                  volume: subTransferVol,
                 }),
               ]
             : []
@@ -286,17 +288,14 @@ export const transfer: CommandCreator<TransferArgs> = (
                   well: sourceWell,
                   volume: Math.max(subTransferVol),
                   times: 1,
-                  aspirateOffsetFromBottomMm,
-                  dispenseOffsetFromBottomMm: aspirateOffsetFromBottomMm,
+                  offsetFromBottomMm: aspirateOffsetFromBottomMm,
                   aspirateFlowRateUlSec,
                   dispenseFlowRateUlSec,
                   aspirateDelaySeconds: aspirateDelay?.seconds,
                   dispenseDelaySeconds: dispenseDelay?.seconds,
                   tipRack,
-                  aspirateXOffset,
-                  aspirateYOffset,
-                  dispenseXOffset,
-                  dispenseYOffset,
+                  xOffset: aspirateXOffset,
+                  yOffset: aspirateYOffset,
                   nozzles: args.nozzles,
                 })
               : []
@@ -308,17 +307,14 @@ export const transfer: CommandCreator<TransferArgs> = (
                   well: sourceWell,
                   volume: args.mixBeforeAspirate.volume,
                   times: args.mixBeforeAspirate.times,
-                  aspirateOffsetFromBottomMm,
-                  dispenseOffsetFromBottomMm: aspirateOffsetFromBottomMm,
+                  offsetFromBottomMm: aspirateOffsetFromBottomMm,
                   aspirateFlowRateUlSec,
                   dispenseFlowRateUlSec,
                   aspirateDelaySeconds: aspirateDelay?.seconds,
                   dispenseDelaySeconds: dispenseDelay?.seconds,
                   tipRack,
-                  aspirateXOffset,
-                  aspirateYOffset,
-                  dispenseXOffset,
-                  dispenseYOffset,
+                  xOffset: aspirateXOffset,
+                  yOffset: aspirateYOffset,
                   nozzles: args.nozzles,
                 })
               : []
@@ -326,32 +322,35 @@ export const transfer: CommandCreator<TransferArgs> = (
             aspirateDelay != null
               ? [
                   curryCommandCreator(moveToWell, {
-                    pipette: args.pipette,
-                    labware: args.sourceLabware,
-                    well: sourceWell,
-                    offset: {
-                      x: 0,
-                      y: 0,
-                      z: aspirateDelay.mmFromBottom,
+                    pipetteId: args.pipette,
+                    labwareId: args.sourceLabware,
+                    wellName: sourceWell,
+                    wellLocation: {
+                      origin: 'bottom',
+                      offset: {
+                        x: 0,
+                        y: 0,
+                        z: aspirateDelay.mmFromBottom,
+                      },
                     },
                   }),
                   curryCommandCreator(delay, {
-                    commandCreatorFnName: 'delay',
-                    description: null,
-                    name: null,
-                    meta: null,
-                    wait: aspirateDelay.seconds,
+                    seconds: aspirateDelay.seconds,
                   }),
                 ]
               : []
           const touchTipAfterAspirateCommands = args.touchTipAfterAspirate
             ? [
                 curryCommandCreator(touchTip, {
-                  pipette: args.pipette,
-                  labware: args.sourceLabware,
-                  well: sourceWell,
-                  offsetFromBottomMm:
-                    args.touchTipAfterAspirateOffsetMmFromBottom,
+                  pipetteId: args.pipette,
+                  labwareId: args.sourceLabware,
+                  wellName: sourceWell,
+                  wellLocation: {
+                    origin: 'top',
+                    offset: {
+                      z: args.touchTipAfterAspirateOffsetMmFromTop,
+                    },
+                  },
                 }),
               ]
             : []
@@ -360,11 +359,15 @@ export const transfer: CommandCreator<TransferArgs> = (
             args.touchTipAfterDispense && destinationWell != null
               ? [
                   curryCommandCreator(touchTip, {
-                    pipette: args.pipette,
-                    labware: args.destLabware,
-                    well: destinationWell,
-                    offsetFromBottomMm:
-                      args.touchTipAfterDispenseOffsetMmFromBottom,
+                    pipetteId: args.pipette,
+                    labwareId: args.destLabware,
+                    wellName: destinationWell,
+                    wellLocation: {
+                      origin: 'top',
+                      offset: {
+                        z: args.touchTipAfterDispenseOffsetMmFromTop,
+                      },
+                    },
                   }),
                 ]
               : []
@@ -377,17 +380,14 @@ export const transfer: CommandCreator<TransferArgs> = (
                   well: destinationWell,
                   volume: args.mixInDestination.volume,
                   times: args.mixInDestination.times,
-                  aspirateOffsetFromBottomMm: dispenseOffsetFromBottomMm,
-                  dispenseOffsetFromBottomMm,
+                  offsetFromBottomMm: dispenseOffsetFromBottomMm,
                   aspirateFlowRateUlSec,
                   dispenseFlowRateUlSec,
                   aspirateDelaySeconds: aspirateDelay?.seconds,
                   dispenseDelaySeconds: dispenseDelay?.seconds,
                   tipRack,
-                  aspirateXOffset,
-                  aspirateYOffset,
-                  dispenseXOffset,
-                  dispenseYOffset,
+                  xOffset: dispenseXOffset,
+                  yOffset: dispenseYOffset,
                   nozzles: args.nozzles,
                 })
               : []
@@ -395,51 +395,52 @@ export const transfer: CommandCreator<TransferArgs> = (
           const airGapAfterAspirateCommands =
             aspirateAirGapVolume && destinationWell != null
               ? [
-                  curryCommandCreator(aspirate, {
-                    pipette: args.pipette,
+                  curryCommandCreator(moveToWell, {
+                    pipetteId: args.pipette,
+                    labwareId: args.sourceLabware,
+                    wellName: sourceWell,
+                    wellLocation: {
+                      origin: 'bottom',
+                      offset: {
+                        z: airGapOffsetSourceWell,
+                        x: 0,
+                        y: 0,
+                      },
+                    },
+                  }),
+                  curryCommandCreator(airGapInPlace, {
+                    pipetteId: args.pipette,
                     volume: aspirateAirGapVolume,
-                    labware: args.sourceLabware,
-                    well: sourceWell,
                     flowRate: aspirateFlowRateUlSec,
-                    offsetFromBottomMm: airGapOffsetSourceWell,
-                    isAirGap: true,
-                    tipRack,
-                    xOffset: 0,
-                    yOffset: 0,
-                    nozzles: args.nozzles,
                   }),
                   ...(aspirateDelay != null
                     ? [
                         curryCommandCreator(delay, {
-                          commandCreatorFnName: 'delay',
-                          description: null,
-                          name: null,
-                          meta: null,
-                          wait: aspirateDelay.seconds,
+                          seconds: aspirateDelay.seconds,
                         }),
                       ]
                     : []),
                   curryCommandCreator(dispense, {
-                    pipette: args.pipette,
+                    pipetteId: args.pipette,
                     volume: aspirateAirGapVolume,
-                    labware: args.destLabware,
-                    well: destinationWell,
+                    labwareId: args.destLabware,
+                    wellName: destinationWell,
                     flowRate: dispenseFlowRateUlSec,
-                    offsetFromBottomMm: airGapOffsetDestWell,
-                    isAirGap: true,
-                    xOffset: 0,
-                    yOffset: 0,
+                    wellLocation: {
+                      origin: 'bottom',
+                      offset: {
+                        z: airGapOffsetDestWell,
+                        x: 0,
+                        y: 0,
+                      },
+                    },
                     tipRack: args.tipRack,
                     nozzles: args.nozzles,
                   }),
                   ...(dispenseDelay != null
                     ? [
                         curryCommandCreator(delay, {
-                          commandCreatorFnName: 'delay',
-                          description: null,
-                          name: null,
-                          meta: null,
-                          wait: dispenseDelay.seconds,
+                          seconds: dispenseDelay.seconds,
                         }),
                       ]
                     : []),
@@ -465,15 +466,20 @@ export const transfer: CommandCreator<TransferArgs> = (
 
           const aspirateCommand = [
             curryCommandCreator(aspirate, {
-              pipette: args.pipette,
+              pipetteId: args.pipette,
               volume: subTransferVol,
-              labware: args.sourceLabware,
-              well: sourceWell,
+              labwareId: args.sourceLabware,
+              wellName: sourceWell,
               flowRate: aspirateFlowRateUlSec,
-              offsetFromBottomMm: aspirateOffsetFromBottomMm,
+              wellLocation: {
+                origin: 'bottom',
+                offset: {
+                  z: aspirateOffsetFromBottomMm,
+                  x: aspirateXOffset,
+                  y: aspirateYOffset,
+                },
+              },
               tipRack,
-              xOffset: aspirateXOffset,
-              yOffset: aspirateYOffset,
               nozzles: args.nozzles,
             }),
           ]
@@ -502,11 +508,7 @@ export const transfer: CommandCreator<TransferArgs> = (
                     zOffset: dispenseDelay.mmFromBottom,
                   }),
                   curryCommandCreator(delay, {
-                    commandCreatorFnName: 'delay',
-                    description: null,
-                    name: null,
-                    meta: null,
-                    wait: dispenseDelay.seconds,
+                    seconds: dispenseDelay.seconds,
                   }),
                 ]
               : []
@@ -537,17 +539,11 @@ export const transfer: CommandCreator<TransferArgs> = (
                     destWell: destinationWell,
                     flowRate: aspirateFlowRateUlSec,
                     offsetFromBottomMm: airGapOffsetDestWell,
-                    tipRack,
-                    nozzles: args.nozzles,
                   }),
                   ...(aspirateDelay != null
                     ? [
                         curryCommandCreator(delay, {
-                          commandCreatorFnName: 'delay',
-                          description: null,
-                          name: null,
-                          meta: null,
-                          wait: aspirateDelay.seconds,
+                          seconds: aspirateDelay.seconds,
                         }),
                       ]
                     : []),

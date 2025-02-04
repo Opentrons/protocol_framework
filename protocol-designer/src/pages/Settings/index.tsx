@@ -27,7 +27,7 @@ import {
   selectors as tutorialSelectors,
 } from '../../tutorial'
 import { ToggleButton } from '../../atoms/ToggleButton'
-import { BUTTON_LINK_STYLE } from '../../atoms'
+import { LINK_BUTTON_STYLE } from '../../atoms'
 import { actions as featureFlagActions } from '../../feature-flags'
 import { getFeatureFlagData } from '../../feature-flags/selectors'
 import type { FlagTypes } from '../../feature-flags'
@@ -42,14 +42,13 @@ export function Settings(): JSX.Element {
   const [showAnnouncementModal, setShowAnnouncementModal] = useState<boolean>(
     false
   )
-  const hasOptedIn = useSelector(analyticsSelectors.getHasOptedIn)
+  const { hasOptedIn } = useSelector(analyticsSelectors.getHasOptedIn)
   const flags = useSelector(getFeatureFlagData)
   const canClearHintDismissals = useSelector(
     tutorialSelectors.getCanClearHintDismissals
   )
-  const _toggleOptedIn = hasOptedIn
-    ? analyticsActions.optOut
-    : analyticsActions.optIn
+
+  const pdVersion = process.env.OT_PD_VERSION
 
   const prereleaseModeEnabled = flags.PRERELEASE_MODE === true
 
@@ -126,7 +125,7 @@ export function Settings(): JSX.Element {
           <Flex flexDirection={DIRECTION_COLUMN} gridGap={SPACING.spacing24}>
             <Flex flexDirection={DIRECTION_COLUMN} gridGap={SPACING.spacing8}>
               <StyledText desktopStyle="bodyLargeSemiBold">
-                {t('shared:app_settings')}
+                {t('shared:app_info')}
               </StyledText>
               <ListItem
                 padding={SPACING.spacing16}
@@ -138,12 +137,12 @@ export function Settings(): JSX.Element {
                     {t('shared:pd_version')}
                   </StyledText>
                   <StyledText desktopStyle="bodyDefaultRegular">
-                    {process.env.OT_PD_VERSION}
+                    {pdVersion}
                   </StyledText>
                 </Flex>
                 <Flex gridGap={SPACING.spacing16} alignItems={ALIGN_CENTER}>
                   <LinkComponent
-                    css={BUTTON_LINK_STYLE}
+                    css={LINK_BUTTON_STYLE}
                     textDecoration={TYPOGRAPHY.textDecorationUnderline}
                     href={DOC_URL}
                     external
@@ -155,7 +154,7 @@ export function Settings(): JSX.Element {
                   </LinkComponent>
 
                   <Btn
-                    css={BUTTON_LINK_STYLE}
+                    css={LINK_BUTTON_STYLE}
                     textDecoration={TYPOGRAPHY.textDecorationUnderline}
                     onClick={() => {
                       setShowAnnouncementModal(true)
@@ -185,7 +184,7 @@ export function Settings(): JSX.Element {
                   </StyledText>
                   <Flex color={COLORS.grey60}>
                     <StyledText desktopStyle="bodyDefaultRegular">
-                      {t('shared:reset_hints_and_tips')}
+                      {t('shared:show_hints_and_tips')}
                     </StyledText>
                   </Flex>
                 </Flex>
@@ -202,7 +201,7 @@ export function Settings(): JSX.Element {
                 >
                   <StyledText desktopStyle="bodyDefaultRegular">
                     {canClearHintDismissals
-                      ? t('shared:reset_hints')
+                      ? t('shared:reset')
                       : t('shared:no_hints_to_restore')}
                   </StyledText>
                 </Btn>
@@ -245,7 +244,7 @@ export function Settings(): JSX.Element {
               >
                 <Flex flexDirection={DIRECTION_COLUMN}>
                   <StyledText desktopStyle="bodyDefaultSemiBold">
-                    {t('shared:shared_sessions')}
+                    {t('shared:shared_analytics')}
                   </StyledText>
                   <StyledText desktopStyle="bodyDefaultRegular">
                     <Trans
@@ -279,7 +278,13 @@ export function Settings(): JSX.Element {
                       ? TOGGLE_ENABLED_STYLES
                       : TOGGLE_DISABLED_STYLES
                   }
-                  onClick={() => dispatch(_toggleOptedIn())}
+                  onClick={() =>
+                    dispatch(
+                      hasOptedIn
+                        ? analyticsActions.optOut()
+                        : analyticsActions.optIn()
+                    )
+                  }
                 >
                   <Icon
                     name={

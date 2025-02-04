@@ -165,7 +165,7 @@ export function InterventionModal({
     }
   })()
 
-  const { iconName, headerTitle, headerTitleOnDevice } = (() => {
+  const { iconName, headerTitle, headerTitleOnDevice, iconSize } = (() => {
     switch (command.commandType) {
       case 'waitForResume':
       case 'pause':
@@ -173,12 +173,14 @@ export function InterventionModal({
           iconName: 'pause-circle' as IconName,
           headerTitle: t('pause_on', { robot_name: robotName }),
           headerTitleOnDevice: t('pause'),
+          iconSize: SPACING.spacing32,
         }
       case 'moveLabware':
         return {
           iconName: 'move-xy-circle' as IconName,
           headerTitle: t('move_labware_on', { robot_name: robotName }),
           headerTitleOnDevice: t('move_labware'),
+          iconSize: SPACING.spacing32,
         }
       default:
         console.warn(
@@ -189,6 +191,7 @@ export function InterventionModal({
           iconName: null,
           headerTitle: '',
           headerTitleOnDevice: '',
+          iconSize: undefined,
         }
     }
   })()
@@ -228,6 +231,7 @@ export function InterventionModal({
       iconHeading={<LegacyStyledText as="h1">{headerTitle}</LegacyStyledText>}
       iconName={iconName}
       type="intervention-required"
+      iconSize={iconSize}
     >
       <Box {...CONTENT_STYLE}>
         {childContent}

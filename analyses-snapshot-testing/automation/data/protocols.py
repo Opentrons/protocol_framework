@@ -708,6 +708,55 @@ class Protocols:
         file_extension="py",
         robot="Flex",
     )
+    # analyses-snapshot-testing/files/protocols/Flex_X_v2_21_plate_reader_no_trash.py
+    Flex_X_v2_21_plate_reader_no_trash: Protocol = Protocol(
+        file_stem="Flex_X_v2_21_plate_reader_no_trash",
+        file_extension="py",
+        robot="Flex",
+    )
+    # analyses-snapshot-testing/files/protocols/Flex_X_v2_21_plate_reader_wrong_plate.py
+    Flex_X_v2_21_plate_reader_wrong_plate: Protocol = Protocol(
+        file_stem="Flex_X_v2_21_plate_reader_wrong_plate",
+        file_extension="py",
+        robot="Flex",
+    )
+    # analyses-snapshot-testing/files/protocols/Flex_X_v2_21_plate_reader_wrong_plate2.py
+    Flex_X_v2_21_plate_reader_wrong_plate2: Protocol = Protocol(
+        file_stem="Flex_X_v2_21_plate_reader_wrong_plate2",
+        file_extension="py",
+        robot="Flex",
+    )
+    # analyses-snapshot-testing/files/protocols/Flex_X_v2_21_plate_reader_bad_slot.py
+    Flex_X_v2_21_plate_reader_bad_slot: Protocol = Protocol(
+        file_stem="Flex_X_v2_21_plate_reader_bad_slot",
+        file_extension="py",
+        robot="Flex",
+    )
+    # analyses-snapshot-testing/files/protocols/Flex_X_v2_21_plate_reader_no_close_lid.py
+    Flex_X_v2_21_plate_reader_no_close_lid: Protocol = Protocol(
+        file_stem="Flex_X_v2_21_plate_reader_no_close_lid",
+        file_extension="py",
+        robot="Flex",
+    )
+    # analyses-snapshot-testing/files/protocols/Flex_S_v2_21_tc_lids_happy_path.py
+    Flex_S_v2_21_tc_lids_happy_path: Protocol = Protocol(
+        file_stem="Flex_S_v2_21_tc_lids_happy_path",
+        file_extension="py",
+        robot="Flex",
+    )
+    # analyses-snapshot-testing/files/protocols/Flex_X_v2_21_tc_lids_wrong_target.py
+    Flex_X_v2_21_tc_lids_wrong_target: Protocol = Protocol(
+        file_stem="Flex_X_v2_21_tc_lids_wrong_target",
+        file_extension="py",
+        robot="Flex",
+    )
+
+    # analyses-snapshot-testing/files/protocols/Flex_S_v2_21_P1000_96_GRIP_HS_MB_TC_TM_Smoke.py
+    Flex_S_v2_21_P1000_96_GRIP_HS_MB_TC_TM_Smoke: Protocol = Protocol(
+        file_stem="Flex_S_v2_21_P1000_96_GRIP_HS_MB_TC_TM_Smoke",
+        file_extension="py",
+        robot="Flex",
+    )
 
     OT2_X_v2_18_None_None_duplicateRTPVariableName: Protocol = Protocol(
         file_stem="OT2_X_v2_18_None_None_duplicateRTPVariableName",

@@ -106,7 +106,18 @@ export function ChatDisplay({ chat, chatId }: ChatDisplayProps): JSX.Element {
 
   const handleFileDownload = (): void => {
     const lastCodeBlock = document.querySelector(`#${chatId}`)
-    const code = lastCodeBlock?.textContent ?? ''
+    const code = lastCodeBlock?.textContent?.trim() ?? ''
+    // Don't proceed if code is empty, no need to download as a python file
+    if (!code) {
+      return
+    }
+    // Make sure python protocol is valid
+    const hasRunFunction = code.includes('def run(')
+    const numberOfLines = code.split('\n').length
+    if (!hasRunFunction || numberOfLines <= 3) {
+      return
+    }
+
     const blobParts: BlobPart[] = [code]
 
     const file = new File(blobParts, 'OpentronsAI.py', { type: 'text/python' })
@@ -194,14 +205,14 @@ export function ChatDisplay({ chat, chatId }: ChatDisplayProps): JSX.Element {
                 setInputFieldToCorrespondingRequest()
               }}
             >
-              <StyledIcon size={SPACING.spacing20} name={'reload'} />
+              <StyledIcon size={SPACING.spacing20} name="reload" />
             </HoverShadow>
             <HoverShadow
               onClick={() => {
                 setShowFeedbackModal(true)
               }}
             >
-              <StyledIcon size={SPACING.spacing20} name={'thumbs-down'} />
+              <StyledIcon size={SPACING.spacing20} name="thumbs-down" />
             </HoverShadow>
             <HoverShadow
               onClick={async () => {
@@ -218,7 +229,7 @@ export function ChatDisplay({ chat, chatId }: ChatDisplayProps): JSX.Element {
                 handleFileDownload()
               }}
             >
-              <StyledIcon size={SPACING.spacing20} name={'download'} />
+              <StyledIcon size={SPACING.spacing20} name="download" />
             </HoverShadow>
           </Flex>
         ) : null}
@@ -238,6 +249,7 @@ function ParagraphText(props: JSX.IntrinsicAttributes): JSX.Element {
       {...props}
       fontSize={TYPOGRAPHY.fontSize20}
       lineHeight={TYPOGRAPHY.lineHeight24}
+      css="white-space: pre-wrap;"
     />
   )
 }

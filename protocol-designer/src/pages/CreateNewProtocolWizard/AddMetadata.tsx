@@ -1,20 +1,26 @@
 import { useTranslation } from 'react-i18next'
 import { useDispatch } from 'react-redux'
+import styled from 'styled-components'
 
 import { FLEX_ROBOT_TYPE } from '@opentrons/shared-data'
 import {
+  BORDERS,
   COLORS,
   DIRECTION_COLUMN,
   Flex,
   InputField,
   SPACING,
   StyledText,
+  TYPOGRAPHY,
 } from '@opentrons/components'
+<<<<<<< HEAD
 import {
   // DescriptionField,
   // DescriptionFieldContainer,
   TextAreaField,
 } from '../../atoms'
+=======
+>>>>>>> edge
 import { HandleEnter } from '../../atoms/HandleEnter'
 import { analyticsEvent } from '../../analytics/actions'
 import { ONBOARDING_FLOW_DURATION_EVENT } from '../../analytics/constants'
@@ -47,6 +53,7 @@ export function AddMetadata(props: AddMetadataProps): JSX.Element | null {
   return (
     <HandleEnter onEnter={handleProceed}>
       <WizardBody
+        robotType={robotType}
         stepNumber={
           robotType === FLEX_ROBOT_TYPE
             ? FLEX_METADATA_WIZARD_STEP
@@ -68,8 +75,8 @@ export function AddMetadata(props: AddMetadataProps): JSX.Element | null {
               {...register('fields.name')}
               type="text"
               value={watch('fields.name')}
-              min={''}
-              max={''}
+              min=""
+              max=""
               autoFocus
             />
           </Flex>
@@ -95,8 +102,8 @@ export function AddMetadata(props: AddMetadataProps): JSX.Element | null {
               {...register('fields.organizationOrAuthor')}
               type="text"
               value={watch('fields.organizationOrAuthor')}
-              min={''}
-              max={''}
+              min=""
+              max=""
             />
           </Flex>
         </Flex>
@@ -104,3 +111,13 @@ export function AddMetadata(props: AddMetadataProps): JSX.Element | null {
     </HandleEnter>
   )
 }
+
+export const DescriptionField = styled.textarea`
+  min-height: 5rem;
+  width: 100%;
+  border: 1px ${BORDERS.styleSolid} ${COLORS.grey50};
+  border-radius: ${BORDERS.borderRadius4};
+  padding: ${SPACING.spacing8};
+  font-size: ${TYPOGRAPHY.fontSizeP};
+  resize: none;
+`

@@ -1,4 +1,4 @@
-import * as React from 'react'
+import { forwardRef } from 'react'
 import styled, { css } from 'styled-components'
 
 import { Flex } from '../../primitives'
@@ -6,6 +6,7 @@ import {
   ALIGN_CENTER,
   DIRECTION_COLUMN,
   DIRECTION_ROW,
+  NO_WRAP,
   TEXT_ALIGN_RIGHT,
 } from '../../styles'
 import { BORDERS, COLORS } from '../../helix-design-system'
@@ -14,7 +15,16 @@ import { RESPONSIVENESS, SPACING, TYPOGRAPHY } from '../../ui-style-constants'
 import { Tooltip } from '../Tooltip'
 import { useHoverTooltip } from '../../tooltips'
 import { StyledText } from '../StyledText'
+
+import type {
+  ChangeEventHandler,
+  FocusEvent,
+  MouseEvent,
+  MutableRefObject,
+  ReactNode,
+} from 'react'
 import type { IconName } from '../../icons'
+
 export const INPUT_TYPE_NUMBER = 'number' as const
 export const LEGACY_INPUT_TYPE_TEXT = 'text' as const
 export const LEGACY_INPUT_TYPE_PASSWORD = 'password' as const
@@ -24,7 +34,7 @@ export interface InputFieldProps {
   /** field is disabled if value is true */
   disabled?: boolean
   /** change handler */
-  onChange?: React.ChangeEventHandler<HTMLInputElement>
+  onChange?: ChangeEventHandler<HTMLInputElement>
   /** name of field in form */
   name?: string
   /** optional ID of <input> element */
@@ -32,7 +42,7 @@ export interface InputFieldProps {
   /** placeholder text */
   placeholder?: string
   /** optional suffix component, appears to the right of input text */
-  units?: React.ReactNode
+  units?: ReactNode
   /** current value of text in box, defaults to '' */
   value?: string | number | null
   /** if included, InputField will use error style and display error instead of caption */
@@ -49,11 +59,11 @@ export interface InputFieldProps {
     | typeof LEGACY_INPUT_TYPE_PASSWORD
     | typeof INPUT_TYPE_NUMBER
   /** mouse click handler */
-  onClick?: (event: React.MouseEvent<HTMLInputElement>) => unknown
+  onClick?: (event: MouseEvent<HTMLInputElement>) => unknown
   /** focus handler */
-  onFocus?: (event: React.FocusEvent<HTMLInputElement>) => unknown
+  onFocus?: (event: FocusEvent<HTMLInputElement>) => unknown
   /** blur handler */
-  onBlur?: (event: React.FocusEvent<HTMLInputElement>) => unknown
+  onBlur?: (event: FocusEvent<HTMLInputElement>) => unknown
   /** makes input field read-only */
   readOnly?: boolean
   /** html tabindex property */
@@ -72,7 +82,7 @@ export interface InputFieldProps {
   /** small or medium input field height, relevant only */
   size?: 'medium' | 'small'
   /** react useRef to control input field instead of react event */
-  ref?: React.MutableRefObject<HTMLInputElement | null>
+  ref?: MutableRefObject<HTMLInputElement | null>
   /** optional IconName to display icon aligned to left of input field */
   leftIcon?: IconName
   /** if true, show delete icon aligned to right of input field */
@@ -87,7 +97,7 @@ export interface InputFieldProps {
   padding?: string
 }
 
-export const InputField = React.forwardRef<HTMLInputElement, InputFieldProps>(
+export const InputField = forwardRef<HTMLInputElement, InputFieldProps>(
   (props, ref): JSX.Element => {
     const {
       placeholder,
@@ -245,6 +255,7 @@ export const InputField = React.forwardRef<HTMLInputElement, InputFieldProps>(
       color: ${props.disabled ? COLORS.grey40 : COLORS.grey50};
       font: ${TYPOGRAPHY.bodyTextRegular};
       text-align: ${TYPOGRAPHY.textAlignRight};
+      white-space: ${NO_WRAP};
       @media ${RESPONSIVENESS.touchscreenMediaQuerySpecs} {
         color: ${props.disabled ? COLORS.grey40 : COLORS.grey50};
         font-size: ${TYPOGRAPHY.fontSize22};
@@ -346,7 +357,7 @@ export const InputField = React.forwardRef<HTMLInputElement, InputFieldProps>(
             <StyledText
               desktopStyle="bodyDefaultRegular"
               css={FORM_BOTTOM_SPACE_STYLE}
-              color={COLORS.grey60}
+              color={hasError ? COLORS.red50 : COLORS.grey60}
             >
               {props.caption}
             </StyledText>

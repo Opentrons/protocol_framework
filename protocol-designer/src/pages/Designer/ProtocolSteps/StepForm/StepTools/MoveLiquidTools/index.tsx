@@ -1,14 +1,24 @@
 import { useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
 import {
+  ALIGN_CENTER,
+  COLORS,
   DIRECTION_COLUMN,
   Divider,
   Flex,
+  Icon,
+  ListItem,
   SPACING,
   StyledText,
   Tabs,
+  Tooltip,
+  useHoverTooltip,
 } from '@opentrons/components'
-import { getEnableReturnTip } from '../../../../../../feature-flags/selectors'
+import { getTrashOrLabware } from '@opentrons/step-generation'
+import {
+  getEnableLiquidClasses,
+  getEnableReturnTip,
+} from '../../../../../../feature-flags/selectors'
 import {
   getAdditionalEquipmentEntities,
   getLabwareEntities,
@@ -60,11 +70,13 @@ export function MoveLiquidTools(props: StepFormProps): JSX.Element {
     tab,
     setTab,
   } = props
-  const { t, i18n } = useTranslation(['protocol_steps', 'form'])
+  const [targetProps, tooltipProps] = useHoverTooltip()
+  const { t, i18n } = useTranslation(['protocol_steps', 'form', 'tooltip'])
   const { path } = formData
   const additionalEquipmentEntities = useSelector(
     getAdditionalEquipmentEntities
   )
+  const enableLiquidClasses = useSelector(getEnableLiquidClasses)
   const enableReturnTip = useSelector(getEnableReturnTip)
   const labwares = useSelector(getLabwareEntities)
   const pipettes = useSelector(getPipetteEntities)
@@ -96,6 +108,23 @@ export function MoveLiquidTools(props: StepFormProps): JSX.Element {
     additionalEquipmentEntities[String(propsForFields.dispense_labware.value)]
       ?.name === 'trashBin'
 
+  const destinationLabwareType =
+    formData.dispense_labware != null
+      ? getTrashOrLabware(
+          labwares,
+          additionalEquipmentEntities,
+          formData.dispense_labware as string
+        )
+      : null
+  const isDestinationTrash =
+    destinationLabwareType != null
+      ? ['trashBin', 'wasteChute'].includes(destinationLabwareType)
+      : false
+  const dispenseMixDisabledTooltipText = t(
+    `tooltip:step_fields.moveLiquid.disabled.${
+      isDestinationTrash ? 'dispense_mix_checkbox' : 'dispense_mix_checkbox_2'
+    }`
+  )
   const aspirateTab = {
     text: t('aspirate'),
     isActive: tab === 'aspirate',
@@ -298,6 +327,67 @@ export function MoveLiquidTools(props: StepFormProps): JSX.Element {
           ]
         }
       />
+      {enableLiquidClasses ? (
+        <>
+          <Divider marginY="0" />
+          <Flex
+            flexDirection={DIRECTION_COLUMN}
+            gridGap={SPACING.spacing8}
+            padding={`0 ${SPACING.spacing16}`}
+          >
+            <Flex gridGap={SPACING.spacing8} alignItems={ALIGN_CENTER}>
+              <StyledText
+                desktopStyle="bodyDefaultRegular"
+                color={COLORS.grey60}
+              >
+                {t('protocol_steps:submerge')}
+              </StyledText>
+              <Flex {...targetProps}>
+                <Icon
+                  name="information"
+                  size="1rem"
+                  color={COLORS.grey60}
+                  data-testid="information_icon"
+                />
+              </Flex>
+              <Tooltip tooltipProps={tooltipProps}>
+                {t(`tooltip:step_fields.defaults.${tab}_submerge`)}
+              </Tooltip>
+            </Flex>
+            <ListItem type="noActive">
+              <Flex
+                padding={SPACING.spacing12}
+                width="100%"
+                flexDirection={DIRECTION_COLUMN}
+                gridGap={SPACING.spacing8}
+              >
+                <InputStepFormField
+                  showTooltip={false}
+                  padding="0"
+                  title={t('protocol_steps:submerge_speed')}
+                  {...propsForFields[`${tab}_submerge_speed`]}
+                  units={t('application:units.millimeterPerSec')}
+                  errorToShow={getFormLevelError(
+                    `${tab}_submerge_speed`,
+                    mappedErrorsToField
+                  )}
+                />
+                <InputStepFormField
+                  showTooltip={false}
+                  padding="0"
+                  title={t('protocol_steps:delay_duration')}
+                  {...propsForFields[`${tab}_submerge_delay_seconds`]}
+                  units={t('application:units.seconds')}
+                  errorToShow={getFormLevelError(
+                    `${tab}_submerge_delay_seconds`,
+                    mappedErrorsToField
+                  )}
+                />
+              </Flex>
+            </ListItem>
+          </Flex>
+        </>
+      ) : null}
       <Divider marginY="0" />
       <Flex
         flexDirection={DIRECTION_COLUMN}
@@ -329,7 +419,16 @@ export function MoveLiquidTools(props: StepFormProps): JSX.Element {
           checkboxUpdateValue={
             propsForFields[`${tab}_mix_checkbox`].updateValue
           }
-          tooltipText={propsForFields[`${tab}_mix_checkbox`].tooltipContent}
+          tooltipText={
+            tab === 'dispense'
+              ? dispenseMixDisabledTooltipText
+              : propsForFields.aspirate_mix_checkbox.tooltipContent
+          }
+          disabled={
+            tab === 'dispense'
+              ? isDestinationTrash || formData.path === 'multiDispense'
+              : formData.path === 'multiAspirate'
+          }
         >
           {formData[`${tab}_mix_checkbox`] === true ? (
             <Flex
@@ -416,6 +515,10 @@ export function MoveLiquidTools(props: StepFormProps): JSX.Element {
             isChecked={propsForFields.blowout_checkbox.value === true}
             checkboxUpdateValue={propsForFields.blowout_checkbox.updateValue}
             tooltipText={propsForFields.blowout_checkbox.tooltipContent}
+            disabled={
+              formData.path === 'multiDispense' &&
+              formData.disposalVolume_checkbox
+            }
           >
             {formData.blowout_checkbox === true ? (
               <Flex
@@ -468,11 +571,11 @@ export function MoveLiquidTools(props: StepFormProps): JSX.Element {
             <PositionField
               prefix={tab}
               propsForFields={propsForFields}
-              zField={`${tab}_touchTip_mmFromBottom`}
+              zField={`${tab}_touchTip_mmFromTop`}
               labwareId={
                 formData[
                   getLabwareFieldForPositioningField(
-                    addFieldNamePrefix('touchTip_mmFromBottom')
+                    addFieldNamePrefix('touchTip_mmFromTop')
                   )
                 ]
               }

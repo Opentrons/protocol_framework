@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import {
+  ALIGN_CENTER,
   Btn,
   COLORS,
   DIRECTION_COLUMN,
@@ -12,7 +13,7 @@ import {
   TYPOGRAPHY,
 } from '@opentrons/components'
 
-import { BUTTON_LINK_STYLE, LINE_CLAMP_TEXT_STYLE } from '../../atoms'
+import { LINK_BUTTON_STYLE, LINE_CLAMP_TEXT_STYLE } from '../../atoms'
 
 const REQUIRED_APP_VERSION = '8.2.0'
 
@@ -36,7 +37,7 @@ export function ProtocolMetadata({
 
   return (
     <Flex flexDirection={DIRECTION_COLUMN} gridGap={SPACING.spacing12}>
-      <Flex justifyContent={JUSTIFY_SPACE_BETWEEN}>
+      <Flex justifyContent={JUSTIFY_SPACE_BETWEEN} alignItems={ALIGN_CENTER}>
         <StyledText desktopStyle="headingSmallBold">
           {t('protocol_metadata')}
         </StyledText>
@@ -46,7 +47,7 @@ export function ProtocolMetadata({
             onClick={() => {
               setShowEditMetadataModal(true)
             }}
-            css={BUTTON_LINK_STYLE}
+            css={LINK_BUTTON_STYLE}
             data-testid="ProtocolOverview_MetadataEditButton"
           >
             <StyledText desktopStyle="bodyDefaultRegular">

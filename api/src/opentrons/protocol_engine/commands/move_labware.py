@@ -1,14 +1,17 @@
 """Models and implementation for the ``moveLabware`` command."""
 
 from __future__ import annotations
+from typing import TYPE_CHECKING, Optional, Type, Any, List
+
+from pydantic.json_schema import SkipJsonSchema
+from pydantic import BaseModel, Field
+from typing_extensions import Literal
+
 from opentrons_shared_data.errors.exceptions import (
     FailedGripperPickupError,
     LabwareDroppedError,
     StallOrCollisionDetectedError,
 )
-from pydantic import BaseModel, Field
-from typing import TYPE_CHECKING, Optional, Type
-from typing_extensions import Literal
 
 from opentrons.protocol_engine.resources.model_utils import ModelUtils
 from opentrons.types import Point
@@ -49,6 +52,10 @@ if TYPE_CHECKING:
 MoveLabwareCommandType = Literal["moveLabware"]
 
 
+def _remove_default(s: dict[str, Any]) -> None:
+    s.pop("default", None)
+
+
 # Extra buffer on top of minimum distance to move to the right
 _TRASH_CHUTE_DROP_BUFFER_MM = 8
 
@@ -63,15 +70,17 @@ class MoveLabwareParams(BaseModel):
         description="Whether to use the gripper to perform the labware movement"
         " or to perform a manual movement with an option to pause.",
     )
-    pickUpOffset: Optional[LabwareOffsetVector] = Field(
+    pickUpOffset: LabwareOffsetVector | SkipJsonSchema[None] = Field(
         None,
         description="Offset to use when picking up labware. "
         "Experimental param, subject to change",
+        json_schema_extra=_remove_default,
     )
-    dropOffset: Optional[LabwareOffsetVector] = Field(
+    dropOffset: LabwareOffsetVector | SkipJsonSchema[None] = Field(
         None,
         description="Offset to use when dropping off labware. "
         "Experimental param, subject to change",
+        json_schema_extra=_remove_default,
     )
 
 
@@ -156,6 +165,7 @@ class MoveLabwareImplementation(AbstractCommandImpl[MoveLabwareParams, _ExecuteR
             self._state_view.addressable_areas.raise_if_area_not_in_deck_configuration(
                 area_name
             )
+            state_update.set_addressable_area_used(addressable_area_name=area_name)
 
             if fixture_validation.is_gripper_waste_chute(area_name):
                 # When dropping off labware in the waste chute, some bigger pieces
@@ -201,6 +211,9 @@ class MoveLabwareImplementation(AbstractCommandImpl[MoveLabwareParams, _ExecuteR
             self._state_view.addressable_areas.raise_if_area_not_in_deck_configuration(
                 params.newLocation.slotName.id
             )
+            state_update.set_addressable_area_used(
+                addressable_area_name=params.newLocation.slotName.id
+            )
 
         available_new_location = self._state_view.geometry.ensure_location_not_occupied(
             location=params.newLocation
@@ -210,6 +223,15 @@ class MoveLabwareImplementation(AbstractCommandImpl[MoveLabwareParams, _ExecuteR
         self._state_view.labware.raise_if_labware_has_labware_on_top(
             labware_id=params.labwareId
         )
+
+        if isinstance(available_new_location, DeckSlotLocation):
+            self._state_view.labware.raise_if_labware_cannot_be_ondeck(
+                location=available_new_location,
+                labware_definition=self._state_view.labware.get_definition(
+                    params.labwareId
+                ),
+            )
+
         if isinstance(available_new_location, OnLabwareLocation):
             self._state_view.labware.raise_if_labware_has_labware_on_top(
                 available_new_location.labwareId
@@ -260,7 +282,6 @@ class MoveLabwareImplementation(AbstractCommandImpl[MoveLabwareParams, _ExecuteR
                 raise LabwareMovementNotAllowedError(
                     f"Cannot move adapter '{current_labware_definition.parameters.loadName}' with gripper."
                 )
-
             validated_current_loc = (
                 self._state_view.geometry.ensure_valid_gripper_location(
                     current_labware.location
@@ -342,6 +363,40 @@ class MoveLabwareImplementation(AbstractCommandImpl[MoveLabwareParams, _ExecuteR
             new_offset_id=new_offset_id,
         )
 
+        if labware_validation.validate_definition_is_lid(
+            definition=self._state_view.labware.get_definition(params.labwareId)
+        ):
+            parent_updates: List[str] = []
+            lid_updates: List[str | None] = []
+            # when moving a lid between locations we need to:
+            assert isinstance(current_labware.location, OnLabwareLocation)
+            if (
+                self._state_view.labware.get_lid_by_labware_id(
+                    current_labware.location.labwareId
+                )
+                is not None
+            ):
+                # if the source location was a parent labware and not a lid stack or lid, update the parent labware lid ID to None (no more lid)
+                parent_updates.append(current_labware.location.labwareId)
+                lid_updates.append(None)
+
+            # If we're moving to a non lid object, add to the setlids list of things to do
+            if isinstance(
+                available_new_location, OnLabwareLocation
+            ) and not labware_validation.validate_definition_is_lid(
+                self._state_view.labware.get_definition(
+                    available_new_location.labwareId
+                )
+            ):
+                parent_updates.append(available_new_location.labwareId)
+                lid_updates.append(params.labwareId)
+            # Add to setlids
+            if len(parent_updates) > 0:
+                state_update.set_lids(
+                    parent_labware_ids=parent_updates,
+                    lid_ids=lid_updates,
+                )
+
         return SuccessData(
             public=MoveLabwareResult(offsetId=new_offset_id),
             state_update=state_update,
@@ -355,7 +410,7 @@ class MoveLabware(
 
     commandType: MoveLabwareCommandType = "moveLabware"
     params: MoveLabwareParams
-    result: Optional[MoveLabwareResult]
+    result: Optional[MoveLabwareResult] = None
 
     _ImplementationCls: Type[MoveLabwareImplementation] = MoveLabwareImplementation
 

@@ -11,6 +11,7 @@ from .types import (
     PipetteGenerationType,
     PipetteModelMajorVersionType,
     PipetteModelMinorVersionType,
+    PipetteOEMType,
 )
 from .pipette_definition import (
     PipetteNameType,
@@ -21,6 +22,7 @@ DEFAULT_CALIBRATION_OFFSET = [0.0, 0.0, 0.0]
 DEFAULT_MODEL = PipetteModelType.p1000
 DEFAULT_CHANNELS = PipetteChannelType.SINGLE_CHANNEL
 DEFAULT_MODEL_VERSION = PipetteVersionType(major=1, minor=0)
+DEFAULT_OEM = PipetteOEMType.OT
 
 PIPETTE_AVAILABLE_TYPES = [m.name for m in PipetteModelType]
 PIPETTE_CHANNELS_INTS = [c.value for c in PipetteChannelType]
@@ -115,6 +117,8 @@ def get_channel_from_pipette_name(pipette_name_tuple: Tuple[str, ...]) -> str:
     elif "96" in pipette_name_tuple:
         return "ninety_six_channel"
     else:
+        if "em" in pipette_name_tuple:
+            return "eight_channel_em"
         return "eight_channel"
 
 
@@ -154,7 +158,6 @@ def version_from_generation(pipette_name_tuple: Tuple[str, ...]) -> PipetteVersi
     )
     model_from_pipette_name = pipette_name_tuple[0]
     channel_from_pipette_name = get_channel_from_pipette_name(pipette_name_tuple)
-
     paths_to_validate = (
         get_shared_data_root() / "pipette" / "definitions" / "2" / "general"
     )
@@ -226,8 +229,8 @@ def convert_to_pipette_name_type(
     channels = channels_from_string(split_pipette_model_or_name[1])
     generation = generation_from_string(split_pipette_model_or_name)
     pipette_type = PipetteModelType[split_pipette_model_or_name[0]]
-
-    return PipetteNameType(pipette_type, channels, generation)
+    oem = PipetteOEMType.get_oem_from_model_str(model_or_name)
+    return PipetteNameType(pipette_type, channels, generation, oem)
 
 
 def convert_pipette_name(
@@ -246,7 +249,12 @@ def convert_pipette_name(
 
     """
     split_pipette_name = name.split("_")
-    channels = channels_from_string(split_pipette_name[1])
+    channels_type = split_pipette_name[1]
+    if len(split_pipette_name) > 2:
+        if split_pipette_name[2] == "em":
+            channels_type = "multi_em"
+
+    channels = channels_from_string(channels_type)
     if provided_version:
         version = version_from_string(provided_version)
     else:
@@ -258,8 +266,8 @@ def convert_pipette_name(
         version = version_from_generation(pipette_name_tuple)
 
     pipette_type = PipetteModelType[split_pipette_name[0]]
-
-    return PipetteModelVersionType(pipette_type, channels, version)
+    oem = PipetteOEMType.get_oem_from_model_str(name)
+    return PipetteModelVersionType(pipette_type, channels, version, oem)
 
 
 def convert_pipette_model(
@@ -296,12 +304,17 @@ def convert_pipette_model(
             pipette_type, parsed_channels, parsed_oem, parsed_version = exploded
             channels = channels_from_string(f"{parsed_channels}_{parsed_oem}")
         version = version_from_string(parsed_version)
+        oem = PipetteOEMType.get_oem_from_model_str(str(model))
     elif model and provided_version:
         pipette_type, parsed_channels = model.split("_")
         channels = channels_from_string(parsed_channels)
         version = version_from_string(provided_version)
+        oem = PipetteOEMType.get_oem_from_model_str(str(model))
     else:
         pipette_type = DEFAULT_MODEL.value
         channels = DEFAULT_CHANNELS
         version = DEFAULT_MODEL_VERSION
-    return PipetteModelVersionType(PipetteModelType[pipette_type], channels, version)
+        oem = DEFAULT_OEM
+    return PipetteModelVersionType(
+        PipetteModelType[pipette_type], channels, version, oem
+    )

@@ -16,14 +16,14 @@ import {
   SPACING,
   LegacyStyledText,
   TYPOGRAPHY,
+  getLabwareDefinitionsFromCommands,
 } from '@opentrons/components'
 
 import { getIsLabwareOffsetCodeSnippetsOn } from '/app/redux/config'
 import { LabwareOffsetTabs } from '/app/organisms/LabwareOffsetTabs'
 import { OffsetVector } from '/app/molecules/OffsetVector'
 import { PythonLabwareOffsetSnippet } from '/app/molecules/PythonLabwareOffsetSnippet'
-import { getDisplayLocation } from '/app/organisms/LabwarePositionCheck/utils/getDisplayLocation'
-import { getLabwareDefinitionsFromCommands } from '/app/local-resources/labware'
+import { getDisplayLocation } from '/app/organisms/LegacyLabwarePositionCheck/utils/getDisplayLocation'
 import type { LabwareOffset } from '@opentrons/api-client'
 import type {
   RunTimeCommand,

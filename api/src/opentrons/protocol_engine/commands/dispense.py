@@ -1,11 +1,12 @@
 """Dispense command request, result, and implementation models."""
 
 from __future__ import annotations
-from typing import TYPE_CHECKING, Optional, Type, Union
+from typing import TYPE_CHECKING, Optional, Type, Union, Any
 from typing_extensions import Literal
 
 
 from pydantic import Field
+from pydantic.json_schema import SkipJsonSchema
 
 from ..state.update_types import StateUpdate, CLEAR
 from .pipetting_common import (
@@ -15,6 +16,7 @@ from .pipetting_common import (
     BaseLiquidHandlingResult,
     OverpressureError,
     dispense_in_place,
+    DEFAULT_CORRECTION_VOLUME,
 )
 from .movement_common import (
     LiquidHandlingWellLocationMixin,
@@ -39,14 +41,19 @@ if TYPE_CHECKING:
 DispenseCommandType = Literal["dispense"]
 
 
+def _remove_default(s: dict[str, Any]) -> None:
+    s.pop("default", None)
+
+
 class DispenseParams(
     PipetteIdMixin, DispenseVolumeMixin, FlowRateMixin, LiquidHandlingWellLocationMixin
 ):
     """Payload required to dispense to a specific well."""
 
-    pushOut: Optional[float] = Field(
+    pushOut: float | SkipJsonSchema[None] = Field(
         None,
         description="push the plunger a small amount farther than necessary for accurate low-volume dispensing",
+        json_schema_extra=_remove_default,
     )
 
 
@@ -111,6 +118,7 @@ class DispenseImplementation(AbstractCommandImpl[DispenseParams, _ExecuteReturn]
             },
             pipetting=self._pipetting,
             model_utils=self._model_utils,
+            correction_volume=params.correctionVolume or DEFAULT_CORRECTION_VOLUME,
         )
 
         if isinstance(dispense_result, DefinedErrorData):
@@ -172,7 +180,7 @@ class Dispense(
 
     commandType: DispenseCommandType = "dispense"
     params: DispenseParams
-    result: Optional[DispenseResult]
+    result: Optional[DispenseResult] = None
 
     _ImplementationCls: Type[DispenseImplementation] = DispenseImplementation
 

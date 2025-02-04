@@ -1,4 +1,5 @@
 """Can messenger class."""
+
 from __future__ import annotations
 import asyncio
 from inspect import Traceback
@@ -152,7 +153,7 @@ class AcknowledgeListener:
             )
         except asyncio.TimeoutError:
             log.error(
-                f"Message did not receive ack for message index {self._message.payload.message_index}"
+                f"Message did not receive ack for message index {self._message.payload.message_index} Missing node(s) {self._expected_nodes}"
             )
             return ErrorCode.timeout
         finally:
@@ -278,12 +279,14 @@ class CanMessenger:
         exclusive: bool = False,
     ) -> ErrorCode:
         if len(expected_nodes) == 0:
-            log.warning("Expected Nodes should have been specified")
             if node_id == NodeId.broadcast:
                 if not expected_nodes:
                     expected_nodes = list(self._known_nodes)
             else:
                 expected_nodes = [node_id]
+            log.warning(
+                f"Expected Nodes should have been specified, Setting expected nodes to {expected_nodes}"
+            )
 
         listener = AcknowledgeListener(
             can_messenger=self,
@@ -361,7 +364,11 @@ class CanMessenger:
                 return
             except BaseException:
                 log.exception("Exception in read")
+                await asyncio.sleep(0)
                 continue
+            else:
+                log.error("read task finished, this should not happen")
+                await asyncio.sleep(0)
 
     async def _read_task(self) -> None:
         """Read task."""

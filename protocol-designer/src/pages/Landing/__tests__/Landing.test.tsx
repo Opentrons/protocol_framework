@@ -35,7 +35,10 @@ const render = () => {
 
 describe('Landing', () => {
   beforeEach(() => {
-    vi.mocked(getHasOptedIn).mockReturnValue(false)
+    vi.mocked(getHasOptedIn).mockReturnValue({
+      hasOptedIn: false,
+      appVersion: '8.2.1',
+    })
     vi.mocked(getFileMetadata).mockReturnValue({})
     vi.mocked(loadProtocolFile).mockReturnValue(vi.fn())
     vi.mocked(useAnnouncements).mockReturnValue({} as any)
@@ -55,7 +58,7 @@ describe('Landing', () => {
     )
     fireEvent.click(screen.getByRole('button', { name: 'Create a protocol' }))
     expect(vi.mocked(toggleNewProtocolModal)).toHaveBeenCalled()
-    screen.getByText('Edit existing protocol')
+    screen.getByText('Import existing protocol')
     screen.getByRole('img', { name: 'welcome image' })
   })
 

@@ -1,8 +1,10 @@
-import type * as React from 'react'
-
 import { MAGNETIC_MODULE_V1, MAGNETIC_MODULE_V2 } from '@opentrons/shared-data'
 
 import {
+  ABSORBANCE_READER_INITIALIZE,
+  ABSORBANCE_READER_MAX_WAVELENGTH_NM,
+  ABSORBANCE_READER_MIN_WAVELENGTH_NM,
+  ABSORBANCE_READER_READ,
   MIN_ENGAGE_HEIGHT_V1,
   MAX_ENGAGE_HEIGHT_V1,
   MIN_ENGAGE_HEIGHT_V2,
@@ -17,6 +19,7 @@ import { canPipetteUseLabware } from '../../utils'
 import { getWellRatio } from '../utils'
 import { getTimeFromForm } from '../utils/getTimeFromForm'
 
+import type { ReactNode } from 'react'
 import type { LabwareDefinition2, PipetteV2Specs } from '@opentrons/shared-data'
 import type { LabwareEntities, PipetteEntity } from '@opentrons/step-generation'
 import type { StepFieldName } from '../../form-types'
@@ -51,7 +54,7 @@ export type FormErrorKey =
 
 export interface FormError {
   title: string
-  body?: React.ReactNode
+  body?: ReactNode
   dependentFields: StepFieldName[]
   showAtField?: boolean
   showAtForm?: boolean
@@ -119,6 +122,8 @@ const MODULE_ID_REQUIRED: FormError = {
   title:
     'Module is required. Ensure the appropriate module is present on the deck and selected for this step',
   dependentFields: ['moduleId'],
+  showAtForm: false,
+  showAtField: true,
 }
 const TARGET_TEMPERATURE_REQUIRED: FormError = {
   title: 'Temperature required',
@@ -352,6 +357,48 @@ const BLOWOUT_LOCATION_REQUIRED: FormError = {
   showAtField: true,
   page: 1,
   tab: 'dispense',
+}
+const WAVELENGTH_REQUIRED: FormError = {
+  title: 'Custom wavelength required',
+  dependentFields: ['wavelengths'],
+  showAtForm: false,
+  showAtField: true,
+  page: 1,
+}
+const WAVELENGTH_OUT_OF_RANGE: FormError = {
+  title: 'Value falls outside of accepted range',
+  dependentFields: ['wavelengths'],
+  showAtForm: false,
+  showAtField: true,
+  page: 1,
+}
+const REFERENCE_WAVELENGTH_OUT_OF_RANGE: FormError = {
+  title: 'Value falls outside of accepted range',
+  dependentFields: ['referenceWavelength'],
+  showAtForm: false,
+  showAtField: true,
+  page: 1,
+}
+const REFERENCE_WAVELENGTH_REQUIRED: FormError = {
+  title: 'Custom wavelength required',
+  dependentFields: ['referenceWavelength'],
+  showAtForm: false,
+  showAtField: true,
+  page: 1,
+}
+const FILENAME_REQUIRED: FormError = {
+  title: 'File name required',
+  dependentFields: ['fileName'],
+  showAtForm: false,
+  showAtField: true,
+  page: 1,
+}
+const ABSORBANCE_READER_MODULE_ID_REQUIRED: FormError = {
+  title: 'Module required',
+  dependentFields: ['moduleId'],
+  showAtForm: false,
+  showAtField: true,
+  page: 0,
 }
 
 export interface HydratedFormData {
@@ -776,6 +823,94 @@ export const blowoutLocationRequired = (
     ? BLOWOUT_LOCATION_REQUIRED
     : null
 }
+export const wavelengthRequired = (
+  fields: HydratedFormData
+): FormError | null => {
+  const { absorbanceReaderFormType, wavelengths, mode } = fields
+  if (!wavelengths) {
+    return null
+  }
+  const wavelengthsToCheck = wavelengths.slice(
+    0,
+    mode === 'single' ? 1 : wavelengths.length
+  )
+  return wavelengthsToCheck?.some((wavelength: string[]) => !wavelength) &&
+    absorbanceReaderFormType === ABSORBANCE_READER_INITIALIZE
+    ? WAVELENGTH_REQUIRED
+    : null
+}
+export const referenceWavelengthRequired = (
+  fields: HydratedFormData
+): FormError | null => {
+  const {
+    absorbanceReaderFormType,
+    referenceWavelength,
+    referenceWavelengthActive,
+  } = fields
+  return referenceWavelengthActive &&
+    !referenceWavelength &&
+    absorbanceReaderFormType === ABSORBANCE_READER_INITIALIZE
+    ? REFERENCE_WAVELENGTH_REQUIRED
+    : null
+}
+export const absorbanceReaderModuleIdRequired = (
+  fields: HydratedFormData
+): FormError | null => {
+  const { moduleId } = fields
+  if (moduleId == null) return ABSORBANCE_READER_MODULE_ID_REQUIRED
+  return null
+}
+export const wavelengthOutOfRange = (
+  fields: HydratedFormData
+): FormError | null => {
+  const { absorbanceReaderFormType, wavelengths, mode } = fields
+  if (
+    !wavelengths ||
+    absorbanceReaderFormType !== ABSORBANCE_READER_INITIALIZE
+  ) {
+    return null
+  }
+  const wavelengthsToCheck = wavelengths.slice(
+    0,
+    mode === 'single' ? 1 : wavelengths.length
+  )
+  return wavelengthsToCheck.some(
+    (wavelength: any) =>
+      getIsOutOfRange(
+        wavelength,
+        ABSORBANCE_READER_MIN_WAVELENGTH_NM,
+        ABSORBANCE_READER_MAX_WAVELENGTH_NM
+      ) && wavelength
+  )
+    ? WAVELENGTH_OUT_OF_RANGE
+    : null
+}
+export const referenceWavelengthOutOfRange = (
+  fields: HydratedFormData
+): FormError | null => {
+  const { absorbanceReaderFormType, referenceWavelength } = fields
+  if (
+    !referenceWavelength ||
+    absorbanceReaderFormType !== ABSORBANCE_READER_INITIALIZE
+  ) {
+    return null
+  }
+  return getIsOutOfRange(
+    referenceWavelength,
+    ABSORBANCE_READER_MIN_WAVELENGTH_NM,
+    ABSORBANCE_READER_MAX_WAVELENGTH_NM
+  )
+    ? REFERENCE_WAVELENGTH_OUT_OF_RANGE
+    : null
+}
+export const fileNameRequired = (
+  fields: HydratedFormData
+): FormError | null => {
+  const { absorbanceReaderFormType, fileName } = fields
+  return !fileName && absorbanceReaderFormType === ABSORBANCE_READER_READ
+    ? FILENAME_REQUIRED
+    : null
+}
 
 /*******************
  **     Helpers    **
@@ -790,3 +925,12 @@ export const composeErrors: ComposeErrors = (
     const possibleError = errorChecker(value)
     return possibleError ? [...acc, possibleError] : acc
   }, [])
+
+export const getIsOutOfRange = (
+  value: any,
+  min: number,
+  max: number
+): boolean => {
+  const castValue = Number(value)
+  return castValue < min || castValue > max
+}

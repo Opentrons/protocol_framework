@@ -1,4 +1,3 @@
-import type * as React from 'react'
 import { describe, it, beforeEach, vi, afterEach, expect } from 'vitest'
 import { I18nextProvider } from 'react-i18next'
 import { renderHook } from '@testing-library/react'
@@ -16,6 +15,8 @@ import {
 import { FLOWS } from '../constants'
 import { usePipetteFlowWizardHeaderText } from '../hooks'
 
+import type { FunctionComponent, ReactNode } from 'react'
+
 const BASE_PROPS_FOR_RUN_SETUP = {
   flowType: FLOWS.CALIBRATE,
   selectedPipette: SINGLE_MOUNT_PIPETTES,
@@ -23,7 +24,7 @@ const BASE_PROPS_FOR_RUN_SETUP = {
 }
 
 describe('usePipetteFlowWizardHeaderText', () => {
-  let wrapper: React.FunctionComponent<{ children: React.ReactNode }>
+  let wrapper: FunctionComponent<{ children: ReactNode }>
   beforeEach(() => {
     wrapper = ({ children }) => (
       <I18nextProvider i18n={i18n}>{children}</I18nextProvider>
@@ -199,7 +200,7 @@ describe('usePipetteFlowWizardHeaderText', () => {
       }
     )
     expect(result.current).toEqual(
-      'Detach Flex 1-Channel 1000 μL and Attach 96-Channel Pipette'
+      'Detach Flex 1-Channel 1000 µL and Attach 96-Channel Pipette'
     )
   })
   it('should return correct title for detaching single mount', () => {

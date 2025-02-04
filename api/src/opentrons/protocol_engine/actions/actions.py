@@ -8,11 +8,11 @@ from datetime import datetime
 from enum import Enum
 from typing import List, Optional, Union
 
-from opentrons.protocols.models import LabwareDefinition
+from opentrons_shared_data.errors import EnumeratedError
+from opentrons_shared_data.labware.labware_definition import LabwareDefinition
+
 from opentrons.hardware_control.types import DoorState
 from opentrons.hardware_control.modules import LiveData
-
-from opentrons_shared_data.errors import EnumeratedError
 
 from ..commands import (
     Command,
@@ -23,11 +23,10 @@ from ..error_recovery_policy import ErrorRecoveryPolicy, ErrorRecoveryType
 from ..notes.notes import CommandNote
 from ..state.update_types import StateUpdate
 from ..types import (
-    LabwareOffsetCreate,
+    LabwareOffsetCreateInternal,
     ModuleDefinition,
     Liquid,
     DeckConfigurationType,
-    AddressableAreaLocation,
 )
 
 
@@ -207,7 +206,7 @@ class AddLabwareOffsetAction:
 
     labware_offset_id: str
     created_at: datetime
-    request: LabwareOffsetCreate
+    request: LabwareOffsetCreateInternal
 
 
 @dataclasses.dataclass(frozen=True)
@@ -235,12 +234,12 @@ class SetDeckConfigurationAction:
 class AddAddressableAreaAction:
     """Add a single addressable area to state.
 
-    This differs from the deck configuration in ProvideDeckConfigurationAction which
+    This differs from the deck configuration in SetDeckConfigurationAction which
     sends over a mapping of cutout fixtures. This action will only load one addressable
     area and that should be pre-validated before being sent via the action.
     """
 
-    addressable_area: AddressableAreaLocation
+    addressable_area_name: str
 
 
 @dataclasses.dataclass(frozen=True)

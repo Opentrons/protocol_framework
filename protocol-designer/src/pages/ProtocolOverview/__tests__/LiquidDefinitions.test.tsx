@@ -6,7 +6,10 @@ import { i18n } from '../../../assets/localization'
 import { LiquidDefinitions } from '../LiquidDefinitions'
 
 import type { ComponentProps } from 'react'
+import type { LiquidEntities } from '@opentrons/step-generation'
 import type { InfoScreen } from '@opentrons/components'
+
+vi.mock('../../../feature-flags/selectors')
 
 vi.mock('@opentrons/components', async importOriginal => {
   const actual = await importOriginal<typeof InfoScreen>()
@@ -16,27 +19,28 @@ vi.mock('@opentrons/components', async importOriginal => {
   }
 })
 
-const mockAllIngredientGroupFields = {
+const mockAllIngredientGroupFields: LiquidEntities = {
   '0': {
-    name: 'EtOH',
+    displayName: 'EtOH',
     displayColor: '#b925ff',
     description: 'Immer fisch Hergestllter EtOH',
-    serialize: false,
     liquidGroupId: '0',
+    pythonName: 'liquid_1',
   },
   '1': {
-    name: '10mM Tris pH8,5',
+    displayName: '10mM Tris pH8,5',
     displayColor: '#ffd600',
     description: null,
-    serialize: false,
     liquidGroupId: '1',
+    pythonName: 'liquid_2',
   },
   '2': {
-    name: 'Amplicon PCR sample + AMPure XP beads',
+    displayName: 'Amplicon PCR sample + AMPure XP beads',
     displayColor: '#9dffd8',
     description: '25µl Amplicon PCR + 20 µl AMPure XP beads',
-    serialize: false,
+    liquidClass: 'Water',
     liquidGroupId: '2',
+    pythonName: 'liquid_3',
   },
 }
 

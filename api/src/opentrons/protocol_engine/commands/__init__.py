@@ -14,6 +14,7 @@ and/or schema generation.
 """
 
 from . import absorbance_reader
+from . import flex_stacker
 from . import heater_shaker
 from . import magnetic_module
 from . import temperature_module
@@ -35,8 +36,10 @@ from .command import (
 
 from .command_unions import (
     Command,
+    CommandAdapter,
     CommandParams,
     CommandCreate,
+    CommandCreateAdapter,
     CommandResult,
     CommandType,
     CommandDefinedErrorData,
@@ -56,6 +59,14 @@ from .aspirate import (
     AspirateCreate,
     AspirateResult,
     AspirateCommandType,
+)
+
+from .aspirate_while_tracking import (
+    AspirateWhileTracking,
+    AspirateWhileTrackingParams,
+    AspirateWhileTrackingCreate,
+    AspirateWhileTrackingResult,
+    AspirateWhileTrackingCommandType,
 )
 
 from .aspirate_in_place import (
@@ -88,6 +99,14 @@ from .dispense import (
     DispenseCreate,
     DispenseResult,
     DispenseCommandType,
+)
+
+from .dispense_while_tracking import (
+    DispenseWhileTracking,
+    DispenseWhileTrackingParams,
+    DispenseWhileTrackingCreate,
+    DispenseWhileTrackingResult,
+    DispenseWhileTrackingCommandType,
 )
 
 from .dispense_in_place import (
@@ -147,6 +166,15 @@ from .load_liquid import (
     LoadLiquidImplementation,
 )
 
+from .load_liquid_class import (
+    LoadLiquidClass,
+    LoadLiquidClassParams,
+    LoadLiquidClassCreate,
+    LoadLiquidClassResult,
+    LoadLiquidClassCommandType,
+    LoadLiquidClassImplementation,
+)
+
 from .load_module import (
     LoadModule,
     LoadModuleParams,
@@ -161,6 +189,22 @@ from .load_pipette import (
     LoadPipetteCreate,
     LoadPipetteResult,
     LoadPipetteCommandType,
+)
+
+from .load_lid_stack import (
+    LoadLidStack,
+    LoadLidStackParams,
+    LoadLidStackCreate,
+    LoadLidStackResult,
+    LoadLidStackCommandType,
+)
+
+from .load_lid import (
+    LoadLid,
+    LoadLidParams,
+    LoadLidCreate,
+    LoadLidResult,
+    LoadLidCommandType,
 )
 
 from .move_labware import (
@@ -332,6 +376,14 @@ from .verify_tip_presence import (
     VerifyTipPresenceCommandType,
 )
 
+from .get_next_tip import (
+    GetNextTip,
+    GetNextTipCreate,
+    GetNextTipParams,
+    GetNextTipResult,
+    GetNextTipCommandType,
+)
+
 from .liquid_probe import (
     LiquidProbe,
     LiquidProbeParams,
@@ -345,11 +397,35 @@ from .liquid_probe import (
     TryLiquidProbeCommandType,
 )
 
+from .evotip_seal_pipette import (
+    EvotipSealPipette,
+    EvotipSealPipetteParams,
+    EvotipSealPipetteCreate,
+    EvotipSealPipetteResult,
+    EvotipSealPipetteCommandType,
+)
+from .evotip_unseal_pipette import (
+    EvotipUnsealPipette,
+    EvotipUnsealPipetteParams,
+    EvotipUnsealPipetteCreate,
+    EvotipUnsealPipetteResult,
+    EvotipUnsealPipetteCommandType,
+)
+from .evotip_dispense import (
+    EvotipDispense,
+    EvotipDispenseParams,
+    EvotipDispenseCreate,
+    EvotipDispenseResult,
+    EvotipDispenseCommandType,
+)
+
 __all__ = [
     # command type unions
     "Command",
+    "CommandAdapter",
     "CommandParams",
     "CommandCreate",
+    "CommandCreateAdapter",
     "CommandResult",
     "CommandType",
     "CommandPrivateResult",
@@ -376,6 +452,12 @@ __all__ = [
     "AspirateParams",
     "AspirateResult",
     "AspirateCommandType",
+    # aspirate while tracking command models
+    "AspirateWhileTracking",
+    "AspirateWhileTrackingCreate",
+    "AspirateWhileTrackingParams",
+    "AspirateWhileTrackingResult",
+    "AspirateWhileTrackingCommandType",
     # aspirate in place command models
     "AspirateInPlace",
     "AspirateInPlaceCreate",
@@ -400,6 +482,12 @@ __all__ = [
     "DispenseParams",
     "DispenseResult",
     "DispenseCommandType",
+    # dispense while tracking command models
+    "DispenseWhileTracking",
+    "DispenseWhileTrackingCreate",
+    "DispenseWhileTrackingParams",
+    "DispenseWhileTrackingResult",
+    "DispenseWhileTrackingCommandType",
     # dispense in place command models
     "DispenseInPlace",
     "DispenseInPlaceCreate",
@@ -455,6 +543,20 @@ __all__ = [
     "LoadPipetteResult",
     "LoadPipetteCommandType",
     "LoadPipettePrivateResult",
+    # load lid stack command models
+    "LoadLidStack",
+    "LoadLidStackCreate",
+    "LoadLidStackParams",
+    "LoadLidStackResult",
+    "LoadLidStackCommandType",
+    "LoadLidStackPrivateResult",
+    # load lid command models
+    "LoadLid",
+    "LoadLidCreate",
+    "LoadLidParams",
+    "LoadLidResult",
+    "LoadLidCommandType",
+    "LoadLidPrivateResult",
     # move labware command models
     "MoveLabware",
     "MoveLabwareCreate",
@@ -553,9 +655,17 @@ __all__ = [
     "LoadLiquidParams",
     "LoadLiquidResult",
     "LoadLiquidCommandType",
+    # load liquid class command models
+    "LoadLiquidClass",
+    "LoadLiquidClassParams",
+    "LoadLiquidClassCreate",
+    "LoadLiquidClassResult",
+    "LoadLiquidClassImplementation",
+    "LoadLiquidClassCommandType",
     # hardware control command models
     # hardware module command bundles
     "absorbance_reader",
+    "flex_stacker",
     "heater_shaker",
     "magnetic_module",
     "temperature_module",
@@ -595,6 +705,12 @@ __all__ = [
     "VerifyTipPresenceParams",
     "VerifyTipPresenceResult",
     "VerifyTipPresenceCommandType",
+    # get next tip command bundle
+    "GetNextTip",
+    "GetNextTipCreate",
+    "GetNextTipParams",
+    "GetNextTipResult",
+    "GetNextTipCommandType",
     # liquid probe command bundle
     "LiquidProbe",
     "LiquidProbeParams",
@@ -606,4 +722,22 @@ __all__ = [
     "TryLiquidProbeCreate",
     "TryLiquidProbeResult",
     "TryLiquidProbeCommandType",
+    # evotip seal command bundle
+    "EvotipSealPipette",
+    "EvotipSealPipetteParams",
+    "EvotipSealPipetteCreate",
+    "EvotipSealPipetteResult",
+    "EvotipSealPipetteCommandType",
+    # evotip unseal command bundle
+    "EvotipUnsealPipette",
+    "EvotipUnsealPipetteParams",
+    "EvotipUnsealPipetteCreate",
+    "EvotipUnsealPipetteResult",
+    "EvotipUnsealPipetteCommandType",
+    # evotip dispense command bundle
+    "EvotipDispense",
+    "EvotipDispenseParams",
+    "EvotipDispenseCreate",
+    "EvotipDispenseResult",
+    "EvotipDispenseCommandType",
 ]

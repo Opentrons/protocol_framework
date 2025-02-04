@@ -3,23 +3,12 @@ import { useAllCommandsQuery } from '@opentrons/react-api-client'
 import { useNotifyDataReady } from '../useNotifyDataReady'
 
 import type { UseQueryResult } from 'react-query'
-import type {
-  CommandsData,
-  GetRunCommandsParams,
-  GetCommandsParams,
-} from '@opentrons/api-client'
+import type { CommandsData, GetRunCommandsParams } from '@opentrons/api-client'
 import type { QueryOptionsWithPolling } from '../useNotifyDataReady'
-
-const DEFAULT_PAGE_LENGTH = 30
-
-export const DEFAULT_PARAMS: GetCommandsParams = {
-  cursor: null,
-  pageLength: DEFAULT_PAGE_LENGTH,
-}
 
 export function useNotifyAllCommandsQuery<TError = Error>(
   runId: string | null,
-  params?: GetRunCommandsParams | null,
+  params?: GetRunCommandsParams,
   options: QueryOptionsWithPolling<CommandsData, TError> = {}
 ): UseQueryResult<CommandsData, TError> {
   // Assume the useAllCommandsQuery() response can only change when the command links change.
@@ -32,19 +21,8 @@ export function useNotifyAllCommandsQuery<TError = Error>(
     topic: 'robot-server/runs/commands_links',
     options,
   })
-  const nullCheckedParams = params ?? DEFAULT_PARAMS
 
-  const nullCheckedFixitCommands = params?.includeFixitCommands ?? null
-  const finalizedNullCheckParams = {
-    ...nullCheckedParams,
-    includeFixitCommands: nullCheckedFixitCommands,
-  }
-
-  const httpQueryResult = useAllCommandsQuery(
-    runId,
-    finalizedNullCheckParams,
-    queryOptionsNotify
-  )
+  const httpQueryResult = useAllCommandsQuery(runId, params, queryOptionsNotify)
 
   if (shouldRefetch) {
     void httpQueryResult.refetch()

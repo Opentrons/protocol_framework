@@ -24,6 +24,7 @@ from opentrons.hardware_control.modules.types import (
     ModuleType,
     AbsorbanceReaderStatus,
     LiveData,
+    AbsorbanceReaderData,
     UploadFunction,
 )
 from opentrons.hardware_control.modules.errors import AbsorbanceReaderDisconnectedError
@@ -243,17 +244,18 @@ class AbsorbanceReader(mod_abc.AbstractModule):
     def live_data(self) -> LiveData:
         """Return a dict of the module's dynamic information"""
         conf = self._measurement_config.data if self._measurement_config else dict()
+        data: AbsorbanceReaderData = {
+            "uptime": self.uptime,
+            "deviceStatus": self.status.value,
+            "lidStatus": self.lid_status.value,
+            "platePresence": self.plate_presence.value,
+            "measureMode": conf.get("measureMode", ""),
+            "sampleWavelengths": conf.get("sampleWavelengths", []),
+            "referenceWavelength": conf.get("referenceWavelength", 0),
+        }
         return {
             "status": self.status.value,
-            "data": {
-                "uptime": self.uptime,
-                "deviceStatus": self.status.value,
-                "lidStatus": self.lid_status.value,
-                "platePresence": self.plate_presence.value,
-                "measureMode": conf.get("measureMode", ""),
-                "sampleWavelengths": conf.get("sampleWavelengths", []),
-                "referenceWavelength": conf.get("referenceWavelength", 0),
-            },
+            "data": data,
         }
 
     @property
@@ -312,6 +314,8 @@ class AbsorbanceReader(mod_abc.AbstractModule):
         log.debug(f"Updating {self.name}: {self.port} with {firmware_file_path}")
         self._updating = True
         success, res = await self._driver.update_firmware(firmware_file_path)
+        # it takes time for the plate reader to re-init after an update.
+        await asyncio.sleep(10)
         self._device_info = await self._driver.get_device_info()
         await self._poller.start()
         self._updating = False

@@ -1,7 +1,6 @@
-import type * as React from 'react'
 import { useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
-import { css } from 'styled-components'
+import styled from 'styled-components'
 import {
   ALIGN_CENTER,
   BORDERS,
@@ -23,11 +22,21 @@ import { Divider } from '/app/atoms/structure'
 import { labwareImages } from '/app/local-resources/labware'
 import { equipmentImages } from './equipmentImages'
 
+import type { ComponentProps } from 'react'
 import type { StyleProps } from '@opentrons/components'
+
 interface WizardRequiredEquipmentListProps extends StyleProps {
-  equipmentList: Array<React.ComponentProps<typeof RequiredEquipmentCard>>
+  equipmentList: Array<ComponentProps<typeof RequiredEquipmentCard>>
   footer?: string
 }
+
+const StyledEquipmentImage = styled.img<{ isEquipmentImage: boolean }>`
+  max-width: 100%;
+  max-height: 100%;
+  flex: ${props => (props.isEquipmentImage ? '0' : '0 1 5rem')};
+  display: block;
+`
+
 export function WizardRequiredEquipmentList(
   props: WizardRequiredEquipmentListProps
 ): JSX.Element {
@@ -142,20 +151,15 @@ function RequiredEquipmentCard(props: RequiredEquipmentCardProps): JSX.Element {
             alignItems={ALIGN_CENTER}
             marginRight={SPACING.spacing16}
           >
-            <img
-              css={css`
-                max-width: 100%;
-                max-height: 100%;
-                flex: ${loadName in equipmentImages ? `0` : `0 1 5rem`};
-                display: block;
-              `}
+            <StyledEquipmentImage
+              isEquipmentImage={loadName in equipmentImages}
               src={imageSrc}
               alt={displayName}
             />
           </Flex>
         ) : null}
         <Flex
-          flex="0 1 70%"
+          flex={imageSrc == null ? '0 1 100%' : '0 1 70%'}
           flexDirection={DIRECTION_COLUMN}
           justifyContent={JUSTIFY_SPACE_AROUND}
         >

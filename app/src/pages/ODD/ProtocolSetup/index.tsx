@@ -1,9 +1,10 @@
-import * as React from 'react'
+import { useEffect, useState } from 'react'
 import last from 'lodash/last'
 import { useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
 import { useNavigate, useParams } from 'react-router-dom'
 import first from 'lodash/first'
+import { css } from 'styled-components'
 
 import { RUN_STATUS_IDLE, RUN_STATUS_STOPPED } from '@opentrons/api-client'
 import {
@@ -56,7 +57,7 @@ import {
   getIncompleteInstrumentCount,
   ViewOnlyParameters,
 } from '/app/organisms/ODD/ProtocolSetup'
-import { useLaunchLPC } from '/app/organisms/LabwarePositionCheck/useLaunchLPC'
+import { useLaunchLegacyLPC } from '/app/organisms/LegacyLabwarePositionCheck/useLaunchLegacyLPC'
 import { ConfirmCancelRunModal } from '/app/organisms/ODD/RunningProtocol'
 import { useRunControls } from '/app/organisms/RunTimeControl/hooks'
 import { useToaster } from '/app/organisms/ToasterOven'
@@ -67,7 +68,7 @@ import {
   ANALYTICS_PROTOCOL_RUN_ACTION,
   useTrackEvent,
 } from '/app/redux/analytics'
-import { getIsHeaterShakerAttached } from '/app/redux/config'
+import { getIsHeaterShakerAttached, useFeatureFlag } from '/app/redux/config'
 import { ConfirmAttachedModal } from './ConfirmAttachedModal'
 import { ConfirmSetupStepsCompleteModal } from './ConfirmSetupStepsCompleteModal'
 import { getLatestCurrentOffsets } from '/app/transformations/runs'
@@ -82,7 +83,16 @@ import {
   useProtocolAnalysisErrors,
 } from '/app/resources/runs'
 import { useScrollPosition } from '/app/local-resources/dom-utils'
+import {
+  getLabwareSetupItemGroups,
+  getProtocolUsesGripper,
+  useRequiredProtocolHardwareFromAnalysis,
+  useMissingProtocolHardwareFromAnalysis,
+} from '/app/transformations/commands'
+import { useLPCFlows, LPCFlows } from '/app/organisms/LabwarePositionCheck'
 
+import type { Dispatch, SetStateAction } from 'react'
+import type { FlattenSimpleInterpolation } from 'styled-components'
 import type { Run } from '@opentrons/api-client'
 import type { CutoutFixtureId, CutoutId } from '@opentrons/shared-data'
 import type { OnDeviceRouteParams } from '/app/App/types'
@@ -92,19 +102,13 @@ import type {
   ProtocolHardware,
   ProtocolFixture,
 } from '/app/transformations/commands'
-import {
-  getLabwareSetupItemGroups,
-  getProtocolUsesGripper,
-  useRequiredProtocolHardwareFromAnalysis,
-  useMissingProtocolHardwareFromAnalysis,
-} from '/app/transformations/commands'
 
 const FETCH_DURATION_MS = 5000
 
 const ANALYSIS_POLL_MS = 5000
 interface PrepareToRunProps {
   runId: string
-  setSetupScreen: React.Dispatch<React.SetStateAction<SetupScreens>>
+  setSetupScreen: Dispatch<SetStateAction<SetupScreens>>
   confirmAttachment: () => void
   confirmStepsComplete: () => void
   play: () => void
@@ -147,7 +151,7 @@ function PrepareToRun({
   const [
     isPollingForCompletedAnalysis,
     setIsPollingForCompletedAnalysis,
-  ] = React.useState<boolean>(mostRecentAnalysisSummary?.status !== 'completed')
+  ] = useState<boolean>(mostRecentAnalysisSummary?.status !== 'completed')
 
   const {
     data: mostRecentAnalysis = null,
@@ -165,7 +169,7 @@ function PrepareToRun({
     navigate('/protocols')
   }
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (mostRecentAnalysis?.status === 'completed') {
       setIsPollingForCompletedAnalysis(false)
     } else {
@@ -229,10 +233,9 @@ function PrepareToRun({
       parameter.type === 'csv_file' || parameter.value !== parameter.default
   )
 
-  const [
-    showConfirmCancelModal,
-    setShowConfirmCancelModal,
-  ] = React.useState<boolean>(false)
+  const [showConfirmCancelModal, setShowConfirmCancelModal] = useState<boolean>(
+    false
+  )
 
   const deckConfigCompatibility = useDeckConfigurationCompatibility(
     robotType,
@@ -658,6 +661,7 @@ export function ProtocolSetup(): JSX.Element {
   const { runId } = useParams<
     keyof OnDeviceRouteParams
   >() as OnDeviceRouteParams
+  const isNewLPC = useFeatureFlag('lpcRedesign')
   const { data: runRecord } = useNotifyRunQuery(runId, { staleTime: Infinity })
   const { analysisErrors } = useProtocolAnalysisErrors(runId)
   const { t } = useTranslation(['protocol_setup'])
@@ -670,7 +674,7 @@ export function ProtocolSetup(): JSX.Element {
   const [
     showAnalysisFailedModal,
     setShowAnalysisFailedModal,
-  ] = React.useState<boolean>(true)
+  ] = useState<boolean>(true)
   const robotType = useRobotType(robotName)
   const attachedModules =
     useAttachedModules({
@@ -684,7 +688,7 @@ export function ProtocolSetup(): JSX.Element {
   const [
     isPollingForCompletedAnalysis,
     setIsPollingForCompletedAnalysis,
-  ] = React.useState<boolean>(mostRecentAnalysisSummary?.status !== 'completed')
+  ] = useState<boolean>(mostRecentAnalysisSummary?.status !== 'completed')
 
   const {
     data: mostRecentAnalysis = null,
@@ -699,7 +703,7 @@ export function ProtocolSetup(): JSX.Element {
 
   const areLiquidsInProtocol = (mostRecentAnalysis?.liquids?.length ?? 0) > 0
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (mostRecentAnalysis?.status === 'completed') {
       setIsPollingForCompletedAnalysis(false)
     } else {
@@ -735,11 +739,28 @@ export function ProtocolSetup(): JSX.Element {
     protocolRecord?.data.files[0].name ??
     ''
 
-  const { launchLPC, LPCWizard } = useLaunchLPC(runId, robotType, protocolName)
+  const { launchLegacyLPC, LegacyLPCWizard } = useLaunchLegacyLPC(
+    runId,
+    robotType,
+    protocolName
+  )
+  const { launchLPC, showLPC, lpcProps } = useLPCFlows({
+    runId,
+    robotType,
+    protocolName,
+  })
+
+  const { trackProtocolRunEvent } = useTrackProtocolRunEvent(runId, robotName)
+  const robotAnalyticsData = useRobotAnalyticsData(robotName)
+
   const handleProceedToRunClick = (): void => {
     trackEvent({
       name: ANALYTICS_PROTOCOL_PROCEED_TO_RUN,
       properties: { robotSerialNumber },
+    })
+    trackProtocolRunEvent({
+      name: ANALYTICS_PROTOCOL_RUN_ACTION.START,
+      properties: robotAnalyticsData ?? {},
     })
     play()
   }
@@ -754,14 +775,14 @@ export function ProtocolSetup(): JSX.Element {
     handleProceedToRunClick,
     !configBypassHeaterShakerAttachmentConfirmation
   )
-  const [cutoutId, setCutoutId] = React.useState<CutoutId | null>(null)
-  const [providedFixtureOptions, setProvidedFixtureOptions] = React.useState<
+  const [cutoutId, setCutoutId] = useState<CutoutId | null>(null)
+  const [providedFixtureOptions, setProvidedFixtureOptions] = useState<
     CutoutFixtureId[]
   >([])
   // TODO(jh 10-31-24): Refactor the below to utilize useMissingStepsModal.
-  const [labwareConfirmed, setLabwareConfirmed] = React.useState<boolean>(false)
-  const [liquidsConfirmed, setLiquidsConfirmed] = React.useState<boolean>(false)
-  const [offsetsConfirmed, setOffsetsConfirmed] = React.useState<boolean>(false)
+  const [labwareConfirmed, setLabwareConfirmed] = useState<boolean>(false)
+  const [liquidsConfirmed, setLiquidsConfirmed] = useState<boolean>(false)
+  const [offsetsConfirmed, setOffsetsConfirmed] = useState<boolean>(false)
   const missingSteps = [
     !offsetsConfirmed ? t('applied_labware_offsets') : null,
     !labwareConfirmed ? t('labware_placement') : null,
@@ -779,9 +800,7 @@ export function ProtocolSetup(): JSX.Element {
   const isHeaterShakerInProtocol = useIsHeaterShakerInProtocol()
 
   // orchestrate setup subpages/components
-  const [setupScreen, setSetupScreen] = React.useState<SetupScreens>(
-    'prepare to run'
-  )
+  const [setupScreen, setSetupScreen] = useState<SetupScreens>('prepare to run')
   const setupComponentByScreen = {
     'prepare to run': (
       <PrepareToRun
@@ -813,8 +832,16 @@ export function ProtocolSetup(): JSX.Element {
         runId={runId}
         setSetupScreen={setSetupScreen}
         lpcDisabledReason={lpcDisabledReason}
-        launchLPC={launchLPC}
-        LPCWizard={LPCWizard}
+        launchLPC={isNewLPC ? launchLPC : launchLegacyLPC}
+        LPCWizard={
+          isNewLPC ? (
+            showLPC ? (
+              <LPCFlows {...lpcProps} />
+            ) : null
+          ) : (
+            LegacyLPCWizard
+          )
+        }
         isConfirmed={offsetsConfirmed}
         setIsConfirmed={setOffsetsConfirmed}
       />
@@ -877,16 +904,29 @@ export function ProtocolSetup(): JSX.Element {
           onConfirmClick={handleProceedToRunClick}
         />
       ) : null}
-      <Flex
-        flexDirection={DIRECTION_COLUMN}
-        padding={
-          setupScreen === 'prepare to run'
-            ? `0 ${SPACING.spacing32} ${SPACING.spacing40}`
-            : `${SPACING.spacing32} ${SPACING.spacing40} ${SPACING.spacing40}`
-        }
-      >
+      <Flex css={buildSetupScreenStyle(setupScreen)}>
         {setupComponentByScreen[setupScreen]}
       </Flex>
     </>
   )
+}
+
+const buildSetupScreenStyle = (
+  setupScreen: SetupScreens
+): FlattenSimpleInterpolation => {
+  const paddingStyle = (): string => {
+    switch (setupScreen) {
+      case 'prepare to run':
+        return `0 ${SPACING.spacing32} ${SPACING.spacing40}`
+      case 'offsets':
+        return ''
+      default:
+        return `${SPACING.spacing32} ${SPACING.spacing40} ${SPACING.spacing40}`
+    }
+  }
+
+  return css`
+    flex-direction: ${DIRECTION_COLUMN};
+    padding: ${paddingStyle()};
+  `
 }

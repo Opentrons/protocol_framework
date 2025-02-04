@@ -8,36 +8,36 @@ import type {
   LabwareDefinition2,
 } from '@opentrons/shared-data'
 
-interface ModuleLabelProps {
+interface LabwareLabelProps {
   position: CoordinateTuple
   labwareDef: LabwareDefinition2
   isSelected: boolean
   isLast: boolean
   nestedLabwareInfo?: DeckLabelProps[]
+  labelText?: string
 }
-export const LabwareLabel = (props: ModuleLabelProps): JSX.Element => {
+export const LabwareLabel = (props: LabwareLabelProps): JSX.Element => {
   const {
     labwareDef,
     position,
     isSelected,
     isLast,
     nestedLabwareInfo = [],
+    labelText = labwareDef.metadata.displayName,
   } = props
   const labelContainerRef = useRef<HTMLDivElement>(null)
   const designerTab = useSelector(getDesignerTab)
   const [labelContainerHeight, setLabelContainerHeight] = useState(0)
 
-  const deckLabels =
-    designerTab === 'startingDeck'
-      ? [
-          ...nestedLabwareInfo,
-          {
-            text: labwareDef.metadata.displayName,
-            isSelected: isSelected,
-            isLast: isLast,
-          },
-        ]
-      : []
+  const deckLabels = [
+    {
+      text: labelText,
+      isSelected: isSelected,
+      isLast: isLast,
+      isZoomed: designerTab === 'startingDeck',
+    },
+    ...nestedLabwareInfo,
+  ]
 
   useEffect(() => {
     if (labelContainerRef.current) {

@@ -1,4 +1,3 @@
-import type * as React from 'react'
 import { useSelector } from 'react-redux'
 import { css } from 'styled-components'
 
@@ -23,7 +22,6 @@ import {
 
 import { getIsOnDevice } from '/app/redux/config'
 
-import type { IconName } from '@opentrons/components'
 import { ModalContentOneColSimpleButtons } from './ModalContentOneColSimpleButtons'
 import { TwoColumn } from './TwoColumn'
 import { OneColumn } from './OneColumn'
@@ -32,6 +30,11 @@ import { ModalContentMixed } from './ModalContentMixed'
 import { DescriptionContent } from './DescriptionContent'
 import { DeckMapContent } from './DeckMapContent'
 import { CategorizedStepContent } from './CategorizedStepContent'
+
+import type { MouseEvent, ReactNode } from 'react'
+import type { FlattenSimpleInterpolation } from 'styled-components'
+import type { IconName } from '@opentrons/components'
+
 export {
   ModalContentOneColSimpleButtons,
   TwoColumn,
@@ -113,17 +116,19 @@ const ERROR_COLOR = COLORS.red50
 
 export interface InterventionModalProps {
   /** Optional modal title heading. Aligned to the left. */
-  titleHeading?: React.ReactNode
+  titleHeading?: ReactNode
   /** Optional modal heading right of the icon. Aligned right if titleHeading is supplied, otherwise aligned left. **/
-  iconHeading?: React.ReactNode
+  iconHeading?: ReactNode
   /** Optional onClick for the icon heading and icon. */
   iconHeadingOnClick?: () => void
   /** overall style hint */
   type?: ModalType
   /** optional icon name */
   iconName?: IconName | null | undefined
+  /* Optional icon size override. */
+  iconSize?: string
   /** modal contents */
-  children: React.ReactNode
+  children: ReactNode
 }
 
 export function InterventionModal({
@@ -133,6 +138,7 @@ export function InterventionModal({
   iconName,
   iconHeading,
   children,
+  iconSize,
 }: InterventionModalProps): JSX.Element {
   const modalType = type ?? 'intervention-required'
   const headerColor =
@@ -154,7 +160,7 @@ export function InterventionModal({
           {...modalStyle}
           flexDirection={DIRECTION_COLUMN}
           border={border}
-          onClick={(e: React.MouseEvent) => {
+          onClick={(e: MouseEvent) => {
             e.stopPropagation()
           }}
         >
@@ -166,7 +172,7 @@ export function InterventionModal({
             {titleHeading}
             <Flex alignItems={ALIGN_CENTER} onClick={iconHeadingOnClick}>
               {iconName != null ? (
-                <Icon name={iconName} css={ICON_STYLE} />
+                <Icon name={iconName} css={buildIconStyle(iconSize)} />
               ) : null}
               {iconHeading != null ? iconHeading : null}
             </Flex>
@@ -178,15 +184,15 @@ export function InterventionModal({
   )
 }
 
-const ICON_STYLE = css`
-  width: ${SPACING.spacing16};
-  height: ${SPACING.spacing16};
+const buildIconStyle = (
+  iconSize: string | undefined
+): FlattenSimpleInterpolation => css`
+  width: ${iconSize ?? SPACING.spacing16};
+  height: ${iconSize ?? SPACING.spacing16};
   margin: ${SPACING.spacing4};
   cursor: ${CURSOR_POINTER};
 
   @media (${RESPONSIVENESS.touchscreenMediaQuerySpecs}) {
-    width: ${SPACING.spacing32};
-    height: ${SPACING.spacing32};
     margin: ${SPACING.spacing12};
   }
 `

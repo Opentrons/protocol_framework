@@ -14,7 +14,7 @@ def test_limit_switches_per_direction(
     direction: Direction,
     report: CSVReport,
     section: str,
-    speed: float = 50.0,
+    speed: float = 10.0,
 ) -> None:
     """Sequence to test the limit switch for one direction."""
     ui.print_header(f"{axis} Limit Switch - {direction} direction")
@@ -26,7 +26,7 @@ def test_limit_switches_per_direction(
 
     # move until the limit switch is reached
     print(f"moving towards {direction} limit switch...\n")
-    driver.move_to_limit_switch(axis, direction, MoveParams(max_speed=speed))
+    driver.move_to_limit_switch(axis, direction, MoveParams(max_speed_discont=speed))
     result = driver.get_limit_switch(axis, direction)
     opposite_result = not driver.get_limit_switch(axis, direction.opposite())
     print(f"{direction} switch triggered: {result}")

@@ -38,6 +38,7 @@ import type {
   CollapsedStepsState,
   HoverableItem,
 } from './reducers'
+import type { Selection } from './actions/types'
 
 export const rootSelector = (state: BaseState): StepsState => state.ui.steps
 // ======= Selectors ===============================================
@@ -102,6 +103,14 @@ export const getHoveredStepId: Selector<StepIdType | null> = createSelector(
   item =>
     item && item.selectionType === SINGLE_STEP_SELECTION_TYPE ? item.id : null
 )
+export const getHoveredDropdownItem: Selector<Selection> = createSelector(
+  rootSelector,
+  (state: StepsState) => state.hoveredDropdownItem
+)
+export const getSelectedDropdownItem: Selector<Selection[]> = createSelector(
+  rootSelector,
+  (state: StepsState) => state.selectedDropdownItem
+)
 
 /** Array of labware (labwareId's) involved in hovered Step, or [] */
 export const getHoveredStepLabware = createSelector(
@@ -136,16 +145,16 @@ export const getHoveredStepLabware = createSelector(
       // only 1 labware
       return [stepArgs.labware]
     }
-    if ('module' in stepArgs) {
+    if ('moduleId' in stepArgs) {
       const labware = getLabwareOnModule(
         initialDeckState,
-        stepArgs.module ?? ''
+        stepArgs.moduleId ?? ''
       )
       return labware ? [labware.id] : []
     }
 
     if (stepArgs.commandCreatorFnName === 'moveLabware') {
-      const src = stepArgs.labware
+      const src = stepArgs.labwareId
       return [src]
     }
 

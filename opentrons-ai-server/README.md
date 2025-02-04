@@ -9,9 +9,7 @@ The Opentrons AI server is a FastAPI server that handles complex tasks like runn
 Currently we have 2 environments: `staging` and `prod`.
 
 - staging: <https://staging.opentrons.ai>
-- prod: <https://opentrons.ai>
-
-If your browser blocks cross site cookies, use <https://ai.opentrons.com> instead.
+- prod: <https://ai.opentrons.com>
 
 ### Environment Variables and Secrets
 
@@ -33,7 +31,7 @@ The opentrons-ai-server/api/settings.py file manages environment variables and s
    1. This allows formatting of of `.md` and `.json` files.
 1. select the python version `pyenv local 3.12.6`.
    1. This will create a `.python-version` file in this directory.
-1. select the node version with `nvs` or `nvm` currently 18.19\*.
+1. select the node version with `nvs` or `nvm` currently 22.11\*.
 1. Install pipenv and python dependencies using `make setup`.
 1. Install docker if you plan to run and build the docker container locally.
 1. `make teardown` will remove the virtual environment but requires pipenv to be installed.

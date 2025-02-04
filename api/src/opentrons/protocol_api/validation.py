@@ -14,13 +14,16 @@ from typing import (
 from math import isinf, isnan
 from typing_extensions import TypeGuard
 
-from opentrons_shared_data.labware.labware_definition import LabwareRole
-from opentrons_shared_data.pipette.types import PipetteNameType
+from opentrons_shared_data.labware.labware_definition import (
+    LabwareDefinition,
+    LabwareRole,
+)
+from opentrons_shared_data.pipette.types import PipetteNameType, PIPETTE_API_NAMES_MAP
 from opentrons_shared_data.robot.types import RobotType
 
 from opentrons.protocols.api_support.types import APIVersion, ThermocyclerStep
 from opentrons.protocols.api_support.util import APIVersionError
-from opentrons.protocols.models import LabwareDefinition
+from opentrons.protocols.advanced_control.transfers.common import TransferTipPolicyV2
 from opentrons.types import (
     Mount,
     DeckSlotName,
@@ -38,6 +41,7 @@ from opentrons.hardware_control.modules.types import (
     HeaterShakerModuleModel,
     MagneticBlockModel,
     AbsorbanceReaderModel,
+    FlexStackerModuleModel,
 )
 
 from .disposal_locations import TrashBin, WasteChute
@@ -52,28 +56,11 @@ _COORDINATE_DECK_LABEL_VERSION_GATE = APIVersion(2, 15)
 # The first APIVersion where Python protocols can specify staging deck slots (e.g. "D4")
 _STAGING_DECK_SLOT_VERSION_GATE = APIVersion(2, 16)
 
-# Mapping of public Python Protocol API pipette load names
-# to names used by the internal Opentrons system
-_PIPETTE_NAMES_MAP = {
-    "p10_single": PipetteNameType.P10_SINGLE,
-    "p10_multi": PipetteNameType.P10_MULTI,
-    "p20_single_gen2": PipetteNameType.P20_SINGLE_GEN2,
-    "p20_multi_gen2": PipetteNameType.P20_MULTI_GEN2,
-    "p50_single": PipetteNameType.P50_SINGLE,
-    "p50_multi": PipetteNameType.P50_MULTI,
-    "p300_single": PipetteNameType.P300_SINGLE,
-    "p300_multi": PipetteNameType.P300_MULTI,
-    "p300_single_gen2": PipetteNameType.P300_SINGLE_GEN2,
-    "p300_multi_gen2": PipetteNameType.P300_MULTI_GEN2,
-    "p1000_single": PipetteNameType.P1000_SINGLE,
-    "p1000_single_gen2": PipetteNameType.P1000_SINGLE_GEN2,
-    "flex_1channel_50": PipetteNameType.P50_SINGLE_FLEX,
-    "flex_8channel_50": PipetteNameType.P50_MULTI_FLEX,
-    "flex_1channel_1000": PipetteNameType.P1000_SINGLE_FLEX,
-    "flex_8channel_1000": PipetteNameType.P1000_MULTI_FLEX,
-    "flex_96channel_1000": PipetteNameType.P1000_96,
-    "flex_96channel_200": PipetteNameType.P200_96,
-}
+# The first APIVersion where Python protocols can load lids as stacks and treat them as attributes of a parent labware.
+LID_STACK_VERSION_GATE = APIVersion(2, 23)
+
+# The first APIVersion where Python protocols can use the Flex Stacker module.
+FLEX_STACKER_VERSION_GATE = APIVersion(2, 23)
 
 
 class InvalidPipetteMountError(ValueError):
@@ -187,7 +174,7 @@ def ensure_pipette_name(pipette_name: str) -> PipetteNameType:
     pipette_name = ensure_lowercase_name(pipette_name)
 
     try:
-        return _PIPETTE_NAMES_MAP[pipette_name]
+        return PIPETTE_API_NAMES_MAP[pipette_name]
     except KeyError:
         raise ValueError(
             f"Cannot resolve {pipette_name} to pipette, must be given valid pipette name."
@@ -362,6 +349,27 @@ def ensure_definition_is_labware(definition: LabwareDefinition) -> None:
         )
 
 
+def ensure_definition_is_lid(definition: LabwareDefinition) -> None:
+    """Ensure that one of the definition's allowed roles is `lid` or that that field is empty."""
+    if LabwareRole.lid not in definition.allowedRoles:
+        raise LabwareDefinitionIsNotLabwareError(
+            f"Labware {definition.parameters.loadName} is not a lid."
+        )
+
+
+def ensure_definition_is_not_lid_after_api_version(
+    api_version: APIVersion, definition: LabwareDefinition
+) -> None:
+    """Ensure that one of the definition's allowed roles is not `lid` or that the API Version is below the release where lid loading was seperated."""
+    if (
+        LabwareRole.lid in definition.allowedRoles
+        and api_version >= LID_STACK_VERSION_GATE
+    ):
+        raise APIVersionError(
+            f"Labware Lids cannot be loaded like standard labware in Protocols written with an API version greater than {LID_STACK_VERSION_GATE}."
+        )
+
+
 _MODULE_ALIASES: Dict[str, ModuleModel] = {
     "magdeck": MagneticModuleModel.MAGNETIC_V1,
     "magnetic module": MagneticModuleModel.MAGNETIC_V1,
@@ -385,6 +393,7 @@ _MODULE_MODELS: Dict[str, ModuleModel] = {
     "heaterShakerModuleV1": HeaterShakerModuleModel.HEATER_SHAKER_V1,
     "magneticBlockV1": MagneticBlockModel.MAGNETIC_BLOCK_V1,
     "absorbanceReaderV1": AbsorbanceReaderModel.ABSORBANCE_READER_V1,
+    "flexStackerModuleV1": FlexStackerModuleModel.FLEX_STACKER_V1,
 }
 
 
@@ -634,3 +643,102 @@ def validate_coordinates(value: Sequence[float]) -> Tuple[float, float, float]:
     if not all(isinstance(v, (float, int)) for v in value):
         raise ValueError("All values in coordinates must be floats.")
     return float(value[0]), float(value[1]), float(value[2])
+
+
+def ensure_new_tip_policy(value: str) -> TransferTipPolicyV2:
+    """Ensure that new_tip value is a valid TransferTipPolicy value."""
+    try:
+        return TransferTipPolicyV2(value.lower())
+    except ValueError:
+        raise ValueError(
+            f"'{value}' is invalid value for 'new_tip'."
+            f" Acceptable value is either 'never', 'once', 'always' or 'per source'."
+        )
+
+
+def _verify_each_list_element_is_valid_location(locations: Sequence[Well]) -> None:
+    from .labware import Well
+
+    for loc in locations:
+        if not isinstance(loc, Well):
+            raise ValueError(
+                f"'{loc}' is not a valid location for transfer."
+                f" Location should be a well instance."
+            )
+
+
+def ensure_valid_flat_wells_list_for_transfer_v2(
+    target: Union[Well, Sequence[Well], Sequence[Sequence[Well]]],
+) -> List[Well]:
+    """Ensure that the given target(s) for a liquid transfer are valid and in a flat list."""
+    from .labware import Well
+
+    if isinstance(target, Well):
+        return [target]
+
+    if isinstance(target, (list, tuple)):
+        if len(target) == 0:
+            raise ValueError("No target well(s) specified for transfer.")
+        if isinstance(target[0], (list, tuple)):
+            for sub_sequence in target:
+                _verify_each_list_element_is_valid_location(sub_sequence)
+            return [loc for sub_sequence in target for loc in sub_sequence]
+        else:
+            _verify_each_list_element_is_valid_location(target)
+            return list(target)
+    else:
+        raise ValueError(
+            f"'{target}' is not a valid location for transfer."
+            f" Location should be a well instance, or a 1-dimensional or"
+            f" 2-dimensional sequence of well instances."
+        )
+
+
+def ensure_valid_trash_location_for_transfer_v2(
+    trash_location: Union[Location, Well, TrashBin, WasteChute]
+) -> Union[Location, TrashBin, WasteChute]:
+    """Ensure that the trash location is valid for v2 transfer."""
+    from .labware import Well
+
+    if isinstance(trash_location, TrashBin) or isinstance(trash_location, WasteChute):
+        return trash_location
+    elif isinstance(trash_location, Well):
+        return trash_location.top()
+    elif isinstance(trash_location, Location):
+        _, maybe_well = trash_location.labware.get_parent_labware_and_well()
+
+        if maybe_well is None:
+            raise TypeError(
+                "If a location is specified as a `types.Location`"
+                " (for instance, as the result of a call to `Well.top()`),"
+                " it must be a location relative to a well,"
+                " since that is where a tip is dropped."
+                " However, the given location doesn't refer to any well."
+            )
+        return trash_location
+    else:
+        raise TypeError(
+            f"If specified, location should be an instance of"
+            f" `types.Location` (e.g. the return value from `Well.top()`)"
+            f" or `Well` (e.g. `reservoir.wells()[0]`) or an instance of `TrashBin` or `WasteChute`."
+            f" However, it is '{trash_location}'."
+        )
+
+
+def convert_flex_stacker_load_slot(slot_name: StagingSlotName) -> DeckSlotName:
+    """
+    Ensure a Flex Stacker load location to a deck slot location.
+
+    Args:
+        slot_name: The input staging slot location.
+
+    Returns:
+        A `DeckSlotName` on the deck.
+    """
+    _map = {
+        StagingSlotName.SLOT_A4: DeckSlotName.SLOT_A3,
+        StagingSlotName.SLOT_B4: DeckSlotName.SLOT_B3,
+        StagingSlotName.SLOT_C4: DeckSlotName.SLOT_C3,
+        StagingSlotName.SLOT_D4: DeckSlotName.SLOT_D3,
+    }
+    return _map[slot_name]

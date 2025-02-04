@@ -1,13 +1,14 @@
 """Tests for /runs routes dealing with labware offsets and definitions."""
+
 import pytest
 from datetime import datetime
 from decoy import Decoy
 
 from opentrons_shared_data.labware.types import LabwareDefinition as LabwareDefDict
+from opentrons_shared_data.labware.labware_definition import LabwareDefinition
 
 from opentrons.types import DeckSlotName
 from opentrons.protocol_engine import EngineStatus, types as pe_types
-from opentrons.protocols.models import LabwareDefinition
 
 from robot_server.service.json_api import RequestModel, SimpleBody
 from robot_server.maintenance_runs.maintenance_run_models import (
@@ -38,6 +39,7 @@ def run() -> MaintenanceRun:
         modules=[],
         labwareOffsets=[],
         liquids=[],
+        liquidClasses=[],
         hasEverEnteredErrorRecovery=False,
     )
 
@@ -45,7 +47,7 @@ def run() -> MaintenanceRun:
 @pytest.fixture()
 def labware_definition(minimal_labware_def: LabwareDefDict) -> LabwareDefinition:
     """Create a labware definition fixture."""
-    return LabwareDefinition.parse_obj(minimal_labware_def)
+    return LabwareDefinition.model_validate(minimal_labware_def)
 
 
 async def test_add_labware_offset(
@@ -54,9 +56,9 @@ async def test_add_labware_offset(
     run: MaintenanceRun,
 ) -> None:
     """It should add the labware offset to the engine, assuming the run is current."""
-    labware_offset_request = pe_types.LabwareOffsetCreate(
+    labware_offset_request = pe_types.LegacyLabwareOffsetCreate(
         definitionUri="namespace_1/load_name_1/123",
-        location=pe_types.LabwareOffsetLocation(slotName=DeckSlotName.SLOT_1),
+        location=pe_types.LegacyLabwareOffsetLocation(slotName=DeckSlotName.SLOT_1),
         vector=pe_types.LabwareOffsetVector(x=1, y=2, z=3),
     )
 
@@ -64,7 +66,7 @@ async def test_add_labware_offset(
         id="labware-offset-id",
         createdAt=datetime(year=2022, month=2, day=2),
         definitionUri="labware-definition-uri",
-        location=pe_types.LabwareOffsetLocation(slotName=DeckSlotName.SLOT_1),
+        location=pe_types.LegacyLabwareOffsetLocation(slotName=DeckSlotName.SLOT_1),
         vector=pe_types.LabwareOffsetVector(x=0, y=0, z=0),
     )
 

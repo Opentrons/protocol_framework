@@ -1,4 +1,3 @@
-import type * as React from 'react'
 import { fireEvent, screen, waitFor } from '@testing-library/react'
 import { describe, it, beforeEach, afterEach, vi, expect } from 'vitest'
 import { renderWithProviders } from '../../../__testing-utils__'
@@ -6,6 +5,8 @@ import { i18n } from '../../../i18n'
 
 import { ChatDisplay } from '../index'
 import { useForm, FormProvider } from 'react-hook-form'
+
+import type { ComponentProps } from 'react'
 
 const mockUseTrackEvent = vi.fn()
 
@@ -17,7 +18,7 @@ vi.mock('../../../hooks/useTrackEvent', () => ({
   useTrackEvent: () => mockUseTrackEvent,
 }))
 
-const RenderChatDisplay = (props: React.ComponentProps<typeof ChatDisplay>) => {
+const RenderChatDisplay = (props: ComponentProps<typeof ChatDisplay>) => {
   const methods = useForm({
     defaultValues: {},
   })
@@ -29,14 +30,14 @@ const RenderChatDisplay = (props: React.ComponentProps<typeof ChatDisplay>) => {
   )
 }
 
-const render = (props: React.ComponentProps<typeof ChatDisplay>) => {
+const render = (props: ComponentProps<typeof ChatDisplay>) => {
   return renderWithProviders(<RenderChatDisplay {...props} />, {
     i18nInstance: i18n,
   })
 }
 
 describe('ChatDisplay', () => {
-  let props: React.ComponentProps<typeof ChatDisplay>
+  let props: ComponentProps<typeof ChatDisplay>
 
   beforeEach(() => {
     props = {
@@ -93,6 +94,12 @@ describe('ChatDisplay', () => {
   })
 
   it('should call trackEvent when download button is clicked', () => {
+    props.chat = {
+      ...props.chat,
+      role: 'assistant',
+      reply:
+        '```python\ndef run(protocol):\n    print("hello")\n print("protocol")\n return True\n```',
+    }
     URL.createObjectURL = vi.fn()
     window.URL.revokeObjectURL = vi.fn()
     HTMLAnchorElement.prototype.click = vi.fn()
@@ -105,6 +112,24 @@ describe('ChatDisplay', () => {
     fireEvent.click(downloadPath)
 
     expect(mockUseTrackEvent).toHaveBeenCalledWith({
+      name: 'download-protocol',
+      properties: {},
+    })
+  })
+
+  it('should not call trackEvent when download button is clicked', () => {
+    URL.createObjectURL = vi.fn()
+    window.URL.revokeObjectURL = vi.fn()
+    HTMLAnchorElement.prototype.click = vi.fn()
+
+    render(props)
+    // eslint-disable-next-line testing-library/no-node-access, @typescript-eslint/non-nullable-type-assertion-style
+    const downloadPath = document.querySelector(
+      '[aria-roledescription="download"]'
+    ) as Element
+    fireEvent.click(downloadPath)
+
+    expect(mockUseTrackEvent).not.toHaveBeenCalledWith({
       name: 'download-protocol',
       properties: {},
     })

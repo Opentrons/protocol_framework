@@ -1,4 +1,4 @@
-import * as React from 'react'
+import { useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
 import {
@@ -17,12 +17,13 @@ import {
 } from '@opentrons/components'
 import { DEFAULT_MM_BLOWOUT_OFFSET_FROM_TOP } from '../../constants'
 import { getIsTouchTipField } from '../../form-types'
-import { BUTTON_LINK_STYLE } from '../../atoms'
-import { getMainPagePortalEl } from '../../components/portals/MainPageModalPortal'
+import { LINK_BUTTON_STYLE } from '../../atoms'
+import { getMainPagePortalEl } from '../Portal'
 import * as utils from './utils'
 import { TOO_MANY_DECIMALS } from './constants'
 import { TipPositionZOnlyView } from './TipPositionZOnlyView'
 
+import type { ChangeEvent } from 'react'
 import type { StepFieldName } from '../../form-types'
 
 interface ZTipPositionModalProps {
@@ -45,20 +46,23 @@ export function ZTipPositionModal(props: ZTipPositionModalProps): JSX.Element {
   } = props
   const { t } = useTranslation(['modal', 'button'])
 
-  const isBlowout = name === 'blowout_z_offset'
-  const defaultMm = isBlowout
+  const isPositionFromTop =
+    name === 'blowout_z_offset' ||
+    name === 'aspirate_touchTip_mmFromTop' ||
+    name === 'dispense_touchTip_mmFromTop' ||
+    name === 'mix_touchTip_mmFromTop'
+  const defaultMm = isPositionFromTop
     ? 0
-    : utils.getDefaultMmFromBottom({
+    : utils.getDefaultMmFromEdge({
         name,
-        wellDepthMm,
       })
 
-  const [value, setValue] = React.useState<string | null>(
+  const [value, setValue] = useState<string | null>(
     zValue !== null ? String(zValue) : null
   )
 
   // in this modal, pristinity hides the OUT_OF_BOUNDS error only.
-  const [isPristine, setPristine] = React.useState<boolean>(true)
+  const [isPristine, setPristine] = useState<boolean>(true)
 
   const getMinMaxMmFromBottom = (): {
     maxMmFromBottom: number
@@ -81,8 +85,8 @@ export function ZTipPositionModal(props: ZTipPositionModalProps): JSX.Element {
   const minFromTop = DEFAULT_MM_BLOWOUT_OFFSET_FROM_TOP
   const maxFromTop = -wellDepthMm
 
-  const minMm = isBlowout ? maxFromTop : minMmFromBottom
-  const maxMm = isBlowout ? minFromTop : maxMmFromBottom
+  const minMm = isPositionFromTop ? maxFromTop : minMmFromBottom
+  const maxMm = isPositionFromTop ? minFromTop : maxMmFromBottom
 
   const errors = utils.getErrors({
     minMm,
@@ -125,15 +129,13 @@ export function ZTipPositionModal(props: ZTipPositionModalProps): JSX.Element {
     } else if (newValue === '-0') {
       setValue('0')
     } else {
-      isBlowout
+      isPositionFromTop
         ? setValue(newValue)
         : setValue(Number(newValue) >= 0 ? newValue : '0')
     }
   }
 
-  const handleInputFieldChange = (
-    e: React.ChangeEvent<HTMLInputElement>
-  ): void => {
+  const handleInputFieldChange = (e: ChangeEvent<HTMLInputElement>): void => {
     handleChange(e.currentTarget.value)
     setPristine(false)
   }
@@ -156,7 +158,7 @@ export function ZTipPositionModal(props: ZTipPositionModalProps): JSX.Element {
             onClick={() => {
               setValue(utils.roundValue(defaultMm, 'up').toString())
             }}
-            css={BUTTON_LINK_STYLE}
+            css={LINK_BUTTON_STYLE}
           >
             {t('shared:reset_to_default')}
           </Btn>
@@ -193,10 +195,14 @@ export function ZTipPositionModal(props: ZTipPositionModalProps): JSX.Element {
         <Flex>
           <TipPositionZOnlyView
             mmFromBottom={
-              isBlowout ? undefined : value !== null ? Number(value) : defaultMm
+              isPositionFromTop
+                ? undefined
+                : value !== null
+                ? Number(value)
+                : defaultMm
             }
             mmFromTop={
-              isBlowout
+              isPositionFromTop
                 ? value !== null
                   ? Number(value)
                   : defaultMm

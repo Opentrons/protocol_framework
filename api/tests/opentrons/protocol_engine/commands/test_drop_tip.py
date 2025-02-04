@@ -60,7 +60,7 @@ def mock_model_utils(decoy: Decoy) -> ModelUtils:
 
 def test_drop_tip_params_defaults() -> None:
     """A drop tip should use a `WellOrigin.DROP_TIP` by default."""
-    default_params = DropTipParams.parse_obj(
+    default_params = DropTipParams.model_validate(
         {"pipetteId": "abc", "labwareId": "def", "wellName": "ghj"}
     )
 
@@ -71,7 +71,7 @@ def test_drop_tip_params_defaults() -> None:
 
 def test_drop_tip_params_default_origin() -> None:
     """A drop tip should drop a `WellOrigin.DROP_TIP` by default even if an offset is given."""
-    default_params = DropTipParams.parse_obj(
+    default_params = DropTipParams.model_validate(
         {
             "pipetteId": "abc",
             "labwareId": "def",
@@ -303,10 +303,11 @@ async def test_tip_attached_error(
     result = await subject.execute(params)
 
     assert result == DefinedErrorData(
-        public=TipPhysicallyAttachedError.construct(
+        public=TipPhysicallyAttachedError.model_construct(
             id="error-id",
             createdAt=datetime(year=1, month=2, day=3),
             wrappedErrors=[matchers.Anything()],
+            errorInfo={"retryLocation": (111, 222, 333)},
         ),
         state_update=update_types.StateUpdate(
             pipette_location=update_types.PipetteLocationUpdate(
@@ -395,7 +396,7 @@ async def test_stall_error(
     result = await subject.execute(params)
 
     assert result == DefinedErrorData(
-        public=StallOrCollisionError.construct(
+        public=StallOrCollisionError.model_construct(
             id="error-id",
             createdAt=datetime(year=1, month=2, day=3),
             wrappedErrors=[matchers.Anything()],

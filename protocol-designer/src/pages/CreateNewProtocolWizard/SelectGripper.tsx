@@ -2,13 +2,14 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import without from 'lodash/without'
 import { useLocation } from 'react-router-dom'
-
+import { FLEX_ROBOT_TYPE } from '@opentrons/shared-data'
 import {
+  COLORS,
+  DIRECTION_COLUMN,
   Flex,
+  RadioButton,
   SPACING,
   StyledText,
-  RadioButton,
-  DIRECTION_COLUMN,
 } from '@opentrons/components'
 import { WizardBody } from './WizardBody'
 import { HandleEnter } from '../../atoms/HandleEnter'
@@ -43,6 +44,7 @@ export function SelectGripper(props: WizardTileProps): JSX.Element | null {
   return (
     <HandleEnter onEnter={handleProceed}>
       <WizardBody
+        robotType={FLEX_ROBOT_TYPE}
         stepNumber={3}
         header={t('add_gripper')}
         disabled={gripperStatus == null}
@@ -54,9 +56,14 @@ export function SelectGripper(props: WizardTileProps): JSX.Element | null {
       >
         <Flex flexDirection={DIRECTION_COLUMN}>
           <Flex flexDirection={DIRECTION_COLUMN} gridGap={SPACING.spacing12}>
-            <StyledText desktopStyle="headingSmallBold">
-              {t('need_gripper')}
-            </StyledText>
+            <Flex flexDirection={DIRECTION_COLUMN} gridGap={SPACING.spacing4}>
+              <StyledText desktopStyle="headingSmallBold">
+                {t('need_gripper')}
+              </StyledText>
+              <StyledText desktopStyle="bodyLargeRegular" color={COLORS.grey60}>
+                {t('some_modules_require_gripper')}
+              </StyledText>
+            </Flex>
             <Flex gridGap={SPACING.spacing4}>
               <RadioButton
                 onChange={() => {

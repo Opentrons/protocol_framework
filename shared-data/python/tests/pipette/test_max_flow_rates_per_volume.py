@@ -75,6 +75,7 @@ def test_max_flow_rates_per_volume(pipette: PipetteModel, action: str) -> None:
         pipette_model_version.pipette_type,
         pipette_model_version.pipette_channels,
         pipette_model_version.pipette_version,
+        pipette_model_version.oem_type,
     )
 
     pipette_model_version_str = f"{pipette_model_version}"

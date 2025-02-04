@@ -1,4 +1,3 @@
-import type * as React from 'react'
 import { fireEvent, screen } from '@testing-library/react'
 import { describe, it, expect, afterEach, vi, beforeEach } from 'vitest'
 
@@ -8,6 +7,8 @@ import { renderWithProviders } from '/app/__testing-utils__'
 import { i18n } from '/app/i18n'
 import { useTrackEventWithRobotSerial } from '/app/redux-resources/analytics'
 import { AirGap } from '../../QuickTransferAdvancedSettings/AirGap'
+
+import type { ComponentProps } from 'react'
 import type { QuickTransferSummaryState } from '../../types'
 
 vi.mock('/app/redux-resources/analytics')
@@ -21,7 +22,7 @@ vi.mock('@opentrons/components', async importOriginal => {
   }
 })
 
-const render = (props: React.ComponentProps<typeof AirGap>) => {
+const render = (props: ComponentProps<typeof AirGap>) => {
   return renderWithProviders(<AirGap {...props} />, {
     i18nInstance: i18n,
   })
@@ -29,7 +30,7 @@ const render = (props: React.ComponentProps<typeof AirGap>) => {
 let mockTrackEventWithRobotSerial: any
 
 describe('AirGap', () => {
-  let props: React.ComponentProps<typeof AirGap>
+  let props: ComponentProps<typeof AirGap>
 
   beforeEach(() => {
     props = {
@@ -74,7 +75,7 @@ describe('AirGap', () => {
 
   it('renders the first air gap screen, continue, and back buttons', () => {
     render(props)
-    screen.getByText('Air gap before aspirating')
+    screen.getByText('Air gap after aspirating')
     screen.getByTestId('ChildNavigation_Primary_Button')
     screen.getByText('Enabled')
     screen.getByText('Disabled')
@@ -122,7 +123,7 @@ describe('AirGap', () => {
     expect(vi.mocked(InputField)).toHaveBeenCalledWith(
       {
         title: 'Air gap volume (µL)',
-        error: 'Value must be between 1-180',
+        error: 'Value must be between 1 to 180',
         readOnly: true,
         type: 'number',
         value: 0,
@@ -151,7 +152,7 @@ describe('AirGap', () => {
     expect(vi.mocked(InputField)).toHaveBeenCalledWith(
       {
         title: 'Air gap volume (µL)',
-        error: 'Value must be between 1-80',
+        error: 'Value must be between 1 to 80',
         readOnly: true,
         type: 'number',
         value: 0,
@@ -178,7 +179,7 @@ describe('AirGap', () => {
     expect(vi.mocked(InputField)).toHaveBeenCalledWith(
       {
         title: 'Air gap volume (µL)',
-        error: 'Value must be between 1-140',
+        error: 'Value must be between 1 to 140',
         readOnly: true,
         type: 'number',
         value: 0,
@@ -203,7 +204,7 @@ describe('AirGap', () => {
     expect(vi.mocked(InputField)).toHaveBeenCalledWith(
       {
         title: 'Air gap volume (µL)',
-        error: 'Value must be between 1-200',
+        error: 'Value must be between 1 to 200',
         readOnly: true,
         type: 'number',
         value: 0,

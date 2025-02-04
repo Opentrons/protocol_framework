@@ -39,6 +39,7 @@ import {
   useProtocolQuery,
   useDeleteRunMutation,
   useRunCommandErrors,
+  useErrorRecoverySettings,
 } from '@opentrons/react-api-client'
 import { useRunControls } from '/app/organisms/RunTimeControl/hooks'
 import { onDeviceDisplayFormatTimestamp } from '/app/transformations/runs'
@@ -65,15 +66,15 @@ import {
   useRunCreatedAtTimestamp,
   useCloseCurrentRun,
   EMPTY_TIMESTAMP,
+  useCurrentRunCommands,
 } from '/app/resources/runs'
-import {
-  useTipAttachmentStatus,
-  handleTipsAttachedModal,
-} from '/app/organisms/DropTipWizardFlows'
+import { handleTipsAttachedModal } from '/app/organisms/DropTipWizardFlows'
+import { useTipAttachmentStatus } from '/app/resources/instruments'
+import { lastRunCommandPromptedErrorRecovery } from '/app/local-resources/commands'
 
 import type { IconName } from '@opentrons/components'
 import type { OnDeviceRouteParams } from '/app/App/types'
-import type { PipetteWithTip } from '/app/organisms/DropTipWizardFlows'
+import type { PipetteWithTip } from '/app/resources/instruments'
 
 export function RunSummary(): JSX.Element {
   const { runId } = useParams<
@@ -147,15 +148,15 @@ export function RunSummary(): JSX.Element {
   const { closeCurrentRun } = useCloseCurrentRun()
   // Close the current run only if it's active and then execute the onSuccess callback. Prefer this wrapper over
   // closeCurrentRun directly, since the callback is swallowed if currentRun is null.
-  const closeCurrentRunIfValid = (onSuccess?: () => void): void => {
+  const closeCurrentRunIfValid = (onSettled?: () => void): void => {
     if (isRunCurrent) {
       closeCurrentRun({
-        onSuccess: () => {
-          onSuccess?.()
+        onSettled: () => {
+          onSettled?.()
         },
       })
     } else {
-      onSuccess?.()
+      onSettled?.()
     }
   }
   const [showRunFailedModal, setShowRunFailedModal] = useState<boolean>(false)
@@ -234,15 +235,20 @@ export function RunSummary(): JSX.Element {
   } = useTipAttachmentStatus({
     runId,
     runRecord: runRecord ?? null,
-    host,
+  })
+  const { data } = useErrorRecoverySettings()
+  const isEREnabled = data?.data.enabled ?? true
+  const runSummaryNoFixit = useCurrentRunCommands({
+    includeFixitCommands: false,
+    pageLength: 1,
   })
 
-  // Determine tip status on initial render only. Error Recovery always handles tip status, so don't show it twice.
   useEffect(() => {
-    if (isRunCurrent && enteredER === false) {
+    // Only run tip checking if it wasn't *just* handled during Error Recovery.
+    if (!lastRunCommandPromptedErrorRecovery(runSummaryNoFixit, isEREnabled)) {
       void determineTipStatus()
     }
-  }, [isRunCurrent, enteredER])
+  }, [isRunCurrent, runSummaryNoFixit, isEREnabled])
 
   const returnToQuickTransfer = (): void => {
     closeCurrentRunIfValid(() => {

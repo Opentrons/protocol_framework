@@ -1,4 +1,4 @@
-import * as React from 'react'
+import { Fragment, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   ALIGN_CENTER,
@@ -25,12 +25,14 @@ import { SmallButton } from '/app/atoms/buttons'
 import { useMostRecentCompletedAnalysis } from '/app/resources/runs'
 import { getTotalVolumePerLiquidId } from '/app/transformations/analysis'
 import { LiquidDetails } from './LiquidDetails'
+
+import type { Dispatch, SetStateAction } from 'react'
 import type { ParsedLiquid, RunTimeCommand } from '@opentrons/shared-data'
 import type { SetupScreens } from '../types'
 
 export interface ProtocolSetupLiquidsProps {
   runId: string
-  setSetupScreen: React.Dispatch<React.SetStateAction<SetupScreens>>
+  setSetupScreen: Dispatch<SetStateAction<SetupScreens>>
   isConfirmed: boolean
   setIsConfirmed: (confirmed: boolean) => void
 }
@@ -95,13 +97,13 @@ export function ProtocolSetupLiquids({
           </Flex>
         </Flex>
         {liquidsInLoadOrder?.map(liquid => (
-          <React.Fragment key={liquid.id}>
+          <Fragment key={liquid.id}>
             <LiquidsList
               liquid={liquid}
               commands={protocolData?.commands}
               runId={runId}
             />
-          </React.Fragment>
+          </Fragment>
         ))}
       </Flex>
     </>
@@ -116,7 +118,7 @@ interface LiquidsListProps {
 
 export function LiquidsList(props: LiquidsListProps): JSX.Element {
   const { liquid, runId, commands } = props
-  const [openItem, setOpenItem] = React.useState(false)
+  const [openItem, setOpenItem] = useState(false)
   const labwareByLiquidId = parseLabwareInfoByLiquidId(commands ?? [])
 
   return (
@@ -153,26 +155,30 @@ export function LiquidsList(props: LiquidsListProps): JSX.Element {
         </Flex>
         <Flex
           flexDirection={DIRECTION_COLUMN}
-          alignItems={TYPOGRAPHY.textAlignCenter}
+          alignItems={TYPOGRAPHY.textAlignLeft}
+          width="31rem"
+          overflow="hidden"
         >
           <StyledText oddStyle="bodyTextSemiBold">
-            {liquid.displayName}
+            {liquid.displayName.length > 33
+              ? `${liquid.displayName.substring(0, 33)}...`
+              : liquid.displayName}
           </StyledText>
         </Flex>
-        <Flex flex="1">
+        <Flex justifyContent={JUSTIFY_SPACE_BETWEEN} width="18.5rem">
           <Flex
             backgroundColor={`${COLORS.black90}${COLORS.opacity20HexCode}`}
             borderRadius={BORDERS.borderRadius8}
             height="2.75rem"
             padding={`${SPACING.spacing8} ${SPACING.spacing12}`}
-            alignItems={TYPOGRAPHY.textAlignCenter}
-            marginLeft="30.825rem"
+            alignItems={TYPOGRAPHY.textAlignLeft}
+            overflow="hidden"
           >
             {getTotalVolumePerLiquidId(liquid.id, labwareByLiquidId)}{' '}
             {MICRO_LITERS}
           </Flex>
+          <Icon name={openItem ? 'chevron-up' : 'chevron-right'} size="3rem" />
         </Flex>
-        <Icon name={openItem ? 'chevron-up' : 'chevron-right'} size="3rem" />
       </Flex>
       {openItem ? (
         <LiquidDetails

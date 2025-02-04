@@ -8,6 +8,22 @@ By installing and using Opentrons software, you agree to the Opentrons End-User 
 
 ---
 
+## Opentrons App Changes in 8.3.0
+
+Welcome to the v8.3.0 release of the Opentrons App! This release adds support for Evosep Evotips on the Flex, as well as other features.
+
+### New Features
+
+- Use Evosep Evotips in Python API version 2.22 protocols for protein sample purification. Only available with the Flex 96-channel pipette.
+- Change the app or Flex touchscreen language to Mandarin in Settings.
+- Load a newly modified Flex 8-Channel EM 1000 µL pipette equipped with a PEEK motor component to automate emulsion applications.
+
+### Improved Features
+
+- Improvements to the Flex error recovery feature help protocols recover from detected stalls and collisions, saving you valuable time and resources.
+
+---
+
 ## Opentrons App Changes in 8.2.0
 
 Welcome to the v8.2.0 release of the Opentrons App! This release adds support for the Opentrons Absorbance Plate Reader Module, as well as other features.
@@ -29,6 +45,10 @@ Welcome to the v8.2.0 release of the Opentrons App! This release adds support fo
 ### Bug Fixes
 
 - Fixed an app crash when performing certain error recovery steps with Python API version 2.15 protocols.
+
+### Known Issues
+
+- If you attach an Absorbance Plate Reader to _any_ Flex on your local network, you must update all copies of the Opentrons App on the same network to at least v8.1.0.
 
 ---
 

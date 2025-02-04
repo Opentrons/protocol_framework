@@ -40,6 +40,7 @@ import type {
   SelectFixtureAction,
   ZoomedIntoSlotAction,
   GenerateNewProtocolAction,
+  EditMultipleLiquidGroupsAction,
 } from '../actions'
 // REDUCERS
 // modeLabwareSelection: boolean. If true, we're selecting labware to add to a slot
@@ -243,7 +244,7 @@ export const savedLabware: Reducer<SavedLabwareState, any> = handleActions(
           const { displayName, loadName, labwareId } = command.params
           const location = command.params.location
           let slot
-          if (location === 'offDeck') {
+          if (location === 'offDeck' || location === 'systemLocation') {
             slot = 'offDeck'
           } else if ('moduleId' in location) {
             slot = location.moduleId
@@ -292,6 +293,15 @@ export const ingredients: Reducer<IngredientsState, any> = handleActions(
     ): IngredientsState => {
       const liquidGroupId = action.payload
       return omit(state, liquidGroupId)
+    },
+    EDIT_MULTIPLE_LIQUID_GROUPS_PYTHON_NAME: (
+      state: IngredientsState,
+      action: EditMultipleLiquidGroupsAction
+    ): IngredientsState => {
+      return {
+        ...state,
+        ...action.payload,
+      }
     },
     LOAD_FILE: (
       state: IngredientsState,

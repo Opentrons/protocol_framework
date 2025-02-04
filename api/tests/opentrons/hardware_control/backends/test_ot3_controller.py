@@ -145,7 +145,18 @@ def mock_messenger(can_message_notifier: MockCanMessageNotifier) -> mock.AsyncMo
 
 @pytest.fixture
 def mock_can_driver(mock_messenger: mock.AsyncMock) -> AbstractCanDriver:
-    return mock.AsyncMock(spec=AbstractCanDriver)
+    driver = mock.AsyncMock(spec=AbstractCanDriver)
+
+    # ignoring this type error because this is a very weird function that will in fact
+    # do nothing, but has to have the yield in there for the compiler to make it a
+    # generator function
+    async def _fake_message_retrieve(d):  # type: ignore[no-untyped-def]
+        while True:
+            await asyncio.sleep(1)
+        yield
+
+    driver.__aiter__ = _fake_message_retrieve
+    return driver
 
 
 @pytest.fixture
@@ -160,15 +171,19 @@ def mock_eeprom_driver() -> EEPROMDriver:
 
 
 @pytest.fixture
-def controller(
+async def controller(
     mock_config: OT3Config,
     mock_can_driver: AbstractCanDriver,
     mock_eeprom_driver: EEPROMDriver,
-) -> OT3Controller:
-    with (mock.patch("opentrons.hardware_control.backends.ot3controller.OT3GPIO")):
-        return OT3Controller(
+) -> AsyncIterator[OT3Controller]:
+    with mock.patch("opentrons.hardware_control.backends.ot3controller.OT3GPIO"):
+        controller = OT3Controller(
             mock_config, mock_can_driver, eeprom_driver=mock_eeprom_driver
         )
+        try:
+            yield controller
+        finally:
+            await controller.clean_up()
 
 
 @pytest.fixture
@@ -374,6 +389,8 @@ async def test_home_execute(
         **config
     ) as mock_runner:
         present_axes = set(ax for ax in axes if controller.axis_is_present(ax))
+        controller.set_pressure_sensor_available(Axis.P_L, True)
+        controller.set_pressure_sensor_available(Axis.P_R, True)
 
         # nothing has been homed
         assert not controller._motor_status
@@ -485,6 +502,8 @@ async def test_home_only_present_devices(
     homed_position = {}
 
     controller._position = starting_position
+    controller.set_pressure_sensor_available(Axis.P_L, True)
+    controller.set_pressure_sensor_available(Axis.P_R, True)
 
     mock_move_group_run.side_effect = move_group_run_side_effect_home(controller, axes)
 
@@ -729,6 +748,9 @@ async def test_liquid_probe(
     mock_move_group_run.side_effect = probe_move_group_run_side_effect(
         head_node, tool_node
     )
+    controller._pipettes_to_monitor_pressure = mock.MagicMock(  # type: ignore[method-assign]
+        return_value=[sensor_node_for_mount(mount)]
+    )
     try:
         await controller.liquid_probe(
             mount=mount,
@@ -738,6 +760,7 @@ async def test_liquid_probe(
             threshold_pascals=fake_liquid_settings.sensor_threshold_pascals,
             plunger_impulse_time=fake_liquid_settings.plunger_impulse_time,
             num_baseline_reads=fake_liquid_settings.samples_for_baselining,
+            z_offset_for_plunger_prep=2.0,
         )
     except PipetteLiquidNotFoundError:
         # the move raises a liquid not found now since we don't call the move group and it doesn't
@@ -1413,3 +1436,34 @@ async def test_controller_move(
 
         assert position == expected_pos
         assert gear_position == gear_position
+
+
+@pytest.mark.parametrize(
+    argnames=["axes", "pipette_has_sensor"],
+    argvalues=[[[Axis.P_L, Axis.P_R], True], [[Axis.P_L, Axis.P_R], False]],
+)
+async def test_pressure_disable(
+    controller: OT3Controller,
+    axes: List[Axis],
+    mock_present_devices: None,
+    mock_check_overpressure: None,
+    pipette_has_sensor: bool,
+) -> None:
+    config = {"run.side_effect": move_group_run_side_effect_home(controller, axes)}
+    with mock.patch(  # type: ignore [call-overload]
+        "opentrons.hardware_control.backends.ot3controller.MoveGroupRunner",
+        spec=MoveGroupRunner,
+        **config
+    ):
+        with mock.patch.object(controller, "_monitor_overpressure") as monitor:
+            controller.set_pressure_sensor_available(Axis.P_L, pipette_has_sensor)
+            controller.set_pressure_sensor_available(Axis.P_R, True)
+
+            await controller.home(axes, GantryLoad.LOW_THROUGHPUT)
+
+            if pipette_has_sensor:
+                monitor.assert_called_once_with(
+                    [NodeId.pipette_left, NodeId.pipette_right]
+                )
+            else:
+                monitor.assert_called_once_with([NodeId.pipette_right])

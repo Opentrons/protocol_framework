@@ -92,12 +92,14 @@ class LabwareCore(AbstractLabware[WellCore]):
 
     def get_definition(self) -> LabwareDefinitionDict:
         """Get the labware's definition as a plain dictionary."""
-        return cast(LabwareDefinitionDict, self._definition.dict(exclude_none=True))
+        return cast(
+            LabwareDefinitionDict, self._definition.model_dump(exclude_none=True)
+        )
 
     def get_parameters(self) -> LabwareParametersDict:
         return cast(
             LabwareParametersDict,
-            self._definition.parameters.dict(exclude_none=True),
+            self._definition.parameters.model_dump(exclude_none=True),
         )
 
     def get_quirks(self) -> List[str]:
@@ -118,9 +120,9 @@ class LabwareCore(AbstractLabware[WellCore]):
                 details={"kind": "labware-not-in-slot"},
             )
 
-        request = LabwareOffsetCreate.construct(
+        request = LabwareOffsetCreate.model_construct(
             definitionUri=self.get_uri(),
-            location=offset_location,
+            locationSequence=offset_location,
             vector=LabwareOffsetVector(x=delta.x, y=delta.y, z=delta.z),
         )
         self._engine_client.add_labware_offset(request)

@@ -1,5 +1,3 @@
-import type * as React from 'react'
-
 import {
   getDeckDefFromRobotType,
   FLEX_ROBOT_TYPE,
@@ -13,6 +11,8 @@ import {
   TEMPERATURE_MODULE_V2_FIXTURE,
   MAGNETIC_BLOCK_V1_FIXTURE,
   ABSORBANCE_READER_V1_FIXTURE,
+  FLEX_STACKER_V1_FIXTURE,
+  FLEX_STACKER_FIXTURES,
   STAGING_AREA_SLOT_WITH_MAGNETIC_BLOCK_V1_FIXTURE,
   THERMOCYCLER_MODULE_CUTOUTS,
 } from '@opentrons/shared-data'
@@ -26,17 +26,21 @@ import { StagingAreaConfigFixture } from './StagingAreaConfigFixture'
 import { TrashBinConfigFixture } from './TrashBinConfigFixture'
 import { WasteChuteConfigFixture } from './WasteChuteConfigFixture'
 import { StaticFixture } from './StaticFixture'
-
-import type {
-  CutoutFixtureId,
-  CutoutId,
-  DeckConfiguration,
-} from '@opentrons/shared-data'
 import { TemperatureModuleFixture } from './TemperatureModuleFixture'
 import { HeaterShakerFixture } from './HeaterShakerFixture'
 import { MagneticBlockFixture } from './MagneticBlockFixture'
 import { ThermocyclerFixture } from './ThermocyclerFixture'
 import { AbsorbanceReaderFixture } from './AbsorbanceReaderFixture'
+import { FlexStackerFixture } from './FlexStackerFixture'
+
+import type { ReactNode } from 'react'
+import type {
+  CutoutFixtureId,
+  CutoutId,
+  DeckConfiguration,
+} from '@opentrons/shared-data'
+
+export * from './constants'
 
 interface DeckConfiguratorProps {
   deckConfig: DeckConfiguration
@@ -49,7 +53,7 @@ interface DeckConfiguratorProps {
   darkFill?: string
   editableCutoutIds?: CutoutId[]
   showExpansion?: boolean
-  children?: React.ReactNode
+  children?: ReactNode
   additionalStaticFixtures?: Array<{ location: CutoutId; label: string }>
   height?: string
   selectedCutoutId?: CutoutId
@@ -114,6 +118,9 @@ export function DeckConfigurator(props: DeckConfiguratorProps): JSX.Element {
   const magneticBlockStagingAreaFixtures = deckConfig.filter(
     ({ cutoutFixtureId }) =>
       cutoutFixtureId === STAGING_AREA_SLOT_WITH_MAGNETIC_BLOCK_V1_FIXTURE
+  )
+  const flexStackerFixtures = deckConfig.filter(({ cutoutFixtureId }) =>
+    FLEX_STACKER_FIXTURES.includes(cutoutFixtureId)
   )
 
   return (
@@ -258,6 +265,19 @@ export function DeckConfigurator(props: DeckConfiguratorProps): JSX.Element {
           }
           fixtureLocation={cutoutId}
           cutoutFixtureId={cutoutFixtureId}
+          selected={cutoutId === selectedCutoutId}
+        />
+      ))}
+      {flexStackerFixtures.map(({ cutoutId, cutoutFixtureId }) => (
+        <FlexStackerFixture
+          key={cutoutId}
+          deckDefinition={deckDef}
+          handleClickRemove={
+            editableCutoutIds.includes(cutoutId) ? handleClickRemove : undefined
+          }
+          fixtureLocation={cutoutId}
+          cutoutFixtureId={cutoutFixtureId}
+          hasWasteChute={cutoutFixtureId !== FLEX_STACKER_V1_FIXTURE}
           selected={cutoutId === selectedCutoutId}
         />
       ))}

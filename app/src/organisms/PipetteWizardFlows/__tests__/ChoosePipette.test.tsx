@@ -1,4 +1,3 @@
-import type * as React from 'react'
 import {
   LEFT,
   NINETY_SIX_CHANNEL,
@@ -17,18 +16,20 @@ import { useAttachedPipettesFromInstrumentsQuery } from '/app/resources/instrume
 import { ChoosePipette } from '../ChoosePipette'
 import { getIsGantryEmpty } from '../utils'
 
+import type { ComponentProps } from 'react'
+
 vi.mock('../utils')
 vi.mock('/app/resources/instruments')
 vi.mock('/app/redux/config')
 
-const render = (props: React.ComponentProps<typeof ChoosePipette>) => {
+const render = (props: ComponentProps<typeof ChoosePipette>) => {
   return renderWithProviders(<ChoosePipette {...props} />, {
     i18nInstance: i18n,
   })[0]
 }
 
 describe('ChoosePipette', () => {
-  let props: React.ComponentProps<typeof ChoosePipette>
+  let props: ComponentProps<typeof ChoosePipette>
   beforeEach(() => {
     vi.mocked(getIsOnDevice).mockReturnValue(false)
     vi.mocked(getIsGantryEmpty).mockReturnValue(true)
@@ -150,7 +151,7 @@ describe('ChoosePipette', () => {
     props = { ...props, selectedPipette: NINETY_SIX_CHANNEL }
     render(props)
     screen.getByText(
-      'Detach Flex 1-Channel 1000 μL and Attach 96-Channel pipette'
+      'Detach Flex 1-Channel 1000 µL and Attach 96-Channel pipette'
     )
   })
 
@@ -163,7 +164,7 @@ describe('ChoosePipette', () => {
     props = { ...props, selectedPipette: NINETY_SIX_CHANNEL }
     render(props)
     screen.getByText(
-      'Detach Flex 1-Channel 1000 μL and Attach 96-Channel pipette'
+      'Detach Flex 1-Channel 1000 µL and Attach 96-Channel pipette'
     )
   })
 })

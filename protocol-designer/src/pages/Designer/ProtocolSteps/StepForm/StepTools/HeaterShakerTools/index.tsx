@@ -1,4 +1,4 @@
-import { useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
 import {
   Box,
@@ -8,6 +8,7 @@ import {
   SPACING,
   StyledText,
 } from '@opentrons/components'
+import { hoverSelection } from '../../../../../../ui/steps/actions/actions'
 import { getHeaterShakerLabwareOptions } from '../../../../../../ui/modules/selectors'
 import {
   DropdownStepFormField,
@@ -21,7 +22,7 @@ export function HeaterShakerTools(props: StepFormProps): JSX.Element {
   const { propsForFields, formData, visibleFormErrors } = props
   const { t } = useTranslation(['application', 'form', 'protocol_steps'])
   const moduleLabwareOptions = useSelector(getHeaterShakerLabwareOptions)
-
+  const dispatch = useDispatch()
   const mappedErrorsToField = getFormErrorsMappedToField(visibleFormErrors)
 
   return (
@@ -34,6 +35,12 @@ export function HeaterShakerTools(props: StepFormProps): JSX.Element {
         {...propsForFields.moduleId}
         options={moduleLabwareOptions}
         title={t('protocol_steps:module')}
+        onEnter={(id: string) => {
+          dispatch(hoverSelection({ id, text: t('select') }))
+        }}
+        onExit={() => {
+          dispatch(hoverSelection({ id: null, text: null }))
+        }}
       />
       <Box borderBottom={`1px solid ${COLORS.grey30}`} />
       <Flex
@@ -41,7 +48,7 @@ export function HeaterShakerTools(props: StepFormProps): JSX.Element {
         gridGap={SPACING.spacing4}
         paddingX={SPACING.spacing16}
       >
-        <StyledText desktopStyle="bodyDefaultRegular" color={COLORS.grey60}>
+        <StyledText desktopStyle="bodyDefaultSemiBold">
           {t('protocol_steps:heater_shaker_settings')}
         </StyledText>
         <ToggleExpandStepFormField

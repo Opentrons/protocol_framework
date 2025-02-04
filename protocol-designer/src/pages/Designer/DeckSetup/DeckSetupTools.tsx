@@ -9,6 +9,7 @@ import {
   Flex,
   Icon,
   ModuleIcon,
+  POSITION_FIXED,
   RadioButton,
   SPACING,
   StyledText,
@@ -17,9 +18,12 @@ import {
   TYPOGRAPHY,
 } from '@opentrons/components'
 import {
+  ABSORBANCE_READER_V1,
   FLEX_ROBOT_TYPE,
+  FLEX_STAGING_AREA_SLOT_ADDRESSABLE_AREAS,
   getModuleDisplayName,
   getModuleType,
+  MAGNETIC_BLOCK_V1,
   MAGNETIC_MODULE_TYPE,
   MAGNETIC_MODULE_V1,
   MAGNETIC_MODULE_V2,
@@ -32,7 +36,8 @@ import {
   createDeckFixture,
   deleteDeckFixture,
 } from '../../../step-forms/actions/additionalItems'
-import { createModule, deleteModule } from '../../../step-forms/actions'
+import { getSavedStepForms } from '../../../step-forms/selectors'
+import { deleteModule } from '../../../step-forms/actions'
 import { getDeckSetupForActiveItem } from '../../../top-selectors/labware-locations'
 import {
   createContainer,
@@ -44,23 +49,33 @@ import {
   selectNestedLabware,
   selectZoomedIntoSlot,
 } from '../../../labware-ingred/actions'
-import { getEnableAbsorbanceReader } from '../../../feature-flags/selectors'
 import { useBlockingHint } from '../../../organisms/BlockingHintModal/useBlockingHint'
 import { selectors } from '../../../labware-ingred/selectors'
 import { useKitchen } from '../../../organisms/Kitchen/hooks'
 import { getDismissedHints } from '../../../tutorial/selectors'
-import { createContainerAboveModule } from '../../../step-forms/actions/thunks'
+import { LINK_BUTTON_STYLE, NAV_BAR_HEIGHT_REM } from '../../../atoms'
+import {
+  createContainerAboveModule,
+  createModuleEntityAndChangeForm,
+} from '../../../step-forms/actions/thunks'
 import { ConfirmDeleteStagingAreaModal } from '../../../organisms'
-import { BUTTON_LINK_STYLE } from '../../../atoms'
 import { getSlotInformation } from '../utils'
 import { ALL_ORDERED_CATEGORIES, FIXTURES, MOAM_MODELS } from './constants'
 import { LabwareTools } from './LabwareTools'
 import { MagnetModuleChangeContent } from './MagnetModuleChangeContent'
 import { getModuleModelsBySlot, getDeckErrors } from './utils'
 
-import type { ModuleModel } from '@opentrons/shared-data'
+import type { AddressableAreaName, ModuleModel } from '@opentrons/shared-data'
 import type { ThunkDispatch } from '../../../types'
 import type { Fixture } from './constants'
+import type { ModuleModelExtended } from './utils'
+
+const mapModTypeToStepType: Record<string, string> = {
+  heaterShakerModuleType: 'heaterShaker',
+  magneticModuleType: 'magnet',
+  temperatureModuleType: 'temperature',
+  thermocyclerModuleType: 'thermocycler',
+}
 
 interface DeckSetupToolsProps {
   onCloseClick: () => void
@@ -69,16 +84,24 @@ interface DeckSetupToolsProps {
     setHoveredModule: (model: ModuleModel | null) => void
     setHoveredFixture: (fixture: Fixture | null) => void
   } | null
+  position?: string
 }
 
 export type CategoryExpand = Record<string, boolean>
+export const DECK_SETUP_TOOLS_WIDTH_REM = 21.875
 
 export function DeckSetupTools(props: DeckSetupToolsProps): JSX.Element | null {
-  const { onCloseClick, setHoveredLabware, onDeckProps } = props
+  const {
+    onCloseClick,
+    setHoveredLabware,
+    onDeckProps,
+    position = POSITION_FIXED,
+  } = props
   const { t, i18n } = useTranslation(['starting_deck_state', 'shared'])
   const { makeSnackbar } = useKitchen()
   const selectedSlotInfo = useSelector(selectors.getZoomedInSlotInfo)
   const robotType = useSelector(getRobotType)
+  const savedSteps = useSelector(getSavedStepForms)
   const [showDeleteLabwareModal, setShowDeleteLabwareModal] = useState<
     ModuleModel | 'clear' | null
   >(null)
@@ -86,7 +109,6 @@ export function DeckSetupTools(props: DeckSetupToolsProps): JSX.Element | null {
     'change_magnet_module_model'
   )
   const dispatch = useDispatch<ThunkDispatch<any>>()
-  const enableAbsorbanceReader = useSelector(getEnableAbsorbanceReader)
   const deckSetup = useSelector(getDeckSetupForActiveItem)
   const {
     selectedLabwareDefUri,
@@ -101,21 +123,26 @@ export function DeckSetupTools(props: DeckSetupToolsProps): JSX.Element | null {
     false
   )
   const [selectedHardware, setSelectedHardware] = useState<
-    ModuleModel | Fixture | null
+    ModuleModelExtended | Fixture | null
   >(null)
 
   //  initialize the previously selected hardware because for some reason it does not
   //  work initiating it in the above useState
   useEffect(() => {
     if (selectedModuleModel !== null || selectedFixture != null) {
-      setSelectedHardware(selectedModuleModel ?? selectedFixture ?? null)
+      if (
+        selectedModuleModel === MAGNETIC_BLOCK_V1 &&
+        selectedFixture === 'stagingArea'
+      ) {
+        setSelectedHardware('stagingAreaAndMagneticBlock')
+      } else {
+        setSelectedHardware(selectedModuleModel ?? selectedFixture ?? null)
+      }
     }
   }, [selectedModuleModel, selectedFixture])
 
   const moduleModels =
-    slot != null
-      ? getModuleModelsBySlot(enableAbsorbanceReader, robotType, slot)
-      : null
+    slot != null ? getModuleModelsBySlot(robotType, slot) : null
   const [tab, setTab] = useState<'hardware' | 'labware'>(
     moduleModels?.length === 0 || slot === 'offDeck' ? 'labware' : 'hardware'
   )
@@ -214,12 +241,29 @@ export function DeckSetupTools(props: DeckSetupToolsProps): JSX.Element | null {
       setTab('hardware')
     },
   }
+
+  const isLabwareTabDisabled =
+    selectedFixture === 'wasteChute' ||
+    selectedFixture === 'wasteChuteAndStagingArea' ||
+    selectedFixture === 'trashBin' ||
+    selectedModuleModel === ABSORBANCE_READER_V1
+  let labwareTabDisabledReason: string | null = null
+  if (selectedModuleModel === ABSORBANCE_READER_V1) {
+    labwareTabDisabledReason = t('plate_reader_no_labware')
+  }
+  if (selectedFixture === 'trashBin') {
+    labwareTabDisabledReason = t('trash_no_labware')
+  }
+  if (
+    selectedFixture === 'wasteChute' ||
+    selectedFixture === 'wasteChuteAndStagingArea'
+  ) {
+    labwareTabDisabledReason = t('waste_chute_no_labware')
+  }
   const labwareTab = {
     text: t('labware'),
-    disabled:
-      selectedFixture === 'wasteChute' ||
-      selectedFixture === 'wasteChuteAndStagingArea' ||
-      selectedFixture === 'trashBin',
+    disabled: isLabwareTabDisabled,
+    disabledReasonForTooltip: labwareTabDisabledReason,
     isActive: tab === 'labware',
     onClick: () => {
       setTab('labware')
@@ -242,7 +286,7 @@ export function DeckSetupTools(props: DeckSetupToolsProps): JSX.Element | null {
     handleResetSearchTerm()
   }
 
-  const handleClear = (): void => {
+  const handleClear = (keepExistingLabware = false): void => {
     onDeckProps?.setHoveredModule(null)
     onDeckProps?.setHoveredFixture(null)
     if (slot !== 'offDeck') {
@@ -250,30 +294,44 @@ export function DeckSetupTools(props: DeckSetupToolsProps): JSX.Element | null {
       if (createdModuleForSlot != null) {
         dispatch(deleteModule(createdModuleForSlot.id))
       }
-      //  clear fixture(s) from slot
-      if (createFixtureForSlots != null && createFixtureForSlots.length > 0) {
-        createFixtureForSlots.forEach(fixture =>
-          dispatch(deleteDeckFixture(fixture.id))
-        )
-      }
       //  clear labware from slot
       if (
         createdLabwareForSlot != null &&
-        createdLabwareForSlot.labwareDefURI !== selectedLabwareDefUri
+        (!keepExistingLabware ||
+          createdLabwareForSlot.labwareDefURI !== selectedLabwareDefUri ||
+          //  if nested labware changes but labware doesn't, still delete both
+          (createdLabwareForSlot.labwareDefURI === selectedLabwareDefUri &&
+            createdNestedLabwareForSlot?.labwareDefURI !==
+              selectedNestedLabwareDefUri))
       ) {
         dispatch(deleteContainer({ labwareId: createdLabwareForSlot.id }))
       }
       //  clear nested labware from slot
       if (
         createdNestedLabwareForSlot != null &&
-        createdNestedLabwareForSlot.labwareDefURI !==
-          selectedNestedLabwareDefUri
+        (!keepExistingLabware ||
+          createdNestedLabwareForSlot.labwareDefURI !==
+            selectedNestedLabwareDefUri)
       ) {
         dispatch(deleteContainer({ labwareId: createdNestedLabwareForSlot.id }))
       }
       // clear labware on staging area 4th column slot
-      if (matchingLabwareFor4thColumn != null) {
+      if (matchingLabwareFor4thColumn != null && !keepExistingLabware) {
         dispatch(deleteContainer({ labwareId: matchingLabwareFor4thColumn.id }))
+      }
+      //  clear fixture(s) from slot
+      if (createFixtureForSlots != null && createFixtureForSlots.length > 0) {
+        createFixtureForSlots.forEach(fixture =>
+          dispatch(deleteDeckFixture(fixture.id))
+        )
+        // zoom out if you're clearing a staging area slot directly from a 4th column
+        if (
+          FLEX_STAGING_AREA_SLOT_ADDRESSABLE_AREAS.includes(
+            slot as AddressableAreaName
+          )
+        ) {
+          dispatch(selectZoomedIntoSlot({ slot: null, cutout: null }))
+        }
       }
     }
     handleResetToolbox()
@@ -285,7 +343,7 @@ export function DeckSetupTools(props: DeckSetupToolsProps): JSX.Element | null {
   }
   const handleConfirm = (): void => {
     //  clear entities first before recreating them
-    handleClear()
+    handleClear(true)
 
     if (selectedFixture != null && cutout != null) {
       //  create fixture(s)
@@ -298,30 +356,50 @@ export function DeckSetupTools(props: DeckSetupToolsProps): JSX.Element | null {
     }
     if (selectedModuleModel != null) {
       //  create module
+      const moduleType = getModuleType(selectedModuleModel)
+
+      const moduleSteps = Object.values(savedSteps).filter(step => {
+        return (
+          step.stepType === mapModTypeToStepType[moduleType] &&
+          //  only update module steps that match the old moduleId
+          //  to accommodate instances of MoaM
+          step.moduleId === createdModuleForSlot?.id
+        )
+      })
+
+      const pauseSteps = Object.values(savedSteps).filter(step => {
+        return (
+          step.stepType === 'pause' &&
+          //  only update pause steps that match the old moduleId
+          //  to accommodate instances of MoaM
+          step.moduleId === createdModuleForSlot?.id
+        )
+      })
+
       dispatch(
-        createModule({
+        createModuleEntityAndChangeForm({
           slot,
-          type: getModuleType(selectedModuleModel),
+          type: moduleType,
           model: selectedModuleModel,
+          moduleSteps,
+          pauseSteps,
         })
       )
     }
     if (
-      selectedModuleModel == null &&
-      selectedLabwareDefUri != null &&
-      (createdLabwareForSlot?.labwareDefURI !== selectedLabwareDefUri ||
-        (selectedNestedLabwareDefUri != null &&
-          selectedNestedLabwareDefUri !==
-            createdNestedLabwareForSlot?.labwareDefURI))
+      (slot === 'offDeck' && selectedLabwareDefUri != null) ||
+      (selectedModuleModel == null &&
+        selectedLabwareDefUri != null &&
+        (createdLabwareForSlot?.labwareDefURI !== selectedLabwareDefUri ||
+          (selectedNestedLabwareDefUri != null &&
+            selectedNestedLabwareDefUri !==
+              createdNestedLabwareForSlot?.labwareDefURI)))
     ) {
       //  create adapter + labware on deck
       dispatch(
         createContainer({
           slot,
-          labwareDefURI:
-            selectedNestedLabwareDefUri == null
-              ? selectedLabwareDefUri
-              : selectedNestedLabwareDefUri,
+          labwareDefURI: selectedNestedLabwareDefUri ?? selectedLabwareDefUri,
           adapterUnderLabwareDefURI:
             selectedNestedLabwareDefUri == null
               ? undefined
@@ -332,7 +410,11 @@ export function DeckSetupTools(props: DeckSetupToolsProps): JSX.Element | null {
     if (
       selectedModuleModel != null &&
       selectedLabwareDefUri != null &&
-      createdLabwareForSlot?.labwareDefURI !== selectedLabwareDefUri
+      (createdLabwareForSlot?.labwareDefURI !== selectedLabwareDefUri ||
+        //  if nested labware changes but labware doesn't, still create both both
+        (createdLabwareForSlot.labwareDefURI === selectedLabwareDefUri &&
+          createdNestedLabwareForSlot?.labwareDefURI !==
+            selectedNestedLabwareDefUri))
     ) {
       //   create adapter + labware on module
       dispatch(
@@ -347,6 +429,13 @@ export function DeckSetupTools(props: DeckSetupToolsProps): JSX.Element | null {
     dispatch(selectZoomedIntoSlot({ slot: null, cutout: null }))
     onCloseClick()
   }
+  const positionStyles =
+    position === POSITION_FIXED
+      ? {
+          right: SPACING.spacing12,
+          top: `calc(${NAV_BAR_HEIGHT_REM}rem + ${SPACING.spacing12})`,
+        }
+      : {}
   return (
     <>
       {showDeleteLabwareModal != null ? (
@@ -371,8 +460,10 @@ export function DeckSetupTools(props: DeckSetupToolsProps): JSX.Element | null {
       ) : null}
       {changeModuleWarning}
       <Toolbox
-        height="calc(100vh - 64px)"
-        width="23.375rem"
+        height={`calc(100vh - ${NAV_BAR_HEIGHT_REM}rem - 2 * ${SPACING.spacing12})`}
+        width={`${DECK_SETUP_TOOLS_WIDTH_REM}rem`}
+        position={position}
+        {...positionStyles}
         title={
           <Flex gridGap={SPACING.spacing8} alignItems={ALIGN_CENTER}>
             <DeckInfoLabel
@@ -397,7 +488,7 @@ export function DeckSetupTools(props: DeckSetupToolsProps): JSX.Element | null {
                 handleResetToolbox()
               }
             }}
-            css={BUTTON_LINK_STYLE}
+            css={LINK_BUTTON_STYLE}
             textDecoration={TYPOGRAPHY.textDecorationUnderline}
           >
             <StyledText desktopStyle="bodyDefaultRegular">
@@ -429,6 +520,10 @@ export function DeckSetupTools(props: DeckSetupToolsProps): JSX.Element | null {
                   gridGap={SPACING.spacing4}
                 >
                   {moduleModels?.map(model => {
+                    const selectedModel =
+                      model === 'stagingAreaAndMagneticBlock'
+                        ? MAGNETIC_BLOCK_V1
+                        : model
                     const modelSomewhereOnDeck = Object.values(
                       deckSetupModules
                     ).filter(
@@ -438,7 +533,7 @@ export function DeckSetupTools(props: DeckSetupToolsProps): JSX.Element | null {
                       deckSetupModules
                     ).filter(
                       module =>
-                        module.type === getModuleType(model) &&
+                        module.type === getModuleType(selectedModel) &&
                         module.slot !== slot
                     )
                     const moamModels = MOAM_MODELS
@@ -446,7 +541,7 @@ export function DeckSetupTools(props: DeckSetupToolsProps): JSX.Element | null {
                     const collisionError = getDeckErrors({
                       modules: deckSetupModules,
                       selectedSlot: slot,
-                      selectedModel: model,
+                      selectedModel,
                       labware: deckSetupLabware,
                       robotType,
                     })
@@ -457,10 +552,19 @@ export function DeckSetupTools(props: DeckSetupToolsProps): JSX.Element | null {
                           if (onDeckProps?.setHoveredModule != null) {
                             onDeckProps.setHoveredModule(null)
                           }
+                          if (onDeckProps?.setHoveredFixture != null) {
+                            onDeckProps.setHoveredFixture(null)
+                          }
                         }}
                         setHovered={() => {
                           if (onDeckProps?.setHoveredModule != null) {
-                            onDeckProps.setHoveredModule(model)
+                            onDeckProps.setHoveredModule(selectedModel)
+                          }
+                          if (
+                            onDeckProps?.setHoveredFixture != null &&
+                            model === 'stagingAreaAndMagneticBlock'
+                          ) {
+                            onDeckProps.setHoveredFixture('stagingArea')
                           }
                         }}
                         largeDesktopBorderRadius
@@ -471,10 +575,16 @@ export function DeckSetupTools(props: DeckSetupToolsProps): JSX.Element | null {
                           >
                             <ModuleIcon
                               size="1rem"
-                              moduleType={getModuleType(model)}
+                              moduleType={getModuleType(selectedModel)}
                             />
                             <StyledText desktopStyle="bodyDefaultRegular">
-                              {getModuleDisplayName(model)}
+                              {model === 'stagingAreaAndMagneticBlock'
+                                ? t('shared:magneticBlockAndStagingArea', {
+                                    module: getModuleDisplayName(
+                                      MAGNETIC_BLOCK_V1
+                                    ),
+                                  })
+                                : getModuleDisplayName(selectedModel)}
                             </StyledText>
                           </Flex>
                         }
@@ -483,12 +593,12 @@ export function DeckSetupTools(props: DeckSetupToolsProps): JSX.Element | null {
                         onChange={() => {
                           if (
                             modelSomewhereOnDeck.length === 1 &&
-                            !moamModels.includes(model) &&
+                            !moamModels.includes(selectedModel) &&
                             robotType === FLEX_ROBOT_TYPE
                           ) {
                             makeSnackbar(
                               t('one_item', {
-                                hardware: getModuleDisplayName(model),
+                                hardware: getModuleDisplayName(selectedModel),
                               }) as string
                             )
                           } else if (
@@ -498,7 +608,9 @@ export function DeckSetupTools(props: DeckSetupToolsProps): JSX.Element | null {
                             makeSnackbar(
                               t('one_item', {
                                 hardware: t(
-                                  `shared:${getModuleType(model).toLowerCase()}`
+                                  `shared:${getModuleType(
+                                    selectedModel
+                                  ).toLowerCase()}`
                                 ),
                               }) as string
                             )
@@ -516,11 +628,20 @@ export function DeckSetupTools(props: DeckSetupToolsProps): JSX.Element | null {
                             (selectedFixture === 'wasteChuteAndStagingArea' &&
                               matchingLabwareFor4thColumn != null)
                           ) {
-                            setShowDeleteLabwareModal(model)
+                            setShowDeleteLabwareModal(selectedModel)
                           } else {
                             setSelectedHardware(model)
-                            dispatch(selectFixture({ fixture: null }))
-                            dispatch(selectModule({ moduleModel: model }))
+                            dispatch(
+                              selectFixture({
+                                fixture:
+                                  model === 'stagingAreaAndMagneticBlock'
+                                    ? 'stagingArea'
+                                    : null,
+                              })
+                            )
+                            dispatch(
+                              selectModule({ moduleModel: selectedModel })
+                            )
                             dispatch(selectLabware({ labwareDefUri: null }))
                             dispatch(
                               selectNestedLabware({ nestedLabwareDefUri: null })

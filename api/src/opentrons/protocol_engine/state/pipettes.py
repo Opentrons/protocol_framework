@@ -105,6 +105,7 @@ class StaticPipetteConfig:
     lld_settings: Optional[Dict[str, Dict[str, float]]]
     plunger_positions: Dict[str, float]
     shaft_ul_per_mm: float
+    available_sensors: pipette_definition.AvailableSensorDefinition
 
 
 @dataclasses.dataclass
@@ -296,6 +297,7 @@ class PipetteStore(HasState[PipetteState], HandlesActions):
                 lld_settings=config.pipette_lld_settings,
                 plunger_positions=config.plunger_positions,
                 shaft_ul_per_mm=config.shaft_ul_per_mm,
+                available_sensors=config.available_sensors,
             )
             self._state.flow_rates_by_id[
                 state_update.pipette_config.pipette_id
@@ -329,6 +331,11 @@ class PipetteStore(HasState[PipetteState], HandlesActions):
     def _update_aspirated(
         self, update: update_types.PipetteAspiratedFluidUpdate
     ) -> None:
+        if self._state.pipette_contents_by_id[update.pipette_id] is None:
+            self._state.pipette_contents_by_id[
+                update.pipette_id
+            ] = fluid_stack.FluidStack()
+
         self._fluid_stack_log_if_empty(update.pipette_id).add_fluid(update.fluid)
 
     def _update_ejected(self, update: update_types.PipetteEjectedFluidUpdate) -> None:
@@ -348,7 +355,7 @@ class PipetteStore(HasState[PipetteState], HandlesActions):
         return stack
 
 
-class PipetteView(HasState[PipetteState]):
+class PipetteView:
     """Read-only view of computed pipettes state."""
 
     _state: PipetteState
@@ -759,6 +766,13 @@ class PipetteView(HasState[PipetteState]):
             pip_front_right_bound,
             pip_back_right_bound,
             pip_front_left_bound,
+        )
+
+    def get_pipette_supports_pressure(self, pipette_id: str) -> bool:
+        """Return if this pipette supports a pressure sensor."""
+        return (
+            "pressure"
+            in self._state.static_config_by_id[pipette_id].available_sensors.sensors
         )
 
     def get_liquid_presence_detection(self, pipette_id: str) -> bool:

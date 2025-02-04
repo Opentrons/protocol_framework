@@ -6,17 +6,21 @@ import {
   ALIGN_END,
   COLORS,
   DIRECTION_COLUMN,
+  FLEX_MAX_CONTENT,
   Flex,
   INFO_TOAST,
   SPACING,
   ToggleGroup,
   useOnClickOutside,
 } from '@opentrons/components'
-import { selectTerminalItem } from '../../ui/steps/actions/actions'
+import {
+  selectDropdownItem,
+  selectTerminalItem,
+} from '../../ui/steps/actions/actions'
 import { useKitchen } from '../../organisms/Kitchen/hooks'
 import { getDeckSetupForActiveItem } from '../../top-selectors/labware-locations'
 import { generateNewProtocol } from '../../labware-ingred/actions'
-import { DefineLiquidsModal, ProtocolNavBar } from '../../organisms'
+import { DefineLiquidsModal, DesignerNavigation } from '../../organisms'
 import { selectDesignerTab } from '../../file-data/actions'
 import { getDesignerTab, getFileMetadata } from '../../file-data/selectors'
 import { DeckSetupContainer } from './DeckSetup'
@@ -67,6 +71,12 @@ export function Designer(): JSX.Element {
     isActive: tab === 'startingDeck',
     onClick: () => {
       dispatch(selectDesignerTab({ tab: 'startingDeck' }))
+      dispatch(
+        selectDropdownItem({
+          selection: null,
+          mode: 'clear',
+        })
+      )
     },
   }
   const protocolStepTab = {
@@ -149,8 +159,8 @@ export function Designer(): JSX.Element {
           }}
         />
       ) : null}
-      <Flex flexDirection={DIRECTION_COLUMN}>
-        <ProtocolNavBar
+      <Flex flexDirection={DIRECTION_COLUMN} minHeight={FLEX_MAX_CONTENT}>
+        <DesignerNavigation
           hasZoomInSlot={zoomIn.slot != null || zoomIn.cutout != null}
           hasTrashEntity={hasTrashEntity}
           showLiquidOverflowMenu={showLiquidOverflowMenu}
@@ -161,10 +171,15 @@ export function Designer(): JSX.Element {
           <Flex
             flexDirection={DIRECTION_COLUMN}
             backgroundColor={COLORS.grey10}
+            gridGap={SPACING.spacing24}
             padding={zoomIn.slot != null ? '0' : SPACING.spacing40}
             height="calc(100vh - 64px)"
           >
-            <Flex flexDirection={DIRECTION_COLUMN} gridGap={SPACING.spacing24}>
+            <Flex
+              flexDirection={DIRECTION_COLUMN}
+              gridGap={SPACING.spacing24}
+              height="100%"
+            >
               {zoomIn.slot == null ? (
                 <Flex alignSelf={ALIGN_END}>
                   <ToggleGroup

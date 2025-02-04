@@ -146,7 +146,6 @@ describe('RunningProtocol', () => {
       .thenReturn(mockRobotSideAnalysis)
     when(vi.mocked(useNotifyAllCommandsQuery))
       .calledWith(RUN_ID, {
-        cursor: null,
         pageLength: 1,
       })
       .thenReturn(mockUseAllCommandsResponseNonDeterministic)
@@ -162,6 +161,7 @@ describe('RunningProtocol', () => {
     vi.mocked(useErrorRecoveryFlows).mockReturnValue({
       isERActive: false,
       failedCommand: {} as any,
+      runLwDefsByUri: {} as any,
     })
     vi.mocked(useInterventionModal).mockReturnValue({
       showModal: false,
@@ -225,6 +225,7 @@ describe('RunningProtocol', () => {
     vi.mocked(useErrorRecoveryFlows).mockReturnValue({
       isERActive: true,
       failedCommand: {} as any,
+      runLwDefsByUri: {} as any,
     })
     render(`/runs/${RUN_ID}/run`)
     screen.getByText('MOCK ERROR RECOVERY')
