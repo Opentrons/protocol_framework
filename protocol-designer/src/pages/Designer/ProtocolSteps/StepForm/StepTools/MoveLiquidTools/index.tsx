@@ -50,6 +50,7 @@ import {
 import { MultiInputField } from './MultiInputField'
 import type { StepFieldName } from '../../../../../../form-types'
 import type { StepFormProps } from '../../types'
+import type { StepInputFieldProps } from './MultiInputField'
 
 const makeAddFieldNamePrefix = (prefix: string) => (
   fieldName: string
@@ -140,6 +141,29 @@ export function MoveLiquidTools(props: StepFormProps): JSX.Element {
     tab === 'dispense' && (isWasteChuteSelected || isTrashBinSelected)
 
   const mappedErrorsToField = getFormErrorsMappedToField(visibleFormErrors)
+
+  const getFields = (type: 'submerge' | 'retract'): StepInputFieldProps[] => {
+    return [
+      {
+        fieldTitle: t(`protocol_steps:${type}_speed`),
+        fieldKey: `${tab}_${type}_speed`,
+        units: 'application:units.millimeterPerSec',
+        errorToShow: getFormLevelError(
+          `${tab}_${type}_speed`,
+          mappedErrorsToField
+        ),
+      },
+      {
+        fieldTitle: t('protocol_steps:delay_duration'),
+        fieldKey: `${tab}_${type}_delay_seconds`,
+        units: 'application:units.seconds',
+        errorToShow: getFormLevelError(
+          `${tab}_${type}_delay_seconds`,
+          mappedErrorsToField
+        ),
+      },
+    ]
+  }
 
   return toolboxStep === 0 ? (
     <Flex
@@ -325,57 +349,20 @@ export function MoveLiquidTools(props: StepFormProps): JSX.Element {
         <>
           <Divider marginY="0" />
           <MultiInputField
-            name="submerge"
+            name={t('submerge')}
             tab={tab}
             tooltipContent={t(`tooltip:step_fields.defaults.${tab}_submerge`)}
             propsForFields={propsForFields}
-            fields={[
-              {
-                fieldTitle: 'protocol_steps:submerge_speed',
-                fieldKey: `${tab}_submerge_speed`,
-                units: 'application:units.millimeterPerSec',
-                errorToShow: getFormLevelError(
-                  `${tab}_submerge_speed`,
-                  mappedErrorsToField
-                ),
-              },
-              {
-                fieldTitle: 'protocol_steps:delay_duration',
-                fieldKey: `${tab}_submerge_delay_seconds`,
-                units: 'application:units.seconds',
-                errorToShow: getFormLevelError(
-                  `${tab}_submerge_delay_seconds`,
-                  mappedErrorsToField
-                ),
-              },
-            ]}
+            fields={getFields('submerge')}
           />
+          <Divider marginY="0" />
           <MultiInputField
-            name="retract"
+            name={t('retract')}
             tab={tab}
             tooltipContent={t(`tooltip:step_fields.defaults.${tab}_retract`)}
             propsForFields={propsForFields}
-            fields={[
-              {
-                fieldTitle: 'protocol_steps:retract_speed',
-                fieldKey: `${tab}_retract_speed`,
-                units: 'application:units.millimeterPerSec',
-                errorToShow: getFormLevelError(
-                  `${tab}_retract_speed`,
-                  mappedErrorsToField
-                ),
-              },
-              {
-                fieldTitle: 'protocol_steps:delay_duration',
-                fieldKey: `${tab}_retract_delay_seconds`,
-                units: 'application:units.seconds',
-                errorToShow: getFormLevelError(
-                  `${tab}_retract_delay_seconds`,
-                  mappedErrorsToField
-                ),
-              },
-            ]}
-            extraButton={true}
+            fields={getFields('retract')}
+            wellPosition={true}
             labwareId={
               formData[
                 getLabwareFieldForPositioningField(
