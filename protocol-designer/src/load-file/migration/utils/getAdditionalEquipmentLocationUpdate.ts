@@ -70,7 +70,7 @@ const getStagingAreaSlotNames = (
           command
         ): command is MoveLabwareCreateCommand | LoadLabwareCreateCommand =>
           command.commandType === commandType &&
-          //  @ts-expect-error
+          //  @ts-expect-error: ts doesn't trust that locationkey is actually found in the command params
           command.params[locationKey] !== 'offDeck' &&
           //  @ts-expect-error
           command.params[locationKey] !== 'systemLocation' &&
