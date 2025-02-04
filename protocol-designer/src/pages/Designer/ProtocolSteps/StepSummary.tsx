@@ -40,11 +40,7 @@ function StyledTrans(props: StyledTransProps): JSX.Element {
   const { i18nKey, tagText, values } = props
   const { t } = useTranslation(['protocol_steps', 'application'])
   return (
-    <Flex
-      gridGap={SPACING.spacing4}
-      alignItems={ALIGN_CENTER}
-      flexWrap={NO_WRAP}
-    >
+    <Flex gridGap={SPACING.spacing4} alignItems={ALIGN_CENTER} flexWrap={WRAP}>
       <Trans
         t={t}
         i18nKey={i18nKey}
@@ -431,6 +427,7 @@ export function StepSummary(props: StepSummaryProps): JSX.Element | null {
       flexDirection={DIRECTION_COLUMN}
       gridGap={SPACING.spacing4}
       width="100%"
+      height="100%"
     >
       {stepSummaryContent != null ? (
         <ListItem type="noActive">

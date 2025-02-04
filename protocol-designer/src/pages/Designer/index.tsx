@@ -3,12 +3,14 @@ import { useDispatch, useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import {
-  ALIGN_END,
+  ALIGN_CENTER,
+  ALIGN_STRETCH,
   COLORS,
   DIRECTION_COLUMN,
-  FLEX_MAX_CONTENT,
   Flex,
   INFO_TOAST,
+  JUSTIFY_CENTER,
+  JUSTIFY_FLEX_END,
   SPACING,
   ToggleGroup,
   useOnClickOutside,
@@ -25,7 +27,7 @@ import { selectDesignerTab } from '../../file-data/actions'
 import { getDesignerTab, getFileMetadata } from '../../file-data/selectors'
 import { DeckSetupContainer } from './DeckSetup'
 import { selectors } from '../../labware-ingred/selectors'
-import { OffDeck } from './Offdeck'
+import { OffDeck } from './OffDeck'
 import { LiquidsOverflowMenu } from './LiquidsOverflowMenu'
 import { ProtocolSteps } from './ProtocolSteps'
 
@@ -126,7 +128,14 @@ export function Designer(): JSX.Element {
 
   const deckViewItems =
     deckView === leftString ? (
-      <DeckSetupContainer tab={tab} />
+      <Flex
+        height="100%"
+        width="100%"
+        justifyContent={JUSTIFY_CENTER}
+        alignItems={ALIGN_CENTER}
+      >
+        <DeckSetupContainer tab={tab} />
+      </Flex>
     ) : (
       <OffDeck tab={tab} />
     )
@@ -159,7 +168,7 @@ export function Designer(): JSX.Element {
           }}
         />
       ) : null}
-      <Flex flexDirection={DIRECTION_COLUMN} minHeight={FLEX_MAX_CONTENT}>
+      <Flex flexDirection={DIRECTION_COLUMN} height="100%">
         <DesignerNavigation
           hasZoomInSlot={zoomIn.slot != null || zoomIn.cutout != null}
           hasTrashEntity={hasTrashEntity}
@@ -172,8 +181,13 @@ export function Designer(): JSX.Element {
             flexDirection={DIRECTION_COLUMN}
             backgroundColor={COLORS.grey10}
             gridGap={SPACING.spacing24}
-            padding={zoomIn.slot != null ? '0' : SPACING.spacing40}
-            height="calc(100vh - 64px)"
+            padding={
+              zoomIn.slot != null
+                ? '0'
+                : `${SPACING.spacing60} ${SPACING.spacing40}`
+            }
+            height="100%"
+            width="100%"
           >
             <Flex
               flexDirection={DIRECTION_COLUMN}
@@ -181,7 +195,11 @@ export function Designer(): JSX.Element {
               height="100%"
             >
               {zoomIn.slot == null ? (
-                <Flex alignSelf={ALIGN_END}>
+                <Flex
+                  justifyContent={JUSTIFY_FLEX_END}
+                  alignSelf={ALIGN_STRETCH}
+                  width="100%"
+                >
                   <ToggleGroup
                     selectedValue={deckView}
                     leftText={leftString}
