@@ -144,7 +144,7 @@ export const migrateFile = (
           ...acc,
           [id]: {
             ...form,
-            additionalEquipmentLocationUpdate: getAdditionalEquipmentLocationUpdate(
+            ...getAdditionalEquipmentLocationUpdate(
               commands,
               robot.model,
               savedStepForms
@@ -156,7 +156,7 @@ export const migrateFile = (
     },
     {}
   )
-
+  console.log('updatedInitialStep', updatedInitialStep)
   return {
     ...appData,
     designerApplication: {

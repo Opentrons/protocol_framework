@@ -17,12 +17,21 @@ import type {
   AddressableAreaName,
   CreateCommand,
   LoadLabwareCreateCommand,
+  LoadLabwareParams,
   MoveLabwareCreateCommand,
+  MoveLabwareParams,
   MoveToAddressableAreaCreateCommand,
   MoveToAddressableAreaForDropTipCreateCommand,
 } from '@opentrons/shared-data'
 
-type AdditionalEquipmentLocationUpdate = Record<string, string>
+type LocationUpdate = Record<string, string>
+
+export interface AdditionalEquipmentLocationUpdate {
+  trashBinLocationUpdate: LocationUpdate
+  wasteChuteLocationUpdate: LocationUpdate
+  stagingAreaLocationUpdate: LocationUpdate
+  gripperLocationUpdate: LocationUpdate
+}
 
 const findTrashBinId = (savedStepForms: SavedStepFormState): string | null => {
   if (!savedStepForms) {
@@ -58,20 +67,28 @@ const getStagingAreaSlotNames = (
   commandType: 'moveLabware' | 'loadLabware',
   locationKey: 'newLocation' | 'location'
 ): AddressableAreaName[] => {
-  return Object.values(commands)
-    .filter(
-      (
-        command
-      ): command is MoveLabwareCreateCommand | LoadLabwareCreateCommand =>
-        command.commandType === commandType &&
-        command.params[locationKey] !== 'offDeck' &&
-        command.params[locationKey] !== 'systemLocation' &&
-        'addressableAreaName' in command.params[locationKey] &&
-        COLUMN_4_SLOTS.includes(
-          command.params[locationKey].addressableAreaName as AddressableAreaName
-        )
-    )
-    .map(command => command.params[locationKey].addressableAreaName)
+  return (
+    Object.values(commands)
+      .filter(
+        (
+          command
+        ): command is MoveLabwareCreateCommand | LoadLabwareCreateCommand =>
+          command.commandType === commandType &&
+          //  @ts-expect-error
+          command.params[locationKey] !== 'offDeck' &&
+          //  @ts-expect-error
+          command.params[locationKey] !== 'systemLocation' &&
+          //  @ts-expect-error
+          'addressableAreaName' in command.params[locationKey] &&
+          COLUMN_4_SLOTS.includes(
+            //  @ts-expect-error
+            command.params[locationKey]
+              .addressableAreaName as AddressableAreaName
+          )
+      )
+      //  @ts-expect-error
+      .map(command => command.params[locationKey].addressableAreaName)
+  )
 }
 
 export const getAdditionalEquipmentLocationUpdate = (
@@ -184,7 +201,7 @@ export const getAdditionalEquipmentLocationUpdate = (
     wasteChuteId = `${uuid()}:wasteChute`
   }
 
-  const wasteChuteLocationUpdate: AdditionalEquipmentLocationUpdate =
+  let wasteChuteLocationUpdate: LocationUpdate =
     hasWasteChuteCommands && wasteChuteId != null
       ? {
           [wasteChuteId]: WASTE_CHUTE_CUTOUT,
@@ -192,7 +209,7 @@ export const getAdditionalEquipmentLocationUpdate = (
       : {}
 
   const gripperId = `${uuid()}:gripper`
-  const gripperLocationUpdate: AdditionalEquipmentLocationUpdate = hasGripperCommands
+  const gripperLocationUpdate: LocationUpdate = hasGripperCommands
     ? {
         [gripperId]: GRIPPER_LOCATION,
       }
@@ -231,16 +248,22 @@ export const getAdditionalEquipmentLocationUpdate = (
       : hardCodedTrashLocation,
   }
 
-  let trashBinLocationUpdate: AdditionalEquipmentLocationUpdate = hardcodedTrashBinOt2
+  let trashBinLocationUpdate: LocationUpdate = hasWasteChuteCommands
+    ? {}
+    : hardcodedTrashBinOt2
+
   if (trashAddressableAreaName != null && trashBinId != null) {
     trashBinLocationUpdate = {
       [trashBinId]: trashCutoutId as string,
     }
-  } else if (isFlex) {
-    trashBinLocationUpdate = hardcodedTrashFlex
+  } else if (isFlex && !hasWasteChuteCommands) {
+    trashBinLocationUpdate =
+      unoccupiedSlotForTrash === WASTE_CHUTE_CUTOUT ? {} : hardcodedTrashFlex
+    wasteChuteLocationUpdate =
+      unoccupiedSlotForTrash === WASTE_CHUTE_CUTOUT ? hardcodedTrashFlex : {}
   }
 
-  const stagingAreaLocationUpdate: AdditionalEquipmentLocationUpdate = stagingAreaSlotNames.reduce(
+  const stagingAreaLocationUpdate: LocationUpdate = stagingAreaSlotNames.reduce(
     (acc, slot) => {
       const stagingAreaId = `${uuid()}:stagingArea`
       const cutoutId = getCutoutIdByAddressableArea(
@@ -257,9 +280,9 @@ export const getAdditionalEquipmentLocationUpdate = (
   )
 
   return {
-    ...stagingAreaLocationUpdate,
-    ...gripperLocationUpdate,
-    ...wasteChuteLocationUpdate,
-    ...trashBinLocationUpdate,
+    stagingAreaLocationUpdate,
+    gripperLocationUpdate,
+    wasteChuteLocationUpdate,
+    trashBinLocationUpdate,
   }
 }
