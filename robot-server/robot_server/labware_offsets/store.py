@@ -44,7 +44,7 @@ class LabwareOffsetStore:
                 sqlalchemy.insert(labware_offset_table).values(
                     _pydantic_to_sql_offset(offset)
                 )
-            ).lastrowid
+            ).inserted_primary_key.row_id
             transaction.execute(
                 sqlalchemy.insert(
                     labware_offset_location_sequence_components_table

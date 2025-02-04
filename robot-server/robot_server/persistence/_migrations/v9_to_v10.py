@@ -61,7 +61,7 @@ def _upmigrate_stored_offsets(connection: sqlalchemy.engine.Connection) -> None:
             sqlalchemy.insert(schema_10.labware_offset_table).values(
                 _v9_offset_to_v10_offset(offset)
             )
-        ).lastrowid
+        ).inserted_primary_key.row_id
         connection.execute(
             sqlalchemy.insert(
                 schema_10.labware_offset_location_sequence_components_table
