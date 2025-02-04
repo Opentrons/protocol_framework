@@ -184,6 +184,7 @@ class RunArgs:
     liquid: str
     dilution: float
     reverse_tips: bool
+    tune_volume_correction: bool
 
     @classmethod
     def _get_protocol_context(cls, args: argparse.Namespace) -> ProtocolContext:
@@ -414,6 +415,7 @@ class RunArgs:
             liquid=args.liquid,
             dilution=args.dilution,
             reverse_tips=args.reverse_tips,
+            tune_volume_correction=args.tune_volume_correction,
         )
 
 
@@ -474,6 +476,7 @@ def build_gravimetric_cfg(
         dilution=run_args.dilution,
         starting_tip=starting_tip,
         use_old_method=use_old_method,
+        tune_volume_correction=run_args.tune_volume_correction,
     )
 
 
@@ -680,6 +683,7 @@ if __name__ == "__main__":
         default="A1",
     )
     parser.add_argument("--serial-log", action="store_true")
+    parser.add_argument("--tune-volume-correction", action="store_true")
     args = parser.parse_args()
     run_args = RunArgs.build_run_args(args)
     config.NUM_BLANK_TRIALS = args.blank_trials

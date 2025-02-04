@@ -2,7 +2,15 @@
 from time import sleep
 from typing import Optional, Tuple, List, Dict
 
-from opentrons.protocol_api import ProtocolContext, Well, Labware, InstrumentContext
+from opentrons.protocol_api import (
+    ProtocolContext,
+    Well,
+    Labware,
+    InstrumentContext,
+    LiquidClass,
+)
+from opentrons.protocol_api._liquid import TransferProperties
+
 from opentrons.protocol_api.core.engine.transfer_components_executor import (
     TransferType,
     LiquidAndAirGapPair,
@@ -42,6 +50,7 @@ from .liquid_class.pipetting import (
     _get_approach_submerge_retract_heights,
 )
 from .liquid_class.defaults import get_liquid_class, set_liquid_class
+from .liquid_class.definition import LiquidClassSettings
 from .liquid_class.interactive import interactively_build_liquid_class
 from .liquid_height.height import LiquidTracker
 from .measurement import (
@@ -271,11 +280,16 @@ def _take_photos(trial: GravimetricTrial, stage_str: str) -> None:
 
 
 def _run_trial(
-    trial: GravimetricTrial, use_old_method: bool = False
+    trial: GravimetricTrial,
+    new_liquid_class: Optional[LiquidClass] = None,
+    tune_volume_correction: bool = False,
 ) -> Tuple[float, MeasurementData, float, MeasurementData]:
     global _PREV_TRIAL_GRAMS
     assert trial.pipette.has_tip
-    if use_old_method:
+    transfer_properties: Optional[TransferProperties] = None
+    old_liquid_class: Optional[LiquidClassSettings] = None
+    pipetting_callbacks = None
+    if not new_liquid_class:
         pipetting_callbacks = _generate_callbacks_for_trial(
             trial.ctx,
             trial.pipette,
@@ -286,7 +300,7 @@ def _run_trial(
             trial.trial,
             trial.blank,
         )
-        liquid_class = get_liquid_class(
+        old_liquid_class = get_liquid_class(
             trial.cfg.liquid,
             trial.cfg.dilution,
             int(trial.pipette.max_volume),
@@ -295,10 +309,10 @@ def _run_trial(
             trial.volume,
         )
         if trial.cfg.interactive:
-            liquid_class = interactively_build_liquid_class(liquid_class)
+            old_liquid_class = interactively_build_liquid_class(old_liquid_class)
             # store it, so that next loop we don't have to think so much
             set_liquid_class(
-                liquid_class,
+                old_liquid_class,
                 trial.cfg.liquid,
                 trial.cfg.dilution,
                 int(trial.pipette.max_volume),
@@ -307,20 +321,13 @@ def _run_trial(
                 trial.volume,
             )
     else:
-        pipetting_callbacks = None
-        lc_name = SupportedLiquid.from_string(trial.cfg.liquid).name_with_dilution(
-            trial.cfg.dilution
-        )
-        liquid_class_root = trial.ctx.define_liquid_class(
-            lc_name.lower().replace("-", "_")
-        )
         pip_load_name = (
             f"flex_{trial.pipette.channels}channel_{int(trial.pipette.max_volume)}"
         )
         tiprack_load_name = (
             f"opentrons/opentrons_flex_96_tiprack_{trial.cfg.tip_volume}ul/1"
         )
-        liquid_class = liquid_class_root.get_for(pip_load_name, tiprack_load_name)
+        transfer_properties = new_liquid_class.get_for(pip_load_name, tiprack_load_name)
 
     def _tag(m_type: MeasurementType) -> str:
         tag = create_measurement_tag(
@@ -405,7 +412,7 @@ def _run_trial(
     #        tell the API's liquid-class to move the correct submerge depth (relative to well-bottom)
     def _calculate_meniscus_relative_offsets(is_aspirate: bool) -> None:
         _attr_name = "aspirate" if is_aspirate else "dispense"
-        _asp_or_disp = getattr(liquid_class, _attr_name)
+        _asp_or_disp = getattr(transfer_properties, _attr_name)
         _retract_mm = max(
             0.0, _asp_or_disp.submerge.offset.z, _asp_or_disp.retract.offset.z
         )
@@ -430,10 +437,10 @@ def _run_trial(
         _asp_or_disp.retract.offset.z = retract
 
     # RUN ASPIRATE
-    if use_old_method:
+    if not transfer_properties:
         aspirate_with_liquid_class(
             trial.ctx,
-            liquid_class,
+            old_liquid_class,
             trial.pipette,
             trial.volume,
             trial.well,
@@ -464,10 +471,42 @@ def _run_trial(
         # FIXME: This assumes whatever is in the pipette from last trial is air (not liquid),
         #        and so this would break any sort of multi-dispense testing
         assumed_air_gap = trial.pipette.current_volume
+        if tune_volume_correction:
+            _prev_vol_corr_val_asp = (
+                transfer_properties.aspirate.correction_by_volume.get_for_volume(
+                    trial.volume
+                )
+            )
+            _prev_vol_corr_val_disp = (
+                transfer_properties.dispense.correction_by_volume.get_for_volume(
+                    trial.volume
+                )
+            )
+            assert abs(_prev_vol_corr_val_asp - _prev_vol_corr_val_disp) < 0.001
+            while True:
+                _inp = input(
+                    f"ENTER volumeCorrection (uL) for Aspirate={trial.volume} "
+                    f"(currently set to {_prev_vol_corr_val_asp}): "
+                )
+                if not _inp:
+                    print(f"using old volumeCorrection {_prev_vol_corr_val_asp}")
+                    break
+                try:
+                    _new_vol_corr_val = float(_inp.strip())
+                    # NOTE: aspirate/dispense need identical values to avoid errors
+                    transfer_properties.aspirate.correction_by_volume.set_for_volume(
+                        trial.volume, _new_vol_corr_val
+                    )
+                    transfer_properties.dispense.correction_by_volume.set_for_volume(
+                        trial.volume, _new_vol_corr_val
+                    )
+                    break
+                except ValueError as e:
+                    print(e)
         tip_contents = trial.pipette._core.aspirate_liquid_class(
             volume=trial.volume,
             source=(Location(Point(), trial.well), trial.well._core),
-            transfer_properties=liquid_class,
+            transfer_properties=transfer_properties,
             transfer_type=TransferType.ONE_TO_ONE,
             tip_contents=[LiquidAndAirGapPair(liquid=0, air_gap=assumed_air_gap)],
         )
@@ -488,10 +527,10 @@ def _run_trial(
         ui.get_user_ready("dispensing")
 
     # RUN DISPENSE
-    if use_old_method:
+    if not transfer_properties:
         dispense_with_liquid_class(
             ctx=trial.ctx,
-            liquid_class=liquid_class,
+            liquid_class=old_liquid_class,
             pipette=trial.pipette,
             dispense_volume=trial.volume,
             well=trial.well,
@@ -510,7 +549,7 @@ def _run_trial(
             volume=trial.volume,
             dest=(Location(Point(), trial.well), trial.well._core),
             source=(Location(Point(), trial.well), trial.well._core),
-            transfer_properties=liquid_class,
+            transfer_properties=transfer_properties,
             transfer_type=TransferType.ONE_TO_ONE,
             tip_contents=tip_contents,
             add_final_air_gap=True,
@@ -663,8 +702,16 @@ def _calculate_evaporation(
     actual_disp_list_evap: List[float] = []
     for b_trial in blank_trials[resources.test_volumes[-1]][0]:
         ui.print_header(f"BLANK {b_trial.trial + 1}/{config.NUM_BLANK_TRIALS}")
+        new_liquid_class = None
+        if not use_old_method:
+            lc_name = SupportedLiquid.from_string(
+                b_trial.cfg.liquid
+            ).name_with_dilution(b_trial.cfg.dilution)
+            new_liquid_class = b_trial.ctx.define_liquid_class(
+                lc_name.lower().replace("-", "_")
+            )
         evap_aspirate, _, evap_dispense, _ = _run_trial(
-            b_trial, use_old_method=use_old_method
+            b_trial, new_liquid_class=new_liquid_class
         )
         ui.print_info(
             f"blank {b_trial.trial + 1}/{config.NUM_BLANK_TRIALS}:\n"
@@ -716,6 +763,14 @@ def _get_liquid_height(
 
 def run(cfg: config.GravimetricConfig, resources: TestResources) -> None:  # noqa: C901
     """Run."""
+    new_liquid_class = None
+    if not cfg.use_old_method:
+        lc_name = SupportedLiquid.from_string(
+            cfg.liquid
+        ).name_with_dilution(cfg.dilution)
+        new_liquid_class = resources.ctx.define_liquid_class(
+            lc_name.lower().replace("-", "_")
+        )
     global _PREV_TRIAL_GRAMS
     global _MEASUREMENTS
     ui.print_header("LOAD LABWARE")
@@ -897,7 +952,11 @@ def run(cfg: config.GravimetricConfig, resources: TestResources) -> None:  # noq
                         aspirate_data,
                         actual_dispense,
                         dispense_data,
-                    ) = _run_trial(run_trial, use_old_method=cfg.use_old_method)
+                    ) = _run_trial(
+                        run_trial,
+                        new_liquid_class=new_liquid_class,
+                        tune_volume_correction=cfg.tune_volume_correction,
+                    )
                     ui.print_info(
                         "measured volumes:\n"
                         f"\taspirate: {round(actual_aspirate, 2)} uL\n"
