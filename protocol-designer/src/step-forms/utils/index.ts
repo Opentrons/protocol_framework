@@ -35,7 +35,6 @@ import type {
 } from '@opentrons/step-generation'
 import type { DeckSlot } from '../../types'
 import type { FormData, HydratedFormData } from '../../form-types'
-import type { PDProtocolFile } from '../../file-types'
 import type {
   AdditionalEquipmentOnDeck,
   InitialDeckSetup,

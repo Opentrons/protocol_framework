@@ -5,20 +5,14 @@ import merge from 'lodash/merge'
 import omit from 'lodash/omit'
 import reduce from 'lodash/reduce'
 import {
-  FLEX_ROBOT_TYPE,
-  OT2_ROBOT_TYPE,
   getLabwareDefaultEngageHeight,
   getLabwareDefURI,
   getModuleType,
   MAGNETIC_MODULE_TYPE,
   MAGNETIC_MODULE_V1,
   THERMOCYCLER_MODULE_TYPE,
-  WASTE_CHUTE_ADDRESSABLE_AREAS,
-  MOVABLE_TRASH_ADDRESSABLE_AREAS,
-  WASTE_CHUTE_CUTOUT,
 } from '@opentrons/shared-data'
 import { rootReducer as labwareDefsRootReducer } from '../../labware-defs'
-import { getCutoutIdByAddressableArea, uuid } from '../../utils'
 import {
   GRIPPER_LOCATION,
   INITIAL_DECK_SETUP_STEP_ID,
@@ -33,7 +27,6 @@ import { PRESAVED_STEP_ID } from '../../steplist/types'
 import { getLabwareIsCompatible } from '../../utils/labwareModuleCompatibility'
 import { getLabwareOnModule } from '../../ui/modules/utils'
 import { nestedCombineReducers } from './nestedCombineReducers'
-import { COLUMN_4_SLOTS } from '@opentrons/step-generation'
 import {
   _getPipetteEntitiesRootState,
   _getLabwareEntitiesRootState,
@@ -44,7 +37,6 @@ import {
   createPresavedStepForm,
   getDeckItemIdInSlot,
   getIdsInRange,
-  getUnoccupiedSlotForTrash,
 } from '../utils'
 
 import type { Reducer } from 'redux'
@@ -57,11 +49,7 @@ import type {
   LoadLabwareCreateCommand,
   LoadModuleCreateCommand,
   LoadPipetteCreateCommand,
-  MoveLabwareCreateCommand,
-  MoveToAddressableAreaCreateCommand,
-  MoveToAddressableAreaForDropTipCreateCommand,
   PipetteName,
-  AddressableAreaName,
 } from '@opentrons/shared-data'
 import type { RootState as LabwareDefsRootState } from '../../labware-defs'
 import type { LoadFileAction } from '../../load-file'
@@ -112,12 +100,12 @@ import type {
   SelectMultipleStepsAction,
 } from '../../ui/steps/actions/types'
 import type { Action } from '../../types'
+import type { AdditionalEquipmentLocationUpdate } from '../../load-file/migration/utils/getAdditionalEquipmentLocationUpdate'
 import type {
   NormalizedLabware,
   NormalizedLabwareById,
   ModuleEntities,
 } from '../types'
-import { AdditionalEquipmentLocationUpdate } from '../../load-file/migration/utils/getAdditionalEquipmentLocationUpdate'
 
 type FormState = FormData | null
 const unsavedFormInitialState = null

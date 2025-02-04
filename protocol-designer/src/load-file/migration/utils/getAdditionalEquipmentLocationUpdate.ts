@@ -1,28 +1,24 @@
 import {
   WASTE_CHUTE_ADDRESSABLE_AREAS,
-  RobotType,
   FLEX_ROBOT_TYPE,
   OT2_ROBOT_TYPE,
   MOVABLE_TRASH_ADDRESSABLE_AREAS,
   WASTE_CHUTE_CUTOUT,
 } from '@opentrons/shared-data'
 import { COLUMN_4_SLOTS, uuid } from '@opentrons/step-generation'
-import {
-  SavedStepFormState,
-  getUnoccupiedSlotForTrash,
-} from '../../../step-forms'
+import { getUnoccupiedSlotForTrash } from '../../../step-forms'
 import { getCutoutIdByAddressableArea } from '../../../utils'
 import { GRIPPER_LOCATION } from '../../../constants'
+import type { RobotType } from '@opentrons/shared-data'
 import type {
   AddressableAreaName,
   CreateCommand,
   LoadLabwareCreateCommand,
-  LoadLabwareParams,
   MoveLabwareCreateCommand,
-  MoveLabwareParams,
   MoveToAddressableAreaCreateCommand,
   MoveToAddressableAreaForDropTipCreateCommand,
 } from '@opentrons/shared-data'
+import type { SavedStepFormState } from '../../../step-forms'
 
 type LocationUpdate = Record<string, string>
 
