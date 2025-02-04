@@ -1,18 +1,12 @@
 import { useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
 import {
-  ALIGN_CENTER,
-  COLORS,
   DIRECTION_COLUMN,
   Divider,
   Flex,
-  Icon,
-  ListItem,
   SPACING,
   StyledText,
   Tabs,
-  Tooltip,
-  useHoverTooltip,
 } from '@opentrons/components'
 import { getTrashOrLabware } from '@opentrons/step-generation'
 import {
@@ -53,9 +47,9 @@ import {
   getFormLevelError,
   getLabwareFieldForPositioningField,
 } from '../../utils'
+import { MultiInputField } from './MultiInputField'
 import type { StepFieldName } from '../../../../../../form-types'
 import type { StepFormProps } from '../../types'
-import { MultiInputField } from './MultiInputField'
 
 const makeAddFieldNamePrefix = (prefix: string) => (
   fieldName: string

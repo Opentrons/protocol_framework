@@ -13,9 +13,9 @@ import {
 } from '@opentrons/components'
 import { InputStepFormField } from '../../../../../../molecules'
 import { PositionField } from '../../PipetteFields'
-import { type FieldPropsByName } from '../../types'
+import type { FieldPropsByName } from '../../types'
 
-interface InputFieldProps{
+interface InputFieldProps {
   fieldTitle: string
   fieldKey: string
   units: string
@@ -32,7 +32,15 @@ interface MultiInputFieldProps {
 }
 
 export function MultiInputField(props: MultiInputFieldProps): JSX.Element {
-  const { name, tab, tooltipContent, extraButton, fields, propsForFields, labwareId } = props
+  const {
+    name,
+    tab,
+    tooltipContent,
+    extraButton,
+    fields,
+    propsForFields,
+    labwareId,
+  } = props
   const [targetProps, tooltipProps] = useHoverTooltip()
   const { t } = useTranslation(['protocol_steps', 'form', 'tooltip'])
 
@@ -65,26 +73,26 @@ export function MultiInputField(props: MultiInputFieldProps): JSX.Element {
             gridGap={SPACING.spacing8}
           >
             {fields.map(({ fieldTitle, fieldKey, units, errorToShow }) => (
-                <InputStepFormField
-                    key={fieldKey}
-                    showTooltip={false}
-                    padding="0"
-                    title={t(fieldTitle)}
-                    {...propsForFields[fieldKey]}
-                    units={t(units)}
-                    errorToShow={errorToShow}
-                />
+              <InputStepFormField
+                key={fieldKey}
+                showTooltip={false}
+                padding="0"
+                title={t(fieldTitle)}
+                {...propsForFields[fieldKey]}
+                units={t(units)}
+                errorToShow={errorToShow}
+              />
             ))}
-            {(extraButton != null) && (
+            {extraButton != null && (
               <PositionField
-              padding="0"
-              prefix={tab}
-              propsForFields={propsForFields}
-              zField={`${tab}_mmFromBottom`}
-              xField={`${tab}_x_position`}
-              yField={`${tab}_y_position`}
-              labwareId={labwareId}
-            />
+                padding="0"
+                prefix={tab}
+                propsForFields={propsForFields}
+                zField={`${tab}_mmFromBottom`}
+                xField={`${tab}_x_position`}
+                yField={`${tab}_y_position`}
+                labwareId={labwareId}
+              />
             )}
           </Flex>
         </ListItem>
