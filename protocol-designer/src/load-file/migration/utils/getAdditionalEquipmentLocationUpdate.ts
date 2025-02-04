@@ -157,12 +157,6 @@ export const getAdditionalEquipmentLocationUpdate = (
         )
       : null
 
-  if (trashBinCommand == null && robotType === OT2_ROBOT_TYPE) {
-    console.error(
-      'expected to find a fixedTrash command for the OT-2 but could not'
-    )
-  }
-
   const moveLiquidStepWasteChute =
     savedStepForms != null
       ? Object.values(savedStepForms).find(
@@ -211,37 +205,13 @@ export const getAdditionalEquipmentLocationUpdate = (
       }
     : {}
 
-  const hardcodedTrashBinIdOt2 = `${uuid()}:fixedTrash`
+  const hardcodedTrashBinIdOt2 = `${uuid()}:trashBin`
   const hardcodedTrashBinOt2 = {
     [hardcodedTrashBinIdOt2]: getCutoutIdByAddressableArea(
       'fixedTrash' as AddressableAreaName,
       'fixedTrashSlot',
       OT2_ROBOT_TYPE
     ),
-  }
-
-  const hardcodedTrashAddressableAreaName =
-    unoccupiedSlotForTrash === WASTE_CHUTE_CUTOUT
-      ? 'wasteChute'
-      : `movableTrash${unoccupiedSlotForTrash}`
-
-  const hardcodedTrashIdFlex = `${uuid()}:${hardcodedTrashAddressableAreaName}`
-
-  const hardCodedTrashLocation =
-    unoccupiedSlotForTrash === ''
-      ? ''
-      : unoccupiedSlotForTrash === WASTE_CHUTE_CUTOUT
-      ? WASTE_CHUTE_CUTOUT
-      : getCutoutIdByAddressableArea(
-          hardcodedTrashAddressableAreaName as AddressableAreaName,
-          'trashBinAdapter',
-          FLEX_ROBOT_TYPE
-        )
-
-  const hardcodedTrashFlex = {
-    [hardcodedTrashIdFlex]: hasWasteChuteCommands
-      ? WASTE_CHUTE_CUTOUT
-      : hardCodedTrashLocation,
   }
 
   let trashBinLocationUpdate: LocationUpdate = hasWasteChuteCommands
@@ -252,11 +222,27 @@ export const getAdditionalEquipmentLocationUpdate = (
     trashBinLocationUpdate = {
       [trashBinId]: trashCutoutId as string,
     }
+    //  in case the user has no pipetting steps, auto-generate a trashBin or wasteChute entity for Flex
   } else if (isFlex && !hasWasteChuteCommands) {
+    const hardCodedTrashIdFlex = `${uuid()}:movableTrash${unoccupiedSlotForTrash}`
+    const hardCodedWasteChuteId = `${uuid()}:wasteChute`
+
     trashBinLocationUpdate =
-      unoccupiedSlotForTrash === WASTE_CHUTE_CUTOUT ? {} : hardcodedTrashFlex
+      unoccupiedSlotForTrash === WASTE_CHUTE_CUTOUT
+        ? {}
+        : {
+            [hardCodedTrashIdFlex]: getCutoutIdByAddressableArea(
+              `movableTrash${unoccupiedSlotForTrash}` as AddressableAreaName,
+              'trashBinAdapter',
+              FLEX_ROBOT_TYPE
+            ),
+          }
     wasteChuteLocationUpdate =
-      unoccupiedSlotForTrash === WASTE_CHUTE_CUTOUT ? hardcodedTrashFlex : {}
+      unoccupiedSlotForTrash === WASTE_CHUTE_CUTOUT
+        ? {
+            [hardCodedWasteChuteId]: WASTE_CHUTE_CUTOUT,
+          }
+        : {}
   }
 
   const stagingAreaLocationUpdate: LocationUpdate = stagingAreaSlotNames.reduce(
