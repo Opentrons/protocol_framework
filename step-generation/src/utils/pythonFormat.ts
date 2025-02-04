@@ -1,9 +1,9 @@
 /** Utility functions for Python code generation. */
 
-export const INDENT = '    '
+const INDENT = '    '
 
 /** Indent each of the lines in `text`. */
-export function indentLines(text: string): string {
+export function indentPyLines(text: string): string {
   return text
     .split('\n')
     .map(line => (line ? INDENT + line : line))
@@ -56,7 +56,7 @@ export function formatPyDict(dict: Record<string, any>): string {
       .map(([key, value]) => `${formatPyStr(key)}: ${formatPyValue(value)}`)
       .join(', ')}}`
   } else {
-    return `{\n${indentLines(
+    return `{\n${indentPyLines(
       dictEntries
         .map(([key, value]) => `${formatPyStr(key)}: ${formatPyValue(value)}`)
         .join(',\n')
