@@ -32,6 +32,8 @@ export type StepFieldName = string
 // | 'aspirate_mix_times'
 // | 'aspirate_mix_volume'
 // | 'aspirate_mmFromBottom'
+// | 'aspirate_retract_delay_seconds'
+// | 'aspirate_retract_speed'
 // | 'aspirate_submerge_delay_seconds'
 // | 'aspirate_submerge_speed'
 // | 'aspirate_touchTip_checkbox'
@@ -53,6 +55,8 @@ export type StepFieldName = string
 // | 'dispense_mix_times'
 // | 'dispense_mix_volume'
 // | 'dispense_mmFromBottom'
+// | 'dispense_retract_delay_seconds'
+// | 'dispense_retract_speed'
 // | 'dispense_submerge_delay_seconds'
 // | 'dispense_submerge_speed'
 // | 'dispense_touchTip_checkbox'
@@ -256,6 +260,8 @@ export interface HydratedMoveLiquidFormData extends AnnotationFields {
   aspirate_mix_times?: number | null
   aspirate_mix_volume?: number | null
   aspirate_mmFromBottom?: number | null
+  aspirate_retract_delay_seconds?: number | null
+  aspirate_retract_speed?: number | null
   aspirate_submerge_delay_seconds?: number | null
   aspirate_submerge_speed?: number | null
   aspirate_touchTip_mmFromTop?: number | null
@@ -272,6 +278,8 @@ export interface HydratedMoveLiquidFormData extends AnnotationFields {
   dispense_mix_times?: number | null
   dispense_mix_volume?: number | null
   dispense_mmFromBottom?: number | null
+  dispense_retract_delay_seconds?: number | null
+  dispense_retract_speed?: number | null
   dispense_submerge_delay_seconds?: number | null
   dispense_submerge_speed?: number | null
   dispense_touchTip_mmFromTop?: number | null

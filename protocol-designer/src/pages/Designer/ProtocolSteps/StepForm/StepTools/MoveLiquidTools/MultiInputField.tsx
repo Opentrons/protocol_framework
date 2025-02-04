@@ -12,7 +12,7 @@ import {
   useHoverTooltip,
 } from '@opentrons/components'
 import { InputStepFormField } from '../../../../../../molecules'
-
+import { PositionField } from '../../PipetteFields'
 import { type FieldPropsByName } from '../../types'
 
 interface InputFieldProps{
@@ -23,14 +23,16 @@ interface InputFieldProps{
 }
 interface MultiInputFieldProps {
   name: string
+  tab: 'aspirate' | 'dispense' | 'mix'
   tooltipContent: string
   propsForFields: FieldPropsByName
   fields: InputFieldProps[]
-  extraButton?: string
+  extraButton?: boolean | null
+  labwareId?: string | null
 }
 
 export function MultiInputField(props: MultiInputFieldProps): JSX.Element {
-  const { name, tooltipContent, extraButton, fields, propsForFields } = props
+  const { name, tab, tooltipContent, extraButton, fields, propsForFields, labwareId } = props
   const [targetProps, tooltipProps] = useHoverTooltip()
   const { t } = useTranslation(['protocol_steps', 'form', 'tooltip'])
 
@@ -74,7 +76,15 @@ export function MultiInputField(props: MultiInputFieldProps): JSX.Element {
                 />
             ))}
             {(extraButton != null) && (
-              {extraButton}
+              <PositionField
+              padding="0"
+              prefix={tab}
+              propsForFields={propsForFields}
+              zField={`${tab}_mmFromBottom`}
+              xField={`${tab}_x_position`}
+              yField={`${tab}_y_position`}
+              labwareId={labwareId}
+            />
             )}
           </Flex>
         </ListItem>

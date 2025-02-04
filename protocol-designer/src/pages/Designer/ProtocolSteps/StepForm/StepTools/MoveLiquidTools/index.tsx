@@ -71,7 +71,6 @@ export function MoveLiquidTools(props: StepFormProps): JSX.Element {
     tab,
     setTab,
   } = props
-  const [targetProps, tooltipProps] = useHoverTooltip()
   const { t, i18n } = useTranslation(['protocol_steps', 'form', 'tooltip'])
   const { path } = formData
   const additionalEquipmentEntities = useSelector(
@@ -333,6 +332,7 @@ export function MoveLiquidTools(props: StepFormProps): JSX.Element {
           <Divider marginY="0" />
           <MultiInputField
             name="submerge"
+            tab={tab}
             tooltipContent={t(`tooltip:step_fields.defaults.${tab}_submerge`)}
             propsForFields={propsForFields}
             fields={[
@@ -355,6 +355,40 @@ export function MoveLiquidTools(props: StepFormProps): JSX.Element {
                 ),
               },
             ]}
+          />
+          <MultiInputField
+            name="retract"
+            tab={tab}
+            tooltipContent={t(`tooltip:step_fields.defaults.${tab}_retract`)}
+            propsForFields={propsForFields}
+            fields={[
+              {
+                fieldTitle: 'protocol_steps:retract_speed',
+                fieldKey: `${tab}_retract_speed`,
+                units: 'application:units.millimeterPerSec',
+                errorToShow: getFormLevelError(
+                  `${tab}_retract_speed`,
+                  mappedErrorsToField
+                ),
+              },
+              {
+                fieldTitle: 'protocol_steps:delay_duration',
+                fieldKey: `${tab}_retract_delay_seconds`,
+                units: 'application:units.seconds',
+                errorToShow: getFormLevelError(
+                  `${tab}_retract_delay_seconds`,
+                  mappedErrorsToField
+                ),
+              },
+            ]}
+            extraButton={true}
+            labwareId={
+              formData[
+                getLabwareFieldForPositioningField(
+                  addFieldNamePrefix('mmFromBottom')
+                )
+              ]
+            }
           />
         </>
       ) : null}
