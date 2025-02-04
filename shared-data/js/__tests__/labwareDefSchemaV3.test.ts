@@ -13,11 +13,8 @@ const globPattern = '**/*.json'
 const ajv = new Ajv({ allErrors: true, jsonPointers: true })
 const validate = ajv.compile(schema)
 
-const checkGeometryDefinitions = (
-  labwareDef: LabwareDefinition3,
-  filename: string
-): void => {
-  test(`all geometryDefinitionIds specified in {filename} should have an accompanying valid entry in innerLabwareGeometry`, () => {
+const checkGeometryDefinitions = (labwareDef: LabwareDefinition3): void => {
+  test('all geometryDefinitionIds should have an accompanying valid entry in innerLabwareGeometry', () => {
     for (const wellName in labwareDef.wells) {
       const wellGeometryId = labwareDef.wells[wellName].geometryDefinitionId
 
@@ -68,6 +65,6 @@ describe(`test labware definitions with schema v3`, () => {
       expect(valid).toBe(true)
     })
 
-    checkGeometryDefinitions(labwareDef, labwarePath)
+    checkGeometryDefinitions(labwareDef)
   })
 })
