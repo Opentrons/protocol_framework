@@ -97,6 +97,7 @@
       },
       "result": {
         "definition": {
+          "$otSharedSchema": "#/labware/schemas/3",
           "allowedRoles": [
             "labware",
             "lid"
@@ -255,6 +256,7 @@
       },
       "result": {
         "definition": {
+          "$otSharedSchema": "#/labware/schemas/3",
           "allowedRoles": [
             "labware",
             "lid"
@@ -413,6 +415,7 @@
       },
       "result": {
         "definition": {
+          "$otSharedSchema": "#/labware/schemas/3",
           "allowedRoles": [
             "labware",
             "lid"
