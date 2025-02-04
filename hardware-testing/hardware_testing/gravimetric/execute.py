@@ -413,12 +413,15 @@ def _run_trial(
             blank=trial.blank,
             channel_count=trial.channel_count,
         )
-        _asp_or_disp = getattr(liquid_class, "aspirate" if is_aspirate else "dispense")
-        _asp_or_disp.position_reference = PositionReference.WELL_BOTTOM
+        _attr_name = "aspirate" if is_aspirate else "dispense"
+        _asp_or_disp = getattr(liquid_class, _attr_name)
+        # NOTE: setting all position references to BOTTOM
         _asp_or_disp.submerge.position_reference = PositionReference.WELL_BOTTOM
+        _asp_or_disp.position_reference = PositionReference.WELL_BOTTOM
         _asp_or_disp.retract.position_reference = PositionReference.WELL_BOTTOM
-        _asp_or_disp.offset.z = submerge
+        # update liquid-class offsets based on CALCULATED meniscus height
         _asp_or_disp.submerge.offset.z = approach
+        _asp_or_disp.offset.z = submerge
         _asp_or_disp.retract.offset.z = retract
 
     # RUN ASPIRATE
@@ -442,6 +445,7 @@ def _run_trial(
     else:
         # FIXME: This assumes whatever is in the pipette from last trial is air (not liquid),
         #        and so this would break any sort of multi-dispense testing
+        _calculate_meniscus_relative_offsets(is_aspirate=True)
         assumed_air_gap = trial.pipette.current_volume
         tip_contents = trial.pipette._core.aspirate_liquid_class(
             volume=trial.volume,
@@ -484,6 +488,7 @@ def _run_trial(
             pose_for_camera=trial.cfg.interactive,
         )
     else:
+        _calculate_meniscus_relative_offsets(is_aspirate=False)
         _ = trial.pipette._core.dispense_liquid_class(
             volume=trial.volume,
             dest=(Location(Point(), trial.well), trial.well._core),
