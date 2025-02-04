@@ -5,6 +5,7 @@ import {
   COLORS,
   DIRECTION_COLUMN,
   EmptySelectorButton,
+  FLEX_MAX_CONTENT,
   Flex,
   ListItem,
   SPACING,
@@ -320,7 +321,7 @@ function AddModuleEmptySelectorButton(
 
   return (
     <>
-      <Flex {...targetProps}>
+      <Flex {...targetProps} width={FLEX_MAX_CONTENT}>
         <EmptySelectorButton
           disabled={!areSlotsAvailable || disableGripperRequired}
           textAlignment={TYPOGRAPHY.textAlignLeft}

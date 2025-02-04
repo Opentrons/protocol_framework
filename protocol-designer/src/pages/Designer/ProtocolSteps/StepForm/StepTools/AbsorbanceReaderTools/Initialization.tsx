@@ -10,6 +10,7 @@ import {
   Divider,
   DropdownMenu,
   EmptySelectorButton,
+  FLEX_MAX_CONTENT,
   Flex,
   Icon,
   InputField,
@@ -237,12 +238,14 @@ function IntializationEditor(props: InitializationEditorProps): JSX.Element {
           {wavelengthItems}
         </Flex>
         {mode === 'multi' && wavelengths.length < MAX_WAVELENGTHS ? (
-          <EmptySelectorButton
-            onClick={handleAddWavelength}
-            text={t('step_edit_form.absorbanceReader.add_wavelength.label')}
-            textAlignment="left"
-            disabled={numWavelengths === MAX_WAVELENGTHS}
-          />
+          <Flex width={FLEX_MAX_CONTENT}>
+            <EmptySelectorButton
+              onClick={handleAddWavelength}
+              text={t('step_edit_form.absorbanceReader.add_wavelength.label')}
+              textAlignment="left"
+              disabled={numWavelengths === MAX_WAVELENGTHS}
+            />
+          </Flex>
         ) : null}
       </Flex>
       {mode === 'single' ? (
