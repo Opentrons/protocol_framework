@@ -32,7 +32,6 @@ from .._folder_migrator import Migration
 class Migration9to10(Migration):  # noqa: D101
     def migrate(self, source_dir: Path, dest_dir: Path) -> None:
         """Migrate the persistence directory from schema 9 to 10."""
-        # grab the deck def. middlewares aren't up yet so we can't use the nice version
         copy_contents(source_dir=source_dir, dest_dir=dest_dir)
 
         # First we create the new version of our labware offsets table and sequence table
@@ -50,6 +49,7 @@ class Migration9to10(Migration):  # noqa: D101
 
 
 def _upmigrate_stored_offsets(connection: sqlalchemy.engine.Connection) -> None:
+    # grab the deck def. middlewares aren't up yet so we can't use the nice version
     deck_definition = load_deck(
         DeckType(guess_deck_type_from_global_config()), version=5
     )

@@ -1,6 +1,7 @@
 # noqa: D100
 
 from typing import Iterator
+from typing_extensions import assert_never
 
 from opentrons.protocol_engine.types import (
     LabwareOffsetVector,
@@ -237,5 +238,4 @@ def _pydantic_to_sql_location_sequence_iterator(
                 component_value_json=component.model_dump_json(),
             )
         else:
-            print(f"ISINSTANCE FAILED: {component}")
-            pass
+            assert_never(component)
