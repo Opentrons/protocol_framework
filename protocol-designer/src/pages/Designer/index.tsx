@@ -3,19 +3,17 @@ import { useDispatch, useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import {
-  ALIGN_END,
+  ALIGN_CENTER,
   ALIGN_STRETCH,
   COLORS,
   DIRECTION_COLUMN,
-  FLEX_MAX_CONTENT,
   Flex,
   INFO_TOAST,
+  JUSTIFY_CENTER,
   JUSTIFY_FLEX_END,
   SPACING,
   ToggleGroup,
   useOnClickOutside,
-  JUSTIFY_CENTER,
-  ALIGN_CENTER,
 } from '@opentrons/components'
 import {
   selectDropdownItem,
