@@ -2,96 +2,76 @@
 from serial import Serial  # type: ignore[import]
 from abc import ABC, abstractmethod
 from time import time
-from typing import Tuple
+from typing import List, Optional, Protocol
 import asyncio
+from opentrons.drivers.asyncio.communication import AsyncResponseSerialConnection
 
-class Mark10Base(ABC):
-    """Base Class if Mark10 Force Gauge Driver."""
+FG_BAUDRATE = 115200
+DEFAULT_FG_TIMEOUT = 1
+FG_TIMEOUT = 1
+FG_ACK = ""
+FG_ERROR_KEYWORD = "err"
+FG_ASYNC_ERROR_ACK = "async"
+DEFAULT_COMMAND_RETRIES = 0
 
-    @classmethod
-    def vid_pid(cls) -> Tuple[int, int]:
-        """Mark10 Force Gauge VID:PID."""
-        # Check what's the VID and PID for this device
-        return 0x0483, 0xA1AD
+class AbstractForceGaugeDriver(Protocol):
+    """Protocol for the force gauge driver."""
+    async def connect(self) -> None:
+        """Connect to force gauge."""
+        ...
+
+    async def disconnect(self) -> None:
+        """Disconnect to force gauge."""
+        ...
 
     @abstractmethod
     def is_simulator(self) -> bool:
         """Is this a simulation."""
         ...
 
-    @abstractmethod
-    def connect(self) -> None:
-        """Connect to the Mark10 Force Gauge."""
-        ...
-
-    @abstractmethod
-    def disconnect(self) -> None:
-        """Disconnect from the Mark10 Force Gauge."""
-        ...
-
-    @abstractmethod
-    def read_force(self, timeout: float = 1.0) -> float:
+    async def read_force(self, timeout: float = 1.0) -> float:
         """Read Force in Newtons."""
         ...
 
-
-class SimMark10(Mark10Base):
-    """Simulating Mark 10 Driver."""
-
-    def __init__(self) -> None:
-        """Simulating Mark 10 Driver."""
-        self._sim_force = 0.0
-        super().__init__()
-
-    def is_simulator(self) -> bool:
-        """Is a simulator."""
-        return True
-
-    def connect(self) -> None:
-        """Connect."""
-        return
-
-    def disconnect(self) -> None:
-        """Disconnect."""
-        return
-
-    def read_force(self, timeout: float = 1.0) -> float:
-        """Read Force."""
-        return self._sim_force
-
-    def set_simulation_force(self, force: float) -> None:
-        """Set simulation force."""
-        self._sim_force = force
+    # @classmethod
+    # def vid_pid(cls) -> Tuple[int, int]:
+    #     """Mark10 Force Gauge VID:PID."""
+    #     # Check what's the VID and PID for this device
+    #     return 0x0483, 0xA1AD
 
 
-class Mark10(Mark10Base):
+
+
+class Mark10(AbstractForceGaugeDriver):
     """Mark10 Driver."""
 
     def __init__(self, connection: Serial) -> None:
-        """Constructor."""
+        """
+        Constructor
+
+        Args:
+            connection: Connection to the FLEX Stacker
+        """
         self._force_guage = connection
         self._units = None
 
     @classmethod
-    def create(cls, port: str, baudrate: int = 115200, timeout: float = 1) -> "Mark10":
+    async def create(cls, port: str, baudrate: int,loop: Optional[asyncio.AbstractEventLoop]) -> "Mark10":
         """Create a Mark10 driver."""
-        conn = Serial()
-        conn.port = port
-        conn.baudrate = baudrate
-        conn.timeout = timeout
+        conn = Serial(port=port, baudrate=baudrate, timeout=FG_TIMEOUT)
         return Mark10(connection=conn)
 
-    def is_simulator(self) -> bool:
+    async def is_simulator(self) -> bool:
         """Is simulator."""
         return False
 
-    def connect(self) -> None:
+    async def connect(self) -> None:
         """Connect."""
-        self._force_guage.open()
+        await self._force_guage.open()
 
-    def disconnect(self) -> None:
+    async def disconnect(self) -> None:
         """Disconnect."""
-        self._force_guage.close()
+        await self._force_guage.close()
 
     async def _write(self, data: bytes) -> None:
         """Non-blocking write operation."""
@@ -124,3 +104,8 @@ class Mark10(Mark10Base):
                 print(f'bad data: "{line}"')
                 continue
         raise TimeoutError(f"unable to read from gauge within {timeout} seconds")
+
+    def reset_serial_buffers(self) -> None:
+        """Reset the input and output serial buffers."""
+        self._force_guage._serial.reset_input_buffer()
+        self._force_guage._serial.reset_output_buffer()
