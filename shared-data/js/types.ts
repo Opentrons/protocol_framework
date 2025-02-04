@@ -263,6 +263,7 @@ export interface LabwareDefinition2 {
 
 export interface LabwareDefinition3 {
   version: number
+  $otSharedSchema: '#/labware/schemas/3'
   schemaVersion: 3
   namespace: string
   metadata: LabwareMetadata

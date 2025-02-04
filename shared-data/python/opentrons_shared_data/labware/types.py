@@ -125,6 +125,8 @@ class WellGroup(TypedDict, total=False):
 
 
 class LabwareDefinition(TypedDict):
+    # $otSharedSchema omitted because the dollar sign makes it annoying to include
+    # here and nothing needs it yet, anyway.
     schemaVersion: Literal[2, 3]
     version: int
     namespace: str
