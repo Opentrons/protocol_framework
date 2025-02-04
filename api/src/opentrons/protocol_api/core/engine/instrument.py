@@ -2,15 +2,7 @@
 
 from __future__ import annotations
 
-from typing import (
-    Optional,
-    TYPE_CHECKING,
-    cast,
-    Union,
-    List,
-    Tuple,
-    NamedTuple,
-)
+from typing import Optional, TYPE_CHECKING, cast, Union, List, Tuple, NamedTuple
 from opentrons.types import Location, Mount, NozzleConfigurationType, NozzleMapInterface
 from opentrons.hardware_control import SyncHardwareAPI
 from opentrons.hardware_control.dev_types import PipetteDict
@@ -61,6 +53,8 @@ if TYPE_CHECKING:
     from opentrons.protocol_api._liquid_properties import TransferProperties
 
 _DISPENSE_VOLUME_VALIDATION_ADDED_IN = APIVersion(2, 17)
+_RESIN_TIP_DEFAULT_VOLUME = 400
+_RESIN_TIP_DEFAULT_FLOW_RATE = 10.0
 
 _FLEX_PIPETTE_NAMES_FIXED_IN = APIVersion(2, 23)
 """The version after which InstrumentContext.name returns the correct API-specific names of Flex pipettes."""
@@ -712,6 +706,113 @@ class InstrumentCore(AbstractInstrument[WellCore, LabwareCore]):
             self._protocol_core.set_last_location(
                 location=location, mount=self.get_mount()
             )
+
+    def resin_tip_seal(
+        self, location: Location, well_core: WellCore, in_place: Optional[bool] = False
+    ) -> None:
+        labware_id = well_core.labware_id
+        well_name = well_core.get_name()
+        well_location = (
+            self._engine_client.state.geometry.get_relative_pick_up_tip_well_location(
+                labware_id=labware_id,
+                well_name=well_name,
+                absolute_point=location.point,
+            )
+        )
+
+        self._engine_client.execute_command(
+            cmd.EvotipSealPipetteParams(
+                pipetteId=self._pipette_id,
+                labwareId=labware_id,
+                wellName=well_name,
+                wellLocation=well_location,
+            )
+        )
+
+    def resin_tip_unseal(self, location: Location, well_core: WellCore) -> None:
+        well_name = well_core.get_name()
+        labware_id = well_core.labware_id
+
+        if location is not None:
+            relative_well_location = (
+                self._engine_client.state.geometry.get_relative_well_location(
+                    labware_id=labware_id,
+                    well_name=well_name,
+                    absolute_point=location.point,
+                )
+            )
+
+            well_location = DropTipWellLocation(
+                origin=DropTipWellOrigin(relative_well_location.origin.value),
+                offset=relative_well_location.offset,
+            )
+        else:
+            well_location = DropTipWellLocation()
+
+        pipette_movement_conflict.check_safe_for_pipette_movement(
+            engine_state=self._engine_client.state,
+            pipette_id=self._pipette_id,
+            labware_id=labware_id,
+            well_name=well_name,
+            well_location=well_location,
+        )
+        self._engine_client.execute_command(
+            cmd.EvotipUnsealPipetteParams(
+                pipetteId=self._pipette_id,
+                labwareId=labware_id,
+                wellName=well_name,
+                wellLocation=well_location,
+            )
+        )
+
+        self._protocol_core.set_last_location(location=location, mount=self.get_mount())
+
+    def resin_tip_dispense(
+        self,
+        location: Location,
+        well_core: WellCore,
+        volume: Optional[float] = None,
+        flow_rate: Optional[float] = None,
+    ) -> None:
+        """
+        Args:
+            volume: The volume of liquid to dispense, in microliters. Defaults to 400uL.
+            location: The exact location to dispense to.
+            well_core: The well to dispense to, if applicable.
+            flow_rate: The flow rate in µL/s to dispense at. Defaults to 10.0uL/S.
+        """
+        if isinstance(location, (TrashBin, WasteChute)):
+            raise ValueError("Trash Bin and Waste Chute have no Wells.")
+        well_name = well_core.get_name()
+        labware_id = well_core.labware_id
+        if volume is None:
+            volume = _RESIN_TIP_DEFAULT_VOLUME
+        if flow_rate is None:
+            flow_rate = _RESIN_TIP_DEFAULT_FLOW_RATE
+
+        well_location = self._engine_client.state.geometry.get_relative_liquid_handling_well_location(
+            labware_id=labware_id,
+            well_name=well_name,
+            absolute_point=location.point,
+            is_meniscus=None,
+        )
+        pipette_movement_conflict.check_safe_for_pipette_movement(
+            engine_state=self._engine_client.state,
+            pipette_id=self._pipette_id,
+            labware_id=labware_id,
+            well_name=well_name,
+            well_location=well_location,
+        )
+        self._engine_client.execute_command(
+            cmd.EvotipDispenseParams(
+                pipetteId=self._pipette_id,
+                labwareId=labware_id,
+                wellName=well_name,
+                wellLocation=well_location,
+                volume=volume,
+                flowRate=flow_rate,
+            )
+        )
 
     def get_mount(self) -> Mount:
         """Get the mount the pipette is attached to."""
@@ -1501,6 +1602,27 @@ class InstrumentCore(AbstractInstrument[WellCore, LabwareCore]):
         self._protocol_core.set_last_location(location=loc, mount=self.get_mount())
 
         return result.z_position is not None
+
+    def get_minimum_liquid_sense_height(self) -> float:
+        attached_tip = self._engine_client.state.pipettes.get_attached_tip(
+            self._pipette_id
+        )
+        if attached_tip:
+            tip_volume = attached_tip.volume
+        else:
+            raise TipNotAttachedError(
+                "Need to have a tip attached for liquid-sense operations."
+            )
+        lld_settings = self._engine_client.state.pipettes.get_pipette_lld_settings(
+            pipette_id=self.pipette_id
+        )
+        if lld_settings:
+            lld_min_height_for_tip_attached = lld_settings[f"t{tip_volume}"][
+                "minHeight"
+            ]
+            return lld_min_height_for_tip_attached
+        else:
+            raise ValueError("liquid-level detection settings not found.")
 
     def liquid_probe_with_recovery(self, well_core: WellCore, loc: Location) -> None:
         labware_id = well_core.labware_id

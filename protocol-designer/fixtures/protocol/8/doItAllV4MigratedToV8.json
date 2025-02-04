@@ -33,9 +33,10 @@
       },
       "ingredients": {
         "0": {
-          "name": "Water",
+          "displayName": "Water",
+          "displayColor": "#b925ff",
           "description": null,
-          "serialize": false,
+          "pythonName": "liquid_1",
           "liquidGroupId": "0"
         }
       },
@@ -181,6 +182,8 @@
           "aspirate_mix_times": null,
           "aspirate_mix_volume": null,
           "aspirate_mmFromBottom": 1,
+          "aspirate_submerge_delay_seconds": null,
+          "aspirate_submerge_speed": null,
           "aspirate_touchTip_checkbox": false,
           "aspirate_touchTip_mmFromTop": null,
           "aspirate_wellOrder_first": "t2b",
@@ -205,6 +208,8 @@
           "dispense_mix_times": null,
           "dispense_mix_volume": null,
           "dispense_mmFromBottom": 0.5,
+          "dispense_submerge_delay_seconds": null,
+          "dispense_submerge_speed": null,
           "dispense_touchTip_checkbox": false,
           "dispense_touchTip_mmFromTop": null,
           "dispense_wellOrder_first": "t2b",
