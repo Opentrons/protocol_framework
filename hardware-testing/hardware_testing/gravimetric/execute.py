@@ -311,7 +311,9 @@ def _run_trial(
         lc_name = SupportedLiquid.from_string(trial.cfg.liquid).name_with_dilution(
             trial.cfg.dilution
         )
-        liquid_class_root = trial.ctx.define_liquid_class(lc_name.lower().replace("-", "_"))
+        liquid_class_root = trial.ctx.define_liquid_class(
+            lc_name.lower().replace("-", "_")
+        )
         pip_load_name = (
             f"flex_{trial.pipette.channels}channel_{int(trial.pipette.max_volume)}"
         )
@@ -402,19 +404,22 @@ def _run_trial(
     #        so for now we are still using the custom liquid-height code here, and
     #        tell the API's liquid-class to move the correct submerge depth (relative to well-bottom)
     def _calculate_meniscus_relative_offsets(is_aspirate: bool) -> None:
+        _attr_name = "aspirate" if is_aspirate else "dispense"
+        _asp_or_disp = getattr(liquid_class, _attr_name)
+        _retract_mm = max(
+            0.0, _asp_or_disp.submerge.offset.z, _asp_or_disp.retract.offset.z
+        )
         approach, submerge, retract = _get_approach_submerge_retract_heights(
             trial.well,
             trial.liquid_tracker,
-            submerge_mm=-1.5,  # FIXME: use variable
-            retract_mm=3.0,  # FIXME: use variable
+            submerge_mm=-1.5,  # NOTE: this will continue to be set here in script until LLD is available
+            retract_mm=_retract_mm,  # FIXME: use value from liquid-class definition
             mix=None,
             aspirate=trial.volume if is_aspirate else None,
             dispense=trial.volume if not is_aspirate else None,
             blank=trial.blank,
             channel_count=trial.channel_count,
         )
-        _attr_name = "aspirate" if is_aspirate else "dispense"
-        _asp_or_disp = getattr(liquid_class, _attr_name)
         # NOTE: setting all position references to BOTTOM
         _asp_or_disp.submerge.position_reference = PositionReference.WELL_BOTTOM
         _asp_or_disp.position_reference = PositionReference.WELL_BOTTOM
@@ -445,6 +450,9 @@ def _run_trial(
     else:
         # FIXME: this should happen inside the `transfer_liquid` command
         #        so delete this `configure` call once that is added
+        # NOTE: required to remove air-gap before calling configure-for-volume
+        trial.pipette.dispense(trial.pipette.current_volume, push_out=0)
+        trial.pipette.prepare_to_aspirate()
         if trial.mode == "default":
             trial.pipette.configure_for_volume(volume=trial.pipette.max_volume)
         elif trial.mode == "lowVolumeDefault":
@@ -452,9 +460,9 @@ def _run_trial(
             trial.pipette.configure_for_volume(volume=trial.pipette.min_volume)
         else:
             trial.pipette.configure_for_volume(volume=trial.volume)
+        _calculate_meniscus_relative_offsets(is_aspirate=True)
         # FIXME: This assumes whatever is in the pipette from last trial is air (not liquid),
         #        and so this would break any sort of multi-dispense testing
-        _calculate_meniscus_relative_offsets(is_aspirate=True)
         assumed_air_gap = trial.pipette.current_volume
         tip_contents = trial.pipette._core.aspirate_liquid_class(
             volume=trial.volume,
