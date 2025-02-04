@@ -100,7 +100,10 @@ import type {
   SelectMultipleStepsAction,
 } from '../../ui/steps/actions/types'
 import type { Action } from '../../types'
-import type { AdditionalEquipmentLocationUpdate } from '../../load-file/migration/utils/getAdditionalEquipmentLocationUpdate'
+import type {
+  AdditionalEquipmentLocationUpdate,
+  LocationUpdate,
+} from '../../load-file/migration/utils/getAdditionalEquipmentLocationUpdate'
 import type {
   NormalizedLabware,
   NormalizedLabwareById,
@@ -407,7 +410,7 @@ export const savedStepForms = (
       const { id } = action.payload
       const prevInitialDeckSetupStep =
         savedStepForms[INITIAL_DECK_SETUP_STEP_ID]
-      const gripperLocationUpdate =
+      const gripperLocationUpdate: LocationUpdate =
         prevInitialDeckSetupStep.gripperLocationUpdate
       const gripperKey = Object.entries(gripperLocationUpdate).find(
         ([_, value]) => value === GRIPPER_LOCATION

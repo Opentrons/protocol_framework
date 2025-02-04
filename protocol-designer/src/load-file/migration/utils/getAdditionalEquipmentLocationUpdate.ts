@@ -9,7 +9,6 @@ import { COLUMN_4_SLOTS, uuid } from '@opentrons/step-generation'
 import { getUnoccupiedSlotForTrash } from '../../../step-forms'
 import { getCutoutIdByAddressableArea } from '../../../utils'
 import { GRIPPER_LOCATION } from '../../../constants'
-import type { RobotType } from '@opentrons/shared-data'
 import type {
   AddressableAreaName,
   CreateCommand,
@@ -17,10 +16,11 @@ import type {
   MoveLabwareCreateCommand,
   MoveToAddressableAreaCreateCommand,
   MoveToAddressableAreaForDropTipCreateCommand,
+  RobotType,
 } from '@opentrons/shared-data'
 import type { SavedStepFormState } from '../../../step-forms'
 
-type LocationUpdate = Record<string, string>
+export type LocationUpdate = Record<string, string>
 
 export interface AdditionalEquipmentLocationUpdate {
   trashBinLocationUpdate: LocationUpdate
