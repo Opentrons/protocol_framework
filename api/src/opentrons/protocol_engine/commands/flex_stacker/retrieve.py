@@ -113,7 +113,7 @@ class Retrieve(BaseCommand[RetrieveParams, RetrieveResult, ErrorOccurrence]):
 
     commandType: RetrieveCommandType = "flexStacker/retrieve"
     params: RetrieveParams
-    result: Optional[RetrieveResult]
+    result: Optional[RetrieveResult] = None
 
     _ImplementationCls: Type[RetrieveImpl] = RetrieveImpl
 

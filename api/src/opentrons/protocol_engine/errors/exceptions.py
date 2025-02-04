@@ -283,6 +283,19 @@ class LabwareCannotBeStackedError(ProtocolEngineError):
         super().__init__(ErrorCodes.GENERAL_ERROR, message, details, wrapping)
 
 
+class LabwareCannotSitOnDeckError(ProtocolEngineError):
+    """Raised when a labware is incompatible with a deck slot."""
+
+    def __init__(
+        self,
+        message: Optional[str] = None,
+        details: Optional[Dict[str, Any]] = None,
+        wrapping: Optional[Sequence[EnumeratedError]] = None,
+    ) -> None:
+        """Build a LabwareCannotSitOnDeckError."""
+        super().__init__(ErrorCodes.GENERAL_ERROR, message, details, wrapping)
+
+
 class LabwareIsInStackError(ProtocolEngineError):
     """Raised when trying to move to or physically interact with a labware that has another labware on top."""
 
@@ -371,6 +384,19 @@ class TouchTipIncompatibleArgumentsError(ProtocolEngineError):
         wrapping: Optional[Sequence[EnumeratedError]] = None,
     ) -> None:
         """Build a TouchTipIncompatibleArgumentsError."""
+        super().__init__(ErrorCodes.GENERAL_ERROR, message, details, wrapping)
+
+
+class UnsupportedLabwareForActionError(ProtocolEngineError):
+    """Raised when trying to use an unsupported labware for a command."""
+
+    def __init__(
+        self,
+        message: Optional[str] = None,
+        details: Optional[Dict[str, Any]] = None,
+        wrapping: Optional[Sequence[EnumeratedError]] = None,
+    ) -> None:
+        """Build a UnsupportedLabwareForActionError."""
         super().__init__(ErrorCodes.GENERAL_ERROR, message, details, wrapping)
 
 
