@@ -25,6 +25,7 @@ from robot_server.service.json_api.response import (
 from .store import (
     LabwareOffsetNotFoundError,
     LabwareOffsetStore,
+    IncomingStoredLabwareOffset,
 )
 from .fastapi_dependencies import get_labware_offset_store
 from .models import (
@@ -58,7 +59,7 @@ async def post_labware_offset(  # noqa: D103
     new_offset_created_at: Annotated[datetime, fastapi.Depends(get_current_time)],
     request_body: Annotated[RequestModel[StoredLabwareOffsetCreate], fastapi.Body()],
 ) -> PydanticResponse[SimpleBody[StoredLabwareOffset]]:
-    new_offset = StoredLabwareOffset.model_construct(
+    new_offset = IncomingStoredLabwareOffset(
         id=new_offset_id,
         createdAt=new_offset_created_at,
         definitionUri=request_body.data.definitionUri,
@@ -67,7 +68,15 @@ async def post_labware_offset(  # noqa: D103
     )
     store.add(new_offset)
     return await PydanticResponse.create(
-        content=SimpleBody.model_construct(data=new_offset),
+        content=SimpleBody.model_construct(
+            data=StoredLabwareOffset(
+                id=new_offset_id,
+                createdAt=new_offset_created_at,
+                definitionUri=request_body.data.definitionUri,
+                locationSequence=request_body.data.locationSequence,
+                vector=request_body.data.vector,
+            )
+        ),
         status_code=201,
     )
 

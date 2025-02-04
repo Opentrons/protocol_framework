@@ -12,15 +12,19 @@ from opentrons.protocol_engine import (
     OnAddressableAreaOffsetLocationSequenceComponent,
 )
 from opentrons.protocol_engine.types import ModuleModel
-
+from robot_server.persistence.tables import (
+    labware_offset_location_sequence_components_table,
+)
 from robot_server.labware_offsets.store import (
     LabwareOffsetStore,
     LabwareOffsetNotFoundError,
+    IncomingStoredLabwareOffset,
 )
 from robot_server.labware_offsets.models import (
     StoredLabwareOffset,
     DoNotFilterType,
     DO_NOT_FILTER,
+    UnknownLabwareOffsetLocationSequenceComponent,
 )
 
 
@@ -165,7 +169,7 @@ def test_filter_fields(
 ) -> None:
     """Test each filterable field to make sure it returns only matching entries."""
     offsets = {
-        "a": StoredLabwareOffset(
+        "a": IncomingStoredLabwareOffset(
             id="a",
             createdAt=datetime.now(timezone.utc),
             definitionUri="definitionUri a",
@@ -182,7 +186,7 @@ def test_filter_fields(
             ],
             vector=LabwareOffsetVector(x=1, y=2, z=3),
         ),
-        "b": StoredLabwareOffset(
+        "b": IncomingStoredLabwareOffset(
             id="b",
             createdAt=datetime.now(timezone.utc),
             definitionUri="definitionUri b",
@@ -199,7 +203,7 @@ def test_filter_fields(
             ],
             vector=LabwareOffsetVector(x=2, y=4, z=6),
         ),
-        "c": StoredLabwareOffset(
+        "c": IncomingStoredLabwareOffset(
             id="c",
             createdAt=datetime.now(timezone.utc),
             definitionUri="definitionUri a",
@@ -210,7 +214,7 @@ def test_filter_fields(
             ],
             vector=LabwareOffsetVector(x=3, y=6, z=9),
         ),
-        "d": StoredLabwareOffset(
+        "d": IncomingStoredLabwareOffset(
             id="d",
             createdAt=datetime.now(timezone.utc),
             definitionUri="definitionUri a",
@@ -224,7 +228,7 @@ def test_filter_fields(
             ],
             vector=LabwareOffsetVector(x=4, y=8, z=12),
         ),
-        "e": StoredLabwareOffset(
+        "e": IncomingStoredLabwareOffset(
             id="e",
             createdAt=datetime.now(timezone.utc),
             definitionUri="definitionUri a",
@@ -248,10 +252,19 @@ def test_filter_fields(
         location_module_model_filter=location_module_model_filter,
         location_definition_uri_filter=location_labware_uri_filter,
     )
-    assert sorted(
-        results,
+    assert sorted(results, key=lambda o: o.id,) == sorted(
+        [
+            StoredLabwareOffset(
+                id=offsets[id_].id,
+                createdAt=offsets[id_].createdAt,
+                definitionUri=offsets[id_].definitionUri,
+                locationSequence=offsets[id_].locationSequence,
+                vector=offsets[id_].vector,
+            )
+            for id_ in returned_ids
+        ],
         key=lambda o: o.id,
-    ) == sorted([offsets[id_] for id_ in returned_ids], key=lambda o: o.id)
+    )
 
 
 def test_filter_combinations(subject: LabwareOffsetStore) -> None:
@@ -265,7 +278,7 @@ def test_filter_combinations(subject: LabwareOffsetStore) -> None:
         ("id-6", "definition-uri-b"),
     ]
     labware_offsets = [
-        StoredLabwareOffset(
+        IncomingStoredLabwareOffset(
             id=id,
             createdAt=datetime.now(timezone.utc),
             definitionUri=definition_uri,
@@ -278,18 +291,28 @@ def test_filter_combinations(subject: LabwareOffsetStore) -> None:
         )
         for (id, definition_uri) in ids_and_definition_uris
     ]
+    outgoing_offsets = [
+        StoredLabwareOffset(
+            id=offset.id,
+            createdAt=offset.createdAt,
+            definitionUri=offset.definitionUri,
+            locationSequence=offset.locationSequence,
+            vector=offset.vector,
+        )
+        for offset in labware_offsets
+    ]
 
     for labware_offset in labware_offsets:
         subject.add(labware_offset)
 
     # No filters:
-    assert subject.search() == labware_offsets
+    assert subject.search() == outgoing_offsets
 
     # Filter on one thing:
     result = subject.search(definition_uri_filter="definition-uri-b")
     assert len(result) == 3
     assert result == [
-        entry for entry in labware_offsets if entry.definitionUri == "definition-uri-b"
+        entry for entry in outgoing_offsets if entry.definitionUri == "definition-uri-b"
     ]
 
     # Filter on two things:
@@ -297,7 +320,7 @@ def test_filter_combinations(subject: LabwareOffsetStore) -> None:
         id_filter="id-2",
         definition_uri_filter="definition-uri-b",
     )
-    assert result == [labware_offsets[1]]
+    assert result == [outgoing_offsets[1]]
 
     # Filters should be ANDed, not ORed, together:
     result = subject.search(
@@ -309,8 +332,8 @@ def test_filter_combinations(subject: LabwareOffsetStore) -> None:
 
 def test_delete(subject: LabwareOffsetStore) -> None:
     """Test the `delete()` and `delete_all()` methods."""
-    a, b, c = [
-        StoredLabwareOffset(
+    incoming_offsets = [
+        IncomingStoredLabwareOffset(
             id=id,
             createdAt=datetime.now(timezone.utc),
             definitionUri="",
@@ -323,6 +346,18 @@ def test_delete(subject: LabwareOffsetStore) -> None:
         )
         for id in ["id-a", "id-b", "id-c"]
     ]
+    outgoing_offsets = [
+        StoredLabwareOffset(
+            id=offset.id,
+            createdAt=offset.createdAt,
+            definitionUri=offset.definitionUri,
+            locationSequence=offset.locationSequence,
+            vector=offset.vector,
+        )
+        for offset in incoming_offsets
+    ]
+    a, b, c = incoming_offsets
+    out_a, out_b, out_c = outgoing_offsets
 
     with pytest.raises(LabwareOffsetNotFoundError):
         subject.delete("b")
@@ -330,10 +365,52 @@ def test_delete(subject: LabwareOffsetStore) -> None:
     subject.add(a)
     subject.add(b)
     subject.add(c)
-    assert subject.delete(b.id) == b
-    assert _get_all(subject) == [a, c]
+
+    assert subject.delete(b.id) == out_b
+    assert _get_all(subject) == [out_a, out_c]
     with pytest.raises(LabwareOffsetNotFoundError):
-        subject.delete(b.id)
+        subject.delete(out_b.id)
 
     subject.delete_all()
     assert _get_all(subject) == []
+
+
+def test_handle_unknown(
+    subject: LabwareOffsetStore, sql_engine: sqlalchemy.engine.Engine
+) -> None:
+    """Test returning an unknown offset."""
+    original_location = OnAddressableAreaOffsetLocationSequenceComponent(
+        addressableAreaName="A1"
+    )
+    incoming_valid = IncomingStoredLabwareOffset(
+        id="id-a",
+        createdAt=datetime.now(timezone.utc),
+        definitionUri="",
+        locationSequence=[original_location],
+        vector=LabwareOffsetVector(x=1, y=2, z=3),
+    )
+    outgoing_offset = StoredLabwareOffset(
+        id=incoming_valid.id,
+        createdAt=incoming_valid.createdAt,
+        definitionUri=incoming_valid.definitionUri,
+        locationSequence=[
+            original_location,
+            UnknownLabwareOffsetLocationSequenceComponent(
+                storedKind="asdasdad", primaryValue="ddddddd"
+            ),
+        ],
+        vector=incoming_valid.vector,
+    )
+    subject.add(incoming_valid)
+    with sql_engine.begin() as transaction:
+        transaction.execute(
+            sqlalchemy.insert(labware_offset_location_sequence_components_table).values(
+                row_id=2,
+                offset_id=1,
+                sequence_ordinal=2,
+                component_kind="asdasdad",
+                primary_component_value="ddddddd",
+                component_value_json='{"asdasda": "dddddd", "kind": "asdasdad"}',
+            )
+        )
+    assert subject.search(id_filter="id-a") == [outgoing_offset]

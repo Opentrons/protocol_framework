@@ -2,7 +2,7 @@
 
 from datetime import datetime
 import enum
-from typing import Literal, Annotated, Final, TypeAlias
+from typing import Literal, Annotated, Final, TypeAlias, Sequence
 
 from pydantic import BaseModel, Field
 
@@ -35,9 +35,24 @@ Unfortunately, mypy doesn't let us write `Literal[DO_NOT_FILTER]`. Use this inst
 """
 
 
+class UnknownLabwareOffsetLocationSequenceComponent(BaseModel):
+    """A labware offset location sequence component from the future."""
+
+    kind: Literal["unknown"] = "unknown"
+    storedKind: str
+    primaryValue: str
+
+
 # This is redefined here so we can add stuff to it easily
 StoredLabwareOffsetLocationSequenceComponents = Annotated[
     LabwareOffsetLocationSequenceComponentsUnion, Field(discriminator="kind")
+]
+
+
+ReturnedLabwareOffsetLocationSequenceComponents = Annotated[
+    LabwareOffsetLocationSequenceComponentsUnion
+    | UnknownLabwareOffsetLocationSequenceComponent,
+    Field(discriminator="kind"),
 ]
 
 
@@ -46,7 +61,7 @@ class StoredLabwareOffsetCreate(BaseModel):
 
     definitionUri: str = Field(..., description="The URI for the labware's definition.")
 
-    locationSequence: list[StoredLabwareOffsetLocationSequenceComponents] = Field(
+    locationSequence: Sequence[StoredLabwareOffsetLocationSequenceComponents] = Field(
         ...,
         description="Where the labware is located on the robot. Can represent all locations, but may not be present for older runs.",
         min_length=1,
@@ -67,7 +82,7 @@ class StoredLabwareOffset(BaseModel):
     createdAt: datetime = Field(..., description="When this labware offset was added.")
     definitionUri: str = Field(..., description="The URI for the labware's definition.")
 
-    locationSequence: list[StoredLabwareOffsetLocationSequenceComponents] = Field(
+    locationSequence: Sequence[ReturnedLabwareOffsetLocationSequenceComponents] = Field(
         ...,
         description="Where the labware is located on the robot. Can represent all locations, but may not be present for older runs.",
         min_length=1,

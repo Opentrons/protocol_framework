@@ -1,6 +1,8 @@
 # noqa: D100
 
-from typing import Iterator
+from datetime import datetime
+from dataclasses import dataclass
+from typing import Iterator, Sequence
 from typing_extensions import assert_never
 
 from opentrons.protocol_engine.types import (
@@ -9,20 +11,40 @@ from opentrons.protocol_engine.types import (
     OnAddressableAreaOffsetLocationSequenceComponent,
     OnModuleOffsetLocationSequenceComponent,
     OnLabwareOffsetLocationSequenceComponent,
-    LabwareOffsetLocationSequenceComponents,
-    LabwareOffsetLocationSequence,
 )
 
 from robot_server.persistence.tables import (
     labware_offset_table,
     labware_offset_location_sequence_components_table,
 )
-from .models import StoredLabwareOffset, DoNotFilterType, DO_NOT_FILTER
+from .models import (
+    StoredLabwareOffset,
+    DoNotFilterType,
+    DO_NOT_FILTER,
+    StoredLabwareOffsetLocationSequenceComponents,
+    ReturnedLabwareOffsetLocationSequenceComponents,
+    UnknownLabwareOffsetLocationSequenceComponent,
+)
 
 import sqlalchemy
 import sqlalchemy.exc
 
 from ._search_query_builder import SearchQueryBuilder
+
+ReturnedLabwareOffsetLocationSequence = Sequence[
+    ReturnedLabwareOffsetLocationSequenceComponents
+]
+
+
+@dataclass
+class IncomingStoredLabwareOffset:
+    """Internal class for representing valid incoming offsets."""
+
+    id: str
+    createdAt: datetime
+    definitionUri: str
+    locationSequence: Sequence[StoredLabwareOffsetLocationSequenceComponents]
+    vector: LabwareOffsetVector
 
 
 class LabwareOffsetStore:
@@ -37,7 +59,10 @@ class LabwareOffsetStore:
         """
         self._sql_engine = sql_engine
 
-    def add(self, offset: StoredLabwareOffset) -> None:
+    def add(
+        self,
+        offset: IncomingStoredLabwareOffset,
+    ) -> None:
         """Store a new labware offset."""
         with self._sql_engine.begin() as transaction:
             offset_row_id = transaction.execute(
@@ -131,7 +156,7 @@ class LabwareOffsetNotFoundError(KeyError):
 
 def _sql_sequence_component_to_pydantic_sequence_component(
     component_row: sqlalchemy.engine.Row,
-) -> LabwareOffsetLocationSequenceComponents:
+) -> ReturnedLabwareOffsetLocationSequenceComponents:
     if component_row.component_kind == "onLabware":
         return OnLabwareOffsetLocationSequenceComponent(
             labwareUri=component_row.primary_component_value
@@ -145,14 +170,19 @@ def _sql_sequence_component_to_pydantic_sequence_component(
             addressableAreaName=component_row.primary_component_value
         )
     else:
-        raise KeyError(component_row.component_kind)
+        return UnknownLabwareOffsetLocationSequenceComponent(
+            storedKind=component_row.component_kind,
+            primaryValue=component_row.primary_component_value,
+        )
 
 
 def _collate_sql_locations(
     first_row: sqlalchemy.engine.Row, rest_rows: Iterator[sqlalchemy.engine.Row]
-) -> tuple[LabwareOffsetLocationSequence, sqlalchemy.engine.Row | None]:
+) -> tuple[
+    list[ReturnedLabwareOffsetLocationSequenceComponents], sqlalchemy.engine.Row | None
+]:
     offset_id = first_row.offset_id
-    location_sequence: list[LabwareOffsetLocationSequenceComponents] = [
+    location_sequence: list[ReturnedLabwareOffsetLocationSequenceComponents] = [
         _sql_sequence_component_to_pydantic_sequence_component(first_row)
     ]
     while True:
@@ -197,7 +227,9 @@ def _collate_sql_to_pydantic(
         yield result
 
 
-def _pydantic_to_sql_offset(labware_offset: StoredLabwareOffset) -> dict[str, object]:
+def _pydantic_to_sql_offset(
+    labware_offset: IncomingStoredLabwareOffset,
+) -> dict[str, object]:
     return dict(
         offset_id=labware_offset.id,
         definition_uri=labware_offset.definitionUri,
@@ -210,7 +242,7 @@ def _pydantic_to_sql_offset(labware_offset: StoredLabwareOffset) -> dict[str, ob
 
 
 def _pydantic_to_sql_location_sequence_iterator(
-    labware_offset: StoredLabwareOffset, offset_row_id: int
+    labware_offset: IncomingStoredLabwareOffset, offset_row_id: int
 ) -> Iterator[dict[str, object]]:
     for index, component in enumerate(labware_offset.locationSequence):
         if isinstance(component, OnLabwareOffsetLocationSequenceComponent):
