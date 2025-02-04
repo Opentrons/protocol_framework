@@ -7,6 +7,7 @@ import Ajv from 'ajv'
 import schema from '../../labware/schemas/3.json'
 
 const fixturesDir = path.join(__dirname, '../../labware/fixtures/3')
+const definitionsDir = path.join(__dirname, '../../labware/definitions/3')
 const globPattern = '**/*.json'
 
 const ajv = new Ajv({ allErrors: true, jsonPointers: true })
@@ -41,19 +42,26 @@ const checkGeometryDefinitions = (
   })
 }
 
-describe(`test additions to labware schema in v3`, () => {
-  const labwarePaths = glob.sync(globPattern, { cwd: fixturesDir })
+describe(`test labware definitions with schema v3`, () => {
+  const definitionPaths = glob.sync(globPattern, {
+    cwd: definitionsDir,
+    absolute: true,
+  })
+  const fixturePaths = glob.sync(globPattern, {
+    cwd: fixturesDir,
+    absolute: true,
+  })
+  const allPaths = definitionPaths.concat(fixturePaths)
 
-  test("definition paths didn't break, which would give false positives", () => {
-    expect(labwarePaths.length).toBeGreaterThan(0)
+  test("paths didn't break, which would give false positives", () => {
+    expect(definitionPaths.length).toBeGreaterThan(0)
+    expect(fixturePaths.length).toBeGreaterThan(0)
   })
 
-  describe.each(labwarePaths)('%s', labwarePath => {
-    const filename = path.parse(labwarePath).base
-    const fullLabwarePath = path.join(fixturesDir, labwarePath)
-    const labwareDef = require(fullLabwarePath) as LabwareDefinition3
+  describe.each(allPaths)('%s', labwarePath => {
+    const labwareDef = require(labwarePath) as LabwareDefinition3
 
-    it(`${filename} validates against schema`, () => {
+    it('validates against schema', () => {
       const valid = validate(labwareDef)
       const validationErrors = validate.errors
       expect(validationErrors).toBe(null)
