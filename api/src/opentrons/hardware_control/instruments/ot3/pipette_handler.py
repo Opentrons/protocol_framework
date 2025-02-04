@@ -514,6 +514,11 @@ class OT3PipetteHandler:
             multiplier = 1.0 + (correction_volume / ul)
             mm_dist_from_bottom = ul / instr.ul_per_mm(ul, action)
             mm_dist_from_bottom_corrected = mm_dist_from_bottom * multiplier
+            max_mm = instr.plunger_positions.bottom - instr.plunger_positions.top
+            if mm_dist_from_bottom_corrected > max_mm:
+                raise ValueError(f"Pipette does not support displacement of "
+                                 f"{round(mm_dist_from_bottom_corrected, 2)} mm "
+                                 f"(maximum is {max_mm} mm)")
             position = instr.plunger_positions.bottom - mm_dist_from_bottom_corrected
         return round(position, 6)
 
