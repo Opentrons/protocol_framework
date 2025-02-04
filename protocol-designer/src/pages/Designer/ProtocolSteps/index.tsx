@@ -59,7 +59,8 @@ export function ProtocolSteps(): JSX.Element {
   const [deckView, setDeckView] = useState<
     typeof leftString | typeof rightString
   >(leftString)
-  const [targetWidth, setTargetWidth] = useState<number>(350)
+  // Note (02/03/25:kk) use DrraggableSidebar's initial width
+  const [targetWidth, setTargetWidth] = useState<number>(235)
 
   const currentHoveredStepId = useSelector(getHoveredStepId)
   const currentSelectedStepId = useSelector(getSelectedStepId)
@@ -83,6 +84,8 @@ export function ProtocolSteps(): JSX.Element {
       backgroundColor={COLORS.grey10}
       height="calc(100vh - 4rem)"
       width="100%"
+      minHeight={FLEX_MAX_CONTENT}
+      id="container"
     >
       <Flex height="100%" padding={SPACING.spacing12}>
         <DraggableSidebar setTargetWidth={setTargetWidth} />
@@ -93,8 +96,8 @@ export function ProtocolSteps(): JSX.Element {
         gridGap={SPACING.spacing16}
         flex="2.85"
         paddingTop={showTimelineAlerts ? '0' : SPACING.spacing24}
-        paddingX="1.75rem"
         height="100%"
+        position={POSITION_RELATIVE}
       >
         <Flex
           flexDirection={DIRECTION_COLUMN}
@@ -145,12 +148,17 @@ export function ProtocolSteps(): JSX.Element {
             ) : (
               <OffDeck tab="protocolSteps" />
             )}
-            {formData == null ? (
+            {/* avoid shifting the deck view container */}
+            <Flex
+              height="5.5rem"
+              opacity={formData == null ? 1 : 0}
+              id="summary container"
+            >
               <StepSummary
                 currentStep={currentStep}
                 stepDetails={stepDetails}
               />
-            ) : null}
+            </Flex>
           </Flex>
         </Flex>
         {enableHotKeyDisplay ? (
