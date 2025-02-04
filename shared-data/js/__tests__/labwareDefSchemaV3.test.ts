@@ -1,6 +1,6 @@
 import path from 'path'
 import glob from 'glob'
-import { describe, expect, it, beforeAll, test } from 'vitest'
+import { describe, expect, it, test } from 'vitest'
 
 import type { LabwareDefinition3 } from '../types'
 import Ajv from 'ajv'
@@ -44,17 +44,14 @@ const checkGeometryDefinitions = (
 describe(`test additions to labware schema in v3`, () => {
   const labwarePaths = glob.sync(globPattern, { cwd: fixturesDir })
 
-  beforeAll(() => {
-    // Make sure definitions path didn't break, which would give you false positives
+  test("definition paths didn't break, which would give false positives", () => {
     expect(labwarePaths.length).toBeGreaterThan(0)
   })
 
-  labwarePaths.forEach(labwarePath => {
+  describe.each(labwarePaths)('%s', labwarePath => {
     const filename = path.parse(labwarePath).base
     const fullLabwarePath = path.join(fixturesDir, labwarePath)
     const labwareDef = require(fullLabwarePath) as LabwareDefinition3
-
-    checkGeometryDefinitions(labwareDef, labwarePath)
 
     it(`${filename} validates against schema`, () => {
       const valid = validate(labwareDef)
@@ -62,5 +59,7 @@ describe(`test additions to labware schema in v3`, () => {
       expect(validationErrors).toBe(null)
       expect(valid).toBe(true)
     })
+
+    checkGeometryDefinitions(labwareDef, labwarePath)
   })
 })
