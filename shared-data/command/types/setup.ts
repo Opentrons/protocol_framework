@@ -152,7 +152,7 @@ export interface LoadPipetteParams {
 interface LoadPipetteResult {
   pipetteId: string
 }
-export interface LoadLabwareParams {
+interface LoadLabwareParams {
   location: LabwareLocation
   version: number
   namespace: string
