@@ -443,6 +443,15 @@ def _run_trial(
         )
         tip_contents = None
     else:
+        # FIXME: this should happen inside the `transfer_liquid` command
+        #        so delete this `configure` call once that is added
+        if trial.mode == "default":
+            trial.pipette.configure_for_volume(volume=trial.pipette.max_volume)
+        elif trial.mode == "lowVolumeDefault":
+            assert trial.pipette.max_volume == 50
+            trial.pipette.configure_for_volume(volume=trial.pipette.min_volume)
+        else:
+            trial.pipette.configure_for_volume(volume=trial.volume)
         # FIXME: This assumes whatever is in the pipette from last trial is air (not liquid),
         #        and so this would break any sort of multi-dispense testing
         _calculate_meniscus_relative_offsets(is_aspirate=True)
