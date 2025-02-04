@@ -13,5 +13,5 @@ runs:
       env:
         REF: ${{ github.ref }}
       run: |
-        git fetch -f origin ${REF}:${REF}
-        git checkout ${REF}
+        git fetch -f origin "${REF}:${REF}"
+        git checkout "${REF}"
