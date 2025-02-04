@@ -28,7 +28,7 @@ export function formatPyValue(value: any): string {
       } else if (Array.isArray(value)) {
         return formatPyList(value)
       } else {
-        return formatPyDict(value)
+        return formatPyDict(value as Record<string, any>)
       }
     default:
       throw Error('Cannot render value as Python', { cause: value })
