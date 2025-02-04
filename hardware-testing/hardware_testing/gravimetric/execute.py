@@ -311,7 +311,7 @@ def _run_trial(
         lc_name = SupportedLiquid.from_string(trial.cfg.liquid).name_with_dilution(
             trial.cfg.dilution
         )
-        liquid_class_root = trial.ctx.define_liquid_class(lc_name.lower())
+        liquid_class_root = trial.ctx.define_liquid_class(lc_name.lower().replace("-", "_"))
         pip_load_name = (
             f"flex_{trial.pipette.channels}channel_{int(trial.pipette.max_volume)}"
         )
