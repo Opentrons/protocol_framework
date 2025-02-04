@@ -9,6 +9,7 @@ import {
   DIRECTION_COLUMN,
   DIRECTION_ROW,
   EmptySelectorButton,
+  FLEX_MAX_CONTENT,
   Flex,
   Icon,
   JUSTIFY_SPACE_BETWEEN,
@@ -179,15 +180,17 @@ export function PipetteOverview({
           ) : null}
           {has96Channel ||
           (leftPipette != null && rightPipette != null) ? null : (
-            <EmptySelectorButton
-              onClick={() => {
-                setPage('add')
-                setMount(targetPipetteMount)
-              }}
-              text={t('add_pipette')}
-              textAlignment="left"
-              iconName="plus"
-            />
+            <Flex width={FLEX_MAX_CONTENT}>
+              <EmptySelectorButton
+                onClick={() => {
+                  setPage('add')
+                  setMount(targetPipetteMount)
+                }}
+                text={t('add_pipette')}
+                textAlignment="left"
+                iconName="plus"
+              />
+            </Flex>
           )}
         </Flex>
       </Flex>
@@ -238,14 +241,16 @@ export function PipetteOverview({
                 </Flex>
               </ListItem>
             ) : (
-              <EmptySelectorButton
-                onClick={() => {
-                  dispatch(toggleIsGripperRequired())
-                }}
-                text={t('protocol_overview:add_gripper')}
-                textAlignment="left"
-                iconName="plus"
-              />
+              <Flex width={FLEX_MAX_CONTENT}>
+                <EmptySelectorButton
+                  onClick={() => {
+                    dispatch(toggleIsGripperRequired())
+                  }}
+                  text={t('protocol_overview:add_gripper')}
+                  textAlignment="left"
+                  iconName="plus"
+                />
+              </Flex>
             )}
           </Flex>
         </Flex>
