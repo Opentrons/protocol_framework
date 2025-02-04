@@ -156,7 +156,6 @@ export const migrateFile = (
     },
     {}
   )
-  console.log('updatedInitialStep', updatedInitialStep)
   return {
     ...appData,
     designerApplication: {
