@@ -192,7 +192,7 @@ export function LargeButton(props: LargeButtonProps): JSX.Element {
 
     &:active {
       background-color: ${LARGE_BUTTON_PROPS_BY_TYPE[buttonType]
-      .activeBackgroundColor};
+        .activeBackgroundColor};
       ${activeColorFor(buttonType)};
     }
     &:active #btn-icon {
@@ -202,11 +202,11 @@ export function LargeButton(props: LargeButtonProps): JSX.Element {
     &:hover {
       color: ${LARGE_BUTTON_PROPS_BY_TYPE[buttonType].hoverColor};
       background-color: ${LARGE_BUTTON_PROPS_BY_TYPE[buttonType]
-      .hoverBackgroundColor};
+        .hoverBackgroundColor};
 
       border: ${buttonType === 'stroke'
-      ? `2px solid ${COLORS.blue55}`
-      : buttonType === 'primary'
+        ? `2px solid ${COLORS.blue55}`
+        : buttonType === 'primary'
         ? `4px solid ${COLORS.blue55}`
         : computedBorderStyle()};
     }
@@ -218,14 +218,14 @@ export function LargeButton(props: LargeButtonProps): JSX.Element {
     &:disabled {
       color: ${LARGE_BUTTON_PROPS_BY_TYPE[buttonType].disabledColor};
       background-color: ${LARGE_BUTTON_PROPS_BY_TYPE[buttonType]
-      .disabledBackgroundColor};
+        .disabledBackgroundColor};
       border: 4px solid ${COLORS.grey35};
     }
 
     &[aria-disabled='true'] {
       color: ${LARGE_BUTTON_PROPS_BY_TYPE[buttonType].disabledColor};
       background-color: ${LARGE_BUTTON_PROPS_BY_TYPE[buttonType]
-      .disabledBackgroundColor};
+        .disabledBackgroundColor};
       border: 4px solid ${COLORS.grey35};
     }
 
@@ -241,13 +241,13 @@ export function LargeButton(props: LargeButtonProps): JSX.Element {
 
       &:active {
         background-color: ${computedDisabled
-      ? LARGE_BUTTON_PROPS_BY_TYPE[buttonType].disabledBackgroundColor
-      : LARGE_BUTTON_PROPS_BY_TYPE[buttonType].activeBackgroundColor};
+          ? LARGE_BUTTON_PROPS_BY_TYPE[buttonType].disabledBackgroundColor
+          : LARGE_BUTTON_PROPS_BY_TYPE[buttonType].activeBackgroundColor};
         ${!computedDisabled && activeColorFor(buttonType)};
         outline: 4px solid
           ${computedDisabled
-      ? LARGE_BUTTON_PROPS_BY_TYPE[buttonType].disabledBackgroundColor
-      : LARGE_BUTTON_PROPS_BY_TYPE[buttonType].activeBackgroundColor};
+            ? LARGE_BUTTON_PROPS_BY_TYPE[buttonType].disabledBackgroundColor
+            : LARGE_BUTTON_PROPS_BY_TYPE[buttonType].activeBackgroundColor};
       }
 
       &:active #btn-icon {
@@ -256,14 +256,14 @@ export function LargeButton(props: LargeButtonProps): JSX.Element {
 
       &:focus-visible {
         background-color: ${computedDisabled
-      ? LARGE_BUTTON_PROPS_BY_TYPE[buttonType].disabledBackgroundColor
-      : LARGE_BUTTON_PROPS_BY_TYPE[buttonType].focusVisibleBackgroundColor};
+          ? LARGE_BUTTON_PROPS_BY_TYPE[buttonType].disabledBackgroundColor
+          : LARGE_BUTTON_PROPS_BY_TYPE[buttonType].focusVisibleBackgroundColor};
         ${!computedDisabled && activeColorFor(buttonType)};
         padding: calc(${SPACING.spacing24} + ${SPACING.spacing2});
         border: ${computedBorderStyle()};
         outline: ${computedDisabled
-      ? 'none'
-      : `3px solid
+          ? 'none'
+          : `3px solid
     ${LARGE_BUTTON_PROPS_BY_TYPE[buttonType].focusVisibleOutlineColor}`};
         background-clip: padding-box;
         box-shadow: none;
@@ -272,7 +272,7 @@ export function LargeButton(props: LargeButtonProps): JSX.Element {
       &:disabled {
         color: ${LARGE_BUTTON_PROPS_BY_TYPE[buttonType].disabledColor};
         background-color: ${LARGE_BUTTON_PROPS_BY_TYPE[buttonType]
-      .disabledBackgroundColor};
+          .disabledBackgroundColor};
       }
     }
   `
