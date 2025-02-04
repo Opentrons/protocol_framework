@@ -26,6 +26,7 @@ from ..types import (
     LabwareMovementStrategy,
     LabwareOffsetVector,
     LabwareMovementOffsetData,
+    LabwareLocationSequence,
 )
 from ..errors import (
     LabwareMovementNotAllowedError,
@@ -99,6 +100,14 @@ class MoveLabwareResult(BaseModel):
             " Null or undefined means no offset applies,"
             " so the default of (0, 0, 0) will be used."
         ),
+    )
+    newLocationSequence: LabwareLocationSequence | None = Field(
+        None,
+        description="the full location down to the deck of the labware after this command.",
+    )
+    originalLocationSequence: LabwareLocationSequence | None = Field(
+        None,
+        description="The full location down to the deck of the labware before this command.",
     )
 
 
