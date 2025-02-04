@@ -117,8 +117,13 @@ class Well:
     @property
     @requires_version(2, 0)
     def has_tip(self) -> bool:
-        """Whether this well contains a tip. Always ``False`` if the parent labware
-        isn't a tip rack."""
+        """Whether this well contains a clean tip.
+
+        From API v2.2 on: Returns ``False`` if the well has an unclean tip.
+        Before API v2.2: Returns ``True`` as long as the well has a tip, even if it is unclean.
+
+        Always ``False`` if the parent labware isn't a tip rack.
+        """
         return self._core.has_tip()
 
     @has_tip.setter
