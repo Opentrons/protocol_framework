@@ -126,6 +126,7 @@ describe('ProtocolSetupLabware', () => {
 
   it('sends a latch-close command when the labware latch is open and the button is clicked', () => {
     render()
+    fireEvent.click(screen.getByRole('button', { name: 'List View' }))
     fireEvent.click(screen.getByText('Labware Latch'))
     expect(mockCreateLiveCommand).toHaveBeenCalledWith({
       command: {
@@ -144,6 +145,7 @@ describe('ProtocolSetupLabware', () => {
       refetch: mockRefetch,
     } as any)
     render()
+    fireEvent.click(screen.getByRole('button', { name: 'List View' }))
     fireEvent.click(screen.getByText('Labware Latch'))
     expect(mockCreateLiveCommand).toHaveBeenCalledWith({
       command: {
@@ -157,29 +159,32 @@ describe('ProtocolSetupLabware', () => {
   })
 
   it('shows opening transition states of the labware latch button', () => {
+    render()
+    fireEvent.click(screen.getByRole('button', { name: 'List View' }))
     vi.mocked(useModulesQuery).mockReturnValue(
       mockUseModulesQueryOpening as any
     )
 
-    render()
     screen.getByText('Opening...')
   })
 
   it('shows closing transition state of the labware latch button', () => {
+    render()
+    fireEvent.click(screen.getByRole('button', { name: 'List View' }))
     vi.mocked(useModulesQuery).mockReturnValue(
       mockUseModulesQueryClosing as any
     )
 
-    render()
     screen.getByText('Closing...')
   })
 
   it('defaults to open when latch status is unknown', () => {
+    render()
+    fireEvent.click(screen.getByRole('button', { name: 'List View' }))
     vi.mocked(useModulesQuery).mockReturnValue(
       mockUseModulesQueryUnknown as any
     )
 
-    render()
     screen.getByText('Open')
   })
 })
