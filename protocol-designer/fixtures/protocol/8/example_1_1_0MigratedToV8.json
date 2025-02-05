@@ -15,13 +15,7 @@
     "name": "opentrons/protocol-designer",
     "version": "8.5.0",
     "data": {
-      "_internalAppBuildDate": "Tue, 04 Feb 2025 15:16:30 GMT",
-      "defaultValues": {
-        "aspirate_mmFromBottom": 1,
-        "dispense_mmFromBottom": 1,
-        "touchTip_mmFromTop": -1,
-        "blowout_mmFromTop": 0
-      },
+      "_internalAppBuildDate": "Thu, 30 Jan 2025 17:05:24 GMT",
       "pipetteTiprackAssignments": {
         "c6f45030-92a5-11e9-ac62-1b173f839d9e": [
           "opentrons/opentrons_96_tiprack_10ul/1"
@@ -235,7 +229,30 @@
         "e7d36200-92a5-11e9-ac62-1b173f839d9e",
         "18113c80-92a6-11e9-ac62-1b173f839d9e",
         "2e622080-92a6-11e9-ac62-1b173f839d9e"
-      ]
+      ],
+      "pipettes": {
+        "c6f45030-92a5-11e9-ac62-1b173f839d9e": {
+          "pipetteName": "p10_single"
+        },
+        "c6f47740-92a5-11e9-ac62-1b173f839d9e": {
+          "pipetteName": "p50_single"
+        }
+      },
+      "modules": {},
+      "labware": {
+        "c6f4ec70-92a5-11e9-ac62-1b173f839d9e:tiprack-10ul:opentrons/opentrons_96_tiprack_10ul/1": {
+          "displayName": "tiprack 10ul (1)",
+          "labwareDefURI": "opentrons/opentrons_96_tiprack_10ul/1"
+        },
+        "c6f51380-92a5-11e9-ac62-1b173f839d9e:tiprack-200ul:opentrons/tipone_96_tiprack_200ul/1": {
+          "displayName": "tiprack 200ul (1)",
+          "labwareDefURI": "opentrons/tipone_96_tiprack_200ul/1"
+        },
+        "dafd4000-92a5-11e9-ac62-1b173f839d9e:96-deep-well:opentrons/usascientific_96_wellplate_2.4ml_deep/1": {
+          "displayName": "96 deep well (1)",
+          "labwareDefURI": "opentrons/usascientific_96_wellplate_2.4ml_deep/1"
+        }
+      }
     }
   },
   "robot": {

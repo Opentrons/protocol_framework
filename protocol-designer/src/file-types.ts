@@ -34,7 +34,7 @@ export interface PDMetadata {
   labware: Labware
 }
 
-export type PDProtocolFile = ProtocolFile<PDMetadata> & PDMetadata
+export type PDProtocolFile = ProtocolFile<PDMetadata>
 
 export function getPDMetadata(file: PDProtocolFile): PDMetadata {
   const metadata = file.designerApplication?.data

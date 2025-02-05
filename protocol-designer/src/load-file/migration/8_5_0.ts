@@ -162,7 +162,6 @@ export const migrateFile = (
     commands,
     labwareDefinitions
   )
-
   return {
     ...appData,
     designerApplication: {

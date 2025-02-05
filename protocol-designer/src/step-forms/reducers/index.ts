@@ -991,8 +991,8 @@ export const labwareInvariantProperties: Reducer<
       action: LoadFileAction
     ): NormalizedLabwareById => {
       const { file } = action.payload
-      const labware = file.labware
-      return { ...labware, ...state }
+      const metadata = getPDMetadata(file)
+      return { ...metadata.labware, ...state }
     },
     REPLACE_CUSTOM_LABWARE_DEF: (
       state: NormalizedLabwareById,
@@ -1048,8 +1048,8 @@ export const moduleInvariantProperties: Reducer<
       action: LoadFileAction
     ): ModuleEntities => {
       const { file } = action.payload
-      const modulesFromFile = file.modules
-      const modules: ModuleEntities = Object.entries(modulesFromFile).reduce(
+      const metadata = getPDMetadata(file)
+      const modules: ModuleEntities = Object.entries(metadata.modules).reduce(
         (
           acc: ModuleEntities,
           [id, moduleLoadInfo]: [string, ModuleLoadInfo]
@@ -1081,9 +1081,8 @@ export const pipetteInvariantProperties: Reducer<
       action: LoadFileAction
     ): NormalizedPipetteById => {
       const { file } = action.payload
-      const pipettesFromFile = file.pipettes
       const metadata = getPDMetadata(file)
-      const pipettes = Object.entries(pipettesFromFile).reduce(
+      const pipettes = Object.entries(metadata.pipettes).reduce(
         (
           acc: NormalizedPipetteById,
           [id, pipetteLoadInfo]: [string, PipetteLoadInfo]
