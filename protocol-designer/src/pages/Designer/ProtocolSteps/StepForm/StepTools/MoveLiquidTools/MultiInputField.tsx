@@ -27,7 +27,7 @@ interface MultiInputFieldProps {
   tooltipContent: string
   propsForFields: FieldPropsByName
   fields: StepInputFieldProps[]
-  wellPosition?: boolean | null
+  isWellPosition?: boolean | null
   labwareId?: string | null
 }
 
@@ -36,7 +36,7 @@ export function MultiInputField(props: MultiInputFieldProps): JSX.Element {
     name,
     tab,
     tooltipContent,
-    wellPosition,
+    isWellPosition,
     fields,
     propsForFields,
     labwareId,
@@ -82,7 +82,7 @@ export function MultiInputField(props: MultiInputFieldProps): JSX.Element {
               errorToShow={errorToShow}
             />
           ))}
-          {wellPosition != null && (
+          {isWellPosition != null && (
             <PositionField
               padding="0"
               prefix={tab}

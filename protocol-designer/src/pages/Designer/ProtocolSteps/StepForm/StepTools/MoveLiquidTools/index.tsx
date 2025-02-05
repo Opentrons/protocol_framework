@@ -362,7 +362,7 @@ export function MoveLiquidTools(props: StepFormProps): JSX.Element {
             tooltipContent={t(`tooltip:step_fields.defaults.${tab}_retract`)}
             propsForFields={propsForFields}
             fields={getFields('retract')}
-            wellPosition={true}
+            isWellPosition={true}
             labwareId={
               formData[
                 getLabwareFieldForPositioningField(
