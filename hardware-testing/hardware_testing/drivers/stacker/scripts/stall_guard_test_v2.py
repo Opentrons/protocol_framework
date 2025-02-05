@@ -38,13 +38,15 @@ async def force_func(fg_var, sg_value, trial, axis, timer):
     timer.start()
     t = timer.elasped_time()
     dir = '/data/stallguard/'
-    file_name = f'Axis_{axis}_SG_test_SG_value_{sg_value}_speed_200_0.8Amps_lifetime_unit.csv'
+    speed = STACKER_MOTION_CONFIG[axis]['move'].max_speed
+    current = STACKER_MOTION_CONFIG[axis]['move'].current
+    file_name = f'{axis}_SG_val_{sg_value}_Speed_{speed}_{current}_Amps.csv'
     with open(dir + file_name, 'a', newline = '') as file:
         writer = csv.writer(file)
         if trial == 1:
             fields = ["Time(s)", "Force(N)", "SG Value", "Trials"]
             writer.writerow(fields)
-        while t < 10:
+        while t < 5:
             t = timer.elasped_time()
             fg_reading = await fg_var.read_force()
             data = [t, fg_reading, sg_value, trial]
@@ -64,7 +66,7 @@ async def move(s, a, d, d_2):
 
 def build_arg_parser():
     arg_parser = argparse.ArgumentParser(description="Motion Parameter Test Script")
-    arg_parser.add_argument("-c", "--cycles", default = 5, type = int, help = "number of cycles to execute")
+    arg_parser.add_argument("-c", "--cycles", default = 4, type = int, help = "number of cycles to execute")
     arg_parser.add_argument("-a", "--axis", default = 'x', type = str, help = "Choose a Axis")
     # arg_parser.add_argument("-f", "--force_gauge", default = True, help = "Force gauge")
     return arg_parser
@@ -73,15 +75,17 @@ async def main(args) -> None:
 
     t = Timer()
     if args.axis.lower() == 'x':
+        TOTAL_TRAVEL = 202
         test_axis = StackerAxis.X
     elif args.axis.lower() == 'z':
+        TOTAL_TRAVEL = 202
         test_axis = StackerAxis.Z
     elif args.axis.lower() == 'l':
         test_axis = StackerAxis.L
     else:
         raise("Axis not recognized from args options")
-    sg_start = -30
-    sg_final = 30
+    sg_start = -4
+    sg_final = 12
     print(f'config: {STACKER_MOTION_CONFIG}')
     # api = await helpers_ot3.build_async_ot3_hardware_api(is_simulating = False)
     api = await OT3API.build_hardware_controller(loop=asyncio.get_running_loop())
@@ -93,11 +97,12 @@ async def main(args) -> None:
     await stacker.home_axis(StackerAxis.Z, Direction.RETRACT)
     await stacker.home_axis(StackerAxis.X, Direction.RETRACT)
     await stacker.close_latch()
+    await stacker.open_latch()
     stallguard_vals = [x for x in range(sg_start, sg_final+1)]
-    for c in range(1, args.cycles+1):
-        for sg_value in stallguard_vals:
-            await stacker._driver.set_stallguard_threshold(StackerAxis.X, True, sg_value)
-            move_task = asyncio.create_task(move(stacker, StackerAxis.X, Direction.EXTEND, 202))
+    for sg_value in stallguard_vals:
+        for c in range(1, args.cycles+1):
+            await stacker._driver.set_stallguard_threshold(test_axis, True, sg_value)
+            move_task = asyncio.create_task(move(stacker, test_axis, Direction.EXTEND, TOTAL_TRAVEL))
             fg_task = asyncio.create_task(force_func(force_gauge, sg_value, c, test_axis, t))
             print(f"Cycle: {c}")
             try:
@@ -105,9 +110,9 @@ async def main(args) -> None:
             except Exception as e:
                 print(e)
             await asyncio.sleep(1)
-            await stacker._driver.set_stallguard_threshold(StackerAxis.X, False, sg_value)
-            await stacker.home_axis(StackerAxis.X, Direction.RETRACT)
-            await stacker._driver.set_stallguard_threshold(StackerAxis.X, True, sg_value)
+            await stacker._driver.set_stallguard_threshold(test_axis, False, sg_value)
+            await stacker.home_axis(test_axis, Direction.RETRACT)
+            await stacker._driver.set_stallguard_threshold(test_axis, True, sg_value)
 
 
 if __name__ == '__main__':
