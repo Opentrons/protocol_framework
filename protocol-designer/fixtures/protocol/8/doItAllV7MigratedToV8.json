@@ -37,17 +37,17 @@
       "ingredients": {
         "0": {
           "displayName": "Water",
+          "displayColor": "#b925ff",
           "description": null,
-          "liquidGroupId": "0",
           "pythonName": "liquid_1",
-          "displayColor": "#b925ff"
+          "liquidGroupId": "0"
         },
         "1": {
           "displayName": "Samples",
+          "displayColor": "#ffd600",
           "description": null,
-          "liquidGroupId": "1",
           "pythonName": "liquid_2",
-          "displayColor": "#ffd600"
+          "liquidGroupId": "1"
         }
       },
       "ingredLocations": {
