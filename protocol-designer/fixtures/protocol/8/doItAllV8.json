@@ -15,13 +15,7 @@
     "name": "opentrons/protocol-designer",
     "version": "8.5.0",
     "data": {
-      "_internalAppBuildDate": "Wed, 05 Feb 2025 18:32:26 GMT",
-      "defaultValues": {
-        "aspirate_mmFromBottom": 1,
-        "dispense_mmFromBottom": 1,
-        "touchTip_mmFromTop": -1,
-        "blowout_mmFromTop": 0
-      },
+      "_internalAppBuildDate": "Wed, 29 Jan 2025 13:23:47 GMT",
       "pipetteTiprackAssignments": {
         "9fcd50d9-92b2-45ac-acf1-e2cf773feffc": [
           "opentrons/opentrons_flex_96_tiprack_1000ul/1"
@@ -358,7 +352,38 @@
         "2b8f84e2-b079-41e8-a66e-ff8d9c5dfe1d",
         "07dd4472-3ea4-475c-8fd3-18819519b401",
         "ed84f11e-db82-4039-9e04-e619b03af42f"
-      ]
+      ],
+      "pipettes": {
+        "9fcd50d9-92b2-45ac-acf1-e2cf773feffc": {
+          "pipetteName": "p1000_single_flex"
+        }
+      },
+      "modules": {
+        "23347241-80bb-4a7e-9c91-5d9727a9e483:heaterShakerModuleType": {
+          "model": "heaterShakerModuleV1"
+        },
+        "fd6da9f1-d63b-414b-929e-c646b64790e9:thermocyclerModuleType": {
+          "model": "thermocyclerModuleV2"
+        }
+      },
+      "labware": {
+        "7c4d59fa-0e50-442f-adce-9e4b0c7f0b88:opentrons/opentrons_96_pcr_adapter/1": {
+          "displayName": "Opentrons 96 PCR Heater-Shaker Adapter",
+          "labwareDefURI": "opentrons/opentrons_96_pcr_adapter/1"
+        },
+        "f2d371ea-5146-4c89-8200-9c056a7f321a:opentrons/opentrons_flex_96_tiprack_1000ul/1": {
+          "displayName": "Opentrons Flex 96 Tip Rack 1000 µL",
+          "labwareDefURI": "opentrons/opentrons_flex_96_tiprack_1000ul/1"
+        },
+        "54370838-4fca-4a14-b88a-7840e4903649:opentrons/opentrons_96_wellplate_200ul_pcr_full_skirt/2": {
+          "displayName": "Opentrons Tough 96 Well Plate 200 µL PCR Full Skirt",
+          "labwareDefURI": "opentrons/opentrons_96_wellplate_200ul_pcr_full_skirt/2"
+        },
+        "8bacda22-9e05-45e8-bef4-cc04414a204f:opentrons/axygen_1_reservoir_90ml/1": {
+          "displayName": "Axygen 1 Well Reservoir 90 mL",
+          "labwareDefURI": "opentrons/axygen_1_reservoir_90ml/1"
+        }
+      }
     }
   },
   "robot": {

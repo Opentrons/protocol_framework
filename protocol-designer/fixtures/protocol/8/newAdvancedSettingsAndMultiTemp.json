@@ -15,13 +15,7 @@
     "name": "opentrons/protocol-designer",
     "version": "8.5.0",
     "data": {
-      "_internalAppBuildDate": "Tue, 04 Feb 2025 15:16:30 GMT",
-      "defaultValues": {
-        "aspirate_mmFromBottom": 1,
-        "dispense_mmFromBottom": 1,
-        "touchTip_mmFromTop": -1,
-        "blowout_mmFromTop": 0
-      },
+      "_internalAppBuildDate": "Wed, 29 Jan 2025 13:23:47 GMT",
       "pipetteTiprackAssignments": {
         "21087f15-4c03-4587-8a2b-1ba0b5a501a0": [
           "opentrons/opentrons_flex_96_tiprack_50ul/1"
@@ -186,7 +180,38 @@
         "c72b4af9-7488-4109-8221-15a5433f4fd8",
         "ffb0d1ff-8146-409c-9248-2065a3b27c4d",
         "eab2ec89-6d11-4246-ae91-d451cb3a5b1d"
-      ]
+      ],
+      "pipettes": {
+        "21087f15-4c03-4587-8a2b-1ba0b5a501a0": {
+          "pipetteName": "p50_single_flex"
+        }
+      },
+      "modules": {
+        "d6966555-6c0e-45e0-8056-428d7c486401:temperatureModuleType": {
+          "model": "temperatureModuleV2"
+        },
+        "b9c56153-9026-42d1-8113-949e15254571:temperatureModuleType": {
+          "model": "temperatureModuleV2"
+        }
+      },
+      "labware": {
+        "32b596f6-79bb-4ad8-a34a-c44620fdb68f:opentrons/opentrons_96_well_aluminum_block/1": {
+          "displayName": "Opentrons 96 Well Aluminum Block",
+          "labwareDefURI": "opentrons/opentrons_96_well_aluminum_block/1"
+        },
+        "0d39213c-49c2-4170-bf19-4c09e1b72aca:opentrons/opentrons_flex_96_tiprack_50ul/1": {
+          "displayName": "Opentrons Flex 96 Tip Rack 50 µL",
+          "labwareDefURI": "opentrons/opentrons_flex_96_tiprack_50ul/1"
+        },
+        "c3c4e3fd-069f-4f3d-9b70-016a20f36de7:opentrons/opentrons_24_aluminumblock_nest_1.5ml_screwcap/1": {
+          "displayName": "Opentrons 24 Well Aluminum Block with NEST 1.5 mL Screwcap",
+          "labwareDefURI": "opentrons/opentrons_24_aluminumblock_nest_1.5ml_screwcap/1"
+        },
+        "c0093e5f-3f7d-4cbf-aa17-d88394108501:opentrons/nest_96_wellplate_100ul_pcr_full_skirt/2": {
+          "displayName": "NEST 96 Well Plate 100 µL PCR Full Skirt",
+          "labwareDefURI": "opentrons/nest_96_wellplate_100ul_pcr_full_skirt/2"
+        }
+      }
     }
   },
   "robot": {

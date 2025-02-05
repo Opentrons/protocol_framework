@@ -15,13 +15,7 @@
     "name": "opentrons/protocol-designer",
     "version": "8.5.0",
     "data": {
-      "_internalAppBuildDate": "Tue, 04 Feb 2025 15:40:12 GMT",
-      "defaultValues": {
-        "aspirate_mmFromBottom": 1,
-        "dispense_mmFromBottom": 1,
-        "touchTip_mmFromTop": -1,
-        "blowout_mmFromTop": 0
-      },
+      "_internalAppBuildDate": "Wed, 29 Jan 2025 13:23:47 GMT",
       "pipetteTiprackAssignments": {
         "733ba018-3550-476c-9fa3-0b5259d1a1d6": [
           "opentrons/opentrons_96_tiprack_20ul/1"
@@ -187,7 +181,23 @@
       "orderedStepIds": [
         "f07a86fc-8373-427b-b159-89ec8d20b9a6",
         "72b79c80-00e4-48ce-b42a-35b0ba17664c"
-      ]
+      ],
+      "pipettes": {
+        "733ba018-3550-476c-9fa3-0b5259d1a1d6": {
+          "pipetteName": "p20_single_gen2"
+        }
+      },
+      "modules": {
+        "82858229-5c25-46cc-87d4-35ab318c18ce:thermocyclerModuleType": {
+          "model": "thermocyclerModuleV1"
+        }
+      },
+      "labware": {
+        "ac928a51-a248-4304-be43-e9cb19c34fa9:opentrons/nest_96_wellplate_100ul_pcr_full_skirt/2": {
+          "displayName": "NEST 96 Well Plate 100 µL PCR Full Skirt",
+          "labwareDefURI": "opentrons/nest_96_wellplate_100ul_pcr_full_skirt/2"
+        }
+      }
     }
   },
   "robot": {
