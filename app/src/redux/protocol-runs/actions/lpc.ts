@@ -4,7 +4,7 @@ import {
   SET_FINAL_POSITION,
   START_LPC,
   FINISH_LPC,
-  GO_BACK_STEP,
+  GO_BACK_LAST_STEP,
   SET_SELECTED_LABWARE,
   CLEAR_SELECTED_LABWARE,
   SET_SELECTED_LABWARE_NAME,
@@ -36,8 +36,8 @@ export const proceedStep = (
   payload: { runId, toStep },
 })
 
-export const goBackStep = (runId: string): GoBackStepAction => ({
-  type: GO_BACK_STEP,
+export const goBackLastStep = (runId: string): GoBackStepAction => ({
+  type: GO_BACK_LAST_STEP,
   payload: { runId },
 })
 

@@ -30,6 +30,7 @@ export function useLPCInitialState({
         currentStepIndex: 0,
         totalStepCount: LPC_STEPS.length,
         all: LPC_STEPS,
+        lastStepIndices: null,
       },
     }
 

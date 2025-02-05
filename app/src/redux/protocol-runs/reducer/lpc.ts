@@ -5,7 +5,7 @@ import {
   SET_FINAL_POSITION,
   FINISH_LPC,
   START_LPC,
-  GO_BACK_STEP,
+  GO_BACK_LAST_STEP,
   SET_SELECTED_LABWARE_NAME,
   CLEAR_SELECTED_LABWARE,
   APPLY_OFFSET,
@@ -32,7 +32,11 @@ export function LPCReducer(
   } else {
     switch (action.type) {
       case PROCEED_STEP: {
-        const { currentStepIndex, totalStepCount } = state.steps
+        const {
+          currentStepIndex,
+          lastStepIndices,
+          totalStepCount,
+        } = state.steps
         const { toStep } = action.payload
 
         const newStepIdx = (): number => {
@@ -57,19 +61,22 @@ export function LPCReducer(
           steps: {
             ...state.steps,
             currentStepIndex: newStepIdx(),
+            lastStepIndices: [...(lastStepIndices ?? []), currentStepIndex],
           },
         }
       }
 
-      case GO_BACK_STEP: {
-        const { currentStepIndex } = state.steps
-        const newStepIdx = currentStepIndex > 0 ? currentStepIndex - 1 : 0
+      case GO_BACK_LAST_STEP: {
+        const { lastStepIndices } = state.steps
+        const lastStep = lastStepIndices?.[lastStepIndices.length - 1] ?? 0
 
         return {
           ...state,
           steps: {
             ...state.steps,
-            currentStepIndex: newStepIdx,
+            currentStepIndex: lastStep,
+            lastStepIndices:
+              lastStepIndices?.slice(0, lastStepIndices.length - 1) ?? null,
           },
         }
       }

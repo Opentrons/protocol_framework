@@ -6,6 +6,7 @@ export type LPCWizardContentProps = Pick<
   LPCWizardFlexProps,
   'onCloseClick' | 'runId'
 > & {
-  proceed: (toStep?: LPCStep) => void
+  proceedStep: (toStep?: LPCStep) => void
+  goBackLastStep: () => void
   commandUtils: UseLPCCommandsResult
 }

@@ -23,7 +23,8 @@ import {
 } from '/app/organisms/LabwarePositionCheck/hooks'
 import {
   closeLPC,
-  proceedStep,
+  proceedStep as proceedStepDispatch,
+  goBackLastStep as goBackStepDispatch,
   LPC_STEP,
   selectCurrentStep,
 } from '/app/redux/protocol-runs'
@@ -32,14 +33,18 @@ import { getIsOnDevice } from '/app/redux/config'
 import type { LPCFlowsProps } from '/app/organisms/LabwarePositionCheck/LPCFlows'
 import type { LPCWizardContentProps } from '/app/organisms/LabwarePositionCheck/types'
 import type { LPCStep } from '/app/redux/protocol-runs'
+import { ProbeNotAttached } from '/app/organisms/PipetteWizardFlows/ProbeNotAttached'
 
 export interface LPCWizardFlexProps extends Omit<LPCFlowsProps, 'robotType'> {}
 
 export function LPCWizardFlex(props: LPCWizardFlexProps): JSX.Element {
   const { onCloseClick, ...rest } = props
 
-  const proceed = (toStep?: LPCStep): void => {
-    dispatch(proceedStep(props.runId))
+  const proceedStep = (toStep?: LPCStep): void => {
+    dispatch(proceedStepDispatch(props.runId, toStep))
+  }
+  const goBackLastStep = (): void => {
+    dispatch(goBackStepDispatch(props.runId))
   }
   const onCloseClickDispatch = (): void => {
     onCloseClick()
@@ -62,7 +67,8 @@ export function LPCWizardFlex(props: LPCWizardFlexProps): JSX.Element {
   return (
     <LPCWizardFlexComponent
       {...props}
-      proceed={proceed}
+      proceedStep={proceedStep}
+      goBackLastStep={goBackLastStep}
       commandUtils={LPCHandlerUtils}
       onCloseClick={onCloseClickDispatch}
     />
@@ -90,10 +96,13 @@ function LPCWizardFlexComponent(props: LPCWizardContentProps): JSX.Element {
 function LPCWizardContent(props: LPCWizardContentProps): JSX.Element {
   const { t } = useTranslation('shared')
   const currentStep = useSelector(selectCurrentStep(props.runId))
+  const isOnDevice = useSelector(getIsOnDevice)
   const {
     isRobotMoving,
     errorMessage,
     showExitConfirmation,
+    unableToDetect,
+    setShowUnableToDetect,
   } = props.commandUtils
 
   // Handle special cases that are shared by multiple steps first.
@@ -105,6 +114,16 @@ function LPCWizardContent(props: LPCWizardContentProps): JSX.Element {
   }
   if (showExitConfirmation) {
     return <ExitConfirmation {...props} />
+  }
+  if (unableToDetect) {
+    // TODO(jh, 02-05-25): EXEC-1190.
+    return (
+      <ProbeNotAttached
+        handleOnClick={() => null}
+        setShowUnableToDetect={setShowUnableToDetect}
+        isOnDevice={isOnDevice}
+      />
+    )
   }
   if (currentStep == null) {
     console.error('LPC store not properly initialized.')
