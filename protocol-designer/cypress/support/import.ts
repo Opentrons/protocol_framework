@@ -104,6 +104,7 @@ export const migrateAndMatchSnapshot = ({
         savedFile.designerApplication.version as string
       )
       assert(version !== null, 'PD version is not valid semver')
+      const isBelowVersion850 = semver.lt(version ?? '', '8.5.0')
 
       const files = [savedFile, expectedFile]
       files.forEach(f => {
@@ -111,25 +112,43 @@ export const migrateAndMatchSnapshot = ({
         f.designerApplication.data._internalAppBuildDate = 'Foo Date'
         f.designerApplication.version = 'x.x.x'
 
-        Object.values(
-          f.designerApplication.data.savedStepForms as Record<string, unknown>
-        ).forEach(stepForm => {
-          const stepFormTyped = stepForm as {
-            stepType: string
-            dropTip_location?: string
-            blowout_location?: string
+        const savedStepForms = f.designerApplication.data.savedStepForms
+        const initialDeckSetupStep = '__INITIAL_DECK_SETUP_STEP__'
+
+        //  a uuid is randomly generated each time you upload a protocol that is less than version 8_5_0
+        //  which is the migration version that adds these keys. Due to this, we need to ignore
+        //  the uuids
+        if (savedStepForms[initialDeckSetupStep] && isBelowVersion850) {
+          savedStepForms[initialDeckSetupStep].trashBinLocationUpdate = {
+            trashBin: 'trashLocation',
           }
-          if (stepFormTyped.stepType === 'moveLiquid') {
-            stepFormTyped.dropTip_location = 'trash drop tip location'
-            if (stepFormTyped.blowout_location?.includes('trashBin') ?? false) {
+          savedStepForms[initialDeckSetupStep].gripperLocationUpdate = {
+            gripper: 'gripperLocation',
+          }
+        }
+
+        Object.values(savedStepForms as Record<string, unknown>).forEach(
+          stepForm => {
+            const stepFormTyped = stepForm as {
+              stepType: string
+              dropTip_location?: string
+              blowout_location?: string
+            }
+            if (stepFormTyped.stepType === 'moveLiquid') {
+              stepFormTyped.dropTip_location = 'trash drop tip location'
+              if (
+                stepFormTyped.blowout_location?.includes('trashBin') ??
+                false
+              ) {
+                stepFormTyped.blowout_location = 'trash blowout location'
+              }
+            }
+            if (stepFormTyped.stepType === 'mix') {
+              stepFormTyped.dropTip_location = 'trash drop tip location'
               stepFormTyped.blowout_location = 'trash blowout location'
             }
           }
-          if (stepFormTyped.stepType === 'mix') {
-            stepFormTyped.dropTip_location = 'trash drop tip location'
-            stepFormTyped.blowout_location = 'trash blowout location'
-          }
-        })
+        )
 
         f.commands.forEach((command: { key: string }) => {
           if ('key' in command) command.key = '123'

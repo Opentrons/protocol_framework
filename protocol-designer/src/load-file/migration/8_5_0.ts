@@ -1,7 +1,8 @@
 import floor from 'lodash/floor'
 import { swatchColors } from '../../organisms/DefineLiquidsModal/swatchColors'
+import { getMigratedPositionFromTop } from './utils/getMigrationPositionFromTop'
+import { getAdditionalEquipmentLocationUpdate } from './utils/getAdditionalEquipmentLocationUpdate'
 import type {
-  LabwareDefinition2,
   LoadLabwareCreateCommand,
   ProtocolFile,
 } from '@opentrons/shared-data'
@@ -9,51 +10,16 @@ import type { LiquidEntities } from '@opentrons/step-generation'
 import type { DesignerApplicationDataV8_5 } from '../../file-data/selectors'
 import type { DesignerApplicationData } from './utils/getLoadLiquidCommands'
 
-const getMigratedPositionFromTop = (
-  labwareDefinitions: {
-    [definitionId: string]: LabwareDefinition2
-  },
-  loadLabwareCommands: LoadLabwareCreateCommand[],
-  labware: string,
-  type: 'aspirate' | 'dispense' | 'mix'
-): number => {
-  const matchingLoadLabware = loadLabwareCommands.find(
-    command =>
-      command.commandType === 'loadLabware' &&
-      command.params.labwareId === labware
-  )
-  if (matchingLoadLabware == null) {
-    console.error(
-      `expected to find matching ${type} labware load command but could not with ${type}_labware from form data as ${labware}`
-    )
-  }
-  const labwareUri =
-    matchingLoadLabware != null
-      ? `${matchingLoadLabware.params.namespace}/${matchingLoadLabware.params.loadName}/${matchingLoadLabware.params.version}`
-      : ''
-
-  //    early exit for dispense_labware equaling trashBin or wasteChute
-  if (labwareDefinitions[labwareUri] == null) {
-    return 0
-  }
-
-  const matchingLabwareWellDepth = labwareUri
-    ? labwareDefinitions[labwareUri].wells.A1.depth
-    : 0
-
-  if (matchingLabwareWellDepth === 0) {
-    console.error(
-      `error in finding the ${type} labware well depth with labware uri ${labwareUri}`
-    )
-  }
-  return matchingLabwareWellDepth
-}
-
 export const migrateFile = (
   appData: ProtocolFile<DesignerApplicationData>
 ): ProtocolFile<DesignerApplicationDataV8_5> => {
-  const { designerApplication, commands, labwareDefinitions, liquids } = appData
-
+  const {
+    designerApplication,
+    commands,
+    labwareDefinitions,
+    liquids,
+    robot,
+  } = appData
   if (designerApplication == null || designerApplication?.data == null) {
     throw Error('The designerApplication key in your file is corrupt.')
   }
@@ -170,6 +136,26 @@ export const migrateFile = (
     {}
   )
 
+  const updatedInitialStep = Object.values(savedStepForms).reduce(
+    (acc, form) => {
+      const { id } = form
+      if (id === '__INITIAL_DECK_SETUP_STEP__') {
+        return {
+          ...acc,
+          [id]: {
+            ...form,
+            ...getAdditionalEquipmentLocationUpdate(
+              commands,
+              robot.model,
+              savedStepForms
+            ),
+          },
+        }
+      }
+      return acc
+    },
+    {}
+  )
   return {
     ...appData,
     designerApplication: {
@@ -179,6 +165,7 @@ export const migrateFile = (
         ingredients: migratedIngredients,
         savedStepForms: {
           ...designerApplication.data.savedStepForms,
+          ...updatedInitialStep,
           ...savedStepsWithUpdatedMoveLiquidFields,
           ...savedStepsWithUpdatedMixFields,
         },

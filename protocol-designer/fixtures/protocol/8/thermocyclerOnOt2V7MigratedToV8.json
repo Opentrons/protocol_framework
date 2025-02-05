@@ -6,7 +6,7 @@
     "author": "Hopia",
     "description": "testing a thermocycler on OT-2",
     "created": 1731356664582,
-    "lastModified": 1738157325544,
+    "lastModified": 1738683623686,
     "category": null,
     "subcategory": null,
     "tags": []
@@ -15,7 +15,7 @@
     "name": "opentrons/protocol-designer",
     "version": "8.5.0",
     "data": {
-      "_internalAppBuildDate": "Wed, 29 Jan 2025 13:23:47 GMT",
+      "_internalAppBuildDate": "Tue, 04 Feb 2025 15:40:12 GMT",
       "defaultValues": {
         "aspirate_mmFromBottom": 1,
         "dispense_mmFromBottom": 1,
@@ -95,6 +95,12 @@
           "pipetteLocationUpdate": {
             "733ba018-3550-476c-9fa3-0b5259d1a1d6": "left"
           },
+          "trashBinLocationUpdate": {
+            "dc2c4599-29b3-4ec8-adff-56677ac0821e:trashBin": "cutout12"
+          },
+          "wasteChuteLocationUpdate": {},
+          "stagingAreaLocationUpdate": {},
+          "gripperLocationUpdate": {},
           "stepType": "manualIntervention",
           "id": "__INITIAL_DECK_SETUP_STEP__"
         },
@@ -2260,7 +2266,7 @@
   "commandSchemaId": "opentronsCommandSchemaV8",
   "commands": [
     {
-      "key": "01d12a6f-a134-41ad-8a96-0f1db1caa648",
+      "key": "06942533-7498-4507-9a3e-a80640e0b11b",
       "commandType": "loadPipette",
       "params": {
         "pipetteName": "p20_single_gen2",
@@ -2269,7 +2275,7 @@
       }
     },
     {
-      "key": "984a7baa-bf2d-4b9b-8d22-7fa864d443d5",
+      "key": "2d40fefe-7a97-4885-9813-745e87b558d3",
       "commandType": "loadModule",
       "params": {
         "model": "thermocyclerModuleV1",
@@ -2280,7 +2286,7 @@
       }
     },
     {
-      "key": "70bd414e-8191-4c73-a79d-ec514a775cdd",
+      "key": "b6313d6a-b046-4c83-bd79-171ab2267d4a",
       "commandType": "loadLabware",
       "params": {
         "displayName": "NEST 96 Well Plate 100 µL PCR Full Skirt",
@@ -2295,7 +2301,7 @@
     },
     {
       "commandType": "loadLiquid",
-      "key": "6eeecce1-bf14-4ba9-ac27-99d4a45c1352",
+      "key": "2ae9cd8f-caaf-4236-8fa5-f389fdc11c61",
       "params": {
         "liquidId": "0",
         "labwareId": "ac928a51-a248-4304-be43-e9cb19c34fa9:opentrons/nest_96_wellplate_100ul_pcr_full_skirt/2",
@@ -2313,14 +2319,14 @@
     },
     {
       "commandType": "thermocycler/closeLid",
-      "key": "b3f3d0ef-d186-451b-b019-92170d4c54b0",
+      "key": "689eb7ee-b3ef-4fd0-ace8-6a095dc8079e",
       "params": {
         "moduleId": "82858229-5c25-46cc-87d4-35ab318c18ce:thermocyclerModuleType"
       }
     },
     {
       "commandType": "thermocycler/setTargetLidTemperature",
-      "key": "a61991d4-e5ca-4828-88e1-16121263e580",
+      "key": "460e9a31-986e-491f-bf71-a3f93bfbd8f5",
       "params": {
         "moduleId": "82858229-5c25-46cc-87d4-35ab318c18ce:thermocyclerModuleType",
         "celsius": 50
@@ -2328,14 +2334,14 @@
     },
     {
       "commandType": "thermocycler/waitForLidTemperature",
-      "key": "5433a727-f2fc-49ef-a7b2-f88e426fa310",
+      "key": "0ecc6124-c69d-4627-b5db-4955291473fe",
       "params": {
         "moduleId": "82858229-5c25-46cc-87d4-35ab318c18ce:thermocyclerModuleType"
       }
     },
     {
       "commandType": "thermocycler/setTargetLidTemperature",
-      "key": "cd2d7b9e-c308-4efd-9cbd-cca366abbe2d",
+      "key": "ac9e312f-077c-40b8-8962-3cc2f48c9e90",
       "params": {
         "moduleId": "82858229-5c25-46cc-87d4-35ab318c18ce:thermocyclerModuleType",
         "celsius": 40
@@ -2343,14 +2349,14 @@
     },
     {
       "commandType": "thermocycler/waitForLidTemperature",
-      "key": "ea9d18cd-d9a3-461e-96c1-ac41436474d6",
+      "key": "175ed209-4a23-4a8a-ae23-c896c1b45acc",
       "params": {
         "moduleId": "82858229-5c25-46cc-87d4-35ab318c18ce:thermocyclerModuleType"
       }
     },
     {
       "commandType": "thermocycler/runProfile",
-      "key": "5d773732-71d8-45af-83f7-be31f4f89689",
+      "key": "541e8c3a-a19e-48e9-8f67-56898f309a95",
       "params": {
         "moduleId": "82858229-5c25-46cc-87d4-35ab318c18ce:thermocyclerModuleType",
         "profile": [
@@ -2388,14 +2394,14 @@
     },
     {
       "commandType": "thermocycler/deactivateBlock",
-      "key": "49c7e428-7a42-4bc0-93a8-8c30c375fe58",
+      "key": "55aad3e0-0854-408a-a46d-c8834cc5a601",
       "params": {
         "moduleId": "82858229-5c25-46cc-87d4-35ab318c18ce:thermocyclerModuleType"
       }
     },
     {
       "commandType": "thermocycler/deactivateLid",
-      "key": "3358c263-9ce4-4a02-846f-26faf626ed50",
+      "key": "d878f02b-dda5-4bdd-8c8b-344493e498eb",
       "params": {
         "moduleId": "82858229-5c25-46cc-87d4-35ab318c18ce:thermocyclerModuleType"
       }
