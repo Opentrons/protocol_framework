@@ -1010,7 +1010,7 @@
   },
   "namespace": "opentrons",
   "allowedRoles": ["labware"],
-  "version": 1,
+  "version": 2,
   "stackLimit": 5,
   "compatibleParentLabware": [
     "nest_96_wellplate_2ml_deep",
