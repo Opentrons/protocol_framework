@@ -76,7 +76,7 @@ describe(`test labware definitions with schema v3`, () => {
       const validationErrors = validate.errors
 
       // FIXME(mm, 2025-02-04): These new definitions have a displayCategory that
-      // the schema does not recognized. Either they need to change or the schema does.
+      // the schema does not recognize. Either they need to change or the schema does.
       const expectFailure = [
         'opentrons_flex_tiprack_lid',
         'opentrons_tough_pcr_auto_sealing_lid',
