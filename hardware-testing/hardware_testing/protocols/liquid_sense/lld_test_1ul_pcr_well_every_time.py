@@ -7,7 +7,7 @@ from hardware_testing.protocols import (
 )
 import math
 
-metadata = {"protocolName": "LLD 1uL PCR-to-MVS-04feb-TEST-MATRIX"}
+metadata = {"protocolName": "LLD 1uL PCR-to-MVS-04feb-TEST-MATRIX-T-B-M"}
 requirements = {"robotType": "Flex", "apiLevel": "2.22"}
 
 SLOTS = {
