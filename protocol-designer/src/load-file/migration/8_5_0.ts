@@ -2,17 +2,18 @@ import floor from 'lodash/floor'
 import { swatchColors } from '../../organisms/DefineLiquidsModal/swatchColors'
 import { getMigratedPositionFromTop } from './utils/getMigrationPositionFromTop'
 import { getAdditionalEquipmentLocationUpdate } from './utils/getAdditionalEquipmentLocationUpdate'
+import { getEquipmentLoadInfoFromCommands } from './utils/getEquipmentLoadInfoFromCommands'
 import type {
   LoadLabwareCreateCommand,
   ProtocolFile,
 } from '@opentrons/shared-data'
 import type { LiquidEntities } from '@opentrons/step-generation'
-import type { DesignerApplicationDataV8_5 } from '../../file-data/selectors'
 import type { DesignerApplicationData } from './utils/getLoadLiquidCommands'
+import type { PDMetadata } from '../../file-types'
 
 export const migrateFile = (
   appData: ProtocolFile<DesignerApplicationData>
-): ProtocolFile<DesignerApplicationDataV8_5> => {
+): ProtocolFile<PDMetadata> => {
   const {
     designerApplication,
     commands,
@@ -20,6 +21,7 @@ export const migrateFile = (
     liquids,
     robot,
   } = appData
+
   if (designerApplication == null || designerApplication?.data == null) {
     throw Error('The designerApplication key in your file is corrupt.')
   }
@@ -156,6 +158,11 @@ export const migrateFile = (
     },
     {}
   )
+  const equipmentLoadInfoFromCommands = getEquipmentLoadInfoFromCommands(
+    commands,
+    labwareDefinitions
+  )
+
   return {
     ...appData,
     designerApplication: {
@@ -163,6 +170,7 @@ export const migrateFile = (
       data: {
         ...designerApplication.data,
         ingredients: migratedIngredients,
+        ...equipmentLoadInfoFromCommands,
         savedStepForms: {
           ...designerApplication.data.savedStepForms,
           ...updatedInitialStep,
