@@ -118,7 +118,10 @@ export const migrateAndMatchSnapshot = ({
         //  a uuid is randomly generated each time you upload a protocol that is less than version 8_5_0
         //  which is the migration version that adds these keys. Due to this, we need to ignore
         //  the uuids
-        if (savedStepForms[initialDeckSetupStep] && isBelowVersion850) {
+        if (
+          Boolean(savedStepForms[initialDeckSetupStep]) &&
+          isBelowVersion850
+        ) {
           savedStepForms[initialDeckSetupStep].trashBinLocationUpdate = {
             trashBin: 'trashLocation',
           }

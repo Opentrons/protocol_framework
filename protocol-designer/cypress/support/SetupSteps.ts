@@ -1,4 +1,6 @@
 import 'cypress-file-upload'
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
+import { StepListItem } from './StepExecution'
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace Cypress {
@@ -234,8 +236,8 @@ const selectWells = (wells: string[]): void => {
 // Example usage
 // selectWells(['A1', 'B3', 'H12'])
 
-export const executeSetupSteps = (action: SetupActions): void => {
-  switch (action) {
+export const executeSetupSteps = (action: StepListItem): void => {
+  switch (action.step) {
     case SetupActions.SelectFlex:
       cy.contains(SetupContent.OpentronsFlex).should('be.visible').click()
       break
@@ -372,7 +374,11 @@ export const executeSetupSteps = (action: SetupActions): void => {
         .click({ force: true }) // Trigger the Save button
       break
     case SetupActions.WellSelector:
-      selectWells(['A1', 'A2'])
+      if (Array.isArray(action.params) && action.params.length > 0) {
+        selectWells(action.params)
+      } else {
+        selectWells(['A1', 'A2'])
+      }
       break
     case SetupActions.LiquidDropdown: // New case for dropdown
       cy.get(SetupLocators.LiquidsDropdown)
@@ -409,14 +415,12 @@ export const executeSetupSteps = (action: SetupActions): void => {
       break
 
     default:
-      throw new Error(`Unrecognized action: ${action as string}`)
+      throw new Error(`Unrecognized action: ${action.step as string}`)
   }
 }
 
-export const executeVerificationStep = (
-  verification: SetupVerifications
-): void => {
-  switch (verification) {
+export const executeVerificationStep = (verification: StepListItem): void => {
+  switch (verification.step) {
     case SetupVerifications.OnStep1:
       cy.contains(SetupContent.Step1Title).should('be.visible')
       break

@@ -1,4 +1,6 @@
 import 'cypress-file-upload'
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
+import { StepListItem } from './StepExecution'
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace Cypress {
@@ -25,7 +27,7 @@ export enum ModVerifications {
 }
 export enum ModContent {
   ModState = 'Module state',
-  DecativeTempDeck = 'Deactivate',
+  DeactivateTempDeck = 'Deactivate',
   Temperature = 'Temperature',
   Save = 'Save',
   Temp4CVerification = `Build a pause step to wait until Temperature Module GEN2 reaches 4˚C`,
@@ -38,8 +40,8 @@ export enum ModLocators {
   TempdeckTempInput = 'input[name="targetTemperature"]',
 }
 
-export const executeModSteps = (action: ModActions): void => {
-  switch (action) {
+export const executeModSteps = (action: StepListItem): void => {
+  switch (action.step) {
     case ModActions.Done:
       cy.get(ModLocators.DoneButtonLabwareSelection)
         .contains('Done')
@@ -49,7 +51,7 @@ export const executeModSteps = (action: ModActions): void => {
       cy.contains('button', 'Temperature').click({ force: true })
       break
     case ModActions.ActivateTempdeck:
-      cy.contains(ModContent.DecativeTempDeck)
+      cy.contains(ModContent.DeactivateTempDeck)
         .closest(ModLocators.Div)
         .find(ModLocators.Button)
         .click()
@@ -75,15 +77,15 @@ export const executeModSteps = (action: ModActions): void => {
       cy.contains(ModContent.Save).click({ force: true })
       break
     default:
-      throw new Error(`Unrecognized action: ${action as string}`)
+      throw new Error(`Unrecognized action: ${action.step as string}`)
   }
 }
 
-export const executeVerifyModStep = (verification: ModVerifications): void => {
-  switch (verification) {
+export const executeVerifyModStep = (verification: StepListItem): void => {
+  switch (verification.step) {
     case ModVerifications.TempeDeckInitialForm:
       cy.contains(ModContent.ModState)
-      cy.contains(ModContent.DecativeTempDeck)
+      cy.contains(ModContent.DeactivateTempDeck)
       cy.contains(ModContent.Temperature)
       break
     case ModVerifications.Temp4CPauseTextVerification:

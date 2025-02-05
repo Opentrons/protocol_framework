@@ -1,6 +1,5 @@
 import { executeUniversalAction, UniversalActions } from './universalActions'
 import { isEnumValue } from './utils'
-import '../support/commands'
 import {
   SetupActions,
   SetupVerifications,
@@ -14,13 +13,17 @@ import {
   executeVerifyModStep,
 } from './SupportModules'
 
-export type StepsList = Array<
-  | SetupActions
-  | SetupVerifications
-  | UniversalActions
-  | ModActions
-  | ModVerifications
->
+export interface StepListItem {
+  step:
+    | SetupActions
+    | SetupVerifications
+    | UniversalActions
+    | ModActions
+    | ModVerifications
+  params?: string | string[] | number | boolean | undefined
+}
+
+export type StepsList = StepListItem[]
 
 export const runSteps = (steps: StepsList): void => {
   const enumsToCheck = [
@@ -31,21 +34,28 @@ export const runSteps = (steps: StepsList): void => {
     UniversalActions,
   ]
 
-  if (!isEnumValue(enumsToCheck, steps)) {
+  if (
+    !isEnumValue(
+      enumsToCheck,
+      steps.map(step => step.step)
+    )
+  ) {
     throw new Error('One or more steps are unrecognized.')
   }
 
+  // evaluate each step and execute the appropriate function
+
   steps.forEach(step => {
-    if (isEnumValue([SetupActions], step)) {
-      executeSetupSteps(step as SetupActions)
+    if (isEnumValue([SetupActions], step.step)) {
+      executeSetupSteps(step)
     } else if (isEnumValue([SetupVerifications], step)) {
-      executeVerificationStep(step as SetupVerifications)
+      executeVerificationStep(step)
     } else if (isEnumValue([UniversalActions], step)) {
-      executeUniversalAction(step as UniversalActions)
+      executeUniversalAction(step)
     } else if (isEnumValue([ModActions], step)) {
-      executeModSteps(step as ModActions)
+      executeModSteps(step)
     } else if (isEnumValue([ModVerifications], step)) {
-      executeVerifyModStep(step as ModVerifications)
+      executeVerifyModStep(step)
     }
   })
 }
