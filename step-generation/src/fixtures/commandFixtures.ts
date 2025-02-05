@@ -138,7 +138,12 @@ export const makeAspirateHelper: MakeAspDispHelper<AspDispAirgapParams> = bakedP
     ...params,
   },
 })
-export const makeMoveToWellHelper = (wellName: string, labwareId?: string) => ({
+export const makeMoveToWellHelper = (
+  wellName: string,
+  labwareId?: string,
+  forceDirect?: boolean,
+  minimumZHeight?: number
+) => ({
   commandType: 'moveToWell',
   key: expect.any(String),
   params: {
@@ -153,6 +158,8 @@ export const makeMoveToWellHelper = (wellName: string, labwareId?: string) => ({
         z: 11.54,
       },
     },
+    forceDirect,
+    minimumZHeight,
   },
 })
 export const makeAirGapHelper = (volume: number) => ({
@@ -268,18 +275,25 @@ export const makeTouchTipHelper: MakeTouchTipHelper = bakedParams => (
   key: expect.any(String),
   params: { ..._defaultTouchTipParams, ...bakedParams, wellName, ...params },
 })
-export const delayCommand = (seconds: number): CreateCommand => ({
+export const delayCommand = (
+  seconds: number,
+  message?: string
+): CreateCommand => ({
   commandType: 'waitForDuration',
   key: expect.any(String),
   params: {
     seconds: seconds,
+    message,
   },
 })
 export const delayWithOffset = (
   wellName: string,
   labwareId: string,
   seconds?: number,
-  zOffset?: number
+  zOffset?: number,
+  forceDirect?: boolean,
+  minimumZHeight?: number,
+  message?: string
 ): CreateCommand[] => [
   {
     commandType: 'moveToWell',
@@ -296,6 +310,8 @@ export const delayWithOffset = (
           z: zOffset || 14,
         },
       },
+      forceDirect,
+      minimumZHeight,
     },
   },
   {
@@ -303,6 +319,7 @@ export const delayWithOffset = (
     key: expect.any(String),
     params: {
       seconds: seconds ?? 12,
+      message,
     },
   },
 ]

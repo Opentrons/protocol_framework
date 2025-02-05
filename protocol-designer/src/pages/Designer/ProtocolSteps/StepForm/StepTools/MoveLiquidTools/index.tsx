@@ -27,6 +27,7 @@ import {
 import {
   CheckboxExpandStepFormField,
   InputStepFormField,
+  ToggleStepFormField,
 } from '../../../../../../molecules'
 import {
   BlowoutLocationField,
@@ -398,15 +399,16 @@ export function MoveLiquidTools(props: StepFormProps): JSX.Element {
           {t('protocol_steps:advanced_settings')}
         </StyledText>
         {tab === 'aspirate' ? (
-          <CheckboxExpandStepFormField
+          <ToggleStepFormField
             title={i18n.format(
               t('form:step_edit_form.field.preWetTip.label'),
               'capitalize'
             )}
-            checkboxValue={propsForFields.preWetTip.value}
-            isChecked={propsForFields.preWetTip.value === true}
-            checkboxUpdateValue={propsForFields.preWetTip.updateValue}
-            tooltipText={propsForFields.preWetTip.tooltipContent}
+            toggleValue={propsForFields.preWetTip.value}
+            isSelected={propsForFields.preWetTip.value === true}
+            toggleUpdateValue={propsForFields.preWetTip.updateValue}
+            toggleElement="checkbox"
+            tooltipContent={propsForFields.preWetTip.tooltipContent ?? null}
           />
         ) : null}
         <CheckboxExpandStepFormField
