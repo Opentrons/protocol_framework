@@ -46,13 +46,8 @@ from .trial import TestResources, _change_pipettes
 from .tips import get_tips
 from hardware_testing.drivers import asair_sensor
 from opentrons.protocol_api import InstrumentContext, disposal_locations
-from opentrons.protocols.api_support.definitions import MAX_SUPPORTED_VERSION
 from opentrons.protocol_engine.types import LabwareOffset
 
-
-# NOTE: specific tags/branches can be tied to specific versions,
-#       however for CI this should remain as latest API
-API_LEVEL = str(MAX_SUPPORTED_VERSION)
 
 CUSTOM_LABWARE_URIS = ["radwag_pipette_calibration_vial"]
 
@@ -198,7 +193,7 @@ class RunArgs:
             else None
         )
         _ctx = helpers.get_api_context(
-            API_LEVEL,  # type: ignore[attr-defined]
+            api_level=None,  # default to using latest version
             is_simulating=args.simulate,
             pipette_left=_left_pip,
             pipette_right=_right_pip,

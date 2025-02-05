@@ -39,6 +39,13 @@ from opentrons.protocol_engine.notes import CommandNoteAdder
 from opentrons.protocol_engine import StateView
 from opentrons.protocol_api.core.engine import pipette_movement_conflict
 
+from opentrons.protocols.api_support.definitions import MAX_SUPPORTED_VERSION
+
+
+# NOTE: specific tags/branches can be tied to specific versions,
+#       however for CI this should remain as latest API
+DEFAULT_API_LEVEL = str(MAX_SUPPORTED_VERSION)
+
 
 def _add_fake_simulate(
     ctx: protocol_api.ProtocolContext, is_simulating: bool
@@ -65,7 +72,7 @@ def _add_fake_comment_pause(
 
 
 def get_api_context(
-    api_level: str,
+    api_level: Optional[str] = None,
     is_simulating: bool = False,
     pipette_left: Optional[str] = None,
     pipette_right: Optional[str] = None,
@@ -73,7 +80,7 @@ def get_api_context(
     custom_labware_uris_for_simulation: Optional[List[str]] = None,
     deck_version: str = guess_deck_type_from_global_config(),
     stall_detection_enable: Optional[bool] = None,
-    include_labware_offsets: bool = False,
+    include_labware_offsets: bool = True,
 ) -> protocol_api.ProtocolContext:
     """Get api context."""
 
@@ -99,7 +106,7 @@ def get_api_context(
             stall_detection_enable=stall_detection_enable,
         )
 
-    if include_labware_offsets:
+    if not is_simulating and include_labware_offsets:
         ui.print_info(
             "Starting opentrons-robot-server, so we can http GET labware offsets"
         )
@@ -125,6 +132,8 @@ def get_api_context(
             with open(labware_path, "r") as f:
                 extra_labware[def_uri] = json_load(f)
 
+    if api_level is None:
+        api_level = DEFAULT_API_LEVEL
     papi: protocol_api.ProtocolContext
     if is_simulating:
         papi = simulate.get_protocol_api(
