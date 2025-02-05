@@ -7,6 +7,8 @@ from . import config
 from .liquid_class.defaults import get_liquid_class
 from .increments import get_volume_increments
 from inspect import getsource
+from pathlib import Path
+from json import load as json_load
 
 from hardware_testing.data import ui
 from opentrons import protocol_api
@@ -25,7 +27,6 @@ from opentrons.hardware_control.instruments.ot3.pipette import Pipette
 from opentrons import execute, simulate
 from opentrons.types import Point, Location, Mount
 from opentrons.config.types import OT3Config, RobotConfig
-from opentrons_shared_data.labware.types import LabwareDefinition
 
 from hardware_testing.opentrons_api import helpers_ot3
 from opentrons.protocol_api import ProtocolContext, InstrumentContext
@@ -69,7 +70,7 @@ def get_api_context(
     pipette_left: Optional[str] = None,
     pipette_right: Optional[str] = None,
     gripper: Optional[str] = None,
-    extra_labware: Optional[Dict[str, LabwareDefinition]] = None,
+    custom_labware_uris_for_simulation: Optional[List[str]] = None,
     deck_version: str = guess_deck_type_from_global_config(),
     stall_detection_enable: Optional[bool] = None,
     include_labware_offsets: bool = False,
@@ -111,6 +112,19 @@ def get_api_context(
     else:
         offsets = []
 
+    # gather the custom labware (for simulation)
+    extra_labware = {}
+    if is_simulating and custom_labware_uris_for_simulation:
+        for def_uri in custom_labware_uris_for_simulation:
+            labware_path = (
+                Path(__file__).parent.parent
+                / "labware"
+                / def_uri
+                / "1.json"  # assuming v1
+            )
+            with open(labware_path, "r") as f:
+                extra_labware[def_uri] = json_load(f)
+
     papi: protocol_api.ProtocolContext
     if is_simulating:
         papi = simulate.get_protocol_api(
@@ -132,7 +146,7 @@ def get_api_context(
 
     # add labware offsets to engine's state
     if offsets:
-        engine = _ctx._core._engine_client._transport._engine  # type: ignore[attr-defined]
+        engine = papi._core._engine_client._transport._engine  # type: ignore[attr-defined]
         for offset in offsets:
             engine.state_view._labware_store._add_labware_offset(offset)
     return papi

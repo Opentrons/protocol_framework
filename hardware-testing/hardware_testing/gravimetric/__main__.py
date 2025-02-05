@@ -1,7 +1,5 @@
 """Gravimetric OT3."""
-from json import load as json_load
 from traceback import format_exc
-from pathlib import Path
 import argparse
 from typing import List, Union, Dict, Optional, Any, Tuple
 from dataclasses import dataclass
@@ -190,26 +188,21 @@ class RunArgs:
 
     @classmethod
     def _get_protocol_context(cls, args: argparse.Namespace) -> ProtocolContext:
-        # gather the custom labware (for simulation)
-        custom_defs = {}
-        if args.simulate and CUSTOM_LABWARE_URIS:
-            for def_uri in CUSTOM_LABWARE_URIS:
-                labware_path = (
-                    Path(__file__).parent.parent / "labware" / def_uri / "1.json"
-                )  # assuming v1
-                with open(labware_path, "r") as f:
-                    custom_defs[def_uri] = json_load(f)
         include_labware_offsets = bool(
             not args.simulate and not args.skip_labware_offsets
+        )
+        _left_pip = PIPETTE_MODEL_NAME[args.pipette][args.channels]
+        _right_pip = (
+            PIPETTE_MODEL_NAME[args.pipette][args.channels]
+            if args.channels < 96
+            else None
         )
         _ctx = helpers.get_api_context(
             API_LEVEL,  # type: ignore[attr-defined]
             is_simulating=args.simulate,
-            pipette_left=PIPETTE_MODEL_NAME[args.pipette][args.channels],
-            pipette_right=PIPETTE_MODEL_NAME[args.pipette][args.channels]
-            if args.channels < 96
-            else None,
-            extra_labware=custom_defs,
+            pipette_left=_left_pip,
+            pipette_right=_right_pip,
+            custom_labware_uris_for_simulation=CUSTOM_LABWARE_URIS,
             include_labware_offsets=include_labware_offsets,
         )
         return _ctx
