@@ -5,7 +5,7 @@ import type { LPCWizardContentProps } from '/app/organisms/LabwarePositionCheck/
 export function LPCComplete(props: LPCWizardContentProps): JSX.Element {
   useEffect(() => {
     setTimeout(() => {
-      props.onCloseClick()
+      void props.commandUtils.handleCleanUpAndClose()
     }, 5000)
   }, [])
 

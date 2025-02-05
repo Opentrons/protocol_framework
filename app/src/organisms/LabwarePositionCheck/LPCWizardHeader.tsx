@@ -32,7 +32,6 @@ export function LPCWizardHeader({
   commandUtils,
   proceedStep,
   goBackLastStep,
-  onCloseClick,
 }: LPCWizardContentProps): JSX.Element {
   const { t } = useTranslation('labware_position_check')
   const dispatch = useDispatch()
@@ -52,10 +51,8 @@ export function LPCWizardHeader({
     toggleRobotMoving,
     handleValidMoveToMaintenancePosition,
     handleProbeAttachment,
-    showExitConfirmation,
-    isExiting,
-    confirmExitLPC,
-  } = commandUtils // TOME TODO: Delete some of these exiting props. I'm not sure you need any of them anymore.
+    handleCleanUpAndClose,
+  } = commandUtils
 
   const handleAttachProbeCheck = (): void => {
     void toggleRobotMoving(true)
@@ -108,7 +105,9 @@ export function LPCWizardHeader({
       return {
         header: t('labware_position_check_title'),
         // If the maintenance run fails, we cannot move the gantry, so just clean up LPC.
-        onClickButton: onCloseClick,
+        onClickButton: () => {
+          void handleCleanUpAndClose()
+        },
         buttonText: t('exit'),
       }
     } else {
@@ -176,7 +175,9 @@ export function LPCWizardHeader({
           return {
             header: t('labware_position_check_title'),
             buttonText: t('exit'),
-            onClickButton: onCloseClick,
+            onClickButton: () => {
+              void handleCleanUpAndClose()
+            },
           }
         }
         default: {

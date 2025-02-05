@@ -27,14 +27,17 @@ const SUPPORT_EMAIL = 'support@opentrons.com'
 
 export function LPCErrorModal({
   commandUtils,
-  onCloseClick,
 }: LPCWizardContentProps): JSX.Element {
   const { t } = useTranslation(['labware_position_check', 'shared', 'branded'])
-  const { errorMessage, toggleRobotMoving } = commandUtils
+  const {
+    errorMessage,
+    toggleRobotMoving,
+    handleCleanUpAndClose,
+  } = commandUtils
 
   const handleClose = (): void => {
     void toggleRobotMoving(true).then(() => {
-      onCloseClick()
+      void handleCleanUpAndClose()
     })
   }
 

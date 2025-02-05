@@ -13,7 +13,6 @@ import {
   DetachProbe,
   LPCComplete,
 } from '/app/organisms/LabwarePositionCheck/steps'
-import { ExitConfirmation } from './ExitConfirmation'
 import { RobotMotionLoader } from './RobotMotionLoader'
 import { LPCWizardHeader } from './LPCWizardHeader'
 import { LPCErrorModal } from './LPCErrorModal'
@@ -46,13 +45,11 @@ export function LPCWizardFlex(props: LPCWizardFlexProps): JSX.Element {
   const goBackLastStep = (): void => {
     dispatch(goBackStepDispatch(props.runId))
   }
-  const onCloseClickDispatch = (): void => {
-    onCloseClick()
-  }
+
   const dispatch = useDispatch()
   const LPCHandlerUtils = useLPCCommands({
     ...props,
-    onCloseClick: onCloseClickDispatch,
+    onCloseClick,
   })
 
   useLPCInitialState({ ...rest })
@@ -70,7 +67,6 @@ export function LPCWizardFlex(props: LPCWizardFlexProps): JSX.Element {
       proceedStep={proceedStep}
       goBackLastStep={goBackLastStep}
       commandUtils={LPCHandlerUtils}
-      onCloseClick={onCloseClickDispatch}
     />
   )
 }
@@ -100,7 +96,6 @@ function LPCWizardContent(props: LPCWizardContentProps): JSX.Element {
   const {
     isRobotMoving,
     errorMessage,
-    showExitConfirmation,
     unableToDetect,
     setShowUnableToDetect,
   } = props.commandUtils
@@ -111,9 +106,6 @@ function LPCWizardContent(props: LPCWizardContentProps): JSX.Element {
   }
   if (errorMessage != null) {
     return <LPCErrorModal {...props} />
-  }
-  if (showExitConfirmation) {
-    return <ExitConfirmation {...props} />
   }
   if (unableToDetect) {
     // TODO(jh, 02-05-25): EXEC-1190.
