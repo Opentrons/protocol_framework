@@ -115,10 +115,10 @@ describe('ProtocolSetupLabware', () => {
 
   it('should toggle between map view and list view', () => {
     render()
-    expect(screen.queryByText('List View')).toBeNull()
-    fireEvent.click(screen.getByRole('button', { name: 'Map View' }))
     expect(screen.queryByText('Map View')).toBeNull()
     fireEvent.click(screen.getByRole('button', { name: 'List View' }))
+    expect(screen.queryByText('List View')).toBeNull()
+    fireEvent.click(screen.getByRole('button', { name: 'Map View' }))
     screen.getByText('Labware')
     screen.getByText('Labware name')
     screen.getByText('Location')
