@@ -47,7 +47,7 @@ def evotips_definition() -> LabwareDefinition:
     return LabwareDefinition.model_validate(
         json.loads(
             load_shared_data(
-                "labware/definitions/3/evotips_opentrons_96_labware/1.json"
+                "labware/definitions/2/evotips_opentrons_96_labware/1.json"
             )
         )
     )
