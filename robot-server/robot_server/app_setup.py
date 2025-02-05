@@ -2,6 +2,10 @@
 import contextlib
 from typing import AsyncGenerator, Optional
 from pathlib import Path
+import logging
+from datetime import datetime
+from mem_top import mem_top
+import asyncio
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -32,19 +36,20 @@ from .service.notifications import (
     initialize_pe_publisher_notifier,
 )
 
+log = logging.getLogger(__name__)
+
 
 @contextlib.asynccontextmanager
 async def _lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
-    """The server's startup and shutdown logic.
-
-    Entering this context manager sets up our custom global objects
-    so they'll be ready when we process requests.
-
-    Exiting this context manager cleans everything up.
-    """
+    """The server's startup and shutdown logic with memory monitoring."""
     async with contextlib.AsyncExitStack() as exit_stack:
         settings = get_settings()
         persistence_directory = _get_persistence_directory(settings)
+
+        # Set up memory monitoring
+        memory_monitor = MemoryMonitor(interval_seconds=300)  # Check every 5 minutes
+        await memory_monitor.start()
+        exit_stack.push_async_callback(memory_monitor.stop)
 
         initialize_logging()
 
@@ -56,10 +61,8 @@ async def _lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
         start_initializing_hardware(
             app_state=app.state,
             callbacks=[
-                # Flex light control:
                 (start_light_control_task, True),
                 (mark_light_control_startup_finished, False),
-                # OT-2 light control:
                 (lambda _app_state, hw_api: blinker.start_blinking(hw_api), True),
                 (
                     lambda _app_state, _hw_api: blinker.mark_hardware_init_complete(),
@@ -72,12 +75,7 @@ async def _lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
         start_initializing_persistence(
             app_state=app.state,
             persistence_directory_root=persistence_directory,
-            done_callbacks=[
-                # For OT-2 light control only. The Flex status bar isn't handled here
-                # because it's currently tied to hardware and run status, not to
-                # initialization of the persistence layer.
-                blinker.mark_persistence_init_complete
-            ],
+            done_callbacks=[blinker.mark_persistence_init_complete],
         )
         exit_stack.push_async_callback(clean_up_persistence, app.state)
 
@@ -122,3 +120,25 @@ def _get_persistence_directory(settings: RobotServerSettings) -> Optional[Path]:
         return None
     else:
         return settings.persistence_directory
+
+
+class MemoryMonitor:
+    def __init__(self, interval_seconds: int = 300):  # Default 5 minutes
+        self.interval = interval_seconds
+        self.running = False
+        self.task = None
+
+    async def monitor_memory(self):
+        while self.running:
+            timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            log.error(f"Memory usage at {timestamp}:\n{mem_top()}")
+            await asyncio.sleep(self.interval)
+
+    async def start(self):
+        self.running = True
+        self.task = asyncio.create_task(self.monitor_memory())
+
+    async def stop(self):
+        self.running = False
+        if self.task:
+            await self.task
