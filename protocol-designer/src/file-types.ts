@@ -5,7 +5,7 @@ import type { ProtocolFile as ProtocolFileV3 } from '@opentrons/shared-data/prot
 import type { ProtocolFile as ProtocolFileV4 } from '@opentrons/shared-data/protocol/types/schemaV4'
 import type { ProtocolFile as ProtocolFileV5 } from '@opentrons/shared-data/protocol/types/schemaV5'
 import type { ProtocolFile as ProtocolFileV6 } from '@opentrons/shared-data/protocol/types/schemaV6'
-import { LiquidEntities } from '@opentrons/step-generation'
+import type { LiquidEntities } from '@opentrons/step-generation'
 
 export interface PDMetadata {
   // pipetteId to tiprackModel
