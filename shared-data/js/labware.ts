@@ -303,8 +303,6 @@ const usascientific12Reservoir22MlV1 = usascientific12Reservoir22MlV1Uncasted as
 const usascientific96Wellplate24MlDeepV1 = usascientific96Wellplate24MlDeepV1Uncasted as LabwareDefinition2
 const evotipsFlex96TiprackAdapterV1 = evotipsFlex96TiprackAdapterV1Uncasted as LabwareDefinition2
 const evotipsOpentrons96LabwareV1 = evotipsOpentrons96LabwareV1Uncasted as LabwareDefinition2
-const evotipsFlex96TiprackAdapterV2 = evotipsFlex96TiprackAdapterV2Uncasted as LabwareDefinition2
-const evotipsOpentrons96LabwareV2 = evotipsOpentrons96LabwareV2Uncasted as LabwareDefinition2
 
 // cast v1 defs
 
@@ -476,8 +474,6 @@ const latestDefs = {
   usascientific96Wellplate24MlDeepV1,
   evotipsFlex96TiprackAdapterV1,
   evotipsOpentrons96LabwareV1,
-  evotipsFlex96TiprackAdapterV2,
-  evotipsOpentrons96LabwareV2,
 }
 
 // labware definitions
