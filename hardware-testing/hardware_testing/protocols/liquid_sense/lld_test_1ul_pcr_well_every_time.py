@@ -11,9 +11,9 @@ metadata = {"protocolName": "LLD 1uL PCR-to-MVS-04feb-TEST-MATRIX"}
 requirements = {"robotType": "Flex", "apiLevel": "2.22"}
 
 SLOTS = {
-    "tips": ["B2", "B3", "A2", "A3", OFF_DECK],
-    "src": "B1",
-    "src_tube": "C1",
+    "tips": ["A2", "B1", "A3", OFF_DECK],
+    "src": "C2",
+    "src_tube": "B2",
     "dst": ["D3", "D2", "D1", "C1", "C2"],
     "tips_200": "A1",
     "diluent_reservoir": "C3",
@@ -138,10 +138,10 @@ def run(ctx: ProtocolContext) -> None:
     )
     # SRC and DST labware
     src_tube = ctx.load_labware(
-        "opentrons_24_tuberack_eppendorf_1.5ml_safelock_snapcap",
+        "opentrons_24_aluminumblock_nest_1.5ml_snapcap",
         location=SLOTS["src_tube"],
         version=get_latest_version(
-            "opentrons_24_tuberack_eppendorf_1.5ml_safelock_snapcap"
+            "opentrons_24_aluminumblock_nest_1.5ml_snapcap"
         ),
     )
     src_labware = ctx.load_labware(
@@ -205,7 +205,7 @@ def run(ctx: ProtocolContext) -> None:
     src_tube_list = []
     src_tube_list += total_wells_needed * [src_tube["A1"]]
     if baseline:
-        src_tube.load_empty(src_labware_wells)
+        src_tube.load_empty([src_tube["A1"]])
     else:
         src_tube.load_liquid([src_tube["A1"]], total_dye_needed+100, dye)
         pipette.transfer(dye_per_well_list, src_tube_list, src_labware_wells)
@@ -272,8 +272,9 @@ def run(ctx: ProtocolContext) -> None:
             i = 0
             # fill with diluent
             for i in range(columns):
-                if i > 5:
-                    DILUENT_UL = 100
+                if i >= columns/2:
+                    if use_test_matrix:
+                        DILUENT_UL = 100
                 diluent_well = diluent_wells[i % len(diluent_wells_used)]
                 if i < len(diluent_wells_used):
                     if diluent_pipette.has_tip:
@@ -286,8 +287,6 @@ def run(ctx: ProtocolContext) -> None:
                 diluent_pipette.dispense(
                     DILUENT_UL, dst_labware[f"A{i+1}"].top(), push_out=20
                 )
-                # print(f"dispensed {DILUENT_UL} in {dst_labware_str}")
-
             diluent_pipette.return_tip()
     dye_used = 0
 
@@ -299,7 +298,10 @@ def run(ctx: ProtocolContext) -> None:
     if use_test_matrix:
         diluent_pipette.pick_up_tip()
         dst_labware = dst_labwares[0]
-        for i in [7, 8, 9, 10, 11, 12]:
+        columns_list = list(range(columns))
+        halfway = int(len(columns_list)/2)
+        print(halfway)
+        for i in columns_list[halfway:]:
             DILUENT_UL = 99
             diluent_well = diluent_wells[i % len(diluent_wells_used)]
             if i < len(diluent_wells_used):
@@ -311,5 +313,5 @@ def run(ctx: ProtocolContext) -> None:
                 diluent_pipette.pick_up_tip()
             diluent_pipette.aspirate(DILUENT_UL, diluent_well.bottom(0.5))
             diluent_pipette.dispense(
-                DILUENT_UL, dst_labware[f"A{i}"].top(), push_out=20
+                DILUENT_UL, dst_labware[f"A{i+1}"].top(), push_out=20
             )
