@@ -15,13 +15,7 @@
     "name": "opentrons/protocol-designer",
     "version": "8.5.0",
     "data": {
-      "_internalAppBuildDate": "Tue, 04 Feb 2025 15:16:30 GMT",
-      "defaultValues": {
-        "aspirate_mmFromBottom": 1,
-        "dispense_mmFromBottom": 1,
-        "touchTip_mmFromTop": -1,
-        "blowout_mmFromTop": 0
-      },
+      "_internalAppBuildDate": "Wed, 29 Jan 2025 13:23:47 GMT",
       "pipetteTiprackAssignments": {
         "0b3f2210-75c7-11ea-b42f-4b64e50f43e5": [
           "opentrons/opentrons_96_tiprack_300ul/1"
@@ -288,7 +282,34 @@
         "4f4057e0-75c7-11ea-b42f-4b64e50f43e5",
         "54dc3200-75c7-11ea-b42f-4b64e50f43e5",
         "80c00130-75c7-11ea-b42f-4b64e50f43e5"
-      ]
+      ],
+      "pipettes": {
+        "0b3f2210-75c7-11ea-b42f-4b64e50f43e5": {
+          "pipetteName": "p300_single_gen2"
+        }
+      },
+      "modules": {
+        "0b419310-75c7-11ea-b42f-4b64e50f43e5:magneticModuleType": {
+          "model": "magneticModuleV2"
+        },
+        "0b4319b0-75c7-11ea-b42f-4b64e50f43e5:temperatureModuleType": {
+          "model": "temperatureModuleV2"
+        }
+      },
+      "labware": {
+        "0b44c760-75c7-11ea-b42f-4b64e50f43e5:opentrons/opentrons_96_tiprack_300ul/1": {
+          "displayName": "Opentrons 96 Tip Rack 300 µL",
+          "labwareDefURI": "opentrons/opentrons_96_tiprack_300ul/1"
+        },
+        "1e610d40-75c7-11ea-b42f-4b64e50f43e5:opentrons/nest_96_wellplate_100ul_pcr_full_skirt/1": {
+          "displayName": "NEST 96 Well Plate 100 µL PCR Full Skirt",
+          "labwareDefURI": "opentrons/nest_96_wellplate_100ul_pcr_full_skirt/1"
+        },
+        "21ed8f60-75c7-11ea-b42f-4b64e50f43e5:opentrons/opentrons_24_aluminumblock_generic_2ml_screwcap/1": {
+          "displayName": "Opentrons 24 Well Aluminum Block with Generic 2 mL Screwcap",
+          "labwareDefURI": "opentrons/opentrons_24_aluminumblock_generic_2ml_screwcap/1"
+        }
+      }
     }
   },
   "robot": {
