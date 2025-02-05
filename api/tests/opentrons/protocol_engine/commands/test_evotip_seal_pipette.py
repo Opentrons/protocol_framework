@@ -102,7 +102,6 @@ async def test_success(
     decoy.when(
         state_view.geometry.get_nominal_tip_geometry("pipette-id", "labware-id", "A3")
     ).then_return(TipGeometry(length=42, diameter=5, volume=300))
-    decoy.when(state_view.pipettes.get_maximum_volume("pipette-id")).then_return(1000)
 
     decoy.when(
         await tip_handler.pick_up_tip(
@@ -135,7 +134,7 @@ async def test_success(
             ),
             pipette_aspirated_fluid=update_types.PipetteAspiratedFluidUpdate(
                 pipette_id="pipette-id",
-                fluid=AspiratedFluid(kind=FluidKind.LIQUID, volume=1000),
+                fluid=AspiratedFluid(kind=FluidKind.LIQUID, volume=400),
             ),
         ),
     )
@@ -202,7 +201,6 @@ async def test_no_tip_physically_missing_error(
     decoy.when(state_view.labware.get_definition(labware_id)).then_return(
         evotips_definition
     )
-    decoy.when(state_view.pipettes.get_maximum_volume(pipette_id)).then_return(1000)
 
     result = await subject.execute(
         EvotipSealPipetteParams(
@@ -224,7 +222,7 @@ async def test_no_tip_physically_missing_error(
             ),
             pipette_aspirated_fluid=update_types.PipetteAspiratedFluidUpdate(
                 pipette_id="pipette-id",
-                fluid=AspiratedFluid(kind=FluidKind.LIQUID, volume=1000),
+                fluid=AspiratedFluid(kind=FluidKind.LIQUID, volume=400),
             ),
         ),
     )
