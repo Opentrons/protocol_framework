@@ -14,6 +14,17 @@ const ajv = new Ajv({ allErrors: true, jsonPointers: true })
 const validate = ajv.compile(schema)
 
 const checkGeometryDefinitions = (labwareDef: LabwareDefinition3): void => {
+  test('innerLabwareGeometry sections should be sorted top to bottom', () => {
+    const geometries = Object.values(labwareDef.innerLabwareGeometry ?? [])
+    for (const geometry of geometries) {
+      const sectionList = geometry.sections
+      const sortedSectionList = sectionList.toSorted(
+        (a, b) => b.topHeight - a.topHeight
+      )
+      expect(sortedSectionList).toStrictEqual(sectionList)
+    }
+  })
+
   test('all geometryDefinitionIds should have an accompanying valid entry in innerLabwareGeometry', () => {
     for (const wellName in labwareDef.wells) {
       const wellGeometryId = labwareDef.wells[wellName].geometryDefinitionId
@@ -31,8 +42,7 @@ const checkGeometryDefinitions = (labwareDef: LabwareDefinition3): void => {
       expect(wellGeometryId in labwareDef.innerLabwareGeometry).toBe(true)
 
       // FIXME(mm, 2025-02-04):
-      // - `sections` is not necessarily sorted, so `sections[0]` is not necessarily the top.
-      // - Even after solving that, `wellDepth` != `topFrustumHeight` for ~26/60 definitions.
+      // `wellDepth` != `topFrustumHeight` for ~23/60 definitions.
       //
       // const wellDepth = labwareDef.wells[wellName].depth
       // const topFrustumHeight =
