@@ -326,10 +326,11 @@
     "conicalWell": {
       "sections": [
         {
-          "shape": "spherical",
-          "radiusOfCurvature": 2.72,
-          "topHeight": 1.57,
-          "bottomHeight": 0.0
+          "shape": "conical",
+          "topDiameter": 9.28,
+          "bottomDiameter": 8.9,
+          "topHeight": 37.9,
+          "bottomHeight": 17.7
         },
         {
           "shape": "conical",
@@ -339,11 +340,10 @@
           "bottomHeight": 1.57
         },
         {
-          "shape": "conical",
-          "topDiameter": 9.28,
-          "bottomDiameter": 8.9,
-          "topHeight": 37.9,
-          "bottomHeight": 17.7
+          "shape": "spherical",
+          "radiusOfCurvature": 2.72,
+          "topHeight": 1.57,
+          "bottomHeight": 0.0
         }
       ]
     }
