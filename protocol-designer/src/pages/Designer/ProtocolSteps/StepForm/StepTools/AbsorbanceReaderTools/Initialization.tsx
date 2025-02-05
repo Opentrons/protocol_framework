@@ -282,6 +282,7 @@ function WavelengthItem(props: WavelengthItemProps): JSX.Element {
     handleDeleteWavelength,
     index,
     error,
+    mode,
   } = props
   const { t } = useTranslation('form')
   const showCustom = !DEFINED_OPTIONS.some(({ value }) => value === wavelength)
@@ -332,7 +333,7 @@ function WavelengthItem(props: WavelengthItemProps): JSX.Element {
           error={!isFocused ? error : null}
         />
       ) : null}
-      {wavelengths.length > 1 ? (
+      {wavelengths.length > 1 && mode === 'multi' ? (
         <Btn
           onClick={() => {
             handleDeleteWavelength(index)

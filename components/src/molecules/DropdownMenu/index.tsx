@@ -332,7 +332,7 @@ export function DropdownMenu(props: DropdownMenuProps): JSX.Element {
                       </StyledText>
                       <StyledText
                         desktopStyle="captionRegular"
-                        color={COLORS.black70}
+                        color={COLORS.grey60}
                       >
                         {option.subtext}
                       </StyledText>

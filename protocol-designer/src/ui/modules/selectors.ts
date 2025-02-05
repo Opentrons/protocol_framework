@@ -19,6 +19,7 @@ import {
 import type { DropdownOption } from '@opentrons/components'
 import type { Selector } from '../../types'
 import type { LabwareNamesByModuleId } from '../../steplist/types'
+import { getDeckSetupForActiveItem } from '../../top-selectors/labware-locations'
 
 export const getLabwareNamesByModuleId: Selector<LabwareNamesByModuleId> = createSelector(
   getInitialDeckSetup,
@@ -86,11 +87,11 @@ export const getHeaterShakerLabwareOptions: Selector<
 export const getAbsorbanceReaderLabwareOptions: Selector<
   DropdownOption[]
 > = createSelector(
-  getInitialDeckSetup,
+  getDeckSetupForActiveItem,
   getLabwareNicknamesById,
-  (initialDeckSetup, nicknamesById) => {
+  (deckSetup, nicknamesById) => {
     const absorbanceReaderModuleOptions = getModuleLabwareOptions(
-      initialDeckSetup,
+      deckSetup,
       nicknamesById,
       ABSORBANCE_READER_TYPE
     )
