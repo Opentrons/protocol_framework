@@ -813,6 +813,14 @@ describe('_getSavedMultiSelectFieldValues', () => {
           isIndeterminate: false,
           value: undefined,
         },
+        aspirate_retract_delay_seconds: {
+          isIndeterminate: false,
+          value: undefined,
+        },
+        aspirate_retract_speed: {
+          isIndeterminate: false,
+          value: undefined,
+        },
         // dispense settings
         dispense_labware: {
           isIndeterminate: true,
@@ -864,6 +872,14 @@ describe('_getSavedMultiSelectFieldValues', () => {
         dispense_touchTip_mmFromTop: {
           isIndeterminate: false,
           value: -1,
+        },
+        dispense_retract_delay_seconds: {
+          isIndeterminate: false,
+          value: undefined,
+        },
+        dispense_retract_speed: {
+          isIndeterminate: false,
+          value: undefined,
         },
         dispense_submerge_delay_seconds: {
           isIndeterminate: false,
