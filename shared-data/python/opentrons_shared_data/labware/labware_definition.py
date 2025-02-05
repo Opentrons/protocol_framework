@@ -691,7 +691,7 @@ class LabwareDefinition(BaseModel):
         # of doing that when the $otSharedSchema field is declared explicitly on this
         # model.
         #
-        # Splitting this model into separate ones for schema 2 and 3 would also solve this.
+        # Splitting this model into separate ones for schemas 2 and 3 would also solve this.
         "extra": "allow"
     }
 
