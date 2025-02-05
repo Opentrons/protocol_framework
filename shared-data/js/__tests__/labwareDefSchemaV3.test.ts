@@ -16,6 +16,17 @@ const checkGeometryDefinitions = (
   labwareDef: LabwareDefinition3,
   filename: string
 ): void => {
+  test('innerLabwareGeometry sections should be sorted top to bottom', () => {
+    const geometries = Object.values(labwareDef.innerLabwareGeometry ?? [])
+    for (const geometry of geometries) {
+      const sectionList = geometry.sections
+      const sortedSectionList = sectionList.toSorted(
+        (a, b) => b.topHeight - a.topHeight
+      )
+      expect(sortedSectionList).toStrictEqual(sectionList)
+    }
+  })
+
   test(`all geometryDefinitionIds specified in {filename} should have an accompanying valid entry in innerLabwareGeometry`, () => {
     for (const wellName in labwareDef.wells) {
       const wellGeometryId = labwareDef.wells[wellName].geometryDefinitionId
