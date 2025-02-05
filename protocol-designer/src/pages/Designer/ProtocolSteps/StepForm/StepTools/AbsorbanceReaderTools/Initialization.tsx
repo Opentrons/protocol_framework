@@ -24,6 +24,7 @@ import {
   Tooltip,
   useHoverTooltip,
 } from '@opentrons/components'
+import { LINK_BUTTON_STYLE } from '../../../../../../atoms'
 import {
   ABSORBANCE_READER_MAX_WAVELENGTH_NM,
   ABSORBANCE_READER_MIN_WAVELENGTH_NM,
@@ -244,6 +245,7 @@ function IntializationEditor(props: InitializationEditorProps): JSX.Element {
               text={t('step_edit_form.absorbanceReader.add_wavelength.label')}
               textAlignment="left"
               disabled={numWavelengths === MAX_WAVELENGTHS}
+              iconName="plus"
             />
           </Flex>
         ) : null}
@@ -337,13 +339,12 @@ function WavelengthItem(props: WavelengthItemProps): JSX.Element {
           onClick={() => {
             handleDeleteWavelength(index)
           }}
-          alignSelf={ALIGN_FLEX_END}
           padding={SPACING.spacing4}
+          css={LINK_BUTTON_STYLE}
+          alignSelf={ALIGN_FLEX_END}
+          textDecoration={TEXT_DECORATION_UNDERLINE}
         >
-          <StyledText
-            desktopStyle="bodyDefaultRegular"
-            textDecoration={TEXT_DECORATION_UNDERLINE}
-          >
+          <StyledText desktopStyle="bodyDefaultRegular">
             {t('step_edit_form.absorbanceReader.delete')}
           </StyledText>
         </Btn>

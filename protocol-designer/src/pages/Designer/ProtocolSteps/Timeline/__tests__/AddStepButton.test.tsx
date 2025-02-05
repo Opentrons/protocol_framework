@@ -87,7 +87,7 @@ describe('AddStepButton', () => {
     screen.getByText('Mix')
     screen.getByText('Pause')
     screen.getByText('Thermocycler')
-    screen.getByText('Heater-shaker')
+    screen.getByText('Heater-Shaker')
     screen.getByText('Temperature')
     screen.getByText('Magnet')
   })

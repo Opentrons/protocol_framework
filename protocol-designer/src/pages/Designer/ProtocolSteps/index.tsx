@@ -120,7 +120,7 @@ export function ProtocolSteps(): JSX.Element {
           >
             {currentStep != null && hoveredTerminalItem == null ? (
               <StyledText desktopStyle="headingSmallBold">
-                {i18n.format(currentStep.stepName, 'capitalize')}
+                {i18n.format(currentStep.stepName, 'titleCase')}
               </StyledText>
             ) : null}
             {(hoveredTerminalItem != null || selectedTerminalItem != null) &&

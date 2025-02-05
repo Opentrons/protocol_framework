@@ -23,8 +23,8 @@ const LISTBUTTON_PROPS_BY_TYPE: Record<
   { backgroundColor: string; hoverBackgroundColor: string }
 > = {
   noActive: {
-    backgroundColor: COLORS.grey30,
-    hoverBackgroundColor: COLORS.grey35,
+    backgroundColor: COLORS.grey20,
+    hoverBackgroundColor: COLORS.grey30,
   },
   connected: {
     backgroundColor: COLORS.green30,
