@@ -67,6 +67,7 @@ describe('StepOverflowMenu', () => {
       handleEdit: vi.fn(),
       confirmDelete: mockConfirm,
       confirmMultiDelete: vi.fn(),
+      sidebarWidth: 235,
     }
     vi.mocked(getMultiSelectItemIds).mockReturnValue(null)
     vi.mocked(getCurrentFormIsPresaved).mockReturnValue(false)
