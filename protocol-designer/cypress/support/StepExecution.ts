@@ -37,25 +37,23 @@ export const runSteps = (steps: StepsList): void => {
   if (
     !isEnumValue(
       enumsToCheck,
-      steps.map(step => step.step)
+      steps.map(item => item.step)
     )
   ) {
     throw new Error('One or more steps are unrecognized.')
   }
 
-  // evaluate each step and execute the appropriate function
-
-  steps.forEach(step => {
-    if (isEnumValue([SetupActions], step.step)) {
-      executeSetupSteps(step)
-    } else if (isEnumValue([SetupVerifications], step)) {
-      executeVerificationStep(step)
-    } else if (isEnumValue([UniversalActions], step)) {
-      executeUniversalAction(step)
-    } else if (isEnumValue([ModActions], step)) {
-      executeModSteps(step)
-    } else if (isEnumValue([ModVerifications], step)) {
-      executeVerifyModStep(step)
+  steps.forEach(item => {
+    if (isEnumValue([SetupActions], item.step)) {
+      executeSetupSteps(item)
+    } else if (isEnumValue([SetupVerifications], item.step)) {
+      executeVerificationStep(item)
+    } else if (isEnumValue([UniversalActions], item.step)) {
+      executeUniversalAction(item)
+    } else if (isEnumValue([ModActions], item.step)) {
+      executeModSteps(item)
+    } else if (isEnumValue([ModVerifications], item.step)) {
+      executeVerifyModStep(item)
     }
   })
 }
