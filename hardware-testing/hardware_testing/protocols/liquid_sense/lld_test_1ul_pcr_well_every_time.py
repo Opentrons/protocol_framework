@@ -98,10 +98,11 @@ def run(ctx: ProtocolContext) -> None:
         "B": {"ASP": "M_LLD", "DSP": "M"},
         "C": {"ASP": "M", "DSP": "M"},
         "D": {"ASP": "M", "DSP": "M"},
-        "E": {"ASP": "B", "DSP": "B"},
+        "E": {"ASP": "B", "DSP": "T"},
         "F": {"ASP": "B", "DSP": "B"},
         "G": {"ASP": "M_LLD_TIP", "DSP": "M"},
         "H": {"ASP": "M_LLD_TIP", "DSP": "M"},
+        
     }
 
     # LOAD 50 UL TIPS based on # of plates
@@ -240,10 +241,12 @@ def run(ctx: ProtocolContext) -> None:
             pipette.dispense(
                 TARGET_UL, dst_well.meniscus(SUBMERGE_MM), push_out=push_out
             )  # contact
-        else:
+        elif "B" in dsp_behavior:
             pipette.dispense(
                 TARGET_UL, dst_well.bottom(BOTTOM_MM), push_out=push_out
             )  # contact
+        else:
+            pipette.dispense(TARGET_UL, dst_well.top(), push_out = push_out)
         dye_used += TARGET_UL
         if dye_used > dye_per_well:
             dye_used = 0
