@@ -56,6 +56,8 @@ from opentrons.protocol_engine.types import LabwareOffset
 #       however for CI this should remain as latest API
 API_LEVEL = str(MAX_SUPPORTED_VERSION)
 
+CUSTOM_LABWARE_URIS = ["radwag_pipette_calibration_vial"]
+
 LABWARE_OFFSETS: List[LabwareOffset] = []
 
 # Keyed by pipette volume, channel count, and tip volume in that order
@@ -188,30 +190,18 @@ class RunArgs:
 
     @classmethod
     def _get_protocol_context(cls, args: argparse.Namespace) -> ProtocolContext:
-        if not args.simulate and not args.skip_labware_offsets:
-            # getting labware offsets must be done before creating the protocol context
-            # because it requires the robot-server to be running
-            ui.print_title("SETUP")
-            ui.print_info(
-                "Starting opentrons-robot-server, so we can http GET labware offsets"
-            )
-            LABWARE_OFFSETS.extend(workarounds.http_get_all_labware_offsets())
-            # ui.print_info(f"found {len(LABWARE_OFFSETS)} offsets:")
-            # for offset in LABWARE_OFFSETS:
-            #    ui.print_info(f"\t{offset.createdAt}:")
-            #    ui.print_info(f"\t\t{offset.definitionUri}")
-            #    ui.print_info(f"\t\t{offset.vector}")
         # gather the custom labware (for simulation)
         custom_defs = {}
-        if args.simulate:
-            labware_dir = Path(__file__).parent.parent / "labware"
-            custom_def_uris = [
-                "radwag_pipette_calibration_vial",
-            ]
-            for def_uri in custom_def_uris:
-                with open(labware_dir / def_uri / "1.json", "r") as f:
-                    custom_def = json_load(f)
-                custom_defs[def_uri] = custom_def
+        if args.simulate and CUSTOM_LABWARE_URIS:
+            for def_uri in CUSTOM_LABWARE_URIS:
+                labware_path = (
+                    Path(__file__).parent.parent / "labware" / def_uri / "1.json"
+                )  # assuming v1
+                with open(labware_path, "r") as f:
+                    custom_defs[def_uri] = json_load(f)
+        include_labware_offsets = bool(
+            not args.simulate and not args.skip_labware_offsets
+        )
         _ctx = helpers.get_api_context(
             API_LEVEL,  # type: ignore[attr-defined]
             is_simulating=args.simulate,
@@ -220,10 +210,8 @@ class RunArgs:
             if args.channels < 96
             else None,
             extra_labware=custom_defs,
+            include_labware_offsets=include_labware_offsets,
         )
-        for offset in LABWARE_OFFSETS:
-            engine = _ctx._core._engine_client._transport._engine  # type: ignore[attr-defined]
-            engine.state_view._labware_store._add_labware_offset(offset)
         return _ctx
 
     @classmethod

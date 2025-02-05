@@ -29,7 +29,7 @@ from opentrons_shared_data.labware.types import LabwareDefinition
 
 from hardware_testing.opentrons_api import helpers_ot3
 from opentrons.protocol_api import ProtocolContext, InstrumentContext
-from .workarounds import get_sync_hw_api
+from .workarounds import get_sync_hw_api, http_get_all_labware_offsets
 from hardware_testing.opentrons_api.helpers_ot3 import clear_pipette_ul_per_mm
 
 import opentrons.protocol_engine.execution.pipetting as PE_pipetting
@@ -72,6 +72,7 @@ def get_api_context(
     extra_labware: Optional[Dict[str, LabwareDefinition]] = None,
     deck_version: str = guess_deck_type_from_global_config(),
     stall_detection_enable: Optional[bool] = None,
+    include_labware_offsets: bool = False,
 ) -> protocol_api.ProtocolContext:
     """Get api context."""
 
@@ -97,6 +98,19 @@ def get_api_context(
             stall_detection_enable=stall_detection_enable,
         )
 
+    if include_labware_offsets:
+        ui.print_info(
+            "Starting opentrons-robot-server, so we can http GET labware offsets"
+        )
+        offsets = http_get_all_labware_offsets()
+        # print(f"found {len(offsets)} labware offsets")
+        # for offset in offsets:
+        #     print(f"\t{offset.createdAt}:")
+        #     print(f"\t\t{offset.definitionUri}")
+        #     print(f"\t\t{offset.vector}")
+    else:
+        offsets = []
+
     papi: protocol_api.ProtocolContext
     if is_simulating:
         papi = simulate.get_protocol_api(
@@ -116,6 +130,11 @@ def get_api_context(
             version=APIVersion.from_string(api_level), extra_labware=extra_labware
         )
 
+    # add labware offsets to engine's state
+    if offsets:
+        engine = _ctx._core._engine_client._transport._engine  # type: ignore[attr-defined]
+        for offset in offsets:
+            engine.state_view._labware_store._add_labware_offset(offset)
     return papi
 
 

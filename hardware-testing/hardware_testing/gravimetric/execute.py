@@ -765,9 +765,9 @@ def run(cfg: config.GravimetricConfig, resources: TestResources) -> None:  # noq
     """Run."""
     new_liquid_class = None
     if not cfg.use_old_method:
-        lc_name = SupportedLiquid.from_string(
-            cfg.liquid
-        ).name_with_dilution(cfg.dilution)
+        lc_name = SupportedLiquid.from_string(cfg.liquid).name_with_dilution(
+            cfg.dilution
+        )
         new_liquid_class = resources.ctx.define_liquid_class(
             lc_name.lower().replace("-", "_")
         )
