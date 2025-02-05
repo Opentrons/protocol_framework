@@ -23,7 +23,7 @@ if __name__ == '__main__':
     args = arg_parser.parse_args()
     working_dir = os.getcwd()
     detail_row = 0
-    file_name = working_dir + '/EVT Motion Parameter Test - Tiprack Load Z Axis-Unit 1.csv'
+    file_name = working_dir + '/EVT Motion Parameter Test - 5 Tiprack Load Z Axis RAW-Unit 1.csv'
 
     df = pd.read_csv(file_name, skiprows=detail_row)
     new_df = df[
