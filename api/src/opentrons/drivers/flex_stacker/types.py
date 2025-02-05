@@ -132,7 +132,7 @@ class Direction(Enum):
 class TOFSensorState(Enum):
     """TOF Sensor state."""
 
-    INITIALIZING = (0,)
+    INITIALIZING = 0
     IDLE = 1
     MEASURING = 2
     ERROR = 3
