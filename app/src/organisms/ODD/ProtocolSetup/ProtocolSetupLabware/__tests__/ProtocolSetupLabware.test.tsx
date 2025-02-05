@@ -101,6 +101,7 @@ describe('ProtocolSetupLabware', () => {
 
   it('renders the Labware Setup page', () => {
     render()
+    fireEvent.click(screen.getByRole('button', { name: 'List View' }))
     screen.getByText('Labware')
     screen.getByText('Labware name')
     screen.getByText('Location')
@@ -119,6 +120,7 @@ describe('ProtocolSetupLabware', () => {
     fireEvent.click(screen.getByRole('button', { name: 'List View' }))
     expect(screen.queryByText('List View')).toBeNull()
     fireEvent.click(screen.getByRole('button', { name: 'Map View' }))
+    fireEvent.click(screen.getByRole('button', { name: 'List View' }))
     screen.getByText('Labware')
     screen.getByText('Labware name')
     screen.getByText('Location')
