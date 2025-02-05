@@ -1,7 +1,9 @@
 import { useTranslation } from 'react-i18next'
 import { useDispatch, useSelector } from 'react-redux'
+import { css } from 'styled-components'
 
-import type { State } from '/app/redux/types'
+import { SPACING } from '@opentrons/components'
+
 import type { LPCWizardContentProps } from '/app/organisms/LabwarePositionCheck/types'
 
 // TODO(jh, 02-05-25): Move ChildNavigation to molecules.
@@ -14,7 +16,9 @@ import {
   selectCurrentStep,
   selectSelectedLabwareDisplayName,
   selectSelectedLabwareInfo,
+  selectStepInfo,
 } from '/app/redux/protocol-runs'
+import { StepMeter } from '/app/atoms/StepMeter'
 
 // eslint-disable-next-line opentrons/no-imports-across-applications
 import type { ChildNavigationProps } from '/app/organisms/ODD/ChildNavigation'
@@ -32,12 +36,9 @@ export function LPCWizardHeader({
 }: LPCWizardContentProps): JSX.Element {
   const { t } = useTranslation('labware_position_check')
   const dispatch = useDispatch()
-  // TOME TODO: Clean this up with a real selector.
-  const { currentStepIndex, totalStepCount } = useSelector((state: State) => ({
-    currentStepIndex:
-      state.protocolRuns[runId]?.lpc?.steps.currentStepIndex ?? 0,
-    totalStepCount: state.protocolRuns[runId]?.lpc?.steps.totalStepCount ?? 0,
-  }))
+  const { currentStepIndex, totalStepCount } = useSelector(
+    selectStepInfo(runId)
+  )
   const currentStep = useSelector(selectCurrentStep(runId))
   const pipette = useSelector(selectActivePipette(runId))
   const selectedLw = useSelector(selectSelectedLabwareInfo(runId))
@@ -192,7 +193,13 @@ export function LPCWizardHeader({
 
   return (
     <>
-      <ChildNavigation {...getNavProps()} />
+      <StepMeter totalSteps={totalStepCount} currentStep={currentStepIndex} />
+      <ChildNavigation {...getNavProps()} css={CHILD_NAV_STYLE} />
     </>
   )
 }
+
+// TODO(jh, 02-05-25): Investigate whether we can remove the position: fixed styling from ChildNav.
+const CHILD_NAV_STYLE = css`
+  top: ${SPACING.spacing8};
+`
