@@ -84,8 +84,8 @@ async def main(args) -> None:
         test_axis = StackerAxis.L
     else:
         raise("Axis not recognized from args options")
-    sg_start = -4
-    sg_final = 12
+    sg_start = -30
+    sg_final = 30
     print(f'config: {STACKER_MOTION_CONFIG}')
     # api = await helpers_ot3.build_async_ot3_hardware_api(is_simulating = False)
     api = await OT3API.build_hardware_controller(loop=asyncio.get_running_loop())
