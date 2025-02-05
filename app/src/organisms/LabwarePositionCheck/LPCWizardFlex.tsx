@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
 import { useDispatch, useSelector } from 'react-redux'
@@ -14,7 +15,7 @@ import {
 } from '/app/organisms/LabwarePositionCheck/steps'
 import { ExitConfirmation } from './ExitConfirmation'
 import { RobotMotionLoader } from './RobotMotionLoader'
-import { WizardHeader } from '/app/molecules/WizardHeader'
+import { LPCWizardHeader } from './LPCWizardHeader'
 import { LPCErrorModal } from './LPCErrorModal'
 import {
   useLPCCommands,
@@ -30,15 +31,14 @@ import { getIsOnDevice } from '/app/redux/config'
 
 import type { LPCFlowsProps } from '/app/organisms/LabwarePositionCheck/LPCFlows'
 import type { LPCWizardContentProps } from '/app/organisms/LabwarePositionCheck/types'
-import type { State } from '/app/redux/types'
-import { useEffect } from 'react'
+import type { LPCStep } from '/app/redux/protocol-runs'
 
 export interface LPCWizardFlexProps extends Omit<LPCFlowsProps, 'robotType'> {}
 
 export function LPCWizardFlex(props: LPCWizardFlexProps): JSX.Element {
   const { onCloseClick, ...rest } = props
 
-  const proceed = (): void => {
+  const proceed = (toStep?: LPCStep): void => {
     dispatch(proceedStep(props.runId))
   }
   const onCloseClickDispatch = (): void => {
@@ -84,38 +84,6 @@ function LPCWizardFlexComponent(props: LPCWizardContentProps): JSX.Element {
       </ModalShell>,
       getTopPortalEl()
     )
-  )
-}
-
-function LPCWizardHeader({
-  runId,
-  commandUtils,
-}: LPCWizardContentProps): JSX.Element {
-  const { t } = useTranslation('labware_position_check')
-  const { currentStepIndex, totalStepCount } = useSelector((state: State) => ({
-    currentStepIndex:
-      state.protocolRuns[runId]?.lpc?.steps.currentStepIndex ?? 0,
-    totalStepCount: state.protocolRuns[runId]?.lpc?.steps.totalStepCount ?? 0,
-  }))
-  const {
-    errorMessage,
-    showExitConfirmation,
-    isExiting,
-    confirmExitLPC,
-  } = commandUtils
-
-  // TODO(jh 01-15-24): Revisit the onExit conditions. Can we simplify?
-  return (
-    <WizardHeader
-      title={t('labware_position_check_title')}
-      currentStep={errorMessage != null ? undefined : currentStepIndex + 1}
-      totalSteps={errorMessage != null ? undefined : totalStepCount}
-      onExit={
-        showExitConfirmation || isExiting || errorMessage != null
-          ? undefined
-          : confirmExitLPC
-      }
-    />
   )
 }
 

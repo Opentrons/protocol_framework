@@ -25,11 +25,15 @@ import type {
   SelectedLabwareNameAction,
   OffsetLocationDetails,
   ApplyOffsetAction,
+  LPCStep,
 } from '../types'
 
-export const proceedStep = (runId: string): ProceedStepAction => ({
+export const proceedStep = (
+  runId: string,
+  toStep?: LPCStep
+): ProceedStepAction => ({
   type: PROCEED_STEP,
-  payload: { runId },
+  payload: { runId, toStep },
 })
 
 export const goBackStep = (runId: string): GoBackStepAction => ({

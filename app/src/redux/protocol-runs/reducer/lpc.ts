@@ -9,6 +9,7 @@ import {
   SET_SELECTED_LABWARE_NAME,
   CLEAR_SELECTED_LABWARE,
   APPLY_OFFSET,
+  LPC_STEPS,
 } from '../constants'
 import { updateOffsetsForURI } from './transforms'
 
@@ -32,16 +33,30 @@ export function LPCReducer(
     switch (action.type) {
       case PROCEED_STEP: {
         const { currentStepIndex, totalStepCount } = state.steps
-        const newStepIdx =
-          currentStepIndex + 1 < totalStepCount
-            ? currentStepIndex + 1
-            : currentStepIndex
+        const { toStep } = action.payload
+
+        const newStepIdx = (): number => {
+          if (toStep == null) {
+            return currentStepIndex + 1 < totalStepCount
+              ? currentStepIndex + 1
+              : currentStepIndex
+          } else {
+            const newIdx = LPC_STEPS.findIndex(step => step === toStep)
+
+            if (newIdx === -1) {
+              console.error(`Unexpected routing to step: ${toStep}`)
+              return 0
+            } else {
+              return newIdx
+            }
+          }
+        }
 
         return {
           ...state,
           steps: {
             ...state.steps,
-            currentStepIndex: newStepIdx,
+            currentStepIndex: newStepIdx(),
           },
         }
       }

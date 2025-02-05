@@ -111,7 +111,7 @@ export interface FinishLPCAction {
 
 export interface ProceedStepAction {
   type: 'PROCEED_STEP'
-  payload: { runId: string }
+  payload: { runId: string; toStep?: LPCStep }
 }
 
 export interface GoBackStepAction {

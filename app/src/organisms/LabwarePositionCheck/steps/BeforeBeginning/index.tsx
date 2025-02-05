@@ -27,7 +27,7 @@ const SUPPORT_PAGE_URL = 'https://support.opentrons.com/s/ot2-calibration'
 
 export function BeforeBeginning({
   runId,
-  proceed,
+  proceedStep,
   commandUtils,
 }: LPCWizardContentProps): JSX.Element {
   const { t, i18n } = useTranslation(['labware_position_check', 'shared'])
@@ -52,7 +52,7 @@ export function BeforeBeginning({
 
   const handleProceed = (): void => {
     void toggleRobotMoving(true)
-      .then(() => handleStartLPC(activePipette, proceed))
+      .then(() => handleStartLPC(activePipette, proceedStep))
       .finally(() => toggleRobotMoving(false))
   }
 
