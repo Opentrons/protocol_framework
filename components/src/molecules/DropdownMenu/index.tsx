@@ -27,6 +27,7 @@ import { LiquidIcon } from '../LiquidIcon'
 import { DeckInfoLabel } from '../DeckInfoLabel'
 
 import type { FocusEventHandler } from 'react'
+import type { FlattenSimpleInterpolation } from 'styled-components'
 
 export interface DropdownOption {
   name: string
@@ -268,7 +269,7 @@ export function DropdownMenu(props: DropdownMenuProps): JSX.Element {
             >
               <StyledText
                 desktopStyle="captionRegular"
-                css={LINE_CLAMP_TEXT_STYLE}
+                css={LINE_CLAMP_TEXT_STYLE(1)}
               >
                 {currentOption.name}
               </StyledText>
@@ -327,7 +328,10 @@ export function DropdownMenu(props: DropdownMenuProps): JSX.Element {
                       flexDirection={DIRECTION_COLUMN}
                       gridGap={option.subtext != null ? SPACING.spacing4 : '0'}
                     >
-                      <StyledText desktopStyle="captionRegular">
+                      <StyledText
+                        desktopStyle="captionRegular"
+                        css={LINE_CLAMP_TEXT_STYLE(3)}
+                      >
                         {option.name}
                       </StyledText>
                       <StyledText
@@ -363,12 +367,17 @@ export function DropdownMenu(props: DropdownMenuProps): JSX.Element {
   )
 }
 
-const LINE_CLAMP_TEXT_STYLE = css`
+export const LINE_CLAMP_TEXT_STYLE = (
+  lineClamp?: number,
+  title?: boolean
+): FlattenSimpleInterpolation => css`
   display: -webkit-box;
   -webkit-box-orient: vertical;
   overflow: ${OVERFLOW_HIDDEN};
   text-overflow: ellipsis;
   word-wrap: break-word;
-  -webkit-line-clamp: 1;
-  word-break: break-all;
+  -webkit-line-clamp: ${lineClamp ?? 1};
+  word-break: ${title === true
+    ? 'normal'
+    : 'break-all'}; // normal for tile and break-all for a non word case like aaaaaaaa
 `
