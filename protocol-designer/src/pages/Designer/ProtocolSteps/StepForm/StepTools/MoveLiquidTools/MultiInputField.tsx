@@ -23,10 +23,10 @@ export interface StepInputFieldProps {
 }
 interface MultiInputFieldProps {
   name: string
-  tab: 'aspirate' | 'dispense'
   tooltipContent: string
   propsForFields: FieldPropsByName
   fields: StepInputFieldProps[]
+  prefix: 'aspirate' | 'dispense' | 'aspirate_retract' | 'dispense_retract'
   isWellPosition?: boolean | null
   labwareId?: string | null
 }
@@ -34,10 +34,10 @@ interface MultiInputFieldProps {
 export function MultiInputField(props: MultiInputFieldProps): JSX.Element {
   const {
     name,
-    tab,
     tooltipContent,
     isWellPosition,
     fields,
+    prefix,
     propsForFields,
     labwareId,
   } = props
@@ -82,14 +82,14 @@ export function MultiInputField(props: MultiInputFieldProps): JSX.Element {
               errorToShow={errorToShow}
             />
           ))}
-          {isWellPosition != null && (
+          {(isWellPosition ?? false) && (
             <PositionField
               padding="0"
-              prefix={tab}
+              prefix={prefix}
               propsForFields={propsForFields}
-              zField={`${tab}_mmFromBottom`}
-              xField={`${tab}_x_position`}
-              yField={`${tab}_y_position`}
+              zField={`${prefix}_mmFromBottom`}
+              xField={`${prefix}_x_position`}
+              yField={`${prefix}_y_position`}
               labwareId={labwareId}
             />
           )}

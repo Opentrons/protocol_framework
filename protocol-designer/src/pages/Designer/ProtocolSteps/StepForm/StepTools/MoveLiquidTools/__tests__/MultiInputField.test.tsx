@@ -19,8 +19,8 @@ describe('MultiInputField', () => {
   beforeEach(() => {
     props = {
       name: 'Submerge',
-      tab: 'aspirate',
       tooltipContent: 'some tooltip content',
+      prefix: 'aspirate',
       fields: [
         {
           fieldTitle: 'submerge speed',

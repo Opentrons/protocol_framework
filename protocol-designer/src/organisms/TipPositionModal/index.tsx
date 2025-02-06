@@ -43,7 +43,12 @@ interface TipPositionModalProps {
   wellXWidthMm: number
   wellYWidthMm: number
   isIndeterminate?: boolean
-  prefix: 'aspirate' | 'dispense' | 'mix'
+  prefix:
+    | 'aspirate'
+    | 'dispense'
+    | 'mix'
+    | 'aspirate_retract'
+    | 'dispense_retract'
 }
 
 export function TipPositionModal(
@@ -231,13 +236,15 @@ export function TipPositionModal(
       parseInt(yValue) < PERCENT_RANGE_TO_SHOW_WARNING * yMinWidth)
   const isZValueAtBottom = zValue != null && zValue === '0'
 
+  const prefixTitle = prefix.includes('retract') ? 'retract' : prefix
+
   return createPortal(
     <Modal
       marginLeft="0"
       type="info"
       width="37.125rem"
       closeOnOutsideClick
-      title={t('shared:tip_position', { prefix })}
+      title={t('shared:tip_position', { prefixTitle })}
       onClose={handleCancel}
       footer={
         <Flex

@@ -147,7 +147,7 @@
   "tip_position_dispense_delay_mmFromBottom": "Edit dispense delay position",
   "tip_position_dispense_touchTip_mmFromTop": "Edit dispense touch tip position",
   "tip_position_mix_touchTip_mmFromTop": "Edit touch tip position",
-  "tip_position": "Edit {{prefix}} tip position",
+  "tip_position": "Edit {{prefixTitle}} tip position",
   "trashBin": "Trash Bin",
   "updated_protocol_designer": "We've updated Protocol Designer!",
   "user_settings": "User Settings",

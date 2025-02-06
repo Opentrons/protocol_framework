@@ -27,7 +27,12 @@ import type {
 import type { PositionSpecs } from '../../../../../organisms'
 import type { FieldPropsByName } from '../types'
 interface PositionFieldProps {
-  prefix: 'aspirate' | 'dispense' | 'mix'
+  prefix:
+    | 'aspirate'
+    | 'dispense'
+    | 'mix'
+    | 'aspirate_retract'
+    | 'dispense_retract'
   propsForFields: FieldPropsByName
   zField: TipZOffsetFields
   xField?: TipXOffsetFields
@@ -46,6 +51,7 @@ export function PositionField(props: PositionFieldProps): JSX.Element {
     prefix,
     padding = `0 ${SPACING.spacing16}`,
   } = props
+  console.log(propsForFields)
   const {
     name: zName,
     value: rawZValue,

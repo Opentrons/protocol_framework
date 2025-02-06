@@ -350,19 +350,19 @@ export function MoveLiquidTools(props: StepFormProps): JSX.Element {
           <Divider marginY="0" />
           <MultiInputField
             name={t('submerge')}
-            tab={tab}
             tooltipContent={t(`tooltip:step_fields.defaults.${tab}_submerge`)}
             propsForFields={propsForFields}
             fields={getFields('submerge')}
+            prefix={tab}
           />
           <Divider marginY="0" />
           <MultiInputField
             name={t('retract')}
-            tab={tab}
             tooltipContent={t(`tooltip:step_fields.defaults.${tab}_retract`)}
             propsForFields={propsForFields}
             fields={getFields('retract')}
             isWellPosition={true}
+            prefix={`${tab}_retract`}
             labwareId={
               formData[
                 getLabwareFieldForPositioningField(
