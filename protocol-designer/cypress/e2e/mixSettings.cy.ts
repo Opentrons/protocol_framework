@@ -49,14 +49,18 @@ describe('Redesigned Mixing Steps - Happy Path', () => {
       MixActions.AspMixTipPos,
       MixVerifications.AspMixTipPos,
       MixActions.Delay,
-      // MixActions.Save,
-      // MixActions.Back,
-      // MixActions.Dispense,
-      // MixVerifications.PartTwoDisp,
-      // MixActions.DispenseFlowRate,
-      // MixActions.Delay,
-      // MixActions.Blowout,
+      MixActions.Dispense,
+      MixVerifications.PartTwoDisp,
+      MixActions.DispenseFlowRate,
+      MixActions.Delay,
+      MixActions.BlowoutLocation,
+      MixActions.BlowoutFlowRate,
+      MixActions.BlowoutPosFromTop,
+      MixActions.Save,
+      MixVerifications.Blowout,
       // MixActions.TouchTip,
+      //MixActions.TouchTipPos,
+      // MixActions.Rename,
       
     ]
     runSteps(steps)
@@ -66,8 +70,10 @@ describe('Redesigned Mixing Steps - Happy Path', () => {
 /*
 To Add:
 MixActions.TipPosSideImageMove,
-MixActions.Rename,
 MixActions.TipPosTopImageMove,
 MixVerification.TipPosCollisionCheck,
 MixActions.FlowRateWarning, **for asp and disp
+
+To Change:
+Need to refactor labware set up to have different labware on deck for better well selection coverage
 */
