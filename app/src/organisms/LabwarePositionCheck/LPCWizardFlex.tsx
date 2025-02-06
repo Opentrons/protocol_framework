@@ -13,9 +13,9 @@ import {
   DetachProbe,
   LPCComplete,
 } from '/app/organisms/LabwarePositionCheck/steps'
-import { RobotMotionLoader } from './RobotMotionLoader'
-import { LPCWizardHeader } from './LPCWizardHeader'
+import { LPCRobotInMotion } from './LPCRobotInMotion'
 import { LPCErrorModal } from './LPCErrorModal'
+import { LPCProbeNotAttached } from './LPCProbeNotAttached'
 import {
   useLPCCommands,
   useLPCInitialState,
@@ -32,7 +32,6 @@ import { getIsOnDevice } from '/app/redux/config'
 import type { LPCFlowsProps } from '/app/organisms/LabwarePositionCheck/LPCFlows'
 import type { LPCWizardContentProps } from '/app/organisms/LabwarePositionCheck/types'
 import type { LPCStep } from '/app/redux/protocol-runs'
-import { ProbeNotAttached } from '/app/organisms/PipetteWizardFlows/ProbeNotAttached'
 
 export interface LPCWizardFlexProps extends Omit<LPCFlowsProps, 'robotType'> {}
 
@@ -76,12 +75,11 @@ function LPCWizardFlexComponent(props: LPCWizardContentProps): JSX.Element {
 
   return isOnDevice ? (
     <>
-      <LPCWizardHeader {...props} />
       <LPCWizardContent {...props} />
     </>
   ) : (
     createPortal(
-      <ModalShell width="47rem" header={<LPCWizardHeader {...props} />}>
+      <ModalShell width="47rem">
         <LPCWizardContent {...props} />
       </ModalShell>,
       getTopPortalEl()
@@ -92,30 +90,22 @@ function LPCWizardFlexComponent(props: LPCWizardContentProps): JSX.Element {
 function LPCWizardContent(props: LPCWizardContentProps): JSX.Element {
   const { t } = useTranslation('shared')
   const currentStep = useSelector(selectCurrentStep(props.runId))
-  const isOnDevice = useSelector(getIsOnDevice)
-  const {
-    isRobotMoving,
-    errorMessage,
-    unableToDetect,
-    setShowUnableToDetect,
-  } = props.commandUtils
+  const { isRobotMoving, errorMessage, unableToDetect } = props.commandUtils
 
   // Handle special cases that are shared by multiple steps first.
   if (isRobotMoving) {
-    return <RobotMotionLoader header={t('stand_back_robot_is_in_motion')} />
+    return (
+      <LPCRobotInMotion
+        header={t('stand_back_robot_is_in_motion')}
+        {...props}
+      />
+    )
   }
   if (errorMessage != null) {
     return <LPCErrorModal {...props} />
   }
   if (unableToDetect) {
-    // TODO(jh, 02-05-25): EXEC-1190.
-    return (
-      <ProbeNotAttached
-        handleOnClick={() => null}
-        setShowUnableToDetect={setShowUnableToDetect}
-        isOnDevice={isOnDevice}
-      />
-    )
+    return <LPCProbeNotAttached {...props} />
   }
   if (currentStep == null) {
     console.error('LPC store not properly initialized.')

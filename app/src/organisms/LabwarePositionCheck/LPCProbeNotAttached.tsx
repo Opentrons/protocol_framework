@@ -1,22 +1,26 @@
 import { useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
 
+import { ProbeNotAttached } from '/app/organisms/PipetteWizardFlows/ProbeNotAttached'
+import { getIsOnDevice } from '/app/redux/config'
 import { LPCContentContainer } from '/app/organisms/LabwarePositionCheck/LPCContentContainer'
 import { LPC_STEP, selectActivePipette } from '/app/redux/protocol-runs'
 
 import type { LPCWizardContentProps } from '/app/organisms/LabwarePositionCheck/types'
 
-export function AttachProbe(props: LPCWizardContentProps): JSX.Element {
+// TODO(jh, 02-05-25): EXEC-1190.
+export function LPCProbeNotAttached(props: LPCWizardContentProps): JSX.Element {
+  const { t } = useTranslation('labware_position_check')
   const { commandUtils, proceedStep, runId } = props
   const {
+    setShowUnableToDetect,
     toggleRobotMoving,
     handleValidMoveToMaintenancePosition,
     handleProbeAttachment,
   } = commandUtils
-  const { t } = useTranslation('labware_position_check')
+  const isOnDevice = useSelector(getIsOnDevice)
   const pipette = useSelector(selectActivePipette(runId))
 
-  // TOME TODO: The onClicks are duped. Consolidate them.
   const handleAttachProbeCheck = (): void => {
     void toggleRobotMoving(true)
       .then(() => handleProbeAttachment(pipette, proceedStep))
@@ -39,8 +43,8 @@ export function AttachProbe(props: LPCWizardContentProps): JSX.Element {
     <LPCContentContainer
       {...props}
       header={t('labware_position_check_title')}
+      buttonText={t('try_again')}
       onClickButton={handleAttachProbeCheck}
-      buttonText={t('continue')}
       secondaryButtonProps={{
         buttonText: t('exit'),
         buttonCategory: 'rounded',
@@ -48,7 +52,11 @@ export function AttachProbe(props: LPCWizardContentProps): JSX.Element {
         onClick: handleNavToDetachProbe,
       }}
     >
-      <div>PLACEHOLDER ATTACH PROBE</div>
+      <ProbeNotAttached
+        handleOnClick={() => null}
+        setShowUnableToDetect={setShowUnableToDetect}
+        isOnDevice={isOnDevice}
+      />
     </LPCContentContainer>
   )
 }
