@@ -16,7 +16,7 @@ from opentrons.protocol_api.module_contexts import (
 )
 
 metadata = {
-    "protocolName": "MiSeq Library Preparation Protocol - No column pick up",
+    "protocolName": "MiSeq Library Preparation Protocol",
     "author": "Anurag Kanase <anurag.kanase@opentrons.com>",
     "description": "Two-step PCR protocol for Illumina MiSeq library prep.",
 }
@@ -30,6 +30,11 @@ def add_parameters(parameters: ParameterContext) -> None:
     helpers.create_dot_bottom_parameter(parameters)
     helpers.create_deactivate_modules_parameter(parameters)
     helpers.create_disposable_lid_parameter(parameters)
+    parameters.add_bool(
+        variable_name = "perform_column_tip_pickup",
+        display_name = "Perform Column Tip Pickup",
+        default = True
+    )
 
 
 def run(protocol: ProtocolContext) -> None:
@@ -38,9 +43,10 @@ def run(protocol: ProtocolContext) -> None:
     dot_bottom = protocol.params.dot_bottom  # type: ignore[attr-defined]
     deactivate_modules_bool = protocol.params.deactivate_modules  # type: ignore[attr-defined]
     disposable_lid = protocol.params.disposable_lid  # type: ignore[attr-defined]
+    perform_column_tip_pick_up = protocol.params.perform_column_tip_pickup # type: ignore[attr-defined]
     if disposable_lid:
         lids = helpers.load_disposable_lids(
-            protocol=protocol, num_of_lids=2, deck_slot=["A2"], deck_riser=False
+            protocol=protocol, num_of_lids=3, deck_slot=["A2"], deck_riser=False
         )
 
     def transfer(
@@ -177,16 +183,15 @@ def run(protocol: ProtocolContext) -> None:
     thermocycler.set_block_temperature(8)
 
     column_tips = partial_tiprack.rows()[0][::-1]
-    print(column_tips)
-
-    # Step 3: Dispense PCR1 master mix (avoiding multidispense to maintian accuracy)
-    # column()
-    # protocol.comment("Dispensing PCR1 master mix")
-    # p96.pick_up_tip(column_tips.pop(0))
-    # for col in range(12):
-    #     print(col)
-    #     transfer(p96, 7.5, pcr_mm1, pcr1_plate.rows()[0][col])
-    # p96.drop_tip()
+    if perform_column_tip_pick_up:
+        #Step 3: Dispense PCR1 master mix (avoiding multidispense to maintian accuracy)
+        column()
+        protocol.comment("Dispensing PCR1 master mix")
+        p96.pick_up_tip(column_tips.pop(0))
+        for col in range(12):
+            print(col)
+            transfer(p96, 7.5, pcr_mm1, pcr1_plate.rows()[0][col])
+        p96.drop_tip()
 
     # Step 4: Transfer DNA samples
     all()
@@ -250,11 +255,12 @@ def run(protocol: ProtocolContext) -> None:
     protocol.move_labware(pcr2_plate, thermocycler, use_gripper=True)
     # Step 9: Dispense PCR2 master mix
     protocol.comment("Dispensing PCR2 master mix")
-    # column()
-    # p96.pick_up_tip(column_tips.pop(0))
-    # for col in range(12):
-    #     transfer(p96, 6, pcr_mm2, pcr2_plate.rows()[0][col])
-    # p96.drop_tip()
+    if perform_column_tip_pick_up:
+        column()
+        p96.pick_up_tip(column_tips.pop(0))
+        for col in range(12):
+            transfer(p96, 6, pcr_mm2, pcr2_plate.rows()[0][col])
+        p96.drop_tip()
 
     protocol.comment("Rearranging Deck for Dilutions")
     heater_shaker.open_labware_latch()
@@ -333,7 +339,7 @@ def run(protocol: ProtocolContext) -> None:
     p96.pick_up_tip(tiprack_1["A1"])
     for well_name in ["A1", "A2", "B1", "B2"]:
         transfer(p96, 15, pcr2_dilution_plate["A1"], eppendorf_384[well_name])
-    p96.drop_tip()
+    p96.return_tip()
 
     # Final steps
     protocol.comment("Protocol complete through PCR2 dilution")
