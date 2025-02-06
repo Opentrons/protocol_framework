@@ -36,8 +36,8 @@ from opentrons.protocol_engine.execution import (
     PipettingHandler,
 )
 from opentrons.hardware_control import HardwareControlAPI
-import json
-from opentrons_shared_data import load_shared_data
+
+from opentrons_shared_data.labware import load_definition
 
 
 @pytest.fixture
@@ -45,11 +45,7 @@ def evotips_definition() -> LabwareDefinition:
     """A fixturee of the evotips definition."""
     # TODO (chb 2025-01-29): When we migrate all labware to v3 we can clean this up
     return LabwareDefinition.model_validate(
-        json.loads(
-            load_shared_data(
-                "labware/definitions/3/evotips_opentrons_96_labware/1.json"
-            )
-        )
+        load_definition("evotips_opentrons_96_labware", 1)
     )
 
 
