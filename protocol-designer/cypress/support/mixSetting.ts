@@ -39,7 +39,8 @@ export enum MixVerifications {
   WellSelectPopout = 'Verify labware image and available wells',
   AspWellOrder = 'Verify pop out for well order during aspirate',
   AspMixTipPos = 'Verify pop out for mix tip position durin aspirate',
-  Blowout = 'Verify blow out position and pop out'
+  Blowout = 'Verify blow out position and pop out',
+  TouchTip = 'Verify touch tip settings',
   // FlowRateRangeWarning = 'Verify warning appears when outside flow rate parameters',
   // TipPosCollisionCheck = 'Verify banner warning appears when mix tip position is in contact with well wall'
 }
@@ -107,7 +108,10 @@ export enum MixContent {
   DestinationWell = 'Destination Well',
   BlowoutFlowRate = 'Blowout position from top',
   EditBlowoutPos = 'Edit blowout position',
-  BlowoutPosDescrip = 'Change where in the well the robot performs the blowout.'
+  BlowoutPosDescrip = 'Change where in the well the robot performs the blowout.',
+  EditTouchTipPos = 'Edit touch tip position',
+  TouchTipDescrip = 'Change from where in the well the robot performs the touch tip.',
+  TouchTipPos = 'Touch tip position from bottom',
 }
 
 export enum MixLocators {
@@ -139,7 +143,8 @@ export enum MixLocators {
   BlowoutLtnDropdown = '[class="Svg-sc-1lpozsw-0 Icon___StyledSvg-sc-1gt4gyz-0 csSXbR cJpxat"]',
   BlowoutFlowRate = '[name="blowout_flowRate"]',
   BlowoutPos = '[id="TipPositionField_blowout_z_offset"]',
-  BlowoutZPosition = '[data-testid="TipPositionModal_custom_input"]'
+  BlowoutZPosition = '[data-testid="TipPositionModal_custom_input"]',
+  PosFromBottom = '[id="TipPositionField_mix_touchTip_mmFromBottom"]',
 }
 
 
@@ -232,9 +237,19 @@ export const executeMixAction = (action: MixActions | UniversalActions): void =>
       cy.get(MixLocators.BlowoutZPosition).type('{selectAll}, {backspace}, -3')
       cy.contains(MixContent.Cancel).should('exist').should('be.visible')
       break
-    // case MixActions.TouchTip:
-    //   cy.get(MixLocators.Checkbox).should('exist').should('be.visible').eq(0).click()
-    //   break
+    case MixActions.TouchTip:
+      cy.get(MixLocators.Checkbox).should('exist').should('be.visible').eq(0).click()
+      cy.get(MixLocators.PosFromBottom).should('have.prop', "value")
+      cy.get(MixLocators.PosFromBottom).click()
+      cy.contains(MixContent.EditTouchTipPos).should('exist').should('be.visible')
+      cy.contains(MixContent.TouchTipDescrip).should('exist').should('be.visible')
+      cy.contains(MixContent.Zposition).should('exist').should('be.visible')
+      cy.get(MixLocators.BlowoutZPosition).should('have.prop', "value")
+      cy.get(MixLocators.BlowoutZPosition).type('{selectAll}, {backspace}, 2')
+      cy.get(MixLocators.ResetToDefault).click()
+      cy.get(MixLocators.BlowoutZPosition).type('{selectAll}, {backspace}, 7')
+      cy.contains(MixContent.Cancel).should('exist').should('be.visible')
+      break
     // case MixActions.TouchTipPos:
     // very similar to the aspmixtippos actions
     //   break
@@ -249,9 +264,9 @@ export const executeMixAction = (action: MixActions | UniversalActions): void =>
       break
 
     /*
-    To Add:
     case MixAction.Rename:
       break
+    To Add:
     case MixActions.TipPosSideImageMove:
       cy.get(MixLocators.SideViewTipPos).should('have.css','transform', '0px')
       break
@@ -360,11 +375,12 @@ export const executeVerifyMixStep = (verification: MixVerifications): void => {
       cy.contains(MixContent.BlowoutPos).should('exist').should('be.visible')
       cy.get(MixLocators.BlowoutPos).should('have.prop', "value")
       break
-    /*
-    To Add:
-    case MixVerifications.TipPosCollisionCheck:
+    case MixVerifications.TouchTip:
+      cy.contains(MixContent.TouchTip).should('exist').should('be.visible')
+      cy.contains(MixContent.TouchTipPos).should('exist').should('be.visible')
+      cy.get(MixLocators.PosFromBottom).should('have.prop', "value")
       break
-    */
+
     default:
       throw new Error(
         `Unrecognized verification: ${verification as MixVerifications}`

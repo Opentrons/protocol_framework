@@ -58,8 +58,9 @@ describe('Redesigned Mixing Steps - Happy Path', () => {
       MixActions.BlowoutPosFromTop,
       MixActions.Save,
       MixVerifications.Blowout,
-      // MixActions.TouchTip,
-      //MixActions.TouchTipPos,
+      MixActions.TouchTip,
+      MixActions.Save,
+      MixVerifications.TouchTip,
       // MixActions.Rename,
       
     ]
@@ -71,7 +72,6 @@ describe('Redesigned Mixing Steps - Happy Path', () => {
 To Add:
 MixActions.TipPosSideImageMove,
 MixActions.TipPosTopImageMove,
-MixVerification.TipPosCollisionCheck,
 MixActions.FlowRateWarning, **for asp and disp
 
 To Change:
