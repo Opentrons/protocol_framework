@@ -120,12 +120,16 @@ class Well:
         """Whether this well contains an unused tip.
 
         From API v2.2 on:
+
         - Returns ``False`` if:
-            - the well has no tip present or
-            - the well has a tip that's been used by the protocol previously.
+
+          - the well has no tip present, or
+          - the well has a tip that's been used by the protocol previously
+
         - Returns ``True`` if the well has an unused tip.
 
         Before API v2.2:
+
         - Returns ``True`` as long as the well has a tip, even if it is used.
 
         Always ``False`` if the parent labware isn't a tip rack.
