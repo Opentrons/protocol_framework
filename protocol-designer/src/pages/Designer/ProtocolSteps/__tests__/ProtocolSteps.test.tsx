@@ -115,6 +115,6 @@ describe('ProtocolSteps', () => {
 
   it('renders the current step name', () => {
     render()
-    screen.getByText('Custom pause')
+    screen.getByText('Custom Pause')
   })
 })

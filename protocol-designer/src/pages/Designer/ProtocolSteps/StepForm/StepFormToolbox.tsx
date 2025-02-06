@@ -248,7 +248,7 @@ export function StepFormToolbox(props: StepFormToolboxProps): JSX.Element {
           numErrors,
           stepTypeDisplayName: i18n.format(
             t(`stepType.${formData.stepType}`),
-            'capitalize'
+            'titleCase'
           ),
           t,
         })
