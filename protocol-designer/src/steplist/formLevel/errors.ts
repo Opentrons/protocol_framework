@@ -559,7 +559,7 @@ export const targetTemperatureRequired = (
   fields: HydratedFormData
 ): FormError | null => {
   const { setTemperature, targetTemperature } = fields
-  return setTemperature && !targetTemperature
+  return JSON.parse(String(setTemperature ?? false)) && !targetTemperature
     ? TARGET_TEMPERATURE_REQUIRED
     : null
 }
