@@ -25,6 +25,10 @@
         "form": [],
         "timeline": []
       },
+      "dismissedWarnings": {
+        "form": [],
+        "timeline": []
+      },
       "ingredients": {
         "0": {
           "displayName": "Water",
@@ -36,6 +40,86 @@
       },
       "ingredLocations": {
         "1e610d40-75c7-11ea-b42f-4b64e50f43e5:opentrons/nest_96_wellplate_100ul_pcr_full_skirt/1": {
+          "A1": {
+            "0": {
+              "volume": 100
+            }
+          },
+          "B1": {
+            "0": {
+              "volume": 100
+            }
+          },
+          "C1": {
+            "0": {
+              "volume": 100
+            }
+          },
+          "D1": {
+            "0": {
+              "volume": 100
+            }
+          },
+          "E1": {
+            "0": {
+              "volume": 100
+            }
+          },
+          "F1": {
+            "0": {
+              "volume": 100
+            }
+          },
+          "G1": {
+            "0": {
+              "volume": 100
+            }
+          },
+          "H1": {
+            "0": {
+              "volume": 100
+            }
+          },
+          "A2": {
+            "0": {
+              "volume": 100
+            }
+          },
+          "B2": {
+            "0": {
+              "volume": 100
+            }
+          },
+          "C2": {
+            "0": {
+              "volume": 100
+            }
+          },
+          "D2": {
+            "0": {
+              "volume": 100
+            }
+          },
+          "E2": {
+            "0": {
+              "volume": 100
+            }
+          },
+          "F2": {
+            "0": {
+              "volume": 100
+            }
+          },
+          "G2": {
+            "0": {
+              "volume": 100
+            }
+          },
+          "H2": {
+            "0": {
+              "volume": 100
+            }
+          }
           "A1": {
             "0": {
               "volume": 100
@@ -1336,6 +1420,11 @@
         "y": 0,
         "z": 0
       }
+      "cornerOffsetFromSlot": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      }
     },
     "opentrons/nest_96_wellplate_100ul_pcr_full_skirt/1": {
       "ordering": [
@@ -2239,6 +2328,9 @@
           "metadata": {
             "wellBottomShape": "v"
           },
+          "metadata": {
+            "wellBottomShape": "v"
+          },
           "wells": [
             "A1",
             "B1",
@@ -2349,6 +2441,11 @@
       "namespace": "opentrons",
       "version": 1,
       "schemaVersion": 2,
+      "cornerOffsetFromSlot": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      }
       "cornerOffsetFromSlot": {
         "x": 0,
         "y": 0,
@@ -2647,8 +2744,18 @@
             "brandId": [],
             "links": []
           }
+          "brand": {
+            "brand": "generic",
+            "brandId": [],
+            "links": []
+          }
         }
       ],
+      "cornerOffsetFromSlot": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      }
       "cornerOffsetFromSlot": {
         "x": 0,
         "y": 0,
@@ -2683,6 +2790,9 @@
         "location": {
           "slotName": "1"
         },
+        "location": {
+          "slotName": "1"
+        },
         "moduleId": "0b419310-75c7-11ea-b42f-4b64e50f43e5:magneticModuleType"
       }
     },
@@ -2691,6 +2801,9 @@
       "commandType": "loadModule",
       "params": {
         "model": "temperatureModuleV2",
+        "location": {
+          "slotName": "3"
+        },
         "location": {
           "slotName": "3"
         },
@@ -2706,6 +2819,9 @@
         "loadName": "opentrons_96_tiprack_300ul",
         "namespace": "opentrons",
         "version": 1,
+        "location": {
+          "slotName": "2"
+        }
         "location": {
           "slotName": "2"
         }
@@ -2813,6 +2929,11 @@
             "x": 0,
             "y": 0
           }
+          "offset": {
+            "z": 1,
+            "x": 0,
+            "y": 0
+          }
         },
         "flowRate": 46.43
       }
@@ -2832,6 +2953,11 @@
             "x": 0,
             "y": 0
           }
+          "offset": {
+            "z": 0.5,
+            "x": 0,
+            "y": 0
+          }
         },
         "flowRate": 46.43
       }
@@ -2842,6 +2968,11 @@
       "params": {
         "pipetteId": "0b3f2210-75c7-11ea-b42f-4b64e50f43e5",
         "addressableAreaName": "fixedTrash",
+        "offset": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
         "offset": {
           "x": 0,
           "y": 0,
@@ -2881,6 +3012,11 @@
             "x": 0,
             "y": 0
           }
+          "offset": {
+            "z": 1,
+            "x": 0,
+            "y": 0
+          }
         },
         "flowRate": 46.43
       }
@@ -2900,6 +3036,11 @@
             "x": 0,
             "y": 0
           }
+          "offset": {
+            "z": 0.5,
+            "x": 0,
+            "y": 0
+          }
         },
         "flowRate": 46.43
       }
@@ -2910,6 +3051,11 @@
       "params": {
         "pipetteId": "0b3f2210-75c7-11ea-b42f-4b64e50f43e5",
         "addressableAreaName": "fixedTrash",
+        "offset": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
         "offset": {
           "x": 0,
           "y": 0,

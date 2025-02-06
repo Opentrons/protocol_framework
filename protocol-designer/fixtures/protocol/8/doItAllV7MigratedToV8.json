@@ -28,6 +28,10 @@
         "form": [],
         "timeline": []
       },
+      "dismissedWarnings": {
+        "form": [],
+        "timeline": []
+      },
       "ingredients": {
         "0": {
           "displayName": "Water",
@@ -86,8 +90,53 @@
               "volume": 100
             }
           }
+          "A1": {
+            "0": {
+              "volume": 100
+            }
+          },
+          "B1": {
+            "0": {
+              "volume": 100
+            }
+          },
+          "C1": {
+            "0": {
+              "volume": 100
+            }
+          },
+          "D1": {
+            "0": {
+              "volume": 100
+            }
+          },
+          "E1": {
+            "0": {
+              "volume": 100
+            }
+          },
+          "F1": {
+            "0": {
+              "volume": 100
+            }
+          },
+          "G1": {
+            "0": {
+              "volume": 100
+            }
+          },
+          "H1": {
+            "0": {
+              "volume": 100
+            }
+          }
         },
         "a793a135-06aa-4ed6-a1d3-c176c7810afa:opentrons/opentrons_24_aluminumblock_nest_1.5ml_snapcap/1": {
+          "A1": {
+            "1": {
+              "volume": 1000
+            }
+          }
           "A1": {
             "1": {
               "volume": 1000
@@ -471,6 +520,10 @@
         ["A11", "B11", "C11", "D11", "E11", "F11", "G11", "H11"],
         ["A12", "B12", "C12", "D12", "E12", "F12", "G12", "H12"]
       ],
+      "brand": {
+        "brand": "Opentrons",
+        "brandId": []
+      },
       "brand": {
         "brand": "Opentrons",
         "brandId": []
@@ -1474,7 +1527,17 @@
         "y": 0,
         "z": 0
       },
+      "cornerOffsetFromSlot": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
       "stackingOffsetWithLabware": {
+        "opentrons_flex_96_tiprack_adapter": {
+          "x": 0,
+          "y": 0,
+          "z": 121
+        }
         "opentrons_flex_96_tiprack_adapter": {
           "x": 0,
           "y": 0,
@@ -1484,6 +1547,10 @@
     },
     "opentrons/opentrons_96_flat_bottom_adapter/1": {
       "ordering": [],
+      "brand": {
+        "brand": "Opentrons",
+        "brandId": []
+      },
       "brand": {
         "brand": "Opentrons",
         "brandId": []
@@ -1499,7 +1566,18 @@
         "yDimension": 75,
         "zDimension": 7.9
       },
+      "dimensions": {
+        "xDimension": 111,
+        "yDimension": 75,
+        "zDimension": 7.9
+      },
       "wells": {},
+      "groups": [
+        {
+          "metadata": {},
+          "wells": []
+        }
+      ],
       "groups": [
         {
           "metadata": {},
@@ -1517,6 +1595,11 @@
       "version": 1,
       "schemaVersion": 2,
       "allowedRoles": ["adapter"],
+      "cornerOffsetFromSlot": {
+        "x": 8.5,
+        "y": 5.5,
+        "z": 0
+      }
       "cornerOffsetFromSlot": {
         "x": 8.5,
         "y": 5.5,
@@ -2427,6 +2510,9 @@
           "metadata": {
             "wellBottomShape": "v"
           },
+          "metadata": {
+            "wellBottomShape": "v"
+          },
           "wells": [
             "A1",
             "B1",
@@ -2542,7 +2628,22 @@
         "y": 0,
         "z": 0
       },
+      "cornerOffsetFromSlot": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
       "stackingOffsetWithLabware": {
+        "opentrons_96_pcr_adapter": {
+          "x": 0,
+          "y": 0,
+          "z": 10.2
+        },
+        "opentrons_96_well_aluminum_block": {
+          "x": 0,
+          "y": 0,
+          "z": 12.66
+        }
         "opentrons_96_pcr_adapter": {
           "x": 0,
           "y": 0,
@@ -2555,6 +2656,11 @@
         }
       },
       "stackingOffsetWithModule": {
+        "thermocyclerModuleV2": {
+          "x": 0,
+          "y": 0,
+          "z": 10.8
+        }
         "thermocyclerModuleV2": {
           "x": 0,
           "y": 0,
@@ -2857,6 +2963,11 @@
       "namespace": "opentrons",
       "version": 1,
       "schemaVersion": 2,
+      "cornerOffsetFromSlot": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      }
       "cornerOffsetFromSlot": {
         "x": 0,
         "y": 0,
@@ -3769,6 +3880,9 @@
           "metadata": {
             "wellBottomShape": "flat"
           },
+          "metadata": {
+            "wellBottomShape": "flat"
+          },
           "wells": [
             "A1",
             "B1",
@@ -3883,7 +3997,22 @@
         "y": 0,
         "z": 0
       },
+      "cornerOffsetFromSlot": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
       "stackingOffsetWithLabware": {
+        "opentrons_96_flat_bottom_adapter": {
+          "x": 0,
+          "y": 0,
+          "z": 6.7
+        },
+        "opentrons_aluminum_flat_bottom_plate": {
+          "x": 0,
+          "y": 0,
+          "z": 5.55
+        }
         "opentrons_96_flat_bottom_adapter": {
           "x": 0,
           "y": 0,
@@ -3938,6 +4067,9 @@
         "location": {
           "slotName": "D2"
         },
+        "location": {
+          "slotName": "D2"
+        },
         "moduleId": "1be16305-74e7-4bdb-9737-61ec726d2b44:magneticBlockType"
       }
     },
@@ -3946,6 +4078,9 @@
       "commandType": "loadModule",
       "params": {
         "model": "heaterShakerModuleV1",
+        "location": {
+          "slotName": "D1"
+        },
         "location": {
           "slotName": "D1"
         },
@@ -3960,6 +4095,9 @@
         "location": {
           "slotName": "D3"
         },
+        "location": {
+          "slotName": "D3"
+        },
         "moduleId": "ef44ad7f-0fd9-46d6-8bc0-c70785644cc8:temperatureModuleType"
       }
     },
@@ -3968,6 +4106,9 @@
       "commandType": "loadModule",
       "params": {
         "model": "thermocyclerModuleV2",
+        "location": {
+          "slotName": "B1"
+        },
         "location": {
           "slotName": "B1"
         },
@@ -3997,6 +4138,9 @@
         "loadName": "opentrons_flex_96_filtertiprack_50ul",
         "namespace": "opentrons",
         "version": 1,
+        "location": {
+          "slotName": "C1"
+        }
         "location": {
           "slotName": "C1"
         }
@@ -4050,6 +4194,9 @@
       "params": {
         "liquidId": "1",
         "labwareId": "a793a135-06aa-4ed6-a1d3-c176c7810afa:opentrons/opentrons_24_aluminumblock_nest_1.5ml_snapcap/1",
+        "volumeByWell": {
+          "A1": 1000
+        }
         "volumeByWell": {
           "A1": 1000
         }
@@ -4125,6 +4272,14 @@
             "holdSeconds": 120,
             "celsius": 10
           }
+          {
+            "holdSeconds": 60,
+            "celsius": 4
+          },
+          {
+            "holdSeconds": 120,
+            "celsius": 10
+          }
         ],
         "blockMaxVolumeUl": 10
       }
@@ -4174,6 +4329,11 @@
             "x": 0,
             "y": 0
           }
+          "offset": {
+            "z": 1,
+            "x": 0,
+            "y": 0
+          }
         },
         "flowRate": 478
       }
@@ -4193,6 +4353,11 @@
             "x": 0,
             "y": 0
           }
+          "offset": {
+            "z": 1,
+            "x": 0,
+            "y": 0
+          }
         },
         "flowRate": 478
       }
@@ -4203,6 +4368,11 @@
       "params": {
         "pipetteId": "2e7c6344-58ab-465c-b542-489883cb63fe",
         "addressableAreaName": "movableTrashA3",
+        "offset": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
         "offset": {
           "x": 0,
           "y": 0,
@@ -4242,6 +4412,11 @@
             "x": 0,
             "y": 0
           }
+          "offset": {
+            "z": 1,
+            "x": 0,
+            "y": 0
+          }
         },
         "flowRate": 478
       }
@@ -4261,6 +4436,11 @@
             "x": 0,
             "y": 0
           }
+          "offset": {
+            "z": 1,
+            "x": 0,
+            "y": 0
+          }
         },
         "flowRate": 478
       }
@@ -4271,6 +4451,11 @@
       "params": {
         "pipetteId": "2e7c6344-58ab-465c-b542-489883cb63fe",
         "addressableAreaName": "movableTrashA3",
+        "offset": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
         "offset": {
           "x": 0,
           "y": 0,
@@ -4310,6 +4495,11 @@
             "x": 0,
             "y": 0
           }
+          "offset": {
+            "z": 1,
+            "x": 0,
+            "y": 0
+          }
         },
         "flowRate": 478
       }
@@ -4329,6 +4519,11 @@
             "x": 0,
             "y": 0
           }
+          "offset": {
+            "z": 1,
+            "x": 0,
+            "y": 0
+          }
         },
         "flowRate": 478
       }
@@ -4339,6 +4534,11 @@
       "params": {
         "pipetteId": "2e7c6344-58ab-465c-b542-489883cb63fe",
         "addressableAreaName": "movableTrashA3",
+        "offset": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
         "offset": {
           "x": 0,
           "y": 0,
@@ -4378,6 +4578,11 @@
             "x": 0,
             "y": 0
           }
+          "offset": {
+            "z": 1,
+            "x": 0,
+            "y": 0
+          }
         },
         "flowRate": 478
       }
@@ -4397,6 +4602,11 @@
             "x": 0,
             "y": 0
           }
+          "offset": {
+            "z": 1,
+            "x": 0,
+            "y": 0
+          }
         },
         "flowRate": 478
       }
@@ -4407,6 +4617,11 @@
       "params": {
         "pipetteId": "2e7c6344-58ab-465c-b542-489883cb63fe",
         "addressableAreaName": "movableTrashA3",
+        "offset": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
         "offset": {
           "x": 0,
           "y": 0,
@@ -4446,6 +4661,11 @@
             "x": 0,
             "y": 0
           }
+          "offset": {
+            "z": 1,
+            "x": 0,
+            "y": 0
+          }
         },
         "flowRate": 478
       }
@@ -4465,6 +4685,11 @@
             "x": 0,
             "y": 0
           }
+          "offset": {
+            "z": 1,
+            "x": 0,
+            "y": 0
+          }
         },
         "flowRate": 478
       }
@@ -4475,6 +4700,11 @@
       "params": {
         "pipetteId": "2e7c6344-58ab-465c-b542-489883cb63fe",
         "addressableAreaName": "movableTrashA3",
+        "offset": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
         "offset": {
           "x": 0,
           "y": 0,
@@ -4514,6 +4744,11 @@
             "x": 0,
             "y": 0
           }
+          "offset": {
+            "z": 1,
+            "x": 0,
+            "y": 0
+          }
         },
         "flowRate": 478
       }
@@ -4533,6 +4768,11 @@
             "x": 0,
             "y": 0
           }
+          "offset": {
+            "z": 1,
+            "x": 0,
+            "y": 0
+          }
         },
         "flowRate": 478
       }
@@ -4543,6 +4783,11 @@
       "params": {
         "pipetteId": "2e7c6344-58ab-465c-b542-489883cb63fe",
         "addressableAreaName": "movableTrashA3",
+        "offset": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
         "offset": {
           "x": 0,
           "y": 0,
@@ -4582,6 +4827,11 @@
             "x": 0,
             "y": 0
           }
+          "offset": {
+            "z": 1,
+            "x": 0,
+            "y": 0
+          }
         },
         "flowRate": 478
       }
@@ -4601,6 +4851,11 @@
             "x": 0,
             "y": 0
           }
+          "offset": {
+            "z": 1,
+            "x": 0,
+            "y": 0
+          }
         },
         "flowRate": 478
       }
@@ -4611,6 +4866,11 @@
       "params": {
         "pipetteId": "2e7c6344-58ab-465c-b542-489883cb63fe",
         "addressableAreaName": "movableTrashA3",
+        "offset": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
         "offset": {
           "x": 0,
           "y": 0,
@@ -4650,6 +4910,11 @@
             "x": 0,
             "y": 0
           }
+          "offset": {
+            "z": 1,
+            "x": 0,
+            "y": 0
+          }
         },
         "flowRate": 478
       }
@@ -4669,6 +4934,11 @@
             "x": 0,
             "y": 0
           }
+          "offset": {
+            "z": 1,
+            "x": 0,
+            "y": 0
+          }
         },
         "flowRate": 478
       }
@@ -4679,6 +4949,11 @@
       "params": {
         "pipetteId": "2e7c6344-58ab-465c-b542-489883cb63fe",
         "addressableAreaName": "movableTrashA3",
+        "offset": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
         "offset": {
           "x": 0,
           "y": 0,
@@ -4718,6 +4993,11 @@
             "x": 0,
             "y": 0
           }
+          "offset": {
+            "z": 1,
+            "x": 0,
+            "y": 0
+          }
         },
         "flowRate": 478
       }
@@ -4737,6 +5017,11 @@
             "x": 0,
             "y": 0
           }
+          "offset": {
+            "z": 1,
+            "x": 0,
+            "y": 0
+          }
         },
         "flowRate": 478
       }
@@ -4747,6 +5032,11 @@
       "params": {
         "pipetteId": "2e7c6344-58ab-465c-b542-489883cb63fe",
         "addressableAreaName": "movableTrashA3",
+        "offset": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
         "offset": {
           "x": 0,
           "y": 0,
@@ -4786,6 +5076,11 @@
             "x": 0,
             "y": 0
           }
+          "offset": {
+            "z": 1,
+            "x": 0,
+            "y": 0
+          }
         },
         "flowRate": 478
       }
@@ -4805,6 +5100,11 @@
             "x": 0,
             "y": 0
           }
+          "offset": {
+            "z": 1,
+            "x": 0,
+            "y": 0
+          }
         },
         "flowRate": 478
       }
@@ -4815,6 +5115,11 @@
       "params": {
         "pipetteId": "2e7c6344-58ab-465c-b542-489883cb63fe",
         "addressableAreaName": "movableTrashA3",
+        "offset": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
         "offset": {
           "x": 0,
           "y": 0,
@@ -4854,6 +5159,11 @@
             "x": 0,
             "y": 0
           }
+          "offset": {
+            "z": 1,
+            "x": 0,
+            "y": 0
+          }
         },
         "flowRate": 478
       }
@@ -4873,6 +5183,11 @@
             "x": 0,
             "y": 0
           }
+          "offset": {
+            "z": 1,
+            "x": 0,
+            "y": 0
+          }
         },
         "flowRate": 478
       }
@@ -4883,6 +5198,11 @@
       "params": {
         "pipetteId": "2e7c6344-58ab-465c-b542-489883cb63fe",
         "addressableAreaName": "movableTrashA3",
+        "offset": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
         "offset": {
           "x": 0,
           "y": 0,
@@ -4922,6 +5242,11 @@
             "x": 0,
             "y": 0
           }
+          "offset": {
+            "z": 1,
+            "x": 0,
+            "y": 0
+          }
         },
         "flowRate": 478
       }
@@ -4941,6 +5266,11 @@
             "x": 0,
             "y": 0
           }
+          "offset": {
+            "z": 1,
+            "x": 0,
+            "y": 0
+          }
         },
         "flowRate": 478
       }
@@ -4951,6 +5281,11 @@
       "params": {
         "pipetteId": "2e7c6344-58ab-465c-b542-489883cb63fe",
         "addressableAreaName": "movableTrashA3",
+        "offset": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
         "offset": {
           "x": 0,
           "y": 0,
@@ -4990,6 +5325,11 @@
             "x": 0,
             "y": 0
           }
+          "offset": {
+            "z": 1,
+            "x": 0,
+            "y": 0
+          }
         },
         "flowRate": 478
       }
@@ -5009,6 +5349,11 @@
             "x": 0,
             "y": 0
           }
+          "offset": {
+            "z": 1,
+            "x": 0,
+            "y": 0
+          }
         },
         "flowRate": 478
       }
@@ -5019,6 +5364,11 @@
       "params": {
         "pipetteId": "2e7c6344-58ab-465c-b542-489883cb63fe",
         "addressableAreaName": "movableTrashA3",
+        "offset": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
         "offset": {
           "x": 0,
           "y": 0,
@@ -5058,6 +5408,11 @@
             "x": 0,
             "y": 0
           }
+          "offset": {
+            "z": 1,
+            "x": 0,
+            "y": 0
+          }
         },
         "flowRate": 478
       }
@@ -5077,6 +5432,11 @@
             "x": 0,
             "y": 0
           }
+          "offset": {
+            "z": 1,
+            "x": 0,
+            "y": 0
+          }
         },
         "flowRate": 478
       }
@@ -5087,6 +5447,11 @@
       "params": {
         "pipetteId": "2e7c6344-58ab-465c-b542-489883cb63fe",
         "addressableAreaName": "movableTrashA3",
+        "offset": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
         "offset": {
           "x": 0,
           "y": 0,
@@ -5126,6 +5491,11 @@
             "x": 0,
             "y": 0
           }
+          "offset": {
+            "z": 1,
+            "x": 0,
+            "y": 0
+          }
         },
         "flowRate": 478
       }
@@ -5145,6 +5515,11 @@
             "x": 0,
             "y": 0
           }
+          "offset": {
+            "z": 1,
+            "x": 0,
+            "y": 0
+          }
         },
         "flowRate": 478
       }
@@ -5155,6 +5530,11 @@
       "params": {
         "pipetteId": "2e7c6344-58ab-465c-b542-489883cb63fe",
         "addressableAreaName": "movableTrashA3",
+        "offset": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
         "offset": {
           "x": 0,
           "y": 0,
@@ -5194,6 +5574,11 @@
             "x": 0,
             "y": 0
           }
+          "offset": {
+            "z": 1,
+            "x": 0,
+            "y": 0
+          }
         },
         "flowRate": 478
       }
@@ -5213,6 +5598,11 @@
             "x": 0,
             "y": 0
           }
+          "offset": {
+            "z": 1,
+            "x": 0,
+            "y": 0
+          }
         },
         "flowRate": 478
       }
@@ -5223,6 +5613,11 @@
       "params": {
         "pipetteId": "2e7c6344-58ab-465c-b542-489883cb63fe",
         "addressableAreaName": "movableTrashA3",
+        "offset": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
         "offset": {
           "x": 0,
           "y": 0,
@@ -5270,6 +5665,11 @@
             "x": 0,
             "y": 0
           }
+          "offset": {
+            "z": 0.5,
+            "x": 0,
+            "y": 0
+          }
         },
         "flowRate": 35
       }
@@ -5284,6 +5684,11 @@
         "wellName": "A1",
         "wellLocation": {
           "origin": "bottom",
+          "offset": {
+            "z": 0.5,
+            "x": 0,
+            "y": 0
+          }
           "offset": {
             "z": 0.5,
             "x": 0,
@@ -5308,6 +5713,11 @@
             "x": 0,
             "y": 0
           }
+          "offset": {
+            "z": 0.5,
+            "x": 0,
+            "y": 0
+          }
         },
         "flowRate": 35
       }
@@ -5327,6 +5737,11 @@
             "x": 0,
             "y": 0
           }
+          "offset": {
+            "z": 0.5,
+            "x": 0,
+            "y": 0
+          }
         },
         "flowRate": 57
       }
@@ -5337,6 +5752,11 @@
       "params": {
         "pipetteId": "6d1e53c3-2db3-451b-ad60-3fe13781a193",
         "addressableAreaName": "movableTrashA3",
+        "offset": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
         "offset": {
           "x": 0,
           "y": 0,
@@ -5361,6 +5781,9 @@
         "newLocation": {
           "slotName": "B2"
         }
+        "newLocation": {
+          "slotName": "B2"
+        }
       }
     },
     {
@@ -5377,6 +5800,9 @@
       "params": {
         "labwareId": "fcba73e7-b88e-438e-963e-f8b9a5de0983:opentrons/nest_96_wellplate_100ul_pcr_full_skirt/2",
         "strategy": "usingGripper",
+        "newLocation": {
+          "slotName": "C3"
+        }
         "newLocation": {
           "slotName": "C3"
         }
@@ -5435,11 +5861,21 @@
       }
     },
     {
+      "commandType": "temperatureModule/deactivate",
+      "key": "90961514-df6e-4884-9eb7-cf8e03e0f6ae",
+      "params": {
+        "moduleId": "ef44ad7f-0fd9-46d6-8bc0-c70785644cc8:temperatureModuleType"
+      }
+    },
+    {
       "commandType": "moveLabware",
       "key": "2c067101-8353-4bfa-ad4b-869569ce4923",
       "params": {
         "labwareId": "239ceac8-23ec-4900-810a-70aeef880273:opentrons/nest_96_wellplate_200ul_flat/2",
         "strategy": "manualMoveWithPause",
+        "newLocation": {
+          "slotName": "C2"
+        }
         "newLocation": {
           "slotName": "C2"
         }

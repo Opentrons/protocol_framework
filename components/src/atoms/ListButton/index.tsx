@@ -23,8 +23,8 @@ const LISTBUTTON_PROPS_BY_TYPE: Record<
   { backgroundColor: string; hoverBackgroundColor: string }
 > = {
   noActive: {
-    backgroundColor: COLORS.grey30,
-    hoverBackgroundColor: COLORS.grey35,
+    backgroundColor: COLORS.grey20,
+    hoverBackgroundColor: COLORS.grey30,
   },
   connected: {
     backgroundColor: COLORS.green30,
@@ -60,6 +60,11 @@ export function ListButton(props: ListButtonProps): JSX.Element {
         ? COLORS.grey20
         : listButtonProps.hoverBackgroundColor};
     }
+
+    &:focus-visible {
+      outline: 2px solid ${COLORS.blue50};
+      outline-offset: 0.25rem;
+    }
   `
 
   return (
@@ -67,6 +72,7 @@ export function ListButton(props: ListButtonProps): JSX.Element {
       data-testid={`ListButton_${type}`}
       onClick={onClick}
       css={LIST_BUTTON_STYLE}
+      tabIndex={0}
       {...styleProps}
     >
       {children}

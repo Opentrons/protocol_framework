@@ -25,6 +25,10 @@
         "form": [],
         "timeline": []
       },
+      "dismissedWarnings": {
+        "form": [],
+        "timeline": []
+      },
       "ingredients": {},
       "ingredLocations": {},
       "savedStepForms": {
@@ -235,6 +239,10 @@
         ["A11", "B11", "C11", "D11", "E11", "F11", "G11", "H11"],
         ["A12", "B12", "C12", "D12", "E12", "F12", "G12", "H12"]
       ],
+      "brand": {
+        "brand": "Opentrons",
+        "brandId": []
+      },
       "brand": {
         "brand": "Opentrons",
         "brandId": []
@@ -1238,7 +1246,17 @@
         "y": 0,
         "z": 0
       },
+      "cornerOffsetFromSlot": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
       "stackingOffsetWithLabware": {
+        "opentrons_flex_96_tiprack_adapter": {
+          "x": 0,
+          "y": 0,
+          "z": 121
+        }
         "opentrons_flex_96_tiprack_adapter": {
           "x": 0,
           "y": 0,
@@ -1261,6 +1279,10 @@
         ["A11", "B11", "C11", "D11", "E11", "F11", "G11", "H11"],
         ["A12", "B12", "C12", "D12", "E12", "F12", "G12", "H12"]
       ],
+      "brand": {
+        "brand": "Opentrons",
+        "brandId": []
+      },
       "brand": {
         "brand": "Opentrons",
         "brandId": []
@@ -2147,6 +2169,9 @@
           "metadata": {
             "wellBottomShape": "v"
           },
+          "metadata": {
+            "wellBottomShape": "v"
+          },
           "wells": [
             "A1",
             "B1",
@@ -2263,8 +2288,23 @@
         "y": 0,
         "z": 0
       },
+      "cornerOffsetFromSlot": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
       "gripperOffsets": {
         "default": {
+          "pickUpOffset": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "dropOffset": {
+            "x": 0,
+            "y": 0,
+            "z": 1
+          }
           "pickUpOffset": {
             "x": 0,
             "y": 0,
@@ -2571,6 +2611,11 @@
       "namespace": "opentrons",
       "version": 1,
       "schemaVersion": 2,
+      "cornerOffsetFromSlot": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      }
       "cornerOffsetFromSlot": {
         "x": 0,
         "y": 0,
@@ -3481,6 +3526,9 @@
           "metadata": {
             "wellBottomShape": "v"
           },
+          "metadata": {
+            "wellBottomShape": "v"
+          },
           "wells": [
             "A1",
             "B1",
@@ -3596,7 +3644,22 @@
         "y": 0,
         "z": 0
       },
+      "cornerOffsetFromSlot": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
       "stackingOffsetWithLabware": {
+        "opentrons_96_pcr_adapter": {
+          "x": 0,
+          "y": 0,
+          "z": 10.2
+        },
+        "opentrons_96_well_aluminum_block": {
+          "x": 0,
+          "y": 0,
+          "z": 12.66
+        }
         "opentrons_96_pcr_adapter": {
           "x": 0,
           "y": 0,
@@ -3609,6 +3672,11 @@
         }
       },
       "stackingOffsetWithModule": {
+        "thermocyclerModuleV2": {
+          "x": 0,
+          "y": 0,
+          "z": 10.8
+        }
         "thermocyclerModuleV2": {
           "x": 0,
           "y": 0,
@@ -3638,6 +3706,9 @@
         "location": {
           "slotName": "D3"
         },
+        "location": {
+          "slotName": "D3"
+        },
         "moduleId": "d6966555-6c0e-45e0-8056-428d7c486401:temperatureModuleType"
       }
     },
@@ -3646,6 +3717,9 @@
       "commandType": "loadModule",
       "params": {
         "model": "temperatureModuleV2",
+        "location": {
+          "slotName": "C3"
+        },
         "location": {
           "slotName": "C3"
         },
@@ -3675,6 +3749,9 @@
         "loadName": "opentrons_flex_96_tiprack_50ul",
         "namespace": "opentrons",
         "version": 1,
+        "location": {
+          "slotName": "C2"
+        }
         "location": {
           "slotName": "C2"
         }
@@ -3740,6 +3817,11 @@
             "x": 2,
             "y": -2
           }
+          "offset": {
+            "z": 29,
+            "x": 2,
+            "y": -2
+          }
         },
         "flowRate": 35
       }
@@ -3754,6 +3836,11 @@
         "wellName": "B3",
         "wellLocation": {
           "origin": "bottom",
+          "offset": {
+            "z": 1,
+            "x": 0,
+            "y": 0
+          }
           "offset": {
             "z": 1,
             "x": 0,
@@ -3777,6 +3864,12 @@
             "z": -12
           }
         }
+        "wellLocation": {
+          "origin": "top",
+          "offset": {
+            "z": -12
+          }
+        }
       }
     },
     {
@@ -3785,6 +3878,11 @@
       "params": {
         "pipetteId": "21087f15-4c03-4587-8a2b-1ba0b5a501a0",
         "addressableAreaName": "movableTrashA3",
+        "offset": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
         "offset": {
           "x": 0,
           "y": 0,
@@ -3830,6 +3928,20 @@
       "params": {
         "moduleId": "b9c56153-9026-42d1-8113-949e15254571:temperatureModuleType",
         "celsius": 4
+      }
+    },
+    {
+      "commandType": "temperatureModule/deactivate",
+      "key": "385c6783-55de-4c96-878d-7aeb2585b37f",
+      "params": {
+        "moduleId": "d6966555-6c0e-45e0-8056-428d7c486401:temperatureModuleType"
+      }
+    },
+    {
+      "commandType": "temperatureModule/deactivate",
+      "key": "6c7a02c0-96e0-4dba-a763-78cd669a43f8",
+      "params": {
+        "moduleId": "b9c56153-9026-42d1-8113-949e15254571:temperatureModuleType"
       }
     }
   ],
