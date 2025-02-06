@@ -46,7 +46,7 @@ export const ThermocyclerModuleSlideout = (
   const moduleName = getModuleDisplayName(module.moduleModel)
   const modulePart = isSecondaryTemp ? 'Lid' : 'Block'
   const tempRanges = getTCTempRange(isSecondaryTemp)
-  const {reportModuleCommandStarted,
+  const {
     reportModuleCommandCompleted,
     reportModuleCommandError} = useModuleCommandAnalytics()
   const serialNumber = module.serialNumber
@@ -81,28 +81,55 @@ export const ThermocyclerModuleSlideout = (
           //  TODO(jr, 3/17/22): add volume, which will be provided by PD protocols
         },
       }
-      if (modulePart == 'Lid'){
-        reportModuleCommandStarted(module.moduleModel, 'set-thermocycler-lid-temperature', serialNumber, tempValue)
-      }
-      else if (modulePart == 'Block'){
-        reportModuleCommandStarted(module.moduleModel, 'set-thermocycler-block-temperature', serialNumber, tempValue)
-      }
       createLiveCommand({
         command: isSecondaryTemp ? saveLidCommand : saveBlockCommand,
-      }).catch((e: Error) => {
-        if (modulePart == 'Lid'){
-          reportModuleCommandError(module.moduleModel, 'set-thermocycler-lid-temperature', e.message,serialNumber, tempValue)
-        }
-        else if (modulePart == 'Block'){
-          reportModuleCommandError(module.moduleModel, 'set-thermocycler-block-temperature',e.message, serialNumber, tempValue)
-        }
-        console.error(
-          `error setting module status with command type ${
-            saveLidCommand.commandType ?? saveBlockCommand.commandType
-          }: ${e.message}`
-        )
-      })
+        })
+        .then((result) => {
+            if (modulePart === 'Lid') {
+                reportModuleCommandCompleted(
+                    module.moduleModel,
+                    'set-thermocycler-lid-temperature',
+                    { status: 'succeeded', data: result },
+                    serialNumber,
+                    tempValue
+                );
+            } else if (modulePart === 'Block') {
+                reportModuleCommandCompleted(
+                    module.moduleModel,
+                    'set-thermocycler-block-temperature',
+                    { status: 'succeeded', data: result },
+                    serialNumber,
+                    tempValue
+                );
+            }
+        })
+        .catch((e: Error) => {
+            if (modulePart === 'Lid') {
+                reportModuleCommandError(
+                    module.moduleModel,
+                    'set-thermocycler-lid-temperature',
+                    e.message,
+                    serialNumber,
+                    tempValue
+                );
+            } else if (modulePart === 'Block') {
+                reportModuleCommandError(
+                    module.moduleModel,
+                    'set-thermocycler-block-temperature',
+                    e.message,
+                    serialNumber,
+                    tempValue
+                );
+            }
+
+            console.error(
+                `error setting module status with command type ${
+                    isSecondaryTemp ? saveLidCommand.commandType : saveBlockCommand.commandType
+                }: ${e.message}`
+            );
+        });
     }
+    };
     setTempValue(null)
     onCloseClick()
   }

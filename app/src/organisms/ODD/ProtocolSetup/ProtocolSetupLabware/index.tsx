@@ -316,19 +316,16 @@ function LabwareLatch({
 
   const toggleLatch = (): void => {
     // Record latch toggle to analytics
-    const {reportModuleCommandStarted,
+    const {
           reportModuleCommandCompleted,
           reportModuleCommandError} = useModuleCommandAnalytics()
     const serialNumber = matchedHeaterShaker.serialNumber
-    reportModuleCommandStarted('heaterShaker', 'toggle-hs-latch', serialNumber, null)
-
       createLiveCommand({
       command: latchCommand,
       waitUntilComplete: true,
     })
-      .then(() => {
-        reportModuleCommandCompleted('heaterShaker', 'toggle-hs-latch', 'succeeded', serialNumber, null)
-
+      .then(result => {
+        reportModuleCommandCompleted('heatershaker', 'toggle-hs-latch', {status:'succeeded', data: result}, serialNumber, null)
         setIsRefetchingModules(true)
         refetchModules()
           .then(() => {
@@ -342,7 +339,7 @@ function LabwareLatch({
           })
       })
       .catch((e: Error) => {
-        reportModuleCommandError('heaterShaker', 'toggle-hs-latch', e.message, serialNumber, null)
+        reportModuleCommandError('heatershaker', 'toggle-hs-latch', e.message, serialNumber, null)
         console.error(
           `error setting module status with command type ${latchCommand.commandType}: ${e.message}`
         )

@@ -41,13 +41,12 @@ export const TemperatureModuleSlideout = (
   const name = getModuleDisplayName(module.moduleModel)
   const [temperatureValue, setTemperatureValue] = useState<number | null>(null)
   const handleSubmitTemperature = (): void => {
-  const {reportModuleCommandStarted,
+  const {
       reportModuleCommandCompleted,
       reportModuleCommandError} = useModuleCommandAnalytics()
   const serialNumber = module.serialNumber
 
     if (temperatureValue != null) {
-      reportModuleCommandStarted('temperatureModule', 'set-temperature-module-temperature', serialNumber, temperatureValue)
       const saveTempCommand: TemperatureModuleSetTargetTemperatureCreateCommand = {
         commandType: 'temperatureModule/setTargetTemperature',
         params: {
@@ -55,11 +54,10 @@ export const TemperatureModuleSlideout = (
           celsius: temperatureValue,
         },
       }
-      //Not sure if this should go heres
-      reportModuleCommandCompleted('temperatureModule', 'set-temperature-module-temperature', 'succeeded', serialNumber, temperatureValue)
       createLiveCommand({
         command: saveTempCommand,
-      }).catch((e: Error) => {
+      }).then(result=>reportModuleCommandCompleted('temperatureModule', 'set-temperature-module-temperature', {status:'succeeded', data: result}, serialNumber, temperatureValue)
+      ).catch((e: Error) => {
         reportModuleCommandError('temperatureModule', 'set-temperature-module-temperature', e.message, serialNumber, temperatureValue)
         console.error(
           `error setting module status with command type ${saveTempCommand.commandType}: ${e.message}`

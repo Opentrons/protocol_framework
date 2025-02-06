@@ -13,15 +13,11 @@ type commandType = 'toggle-hs-latch' |'toggle-tc-lid'| 'set-temperature-module-t
 type CommandResult = 'succeeded' | 'failed'
 
 export interface UseModuleCommandAnalyticsResult {
-    /* Report when a module command starts. */
-
-    // ASK: temperatureValue
-    reportModuleCommandStarted: (moduleType: string, action: commandType, serialNumber:string, temperature: number| null) => void
     /* Report when a module command completes. */
     reportModuleCommandCompleted: (
         moduleType: string,
         action: commandType,
-        result: CommandResult,
+        result: {status: CommandResult, data?: any},
         serialNumber: string,
         temperature: number | null
     ) => void
@@ -38,21 +34,6 @@ export interface UseModuleCommandAnalyticsResult {
 
 export function useModuleCommandAnalytics(): UseModuleCommandAnalyticsResult {
     const doTrackEvent = useTrackEvent()
-    const reportModuleCommandStarted = (
-        moduleType: string,
-        action: commandType,
-        serialNumber: string
-    ): void => {
-        doTrackEvent({
-            name: ANALYTICS_MODULE_COMMAND_STARTED,
-            properties: {
-                moduleType,
-                action,
-                serialNumber
-            },
-        })
-    }
-
     const reportModuleCommandCompleted = (
         moduleType: string,
         action: commandType,
@@ -91,7 +72,6 @@ export function useModuleCommandAnalytics(): UseModuleCommandAnalyticsResult {
         })
     }
     return {
-        reportModuleCommandStarted,
         reportModuleCommandCompleted,
         reportModuleCommandError,
     }

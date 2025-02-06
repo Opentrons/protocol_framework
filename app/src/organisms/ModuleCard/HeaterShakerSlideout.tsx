@@ -41,7 +41,7 @@ export const HeaterShakerSlideout = (
   const { createLiveCommand } = useCreateLiveCommandMutation()
   const moduleName = getModuleDisplayName(module.moduleModel)
   const modulePart = t('temperature')
-  const {reportModuleCommandStarted,
+  const {
     reportModuleCommandCompleted,
     reportModuleCommandError} = useModuleCommandAnalytics()
   const serialNumber = module.serialNumber
@@ -58,10 +58,9 @@ export const HeaterShakerSlideout = (
           celsius: hsValue,
         },
       }
-      reportModuleCommandStarted('heaterShaker', 'set-heatershaker-temperature', serialNumber, hsValue)
       createLiveCommand({
         command: setTempCommand,
-      }).catch((e: Error) => {
+      }).then((result)=> {reportModuleCommandCompleted('heaterShaker', 'set-heatershaker-temperature', {status: 'succeeded', data: result}, serialNumber, hsValue)}).catch((e: Error) => {
         reportModuleCommandError('heatershaker', 'set-heatershaker-temperature', serialNumber, e.message, hsValue)
         console.error(
           `error setting module status with command type ${setTempCommand.commandType}: ${e.message}`
