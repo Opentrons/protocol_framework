@@ -125,6 +125,10 @@ class WellCore(AbstractWellCore):
             well_location=WellLocation(origin=WellOrigin.CENTER),
         )
 
+    def get_meniscus(self) -> Point:
+        """Get the coordinate of the well's meniscus."""
+        return self.get_bottom(self.current_liquid_height())
+
     def load_liquid(
         self,
         liquid: Liquid,
