@@ -103,7 +103,7 @@ export function DeckSetupContainer(props: DeckSetupTabType): JSX.Element {
   const trash = Object.values(activeDeckSetup.additionalEquipmentOnDeck).find(
     ae => ae.name === 'trashBin'
   )
-  console.log(activeDeckSetup.modules)
+  console.log(activeDeckSetup)
   const wasteChuteFixtures = Object.values(
     activeDeckSetup.additionalEquipmentOnDeck
   ).filter(

@@ -100,6 +100,10 @@ const rootSelector = (state: BaseState): RootState => state.stepForms
 const labwareIngredRootSelector = (state: BaseState): LabwareIngredRootState =>
   state.labwareIngred
 
+const _getInitialDeckSetupStepFormRootState: (
+  arg: RootState
+) => FormData = rs => rs.savedStepForms[INITIAL_DECK_SETUP_STEP_ID]
+
 export const getPresavedStepForm = (state: BaseState): PresavedStepFormState =>
   rootSelector(state).presavedStepForm
 export const getCurrentFormIsPresaved: Selector<
@@ -181,8 +185,15 @@ export const _getPipetteEntitiesRootState: (
 ) => PipetteEntities = createSelector(
   rs => rs.pipetteInvariantProperties,
   labwareDefSelectors._getLabwareDefsByIdRootState,
-  denormalizePipetteEntities
+  _getInitialDeckSetupStepFormRootState,
+  (pipetteInvariantProperties, labwareDefs, initialDeckSetupStepForm) =>
+    denormalizePipetteEntities(
+      pipetteInvariantProperties,
+      labwareDefs,
+      initialDeckSetupStepForm.pipetteLocationUpdate
+    )
 )
+
 // Special version of `getAdditionalEquipmentEntities` selector for use in step-forms reducers
 export const _getAdditionalEquipmentEntitiesRootState: (
   arg: RootState
@@ -207,10 +218,6 @@ export const getAdditionalEquipment: Selector<
   BaseState,
   NormalizedAdditionalEquipmentById
 > = createSelector(rootSelector, _getAdditionalEquipmentRootState)
-
-const _getInitialDeckSetupStepFormRootState: (
-  arg: RootState
-) => FormData = rs => rs.savedStepForms[INITIAL_DECK_SETUP_STEP_ID]
 
 export const getInitialDeckSetupStepForm: Selector<
   BaseState,

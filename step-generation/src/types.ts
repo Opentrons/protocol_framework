@@ -160,6 +160,7 @@ export type NormalizedPipette = NormalizedPipetteById[keyof NormalizedPipetteByI
 export type PipetteEntity = NormalizedPipette & {
   tiprackLabwareDef: LabwareDefinition2[]
   spec: PipetteV2Specs
+  pythonName: string
 }
 
 export interface PipetteEntities {

@@ -1,4 +1,5 @@
 import uuidv1 from 'uuid/v4'
+import snakeCase from 'lodash/snakeCase'
 import {
   makeWellSetHelpers,
   getDeckDefFromRobotType,
@@ -7,13 +8,6 @@ import {
   isAddressableAreaStandardSlot,
   INTERACTIVE_WELL_DATA_ATTRIBUTE,
   LOW_VOLUME_PIPETTES,
-  HEATERSHAKER_MODULE_TYPE,
-  MAGNETIC_BLOCK_TYPE,
-  MAGNETIC_MODULE_TYPE,
-  TEMPERATURE_MODULE_TYPE,
-  THERMOCYCLER_MODULE_TYPE,
-  ABSORBANCE_READER_TYPE,
-  FLEX_STACKER_MODULE_TYPE,
 } from '@opentrons/shared-data'
 import type {
   AdditionalEquipmentEntity,
@@ -289,27 +283,8 @@ export const removeOpentronsPhrases = (input: string): string => {
 }
 
 const getModuleShortnameForPython = (type: ModuleType): string => {
-  switch (type) {
-    case HEATERSHAKER_MODULE_TYPE:
-      return 'heater_shaker'
-    case MAGNETIC_BLOCK_TYPE:
-      return 'magnetic_block'
-    case MAGNETIC_MODULE_TYPE:
-      return 'magnetic_module'
-    case TEMPERATURE_MODULE_TYPE:
-      return 'temperature'
-    case THERMOCYCLER_MODULE_TYPE:
-      return 'thermocycler'
-    case ABSORBANCE_READER_TYPE:
-      return 'absorbance_plate'
-    case FLEX_STACKER_MODULE_TYPE:
-      return 'flex_stacker'
-    default:
-      console.warn(
-        `unsupported module ${type}, need to add to getModuleShortnameForPython`
-      )
-      return 'unsupportedModule'
-  }
+  const shortName = type.split('Type')[0]
+  return snakeCase(shortName)
 }
 
 export const getModulePythonName = (
