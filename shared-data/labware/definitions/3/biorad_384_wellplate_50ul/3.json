@@ -450,9 +450,9 @@
     ]
   },
   "metadata": {
-    "displayName": "Bio-Rad 384 Well Plate 50 \u00b5L",
+    "displayName": "Bio-Rad 384 Well Plate 50 µL",
     "displayCategory": "wellPlate",
-    "displayVolumeUnits": "\u00b5L",
+    "displayVolumeUnits": "µL",
     "tags": []
   },
   "dimensions": {
