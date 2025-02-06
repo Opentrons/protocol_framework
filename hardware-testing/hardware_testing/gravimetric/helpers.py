@@ -31,7 +31,7 @@ from opentrons.config.types import OT3Config, RobotConfig
 from hardware_testing.opentrons_api import helpers_ot3
 from opentrons.protocol_api import ProtocolContext, InstrumentContext
 from .workarounds import get_sync_hw_api, http_get_all_labware_offsets
-from hardware_testing.opentrons_api.helpers_ot3 import clear_pipette_ul_per_mm
+from hardware_testing.opentrons_api.helpers_ot3 import clear_pipette_ul_per_mm, stop_server_ot3
 
 import opentrons.protocol_engine.execution.pipetting as PE_pipetting
 from opentrons.protocol_engine.notes import CommandNoteAdder
@@ -106,7 +106,7 @@ def get_api_context(
             stall_detection_enable=stall_detection_enable,
         )
 
-    if not is_simulating and include_labware_offsets:
+    if include_labware_offsets and not is_simulating:
         ui.print_info(
             "Starting opentrons-robot-server, so we can http GET labware offsets"
         )
@@ -118,6 +118,8 @@ def get_api_context(
         #     print(f"\t\t{offset.vector}")
     else:
         offsets = []
+        if not is_simulating:
+            stop_server_ot3()
 
     # gather the custom labware (for simulation)
     extra_labware = {}
