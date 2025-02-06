@@ -7,6 +7,7 @@ import {
   DeckInfoLabel,
   DropdownMenu,
   Flex,
+  LINE_CLAMP_TEXT_STYLE,
   ListItem,
   SPACING,
   StyledText,
@@ -122,7 +123,10 @@ export function DropdownStepFormField(
                 flexDirection={DIRECTION_COLUMN}
                 gridGap={options[0].subtext != null ? SPACING.spacing4 : '0'}
               >
-                <StyledText desktopStyle="captionRegular">
+                <StyledText
+                  desktopStyle="captionRegular"
+                  css={LINE_CLAMP_TEXT_STYLE(3)}
+                >
                   {options[0].name}
                 </StyledText>
                 <StyledText
