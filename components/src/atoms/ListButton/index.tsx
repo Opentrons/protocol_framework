@@ -60,6 +60,11 @@ export function ListButton(props: ListButtonProps): JSX.Element {
         ? COLORS.grey20
         : listButtonProps.hoverBackgroundColor};
     }
+
+    &:focus-visible {
+      outline: 2px solid ${COLORS.blue50};
+      outline-offset: 0.25rem;
+    }
   `
 
   return (
@@ -67,6 +72,7 @@ export function ListButton(props: ListButtonProps): JSX.Element {
       data-testid={`ListButton_${type}`}
       onClick={onClick}
       css={LIST_BUTTON_STYLE}
+      tabIndex={0}
       {...styleProps}
     >
       {children}
