@@ -300,6 +300,7 @@ const _getInitialDeckSetup = (
               type: MAGNETIC_MODULE_TYPE,
               slot,
               moduleState: MAGNETIC_MODULE_INITIAL_STATE,
+              pythonName: moduleEntity.pythonName,
             }
           case TEMPERATURE_MODULE_TYPE:
             return {
@@ -308,6 +309,7 @@ const _getInitialDeckSetup = (
               type: TEMPERATURE_MODULE_TYPE,
               slot,
               moduleState: TEMPERATURE_MODULE_INITIAL_STATE,
+              pythonName: moduleEntity.pythonName,
             }
           case THERMOCYCLER_MODULE_TYPE:
             return {
@@ -316,6 +318,7 @@ const _getInitialDeckSetup = (
               type: THERMOCYCLER_MODULE_TYPE,
               slot,
               moduleState: THERMOCYCLER_MODULE_INITIAL_STATE,
+              pythonName: moduleEntity.pythonName,
             }
           case HEATERSHAKER_MODULE_TYPE:
             return {
@@ -324,6 +327,7 @@ const _getInitialDeckSetup = (
               type: HEATERSHAKER_MODULE_TYPE,
               slot,
               moduleState: HEATERSHAKER_MODULE_INITIAL_STATE,
+              pythonName: moduleEntity.pythonName,
             }
           case MAGNETIC_BLOCK_TYPE:
             return {
@@ -332,6 +336,7 @@ const _getInitialDeckSetup = (
               type: MAGNETIC_BLOCK_TYPE,
               slot,
               moduleState: MAGNETIC_BLOCK_INITIAL_STATE,
+              pythonName: moduleEntity.pythonName,
             }
           case ABSORBANCE_READER_TYPE:
             return {
@@ -340,6 +345,7 @@ const _getInitialDeckSetup = (
               type: ABSORBANCE_READER_TYPE,
               slot,
               moduleState: ABSORBANCE_READER_INITIAL_STATE,
+              pythonName: moduleEntity.pythonName,
             }
         }
       }

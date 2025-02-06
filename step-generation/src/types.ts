@@ -106,6 +106,7 @@ export interface ModuleEntity {
   id: string
   type: ModuleType
   model: ModuleModel
+  pythonName: string
 }
 
 export interface ModuleEntities {

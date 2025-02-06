@@ -26,6 +26,7 @@ import {
 import { PRESAVED_STEP_ID } from '../../steplist/types'
 import { getLabwareIsCompatible } from '../../utils/labwareModuleCompatibility'
 import { getLabwareOnModule } from '../../ui/modules/utils'
+import { getModulePythonName } from '../../utils'
 import { nestedCombineReducers } from './nestedCombineReducers'
 import {
   _getPipetteEntitiesRootState,
@@ -95,7 +96,7 @@ import type {
   SelectMultipleStepsAction,
 } from '../../ui/steps/actions/types'
 import type { Action } from '../../types'
-import type { ModuleLoadInfo, PipetteLoadInfo } from '../../file-types'
+import type { PipetteLoadInfo } from '../../file-types'
 import type {
   AdditionalEquipmentLocationUpdate,
   LocationUpdate,
@@ -105,6 +106,7 @@ import type {
   NormalizedLabwareById,
   ModuleEntities,
 } from '../types'
+import { EditMultipleModulesAction } from '../../modules'
 
 type FormState = FormData | null
 const unsavedFormInitialState = null
@@ -702,22 +704,17 @@ export const savedStepForms = (
       const moduleId = action.payload.id
       return mapValues(savedStepForms, (form: FormData) => {
         if (form.stepType === 'manualIntervention') {
-          // TODO: Ian 2019-10-28 when we have multiple manualIntervention steps, this should look backwards
-          // for the latest location update for the module, not just the initial deck setup
-          const _deletedModuleSlot =
+          const deletedModuleSlot =
             savedStepForms[INITIAL_DECK_SETUP_STEP_ID].moduleLocationUpdate[
               moduleId
             ]
-          // handle special spanning slots that are intended for modules & not for labware
-          const labwareFallbackSlot =
-            _deletedModuleSlot === SPAN7_8_10_11_SLOT ? '7' : _deletedModuleSlot
           return {
             ...form,
             moduleLocationUpdate: omit(form.moduleLocationUpdate, moduleId),
             labwareLocationUpdate: mapValues(
               form.labwareLocationUpdate,
               labwareSlot =>
-                labwareSlot === moduleId ? labwareFallbackSlot : labwareSlot
+                labwareSlot === moduleId ? deletedModuleSlot : labwareSlot
             ),
           }
         } else if (
@@ -1021,14 +1018,23 @@ export const moduleInvariantProperties: Reducer<
     CREATE_MODULE: (
       state: ModuleEntities,
       action: CreateModuleAction
-    ): ModuleEntities => ({
-      ...state,
-      [action.payload.id]: {
-        id: action.payload.id,
-        type: action.payload.type,
-        model: action.payload.model,
-      },
-    }),
+    ): ModuleEntities => {
+      const type = action.payload.type
+      const typeCount = Object.values(state).filter(
+        module => module.type === type
+      ).length
+
+      return {
+        ...state,
+        [action.payload.id]: {
+          id: action.payload.id,
+          type,
+          model: action.payload.model,
+          pythonName: getModulePythonName(type, typeCount + 1),
+        },
+      }
+    },
+
     EDIT_MODULE: (
       state: ModuleEntities,
       action: EditModuleAction
@@ -1043,6 +1049,15 @@ export const moduleInvariantProperties: Reducer<
       state: ModuleEntities,
       action: DeleteModuleAction
     ): ModuleEntities => omit(state, action.payload.id),
+    EDIT_MULTIPLE_MODULES_PYTHON_NAME: (
+      state: ModuleEntities,
+      action: EditMultipleModulesAction
+    ): ModuleEntities => {
+      return {
+        ...state,
+        ...action.payload,
+      }
+    },
     LOAD_FILE: (
       state: ModuleEntities,
       action: LoadFileAction
@@ -1050,15 +1065,19 @@ export const moduleInvariantProperties: Reducer<
       const { file } = action.payload
       const metadata = getPDMetadata(file)
       const modules: ModuleEntities = Object.entries(metadata.modules).reduce(
-        (
-          acc: ModuleEntities,
-          [id, moduleLoadInfo]: [string, ModuleLoadInfo]
-        ) => {
+        (acc: ModuleEntities, [id, moduleLoadInfo]) => {
+          const moduleType = getModuleType(moduleLoadInfo.model)
+          const typeCount = Object.values(acc).filter(
+            module => module.type === moduleType
+          ).length
+
           acc[id] = {
-            id: id,
-            type: getModuleType(moduleLoadInfo.model),
+            id,
+            type: moduleType,
             model: moduleLoadInfo.model,
+            pythonName: getModulePythonName(moduleType, typeCount + 1),
           }
+
           return acc
         },
         {}
