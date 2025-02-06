@@ -521,7 +521,19 @@ describe('_getSavedMultiSelectFieldValues', () => {
           isIndeterminate: false,
           value: undefined,
         },
+        aspirate_retract_mmFromBottom: {
+          isIndeterminate: false,
+          value: undefined,
+        },
         aspirate_retract_speed: {
+          isIndeterminate: false,
+          value: undefined,
+        },
+        aspirate_retract_x_position: {
+          isIndeterminate: false,
+          value: undefined,
+        },
+        aspirate_retract_y_position: {
           isIndeterminate: false,
           value: undefined,
         },
@@ -598,7 +610,19 @@ describe('_getSavedMultiSelectFieldValues', () => {
           isIndeterminate: false,
           value: undefined,
         },
+        dispense_retract_mmFromBottom: {
+          isIndeterminate: false,
+          value: undefined,
+        },
         dispense_retract_speed: {
+          isIndeterminate: false,
+          value: undefined,
+        },
+        dispense_retract_x_position: {
+          isIndeterminate: false,
+          value: undefined,
+        },
+        dispense_retract_y_position: {
           isIndeterminate: false,
           value: undefined,
         },
@@ -817,7 +841,19 @@ describe('_getSavedMultiSelectFieldValues', () => {
           isIndeterminate: false,
           value: undefined,
         },
+        aspirate_retract_mmFromBottom: {
+          isIndeterminate: false,
+          value: undefined,
+        },
         aspirate_retract_speed: {
+          isIndeterminate: false,
+          value: undefined,
+        },
+        aspirate_retract_x_position: {
+          isIndeterminate: false,
+          value: undefined,
+        },
+        aspirate_retract_y_position: {
           isIndeterminate: false,
           value: undefined,
         },
@@ -877,7 +913,19 @@ describe('_getSavedMultiSelectFieldValues', () => {
           isIndeterminate: false,
           value: undefined,
         },
+        dispense_retract_mmFromBottom: {
+          isIndeterminate: false,
+          value: undefined,
+        },
         dispense_retract_speed: {
+          isIndeterminate: false,
+          value: undefined,
+        },
+        dispense_retract_x_position: {
+          isIndeterminate: false,
+          value: undefined,
+        },
+        dispense_retract_y_position: {
           isIndeterminate: false,
           value: undefined,
         },

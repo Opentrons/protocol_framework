@@ -39,6 +39,7 @@ interface PositionFieldProps {
   yField?: TipYOffsetFields
   labwareId?: string | null
   padding?: string
+  isWhiteButton?: boolean | null
 }
 
 export function PositionField(props: PositionFieldProps): JSX.Element {
@@ -50,6 +51,7 @@ export function PositionField(props: PositionFieldProps): JSX.Element {
     yField,
     prefix,
     padding = `0 ${SPACING.spacing16}`,
+    isWhiteButton,
   } = props
   console.log(propsForFields)
   const {
@@ -186,7 +188,7 @@ export function PositionField(props: PositionFieldProps): JSX.Element {
           </StyledText>
           <ListButton
             padding={SPACING.spacing12}
-            type="noActive"
+            type={isWhiteButton ?? false ? 'onColor' : 'noActive'}
             onClick={() => {
               handleOpen(true)
             }}
