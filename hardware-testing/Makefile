@@ -234,7 +234,7 @@ push-no-restart-ot3: sdist Pipfile.lock
 	$(call push-python-sdist,$(host),$(ssh_key),$(ssh_opts),$(sdist_file),/opt/opentrons-robot-server,"hardware_testing",,,$(version_file))
 
 .PHONY: push-ot3
-push-ot3: push-no-restart-ot3 push-plot-webpage-ot3 push-description-ot3 push-labware-ot3 push-notebooks-ot3
+push-ot3: push-no-restart-ot3 push-plot-webpage-ot3 push-description-ot3 push-labware-ot3
 
 .PHONE: open-dev-app
 open-dev-app:
