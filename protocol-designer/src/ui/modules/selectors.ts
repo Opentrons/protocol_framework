@@ -8,6 +8,7 @@ import {
   TEMPERATURE_MODULE_TYPE,
 } from '@opentrons/shared-data'
 import { getInitialDeckSetup } from '../../step-forms/selectors'
+import { getDeckSetupForActiveItem } from '../../top-selectors/labware-locations'
 import { getLabwareNicknamesById } from '../labware/selectors'
 import {
   getModuleLabwareOptions,
@@ -19,7 +20,6 @@ import {
 import type { DropdownOption } from '@opentrons/components'
 import type { Selector } from '../../types'
 import type { LabwareNamesByModuleId } from '../../steplist/types'
-import { getDeckSetupForActiveItem } from '../../top-selectors/labware-locations'
 
 export const getLabwareNamesByModuleId: Selector<LabwareNamesByModuleId> = createSelector(
   getInitialDeckSetup,
