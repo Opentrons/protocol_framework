@@ -38,6 +38,7 @@ from opentrons_shared_data.pipette.types import PIPETTE_API_NAMES_MAP
 from opentrons_shared_data.errors.exceptions import (
     UnsupportedHardwareCommand,
 )
+from opentrons_shared_data.liquid_classes.liquid_class_definition import BlowoutLocation
 from opentrons.protocol_api._nozzle_layout import NozzleLayout
 from . import overlap_versions, pipette_movement_conflict
 from . import transfer_components_executor as tx_comps_executor
@@ -1246,6 +1247,16 @@ class InstrumentCore(AbstractInstrument[WellCore, LabwareCore]):
         transfer_props = liquid_class.get_for(
             pipette=self.get_pipette_name(), tip_rack=tiprack_uri_for_transfer_props
         )
+        blow_out_properties = transfer_props.dispense.retract.blowout
+        if (
+            blow_out_properties.enabled
+            and blow_out_properties.location == BlowoutLocation.SOURCE
+        ):
+            raise RuntimeError(
+                'Blowout location "source" incompatible with consolidate liquid.'
+                ' Please choose "destination" or "trash".'
+            )
+
         # TODO: use the ID returned by load_liquid_class in command annotations
         self.load_liquid_class(
             name=liquid_class.name,
