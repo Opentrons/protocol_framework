@@ -290,7 +290,7 @@ class EquipmentHandler:
     async def load_magnetic_block(
         self,
         model: ModuleModel,
-        location: Union[DeckSlotLocation, AddressableAreaLocation],
+        location: AddressableAreaLocation,
         module_id: Optional[str],
     ) -> LoadedModuleData:
         """Ensure the required magnetic block is attached.
@@ -321,7 +321,7 @@ class EquipmentHandler:
     async def load_module(
         self,
         model: ModuleModel,
-        location: DeckSlotLocation,
+        location: AddressableAreaLocation,
         module_id: Optional[str],
     ) -> LoadedModuleData:
         """Ensure the required module is attached.
@@ -355,9 +355,10 @@ class EquipmentHandler:
                 for hw_mod in self._hardware_api.attached_modules
             ]
 
-            serial_number_at_locaiton = self._state_store.geometry._addressable_areas.get_fixture_serial_from_deck_configuration_by_deck_slot(
-                location.slotName
+            serial_number_at_locaiton = self._state_store.geometry._addressable_areas.get_fixture_serial_from_deck_configuration_by_addressable_area(
+                addressable_area_name=location.addressableAreaName
             )
+
             attached_module = self._state_store.modules.select_hardware_module_to_load(
                 model=model,
                 location=location,

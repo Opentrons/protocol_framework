@@ -11,6 +11,8 @@ from .command import AbstractCommandImpl, BaseCommand, BaseCommandCreate, Succes
 from ..errors.error_occurrence import ErrorOccurrence
 from ..types import (
     DeckSlotLocation,
+    StagingSlotLocation,
+    AddressableAreaLocation,
     ModuleType,
     ModuleModel,
     ModuleDefinition,
@@ -133,37 +135,39 @@ class LoadModuleImplementation(
         # addressable areas and deck configurations the same way between OT-2 and Flex.
         # Can this be simplified?
         if self._state_view.config.robot_type == "OT-2 Standard":
-            self._state_view.addressable_areas.raise_if_area_not_in_deck_configuration(
-                params.location.slotName.id
+            addressable_area_module_reference = params.location.slotName.id
+            state_update.set_addressable_area_used(
+                addressable_area_name=addressable_area_module_reference
             )
         else:
-            addressable_area_provided_by_module = (
+            addressable_area_module_reference = (
                 self._state_view.modules.ensure_and_convert_module_fixture_location(
                     deck_slot=params.location.slotName,
                     model=params.model,
                 )
             )
-            self._state_view.addressable_areas.raise_if_area_not_in_deck_configuration(
-                addressable_area_provided_by_module
-            )
-
-        verified_location = self._state_view.geometry.ensure_location_not_occupied(
-            params.location
+        self._state_view.addressable_areas.raise_if_area_not_in_deck_configuration(
+            addressable_area_module_reference
         )
-        state_update.set_addressable_area_used(
-            addressable_area_name=params.location.slotName.id
+
+        self._state_view.geometry.ensure_location_not_occupied(
+            params.location, addressable_area_module_reference
         )
 
         if params.model == ModuleModel.MAGNETIC_BLOCK_V1:
             loaded_module = await self._equipment.load_magnetic_block(
                 model=params.model,
-                location=verified_location,
+                location=AddressableAreaLocation(
+                    addressableAreaName=addressable_area_module_reference
+                ),
                 module_id=params.moduleId,
             )
         else:
             loaded_module = await self._equipment.load_module(
                 model=params.model,
-                location=verified_location,
+                location=AddressableAreaLocation(
+                    addressableAreaName=addressable_area_module_reference
+                ),
                 module_id=params.moduleId,
             )
 

@@ -1044,12 +1044,30 @@
           "8ChannelWasteChute",
           "96ChannelWasteChute",
           "gripperWasteChute",
-          "flexStackerModuleV1D4",
-          "D3"
+          "flexStackerModuleV1D4"
         ]
       },
       "fixtureGroup": {},
       "height": 124.5
+    },
+    {
+      "id": "flexStackerModuleV1WithMagneticBlockV1",
+      "expectOpentronsModuleSerialNumber": true,
+      "mayMountTo": [
+        "cutoutD3",
+        "cutoutC3",
+        "cutoutB3",
+        "cutoutA3"
+      ],
+      "displayName": "Flex Stacker With Magnetic Block",
+      "providesAddressableAreas": {
+        "cutoutD3": ["flexStackerModuleV1D4", "magneticBlockV1D3"],
+        "cutoutC3": ["flexStackerModuleV1C4", "magneticBlockV1C3"],
+        "cutoutB3": ["flexStackerModuleV1B4", "magneticBlockV1B3"],
+        "cutoutA3": ["flexStackerModuleV1A4", "magneticBlockV1A3"]
+      },
+      "fixtureGroup": {},
+      "height": 38.0
     },
     {
       "id": "thermocyclerModuleV2Rear",
