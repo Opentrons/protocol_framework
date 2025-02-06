@@ -125,7 +125,7 @@ export function DropdownStepFormField(
               >
                 <StyledText
                   desktopStyle="captionRegular"
-                  css={LINE_CLAMP_TEXT_STYLE(3)}
+                  css={LINE_CLAMP_TEXT_STYLE(3, true)}
                 >
                   {options[0].name}
                 </StyledText>
