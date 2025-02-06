@@ -1256,7 +1256,7 @@
           "x": 0,
           "y": 0,
           "z": 121
-        }
+        },
         "opentrons_flex_96_tiprack_adapter": {
           "x": 0,
           "y": 0,
@@ -2304,7 +2304,7 @@
             "x": 0,
             "y": 0,
             "z": 1
-          }
+          },
           "pickUpOffset": {
             "x": 0,
             "y": 0,
@@ -2615,7 +2615,7 @@
         "x": 0,
         "y": 0,
         "z": 0
-      }
+      },
       "cornerOffsetFromSlot": {
         "x": 0,
         "y": 0,
@@ -3659,7 +3659,7 @@
           "x": 0,
           "y": 0,
           "z": 12.66
-        }
+        },
         "opentrons_96_pcr_adapter": {
           "x": 0,
           "y": 0,
@@ -3676,7 +3676,7 @@
           "x": 0,
           "y": 0,
           "z": 10.8
-        }
+        },
         "thermocyclerModuleV2": {
           "x": 0,
           "y": 0,
@@ -3751,7 +3751,7 @@
         "version": 1,
         "location": {
           "slotName": "C2"
-        }
+        },
         "location": {
           "slotName": "C2"
         }
@@ -3816,7 +3816,7 @@
             "z": 29,
             "x": 2,
             "y": -2
-          }
+          },
           "offset": {
             "z": 29,
             "x": 2,
@@ -3840,7 +3840,7 @@
             "z": 1,
             "x": 0,
             "y": 0
-          }
+          },
           "offset": {
             "z": 1,
             "x": 0,
@@ -3863,7 +3863,7 @@
           "offset": {
             "z": -12
           }
-        }
+        },
         "wellLocation": {
           "origin": "top",
           "offset": {
