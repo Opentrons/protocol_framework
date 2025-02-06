@@ -176,7 +176,7 @@ export const TEMP_MAX = 96
 export const TEMP_BLOCK_MAX = 99
 export const TEMP_LID_MIN = 37
 export const TEMP_LID_MAX = 110
-export const HS_TEMP_MIN = 37
+export const HS_TEMP_MIN = 20
 export const HS_TEMP_MAX = 95
 export const MICRO_LITERS = 'µL'
 
