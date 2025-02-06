@@ -26,7 +26,7 @@ import {
 import { PRESAVED_STEP_ID } from '../../steplist/types'
 import { getLabwareIsCompatible } from '../../utils/labwareModuleCompatibility'
 import { getLabwareOnModule } from '../../ui/modules/utils'
-import { getModulePythonName } from '../../utils'
+import { getLabwarePythonName, getModulePythonName } from '../../utils'
 import { nestedCombineReducers } from './nestedCombineReducers'
 import {
   _getPipetteEntitiesRootState,
@@ -83,6 +83,7 @@ import type {
   CreateContainerAction,
   DeleteContainerAction,
   DuplicateLabwareAction,
+  EditMultipleLabwareAction,
   RenameStepAction,
   SwapSlotContentsAction,
 } from '../../labware-ingred/actions'
@@ -946,6 +947,7 @@ export const batchEditFormChanges = (
     }
   }
 }
+
 const initialLabwareState: NormalizedLabwareById = {}
 // MIGRATION NOTE: copied from `containers` reducer. Slot + UI stuff stripped out.
 export const labwareInvariantProperties: Reducer<
@@ -959,10 +961,22 @@ export const labwareInvariantProperties: Reducer<
       state: NormalizedLabwareById,
       action: CreateContainerAction
     ) => {
+      const { payload } = action
+      const { labwareDefURI, id, displayCategory } = payload
+
+      const categoryLength = Object.values(state).filter(
+        labware => labware.displayCategory === displayCategory
+      ).length
+
       return {
         ...state,
-        [action.payload.id]: {
-          labwareDefURI: action.payload.labwareDefURI,
+        [id]: {
+          labwareDefURI,
+          displayCategory,
+          pythonName: `${getLabwarePythonName(
+            displayCategory,
+            categoryLength + 1
+          )}`,
         },
       }
     },
@@ -970,10 +984,22 @@ export const labwareInvariantProperties: Reducer<
       state: NormalizedLabwareById,
       action: DuplicateLabwareAction
     ) => {
+      const { payload } = action
+      const { duplicateLabwareId, templateLabwareId, displayCategory } = payload
+
+      const categoryLength = Object.values(state).filter(
+        labware => labware.displayCategory === displayCategory
+      ).length
+
       return {
         ...state,
-        [action.payload.duplicateLabwareId]: {
-          labwareDefURI: state[action.payload.templateLabwareId].labwareDefURI,
+        [duplicateLabwareId]: {
+          labwareDefURI: state[templateLabwareId].labwareDefURI,
+          displayCategory,
+          pythonName: `${getLabwarePythonName(
+            displayCategory,
+            categoryLength + 1
+          )}`,
         },
       }
     },
@@ -989,22 +1015,69 @@ export const labwareInvariantProperties: Reducer<
     ): NormalizedLabwareById => {
       const { file } = action.payload
       const metadata = getPDMetadata(file)
-      return { ...metadata.labware, ...state }
+      const labwareDefinitions = file.labwareDefinitions
+
+      const labware: NormalizedLabwareById = Object.entries(
+        metadata.labware
+      ).reduce((acc: NormalizedLabwareById, [id, labwareLoadInfo]) => {
+        const displayCategory =
+          labwareDefinitions[labwareLoadInfo.labwareDefURI]?.metadata
+            .displayCategory ?? 'other'
+        const displayCategoryCount = Object.values(acc).filter(
+          lw => lw.displayCategory === displayCategory
+        ).length
+
+        acc[id] = {
+          labwareDefURI: labwareLoadInfo.labwareDefURI,
+          pythonName: getLabwarePythonName(
+            displayCategory,
+            displayCategoryCount + 1
+          ),
+          displayCategory,
+        }
+
+        return acc
+      }, {})
+
+      return { ...labware, ...state }
+    },
+    EDIT_MULTIPLE_LABWARE_PYTHON_NAME: (
+      state: NormalizedLabwareById,
+      action: EditMultipleLabwareAction
+    ): NormalizedLabwareById => {
+      return {
+        ...state,
+        ...action.payload,
+      }
     },
     REPLACE_CUSTOM_LABWARE_DEF: (
       state: NormalizedLabwareById,
       action: ReplaceCustomLabwareDef
-    ): NormalizedLabwareById =>
-      mapValues(
+    ): NormalizedLabwareById => {
+      const { payload } = action
+      const { newDef, defURIToOverwrite } = payload
+      const displayCategory = newDef.metadata.displayCategory
+      const categoryLength = Object.values(state).filter(
+        labware => labware.displayCategory === displayCategory
+      ).length
+
+      const mappedLabware = mapValues(
         state,
         (prev: NormalizedLabware): NormalizedLabware =>
-          action.payload.defURIToOverwrite === prev.labwareDefURI
+          defURIToOverwrite === prev.labwareDefURI
             ? {
                 ...prev,
-                labwareDefURI: getLabwareDefURI(action.payload.newDef),
+                labwareDefURI: getLabwareDefURI(newDef),
+                pythonName: getLabwarePythonName(
+                  displayCategory,
+                  categoryLength + 1
+                ),
+                displayCategory,
               }
             : prev
-      ),
+      )
+      return mappedLabware
+    },
   },
   initialLabwareState
 )

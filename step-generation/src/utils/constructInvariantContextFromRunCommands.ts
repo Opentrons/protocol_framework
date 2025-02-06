@@ -31,6 +31,8 @@ export function constructInvariantContextFromRunCommands(
             id: result.labwareId,
             labwareDefURI: getLabwareDefURI(result.definition),
             def: result.definition,
+            //  ProtocolTimelineScrubber won't need access to pythonNames
+            pythonName: 'n/a',
           },
         }
         return {

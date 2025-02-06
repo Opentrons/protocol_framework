@@ -23,6 +23,8 @@ import type {
   RobotType,
   SupportedTip,
   ModuleType,
+  LabwareDefinition2,
+  LabwareDisplayCategory,
 } from '@opentrons/shared-data'
 import type { WellGroup } from '@opentrons/components'
 import type { BoundingRect, GenericRect } from '../collision-types'
@@ -292,4 +294,11 @@ export const getModulePythonName = (
   typeCount: number
 ): string => {
   return `${getModuleShortnameForPython(type)}_${typeCount}`
+}
+
+export const getLabwarePythonName = (
+  labwareDisplayCategory: LabwareDisplayCategory,
+  typeCount: number
+): string => {
+  return `${snakeCase(labwareDisplayCategory)}_${typeCount}`
 }

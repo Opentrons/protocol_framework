@@ -11,7 +11,6 @@ import type {
   LabwareLiquidState,
   LiquidEntities,
   LiquidEntity,
-  Ingredient,
 } from '@opentrons/step-generation'
 import type { LoadLabwareCreateCommand } from '@opentrons/shared-data'
 import type { Action, DeckSlot } from '../../types'

@@ -4,8 +4,12 @@ import { selectors } from '../selectors'
 import type { StepFieldName } from '../../form-types'
 import type { DeckSlot, ThunkAction } from '../../types'
 import type { Fixture, IngredInputs } from '../types'
-import type { CutoutId, ModuleModel } from '@opentrons/shared-data'
-import { LiquidEntities, LiquidEntity } from '@opentrons/step-generation'
+import type {
+  CutoutId,
+  LabwareDisplayCategory,
+  ModuleModel,
+} from '@opentrons/shared-data'
+import type { LiquidEntities, LiquidEntity } from '@opentrons/step-generation'
 
 // ===== Labware selector actions =====
 export interface OpenAddLabwareModalAction {
@@ -70,6 +74,7 @@ export interface CreateContainerAction {
   payload: CreateContainerArgs & {
     slot: DeckSlot
     id: string
+    displayCategory: LabwareDisplayCategory
   }
 }
 export interface DeleteContainerAction {
@@ -78,10 +83,6 @@ export interface DeleteContainerAction {
     labwareId: string
   }
 }
-// @ts-expect-error(sa, 2021-6-20): creatActions doesn't return exact actions
-export const deleteContainer: (payload: {
-  labwareId: string
-}) => DeleteContainerAction = createAction('DELETE_CONTAINER')
 // ===========
 export interface SwapSlotContentsAction {
   type: 'MOVE_DECK_ITEM'
@@ -109,6 +110,7 @@ export interface DuplicateLabwareAction {
     duplicateLabwareId: string
     duplicateLabwareNickname: string
     slot: DeckSlot
+    displayCategory: LabwareDisplayCategory
   }
 }
 

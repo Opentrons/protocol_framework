@@ -97,6 +97,7 @@ export interface LabwareEntity {
   id: string
   labwareDefURI: string
   def: LabwareDefinition2
+  pythonName: string
 }
 export interface LabwareEntities {
   [labwareId: string]: LabwareEntity
