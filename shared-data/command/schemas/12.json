@@ -67,7 +67,6 @@
         "correctionVolume": {
           "anyOf": [
             {
-              "minimum": 0.0,
               "type": "number"
             },
             {
@@ -176,7 +175,6 @@
         "correctionVolume": {
           "anyOf": [
             {
-              "minimum": 0.0,
               "type": "number"
             },
             {
@@ -215,7 +213,6 @@
         "correctionVolume": {
           "anyOf": [
             {
-              "minimum": 0.0,
               "type": "number"
             },
             {
@@ -413,7 +410,6 @@
         "correctionVolume": {
           "anyOf": [
             {
-              "minimum": 0.0,
               "type": "number"
             },
             {
@@ -1521,7 +1517,6 @@
         "correctionVolume": {
           "anyOf": [
             {
-              "minimum": 0.0,
               "type": "number"
             },
             {
@@ -1565,7 +1560,6 @@
         "correctionVolume": {
           "anyOf": [
             {
-              "minimum": 0.0,
               "type": "number"
             },
             {
@@ -1651,7 +1645,6 @@
         "correctionVolume": {
           "anyOf": [
             {
-              "minimum": 0.0,
               "type": "number"
             },
             {
@@ -1914,7 +1907,6 @@
         "correctionVolume": {
           "anyOf": [
             {
-              "minimum": 0.0,
               "type": "number"
             },
             {
