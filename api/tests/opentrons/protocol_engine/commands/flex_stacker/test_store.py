@@ -1,4 +1,5 @@
 """Test Flex Stacker store command implementation."""
+
 import pytest
 from decoy import Decoy
 from contextlib import nullcontext as does_not_raise
@@ -29,6 +30,9 @@ from opentrons.protocol_engine.types import (
     OFF_DECK_LOCATION,
     LoadedLabware,
     OverlapOffset,
+    OnModuleLocationSequenceComponent,
+    OnAddressableAreaLocationSequenceComponent,
+    NotOnDeckLocationSequenceComponent,
 )
 from opentrons.protocol_engine.errors import CannotPerformModuleAction
 from opentrons.types import DeckSlotName
@@ -100,6 +104,15 @@ async def test_store(
     decoy.when(
         equipment.get_module_hardware_api(FlexStackerId("flex-stacker-id"))
     ).then_return(fs_hardware)
+    decoy.when(state_view.geometry.get_location_sequence("labware-id")).then_return(
+        [
+            OnModuleLocationSequenceComponent(moduleId="flex-stacker-id"),
+            OnAddressableAreaLocationSequenceComponent(
+                addressableAreaName="flexStackerV1B4",
+                slotName=DeckSlotName.SLOT_B3,
+            ),
+        ]
+    )
 
     with expectation:
         result = await subject.execute(data)
@@ -107,7 +120,21 @@ async def test_store(
     if not in_static_mode:
         decoy.verify(await fs_hardware.store_labware(labware_height=4), times=1)
         assert result == SuccessData(
-            public=flex_stacker.StoreResult(),
+            public=flex_stacker.StoreResult(
+                originLocationSequence=[
+                    OnModuleLocationSequenceComponent(moduleId="flex-stacker-id"),
+                    OnAddressableAreaLocationSequenceComponent(
+                        addressableAreaName="flexStackerV1B4",
+                        slotName=DeckSlotName.SLOT_B3,
+                    ),
+                ],
+                eventualDestinationLocationSequence=[
+                    OnModuleLocationSequenceComponent(moduleId="flex-stacker-id"),
+                    NotOnDeckLocationSequenceComponent(
+                        logicalLocationName=OFF_DECK_LOCATION
+                    ),
+                ],
+            ),
             state_update=StateUpdate(
                 labware_location=LabwareLocationUpdate(
                     labware_id="labware-id",

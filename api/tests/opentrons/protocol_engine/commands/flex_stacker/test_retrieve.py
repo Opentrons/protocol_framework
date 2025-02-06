@@ -1,4 +1,5 @@
 """Test Flex Stacker retrieve command implementation."""
+
 import pytest
 from decoy import Decoy
 from contextlib import nullcontext as does_not_raise
@@ -28,6 +29,10 @@ from opentrons.protocol_engine.types import (
     ModuleLocation,
     LoadedLabware,
     OverlapOffset,
+    OnModuleLocationSequenceComponent,
+    OnAddressableAreaLocationSequenceComponent,
+    NotOnDeckLocationSequenceComponent,
+    OFF_DECK_LOCATION,
 )
 from opentrons.protocol_engine.errors import CannotPerformModuleAction
 from opentrons.types import DeckSlotName
@@ -95,6 +100,18 @@ async def test_retrieve(
     decoy.when(
         equipment.get_module_hardware_api(FlexStackerId("flex-stacker-id"))
     ).then_return(fs_hardware)
+    decoy.when(state_view.geometry.get_location_sequence("labware-id")).then_return(
+        [
+            OnModuleLocationSequenceComponent(moduleId="flex-stacker-id"),
+            NotOnDeckLocationSequenceComponent(logicalLocationName=OFF_DECK_LOCATION),
+        ]
+    )
+    decoy.when(
+        state_view.modules.get_provided_addressable_area("flex-stacker-id")
+    ).then_return("flexStackerV1B4")
+    decoy.when(state_view.modules.get_location("flex-stacker-id")).then_return(
+        DeckSlotLocation(slotName=DeckSlotName.SLOT_B3)
+    )
 
     with expectation:
         result = await subject.execute(data)
@@ -103,7 +120,22 @@ async def test_retrieve(
         decoy.verify(await fs_hardware.dispense_labware(labware_height=4), times=1)
 
         assert result == SuccessData(
-            public=flex_stacker.RetrieveResult(labware_id="labware-id"),
+            public=flex_stacker.RetrieveResult(
+                labware_id="labware-id",
+                originLocationSequence=[
+                    OnModuleLocationSequenceComponent(moduleId="flex-stacker-id"),
+                    NotOnDeckLocationSequenceComponent(
+                        logicalLocationName=OFF_DECK_LOCATION
+                    ),
+                ],
+                eventualDestinationLocationSequence=[
+                    OnModuleLocationSequenceComponent(moduleId="flex-stacker-id"),
+                    OnAddressableAreaLocationSequenceComponent(
+                        addressableAreaName="flexStackerV1B4",
+                        slotName=DeckSlotName.SLOT_B3,
+                    ),
+                ],
+            ),
             state_update=StateUpdate(
                 labware_location=LabwareLocationUpdate(
                     labware_id="labware-id",
