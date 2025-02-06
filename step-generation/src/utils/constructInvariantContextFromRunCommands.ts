@@ -48,6 +48,7 @@ export function constructInvariantContextFromRunCommands(
             id: result.moduleId,
             type: getModuleType(command.params.model),
             model: command.params.model,
+            pythonName: 'n/a',
           },
         }
         return {
@@ -91,6 +92,7 @@ export function constructInvariantContextFromRunCommands(
                 ? [getLabwareDefURI(tiprackLabwareDef)]
                 : [],
             spec: specs,
+            pythonName: 'n/a',
           },
         }
         return {

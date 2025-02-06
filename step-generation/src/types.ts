@@ -134,6 +134,11 @@ export interface LiquidEntities {
   [liquidId: string]: LiquidEntity
 }
 
+export type Ingredient = Omit<LiquidEntity, 'pythonName'>
+export interface Ingredients {
+  [liquidId: string]: Ingredient
+}
+
 export type AdditionalEquipmentName =
   | 'gripper'
   | 'wasteChute'

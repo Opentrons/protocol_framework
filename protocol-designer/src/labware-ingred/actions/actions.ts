@@ -5,6 +5,7 @@ import type { StepFieldName } from '../../form-types'
 import type { DeckSlot, ThunkAction } from '../../types'
 import type { Fixture, IngredInputs } from '../types'
 import type { CutoutId, ModuleModel } from '@opentrons/shared-data'
+import { LiquidEntities, LiquidEntity } from '@opentrons/step-generation'
 
 // ===== Labware selector actions =====
 export interface OpenAddLabwareModalAction {
@@ -128,7 +129,7 @@ export const removeWellsContents: (
 
 export interface EditMultipleLiquidGroupsAction {
   type: 'EDIT_MULTIPLE_LIQUID_GROUPS_PYTHON_NAME'
-  payload: Record<string, IngredInputs> // Updated liquid group pythonName
+  payload: LiquidEntities // Updated liquid group pythonName
 }
 
 export interface DeleteLiquidGroupAction {
@@ -163,7 +164,7 @@ export const deleteLiquidGroup: (
 
   const updatedLiquidGroupPythonName = Object.keys(remainingLiquidEntities)
     .sort() //  sort to ensure correct order
-    .reduce<Record<string, IngredInputs>>((acc, oldId, index) => {
+    .reduce<Record<string, LiquidEntity>>((acc, oldId, index) => {
       acc[oldId] = {
         ...remainingLiquidEntities[oldId],
         pythonName: `liquid_${index + 1}`,
@@ -227,20 +228,22 @@ export interface EditLiquidGroupAction {
   type: 'EDIT_LIQUID_GROUP'
   payload: IngredInputs & {
     liquidGroupId: string
+    pythonName: string
   }
 }
 // NOTE: with no ID, a new one is assigned
 export const editLiquidGroup: (
   args: IngredInputs
 ) => ThunkAction<EditLiquidGroupAction> = args => (dispatch, getState) => {
-  const { liquidGroupId, ...payloadArgs } = args // NOTE: separate liquidGroupId for flow to understand unpacking :/
-
+  const { liquidGroupId: liquidGroupIdFromArg, ...payloadArgs } = args
+  const liquidGroupId =
+    liquidGroupIdFromArg || selectors.getNextLiquidGroupId(getState())
   dispatch({
     type: 'EDIT_LIQUID_GROUP',
     payload: {
       ...payloadArgs,
-      liquidGroupId:
-        args.liquidGroupId || selectors.getNextLiquidGroupId(getState()),
+      liquidGroupId,
+      pythonName: `liquid_${parseInt(liquidGroupId) + 1}`,
     },
   })
 }
