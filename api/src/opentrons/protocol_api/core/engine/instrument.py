@@ -1238,7 +1238,6 @@ class InstrumentCore(AbstractInstrument[WellCore, LabwareCore]):
         tip_racks: List[Tuple[Location, LabwareCore]],
         trash_location: Union[Location, TrashBin, WasteChute],
     ) -> None:
-        # TODO BOILERPLATE BELOW
         if not tip_racks:
             raise RuntimeError(
                 "No tipracks found for pipette in order to perform transfer"
@@ -1263,7 +1262,6 @@ class InstrumentCore(AbstractInstrument[WellCore, LabwareCore]):
             transfer_properties=transfer_props,
             tiprack_uri=tiprack_uri_for_transfer_props,
         )
-        # TODO BOILER PLATE ABOVE
 
         max_volume = min(
             self.get_max_volume(),
@@ -1281,7 +1279,6 @@ class InstrumentCore(AbstractInstrument[WellCore, LabwareCore]):
             max_volume=max_volume,
         )
 
-        # TODO BOILERPLATE BELOW
         def _drop_tip() -> None:
             if isinstance(trash_location, (TrashBin, WasteChute)):
                 self.drop_tip_in_disposal_location(
@@ -1322,8 +1319,6 @@ class InstrumentCore(AbstractInstrument[WellCore, LabwareCore]):
                 presses=None,
                 increment=None,
             )
-
-        # TODO BOILER PLATE ABOVE
 
         if new_tip == TransferTipPolicyV2.ONCE:
             _pick_up_tip()
@@ -1383,7 +1378,7 @@ class InstrumentCore(AbstractInstrument[WellCore, LabwareCore]):
             tip_contents = self.dispense_liquid_class(
                 volume=total_dispense_volume,
                 dest=dest,
-                source=None,  # TODO Should we have a source for this? Should it be an error if blowout is source?
+                source=None,  # Cannot have source as location for blowout so hardcoded to None
                 transfer_properties=transfer_props,
                 transfer_type=tx_comps_executor.TransferType.MANY_TO_ONE,
                 tip_contents=tip_contents,
