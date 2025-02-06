@@ -206,7 +206,7 @@ class LoadLidStack(
 
     commandType: LoadLidStackCommandType = "loadLidStack"
     params: LoadLidStackParams
-    result: Optional[LoadLidStackResult]
+    result: Optional[LoadLidStackResult] = None
 
     _ImplementationCls: Type[LoadLidStackImplementation] = LoadLidStackImplementation
 

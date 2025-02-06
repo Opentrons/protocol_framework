@@ -17,16 +17,17 @@ import { selectors as ingredSelectors } from '../../labware-ingred/selectors'
 import { selectors as stepFormSelectors } from '../../step-forms'
 import { selectors as uiLabwareSelectors } from '../../ui/labware'
 import { swatchColors } from '../../organisms/DefineLiquidsModal/swatchColors'
-import {
-  DEFAULT_MM_TOUCH_TIP_OFFSET_FROM_TOP,
-  DEFAULT_MM_BLOWOUT_OFFSET_FROM_TOP,
-  DEFAULT_MM_OFFSET_FROM_BOTTOM,
-} from '../../constants'
 import { getStepGroups } from '../../step-forms/selectors'
 import { getFileMetadata, getRobotType } from './fileFields'
 import { getInitialRobotState, getRobotStateTimeline } from './commands'
-import { getLoadCommands } from './utils'
+import {
+  getLabwareLoadInfo,
+  getLoadCommands,
+  getModulesLoadInfo,
+  getPipettesLoadInfo,
+} from './utils'
 
+import type { SecondOrderCommandAnnotation } from '@opentrons/shared-data/commandAnnotation/types'
 import type {
   PipetteEntity,
   LabwareEntities,
@@ -45,8 +46,7 @@ import type {
 } from '@opentrons/shared-data'
 import type { LabwareDefByDefURI } from '../../labware-defs'
 import type { Selector } from '../../types'
-import type { DesignerApplicationData } from '../../load-file/migration/utils/getLoadLiquidCommands'
-import type { SecondOrderCommandAnnotation } from '@opentrons/shared-data/commandAnnotation/types'
+import type { PDMetadata } from '../../file-types'
 
 // TODO: BC: 2018-02-21 uncomment this assert, causes test failures
 // console.assert(!isEmpty(process.env.OT_PD_VERSION), 'Could not find application version!')
@@ -92,7 +92,7 @@ export const createFile: Selector<ProtocolFile> = createSelector(
   getRobotStateTimeline,
   getRobotType,
   dismissSelectors.getAllDismissedWarnings,
-  ingredSelectors.getLiquidGroupsById,
+  stepFormSelectors.getLiquidEntities,
   ingredSelectors.getLiquidsByLabwareId,
   stepFormSelectors.getSavedStepForms,
   stepFormSelectors.getOrderedStepIds,
@@ -108,7 +108,7 @@ export const createFile: Selector<ProtocolFile> = createSelector(
     robotStateTimeline,
     robotType,
     dismissedWarnings,
-    ingredients,
+    liquidEntities,
     ingredLocations,
     savedStepForms,
     orderedStepIds,
@@ -127,7 +127,7 @@ export const createFile: Selector<ProtocolFile> = createSelector(
       moduleEntities,
       labwareEntities,
       labwareNicknamesById,
-      ingredients,
+      liquidEntities,
       ingredLocations
     )
 
@@ -144,35 +144,29 @@ export const createFile: Selector<ProtocolFile> = createSelector(
       version: applicationVersion,
       data: {
         _internalAppBuildDate,
-        defaultValues: {
-          // TODO: Ian 2019-06-13 load these into redux and always get them from redux, not constants.js
-          // This `defaultValues` key is not yet read by anything, but is populated here for auditability
-          // and so that later we can do #3587 without a PD migration
-          aspirate_mmFromBottom: DEFAULT_MM_OFFSET_FROM_BOTTOM,
-          dispense_mmFromBottom: DEFAULT_MM_OFFSET_FROM_BOTTOM,
-          touchTip_mmFromTop: DEFAULT_MM_TOUCH_TIP_OFFSET_FROM_TOP,
-          blowout_mmFromTop: DEFAULT_MM_BLOWOUT_OFFSET_FROM_TOP,
-        },
         pipetteTiprackAssignments: mapValues(
           pipetteEntities,
           (p: typeof pipetteEntities[keyof typeof pipetteEntities]): string[] =>
             p.tiprackDefURI
         ),
         dismissedWarnings,
-        ingredients,
+        ingredients: liquidEntities,
         ingredLocations,
         savedStepForms,
         orderedStepIds: savedOrderedStepIds,
+        pipettes: getPipettesLoadInfo(pipetteEntities),
+        modules: getModulesLoadInfo(moduleEntities),
+        labware: getLabwareLoadInfo(labwareEntities, labwareNicknamesById),
       },
     }
 
     const liquids: ProtocolFile['liquids'] = reduce(
-      ingredients,
+      liquidEntities,
       (acc, liquidData, liquidId) => {
         return {
           ...acc,
           [liquidId]: {
-            displayName: liquidData.name,
+            displayName: liquidData.displayName,
             description: liquidData.description ?? '',
             displayColor: liquidData.displayColor ?? swatchColors(liquidId),
           },
@@ -253,7 +247,7 @@ export const createFile: Selector<ProtocolFile> = createSelector(
       commandAnnotations,
     }
 
-    const protocolBase: ProtocolBase<DesignerApplicationData> = {
+    const protocolBase: ProtocolBase<PDMetadata> = {
       $otSharedSchema: '#/protocol/schemas/8',
       schemaVersion: 8,
       metadata: {
