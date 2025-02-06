@@ -8,6 +8,7 @@ import {
   Liquids,
   ProtocolOverview,
   Settings,
+  ReleaseNotes,
 } from './pages'
 import {
   FileUploadMessagesModal,
@@ -50,6 +51,12 @@ const pdRoutes: RouteProps[] = [
     name: 'Settings',
     navLinkTo: '/settings',
     path: '/settings',
+  },
+  {
+    Component: ReleaseNotes,
+    name: 'Releases',
+    navLinkTo: '/release',
+    path: '/release',
   },
 ]
 
