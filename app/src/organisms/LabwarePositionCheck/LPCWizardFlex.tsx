@@ -28,6 +28,7 @@ import {
   selectCurrentStep,
 } from '/app/redux/protocol-runs'
 import { getIsOnDevice } from '/app/redux/config'
+import { useLPCHeaderCommands } from '/app/organisms/LabwarePositionCheck/hooks/useLPCCommands/useLPCHeaderCommands'
 
 import type { LPCFlowsProps } from '/app/organisms/LabwarePositionCheck/LPCFlows'
 import type { LPCWizardContentProps } from '/app/organisms/LabwarePositionCheck/types'
@@ -60,12 +61,19 @@ export function LPCWizardFlex(props: LPCWizardFlexProps): JSX.Element {
     }
   }, [])
 
+  const headerCommands = useLPCHeaderCommands({
+    ...props,
+    LPCHandlerUtils,
+    proceedStep,
+    goBackLastStep,
+  })
+
   return (
     <LPCWizardFlexComponent
       {...props}
       proceedStep={proceedStep}
       goBackLastStep={goBackLastStep}
-      commandUtils={LPCHandlerUtils}
+      commandUtils={{ ...LPCHandlerUtils, headerCommands }}
     />
   )
 }

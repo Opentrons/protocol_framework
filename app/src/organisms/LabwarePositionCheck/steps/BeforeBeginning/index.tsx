@@ -15,7 +15,6 @@ import { ViewOffsets } from './ViewOffsets'
 import { SmallButton } from '/app/atoms/buttons'
 import { getIsOnDevice } from '/app/redux/config'
 import {
-  LPC_STEP,
   selectActivePipette,
   selectLabwareOffsetsForAllLw,
 } from '/app/redux/protocol-runs'
@@ -33,15 +32,10 @@ export function BeforeBeginning(props: LPCWizardContentProps): JSX.Element {
   const isOnDevice = useSelector(getIsOnDevice)
   const activePipette = useSelector(selectActivePipette(runId))
   const existingOffsets = useSelector(selectLabwareOffsetsForAllLw(runId))
-  const pipette = useSelector(selectActivePipette(runId))
   const { protocolName, labwareDefs } = useSelector(
     (state: State) => state.protocolRuns[runId]?.lpc
   ) ?? { protocolName: '', labwareDefs: [] }
-  const {
-    handleStartLPC,
-    toggleRobotMoving,
-    handleValidMoveToMaintenancePosition,
-  } = commandUtils
+  const { handleStartLPC, toggleRobotMoving, headerCommands } = commandUtils
 
   const requiredEquipmentList = [
     {
@@ -60,26 +54,17 @@ export function BeforeBeginning(props: LPCWizardContentProps): JSX.Element {
       .finally(() => toggleRobotMoving(false))
   }
 
-  const handleNavToDetachProbe = (): void => {
-    void toggleRobotMoving(true)
-      .then(() => handleValidMoveToMaintenancePosition(pipette))
-      .then(() => {
-        proceedStep(LPC_STEP.DETACH_PROBE)
-      })
-      .finally(() => toggleRobotMoving(false))
-  }
-
   return (
     <LPCContentContainer
       {...props}
       header={t('labware_position_check_title')}
       buttonText={t('continue')}
-      onClickButton={handleProceed}
+      onClickButton={headerCommands.handleProceed}
       secondaryButtonProps={{
         buttonText: t('exit'),
         buttonCategory: 'rounded',
         buttonType: 'tertiaryLowLight',
-        onClick: handleNavToDetachProbe,
+        onClick: headerCommands.handleNavToDetachProbe,
       }}
     >
       <TwoUpTileLayout

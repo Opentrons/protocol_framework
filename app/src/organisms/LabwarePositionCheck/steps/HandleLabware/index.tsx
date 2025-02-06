@@ -2,8 +2,6 @@ import { useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
 
 import {
-  LPC_STEP,
-  selectActivePipette,
   selectSelectedLabwareFlowType,
   selectSelectedLabwareInfo,
 } from '/app/redux/protocol-runs'
@@ -15,22 +13,7 @@ import { LPCContentContainer } from '/app/organisms/LabwarePositionCheck/LPCCont
 import type { LPCWizardContentProps } from '/app/organisms/LabwarePositionCheck/types'
 
 export function HandleLabware(props: LPCWizardContentProps): JSX.Element {
-  const { commandUtils, proceedStep, runId } = props
-  const {
-    toggleRobotMoving,
-    handleValidMoveToMaintenancePosition,
-  } = commandUtils
   const { t } = useTranslation('labware_position_check')
-  const pipette = useSelector(selectActivePipette(runId))
-
-  const handleNavToDetachProbe = (): void => {
-    void toggleRobotMoving(true)
-      .then(() => handleValidMoveToMaintenancePosition(pipette))
-      .then(() => {
-        proceedStep(LPC_STEP.DETACH_PROBE)
-      })
-      .finally(() => toggleRobotMoving(false))
-  }
 
   // TODO(jh, 02-05-25): EXEC-1119. Use header overrides for the substeps.
   return (
@@ -38,7 +21,7 @@ export function HandleLabware(props: LPCWizardContentProps): JSX.Element {
       {...props}
       header={t('labware_position_check_title')}
       buttonText={t('exit')}
-      onClickButton={handleNavToDetachProbe}
+      onClickButton={props.commandUtils.headerCommands.handleNavToDetachProbe}
     >
       <HandleLabwareContent {...props} />
     </LPCContentContainer>

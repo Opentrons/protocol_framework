@@ -6,20 +6,13 @@ import type { LPCWizardContentProps } from '/app/organisms/LabwarePositionCheck/
 
 export function LPCComplete(props: LPCWizardContentProps): JSX.Element {
   const { t } = useTranslation('labware_position_check')
-  const { toggleRobotMoving, handleCleanUpAndClose } = props.commandUtils
-
-  const handleClose = (): void => {
-    void toggleRobotMoving(true).then(() => {
-      void handleCleanUpAndClose()
-    })
-  }
 
   return (
     <LPCContentContainer
       {...props}
       header={t('labware_position_check_title')}
       buttonText={t('exit')}
-      onClickButton={handleClose}
+      onClickButton={props.commandUtils.headerCommands.handleClose}
     >
       <div>PLACEHOLDER LPC COMPLETE</div>
     </LPCContentContainer>

@@ -28,24 +28,13 @@ const SUPPORT_EMAIL = 'support@opentrons.com'
 
 export function LPCErrorModal(props: LPCWizardContentProps): JSX.Element {
   const { t } = useTranslation(['labware_position_check', 'shared', 'branded'])
-  const {
-    errorMessage,
-    toggleRobotMoving,
-    handleCleanUpAndClose,
-  } = props.commandUtils
-
-  // If the maintenance run fails, we cannot move the gantry, so just clean up LPC.
-  const handleClose = (): void => {
-    void toggleRobotMoving(true).then(() => {
-      void handleCleanUpAndClose()
-    })
-  }
+  const { errorMessage, headerCommands } = props.commandUtils
 
   return (
     <LPCContentContainer
       {...props}
       header={t('labware_position_check_title')}
-      onClickButton={handleClose}
+      onClickButton={headerCommands.handleClose}
       buttonText={t('exit')}
     >
       <ModalContainer
@@ -82,7 +71,7 @@ export function LPCErrorModal(props: LPCWizardContentProps): JSX.Element {
         <PrimaryButton
           textTransform={TEXT_TRANSFORM_CAPITALIZE}
           alignSelf={ALIGN_FLEX_END}
-          onClick={handleClose}
+          onClick={headerCommands.handleClose}
         >
           {t('shared:exit')}
         </PrimaryButton>

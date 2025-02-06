@@ -109,5 +109,5 @@ export function useLPCDisabledReason(
     )
   }
 
-  return null
+  return lpcDisabledReason
 }
