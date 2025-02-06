@@ -267,18 +267,19 @@ export function StepSummary(props: StepSummaryProps): JSX.Element | null {
         setTemperature,
         targetTemperature,
       } = currentStep
-      const isDeactivating = setTemperature === 'false'
+      const isSettingTemperature =
+        setTemperature != null && JSON.parse(String(setTemperature ?? false))
       const tempModuleDisplayName =
         getModuleDisplayName(modules[tempModuleId]?.model) ?? unknownModule
-      stepSummaryContent = isDeactivating ? (
+      stepSummaryContent = isSettingTemperature ? (
         <StyledTrans
-          i18nKey={'protocol_steps:temperature_module.deactivated'}
+          i18nKey={'protocol_steps:temperature_module.active'}
+          tagText={`${targetTemperature}${t('application:units.degrees')}`}
           values={{ module: tempModuleDisplayName }}
         />
       ) : (
         <StyledTrans
-          i18nKey={'protocol_steps:temperature_module.active'}
-          tagText={`${targetTemperature}${t('application:units.degrees')}`}
+          i18nKey={'protocol_steps:temperature_module.deactivated'}
           values={{ module: tempModuleDisplayName }}
         />
       )
