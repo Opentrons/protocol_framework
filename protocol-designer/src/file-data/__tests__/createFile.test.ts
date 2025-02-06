@@ -14,7 +14,11 @@ import {
   fixture_tiprack_300_ul,
 } from '@opentrons/shared-data/labware/fixtures/2'
 import { getLoadLiquidCommands } from '../../load-file/migration/utils/getLoadLiquidCommands'
-import { createFile, getLabwareDefinitionsInUse } from '../selectors'
+import {
+  createFile,
+  createPythonFile,
+  getLabwareDefinitionsInUse,
+} from '../selectors'
 import {
   fileMetadata,
   dismissedWarnings,
@@ -92,7 +96,29 @@ describe('createFile selector', () => {
       ingredLocations
     )
   })
+
+  it('should return a valid Python protocol file', () => {
+    // @ts-expect-error(sa, 2021-6-15): resultFunc not part of Selector type
+    const result = createPythonFile.resultFunc(fileMetadata, {})
+    // This is just a quick smoke test to make sure createPythonFile() produces
+    // something that looks like a Python file. The individual sections of the
+    // generated Python will be tested in separate unit tests.
+    expect(result).toBe(
+      `
+from contextlib import nullcontext as pd_step
+from opentrons import protocol_api
+
+metadata = {
+    "protocolName": "Test Protocol",
+    "author": "The Author",
+    "description": "Protocol description",
+    "created": "2020-02-25T21:48:32.515Z",
+}
+`.trimStart()
+    )
+  })
 })
+
 describe('getLabwareDefinitionsInUse util', () => {
   it('should exclude definitions that are neither on the deck nor assigned to a pipette', () => {
     const assignedTiprackOnDeckDef = fixture_tiprack_10_ul
