@@ -17,6 +17,7 @@ import {
   getSelectedDropdownItem,
 } from '../../../ui/steps/selectors'
 import { getDesignerTab } from '../../../file-data/selectors'
+import { getIsAdapter } from '../../../utils'
 import { LabwareLabel } from '../LabwareLabel'
 import { ModuleLabel } from './ModuleLabel'
 import { FixtureRender } from './FixtureRender'
@@ -75,10 +76,18 @@ export function HighlightItems(props: HighlightItemsProps): JSX.Element | null {
   const selectedItemLabwares = selectedDropdownItems.filter(
     selected => selected.id != null && labware[selected.id]
   )
+
+  // if hovered item is an adapter, show bounding area for parent module
+  const isHoveredItemLabwareAdapter =
+    hoveredItemLabware?.id != null
+      ? getIsAdapter(hoveredItemLabware?.id, labware)
+      : false
+  const moduleUnderLabware =
+    hoveredItemLabware != null ? modules[hoveredItemLabware?.slot] : null
   const hoveredItemModule: ModuleOnDeck | null =
     hoveredItem?.id != null && modules[hoveredItem.id] != null
       ? modules[hoveredItem.id]
-      : null
+      : moduleUnderLabware ?? null
   const selectedItemModule = selectedDropdownItems.find(
     selected => selected.id != null && modules[selected.id]
   )
@@ -104,10 +113,17 @@ export function HighlightItems(props: HighlightItemsProps): JSX.Element | null {
       selected.id != null && SLOTS.includes(selected.id as AddressableAreaName)
   )
 
+  // show only module highlight or labware highlight, but not both
+  const showOnlyLabware =
+    moduleUnderLabware == null || !isHoveredItemLabwareAdapter
+
   const getLabwareItems = (): JSX.Element[] => {
     const items: JSX.Element[] = []
 
-    if (hoveredItemLabware != null || selectedItemLabwares.length > 0) {
+    if (
+      (hoveredItemLabware != null || selectedItemLabwares.length > 0) &&
+      showOnlyLabware
+    ) {
       const selectedLabwaresOnDeck = selectedItemLabwares
         .map(item => (item?.id != null ? labware[item.id] : null))
         .filter(Boolean)
@@ -179,7 +195,10 @@ export function HighlightItems(props: HighlightItemsProps): JSX.Element | null {
   const getModuleItems = (): JSX.Element[] => {
     const items: JSX.Element[] = []
 
-    if (hoveredItemModule != null || selectedItemModule != null) {
+    if (
+      (hoveredItemModule != null || selectedItemModule != null) &&
+      !showOnlyLabware
+    ) {
       const selectedModuleOnDeck =
         selectedItemModule?.id != null ? modules[selectedItemModule.id] : null
       const moduleOnDeck = hoveredItemModule ?? selectedModuleOnDeck
