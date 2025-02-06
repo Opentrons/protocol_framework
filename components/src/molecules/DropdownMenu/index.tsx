@@ -330,7 +330,7 @@ export function DropdownMenu(props: DropdownMenuProps): JSX.Element {
                     >
                       <StyledText
                         desktopStyle="captionRegular"
-                        css={LINE_CLAMP_TEXT_STYLE(3)}
+                        css={LINE_CLAMP_TEXT_STYLE(3, true)}
                       >
                         {option.name}
                       </StyledText>
@@ -369,7 +369,7 @@ export function DropdownMenu(props: DropdownMenuProps): JSX.Element {
 
 export const LINE_CLAMP_TEXT_STYLE = (
   lineClamp?: number,
-  title?: boolean
+  wordBreak?: boolean
 ): FlattenSimpleInterpolation => css`
   display: -webkit-box;
   -webkit-box-orient: vertical;
@@ -377,7 +377,7 @@ export const LINE_CLAMP_TEXT_STYLE = (
   text-overflow: ellipsis;
   word-wrap: break-word;
   -webkit-line-clamp: ${lineClamp ?? 1};
-  word-break: ${title === true
+  word-break: ${wordBreak === true
     ? 'normal'
     : 'break-all'}; // normal for tile and break-all for a non word case like aaaaaaaa
 `
