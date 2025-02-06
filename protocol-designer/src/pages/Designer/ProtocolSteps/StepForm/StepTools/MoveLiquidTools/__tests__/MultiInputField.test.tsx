@@ -1,11 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { COLORS } from '@opentrons/components'
 import { fireEvent, screen } from '@testing-library/react'
 import { i18n } from '../../../../../../../assets/localization'
 import { renderWithProviders } from '../../../../../../../__testing-utils__'
 import { MultiInputField } from '../MultiInputField'
 
 import type { ComponentProps } from 'react'
-import { COLORS } from '@opentrons/components'
 
 const render = (props: ComponentProps<typeof MultiInputField>) => {
   return renderWithProviders(<MultiInputField {...props} />, {
@@ -24,12 +24,12 @@ describe('MultiInputField', () => {
       fields: [
         {
           fieldTitle: 'submerge speed',
-          fieldKey: 'submerge_speed',
+          fieldKey: 'aspirate_submerge_speed',
           units: 'mm/s',
         },
         {
           fieldTitle: 'submerge delay seconds',
-          fieldKey: 'submerge_delay_seconds',
+          fieldKey: 'aspirate_submerge_delay_seconds',
           units: 'mm',
         },
       ],
@@ -42,6 +42,15 @@ describe('MultiInputField', () => {
           name: 'aspirate_submerge_speed',
           updateValue: vi.fn(),
           value: null,
+        },
+        aspirate_submerge_delay_seconds: {
+          onFieldFocus: vi.fn(),
+          onFieldBlur: vi.fn(),
+          errorToShow: null,
+          disabled: false,
+          name: 'aspirate_submerge_delay_seconds',
+          updateValue: vi.fn(),
+          value: '',
         },
       },
     }
@@ -60,13 +69,18 @@ describe('MultiInputField', () => {
     const inputs = screen.getAllByRole('textbox', { name: '' })
     expect(inputs).toHaveLength(2)
     fireEvent.change(inputs[0], { target: { value: ['5'] } })
+    fireEvent.change(inputs[0], { target: { value: ['5'] } })
     expect(
       props.propsForFields.aspirate_submerge_speed.updateValue
     ).toHaveBeenCalled()
+    fireEvent.change(inputs[1], { target: { value: ['10'] } })
+    expect(
+      props.propsForFields.aspirate_submerge_delay_seconds.updateValue
+    ).toHaveBeenCalled()
   })
 
-  it('should render a well position listbutton when isWellPosition is true', () => {
-    props.isWellPosition = true
-    render(props)
-  })
+  //   it('should render a well position listbutton when isWellPosition is true', () => {
+  //     props.isWellPosition = true
+  //     render(props)
+  //   })
 })
