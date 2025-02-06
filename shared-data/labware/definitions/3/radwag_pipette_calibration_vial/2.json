@@ -45,13 +45,13 @@
   ],
   "wells": {
     "A1": {
-      "depth": 40,
-      "totalLiquidVolume": 6605.2,
+      "depth": 25.4,
+      "totalLiquidVolume": 4192.17,
       "shape": "circular",
       "diameter": 14.5,
       "x": 64,
       "y": 43,
-      "z": 46,
+      "z": 60.6,
       "geometryDefinitionId": "conicalWell"
     }
   },
@@ -62,7 +62,7 @@
           "shape": "conical",
           "topDiameter": 14.5,
           "bottomDiameter": 14.5,
-          "topHeight": 40.0,
+          "topHeight": 25.4,
           "bottomHeight": 0.0
         }
       ]
