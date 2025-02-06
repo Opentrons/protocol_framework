@@ -83,7 +83,7 @@ class LoadLidStackResult(BaseModel):
 
     stackLabwareId: str = Field(
         ...,
-        description="An ID to reference the Protocol Engine Labware Lid Stack in subsequent commands.",
+        description="An ID to reference the lid stack labware object created.",
     )
     labwareIds: List[str] = Field(
         ...,
@@ -97,7 +97,8 @@ class LoadLidStackResult(BaseModel):
         ..., description="The Location that the stack of lid labware has been loaded."
     )
     stackLocationSequence: LabwareLocationSequence | None = Field(
-        None, description="The location sequence for this stack."
+        None,
+        description="The location sequence for the lid stack labware object created.",
     )
     locationSequences: List[LabwareLocationSequence] | None = Field(
         None,
