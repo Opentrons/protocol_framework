@@ -26,6 +26,7 @@ import {
   getModulesLoadInfo,
   getPipettesLoadInfo,
 } from './utils'
+import { pythonImports, pythonMetadata } from './pythonFile'
 
 import type { SecondOrderCommandAnnotation } from '@opentrons/shared-data/commandAnnotation/types'
 import type {
@@ -272,5 +273,20 @@ export const createFile: Selector<ProtocolFile> = createSelector(
       ...commandv8Mixin,
       ...commandAnnotionaV1Mixin,
     }
+  }
+)
+
+export const createPythonFile: Selector<string> = createSelector(
+  getFileMetadata,
+  fileMetadata => {
+    return (
+      [
+        // Here are the sections of the Python file:
+        pythonImports(),
+        pythonMetadata(fileMetadata),
+      ]
+        .filter(section => section) // skip any blank sections
+        .join('\n\n') + '\n'
+    )
   }
 )
