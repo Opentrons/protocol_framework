@@ -87,38 +87,38 @@ export const ThermocyclerModuleSlideout = (
         .then((result) => {
             if (modulePart === 'Lid') {
                 reportModuleCommandCompleted(
-                    module.moduleModel,
-                    'set-thermocycler-lid-temperature',
-                    { status: 'succeeded', data: result },
-                    serialNumber,
-                    tempValue
+                    {moduleType: module.moduleModel,
+                    action: 'set-thermocycler-lid-temperature',
+                    result: { status: 'succeeded', data: result },
+                    serialNumber: serialNumber,
+                    temperature: tempValue}
                 );
             } else if (modulePart === 'Block') {
                 reportModuleCommandCompleted(
-                    module.moduleModel,
-                    'set-thermocycler-block-temperature',
-                    { status: 'succeeded', data: result },
-                    serialNumber,
-                    tempValue
+                    {moduleType: module.moduleModel,
+                    action:'set-thermocycler-block-temperature',
+                    result: { status: 'succeeded', data: result },
+                    serialNumber: serialNumber,
+                    temperature: tempValue}
                 );
             }
         })
         .catch((e: Error) => {
             if (modulePart === 'Lid') {
                 reportModuleCommandError(
-                    module.moduleModel,
-                    'set-thermocycler-lid-temperature',
-                    e.message,
-                    serialNumber,
-                    tempValue
+                    {moduleType: module.moduleModel,
+                    action: 'set-thermocycler-lid-temperature',
+                    errorDetails: e.message,
+                    serialNumber: serialNumber,
+                    temperature: tempValue}
                 );
             } else if (modulePart === 'Block') {
                 reportModuleCommandError(
-                    module.moduleModel,
+                    {module.moduleModel,
                     'set-thermocycler-block-temperature',
                     e.message,
                     serialNumber,
-                    tempValue
+                    tempValue}
                 );
             }
 
