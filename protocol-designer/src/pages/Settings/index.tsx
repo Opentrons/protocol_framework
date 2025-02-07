@@ -230,7 +230,7 @@ export function Settings(): JSX.Element {
                     </Flex>
                   </Flex>
                   <ToggleButton
-                    label="Settings_hotKeys"
+                    label={`Settings_${flag}`}
                     toggledOn={Boolean(flags[flag])}
                     onClick={() => {
                       setFeatureFlags({
