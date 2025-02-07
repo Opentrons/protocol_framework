@@ -3,13 +3,15 @@ import type {
   LoadLabwareCreateCommand,
 } from '@opentrons/shared-data'
 
+import type { PrefixType } from '../../../resources/types'
+
 export const getMigratedPositionFromTop = (
   labwareDefinitions: {
     [definitionId: string]: LabwareDefinition2
   },
   loadLabwareCommands: LoadLabwareCreateCommand[],
   labware: string,
-  type: 'aspirate' | 'dispense' | 'mix'
+  type: PrefixType
 ): number => {
   const matchingLoadLabware = loadLabwareCommands.find(
     command =>

@@ -19,6 +19,7 @@ import { TipPositionModal, ZTipPositionModal } from '../../../../../organisms'
 import { getIsDelayPositionField } from '../../../../../form-types'
 import { getDefaultMmFromEdge } from '../../../../../organisms/TipPositionModal/utils'
 import { selectors as stepFormSelectors } from '../../../../../step-forms'
+
 import type {
   TipXOffsetFields,
   TipYOffsetFields,
@@ -26,8 +27,9 @@ import type {
 } from '../../../../../form-types'
 import type { PositionSpecs } from '../../../../../organisms'
 import type { FieldPropsByName } from '../types'
+import type { PrefixType } from '../../../../../resources/types'
 interface PositionFieldProps {
-  prefix: 'aspirate' | 'dispense' | 'mix'
+  prefix: PrefixType
   propsForFields: FieldPropsByName
   zField: TipZOffsetFields
   xField?: TipXOffsetFields

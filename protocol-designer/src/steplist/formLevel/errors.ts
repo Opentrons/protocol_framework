@@ -23,6 +23,7 @@ import type { ReactNode } from 'react'
 import type { LabwareDefinition2, PipetteV2Specs } from '@opentrons/shared-data'
 import type { LabwareEntities, PipetteEntity } from '@opentrons/step-generation'
 import type { StepFieldName } from '../../form-types'
+import type { LiquidHandlingTab } from '../../pages/Designer/ProtocolSteps/StepForm/types'
 /*******************
  ** Error Messages **
  ********************/
@@ -59,7 +60,7 @@ export interface FormError {
   showAtField?: boolean
   showAtForm?: boolean
   page?: number
-  tab?: 'aspirate' | 'dispense'
+  tab?: LiquidHandlingTab
 }
 const INCOMPATIBLE_ASPIRATE_LABWARE: FormError = {
   title: 'Selected aspirate labware is incompatible with pipette',
