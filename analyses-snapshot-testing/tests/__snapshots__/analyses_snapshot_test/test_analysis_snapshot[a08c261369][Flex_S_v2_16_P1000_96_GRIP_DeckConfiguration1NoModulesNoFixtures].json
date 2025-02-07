@@ -1182,7 +1182,14 @@
             }
           }
         },
-        "labwareId": "UUID"
+        "labwareId": "UUID",
+        "locationSequence": [
+          {
+            "addressableAreaName": "B2",
+            "kind": "onAddressableArea",
+            "slotName": "B2"
+          }
+        ]
       },
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
@@ -2356,7 +2363,14 @@
             }
           }
         },
-        "labwareId": "UUID"
+        "labwareId": "UUID",
+        "locationSequence": [
+          {
+            "addressableAreaName": "C2",
+            "kind": "onAddressableArea",
+            "slotName": "C2"
+          }
+        ]
       },
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
@@ -2425,7 +2439,14 @@
           "version": 1,
           "wells": {}
         },
-        "labwareId": "UUID"
+        "labwareId": "UUID",
+        "locationSequence": [
+          {
+            "addressableAreaName": "C3",
+            "kind": "onAddressableArea",
+            "slotName": "C3"
+          }
+        ]
       },
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
@@ -3583,7 +3604,18 @@
             }
           }
         },
-        "labwareId": "UUID"
+        "labwareId": "UUID",
+        "locationSequence": [
+          {
+            "kind": "onLabware",
+            "labwareId": "UUID"
+          },
+          {
+            "addressableAreaName": "C3",
+            "kind": "onAddressableArea",
+            "slotName": "C3"
+          }
+        ]
       },
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
@@ -3652,7 +3684,14 @@
           "version": 1,
           "wells": {}
         },
-        "labwareId": "UUID"
+        "labwareId": "UUID",
+        "locationSequence": [
+          {
+            "addressableAreaName": "D2",
+            "kind": "onAddressableArea",
+            "slotName": "D2"
+          }
+        ]
       },
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
@@ -4810,7 +4849,18 @@
             }
           }
         },
-        "labwareId": "UUID"
+        "labwareId": "UUID",
+        "locationSequence": [
+          {
+            "kind": "onLabware",
+            "labwareId": "UUID"
+          },
+          {
+            "addressableAreaName": "D2",
+            "kind": "onAddressableArea",
+            "slotName": "D2"
+          }
+        ]
       },
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
@@ -5966,7 +6016,13 @@
             }
           }
         },
-        "labwareId": "UUID"
+        "labwareId": "UUID",
+        "locationSequence": [
+          {
+            "kind": "notOnDeck",
+            "logicalLocationName": "offDeck"
+          }
+        ]
       },
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
@@ -7122,7 +7178,13 @@
             }
           }
         },
-        "labwareId": "UUID"
+        "labwareId": "UUID",
+        "locationSequence": [
+          {
+            "kind": "notOnDeck",
+            "logicalLocationName": "offDeck"
+          }
+        ]
       },
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
@@ -9150,7 +9212,31 @@
         "newLocation": "offDeck",
         "strategy": "manualMoveWithPause"
       },
-      "result": {},
+      "result": {
+        "eventualDestinationLocationSequence": [
+          {
+            "kind": "notOnDeck",
+            "logicalLocationName": "offDeck"
+          }
+        ],
+        "immediateDestinationLocationSequence": [
+          {
+            "kind": "notOnDeck",
+            "logicalLocationName": "offDeck"
+          }
+        ],
+        "originLocationSequence": [
+          {
+            "kind": "onLabware",
+            "labwareId": "UUID"
+          },
+          {
+            "addressableAreaName": "C3",
+            "kind": "onAddressableArea",
+            "slotName": "C3"
+          }
+        ]
+      },
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
     },
@@ -9166,7 +9252,31 @@
         "newLocation": "offDeck",
         "strategy": "manualMoveWithPause"
       },
-      "result": {},
+      "result": {
+        "eventualDestinationLocationSequence": [
+          {
+            "kind": "notOnDeck",
+            "logicalLocationName": "offDeck"
+          }
+        ],
+        "immediateDestinationLocationSequence": [
+          {
+            "kind": "notOnDeck",
+            "logicalLocationName": "offDeck"
+          }
+        ],
+        "originLocationSequence": [
+          {
+            "kind": "onLabware",
+            "labwareId": "UUID"
+          },
+          {
+            "addressableAreaName": "D2",
+            "kind": "onAddressableArea",
+            "slotName": "D2"
+          }
+        ]
+      },
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
     },
@@ -9184,7 +9294,36 @@
         },
         "strategy": "manualMoveWithPause"
       },
-      "result": {},
+      "result": {
+        "eventualDestinationLocationSequence": [
+          {
+            "kind": "onLabware",
+            "labwareId": "UUID"
+          },
+          {
+            "addressableAreaName": "C3",
+            "kind": "onAddressableArea",
+            "slotName": "C3"
+          }
+        ],
+        "immediateDestinationLocationSequence": [
+          {
+            "kind": "onLabware",
+            "labwareId": "UUID"
+          },
+          {
+            "addressableAreaName": "C3",
+            "kind": "onAddressableArea",
+            "slotName": "C3"
+          }
+        ],
+        "originLocationSequence": [
+          {
+            "kind": "notOnDeck",
+            "logicalLocationName": "offDeck"
+          }
+        ]
+      },
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
     },
@@ -9202,7 +9341,36 @@
         },
         "strategy": "manualMoveWithPause"
       },
-      "result": {},
+      "result": {
+        "eventualDestinationLocationSequence": [
+          {
+            "kind": "onLabware",
+            "labwareId": "UUID"
+          },
+          {
+            "addressableAreaName": "D2",
+            "kind": "onAddressableArea",
+            "slotName": "D2"
+          }
+        ],
+        "immediateDestinationLocationSequence": [
+          {
+            "kind": "onLabware",
+            "labwareId": "UUID"
+          },
+          {
+            "addressableAreaName": "D2",
+            "kind": "onAddressableArea",
+            "slotName": "D2"
+          }
+        ],
+        "originLocationSequence": [
+          {
+            "kind": "notOnDeck",
+            "logicalLocationName": "offDeck"
+          }
+        ]
+      },
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
     },
@@ -9482,7 +9650,27 @@
         "newLocation": "offDeck",
         "strategy": "manualMoveWithPause"
       },
-      "result": {},
+      "result": {
+        "eventualDestinationLocationSequence": [
+          {
+            "kind": "notOnDeck",
+            "logicalLocationName": "offDeck"
+          }
+        ],
+        "immediateDestinationLocationSequence": [
+          {
+            "kind": "notOnDeck",
+            "logicalLocationName": "offDeck"
+          }
+        ],
+        "originLocationSequence": [
+          {
+            "addressableAreaName": "B2",
+            "kind": "onAddressableArea",
+            "slotName": "B2"
+          }
+        ]
+      },
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
     },
@@ -9498,7 +9686,27 @@
         "newLocation": "offDeck",
         "strategy": "manualMoveWithPause"
       },
-      "result": {},
+      "result": {
+        "eventualDestinationLocationSequence": [
+          {
+            "kind": "notOnDeck",
+            "logicalLocationName": "offDeck"
+          }
+        ],
+        "immediateDestinationLocationSequence": [
+          {
+            "kind": "notOnDeck",
+            "logicalLocationName": "offDeck"
+          }
+        ],
+        "originLocationSequence": [
+          {
+            "addressableAreaName": "C2",
+            "kind": "onAddressableArea",
+            "slotName": "C2"
+          }
+        ]
+      },
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
     }

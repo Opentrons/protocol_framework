@@ -1186,7 +1186,14 @@
             }
           }
         },
-        "labwareId": "UUID"
+        "labwareId": "UUID",
+        "locationSequence": [
+          {
+            "addressableAreaName": "B1",
+            "kind": "onAddressableArea",
+            "slotName": "B1"
+          }
+        ]
       },
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
@@ -2345,7 +2352,14 @@
             }
           }
         },
-        "labwareId": "UUID"
+        "labwareId": "UUID",
+        "locationSequence": [
+          {
+            "addressableAreaName": "C1",
+            "kind": "onAddressableArea",
+            "slotName": "C1"
+          }
+        ]
       },
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
@@ -3504,7 +3518,14 @@
             }
           }
         },
-        "labwareId": "UUID"
+        "labwareId": "UUID",
+        "locationSequence": [
+          {
+            "addressableAreaName": "B2",
+            "kind": "onAddressableArea",
+            "slotName": "B2"
+          }
+        ]
       },
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
@@ -4663,7 +4684,14 @@
             }
           }
         },
-        "labwareId": "UUID"
+        "labwareId": "UUID",
+        "locationSequence": [
+          {
+            "addressableAreaName": "C2",
+            "kind": "onAddressableArea",
+            "slotName": "C2"
+          }
+        ]
       },
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
@@ -5822,7 +5850,14 @@
             }
           }
         },
-        "labwareId": "UUID"
+        "labwareId": "UUID",
+        "locationSequence": [
+          {
+            "addressableAreaName": "A2",
+            "kind": "onAddressableArea",
+            "slotName": "A2"
+          }
+        ]
       },
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
@@ -6981,7 +7016,14 @@
             }
           }
         },
-        "labwareId": "UUID"
+        "labwareId": "UUID",
+        "locationSequence": [
+          {
+            "addressableAreaName": "D4",
+            "kind": "onAddressableArea",
+            "slotName": "D3"
+          }
+        ]
       },
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
@@ -7000,7 +7042,29 @@
         },
         "strategy": "usingGripper"
       },
-      "result": {},
+      "result": {
+        "eventualDestinationLocationSequence": [
+          {
+            "addressableAreaName": "A1",
+            "kind": "onAddressableArea",
+            "slotName": "A1"
+          }
+        ],
+        "immediateDestinationLocationSequence": [
+          {
+            "addressableAreaName": "A1",
+            "kind": "onAddressableArea",
+            "slotName": "A1"
+          }
+        ],
+        "originLocationSequence": [
+          {
+            "addressableAreaName": "B1",
+            "kind": "onAddressableArea",
+            "slotName": "B1"
+          }
+        ]
+      },
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
     },
@@ -7264,7 +7328,29 @@
         },
         "strategy": "usingGripper"
       },
-      "result": {},
+      "result": {
+        "eventualDestinationLocationSequence": [
+          {
+            "addressableAreaName": "D1",
+            "kind": "onAddressableArea",
+            "slotName": "D1"
+          }
+        ],
+        "immediateDestinationLocationSequence": [
+          {
+            "addressableAreaName": "D1",
+            "kind": "onAddressableArea",
+            "slotName": "D1"
+          }
+        ],
+        "originLocationSequence": [
+          {
+            "addressableAreaName": "C1",
+            "kind": "onAddressableArea",
+            "slotName": "C1"
+          }
+        ]
+      },
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
     },
@@ -7452,7 +7538,29 @@
         },
         "strategy": "usingGripper"
       },
-      "result": {},
+      "result": {
+        "eventualDestinationLocationSequence": [
+          {
+            "addressableAreaName": "A3",
+            "kind": "onAddressableArea",
+            "slotName": "A3"
+          }
+        ],
+        "immediateDestinationLocationSequence": [
+          {
+            "addressableAreaName": "A3",
+            "kind": "onAddressableArea",
+            "slotName": "A3"
+          }
+        ],
+        "originLocationSequence": [
+          {
+            "addressableAreaName": "B2",
+            "kind": "onAddressableArea",
+            "slotName": "B2"
+          }
+        ]
+      },
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
     },
@@ -8494,7 +8602,29 @@
         },
         "strategy": "usingGripper"
       },
-      "result": {},
+      "result": {
+        "eventualDestinationLocationSequence": [
+          {
+            "addressableAreaName": "D3",
+            "kind": "onAddressableArea",
+            "slotName": "D3"
+          }
+        ],
+        "immediateDestinationLocationSequence": [
+          {
+            "addressableAreaName": "D3",
+            "kind": "onAddressableArea",
+            "slotName": "D3"
+          }
+        ],
+        "originLocationSequence": [
+          {
+            "addressableAreaName": "C2",
+            "kind": "onAddressableArea",
+            "slotName": "C2"
+          }
+        ]
+      },
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
     },
@@ -13144,7 +13274,29 @@
         },
         "strategy": "usingGripper"
       },
-      "result": {},
+      "result": {
+        "eventualDestinationLocationSequence": [
+          {
+            "addressableAreaName": "B2",
+            "kind": "onAddressableArea",
+            "slotName": "B2"
+          }
+        ],
+        "immediateDestinationLocationSequence": [
+          {
+            "addressableAreaName": "B2",
+            "kind": "onAddressableArea",
+            "slotName": "B2"
+          }
+        ],
+        "originLocationSequence": [
+          {
+            "addressableAreaName": "A2",
+            "kind": "onAddressableArea",
+            "slotName": "A2"
+          }
+        ]
+      },
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
     },
@@ -13882,7 +14034,29 @@
         },
         "strategy": "usingGripper"
       },
-      "result": {},
+      "result": {
+        "eventualDestinationLocationSequence": [
+          {
+            "addressableAreaName": "C1",
+            "kind": "onAddressableArea",
+            "slotName": "C1"
+          }
+        ],
+        "immediateDestinationLocationSequence": [
+          {
+            "addressableAreaName": "C1",
+            "kind": "onAddressableArea",
+            "slotName": "C1"
+          }
+        ],
+        "originLocationSequence": [
+          {
+            "addressableAreaName": "B2",
+            "kind": "onAddressableArea",
+            "slotName": "B2"
+          }
+        ]
+      },
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
     },
@@ -27348,7 +27522,29 @@
         },
         "strategy": "usingGripper"
       },
-      "result": {},
+      "result": {
+        "eventualDestinationLocationSequence": [
+          {
+            "addressableAreaName": "A4",
+            "kind": "onAddressableArea",
+            "slotName": "A3"
+          }
+        ],
+        "immediateDestinationLocationSequence": [
+          {
+            "addressableAreaName": "A4",
+            "kind": "onAddressableArea",
+            "slotName": "A3"
+          }
+        ],
+        "originLocationSequence": [
+          {
+            "addressableAreaName": "D4",
+            "kind": "onAddressableArea",
+            "slotName": "D3"
+          }
+        ]
+      },
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
     },
@@ -31238,7 +31434,29 @@
         },
         "strategy": "usingGripper"
       },
-      "result": {},
+      "result": {
+        "eventualDestinationLocationSequence": [
+          {
+            "addressableAreaName": "D4",
+            "kind": "onAddressableArea",
+            "slotName": "D3"
+          }
+        ],
+        "immediateDestinationLocationSequence": [
+          {
+            "addressableAreaName": "D4",
+            "kind": "onAddressableArea",
+            "slotName": "D3"
+          }
+        ],
+        "originLocationSequence": [
+          {
+            "addressableAreaName": "A4",
+            "kind": "onAddressableArea",
+            "slotName": "A3"
+          }
+        ]
+      },
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
     },
@@ -31256,7 +31474,29 @@
         },
         "strategy": "usingGripper"
       },
-      "result": {},
+      "result": {
+        "eventualDestinationLocationSequence": [
+          {
+            "addressableAreaName": "D2",
+            "kind": "onAddressableArea",
+            "slotName": "D2"
+          }
+        ],
+        "immediateDestinationLocationSequence": [
+          {
+            "addressableAreaName": "D2",
+            "kind": "onAddressableArea",
+            "slotName": "D2"
+          }
+        ],
+        "originLocationSequence": [
+          {
+            "addressableAreaName": "A3",
+            "kind": "onAddressableArea",
+            "slotName": "A3"
+          }
+        ]
+      },
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
     },
@@ -31274,7 +31514,29 @@
         },
         "strategy": "usingGripper"
       },
-      "result": {},
+      "result": {
+        "eventualDestinationLocationSequence": [
+          {
+            "addressableAreaName": "A3",
+            "kind": "onAddressableArea",
+            "slotName": "A3"
+          }
+        ],
+        "immediateDestinationLocationSequence": [
+          {
+            "addressableAreaName": "A3",
+            "kind": "onAddressableArea",
+            "slotName": "A3"
+          }
+        ],
+        "originLocationSequence": [
+          {
+            "addressableAreaName": "C1",
+            "kind": "onAddressableArea",
+            "slotName": "C1"
+          }
+        ]
+      },
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
     },
@@ -32088,7 +32350,29 @@
         },
         "strategy": "usingGripper"
       },
-      "result": {},
+      "result": {
+        "eventualDestinationLocationSequence": [
+          {
+            "addressableAreaName": "B2",
+            "kind": "onAddressableArea",
+            "slotName": "B2"
+          }
+        ],
+        "immediateDestinationLocationSequence": [
+          {
+            "addressableAreaName": "B2",
+            "kind": "onAddressableArea",
+            "slotName": "B2"
+          }
+        ],
+        "originLocationSequence": [
+          {
+            "addressableAreaName": "D4",
+            "kind": "onAddressableArea",
+            "slotName": "D3"
+          }
+        ]
+      },
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
     },
@@ -32656,7 +32940,29 @@
         },
         "strategy": "usingGripper"
       },
-      "result": {},
+      "result": {
+        "eventualDestinationLocationSequence": [
+          {
+            "addressableAreaName": "C3",
+            "kind": "onAddressableArea",
+            "slotName": "C3"
+          }
+        ],
+        "immediateDestinationLocationSequence": [
+          {
+            "addressableAreaName": "C3",
+            "kind": "onAddressableArea",
+            "slotName": "C3"
+          }
+        ],
+        "originLocationSequence": [
+          {
+            "addressableAreaName": "A1",
+            "kind": "onAddressableArea",
+            "slotName": "A1"
+          }
+        ]
+      },
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
     },
@@ -32674,7 +32980,29 @@
         },
         "strategy": "usingGripper"
       },
-      "result": {},
+      "result": {
+        "eventualDestinationLocationSequence": [
+          {
+            "addressableAreaName": "A1",
+            "kind": "onAddressableArea",
+            "slotName": "A1"
+          }
+        ],
+        "immediateDestinationLocationSequence": [
+          {
+            "addressableAreaName": "A1",
+            "kind": "onAddressableArea",
+            "slotName": "A1"
+          }
+        ],
+        "originLocationSequence": [
+          {
+            "addressableAreaName": "B2",
+            "kind": "onAddressableArea",
+            "slotName": "B2"
+          }
+        ]
+      },
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
     },

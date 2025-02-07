@@ -1282,7 +1282,14 @@
             }
           }
         },
-        "labwareId": "UUID"
+        "labwareId": "UUID",
+        "locationSequence": [
+          {
+            "addressableAreaName": "A2",
+            "kind": "onAddressableArea",
+            "slotName": "A2"
+          }
+        ]
       },
       "startedAt": "TIMESTAMP",
       "status": "succeeded"

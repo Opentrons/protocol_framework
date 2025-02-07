@@ -1161,7 +1161,14 @@
             }
           }
         },
-        "labwareId": "UUID"
+        "labwareId": "UUID",
+        "locationSequence": [
+          {
+            "addressableAreaName": "A1",
+            "kind": "onAddressableArea",
+            "slotName": "A1"
+          }
+        ]
       },
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
