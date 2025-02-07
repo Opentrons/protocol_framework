@@ -92,15 +92,16 @@ stages:
             runTimeParameters: []
             commandAnnotations:
               - annotationType: custom
-                commandKeys: [
-                  1abc123,
-                  2abc123,
-                  3abc123,
-                  4abc123,
-                  5abc123,
-                  6abc123,
-                  7abc123,
-                ]
+                commandKeys:
+                  [
+                    1abc123,
+                    2abc123,
+                    3abc123,
+                    4abc123,
+                    5abc123,
+                    6abc123,
+                    7abc123,
+                  ]
             pipettes:
               - id: pipetteId
                 pipetteName: p1000_96
@@ -217,6 +218,12 @@ stages:
                 result:
                   labwareId: sourcePlateId
                   definition: !anydict
+                  locationSequence:
+                    - kind: onModule
+                      moduleId: temperatureModuleId
+                    - kind: onAddressableArea
+                      addressableAreaName: temperatureModuleV2D1
+                      slotName: D1
                 notes: []
                 startedAt: !re_fullmatch "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d+(Z|([+-]\\d{2}:\\d{2}))"
                 completedAt: !re_fullmatch "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d+(Z|([+-]\\d{2}:\\d{2}))"
@@ -236,6 +243,12 @@ stages:
                 result:
                   labwareId: destPlateId
                   definition: !anydict
+                  locationSequence:
+                    - kind: onModule
+                      moduleId: magneticBlockId
+                    - kind: onAddressableArea
+                      addressableAreaName: magneticBlockV1D3
+                      slotName: D3
                 notes: []
                 startedAt: !re_fullmatch "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d+(Z|([+-]\\d{2}:\\d{2}))"
                 completedAt: !re_fullmatch "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d+(Z|([+-]\\d{2}:\\d{2}))"
@@ -255,6 +268,10 @@ stages:
                 result:
                   labwareId: tipRackId
                   definition: !anydict
+                  locationSequence:
+                    - kind: onAddressableArea
+                      addressableAreaName: B2
+                      slotName: B2
                 notes: []
                 startedAt: !re_fullmatch "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d+(Z|([+-]\\d{2}:\\d{2}))"
                 completedAt: !re_fullmatch "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d+(Z|([+-]\\d{2}:\\d{2}))"
@@ -274,6 +291,10 @@ stages:
                 result:
                   labwareId: fixedTrash
                   definition: !anydict
+                  locationSequence:
+                    - kind: onAddressableArea
+                      addressableAreaName: A3
+                      slotName: A3
                 notes: []
                 startedAt: !re_fullmatch "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d+(Z|([+-]\\d{2}:\\d{2}))"
                 completedAt: !re_fullmatch "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d+(Z|([+-]\\d{2}:\\d{2}))"

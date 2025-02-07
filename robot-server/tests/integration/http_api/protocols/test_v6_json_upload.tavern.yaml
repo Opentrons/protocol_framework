@@ -207,6 +207,12 @@ stages:
                 result:
                   labwareId: sourcePlateId
                   definition: !anydict
+                  locationSequence:
+                    - kind: onModule
+                      moduleId: temperatureModuleId
+                    - kind: onAddressableArea
+                      addressableAreaName: '1'
+                      slotName: '1'
                 notes: []
                 startedAt: !re_fullmatch "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d+(Z|([+-]\\d{2}:\\d{2}))"
                 completedAt: !re_fullmatch "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d+(Z|([+-]\\d{2}:\\d{2}))"
@@ -226,6 +232,12 @@ stages:
                 result:
                   labwareId: destPlateId
                   definition: !anydict
+                  locationSequence:
+                    - kind: onModule
+                      moduleId: magneticModuleId
+                    - kind: onAddressableArea
+                      addressableAreaName: '3'
+                      slotName: '3'
                 notes: []
                 startedAt: !re_fullmatch "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d+(Z|([+-]\\d{2}:\\d{2}))"
                 completedAt: !re_fullmatch "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d+(Z|([+-]\\d{2}:\\d{2}))"
@@ -245,6 +257,10 @@ stages:
                 result:
                   labwareId: tipRackId
                   definition: !anydict
+                  locationSequence:
+                    - kind: onAddressableArea
+                      addressableAreaName: '8'
+                      slotName: '8'
                 notes: []
                 startedAt: !re_fullmatch "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d+(Z|([+-]\\d{2}:\\d{2}))"
                 completedAt: !re_fullmatch "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d+(Z|([+-]\\d{2}:\\d{2}))"
