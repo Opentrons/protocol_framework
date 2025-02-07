@@ -27,10 +27,11 @@ def retrieve_version_file(
     print(save_dir)
     command = ["scp", "-r", f"root@{robot_ip}:{version_file_path}", save_dir]
     try:
-        subprocess.run(command, check=True)
+        subprocess.run(command, check=True)  # type: ignore
         return os.path.join(save_dir, "VERSION.json")
     except subprocess.CalledProcessError as e:
         print(f"Error during file transfer: {e}")
+        return ""
 
 
 def retrieve_protocol_file(

@@ -4,7 +4,6 @@ from opentrons.protocol_api import (
     ParameterContext,
     InstrumentContext,
     Well,
-    Liquid,
 )
 from typing import Tuple, Optional
 from opentrons.protocol_api import COLUMN, ALL
@@ -14,6 +13,7 @@ from opentrons.protocol_api.module_contexts import (
     ThermocyclerContext,
     TemperatureModuleContext,
 )
+from typing import List, Dict
 
 metadata = {
     "protocolName": "MiSeq Library Preparation Protocol",
@@ -22,7 +22,7 @@ metadata = {
 }
 
 
-requirements = {"robotType": "Flex", "apiLevel": "2.21"}
+requirements = {"robotType": "Flex", "apiLevel": "2.23"}
 
 
 def add_parameters(parameters: ParameterContext) -> None:
@@ -31,9 +31,9 @@ def add_parameters(parameters: ParameterContext) -> None:
     helpers.create_deactivate_modules_parameter(parameters)
     helpers.create_disposable_lid_parameter(parameters)
     parameters.add_bool(
-        variable_name = "perform_column_tip_pickup",
-        display_name = "Perform Column Tip Pickup",
-        default = True
+        variable_name="column_tip_pickup",
+        display_name="Perform Column Tip Pickup",
+        default=True,
     )
 
 
@@ -43,11 +43,9 @@ def run(protocol: ProtocolContext) -> None:
     dot_bottom = protocol.params.dot_bottom  # type: ignore[attr-defined]
     deactivate_modules_bool = protocol.params.deactivate_modules  # type: ignore[attr-defined]
     disposable_lid = protocol.params.disposable_lid  # type: ignore[attr-defined]
-    perform_column_tip_pick_up = protocol.params.perform_column_tip_pickup # type: ignore[attr-defined]
+    column_tip_pick_up = protocol.params.column_tip_pickup  # type: ignore[attr-defined]
     if disposable_lid:
-        lids = helpers.load_disposable_lids(
-            protocol=protocol, num_of_lids=3, deck_slot=["A2"], deck_riser=False
-        )
+        lids = protocol.load_lid_stack("opentrons_tough_pcr_auto_sealing_lid", "A2", 3)
 
     def transfer(
         pipette: InstrumentContext,
@@ -56,8 +54,7 @@ def run(protocol: ProtocolContext) -> None:
         dest: Well,
         mix_after: Optional[Tuple] = None,
     ) -> None:
-        """
-        Custom transfer function combining aspirate and dispense with optional mixing and flow rate control
+        """Custom transfer function combining asp and dsp with optional mixing and flow rate control.
 
         Args:
             pipette: The pipette object to use
@@ -89,10 +86,16 @@ def run(protocol: ProtocolContext) -> None:
 
     # Load modules
     waste_chute = protocol.load_waste_chute()
-    thermocycler: ThermocyclerContext = protocol.load_module("thermocyclerModuleV2")  # type: ignore[assignment]
-    temp_module: TemperatureModuleContext = protocol.load_module("temperatureModuleV2", "C1")  # type: ignore[assignment]
+    thermocycler: ThermocyclerContext = protocol.load_module(
+        "thermocyclerModuleV2"
+    )  # type: ignore[assignment]
+    temp_module: TemperatureModuleContext = protocol.load_module(
+        "temperatureModuleV2", "C1"
+    )  # type: ignore[assignment]
     reagent_block = temp_module.load_adapter("opentrons_96_well_aluminum_block")
-    heater_shaker: HeaterShakerContext = protocol.load_module("heaterShakerModuleV1", "D1")  # type: ignore[assignment]
+    heater_shaker: HeaterShakerContext = protocol.load_module(
+        "heaterShakerModuleV1", "D1"
+    )  # type: ignore[assignment]
     hs_adapter = heater_shaker.load_adapter("opentrons_96_pcr_adapter")
 
     # Load labware
@@ -132,7 +135,7 @@ def run(protocol: ProtocolContext) -> None:
     partial_tiprack = protocol.load_labware("opentrons_flex_96_tiprack_50ul", "C2")
 
     # Load pipette
-    p96 = protocol.load_instrument("flex_96channel_200", "left")
+    p96 = protocol.load_instrument("flex_96channel_200", "left", tip_racks=[tiprack_1])
 
     def column(pipette: InstrumentContext = p96) -> None:
         pipette.configure_nozzle_layout(style=COLUMN, start="A1")
@@ -140,40 +143,22 @@ def run(protocol: ProtocolContext) -> None:
     def all(pipette: InstrumentContext = p96) -> None:
         pipette.configure_nozzle_layout(style=ALL)
 
-    def add_liquid(
-        name: str, color: str, well: Well, volume: float
-    ) -> Tuple[Liquid, Well]:
-        liquid = protocol.define_liquid(
-            name=name, description="generic", display_color=color
-        )
-        well.load_liquid(liquid=liquid, volume=volume)
-        return liquid, well
-
-    # liquids
-    color_hex_codes = [
-        "#9400D3",
-        "#FFC0CB",  # Light pink
-        "#00CED1",  # Light blue
-        "#7CFC00",  # Lime green
-        "#FF4500",  # Orange
-        "#9400D3",  # Violet
-        "#bd5338",
-    ]
-
+    # Load liquids and probe.
+    liquid_vols_and_wells: Dict[str, List[Dict[str, Well | List[Well] | float]]] = {
+        "Water": [{"well": reservoir.wells(), "volume": 150}],
+        "pcr_mm1": [{"well": pcr_reagents_plate.columns()[0], "volume": 100}],
+        "pcr_mm2": [{"well": pcr_reagents_plate.columns()[1], "volume": 100}],
+        "Index": [{"well": indices_plate.wells(), "volume": 100}],
+        "DNA": [{"well": dna_plate.wells(), "volume": 100}],
+    }
     pcr_mm1 = pcr_reagents_plate["A1"]
     pcr_mm2 = pcr_reagents_plate["A2"]
-    water = reservoir["A1"]
-    for well in reservoir.wells():
-        add_liquid("water", color_hex_codes[0], well, 150)
-    for well in pcr_reagents_plate.columns()[0]:
-        add_liquid("pcr_mm1", color_hex_codes[1], well, 100)
-    for well in pcr_reagents_plate.columns()[1]:
-        add_liquid("pcr_mm2", color_hex_codes[2], well, 100)
-    for well in indices_plate.wells():
-        add_liquid("Index", color_hex_codes[3], well, 100)
-    for well in dna_plate.wells():
-        add_liquid("DNA", color_hex_codes[4], well, 100)
-
+    helpers.load_wells_with_custom_liquids(
+        protocol, liquid_vols_and_wells=liquid_vols_and_wells
+    )
+    helpers.find_liquid_height_of_loaded_liquids(
+        protocol, liquid_vols_and_wells=liquid_vols_and_wells, pipette=p96
+    )
     # Protocol steps
     protocol.comment("Starting MiSeq library preparation protocol")
 
@@ -183,13 +168,12 @@ def run(protocol: ProtocolContext) -> None:
     thermocycler.set_block_temperature(8)
 
     column_tips = partial_tiprack.rows()[0][::-1]
-    if perform_column_tip_pick_up:
-        #Step 3: Dispense PCR1 master mix (avoiding multidispense to maintian accuracy)
+    if column_tip_pick_up:
+        # Step 3: Dispense PCR1 master mix (avoiding multidispense to maintian accuracy)
         column()
         protocol.comment("Dispensing PCR1 master mix")
         p96.pick_up_tip(column_tips.pop(0))
         for col in range(12):
-            print(col)
             transfer(p96, 7.5, pcr_mm1, pcr1_plate.rows()[0][col])
         p96.drop_tip()
 
@@ -215,7 +199,8 @@ def run(protocol: ProtocolContext) -> None:
     protocol.move_labware(pcr1_plate, thermocycler, use_gripper=True)
     heater_shaker.close_labware_latch()
     if disposable_lid:
-        protocol.move_labware(lids[0], pcr1_plate, use_gripper=True)
+        print(lids)
+        protocol.move_lid(lids, pcr1_plate, use_gripper=True)
     thermocycler.close_lid()
     thermocycler.set_lid_temperature(105)
 
@@ -246,8 +231,7 @@ def run(protocol: ProtocolContext) -> None:
     thermocycler.set_block_temperature(8)
     thermocycler.open_lid()
     if disposable_lid:
-        protocol.move_labware(lids[0], waste_chute, use_gripper=True)
-        lids.pop(0)
+        protocol.move_lid(pcr1_plate, waste_chute, use_gripper=True)
     # Steps 7-8: Move plates
     protocol.comment("Setting up PCR2")
     protocol.move_labware(pcr1_plate, "B2", use_gripper=True)
@@ -255,7 +239,7 @@ def run(protocol: ProtocolContext) -> None:
     protocol.move_labware(pcr2_plate, thermocycler, use_gripper=True)
     # Step 9: Dispense PCR2 master mix
     protocol.comment("Dispensing PCR2 master mix")
-    if perform_column_tip_pick_up:
+    if column_tip_pick_up:
         column()
         p96.pick_up_tip(column_tips.pop(0))
         for col in range(12):
@@ -290,7 +274,7 @@ def run(protocol: ProtocolContext) -> None:
     # Step 14: PCR2 thermal cycling
     protocol.comment("Starting PCR2 thermal cycling")
     if disposable_lid:
-        protocol.move_labware(lids[0], pcr2_plate, use_gripper=True)
+        protocol.move_lid(lids, pcr2_plate, use_gripper=True)
     thermocycler.close_lid()
     thermocycler.set_lid_temperature(105)
     # Initial denaturation
@@ -318,11 +302,11 @@ def run(protocol: ProtocolContext) -> None:
 
     thermocycler.open_lid()
     if disposable_lid:
-        protocol.move_labware(lids[0], waste_chute, use_gripper=True)
+        protocol.move_lid(pcr2_plate, waste_chute, use_gripper=True)
 
     # Step 15: Move PCR2 plate
     protocol.comment("Moving PCR2 plate")
-    protocol.move_labware(pcr1_dilution_plate, "A2", use_gripper=True)
+    protocol.move_labware(pcr1_dilution_plate, "A4", use_gripper=True)
     protocol.move_labware(pcr2_plate, reagent_block, use_gripper=True)
 
     # Steps 16-17: PCR2 dilution
@@ -331,7 +315,7 @@ def run(protocol: ProtocolContext) -> None:
     transfer(p96, 25, reservoir["A1"], pcr2_dilution_plate["A1"])
     transfer(p96, 5, pcr2_plate["A1"], pcr2_dilution_plate["A1"], mix_after=(10, 45))
     p96.return_tip()
-    protocol.move_labware(reservoir, "A4", use_gripper=True)
+    protocol.move_labware(reservoir, "C4", use_gripper=True)
     protocol.move_labware(eppendorf_384, "D2", use_gripper=True)
 
     # Step 18: Optional transfer to 384-well plate
@@ -351,10 +335,5 @@ def run(protocol: ProtocolContext) -> None:
         temp_module.deactivate()
         thermocycler.deactivate_lid()
         thermocycler.deactivate_block()
-
     # Pause for plate removal
-    protocol.pause(
-        "Remove plates for quantification. Keep PCR2 dilution plate if continuing with pooling."
-    )
-
     protocol.comment("Protocol complete!")
