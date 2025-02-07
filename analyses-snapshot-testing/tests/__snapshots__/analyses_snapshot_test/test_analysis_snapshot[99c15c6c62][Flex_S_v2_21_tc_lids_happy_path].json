@@ -2046,7 +2046,7 @@
           {
             "kind": "onLabware",
             "labwareId": "UUID",
-            "lidId": "41c02247-abed-4a60-a00d-cfd6a680c0c1"
+            "lidId": "44d97b51-be73-4836-b658-253591263032"
           },
           {
             "kind": "onModule",
@@ -2187,7 +2187,7 @@
           {
             "kind": "onLabware",
             "labwareId": "UUID",
-            "lidId": "9b88e35d-b29e-48fd-a745-2fd195409afa"
+            "lidId": "7dd8084c-8564-4b4c-8620-4f9c4e16d000"
           },
           {
             "kind": "onModule",
@@ -2332,7 +2332,7 @@
           {
             "kind": "onLabware",
             "labwareId": "UUID",
-            "lidId": "e05bbcb3-035f-419a-8cfb-51d94797ac60"
+            "lidId": "4344d4a6-e1d7-4330-8e01-087a7fb38dec"
           },
           {
             "kind": "onModule",
