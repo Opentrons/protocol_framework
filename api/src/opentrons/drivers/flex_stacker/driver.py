@@ -67,14 +67,14 @@ STACKER_MOTION_CONFIG = {
             max_speed=10.0,
             acceleration=100.0,
             max_speed_discont=40,
-            current=1.8,
+            current=1.5,
         ),
         "move": MoveParams(
             StackerAxis.Z,
             max_speed=200.0,
             acceleration=500.0,
             max_speed_discont=40,
-            current=1.8,
+            current=1.5,
         ),
     },
     StackerAxis.L: {

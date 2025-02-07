@@ -5,21 +5,19 @@ import merge from 'lodash/merge'
 import omit from 'lodash/omit'
 import reduce from 'lodash/reduce'
 import {
-  FLEX_ROBOT_TYPE,
-  OT2_ROBOT_TYPE,
   getLabwareDefaultEngageHeight,
   getLabwareDefURI,
   getModuleType,
   MAGNETIC_MODULE_TYPE,
   MAGNETIC_MODULE_V1,
   THERMOCYCLER_MODULE_TYPE,
-  WASTE_CHUTE_ADDRESSABLE_AREAS,
-  MOVABLE_TRASH_ADDRESSABLE_AREAS,
-  WASTE_CHUTE_CUTOUT,
 } from '@opentrons/shared-data'
 import { rootReducer as labwareDefsRootReducer } from '../../labware-defs'
-import { getCutoutIdByAddressableArea, uuid } from '../../utils'
-import { INITIAL_DECK_SETUP_STEP_ID, SPAN7_8_10_11_SLOT } from '../../constants'
+import {
+  GRIPPER_LOCATION,
+  INITIAL_DECK_SETUP_STEP_ID,
+  SPAN7_8_10_11_SLOT,
+} from '../../constants'
 import { getPDMetadata } from '../../file-types'
 import {
   getDefaultsForStepType,
@@ -29,7 +27,6 @@ import { PRESAVED_STEP_ID } from '../../steplist/types'
 import { getLabwareIsCompatible } from '../../utils/labwareModuleCompatibility'
 import { getLabwareOnModule } from '../../ui/modules/utils'
 import { nestedCombineReducers } from './nestedCombineReducers'
-import { COLUMN_4_SLOTS } from '@opentrons/step-generation'
 import {
   _getPipetteEntitiesRootState,
   _getLabwareEntitiesRootState,
@@ -40,7 +37,6 @@ import {
   createPresavedStepForm,
   getDeckItemIdInSlot,
   getIdsInRange,
-  getUnoccupiedSlotForTrash,
 } from '../utils'
 
 import type { Reducer } from 'redux'
@@ -49,16 +45,7 @@ import type {
   NormalizedAdditionalEquipmentById,
   NormalizedPipetteById,
 } from '@opentrons/step-generation'
-import type {
-  LoadLabwareCreateCommand,
-  LoadModuleCreateCommand,
-  LoadPipetteCreateCommand,
-  MoveLabwareCreateCommand,
-  MoveToAddressableAreaCreateCommand,
-  MoveToAddressableAreaForDropTipCreateCommand,
-  PipetteName,
-  AddressableAreaName,
-} from '@opentrons/shared-data'
+import type { PipetteName } from '@opentrons/shared-data'
 import type { RootState as LabwareDefsRootState } from '../../labware-defs'
 import type { LoadFileAction } from '../../load-file'
 import type { SaveStepFormAction } from '../../ui/steps/actions/thunks'
@@ -108,6 +95,11 @@ import type {
   SelectMultipleStepsAction,
 } from '../../ui/steps/actions/types'
 import type { Action } from '../../types'
+import type { ModuleLoadInfo, PipetteLoadInfo } from '../../file-types'
+import type {
+  AdditionalEquipmentLocationUpdate,
+  LocationUpdate,
+} from '../../load-file/migration/utils/getAdditionalEquipmentLocationUpdate'
 import type {
   NormalizedLabware,
   NormalizedLabwareById,
@@ -243,6 +235,10 @@ export const initialDeckSetupStepForm: FormData = {
   labwareLocationUpdate: {},
   pipetteLocationUpdate: {},
   moduleLocationUpdate: {},
+  trashBinLocationUpdate: {},
+  wasteChuteLocationUpdate: {},
+  stagingAreaLocationUpdate: {},
+  gripperLocationUpdate: {},
 }
 export const initialSavedStepFormsState: SavedStepFormState = {
   [INITIAL_DECK_SETUP_STEP_ID]: initialDeckSetupStepForm,
@@ -371,6 +367,71 @@ export const savedStepForms = (
         ...getDefaultsForStepType(stepForm.stepType),
         ...stepForm,
       }))
+    }
+    case 'CREATE_DECK_FIXTURE': {
+      const { id, location, name } = action.payload
+      const prevInitialDeckSetupStep =
+        savedStepForms[INITIAL_DECK_SETUP_STEP_ID]
+      const locationUpdate = `${name}LocationUpdate`
+      return {
+        ...savedStepForms,
+        [INITIAL_DECK_SETUP_STEP_ID]: {
+          ...prevInitialDeckSetupStep,
+          [locationUpdate]: {
+            ...prevInitialDeckSetupStep[locationUpdate],
+            [id]: location,
+          },
+        },
+      }
+    }
+    case 'DELETE_DECK_FIXTURE': {
+      const { id } = action.payload
+      const name = id.split(':')[1]
+      const locationUpdate = `${name}LocationUpdate`
+
+      return mapValues(
+        savedStepForms,
+        (form: FormData): FormData => {
+          const updatedLocation = omit(form[locationUpdate] || {}, id)
+
+          return {
+            ...form,
+            [locationUpdate]:
+              Object.keys(updatedLocation).length > 0 ? updatedLocation : {},
+          }
+        }
+      )
+    }
+    case 'TOGGLE_IS_GRIPPER_REQUIRED': {
+      const { id } = action.payload
+      const prevInitialDeckSetupStep =
+        savedStepForms[INITIAL_DECK_SETUP_STEP_ID]
+      const gripperLocationUpdate: LocationUpdate =
+        prevInitialDeckSetupStep.gripperLocationUpdate
+      const gripperKey = Object.entries(gripperLocationUpdate).find(
+        ([_, value]) => value === GRIPPER_LOCATION
+      )?.[0]
+
+      if (gripperKey == null) {
+        return {
+          ...savedStepForms,
+          [INITIAL_DECK_SETUP_STEP_ID]: {
+            ...prevInitialDeckSetupStep,
+            gripperLocationUpdate: {
+              ...gripperLocationUpdate,
+              [id]: GRIPPER_LOCATION,
+            },
+          },
+        }
+      } else {
+        return {
+          ...savedStepForms,
+          [INITIAL_DECK_SETUP_STEP_ID]: {
+            ...prevInitialDeckSetupStep,
+            gripperLocationUpdate: {},
+          },
+        }
+      }
     }
     case 'DUPLICATE_LABWARE':
     case 'CREATE_CONTAINER': {
@@ -663,6 +724,8 @@ export const savedStepForms = (
           (form.stepType === 'magnet' ||
             form.stepType === 'temperature' ||
             form.stepType === 'heaterShaker' ||
+            form.stepType === 'absorbanceReader' ||
+            form.stepType === 'thermocycler' ||
             form.stepType === 'pause') &&
           form.moduleId === moduleId
         ) {
@@ -928,41 +991,8 @@ export const labwareInvariantProperties: Reducer<
       action: LoadFileAction
     ): NormalizedLabwareById => {
       const { file } = action.payload
-      const loadLabwareCommands = Object.values(file.commands).filter(
-        (command): command is LoadLabwareCreateCommand =>
-          command.commandType === 'loadLabware'
-      )
-      const labware = {
-        ...loadLabwareCommands.reduce(
-          (acc: NormalizedLabwareById, command: LoadLabwareCreateCommand) => {
-            const { labwareId, loadName, namespace, version } = command.params
-            const labwareDefinitionMatch = Object.entries(
-              file.labwareDefinitions
-            ).find(
-              ([definitionUri, labwareDef]) =>
-                labwareDef.parameters.loadName === loadName &&
-                labwareDef.namespace === namespace &&
-                labwareDef.version === version
-            )
-            if (labwareDefinitionMatch == null) {
-              console.error(
-                `expected to find labware definition match with loadname ${loadName} but could not`
-              )
-            }
-            const labwareDefURI =
-              labwareDefinitionMatch != null ? labwareDefinitionMatch[0] : ''
-            const id = labwareId ?? ''
-            return {
-              ...acc,
-              [id]: {
-                labwareDefURI,
-              },
-            }
-          },
-          {}
-        ),
-      }
-      return { ...labware, ...state }
+      const metadata = getPDMetadata(file)
+      return { ...metadata.labware, ...state }
     },
     REPLACE_CUSTOM_LABWARE_DEF: (
       state: NormalizedLabwareById,
@@ -1018,30 +1048,22 @@ export const moduleInvariantProperties: Reducer<
       action: LoadFileAction
     ): ModuleEntities => {
       const { file } = action.payload
-      const loadModuleCommands = Object.values(file.commands).filter(
-        (command): command is LoadModuleCreateCommand =>
-          command.commandType === 'loadModule'
-      )
-      const modules = loadModuleCommands.reduce(
-        (acc: ModuleEntities, command: LoadModuleCreateCommand) => {
-          const { moduleId, model, location } = command.params
-          if (moduleId == null) {
-            console.error(
-              `expected module ${model} in location ${location.slotName} to have an id, but id does not`
-            )
-            return acc
+      const metadata = getPDMetadata(file)
+      const modules: ModuleEntities = Object.entries(metadata.modules).reduce(
+        (
+          acc: ModuleEntities,
+          [id, moduleLoadInfo]: [string, ModuleLoadInfo]
+        ) => {
+          acc[id] = {
+            id: id,
+            type: getModuleType(moduleLoadInfo.model),
+            model: moduleLoadInfo.model,
           }
-          return {
-            ...acc,
-            [moduleId]: {
-              id: moduleId,
-              type: getModuleType(model),
-              model,
-            },
-          }
+          return acc
         },
         {}
       )
+
       return Object.keys(modules).length > 0 ? modules : state
     },
   },
@@ -1052,7 +1074,6 @@ export const pipetteInvariantProperties: Reducer<
   NormalizedPipetteById,
   any
   // @ts-expect-error(sa, 2021-6-10): cannot use string literals as action type
-  // TODO IMMEDIATELY: refactor this to the old fashioned way if we cannot have type safety: https://github.com/redux-utilities/redux-actions/issues/282#issuecomment-595163081
 > = handleActions(
   {
     LOAD_FILE: (
@@ -1061,20 +1082,18 @@ export const pipetteInvariantProperties: Reducer<
     ): NormalizedPipetteById => {
       const { file } = action.payload
       const metadata = getPDMetadata(file)
-      const loadPipetteCommands = Object.values(file.commands).filter(
-        (command): command is LoadPipetteCreateCommand =>
-          command.commandType === 'loadPipette'
-      )
-      const pipettes = loadPipetteCommands.reduce(
-        (acc: NormalizedPipetteById, command) => {
-          const { pipetteName, pipetteId } = command.params
-          const tiprackDefURI = metadata.pipetteTiprackAssignments[pipetteId]
+      const pipettes = Object.entries(metadata.pipettes).reduce(
+        (
+          acc: NormalizedPipetteById,
+          [id, pipetteLoadInfo]: [string, PipetteLoadInfo]
+        ) => {
+          const tiprackDefURI = metadata.pipetteTiprackAssignments[id]
 
           return {
             ...acc,
-            [pipetteId]: {
-              id: pipetteId,
-              name: pipetteName as PipetteName,
+            [id]: {
+              id,
+              name: pipetteLoadInfo.pipetteName as PipetteName,
               tiprackDefURI,
             },
           }
@@ -1109,293 +1128,80 @@ export const additionalEquipmentInvariantProperties = handleActions<NormalizedAd
       action: LoadFileAction
     ): NormalizedAdditionalEquipmentById => {
       const { file } = action.payload
-      const isFlex = file.robot.model === FLEX_ROBOT_TYPE
+      const savedStepForms = file.designerApplication?.data?.savedStepForms
+      const initialDeckSetup: AdditionalEquipmentLocationUpdate = savedStepForms?.[
+        INITIAL_DECK_SETUP_STEP_ID
+      ] as any
+      const {
+        gripperLocationUpdate,
+        trashBinLocationUpdate,
+        wasteChuteLocationUpdate,
+        stagingAreaLocationUpdate,
+      } = initialDeckSetup
 
-      const hasGripperCommands = Object.values(file.commands).some(
-        (command): command is MoveLabwareCreateCommand =>
-          (command.commandType === 'moveLabware' &&
-            command.params.strategy === 'usingGripper') ||
-          command.commandType === 'absorbanceReader/closeLid' ||
-          command.commandType === 'absorbanceReader/openLid'
-      )
-      const hasWasteChuteCommands = Object.values(file.commands).some(
-        command =>
-          (command.commandType === 'moveToAddressableArea' &&
-            WASTE_CHUTE_ADDRESSABLE_AREAS.includes(
-              command.params.addressableAreaName as AddressableAreaName
-            )) ||
-          (command.commandType === 'moveLabware' &&
-            command.params.newLocation !== 'offDeck' &&
-            'addressableAreaName' in command.params.newLocation &&
-            WASTE_CHUTE_ADDRESSABLE_AREAS.includes(
-              command.params.newLocation
-                .addressableAreaName as AddressableAreaName
-            ))
-      )
-      const getStagingAreaSlotNames = (
-        commandType: 'moveLabware' | 'loadLabware',
-        locationKey: 'newLocation' | 'location'
-      ): AddressableAreaName[] => {
-        return Object.values(file.commands)
-          .filter(
-            command =>
-              command.commandType === commandType &&
-              command.params[locationKey] !== 'offDeck' &&
-              'addressableAreaName' in command.params[locationKey] &&
-              COLUMN_4_SLOTS.includes(
-                command.params[locationKey]
-                  .addressableAreaName as AddressableAreaName
-              )
-          )
-          .map(command => command.params[locationKey].addressableAreaName)
-      }
-
-      const stagingAreaSlotNames = [
-        ...new Set([
-          ...getStagingAreaSlotNames('moveLabware', 'newLocation'),
-          ...getStagingAreaSlotNames('loadLabware', 'location'),
-        ]),
-      ]
-
-      const unoccupiedSlotForTrash = hasWasteChuteCommands
-        ? ''
-        : getUnoccupiedSlotForTrash(
-            file,
-            hasWasteChuteCommands,
-            stagingAreaSlotNames
-          )
-
-      const stagingAreas = stagingAreaSlotNames.reduce((acc, slot) => {
-        const stagingAreaId = `${uuid()}:stagingArea`
-        const cutoutId = getCutoutIdByAddressableArea(
-          slot,
-          'stagingAreaRightSlot',
-          isFlex ? FLEX_ROBOT_TYPE : OT2_ROBOT_TYPE
-        )
-        return {
-          ...acc,
-          [stagingAreaId]: {
-            name: 'stagingArea' as const,
-            id: stagingAreaId,
-            location: cutoutId,
+      let gripper
+      if (Object.keys(gripperLocationUpdate).length > 0) {
+        const id = Object.keys(gripperLocationUpdate)[0]
+        gripper = {
+          [id]: {
+            name: 'gripper' as const,
+            id,
+            location: GRIPPER_LOCATION,
           },
         }
-      }, {})
-
-      const trashBinCommand = Object.values(file.commands).find(
-        (
-          command
-        ): command is
-          | MoveToAddressableAreaCreateCommand
-          | MoveToAddressableAreaForDropTipCreateCommand =>
-          (command.commandType === 'moveToAddressableArea' &&
-            (MOVABLE_TRASH_ADDRESSABLE_AREAS.includes(
-              command.params.addressableAreaName as AddressableAreaName
-            ) ||
-              command.params.addressableAreaName === 'fixedTrash')) ||
-          command.commandType === 'moveToAddressableAreaForDropTip'
-      )
-
-      const trashAddressableAreaName =
-        trashBinCommand?.params.addressableAreaName
-      const savedStepForms = file.designerApplication?.data?.savedStepForms
-
-      const findTrashBinId = (): string | null => {
-        if (!savedStepForms) {
-          return null
-        }
-
-        for (const stepForm of Object.values(savedStepForms)) {
-          if (stepForm.stepType === 'moveLiquid') {
-            if (stepForm.dispense_labware.toLowerCase().includes('trash')) {
-              return stepForm.dispense_labware
-            }
-            if (stepForm.dropTip_location.toLowerCase().includes('trash')) {
-              return stepForm.dropTip_location
-            }
-            if (stepForm.blowout_location?.toLowerCase().includes('trash')) {
-              return stepForm.blowout_location
-            }
-          }
-          if (stepForm.stepType === 'mix') {
-            if (stepForm.dropTip_location.toLowerCase().includes('trash')) {
-              return stepForm.dropTip_location
-            } else if (
-              stepForm.blowout_location?.toLowerCase().includes('trash')
-            ) {
-              return stepForm.blowout_location
-            }
-          }
-        }
-
-        return null
       }
-
-      const trashBinId = findTrashBinId()
-      const trashCutoutId =
-        trashAddressableAreaName != null
-          ? getCutoutIdByAddressableArea(
-              trashAddressableAreaName as AddressableAreaName,
-              isFlex ? 'trashBinAdapter' : 'fixedTrashSlot',
-              isFlex ? FLEX_ROBOT_TYPE : OT2_ROBOT_TYPE
-            )
-          : null
-
-      const trashBin =
-        trashAddressableAreaName != null && trashBinId != null
-          ? {
-              [trashBinId]: {
-                name: 'trashBin' as const,
-                id: trashBinId,
-                //  TODO(should be type cutoutId when location is type cutoutId)
-                location: trashCutoutId as string,
-              },
-            }
-          : null
-
-      if (trashBinCommand == null && file.robot.model === OT2_ROBOT_TYPE) {
-        console.error(
-          'expected to find a fixedTrash command for the OT-2 but could not'
+      let trashBin
+      if (Object.keys(trashBinLocationUpdate).length > 0) {
+        const id = Object.keys(trashBinLocationUpdate)[0]
+        trashBin = {
+          [id]: {
+            name: 'trashBin' as const,
+            id,
+            location: Object.values(trashBinLocationUpdate)[0],
+          },
+        }
+      }
+      let wasteChute
+      if (Object.keys(wasteChuteLocationUpdate).length > 0) {
+        const id = Object.keys(wasteChuteLocationUpdate)[0]
+        wasteChute = {
+          [id]: {
+            name: 'wasteChute' as const,
+            id,
+            location: Object.values(wasteChuteLocationUpdate)[0],
+          },
+        }
+      }
+      let stagingArea
+      if (Object.keys(stagingAreaLocationUpdate).length > 0) {
+        stagingArea = Object.entries(stagingAreaLocationUpdate).reduce(
+          (acc, [id, location]) => ({
+            ...acc,
+            [id]: {
+              name: 'stagingArea' as const,
+              id,
+              location,
+            },
+          }),
+          {}
         )
       }
 
-      const moveLiquidStepWasteChute =
-        savedStepForms != null
-          ? Object.values(savedStepForms).find(
-              stepForm =>
-                stepForm.stepType === 'moveLiquid' &&
-                (stepForm.aspirate_labware.includes('wasteChute') ||
-                  stepForm.dispense_labware.includes('wasteChute') ||
-                  stepForm.dropTip_location.includes('wasteChute') ||
-                  stepForm.blowout_location?.includes('wasteChute'))
-            )
-          : null
-
-      let wasteChuteId: string | null = null
-      if (hasWasteChuteCommands && moveLiquidStepWasteChute != null) {
-        if (moveLiquidStepWasteChute.aspirate_labware.includes('wasteChute')) {
-          wasteChuteId = moveLiquidStepWasteChute.aspirate_labware
-        } else if (
-          moveLiquidStepWasteChute.dispense_labware.includes('wasteChute')
-        ) {
-          wasteChuteId = moveLiquidStepWasteChute.dispense_labware
-        } else if (
-          moveLiquidStepWasteChute.dropTip_location.includes('wasteChute')
-        ) {
-          wasteChuteId = moveLiquidStepWasteChute.dropTip_location
-        } else if (
-          moveLiquidStepWasteChute.blowOut_location?.includes('wasteChute')
-        ) {
-          wasteChuteId = moveLiquidStepWasteChute.blowOut_location
-        }
-        //  new wasteChuteId generated for if there are only moveLabware commands
-      } else if (hasWasteChuteCommands && moveLiquidStepWasteChute == null) {
-        wasteChuteId = `${uuid()}:wasteChute`
-      }
-
-      const wasteChute =
-        hasWasteChuteCommands && wasteChuteId != null
-          ? {
-              [wasteChuteId]: {
-                name: 'wasteChute' as const,
-                id: wasteChuteId,
-                location: 'cutoutD3',
-              },
-            }
-          : {}
-
-      const gripperId = `${uuid()}:gripper`
-      const gripper = hasGripperCommands
-        ? {
-            [gripperId]: {
-              name: 'gripper' as const,
-              id: gripperId,
-            },
-          }
-        : {}
-      const hardcodedTrashBinIdOt2 = `${uuid()}:fixedTrash`
-      const hardcodedTrashBinOt2 = {
-        [hardcodedTrashBinIdOt2]: {
-          name: 'trashBin' as const,
-          id: hardcodedTrashBinIdOt2,
-          location: getCutoutIdByAddressableArea(
-            'fixedTrash' as AddressableAreaName,
-            'fixedTrashSlot',
-            OT2_ROBOT_TYPE
-          ),
-        },
-      }
-      const hardcodedTrashAddressableAreaName =
-        unoccupiedSlotForTrash === WASTE_CHUTE_CUTOUT
-          ? 'wasteChute'
-          : `movableTrash${unoccupiedSlotForTrash}`
-
-      const hardcodedTrashIdFlex = `${uuid()}:${hardcodedTrashAddressableAreaName}`
-
-      const hardCodedTrashLocation =
-        unoccupiedSlotForTrash === ''
-          ? ''
-          : unoccupiedSlotForTrash === WASTE_CHUTE_CUTOUT
-          ? WASTE_CHUTE_CUTOUT
-          : getCutoutIdByAddressableArea(
-              hardcodedTrashAddressableAreaName as AddressableAreaName,
-              'trashBinAdapter',
-              FLEX_ROBOT_TYPE
-            )
-
-      const hardcodedTrashFlex = {
-        [hardcodedTrashIdFlex]: {
-          name:
-            unoccupiedSlotForTrash === WASTE_CHUTE_CUTOUT
-              ? ('wasteChute' as const)
-              : ('trashBin' as const),
-          id: hardcodedTrashIdFlex,
-          location: hasWasteChuteCommands ? '' : hardCodedTrashLocation,
-        },
-      }
-      if (isFlex) {
-        if (trashBin != null) {
-          return {
-            ...state,
-            ...gripper,
-            ...trashBin,
-            ...wasteChute,
-            ...stagingAreas,
-          }
-        } else if (trashBin == null && !hasWasteChuteCommands) {
-          //  always hardcode a trash bin or waste chute when no pipetting command is provided since return tip
-          //  is not supported
-          return {
-            ...state,
-            ...gripper,
-            ...hardcodedTrashFlex,
-            ...wasteChute,
-            ...stagingAreas,
-          }
-        } else {
-          return {
-            ...state,
-            ...gripper,
-            ...wasteChute,
-            ...stagingAreas,
-          }
-        }
-      } else {
-        if (trashBin != null) {
-          return { ...state, ...trashBin }
-        } else {
-          //  always hardcode a trash bin when no pipetting command is provided since no trash for
-          //  OT-2 is not supported
-          return { ...state, ...hardcodedTrashBinOt2 }
-        }
+      return {
+        ...state,
+        ...trashBin,
+        ...wasteChute,
+        ...gripper,
+        ...stagingArea,
       }
     },
-
+    //  @ts-expect-error
     TOGGLE_IS_GRIPPER_REQUIRED: (
-      state: NormalizedAdditionalEquipmentById
+      state: NormalizedAdditionalEquipmentById,
+      action: ToggleIsGripperRequiredAction
     ): NormalizedAdditionalEquipmentById => {
       let updatedEquipment = { ...state }
-      const gripperId = `${uuid()}:gripper`
+      const id = action.payload.id
       const gripperKey = Object.keys(updatedEquipment).find(
         key => updatedEquipment[key].name === 'gripper'
       )
@@ -1405,9 +1211,9 @@ export const additionalEquipmentInvariantProperties = handleActions<NormalizedAd
       } else {
         updatedEquipment = {
           ...updatedEquipment,
-          [gripperId]: {
+          [id]: {
             name: 'gripper' as const,
-            id: gripperId,
+            id,
           },
         }
       }

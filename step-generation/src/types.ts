@@ -120,6 +120,19 @@ export interface NormalizedPipetteById {
   }
 }
 
+export interface LiquidEntity {
+  displayName: string
+  displayColor: string
+  description: string | null
+  pythonName: string
+  liquidGroupId: string
+  liquidClass?: string
+}
+
+export interface LiquidEntities {
+  [liquidId: string]: LiquidEntity
+}
+
 export type AdditionalEquipmentName =
   | 'gripper'
   | 'wasteChute'
@@ -195,7 +208,7 @@ export type SharedTransferLikeArgs = CommonArgs & {
   /** Touch tip after every aspirate */
   touchTipAfterAspirate: boolean
   /** Optional offset for touch tip after aspirate (if null, use PD default) */
-  touchTipAfterAspirateOffsetMmFromBottom: number
+  touchTipAfterAspirateOffsetMmFromTop: number
   /** changeTip is interpreted differently by different Step types */
   changeTip: ChangeTipOptions
   /** Delay after every aspirate */
@@ -219,7 +232,7 @@ export type SharedTransferLikeArgs = CommonArgs & {
   /** Touch tip in destination well after dispense */
   touchTipAfterDispense: boolean
   /** Optional offset for touch tip after dispense (if null, use PD default) */
-  touchTipAfterDispenseOffsetMmFromBottom: number
+  touchTipAfterDispenseOffsetMmFromTop: number
   /** Flow rate in uL/sec for all dispenses */
   dispenseFlowRateUlSec: number
   /** offset from bottom of well in mm */
@@ -295,7 +308,7 @@ export type MixArgs = CommonArgs & {
   times: number
   /** Touch tip after mixing */
   touchTip: boolean
-  touchTipMmFromBottom: number
+  touchTipMmFromTop: number
   /** change tip: see comments in step-generation/mix.js */
   changeTip: ChangeTipOptions
   /** drop tip location entity id */
@@ -515,6 +528,7 @@ export interface InvariantContext {
   moduleEntities: ModuleEntities
   pipetteEntities: PipetteEntities
   additionalEquipmentEntities: AdditionalEquipmentEntities
+  liquidEntities: LiquidEntities
   config: Config
 }
 
@@ -619,6 +633,7 @@ export interface CommandsAndRobotState {
   commands: CreateCommand[]
   robotState: RobotState
   warnings?: CommandCreatorWarning[]
+  python?: string
 }
 
 export interface CommandCreatorErrorResponse {
@@ -629,6 +644,7 @@ export interface CommandCreatorErrorResponse {
 export interface CommandsAndWarnings {
   commands: CreateCommand[]
   warnings?: CommandCreatorWarning[]
+  python?: string
 }
 export type CommandCreatorResult =
   | CommandsAndWarnings

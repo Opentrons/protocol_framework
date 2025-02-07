@@ -679,7 +679,7 @@ WellSegment = Union[
 class InnerWellGeometry(BaseModel):
     sections: List[WellSegment] = Field(
         ...,
-        description="A list of all of the sections of the well that have a contiguous shape",
+        description="A list of all of the sections of the well that have a contiguous shape. Must be ordered from top (highest z) to bottom (lowest z).",
     )
 
 
