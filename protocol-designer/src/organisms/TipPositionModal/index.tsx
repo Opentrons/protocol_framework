@@ -244,7 +244,7 @@ export function TipPositionModal(
       type="info"
       width="37.125rem"
       closeOnOutsideClick
-      title={t('shared:tip_position', { prefixTitle })}
+      title={t('shared:tip_position', { prefix: prefixTitle })}
       onClose={handleCancel}
       footer={
         <Flex
