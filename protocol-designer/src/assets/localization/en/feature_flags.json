@@ -5,8 +5,7 @@
   },
   "OT_PD_DISABLE_MODULE_RESTRICTIONS": {
     "title": "Disable module placement restrictions",
-    "description_1": "Turn off all restrictions on module placement and related pipette crash guidance.",
-    "description_2": "NOT recommended! Switching from default positions may cause crashes and the Protocol Designer cannot yet give guidance on what to expect. Use at your own discretion. "
+    "description": "Turn off all restrictions on module placement and related pipette crash guidance."
   },
   "OT_PD_ALLOW_ALL_TIPRACKS": {
     "title": "Allow all tip rack options",
@@ -31,5 +30,9 @@
   "OT_PD_ENABLE_LIQUID_CLASSES": {
     "title": "Enable liquid classes",
     "description": "Enable liquid classes support"
+  },
+  "OT_PD_ENABLE_MULTIPLE_TEMPS_OT2": {
+    "title": "Allow multiple temperature modules on an OT-2",
+    "description": "This is an experimental setting. We are not responsible for any collisions you might encounter."
   }
 }

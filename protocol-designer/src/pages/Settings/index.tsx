@@ -90,8 +90,14 @@ export function Settings(): JSX.Element {
     )
   }
 
+  const userFacingFlags: FlagTypes[] = [
+    'OT_PD_ENABLE_HOT_KEYS_DISPLAY',
+    'OT_PD_ENABLE_MULTIPLE_TEMPS_OT2',
+    'OT_PD_DISABLE_MODULE_RESTRICTIONS',
+  ]
+
   const prereleaseFlagRows = allFlags
-    .filter(flag => flag !== 'OT_PD_ENABLE_HOT_KEYS_DISPLAY')
+    .filter(flag => !userFacingFlags.includes(flag))
     .map(toFlagRow)
 
   return (
@@ -206,31 +212,34 @@ export function Settings(): JSX.Element {
                   </StyledText>
                 </Btn>
               </ListItem>
-              <ListItem
-                padding={SPACING.spacing16}
-                justifyContent={JUSTIFY_SPACE_BETWEEN}
-                type="noActive"
-              >
-                <Flex flexDirection={DIRECTION_COLUMN}>
-                  <StyledText desktopStyle="bodyDefaultSemiBold">
-                    {t('OT_PD_ENABLE_HOT_KEYS_DISPLAY.title')}
-                  </StyledText>
-                  <Flex color={COLORS.grey60}>
-                    <StyledText desktopStyle="bodyDefaultRegular">
-                      {t('OT_PD_ENABLE_HOT_KEYS_DISPLAY.description')}
+              {userFacingFlags.map(flag => (
+                <ListItem
+                  key={flag}
+                  padding={SPACING.spacing16}
+                  justifyContent={JUSTIFY_SPACE_BETWEEN}
+                  type="noActive"
+                >
+                  <Flex flexDirection={DIRECTION_COLUMN}>
+                    <StyledText desktopStyle="bodyDefaultSemiBold">
+                      {t(`${flag}.title`)}
                     </StyledText>
+                    <Flex color={COLORS.grey60}>
+                      <StyledText desktopStyle="bodyDefaultRegular">
+                        {t(`${flag}.description`)}
+                      </StyledText>
+                    </Flex>
                   </Flex>
-                </Flex>
-                <ToggleButton
-                  label="Settings_hotKeys"
-                  toggledOn={Boolean(flags[HOT_KEY_FLAG])}
-                  onClick={() => {
-                    setFeatureFlags({
-                      OT_PD_ENABLE_HOT_KEYS_DISPLAY: !flags[HOT_KEY_FLAG],
-                    })
-                  }}
-                />
-              </ListItem>
+                  <ToggleButton
+                    label="Settings_hotKeys"
+                    toggledOn={Boolean(flags[flag])}
+                    onClick={() => {
+                      setFeatureFlags({
+                        [flag]: !flags[flag],
+                      })
+                    }}
+                  />
+                </ListItem>
+              ))}
             </Flex>
             <Flex flexDirection={DIRECTION_COLUMN} gridGap={SPACING.spacing8}>
               <StyledText desktopStyle="bodyLargeSemiBold">
