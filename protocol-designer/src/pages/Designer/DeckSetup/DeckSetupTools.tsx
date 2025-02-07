@@ -29,6 +29,7 @@ import {
   MAGNETIC_MODULE_V2,
   MODULE_MODELS,
   OT2_ROBOT_TYPE,
+  TEMPERATURE_MODULE_TYPE,
 } from '@opentrons/shared-data'
 
 import { getRobotType } from '../../../file-data/selectors'
@@ -49,6 +50,7 @@ import {
   selectNestedLabware,
   selectZoomedIntoSlot,
 } from '../../../labware-ingred/actions'
+import { getEnableMutlipleTempsOT2 } from '../../../feature-flags/selectors'
 import { useBlockingHint } from '../../../organisms/BlockingHintModal/useBlockingHint'
 import { selectors } from '../../../labware-ingred/selectors'
 import { useKitchen } from '../../../organisms/Kitchen/hooks'
@@ -102,6 +104,7 @@ export function DeckSetupTools(props: DeckSetupToolsProps): JSX.Element | null {
   const selectedSlotInfo = useSelector(selectors.getZoomedInSlotInfo)
   const robotType = useSelector(getRobotType)
   const savedSteps = useSelector(getSavedStepForms)
+  const enableMultipleTempsOt2 = useSelector(getEnableMutlipleTempsOT2)
   const [showDeleteLabwareModal, setShowDeleteLabwareModal] = useState<
     ModuleModel | 'clear' | null
   >(null)
@@ -612,11 +615,33 @@ export function DeckSetupTools(props: DeckSetupToolsProps): JSX.Element | null {
                               }) as string
                             )
                           } else if (
-                            typeSomewhereOnDeck.length > 0 &&
-                            robotType === OT2_ROBOT_TYPE
+                            (!enableMultipleTempsOt2 &&
+                              typeSomewhereOnDeck.length > 0 &&
+                              robotType === OT2_ROBOT_TYPE) ||
+                            (enableMultipleTempsOt2 &&
+                              typeSomewhereOnDeck.length > 0 &&
+                              getModuleType(model as ModuleModel) !==
+                                TEMPERATURE_MODULE_TYPE &&
+                              robotType === OT2_ROBOT_TYPE)
                           ) {
                             makeSnackbar(
                               t('one_item', {
+                                hardware: t(
+                                  `shared:${getModuleType(
+                                    selectedModel
+                                  ).toLowerCase()}`
+                                ),
+                              }) as string
+                            )
+                          } else if (
+                            enableMultipleTempsOt2 &&
+                            typeSomewhereOnDeck.length > 1 &&
+                            getModuleType(model as ModuleModel) ===
+                              TEMPERATURE_MODULE_TYPE &&
+                            robotType === OT2_ROBOT_TYPE
+                          ) {
+                            makeSnackbar(
+                              t('two_item', {
                                 hardware: t(
                                   `shared:${getModuleType(
                                     selectedModel
