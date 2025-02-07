@@ -33,6 +33,6 @@
   },
   "OT_PD_ENABLE_MULTIPLE_TEMPS_OT2": {
     "title": "Allow multiple temperature modules on an OT-2",
-    "description": "This is an experimental setting. We are not responsible for any collisions you might encounter."
+    "description": "This is an experimental setting. Opentrons is not responsible for any collisions you might encounter."
   }
 }
