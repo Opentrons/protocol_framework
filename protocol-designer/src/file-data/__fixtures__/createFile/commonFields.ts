@@ -71,5 +71,3 @@ export const labwareDefsByURI: LabwareDefByDefURI = {
   'opentrons/nest_96_wellplate_100ul_pcr_full_skirt/1': fixture96Plate,
   'opentrons/opentrons_1_trash_1100ml_fixed/1': fixtureTrash,
 }
-
-export const ot2Robot = { model: OT2_ROBOT_TYPE, deckId: OT2_STANDARD_DECKID }

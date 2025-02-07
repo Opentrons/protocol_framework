@@ -6,6 +6,7 @@ import {
   fixtureP300SingleV2Specs,
   labwareSchemaV2,
   protocolSchemaV8,
+  OT2_ROBOT_TYPE,
 } from '@opentrons/shared-data'
 import {
   fixture_12_trough,
@@ -28,7 +29,6 @@ import {
   labwareNicknamesById,
   labwareDefsByURI,
   pipetteEntities,
-  ot2Robot,
 } from '../__fixtures__/createFile/commonFields'
 import * as v7Fixture from '../__fixtures__/createFile/v7Fixture'
 import type { LabwareDefinition2 } from '@opentrons/shared-data'
@@ -76,7 +76,7 @@ describe('createFile selector', () => {
       fileMetadata,
       v7Fixture.initialRobotState,
       v7Fixture.robotStateTimeline,
-      ot2Robot,
+      OT2_ROBOT_TYPE,
       dismissedWarnings,
       ingredients,
       ingredLocations,
