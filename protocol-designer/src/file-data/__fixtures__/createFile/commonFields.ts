@@ -4,11 +4,7 @@ import {
   fixture_tiprack_10_ul,
   fixture_trash,
 } from '@opentrons/shared-data/labware/fixtures/2'
-import {
-  OT2_ROBOT_TYPE,
-  OT2_STANDARD_DECKID,
-  fixtureP10SingleV2Specs,
-} from '@opentrons/shared-data'
+import { fixtureP10SingleV2Specs } from '@opentrons/shared-data'
 import type { LabwareDefinition2 } from '@opentrons/shared-data'
 import type {
   LabwareLiquidState,
@@ -75,5 +71,3 @@ export const labwareDefsByURI: LabwareDefByDefURI = {
   'opentrons/nest_96_wellplate_100ul_pcr_full_skirt/1': fixture96Plate,
   'opentrons/opentrons_1_trash_1100ml_fixed/1': fixtureTrash,
 }
-
-export const ot2Robot = { model: OT2_ROBOT_TYPE, deckId: OT2_STANDARD_DECKID }
