@@ -19,6 +19,8 @@ export interface StepInfo {
   currentStepIndex: number
   totalStepCount: number
   all: LPCStep[]
+  /* The last step idx in the user's routing history - not necessarily the previous step idx. */
+  lastStepIndices: number[] | null
 }
 
 export interface ExistingOffset {
@@ -111,11 +113,11 @@ export interface FinishLPCAction {
 
 export interface ProceedStepAction {
   type: 'PROCEED_STEP'
-  payload: { runId: string }
+  payload: { runId: string; toStep?: LPCStep }
 }
 
 export interface GoBackStepAction {
-  type: 'GO_BACK_STEP'
+  type: 'GO_BACK_LAST_STEP'
   payload: { runId: string }
 }
 

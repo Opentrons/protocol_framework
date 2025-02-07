@@ -5,10 +5,11 @@ import {
   SET_FINAL_POSITION,
   FINISH_LPC,
   START_LPC,
-  GO_BACK_STEP,
+  GO_BACK_LAST_STEP,
   SET_SELECTED_LABWARE_NAME,
   CLEAR_SELECTED_LABWARE,
   APPLY_OFFSET,
+  LPC_STEPS,
 } from '../constants'
 import { updateOffsetsForURI } from './transforms'
 
@@ -31,30 +32,51 @@ export function LPCReducer(
   } else {
     switch (action.type) {
       case PROCEED_STEP: {
-        const { currentStepIndex, totalStepCount } = state.steps
-        const newStepIdx =
-          currentStepIndex + 1 < totalStepCount
-            ? currentStepIndex + 1
-            : currentStepIndex
+        const {
+          currentStepIndex,
+          lastStepIndices,
+          totalStepCount,
+        } = state.steps
+        const { toStep } = action.payload
+
+        const newStepIdx = (): number => {
+          if (toStep == null) {
+            return currentStepIndex + 1 < totalStepCount
+              ? currentStepIndex + 1
+              : currentStepIndex
+          } else {
+            const newIdx = LPC_STEPS.findIndex(step => step === toStep)
+
+            if (newIdx === -1) {
+              console.error(`Unexpected routing to step: ${toStep}`)
+              return 0
+            } else {
+              return newIdx
+            }
+          }
+        }
 
         return {
           ...state,
           steps: {
             ...state.steps,
-            currentStepIndex: newStepIdx,
+            currentStepIndex: newStepIdx(),
+            lastStepIndices: [...(lastStepIndices ?? []), currentStepIndex],
           },
         }
       }
 
-      case GO_BACK_STEP: {
-        const { currentStepIndex } = state.steps
-        const newStepIdx = currentStepIndex > 0 ? currentStepIndex - 1 : 0
+      case GO_BACK_LAST_STEP: {
+        const { lastStepIndices } = state.steps
+        const lastStep = lastStepIndices?.[lastStepIndices.length - 1] ?? 0
 
         return {
           ...state,
           steps: {
             ...state.steps,
-            currentStepIndex: newStepIdx,
+            currentStepIndex: lastStep,
+            lastStepIndices:
+              lastStepIndices?.slice(0, lastStepIndices.length - 1) ?? null,
           },
         }
       }
