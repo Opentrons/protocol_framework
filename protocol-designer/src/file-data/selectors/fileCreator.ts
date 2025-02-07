@@ -26,6 +26,7 @@ import {
   getModulesLoadInfo,
   getPipettesLoadInfo,
 } from './utils'
+import { pythonImports, pythonMetadata } from './pythonFile'
 
 import type { SecondOrderCommandAnnotation } from '@opentrons/shared-data/commandAnnotation/types'
 import type {
@@ -47,7 +48,6 @@ import type {
 import type { LabwareDefByDefURI } from '../../labware-defs'
 import type { Selector } from '../../types'
 import type { PDMetadata } from '../../file-types'
-import { pythonImports, pythonMetadata } from './pythonFile'
 
 // TODO: BC: 2018-02-21 uncomment this assert, causes test failures
 // console.assert(!isEmpty(process.env.OT_PD_VERSION), 'Could not find application version!')
