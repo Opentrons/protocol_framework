@@ -40,7 +40,6 @@ import type {
   ModuleEntities,
   PipetteEntities,
   LiquidEntities,
-  NormalizedPipetteById,
 } from '@opentrons/step-generation'
 import type { PipetteName, LabwareDefinition2 } from '@opentrons/shared-data'
 import type {

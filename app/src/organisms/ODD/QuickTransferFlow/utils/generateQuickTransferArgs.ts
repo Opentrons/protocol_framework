@@ -142,8 +142,8 @@ function getInvariantContextAndRobotState(
         labwareDefURI: destLabwareURI,
         def: quickTransferState.destination,
         pythonName: isSameDisplayCategory
-          ? `${isSameDisplayCategory}_2`
-          : `${isSameDisplayCategory}_1`,
+          ? `${destDisplayCategory}_2`
+          : `${destDisplayCategory}_1`,
       },
     }
     labwareLocations = {
