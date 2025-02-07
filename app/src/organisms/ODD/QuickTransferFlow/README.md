@@ -1,7 +1,6 @@
 # Quick Transfer Versioning:
 
-Quick Transfer is versioned under the `designerApplicationData` field on the resulting protocol file
-Since this data is not yet read or migrated, this doc details the versions, type of `quickTransferState` per version, and changes made so that migration can occur in the future if needed
+Quick Transfer is versioned under the `designerApplicationData` field on the resulting protocol file. Since this data is not yet read or migrated this doc details the versions, type of `quickTransferState` per version, and other changes made so that migration can occur in the future if needed.
 
 ## Version 1.0.0
 
