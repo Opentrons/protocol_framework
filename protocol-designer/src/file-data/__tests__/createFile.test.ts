@@ -99,7 +99,7 @@ describe('createFile selector', () => {
 
   it('should return a valid Python protocol file', () => {
     // @ts-expect-error(sa, 2021-6-15): resultFunc not part of Selector type
-    const result = createPythonFile.resultFunc(fileMetadata, {})
+    const result = createPythonFile.resultFunc(fileMetadata, OT2_ROBOT_TYPE, {})
     // This is just a quick smoke test to make sure createPythonFile() produces
     // something that looks like a Python file. The individual sections of the
     // generated Python will be tested in separate unit tests.
@@ -113,6 +113,11 @@ metadata = {
     "author": "The Author",
     "description": "Protocol description",
     "created": "2020-02-25T21:48:32.515Z",
+}
+
+requirements = {
+    "robotType": "OT-2",
+    "apiLevel": "2.23",
 }
 `.trimStart()
     )
