@@ -126,6 +126,7 @@ function _getNextRobotStateAndWarningsSingleCommand(
     case 'delay': // deprecated, use waitForDuration instead
     case 'custom': // fall-back
     case 'comment':
+    case 'airGapInPlace':
       break
 
     case 'loadLiquid':

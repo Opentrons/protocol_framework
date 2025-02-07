@@ -8,7 +8,6 @@ from opentrons_shared_data.errors.exceptions import (
     UnexpectedTipRemovalError,
     UnsupportedHardwareCommand,
 )
-from opentrons_shared_data.robot.types import RobotTypeEnum
 
 from opentrons.legacy_broker import LegacyBroker
 from opentrons.hardware_control.dev_types import PipetteDict
@@ -38,7 +37,6 @@ from .disposal_locations import TrashBin, WasteChute
 from ._nozzle_layout import NozzleLayout
 from ._liquid import LiquidClass
 from . import labware, validation
-from ..config import feature_flags
 from ..protocols.advanced_control.transfers.common import (
     TransferTipPolicyV2,
     TransferTipPolicyV2Type,
@@ -1509,6 +1507,7 @@ class InstrumentContext(publisher.CommandPublisher):
         for cmd in plan:
             getattr(self, cmd["method"])(*cmd["args"], **cmd["kwargs"])
 
+    @requires_version(2, 23)
     def transfer_liquid(
         self,
         liquid_class: LiquidClass,
@@ -1528,13 +1527,6 @@ class InstrumentContext(publisher.CommandPublisher):
 
         TODO: Add args description.
         """
-        if not feature_flags.allow_liquid_classes(
-            robot_type=RobotTypeEnum.robot_literal_to_enum(
-                self._protocol_core.robot_type
-            )
-        ):
-            raise NotImplementedError("This method is not implemented.")
-
         flat_sources_list = validation.ensure_valid_flat_wells_list_for_transfer_v2(
             source
         )
@@ -1604,6 +1596,7 @@ class InstrumentContext(publisher.CommandPublisher):
         )
         return self
 
+    @requires_version(2, 23)
     def distribute_liquid(
         self,
         liquid_class: LiquidClass,
@@ -1623,13 +1616,6 @@ class InstrumentContext(publisher.CommandPublisher):
 
         TODO: Add args description.
         """
-        if not feature_flags.allow_liquid_classes(
-            robot_type=RobotTypeEnum.robot_literal_to_enum(
-                self._protocol_core.robot_type
-            )
-        ):
-            raise NotImplementedError("This method is not implemented.")
-
         if not isinstance(source, labware.Well):
             raise ValueError(f"Source should be a single Well but received {source}.")
         flat_dests_list = validation.ensure_valid_flat_wells_list_for_transfer_v2(dest)
@@ -1680,6 +1666,89 @@ class InstrumentContext(publisher.CommandPublisher):
                 (types.Location(types.Point(), labware=well), well._core)
                 for well in flat_dests_list
             ],
+            new_tip=valid_new_tip,
+            tip_racks=[
+                (types.Location(types.Point(), labware=rack), rack._core)
+                for rack in tip_racks
+            ],
+            trash_location=checked_trash_location,
+        )
+        return self
+
+    @requires_version(2, 23)
+    def consolidate_liquid(
+        self,
+        liquid_class: LiquidClass,
+        volume: float,
+        source: Union[
+            labware.Well, Sequence[labware.Well], Sequence[Sequence[labware.Well]]
+        ],
+        dest: labware.Well,
+        new_tip: TransferTipPolicyV2Type = "once",
+        trash_location: Optional[
+            Union[types.Location, labware.Well, TrashBin, WasteChute]
+        ] = None,
+    ) -> InstrumentContext:
+        """
+        Consolidate liquid from multiple sources to a single destination
+        using the specified liquid class properties.
+
+        TODO: Add args description.
+        """
+        if not isinstance(dest, labware.Well):
+            raise ValueError(
+                f"Destination should be a single Well but received {dest}."
+            )
+        flat_sources_list = validation.ensure_valid_flat_wells_list_for_transfer_v2(
+            source
+        )
+        for well in flat_sources_list + [dest]:
+            instrument.validate_takes_liquid(
+                location=well.top(),
+                reject_module=True,
+                reject_adapter=True,
+            )
+
+        valid_new_tip = validation.ensure_new_tip_policy(new_tip)
+        if valid_new_tip == TransferTipPolicyV2.NEVER:
+            if self._last_tip_picked_up_from is None:
+                raise RuntimeError(
+                    "Pipette has no tip attached to perform transfer."
+                    " Either do a pick_up_tip beforehand or specify a new_tip parameter"
+                    " of 'once' or 'always'."
+                )
+            else:
+                tip_racks = [self._last_tip_picked_up_from.parent]
+        else:
+            tip_racks = self._tip_racks
+        if self.current_volume != 0:
+            raise RuntimeError(
+                "A transfer on a liquid class cannot start with liquid already in the tip."
+                " Ensure that all previously aspirated liquid is dispensed before starting"
+                " a new transfer."
+            )
+
+        _trash_location: Union[types.Location, labware.Well, TrashBin, WasteChute]
+        if trash_location is None:
+            saved_trash = self.trash_container
+            if isinstance(saved_trash, labware.Labware):
+                _trash_location = saved_trash.wells()[0]
+            else:
+                _trash_location = saved_trash
+        else:
+            _trash_location = trash_location
+
+        checked_trash_location = validation.ensure_valid_trash_location_for_transfer_v2(
+            trash_location=_trash_location
+        )
+        self._core.consolidate_liquid(
+            liquid_class=liquid_class,
+            volume=volume,
+            source=[
+                (types.Location(types.Point(), labware=well), well._core)
+                for well in flat_sources_list
+            ],
+            dest=(types.Location(types.Point(), labware=dest), dest._core),
             new_tip=valid_new_tip,
             tip_racks=[
                 (types.Location(types.Point(), labware=rack), rack._core)
