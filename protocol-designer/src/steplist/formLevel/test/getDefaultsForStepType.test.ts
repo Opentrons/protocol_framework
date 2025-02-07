@@ -132,6 +132,10 @@ describe('getDefaultsForStepType', () => {
         labwareLocationUpdate: {},
         pipetteLocationUpdate: {},
         moduleLocationUpdate: {},
+        trashBinLocationUpdate: {},
+        wasteChuteLocationUpdate: {},
+        stagingAreaLocationUpdate: {},
+        gripperLocationUpdate: {},
       })
     })
   })
