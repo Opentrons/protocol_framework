@@ -1,9 +1,10 @@
-import { ModuleEntities, selectors as stepFormSelectors } from '../step-forms'
+import { selectors as stepFormSelectors } from '../step-forms'
 import { getModulePythonName, uuid } from '../utils'
 import { getModuleEntities } from '../step-forms/selectors'
 import { getNextAvailableModuleSlot } from './moduleData'
 import type { ModuleEntity } from '@opentrons/step-generation'
 import type { ModuleModel, ModuleType } from '@opentrons/shared-data'
+import type { ModuleEntities } from '../step-forms'
 import type {
   CreateModuleAction,
   DeleteModuleAction,

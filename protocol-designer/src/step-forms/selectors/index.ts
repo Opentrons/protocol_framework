@@ -40,6 +40,7 @@ import type {
   ModuleEntities,
   PipetteEntities,
   LiquidEntities,
+  NormalizedPipetteById,
 } from '@opentrons/step-generation'
 import type { PipetteName, LabwareDefinition2 } from '@opentrons/shared-data'
 import type {
@@ -190,7 +191,7 @@ export const _getPipetteEntitiesRootState: (
     denormalizePipetteEntities(
       pipetteInvariantProperties,
       labwareDefs,
-      initialDeckSetupStepForm.pipetteLocationUpdate
+      initialDeckSetupStepForm.pipetteLocationUpdate as Record<string, string>
     )
 )
 

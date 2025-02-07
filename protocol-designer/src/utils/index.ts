@@ -23,7 +23,6 @@ import type {
   RobotType,
   SupportedTip,
   ModuleType,
-  LabwareDefinition2,
   LabwareDisplayCategory,
 } from '@opentrons/shared-data'
 import type { WellGroup } from '@opentrons/components'

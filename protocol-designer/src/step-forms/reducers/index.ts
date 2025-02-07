@@ -13,11 +13,7 @@ import {
   THERMOCYCLER_MODULE_TYPE,
 } from '@opentrons/shared-data'
 import { rootReducer as labwareDefsRootReducer } from '../../labware-defs'
-import {
-  GRIPPER_LOCATION,
-  INITIAL_DECK_SETUP_STEP_ID,
-  SPAN7_8_10_11_SLOT,
-} from '../../constants'
+import { GRIPPER_LOCATION, INITIAL_DECK_SETUP_STEP_ID } from '../../constants'
 import { getPDMetadata } from '../../file-types'
 import {
   getDefaultsForStepType,
@@ -107,7 +103,7 @@ import type {
   NormalizedLabwareById,
   ModuleEntities,
 } from '../types'
-import { EditMultipleModulesAction } from '../../modules'
+import type { EditMultipleModulesAction } from '../../modules'
 
 type FormState = FormData | null
 const unsavedFormInitialState = null

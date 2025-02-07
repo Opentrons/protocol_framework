@@ -5,11 +5,7 @@ import max from 'lodash/max'
 import reduce from 'lodash/reduce'
 import type { Selector } from 'reselect'
 import type { DropdownOption } from '@opentrons/components'
-import type {
-  Ingredient,
-  LabwareLiquidState,
-  LiquidEntity,
-} from '@opentrons/step-generation'
+import type { Ingredient, LabwareLiquidState } from '@opentrons/step-generation'
 import type { CutoutId } from '@opentrons/shared-data'
 import type {
   RootState,

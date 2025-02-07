@@ -9,7 +9,6 @@ import type {
   MAGNETIC_BLOCK_TYPE,
   ABSORBANCE_READER_TYPE,
   NozzleConfigurationStyle,
-  LabwareDisplayCategory,
 } from '@opentrons/shared-data'
 import type { DeckSlot } from '../types'
 
