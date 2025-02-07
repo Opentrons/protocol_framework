@@ -100,7 +100,6 @@ export const SINGLE_CHANNEL_COMPATIBLE_LABWARE = [
   'opentrons/thermoscientificnunc_96_wellplate_2000ul/1',
   'opentrons/usascientific_12_reservoir_22ml/1',
   'opentrons/usascientific_96_wellplate_2.4ml_deep/1',
-  'opentrons/evotips_opentrons_96_labware/1',
 ]
 
 export const EIGHT_CHANNEL_COMPATIBLE_LABWARE = [
@@ -145,7 +144,6 @@ export const EIGHT_CHANNEL_COMPATIBLE_LABWARE = [
   'opentrons/thermoscientificnunc_96_wellplate_2000ul/1',
   'opentrons/usascientific_12_reservoir_22ml/1',
   'opentrons/usascientific_96_wellplate_2.4ml_deep/1',
-  'opentrons/evotips_opentrons_96_labware/1',
 ]
 
 export const NINETY_SIX_CHANNEL_COMPATIBLE_LABWARE = [
@@ -190,5 +188,4 @@ export const NINETY_SIX_CHANNEL_COMPATIBLE_LABWARE = [
   'opentrons/thermoscientificnunc_96_wellplate_2000ul/1',
   'opentrons/usascientific_12_reservoir_22ml/1',
   'opentrons/usascientific_96_wellplate_2.4ml_deep/1',
-  'opentrons/evotips_opentrons_96_labware/1',
 ]
