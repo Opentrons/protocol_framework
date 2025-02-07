@@ -56,13 +56,17 @@ describe('Redesigned Mixing Steps - Happy Path', () => {
       MixActions.BlowoutLocation,
       MixActions.BlowoutFlowRate,
       MixActions.BlowoutPosFromTop,
+      MixVerifications.BlowoutPopout,
       MixActions.Save,
       MixVerifications.Blowout,
       MixActions.TouchTip,
+      MixVerifications.TouchTipPopout,
       MixActions.Save,
       MixVerifications.TouchTip,
-      // MixActions.Rename,
-      
+      MixActions.Rename,
+      MixActions.Save,
+      MixVerifications.Rename,
+      MixActions.Save
     ]
     runSteps(steps)
   });
