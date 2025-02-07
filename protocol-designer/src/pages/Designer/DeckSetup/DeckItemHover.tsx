@@ -1,5 +1,7 @@
 import { useTranslation } from 'react-i18next'
-import { useSelector } from 'react-redux'
+import { DropTargetMonitor, useDrag, useDrop } from 'react-dnd'
+import { useDispatch, useSelector } from 'react-redux'
+import { useRef, useEffect } from 'react'
 import { css } from 'styled-components'
 import {
   ALIGN_CENTER,
@@ -15,7 +17,10 @@ import {
   RobotCoordsForeignDiv,
   StyledText,
 } from '@opentrons/components'
+import { DND_TYPES } from '../../../constants'
+import { moveDeckItem } from '../../../labware-ingred/actions'
 import { getDeckSetupForActiveItem } from '../../../top-selectors/labware-locations'
+import { BlockedSlot } from './BlockedSlot'
 
 import type { Dispatch, SetStateAction } from 'react'
 import type {
@@ -23,6 +28,8 @@ import type {
   DeckSlotId,
   Dimensions,
 } from '@opentrons/shared-data'
+import type { LabwareOnDeck } from '../../../step-forms'
+import type { ThunkDispatch } from '../../../types'
 import type { DeckSetupTabType } from '../types'
 
 interface DeckItemHoverProps extends DeckSetupTabType {
@@ -33,8 +40,16 @@ interface DeckItemHoverProps extends DeckSetupTabType {
   itemId: string
   slotPosition: CoordinateTuple | null
   setShowMenuListForId: Dispatch<SetStateAction<string | null>>
+  labwareOnDeck: LabwareOnDeck
   menuListId: DeckSlotId | null
+  setHoveredLabware?: (labware?: LabwareOnDeck | null) => void
+  setDraggedLabware?: (labware?: LabwareOnDeck | null) => void
+  swapBlocked?: boolean
   isSelected?: boolean
+}
+
+interface DroppedItem {
+  labwareOnDeck: LabwareOnDeck
 }
 
 export function DeckItemHover(props: DeckItemHoverProps): JSX.Element | null {
@@ -47,25 +62,88 @@ export function DeckItemHover(props: DeckItemHoverProps): JSX.Element | null {
     setShowMenuListForId,
     menuListId,
     slotPosition,
+    setHoveredLabware,
+    setDraggedLabware,
     isSelected = false,
+    swapBlocked,
+    labwareOnDeck,
   } = props
   const { t } = useTranslation('starting_deck_state')
   const deckSetup = useSelector(getDeckSetupForActiveItem)
+
   const offDeckLabware = Object.values(deckSetup.labware).find(
     lw => lw.id === itemId
   )
-  if (tab === 'protocolSteps' || slotPosition === null || isSelected)
-    return null
 
   const hoverOpacity =
     (hover != null && hover === itemId) || menuListId === itemId ? '1' : '0'
 
+  const dispatch = useDispatch<ThunkDispatch<any>>()
+  const ref = useRef(null)
+
+  const [, drag] = useDrag(
+    () => ({
+      type: DND_TYPES.LABWARE,
+      item: { labwareOnDeck },
+    }),
+    [labwareOnDeck]
+  )
+
+  const [{ draggedLabware }, drop] = useDrop(
+    () => ({
+      accept: DND_TYPES.LABWARE,
+      canDrop: (item: DroppedItem) => {
+        const draggedLabware = item?.labwareOnDeck
+        const isDifferentSlot =
+          draggedLabware && draggedLabware.slot !== labwareOnDeck?.slot
+        return isDifferentSlot && !swapBlocked
+      },
+      drop: (item: DroppedItem) => {
+        const draggedLabware = item?.labwareOnDeck
+        if (draggedLabware != null && labwareOnDeck != null) {
+          dispatch(moveDeckItem(draggedLabware.slot, labwareOnDeck.slot))
+        }
+      },
+      hover: () => {
+        setHoveredLabware?.(labwareOnDeck)
+      },
+      collect: (monitor: DropTargetMonitor) => ({
+        isOver: monitor.isOver(),
+        draggedLabware: monitor.getItem() as DroppedItem,
+      }),
+    }),
+    [labwareOnDeck]
+  )
+
+  useEffect(() => {
+    if (draggedLabware?.labwareOnDeck != null && setDraggedLabware != null) {
+      setDraggedLabware(draggedLabware?.labwareOnDeck)
+    } else {
+      setHoveredLabware?.(null)
+      setDraggedLabware?.(null)
+    }
+  }, [draggedLabware])
+
+  const isBeingDragged =
+    draggedLabware?.labwareOnDeck?.slot === labwareOnDeck?.slot
+
+  drag(drop(ref))
+
+  if (tab === 'protocolSteps' || slotPosition === null || isSelected)
+    return null
+
+  const x = slotPosition[0]
+  const y = slotPosition[1]
+  const width = slotBoundingBox.xDimension
+  const height = slotBoundingBox.yDimension
+
+  console.log('swapBlocked in deckItemHover', swapBlocked)
   return (
     <RobotCoordsForeignDiv
-      x={slotPosition[0]}
-      y={slotPosition[1]}
-      width={slotBoundingBox.xDimension}
-      height={slotBoundingBox.yDimension}
+      x={x}
+      y={y}
+      width={width}
+      height={height}
       innerDivProps={{
         style: {
           opacity: hoverOpacity,
@@ -96,25 +174,34 @@ export function DeckItemHover(props: DeckItemHoverProps): JSX.Element | null {
       }}
     >
       <Flex
+        ref={ref}
         css={css`
-          justify-content: ${JUSTIFY_CENTER};
-          width: 100%;
           opacity: ${hoverOpacity};
         `}
       >
-        <Link
-          role="button"
-          onClick={() => {
-            setShowMenuListForId(itemId)
-          }}
+        <Flex
+          height={height}
+          width={width}
+          alignItems={ALIGN_CENTER}
+          justifyContent={JUSTIFY_CENTER}
         >
-          <StyledText desktopStyle="bodyDefaultSemiBold">
-            {offDeckLabware?.slot === 'offDeck'
-              ? t('edit_labware')
-              : t('edit_slot')}
-          </StyledText>
-        </Link>
+          <Link role="button">
+            <StyledText desktopStyle="bodyDefaultSemiBold">
+              {isBeingDragged
+                ? 'dragging'
+                : offDeckLabware?.slot === 'offDeck'
+                ? t('edit_labware')
+                : t('edit_slot')}
+            </StyledText>
+          </Link>
+        </Flex>
       </Flex>
+      {swapBlocked && (
+        <BlockedSlot
+          {...{ x, y, width, height }}
+          message="MODULE_INCOMPATIBLE_LABWARE_SWAP"
+        />
+      )}
     </RobotCoordsForeignDiv>
   )
 }

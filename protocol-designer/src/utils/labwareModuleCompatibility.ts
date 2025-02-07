@@ -156,6 +156,7 @@ export const getLabwareIsCustom = (
   customLabwares: LabwareDefByDefURI,
   labwareOnDeck: LabwareOnDeck
 ): boolean => {
+  console.log('labwareOnDeck', labwareOnDeck)
   return labwareOnDeck.labwareDefURI in customLabwares
 }
 

@@ -30,6 +30,7 @@ import type {
   DeckSlotId,
   LabwareDefinition2,
   ModuleModel,
+  ModuleType,
   RobotType,
 } from '@opentrons/shared-data'
 import type { LabwareDefByDefURI } from '../../../labware-defs'
@@ -39,6 +40,10 @@ import type {
   LabwareOnDeck,
 } from '../../../step-forms'
 import type { Fixture } from './constants'
+import {
+  getLabwareIsCompatible,
+  getLabwareIsCustom,
+} from '../../../utils/labwareModuleCompatibility'
 
 const OT2_TC_SLOTS = ['7', '8', '10', '11']
 const FLEX_TC_SLOTS = ['A1', 'B1']
@@ -335,4 +340,56 @@ export function useDeckSetupWindowBreakPoint(): BreakPoint {
   }
 
   return size
+}
+
+export interface SwapBlockedArgs {
+  modulesById: InitialDeckSetup['modules']
+  customLabwareDefs: LabwareDefByDefURI
+  hoveredLabware?: LabwareOnDeck | null
+  draggedLabware?: LabwareOnDeck | null
+}
+
+export const getSwapBlocked = (args: SwapBlockedArgs): boolean => {
+  const {
+    hoveredLabware,
+    draggedLabware,
+    modulesById,
+    customLabwareDefs,
+  } = args
+  console.log(
+    'swap',
+    hoveredLabware,
+    draggedLabware,
+    modulesById,
+    customLabwareDefs
+  )
+  if (!hoveredLabware || !draggedLabware) {
+    return false
+  }
+
+  const sourceModuleType: ModuleType | null =
+    modulesById[draggedLabware.slot]?.type || null
+  const destModuleType: ModuleType | null =
+    modulesById[hoveredLabware.slot]?.type || null
+
+  const draggedLabwareIsCustom = getLabwareIsCustom(
+    customLabwareDefs,
+    draggedLabware
+  )
+  const hoveredLabwareIsCustom = getLabwareIsCustom(
+    customLabwareDefs,
+    hoveredLabware
+  )
+
+  // dragging custom labware to module gives not compat error
+  const labwareSourceToDestBlocked = sourceModuleType
+    ? !getLabwareIsCompatible(hoveredLabware.def, sourceModuleType) &&
+      !hoveredLabwareIsCustom
+    : false
+  const labwareDestToSourceBlocked = destModuleType
+    ? !getLabwareIsCompatible(draggedLabware.def, destModuleType) &&
+      !draggedLabwareIsCustom
+    : false
+
+  return labwareSourceToDestBlocked || labwareDestToSourceBlocked
 }

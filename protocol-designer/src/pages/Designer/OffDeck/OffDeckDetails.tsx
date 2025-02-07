@@ -166,7 +166,7 @@ export function OffDeckDetails(props: OffDeckDetailsProps): JSX.Element {
                         )}
                       />
 
-                      <DeckItemHover
+                      {/* <DeckItemHover
                         hover={hoverSlot}
                         setShowMenuListForId={setShowMenuListForId}
                         menuListId={menuListId}
@@ -175,7 +175,7 @@ export function OffDeckDetails(props: OffDeckDetailsProps): JSX.Element {
                         slotPosition={ZERO_SLOT_POSITION}
                         itemId={lw.id}
                         tab={tab}
-                      />
+                      /> */}
                     </>
                   )}
                 </RobotWorkSpace>
