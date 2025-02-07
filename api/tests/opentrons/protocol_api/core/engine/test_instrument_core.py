@@ -2011,8 +2011,7 @@ def test_dispense_liquid_class(
             submerge_properties=test_transfer_properties.dispense.submerge,
         ),
         mock_transfer_components_executor.dispense_and_wait(
-            volume=123,
-            push_out_override=push_out_vol,
+            "Update me", volume=123, push_out_override=push_out_vol
         ),
         mock_transfer_components_executor.mix(
             mix_properties=test_transfer_properties.dispense.mix,

@@ -208,7 +208,7 @@ def test_dispense_and_wait(
         tip_state=TipState(),
         transfer_type=TransferType.ONE_TO_ONE,
     )
-    subject.dispense_and_wait(volume=10, push_out_override=123)
+    subject.dispense_and_wait("Update me", volume=10, push_out_override=123)
     decoy.verify(
         mock_instrument_core.dispense(
             location=Location(Point(1, 2, 3), labware=None),
@@ -242,7 +242,7 @@ def test_dispense_and_wait_skips_delay(
         tip_state=TipState(),
         transfer_type=TransferType.ONE_TO_ONE,
     )
-    subject.dispense_and_wait(volume=10, push_out_override=123)
+    subject.dispense_and_wait("Update me", volume=10, push_out_override=123)
     decoy.verify(
         mock_instrument_core.delay(0.2),
         times=0,
