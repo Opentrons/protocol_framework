@@ -6,6 +6,7 @@ import {
   fixtureP300SingleV2Specs,
   labwareSchemaV2,
   protocolSchemaV8,
+  OT2_ROBOT_TYPE,
 } from '@opentrons/shared-data'
 import {
   fixture_12_trough,
@@ -14,7 +15,11 @@ import {
   fixture_tiprack_300_ul,
 } from '@opentrons/shared-data/labware/fixtures/2'
 import { getLoadLiquidCommands } from '../../load-file/migration/utils/getLoadLiquidCommands'
-import { createFile, getLabwareDefinitionsInUse } from '../selectors'
+import {
+  createFile,
+  createPythonFile,
+  getLabwareDefinitionsInUse,
+} from '../selectors'
 import {
   fileMetadata,
   dismissedWarnings,
@@ -24,7 +29,6 @@ import {
   labwareNicknamesById,
   labwareDefsByURI,
   pipetteEntities,
-  ot2Robot,
 } from '../__fixtures__/createFile/commonFields'
 import * as v7Fixture from '../__fixtures__/createFile/v7Fixture'
 import type { LabwareDefinition2 } from '@opentrons/shared-data'
@@ -72,7 +76,7 @@ describe('createFile selector', () => {
       fileMetadata,
       v7Fixture.initialRobotState,
       v7Fixture.robotStateTimeline,
-      ot2Robot,
+      OT2_ROBOT_TYPE,
       dismissedWarnings,
       ingredients,
       ingredLocations,
@@ -92,7 +96,34 @@ describe('createFile selector', () => {
       ingredLocations
     )
   })
+
+  it('should return a valid Python protocol file', () => {
+    // @ts-expect-error(sa, 2021-6-15): resultFunc not part of Selector type
+    const result = createPythonFile.resultFunc(fileMetadata, OT2_ROBOT_TYPE, {})
+    // This is just a quick smoke test to make sure createPythonFile() produces
+    // something that looks like a Python file. The individual sections of the
+    // generated Python will be tested in separate unit tests.
+    expect(result).toBe(
+      `
+from contextlib import nullcontext as pd_step
+from opentrons import protocol_api
+
+metadata = {
+    "protocolName": "Test Protocol",
+    "author": "The Author",
+    "description": "Protocol description",
+    "created": "2020-02-25T21:48:32.515Z",
+}
+
+requirements = {
+    "robotType": "OT-2",
+    "apiLevel": "2.23",
+}
+`.trimStart()
+    )
+  })
 })
+
 describe('getLabwareDefinitionsInUse util', () => {
   it('should exclude definitions that are neither on the deck nor assigned to a pipette', () => {
     const assignedTiprackOnDeckDef = fixture_tiprack_10_ul
@@ -106,11 +137,13 @@ describe('getLabwareDefinitionsInUse util', () => {
         id: 'someLabwareId',
         def: assignedTiprackOnDeckDef as LabwareDefinition2,
         labwareDefURI: 'assignedTiprackOnDeckURI',
+        pythonName: 'mockPythonName',
       },
       otherLabwareId: {
         id: 'otherLabwareId',
         def: nonTiprackLabwareOnDeckDef as LabwareDefinition2,
         labwareDefURI: 'nonTiprackLabwareOnDeckURI',
+        pythonName: 'mockPythonName',
       },
     }
     const allLabwareDefsByURI: LabwareDefByDefURI = {
