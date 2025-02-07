@@ -65,13 +65,7 @@ async def test_reload_labware_implementation(
         state_view.geometry.get_predicted_location_sequence(
             DeckSlotLocation(slotName=DeckSlotName.SLOT_4)
         )
-    ).then_return(
-        [
-            OnAddressableAreaLocationSequenceComponent(
-                addressableAreaName="4", slotName=DeckSlotName.SLOT_4
-            )
-        ]
-    )
+    ).then_return([OnAddressableAreaLocationSequenceComponent(addressableAreaName="4")])
 
     result = await subject.execute(data)
 
@@ -80,9 +74,7 @@ async def test_reload_labware_implementation(
             labwareId="my-labware-id",
             offsetId="labware-offset-id",
             locationSequence=[
-                OnAddressableAreaLocationSequenceComponent(
-                    addressableAreaName="4", slotName=DeckSlotName.SLOT_4
-                )
+                OnAddressableAreaLocationSequenceComponent(addressableAreaName="4")
             ],
         ),
         state_update=StateUpdate(

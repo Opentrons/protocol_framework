@@ -110,9 +110,7 @@ async def test_load_lid_stack(
         )
     ).then_return(lids)
 
-    stack_loc = OnAddressableAreaLocationSequenceComponent(
-        addressableAreaName="A1", slotName=DeckSlotName.SLOT_A1
-    )
+    stack_loc = OnAddressableAreaLocationSequenceComponent(addressableAreaName="A1")
     on_stack_loc = OnLabwareLocationSequenceComponent(
         labwareId="stack-labware-id", lidId=None
     )

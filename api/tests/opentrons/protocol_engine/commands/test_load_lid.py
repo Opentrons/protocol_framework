@@ -7,8 +7,6 @@ from decoy import Decoy
 
 from opentrons_shared_data.labware.labware_definition import LabwareDefinition
 
-from opentrons.types import DeckSlotName
-
 from opentrons.protocol_engine.resources import labware_validation
 from opentrons.protocol_engine.execution import LoadedLabwareData, EquipmentHandler
 from opentrons.protocol_engine.state.state import StateView
@@ -81,11 +79,7 @@ async def test_load_lid_on_tiprack(
     decoy.when(
         state_view.geometry.get_location_sequence(input_location.labwareId)
     ).then_return(
-        [
-            OnAddressableAreaLocationSequenceComponent(
-                addressableAreaName="someAa", slotName=DeckSlotName.SLOT_1
-            )
-        ]
+        [OnAddressableAreaLocationSequenceComponent(addressableAreaName="someAa")]
     )
 
     result = await subject.execute(
@@ -105,7 +99,7 @@ async def test_load_lid_on_tiprack(
                     labwareId=input_location.labwareId, lidId="labware-id"
                 ),
                 OnAddressableAreaLocationSequenceComponent(
-                    addressableAreaName="someAa", slotName=DeckSlotName.SLOT_1
+                    addressableAreaName="someAa"
                 ),
             ],
         ),

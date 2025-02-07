@@ -113,7 +113,14 @@ class OnAddressableAreaLocationSequenceComponent(BaseModel):
 
     kind: Literal["onAddressableArea"] = "onAddressableArea"
     addressableAreaName: str
-    slotName: DeckSlotName | None
+
+
+class OnCutoutFixtureLocationSequenceComponent(BaseModel):
+    """Something on a deck cutout fixture."""
+
+    kind: Literal["onCutoutFixture"] = "onCutoutFixture"
+    possibleCutoutFixtureIds: list[str]
+    cutoutId: str
 
 
 class NotOnDeckLocationSequenceComponent(BaseModel):
@@ -128,6 +135,7 @@ LabwareLocationSequence = list[
     | OnModuleLocationSequenceComponent
     | OnAddressableAreaLocationSequenceComponent
     | NotOnDeckLocationSequenceComponent
+    | OnCutoutFixtureLocationSequenceComponent
 ]
 """Labware location specifier."""
 

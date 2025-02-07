@@ -676,6 +676,15 @@ class ModuleView:
 
         return None
 
+    def get_by_addressable_area(
+        self, addressable_area_name: str
+    ) -> Optional[LoadedModule]:
+        """Get the module associated with this addressable area, if any."""
+        for module_id in self._state.slot_by_module_id.keys():
+            if addressable_area_name == self.get_provided_addressable_area(module_id):
+                return self.get(module_id)
+        return None
+
     def _get_module_substate(
         self, module_id: str, expected_type: Type[ModuleSubStateT], expected_name: str
     ) -> ModuleSubStateT:

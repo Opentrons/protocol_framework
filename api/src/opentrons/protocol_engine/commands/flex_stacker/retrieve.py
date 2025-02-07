@@ -113,7 +113,6 @@ class RetrieveImpl(AbstractCommandImpl[RetrieveParams, SuccessData[RetrieveResul
         own_addressable_area = self._state_view.modules.get_provided_addressable_area(
             params.moduleId
         )
-        own_deck_slot = self._state_view.modules.get_location(params.moduleId)
         # update the state to reflect the labware is now in the flex stacker slot
         state_update.set_labware_location(
             labware_id=lw_id,
@@ -131,7 +130,6 @@ class RetrieveImpl(AbstractCommandImpl[RetrieveParams, SuccessData[RetrieveResul
                     OnModuleLocationSequenceComponent(moduleId=params.moduleId),
                     OnAddressableAreaLocationSequenceComponent(
                         addressableAreaName=own_addressable_area,
-                        slotName=own_deck_slot.slotName,
                     ),
                 ],
             ),

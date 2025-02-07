@@ -109,7 +109,6 @@ async def test_store(
             OnModuleLocationSequenceComponent(moduleId="flex-stacker-id"),
             OnAddressableAreaLocationSequenceComponent(
                 addressableAreaName="flexStackerV1B4",
-                slotName=DeckSlotName.SLOT_B3,
             ),
         ]
     )
@@ -125,7 +124,6 @@ async def test_store(
                     OnModuleLocationSequenceComponent(moduleId="flex-stacker-id"),
                     OnAddressableAreaLocationSequenceComponent(
                         addressableAreaName="flexStackerV1B4",
-                        slotName=DeckSlotName.SLOT_B3,
                     ),
                 ],
                 eventualDestinationLocationSequence=[

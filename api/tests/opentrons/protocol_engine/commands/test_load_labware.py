@@ -95,7 +95,6 @@ async def test_load_labware_on_slot_or_addressable_area(
         [
             OnAddressableAreaLocationSequenceComponent(
                 addressableAreaName=expected_addressable_area_name,
-                slotName=DeckSlotName.SLOT_3,
             )
         ]
     )
@@ -133,7 +132,6 @@ async def test_load_labware_on_slot_or_addressable_area(
             locationSequence=[
                 OnAddressableAreaLocationSequenceComponent(
                     addressableAreaName=expected_addressable_area_name,
-                    slotName=DeckSlotName.SLOT_3,
                 )
             ],
         ),
@@ -220,9 +218,7 @@ async def test_load_labware_on_labware(
             OnLabwareLocationSequenceComponent(
                 labwareId="other-labware-id", lidId=None
             ),
-            OnAddressableAreaLocationSequenceComponent(
-                addressableAreaName="A3", slotName=DeckSlotName.SLOT_A3
-            ),
+            OnAddressableAreaLocationSequenceComponent(addressableAreaName="A3"),
         ]
     )
 
@@ -240,9 +236,7 @@ async def test_load_labware_on_labware(
                 OnLabwareLocationSequenceComponent(
                     labwareId="other-labware-id", lidId=None
                 ),
-                OnAddressableAreaLocationSequenceComponent(
-                    addressableAreaName="A3", slotName=DeckSlotName.SLOT_A3
-                ),
+                OnAddressableAreaLocationSequenceComponent(addressableAreaName="A3"),
             ],
         ),
         state_update=StateUpdate(

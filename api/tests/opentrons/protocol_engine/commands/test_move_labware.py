@@ -130,22 +130,10 @@ async def test_manual_move_labware_implementation(
     ).then_return("wowzers-a-new-offset-id")
     decoy.when(
         state_view.geometry.get_location_sequence("my-cool-labware-id")
-    ).then_return(
-        [
-            OnAddressableAreaLocationSequenceComponent(
-                addressableAreaName="5", slotName=DeckSlotName.SLOT_5
-            )
-        ]
-    )
+    ).then_return([OnAddressableAreaLocationSequenceComponent(addressableAreaName="5")])
     decoy.when(
         state_view.geometry.get_predicted_location_sequence(new_location)
-    ).then_return(
-        [
-            OnAddressableAreaLocationSequenceComponent(
-                addressableAreaName="4", slotName=DeckSlotName.SLOT_4
-            )
-        ]
-    )
+    ).then_return([OnAddressableAreaLocationSequenceComponent(addressableAreaName="4")])
 
     result = await subject.execute(data)
     decoy.verify(await run_control.wait_for_resume(), times=times_pause_called)
@@ -156,19 +144,13 @@ async def test_manual_move_labware_implementation(
         public=MoveLabwareResult(
             offsetId="wowzers-a-new-offset-id",
             originLocationSequence=[
-                OnAddressableAreaLocationSequenceComponent(
-                    addressableAreaName="5", slotName=DeckSlotName.SLOT_5
-                )
+                OnAddressableAreaLocationSequenceComponent(addressableAreaName="5")
             ],
             immediateDestinationLocationSequence=[
-                OnAddressableAreaLocationSequenceComponent(
-                    addressableAreaName="4", slotName=DeckSlotName.SLOT_4
-                )
+                OnAddressableAreaLocationSequenceComponent(addressableAreaName="4")
             ],
             eventualDestinationLocationSequence=[
-                OnAddressableAreaLocationSequenceComponent(
-                    addressableAreaName="4", slotName=DeckSlotName.SLOT_4
-                )
+                OnAddressableAreaLocationSequenceComponent(addressableAreaName="4")
             ],
         ),
         state_update=update_types.StateUpdate(
@@ -225,13 +207,7 @@ async def test_move_labware_implementation_on_labware(
     ).then_return("wowzers-a-new-offset-id")
     decoy.when(
         state_view.geometry.get_location_sequence("my-cool-labware-id")
-    ).then_return(
-        [
-            OnAddressableAreaLocationSequenceComponent(
-                addressableAreaName="1", slotName=DeckSlotName.SLOT_1
-            )
-        ]
-    )
+    ).then_return([OnAddressableAreaLocationSequenceComponent(addressableAreaName="1")])
     decoy.when(
         state_view.geometry.get_predicted_location_sequence(
             OnLabwareLocation(labwareId="new-labware-id")
@@ -239,9 +215,7 @@ async def test_move_labware_implementation_on_labware(
     ).then_return(
         [
             OnLabwareLocationSequenceComponent(labwareId="new-labware-id", lidId=None),
-            OnAddressableAreaLocationSequenceComponent(
-                addressableAreaName="2", slotName=DeckSlotName.SLOT_2
-            ),
+            OnAddressableAreaLocationSequenceComponent(addressableAreaName="2"),
         ]
     )
 
@@ -260,25 +234,19 @@ async def test_move_labware_implementation_on_labware(
         public=MoveLabwareResult(
             offsetId="wowzers-a-new-offset-id",
             originLocationSequence=[
-                OnAddressableAreaLocationSequenceComponent(
-                    addressableAreaName="1", slotName=DeckSlotName.SLOT_1
-                )
+                OnAddressableAreaLocationSequenceComponent(addressableAreaName="1")
             ],
             immediateDestinationLocationSequence=[
                 OnLabwareLocationSequenceComponent(
                     labwareId="new-labware-id", lidId=None
                 ),
-                OnAddressableAreaLocationSequenceComponent(
-                    addressableAreaName="2", slotName=DeckSlotName.SLOT_2
-                ),
+                OnAddressableAreaLocationSequenceComponent(addressableAreaName="2"),
             ],
             eventualDestinationLocationSequence=[
                 OnLabwareLocationSequenceComponent(
                     labwareId="new-labware-id", lidId=None
                 ),
-                OnAddressableAreaLocationSequenceComponent(
-                    addressableAreaName="2", slotName=DeckSlotName.SLOT_2
-                ),
+                OnAddressableAreaLocationSequenceComponent(addressableAreaName="2"),
             ],
         ),
         state_update=update_types.StateUpdate(
@@ -349,7 +317,7 @@ async def test_gripper_move_labware_implementation(
     ).then_return(
         [
             OnAddressableAreaLocationSequenceComponent(
-                addressableAreaName="1", slotName=DeckSlotName.SLOT_1
+                addressableAreaName="1",
             )
         ]
     )
@@ -357,13 +325,7 @@ async def test_gripper_move_labware_implementation(
         state_view.geometry.get_predicted_location_sequence(
             sentinel.new_location_validated_for_gripper
         )
-    ).then_return(
-        [
-            OnAddressableAreaLocationSequenceComponent(
-                addressableAreaName="5", slotName=DeckSlotName.SLOT_5
-            )
-        ]
-    )
+    ).then_return([OnAddressableAreaLocationSequenceComponent(addressableAreaName="5")])
 
     result = await subject.execute(data)
     decoy.verify(
@@ -383,19 +345,13 @@ async def test_gripper_move_labware_implementation(
         public=MoveLabwareResult(
             offsetId="wowzers-a-new-offset-id",
             originLocationSequence=[
-                OnAddressableAreaLocationSequenceComponent(
-                    addressableAreaName="1", slotName=DeckSlotName.SLOT_1
-                )
+                OnAddressableAreaLocationSequenceComponent(addressableAreaName="1")
             ],
             immediateDestinationLocationSequence=[
-                OnAddressableAreaLocationSequenceComponent(
-                    addressableAreaName="5", slotName=DeckSlotName.SLOT_5
-                )
+                OnAddressableAreaLocationSequenceComponent(addressableAreaName="5")
             ],
             eventualDestinationLocationSequence=[
-                OnAddressableAreaLocationSequenceComponent(
-                    addressableAreaName="5", slotName=DeckSlotName.SLOT_5
-                )
+                OnAddressableAreaLocationSequenceComponent(addressableAreaName="5")
             ],
         ),
         state_update=update_types.StateUpdate(
@@ -490,20 +446,12 @@ async def test_gripper_error(
     decoy.when(model_utils.get_timestamp()).then_return(error_created_at)
     decoy.when(model_utils.generate_id()).then_return(error_id)
     decoy.when(state_view.geometry.get_location_sequence("labware-id")).then_return(
-        [
-            OnAddressableAreaLocationSequenceComponent(
-                addressableAreaName="A1", slotName=DeckSlotName.SLOT_A1
-            )
-        ]
+        [OnAddressableAreaLocationSequenceComponent(addressableAreaName="A1")]
     )
     decoy.when(
         state_view.geometry.get_predicted_location_sequence(new_location)
     ).then_return(
-        [
-            OnAddressableAreaLocationSequenceComponent(
-                addressableAreaName="A2", slotName=DeckSlotName.SLOT_A2
-            )
-        ]
+        [OnAddressableAreaLocationSequenceComponent(addressableAreaName="A2")]
     )
 
     result = await subject.execute(params)
@@ -516,19 +464,13 @@ async def test_gripper_error(
             detail=underlying_exception.code.value.detail,
             errorInfo={
                 "originLocationSequence": [
-                    OnAddressableAreaLocationSequenceComponent(
-                        addressableAreaName="A1", slotName=DeckSlotName.SLOT_A1
-                    )
+                    OnAddressableAreaLocationSequenceComponent(addressableAreaName="A1")
                 ],
                 "immediateDestinationLocationSequence": [
-                    OnAddressableAreaLocationSequenceComponent(
-                        addressableAreaName="A2", slotName=DeckSlotName.SLOT_A2
-                    )
+                    OnAddressableAreaLocationSequenceComponent(addressableAreaName="A2")
                 ],
                 "eventualDestinationLocationSequence": [
-                    OnAddressableAreaLocationSequenceComponent(
-                        addressableAreaName="A2", slotName=DeckSlotName.SLOT_A2
-                    )
+                    OnAddressableAreaLocationSequenceComponent(addressableAreaName="A2")
                 ],
             },
             wrappedErrors=[matchers.Anything()],
@@ -613,13 +555,11 @@ async def test_gripper_move_to_waste_chute_implementation(
         x=labware_width / 2 + GRIPPER_PADDLE_WIDTH / 2 + 8, y=0, z=0
     )
     from_loc_sequence: LabwareLocationSequence = [
-        OnAddressableAreaLocationSequenceComponent(
-            addressableAreaName="1", slotName=DeckSlotName.SLOT_1
-        )
+        OnAddressableAreaLocationSequenceComponent(addressableAreaName="1")
     ]
     immediate_dest_loc_sequence: LabwareLocationSequence = [
         OnAddressableAreaLocationSequenceComponent(
-            addressableAreaName="gripperWasteChute", slotName=None
+            addressableAreaName="gripperWasteChute"
         )
     ]
     eventual_dest_loc_sequence: LabwareLocationSequence = [

@@ -62,6 +62,7 @@ from ..types import (
     LabwareLocationSequence,
     OnModuleLocationSequenceComponent,
     OnAddressableAreaLocationSequenceComponent,
+    OnCutoutFixtureLocationSequenceComponent,
     NotOnDeckLocationSequenceComponent,
     labware_location_is_off_deck,
     labware_location_is_system,
@@ -1390,20 +1391,108 @@ class GeometryView:
         """Get the location sequence for this location. Useful for a labware that hasn't been loaded."""
         return self._recurse_labware_location(labware_location, [])
 
+    def _cutout_fixture_location_sequence_from_addressable_area(
+        self, addressable_area_name: str
+    ) -> OnCutoutFixtureLocationSequenceComponent:
+        (
+            cutout_id,
+            potential_fixtures,
+        ) = self._addressable_areas.get_current_potential_cutout_fixtures_for_addressable_area(
+            addressable_area_name
+        )
+        return OnCutoutFixtureLocationSequenceComponent(
+            possibleCutoutFixtureIds=sorted(
+                [fixture.cutout_fixture_id for fixture in potential_fixtures]
+            ),
+            cutoutId=cutout_id,
+        )
+
+    def _recurse_labware_location_from_aa_component(
+        self,
+        labware_location: AddressableAreaLocation,
+        building: LabwareLocationSequence,
+    ) -> LabwareLocationSequence:
+        cutout_location = self._cutout_fixture_location_sequence_from_addressable_area(
+            labware_location.addressableAreaName
+        )
+        # If the labware is loaded on an AA that is a module, we want to respect the convention
+        # of giving it an OnModuleLocation.
+        possible_module = self._modules.get_by_addressable_area(
+            labware_location.addressableAreaName
+        )
+        if possible_module is not None:
+            return building + [
+                OnAddressableAreaLocationSequenceComponent(
+                    addressableAreaName=labware_location.addressableAreaName
+                ),
+                OnModuleLocationSequenceComponent(moduleId=possible_module.id),
+                cutout_location,
+            ]
+        else:
+            return building + [
+                OnAddressableAreaLocationSequenceComponent(
+                    addressableAreaName=labware_location.addressableAreaName,
+                ),
+                cutout_location,
+            ]
+
+    def _recurse_labware_location_from_module_component(
+        self, labware_location: ModuleLocation, building: LabwareLocationSequence
+    ) -> LabwareLocationSequence:
+        module_id = labware_location.moduleId
+        module_aa = self._modules.get_provided_addressable_area(module_id)
+        base_location: (
+            OnCutoutFixtureLocationSequenceComponent
+            | NotOnDeckLocationSequenceComponent
+        ) = self._cutout_fixture_location_sequence_from_addressable_area(module_aa)
+        try:
+            self._modules.get_flex_stacker_substate(labware_location.moduleId)
+            base_location = NotOnDeckLocationSequenceComponent(
+                logicalLocationName=OFF_DECK_LOCATION
+            )
+        except WrongModuleTypeError:
+            pass
+
+        if self._modules.get_deck_supports_module_fixtures():
+            # On a deck with modules as cutout fixtures, we want, in order,
+            # - the addressable area of the module
+            # - the module with its module id, which is what clients want
+            # - the cutout
+            loc = self._modules.get_location(module_id)
+            model = self._modules.get_connected_model(module_id)
+            module_aa = self._modules.ensure_and_convert_module_fixture_location(
+                loc.slotName, model
+            )
+            return building + [
+                OnAddressableAreaLocationSequenceComponent(
+                    addressableAreaName=module_aa
+                ),
+                OnModuleLocationSequenceComponent(moduleId=module_id),
+                base_location,
+            ]
+        else:
+            # If the module isn't a cutout fixture, then we want
+            # - the module
+            # - the addressable area the module is loaded on
+            # - the cutout
+            location = self._modules.get_location(module_id)
+            return building + [
+                OnModuleLocationSequenceComponent(moduleId=module_id),
+                OnAddressableAreaLocationSequenceComponent(
+                    addressableAreaName=location.slotName.value
+                ),
+                base_location,
+            ]
+
     def _recurse_labware_location(
         self,
         labware_location: LabwareLocation,
         building: LabwareLocationSequence,
     ) -> LabwareLocationSequence:
         if isinstance(labware_location, AddressableAreaLocation):
-            return building + [
-                OnAddressableAreaLocationSequenceComponent(
-                    addressableAreaName=labware_location.addressableAreaName,
-                    slotName=self._addressable_areas.get_addressable_area_base_slot(
-                        labware_location.addressableAreaName
-                    ),
-                )
-            ]
+            return self._recurse_labware_location_from_aa_component(
+                labware_location, building
+            )
         elif labware_location_is_off_deck(
             labware_location
         ) or labware_location_is_system(labware_location):
@@ -1425,36 +1514,17 @@ class GeometryView:
                 ],
             )
         elif isinstance(labware_location, ModuleLocation):
-            module_deck_slot = self._modules.get_location(labware_location.moduleId)
-            addressable_area = self._modules.get_provided_addressable_area(
-                labware_location.moduleId
+            return self._recurse_labware_location_from_module_component(
+                labware_location, building
             )
-            try:
-                self._modules.get_flex_stacker_substate(labware_location.moduleId)
-                return building + [
-                    OnModuleLocationSequenceComponent(
-                        moduleId=labware_location.moduleId
-                    ),
-                    NotOnDeckLocationSequenceComponent(
-                        logicalLocationName=OFF_DECK_LOCATION
-                    ),
-                ]
-
-            except WrongModuleTypeError:
-                pass
-            return building + [
-                OnModuleLocationSequenceComponent(moduleId=labware_location.moduleId),
-                OnAddressableAreaLocationSequenceComponent(
-                    addressableAreaName=addressable_area,
-                    slotName=module_deck_slot.slotName,
-                ),
-            ]
         elif isinstance(labware_location, DeckSlotLocation):
             return building + [
                 OnAddressableAreaLocationSequenceComponent(
                     addressableAreaName=labware_location.slotName.value,
-                    slotName=labware_location.slotName,
-                )
+                ),
+                self._cutout_fixture_location_sequence_from_addressable_area(
+                    labware_location.slotName.value
+                ),
             ]
         else:
             _LOG.warn(f"Unhandled labware location kind: {labware_location}")
