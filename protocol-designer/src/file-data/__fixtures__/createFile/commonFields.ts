@@ -4,11 +4,7 @@ import {
   fixture_tiprack_10_ul,
   fixture_trash,
 } from '@opentrons/shared-data/labware/fixtures/2'
-import {
-  OT2_ROBOT_TYPE,
-  OT2_STANDARD_DECKID,
-  fixtureP10SingleV2Specs,
-} from '@opentrons/shared-data'
+import { fixtureP10SingleV2Specs } from '@opentrons/shared-data'
 import type { LabwareDefinition2 } from '@opentrons/shared-data'
 import type {
   LabwareLiquidState,
