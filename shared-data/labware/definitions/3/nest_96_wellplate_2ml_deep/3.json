@@ -21,7 +21,7 @@
   "metadata": {
     "displayName": "NEST 96 Deep Well Plate 2mL",
     "displayCategory": "wellPlate",
-    "displayVolumeUnits": "\u00b5L",
+    "displayVolumeUnits": "µL",
     "tags": []
   },
   "dimensions": {
