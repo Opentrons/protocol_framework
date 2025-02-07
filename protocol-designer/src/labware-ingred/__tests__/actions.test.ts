@@ -164,7 +164,7 @@ describe('createContainer', () => {
           id: 'fakeUuid:someLabwareDefURI',
           labwareDefURI: 'someLabwareDefURI',
           slot: '3',
-          displayCategory: 'wellPlate'
+          displayCategory: 'wellPlate',
         },
       },
     ]
