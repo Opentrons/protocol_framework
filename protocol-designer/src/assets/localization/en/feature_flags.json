@@ -32,7 +32,7 @@
     "description": "Enable liquid classes support"
   },
   "OT_PD_ENABLE_MULTIPLE_TEMPS_OT2": {
-    "title": "Allow multiple temperature modules on an OT-2",
-    "description": "This is an experimental setting. Opentrons is not responsible for any collisions you might encounter."
+    "title": "Allow two temperature modules on OT-2",
+    "description": "This experimental setting may cause collisions, and Opentrons will not be responsible for any damage resulting from its use."
   }
 }
