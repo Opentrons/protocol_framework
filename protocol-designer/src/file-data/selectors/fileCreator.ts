@@ -26,7 +26,7 @@ import {
   getModulesLoadInfo,
   getPipettesLoadInfo,
 } from './utils'
-import { pythonImports, pythonMetadata } from './pythonFile'
+import { pythonImports, pythonMetadata, pythonRequirements } from './pythonFile'
 
 import type { SecondOrderCommandAnnotation } from '@opentrons/shared-data/commandAnnotation/types'
 import type {
@@ -302,12 +302,14 @@ export const createFile: Selector<ProtocolFile> = createSelector(
 
 export const createPythonFile: Selector<string> = createSelector(
   getFileMetadata,
-  fileMetadata => {
+  getRobotType,
+  (fileMetadata, robotType) => {
     return (
       [
         // Here are the sections of the Python file:
         pythonImports(),
         pythonMetadata(fileMetadata),
+        pythonRequirements(robotType),
       ]
         .filter(section => section) // skip any blank sections
         .join('\n\n') + '\n'
