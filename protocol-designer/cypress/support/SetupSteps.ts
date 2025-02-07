@@ -1,6 +1,6 @@
-import 'cypress-file-upload'
 // eslint-disable-next-line @typescript-eslint/consistent-type-imports
 import { StepListItem } from './StepExecution'
+// import { getLabwareByDisplayName, getLabwareByLoadName, isFunction } from './utils'
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace Cypress {
@@ -9,6 +9,7 @@ declare global {
     }
   }
 }
+
 export enum SetupActions {
   SelectFlex = 'Select Opentrons Flex',
   SelectOT2 = 'Select Opentrons OT-2',
@@ -37,17 +38,15 @@ export enum SetupActions {
   ChoseDeckSlotD2 = 'Choose deck slot D2',
   ChoseDeckSlotD3 = 'Choose deck slot D3',
   AddHardwareLabware = 'Adds labware to deck slot by chose deck slot',
-  EditHardwareLabwareOnDeck = 'Edits existing labware/harddware on deck slot',
+  EditHardwareLabwareOnDeck = 'Edits existing labware/hardware on deck slot',
   ClickLabwareHeader = 'Click Labware',
   AddAdapters = 'Add an adapter to a module after selecting labware header',
   ClickWellPlatesSection = 'Click Well plates',
-  SelectArmadillo96WellPlate = 'Select Armadillo 96 Well Plate',
-  SelectBioRad96WellPlate = 'Select Bio-Rad 96 Well Plate',
   AddLiquid = 'Add liquid',
   DefineLiquid = 'Define a liquid',
   ClickLiquidButton = 'Click Liquid button',
   LiquidSaveWIP = 'Save liquid, is functional but could use a refactor',
-  WellSelector = 'Select wells with strings A1, A2, etc. comman separated LIST',
+  WellSelector = 'Select wells with strings A1, A2, etc. command separated LIST',
   LiquidDropdown = 'Dropdown for liquids when adding to well',
   SelectLiquidWells = 'Select Liquid Wells',
   SetVolumeAndSaveforWells = 'Set volume and save for wells',
@@ -56,6 +55,7 @@ export enum SetupActions {
   DeepWellTempModAdapter = 'Select Opentrons 96 Deep Well Temperature Module Adapter',
   AddNest96DeepWellPlate = 'Adds Nest 96 Deep Well Plate',
   Done = 'Select Done on a step form',
+  SelectLabware = 'Select labware with display name',
 }
 
 export enum SetupVerifications {
@@ -116,8 +116,6 @@ export enum SetupContent {
   EditHardwareLabwareOnDeck = 'Edit hardware/labware',
   LabwareH = 'Labware',
   WellPlatesCat = 'Well plates',
-  Armadillo96WellPlate200uL = 'Armadillo 96 Well Plate 200 µL PCR Full Skirt',
-  Biorad96WellPlate200uL = 'Bio-Rad 96 Well Plate 200 µL PCR',
   AddLiquid = 'Add liquid',
   DefineALiquid = 'Define a liquid',
   LiquidButton = 'Liquid',
@@ -144,12 +142,25 @@ export enum SetupLocators {
   ModalShellArea = 'div[aria-label="ModalShell_ModalArea"]',
   SaveButton = 'button[type="submit"]',
   LiquidsDropdown = 'div[tabindex="0"].sc-bqWxrE', // Add new locator for the dropdown
-  LabwareSelectionLocation = '[data-testid="Toolbox_confirmButton"]',
-  DoneButtonLabwareSelection = '[data-testid="Toolbox_confirmButton"]',
   Div = 'div',
   Button = 'button',
   TempdeckTempInput = 'input[name="targetTemperature"]',
+  DoneButtonLabwareSelection = '[data-testid="Toolbox_confirmButton"]',
 }
+
+// The alternative to enums is defining functions
+
+function selectLabwareByDisplayName(displayName: string): void {
+  cy.contains(displayName).click({ force: true })
+  cy.get(SetupLocators.DoneButtonLabwareSelection).click({ force: true })
+}
+
+// all function definitions must be added here
+export const setupFunctions = {
+  selectLabwareByDisplayName,
+}
+
+export type SetupFunction = typeof setupFunctions[keyof typeof setupFunctions]
 
 const chooseDeckSlot = (
   slot: string
@@ -237,6 +248,10 @@ const selectWells = (wells: string[]): void => {
 // selectWells(['A1', 'B3', 'H12'])
 
 export const executeSetupSteps = (action: StepListItem): void => {
+  if (typeof action.step === 'function') {
+    action.step(action.params)
+    return
+  }
   switch (action.step) {
     case SetupActions.SelectFlex:
       cy.contains(SetupContent.OpentronsFlex).should('be.visible').click()
@@ -340,15 +355,6 @@ export const executeSetupSteps = (action: StepListItem): void => {
         .contains(SetupContent.EditSlot)
         .click({ force: true })
       break
-    case SetupActions.SelectArmadillo96WellPlate: // New case for selecting Armadillo plate
-      cy.contains(SetupContent.Armadillo96WellPlate200uL).click({ force: true })
-      cy.get(SetupLocators.LabwareSelectionLocation).click({ force: true })
-      break
-    case SetupActions.SelectBioRad96WellPlate: // New case for selecting Armadillo plate
-      cy.contains(SetupContent.Biorad96WellPlate200uL).click({ force: true })
-      cy.get(SetupLocators.LabwareSelectionLocation).click({ force: true })
-      break
-
     case SetupActions.AddLiquid: // New case for "Add liquid"
       cy.contains('button', SetupContent.AddLiquid).click()
       break

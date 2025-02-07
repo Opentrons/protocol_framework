@@ -1,4 +1,8 @@
-import { SetupActions, SetupVerifications } from '../support/SetupSteps'
+import {
+  SetupActions,
+  setupFunctions,
+  SetupVerifications,
+} from '../support/SetupSteps'
 import { UniversalActions } from '../support/universalActions'
 import { ModActions, ModVerifications } from '../support/SupportModules'
 import { runSteps } from '../support/StepExecution'
@@ -53,7 +57,10 @@ describe('The Redesigned Create Protocol Landing Page', () => {
       { step: SetupActions.AddHardwareLabware },
       { step: SetupActions.ClickLabwareHeader },
       { step: SetupActions.ClickWellPlatesSection },
-      { step: SetupActions.SelectArmadillo96WellPlate },
+      {
+        step: setupFunctions.selectLabwareByDisplayName,
+        params: 'Bio-Rad 96 Well Plate',
+      },
       { step: SetupActions.ChoseDeckSlotC2Labware },
       { step: SetupActions.AddLiquid },
       { step: SetupActions.ClickLiquidButton },

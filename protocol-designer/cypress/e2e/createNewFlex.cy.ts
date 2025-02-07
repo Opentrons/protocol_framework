@@ -1,4 +1,8 @@
-import { SetupActions, SetupVerifications } from '../support/SetupSteps'
+import {
+  SetupActions,
+  SetupVerifications,
+  setupFunctions,
+} from '../support/SetupSteps'
 import { UniversalActions } from '../support/universalActions'
 import { runSteps } from '../support/StepExecution'
 import type { StepsList } from '../support/StepExecution'
@@ -51,7 +55,14 @@ describe('The Redesigned Create Protocol Landing Page', () => {
       { step: SetupActions.AddHardwareLabware },
       { step: SetupActions.ClickLabwareHeader },
       { step: SetupActions.ClickWellPlatesSection },
-      { step: SetupActions.SelectArmadillo96WellPlate },
+      // { !!this one is retired!!
+      //   step: setupFunctions.selectLabwareByDisplayName,
+      //   params: 'Armadillo 96 Well Plate 200 µL PCR Full Skirt',
+      // },
+      {
+        step: setupFunctions.selectLabwareByDisplayName,
+        params: 'Bio-Rad 96 Well Plate',
+      },
       { step: SetupActions.ChoseDeckSlotC2Labware },
       { step: SetupActions.AddLiquid },
       { step: SetupActions.ClickLiquidButton },
@@ -67,7 +78,10 @@ describe('The Redesigned Create Protocol Landing Page', () => {
       { step: SetupActions.AddHardwareLabware },
       { step: SetupActions.ClickLabwareHeader },
       { step: SetupActions.ClickWellPlatesSection },
-      { step: SetupActions.SelectBioRad96WellPlate },
+      {
+        step: setupFunctions.selectLabwareByDisplayName,
+        params: 'Bio-Rad 96 Well Plate',
+      },
     ]
     runSteps(steps)
   })

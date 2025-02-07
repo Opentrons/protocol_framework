@@ -1,4 +1,3 @@
-import 'cypress-file-upload'
 // eslint-disable-next-line @typescript-eslint/consistent-type-imports
 import { MigrateTestCase, migrateAndMatchSnapshot } from '../support/import'
 import { TestFilePath } from '../support/testFiles'

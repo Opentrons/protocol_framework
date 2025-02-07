@@ -1,10 +1,12 @@
 import { executeUniversalAction, UniversalActions } from './universalActions'
 import { isEnumValue } from './utils'
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
 import {
   SetupActions,
   SetupVerifications,
   executeVerificationStep,
   executeSetupSteps,
+  SetupFunction,
 } from './SetupSteps'
 import {
   ModActions,
@@ -20,6 +22,7 @@ export interface StepListItem {
     | UniversalActions
     | ModActions
     | ModVerifications
+    | SetupFunction
   params?: string | string[] | number | boolean | undefined
 }
 
@@ -37,14 +40,19 @@ export const runSteps = (steps: StepsList): void => {
   if (
     !isEnumValue(
       enumsToCheck,
-      steps.map(item => item.step)
+      steps
+        .filter(item => typeof item.step !== 'function')
+        .map(item => item.step)
     )
   ) {
     throw new Error('One or more steps are unrecognized.')
   }
 
   steps.forEach(item => {
-    if (isEnumValue([SetupActions], item.step)) {
+    if (
+      isEnumValue([SetupActions], item.step) ||
+      typeof item.step === 'function'
+    ) {
       executeSetupSteps(item)
     } else if (isEnumValue([SetupVerifications], item.step)) {
       executeVerificationStep(item)

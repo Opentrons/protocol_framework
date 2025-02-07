@@ -1,4 +1,8 @@
-import { SetupActions, SetupVerifications } from '../support/SetupSteps'
+import {
+  SetupActions,
+  setupFunctions,
+  SetupVerifications,
+} from '../support/SetupSteps'
 import { UniversalActions } from '../support/universalActions'
 import { runSteps } from '../support/StepExecution'
 import type { StepsList } from '../support/StepExecution'
@@ -52,7 +56,10 @@ describe('The Redesigned Create Protocol Landing Page', () => {
       { step: SetupActions.AddHardwareLabware },
       { step: SetupActions.ClickLabwareHeader },
       { step: SetupActions.ClickWellPlatesSection },
-      { step: SetupActions.SelectArmadillo96WellPlate },
+      {
+        step: setupFunctions.selectLabwareByDisplayName,
+        params: 'Bio-Rad 96 Well Plate',
+      },
       { step: SetupActions.ChoseDeckSlotC2Labware },
       { step: SetupActions.AddLiquid },
       { step: SetupActions.ClickLiquidButton },
@@ -68,7 +75,10 @@ describe('The Redesigned Create Protocol Landing Page', () => {
       { step: SetupActions.AddHardwareLabware },
       { step: SetupActions.ClickLabwareHeader },
       { step: SetupActions.ClickWellPlatesSection },
-      { step: SetupActions.SelectBioRad96WellPlate },
+      {
+        step: setupFunctions.selectLabwareByDisplayName,
+        params: 'Bio-Rad 96 Well Plate',
+      },
       { step: SetupActions.ProtocolStepsH },
       { step: SetupActions.AddStep },
       { step: SetupVerifications.TransferPopOut },

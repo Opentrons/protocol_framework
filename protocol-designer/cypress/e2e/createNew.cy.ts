@@ -1,7 +1,7 @@
-import { SetupActions, SetupVerifications } from '../support/SetupSteps'
+import { SetupVerifications, SetupActions } from '../support/SetupSteps'
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
+import { StepsList, runSteps } from '../support/StepExecution'
 import { UniversalActions } from '../support/universalActions'
-import { runSteps } from '../support/StepExecution'
-import type { StepsList } from '../support/StepExecution'
 
 describe('The Redesigned Create Protocol Landing Page', () => {
   beforeEach(() => {
