@@ -1799,7 +1799,14 @@
             }
           }
         },
-        "labwareId": "UUID"
+        "labwareId": "UUID",
+        "locationSequence": [
+          {
+            "addressableAreaName": "5",
+            "kind": "onAddressableArea",
+            "slotName": "5"
+          }
+        ]
       },
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
@@ -3060,7 +3067,18 @@
             }
           }
         },
-        "labwareId": "UUID"
+        "labwareId": "UUID",
+        "locationSequence": [
+          {
+            "kind": "onModule",
+            "moduleId": "UUID"
+          },
+          {
+            "addressableAreaName": "1",
+            "kind": "onAddressableArea",
+            "slotName": "1"
+          }
+        ]
       },
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
@@ -3417,7 +3435,18 @@
             }
           }
         },
-        "labwareId": "UUID"
+        "labwareId": "UUID",
+        "locationSequence": [
+          {
+            "kind": "onModule",
+            "moduleId": "UUID"
+          },
+          {
+            "addressableAreaName": "3",
+            "kind": "onAddressableArea",
+            "slotName": "3"
+          }
+        ]
       },
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
@@ -4574,7 +4603,18 @@
             }
           }
         },
-        "labwareId": "UUID"
+        "labwareId": "UUID",
+        "locationSequence": [
+          {
+            "kind": "onModule",
+            "moduleId": "UUID"
+          },
+          {
+            "addressableAreaName": "9",
+            "kind": "onAddressableArea",
+            "slotName": "9"
+          }
+        ]
       },
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
@@ -5731,7 +5771,18 @@
             }
           }
         },
-        "labwareId": "UUID"
+        "labwareId": "UUID",
+        "locationSequence": [
+          {
+            "kind": "onModule",
+            "moduleId": "UUID"
+          },
+          {
+            "addressableAreaName": "7",
+            "kind": "onAddressableArea",
+            "slotName": "7"
+          }
+        ]
       },
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
@@ -5825,7 +5876,14 @@
             }
           }
         },
-        "labwareId": "UUID"
+        "labwareId": "UUID",
+        "locationSequence": [
+          {
+            "addressableAreaName": "6",
+            "kind": "onAddressableArea",
+            "slotName": "6"
+          }
+        ]
       },
       "startedAt": "TIMESTAMP",
       "status": "succeeded"

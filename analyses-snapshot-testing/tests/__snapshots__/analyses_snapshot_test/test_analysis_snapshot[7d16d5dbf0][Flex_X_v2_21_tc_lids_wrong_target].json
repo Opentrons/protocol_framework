@@ -534,7 +534,18 @@
           "version": 1,
           "wells": {}
         },
-        "labwareId": "UUID"
+        "labwareId": "UUID",
+        "locationSequence": [
+          {
+            "kind": "onModule",
+            "moduleId": "UUID"
+          },
+          {
+            "addressableAreaName": "temperatureModuleV2D1",
+            "kind": "onAddressableArea",
+            "slotName": "D1"
+          }
+        ]
       },
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
@@ -1817,7 +1828,14 @@
             }
           }
         },
-        "labwareId": "UUID"
+        "labwareId": "UUID",
+        "locationSequence": [
+          {
+            "addressableAreaName": "A1",
+            "kind": "onAddressableArea",
+            "slotName": "A1"
+          }
+        ]
       },
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
@@ -1884,7 +1902,14 @@
           "version": 1,
           "wells": {}
         },
-        "labwareId": "UUID"
+        "labwareId": "UUID",
+        "locationSequence": [
+          {
+            "addressableAreaName": "B2",
+            "kind": "onAddressableArea",
+            "slotName": "B2"
+          }
+        ]
       },
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
@@ -1903,7 +1928,45 @@
         },
         "strategy": "manualMoveWithPause"
       },
-      "result": {},
+      "result": {
+        "eventualDestinationLocationSequence": [
+          {
+            "kind": "onLabware",
+            "labwareId": "UUID"
+          },
+          {
+            "kind": "onModule",
+            "moduleId": "UUID"
+          },
+          {
+            "addressableAreaName": "temperatureModuleV2D1",
+            "kind": "onAddressableArea",
+            "slotName": "D1"
+          }
+        ],
+        "immediateDestinationLocationSequence": [
+          {
+            "kind": "onLabware",
+            "labwareId": "UUID"
+          },
+          {
+            "kind": "onModule",
+            "moduleId": "UUID"
+          },
+          {
+            "addressableAreaName": "temperatureModuleV2D1",
+            "kind": "onAddressableArea",
+            "slotName": "D1"
+          }
+        ],
+        "originLocationSequence": [
+          {
+            "addressableAreaName": "A1",
+            "kind": "onAddressableArea",
+            "slotName": "A1"
+          }
+        ]
+      },
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
     },
@@ -2061,7 +2124,18 @@
           "version": 1,
           "wells": {}
         },
-        "labwareId": "UUID"
+        "labwareId": "UUID",
+        "locationSequence": [
+          {
+            "kind": "onLabware",
+            "labwareId": "UUID"
+          },
+          {
+            "addressableAreaName": "B2",
+            "kind": "onAddressableArea",
+            "slotName": "B2"
+          }
+        ]
       },
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
@@ -2219,7 +2293,22 @@
           "version": 1,
           "wells": {}
         },
-        "labwareId": "UUID"
+        "labwareId": "UUID",
+        "locationSequence": [
+          {
+            "kind": "onLabware",
+            "labwareId": "UUID"
+          },
+          {
+            "kind": "onLabware",
+            "labwareId": "UUID"
+          },
+          {
+            "addressableAreaName": "B2",
+            "kind": "onAddressableArea",
+            "slotName": "B2"
+          }
+        ]
       },
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
@@ -2377,7 +2466,26 @@
           "version": 1,
           "wells": {}
         },
-        "labwareId": "UUID"
+        "labwareId": "UUID",
+        "locationSequence": [
+          {
+            "kind": "onLabware",
+            "labwareId": "UUID"
+          },
+          {
+            "kind": "onLabware",
+            "labwareId": "UUID"
+          },
+          {
+            "kind": "onLabware",
+            "labwareId": "UUID"
+          },
+          {
+            "addressableAreaName": "B2",
+            "kind": "onAddressableArea",
+            "slotName": "B2"
+          }
+        ]
       },
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
@@ -2535,7 +2643,30 @@
           "version": 1,
           "wells": {}
         },
-        "labwareId": "UUID"
+        "labwareId": "UUID",
+        "locationSequence": [
+          {
+            "kind": "onLabware",
+            "labwareId": "UUID"
+          },
+          {
+            "kind": "onLabware",
+            "labwareId": "UUID"
+          },
+          {
+            "kind": "onLabware",
+            "labwareId": "UUID"
+          },
+          {
+            "kind": "onLabware",
+            "labwareId": "UUID"
+          },
+          {
+            "addressableAreaName": "B2",
+            "kind": "onAddressableArea",
+            "slotName": "B2"
+          }
+        ]
       },
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
@@ -2693,7 +2824,34 @@
           "version": 1,
           "wells": {}
         },
-        "labwareId": "UUID"
+        "labwareId": "UUID",
+        "locationSequence": [
+          {
+            "kind": "onLabware",
+            "labwareId": "UUID"
+          },
+          {
+            "kind": "onLabware",
+            "labwareId": "UUID"
+          },
+          {
+            "kind": "onLabware",
+            "labwareId": "UUID"
+          },
+          {
+            "kind": "onLabware",
+            "labwareId": "UUID"
+          },
+          {
+            "kind": "onLabware",
+            "labwareId": "UUID"
+          },
+          {
+            "addressableAreaName": "B2",
+            "kind": "onAddressableArea",
+            "slotName": "B2"
+          }
+        ]
       },
       "startedAt": "TIMESTAMP",
       "status": "succeeded"

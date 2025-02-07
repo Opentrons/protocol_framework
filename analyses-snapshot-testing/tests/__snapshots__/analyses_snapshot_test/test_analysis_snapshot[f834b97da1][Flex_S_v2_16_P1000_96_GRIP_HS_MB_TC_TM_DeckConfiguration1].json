@@ -1809,7 +1809,18 @@
             }
           }
         },
-        "labwareId": "UUID"
+        "labwareId": "UUID",
+        "locationSequence": [
+          {
+            "kind": "onModule",
+            "moduleId": "UUID"
+          },
+          {
+            "addressableAreaName": "temperatureModuleV2B3",
+            "kind": "onAddressableArea",
+            "slotName": "B3"
+          }
+        ]
       },
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
@@ -2983,7 +2994,14 @@
             }
           }
         },
-        "labwareId": "UUID"
+        "labwareId": "UUID",
+        "locationSequence": [
+          {
+            "addressableAreaName": "B2",
+            "kind": "onAddressableArea",
+            "slotName": "B2"
+          }
+        ]
       },
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
@@ -4157,7 +4175,14 @@
             }
           }
         },
-        "labwareId": "UUID"
+        "labwareId": "UUID",
+        "locationSequence": [
+          {
+            "addressableAreaName": "C2",
+            "kind": "onAddressableArea",
+            "slotName": "C2"
+          }
+        ]
       },
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
@@ -4226,7 +4251,14 @@
           "version": 1,
           "wells": {}
         },
-        "labwareId": "UUID"
+        "labwareId": "UUID",
+        "locationSequence": [
+          {
+            "addressableAreaName": "C3",
+            "kind": "onAddressableArea",
+            "slotName": "C3"
+          }
+        ]
       },
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
@@ -5384,7 +5416,18 @@
             }
           }
         },
-        "labwareId": "UUID"
+        "labwareId": "UUID",
+        "locationSequence": [
+          {
+            "kind": "onLabware",
+            "labwareId": "UUID"
+          },
+          {
+            "addressableAreaName": "C3",
+            "kind": "onAddressableArea",
+            "slotName": "C3"
+          }
+        ]
       },
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
@@ -5453,7 +5496,14 @@
           "version": 1,
           "wells": {}
         },
-        "labwareId": "UUID"
+        "labwareId": "UUID",
+        "locationSequence": [
+          {
+            "addressableAreaName": "D2",
+            "kind": "onAddressableArea",
+            "slotName": "D2"
+          }
+        ]
       },
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
@@ -6611,7 +6661,18 @@
             }
           }
         },
-        "labwareId": "UUID"
+        "labwareId": "UUID",
+        "locationSequence": [
+          {
+            "kind": "onLabware",
+            "labwareId": "UUID"
+          },
+          {
+            "addressableAreaName": "D2",
+            "kind": "onAddressableArea",
+            "slotName": "D2"
+          }
+        ]
       },
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
@@ -7767,7 +7828,13 @@
             }
           }
         },
-        "labwareId": "UUID"
+        "labwareId": "UUID",
+        "locationSequence": [
+          {
+            "kind": "notOnDeck",
+            "logicalLocationName": "offDeck"
+          }
+        ]
       },
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
@@ -8923,7 +8990,13 @@
             }
           }
         },
-        "labwareId": "UUID"
+        "labwareId": "UUID",
+        "locationSequence": [
+          {
+            "kind": "notOnDeck",
+            "logicalLocationName": "offDeck"
+          }
+        ]
       },
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
@@ -10081,7 +10154,14 @@
             }
           }
         },
-        "labwareId": "UUID"
+        "labwareId": "UUID",
+        "locationSequence": [
+          {
+            "addressableAreaName": "C4",
+            "kind": "onAddressableArea",
+            "slotName": "C3"
+          }
+        ]
       },
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
@@ -11239,7 +11319,14 @@
             }
           }
         },
-        "labwareId": "UUID"
+        "labwareId": "UUID",
+        "locationSequence": [
+          {
+            "addressableAreaName": "D4",
+            "kind": "onAddressableArea",
+            "slotName": "D3"
+          }
+        ]
       },
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
@@ -13292,7 +13379,32 @@
         },
         "strategy": "usingGripper"
       },
-      "result": {},
+      "result": {
+        "eventualDestinationLocationSequence": [
+          {
+            "kind": "notOnDeck",
+            "logicalLocationName": "offDeck"
+          }
+        ],
+        "immediateDestinationLocationSequence": [
+          {
+            "addressableAreaName": "gripperWasteChute",
+            "kind": "onAddressableArea",
+            "slotName": "D3"
+          }
+        ],
+        "originLocationSequence": [
+          {
+            "kind": "onLabware",
+            "labwareId": "UUID"
+          },
+          {
+            "addressableAreaName": "C3",
+            "kind": "onAddressableArea",
+            "slotName": "C3"
+          }
+        ]
+      },
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
     },
@@ -13310,7 +13422,32 @@
         },
         "strategy": "usingGripper"
       },
-      "result": {},
+      "result": {
+        "eventualDestinationLocationSequence": [
+          {
+            "kind": "notOnDeck",
+            "logicalLocationName": "offDeck"
+          }
+        ],
+        "immediateDestinationLocationSequence": [
+          {
+            "addressableAreaName": "gripperWasteChute",
+            "kind": "onAddressableArea",
+            "slotName": "D3"
+          }
+        ],
+        "originLocationSequence": [
+          {
+            "kind": "onLabware",
+            "labwareId": "UUID"
+          },
+          {
+            "addressableAreaName": "D2",
+            "kind": "onAddressableArea",
+            "slotName": "D2"
+          }
+        ]
+      },
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
     },
@@ -13328,7 +13465,37 @@
         },
         "strategy": "usingGripper"
       },
-      "result": {},
+      "result": {
+        "eventualDestinationLocationSequence": [
+          {
+            "kind": "onLabware",
+            "labwareId": "UUID"
+          },
+          {
+            "addressableAreaName": "C3",
+            "kind": "onAddressableArea",
+            "slotName": "C3"
+          }
+        ],
+        "immediateDestinationLocationSequence": [
+          {
+            "kind": "onLabware",
+            "labwareId": "UUID"
+          },
+          {
+            "addressableAreaName": "C3",
+            "kind": "onAddressableArea",
+            "slotName": "C3"
+          }
+        ],
+        "originLocationSequence": [
+          {
+            "addressableAreaName": "C4",
+            "kind": "onAddressableArea",
+            "slotName": "C3"
+          }
+        ]
+      },
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
     },
@@ -13346,7 +13513,37 @@
         },
         "strategy": "usingGripper"
       },
-      "result": {},
+      "result": {
+        "eventualDestinationLocationSequence": [
+          {
+            "kind": "onLabware",
+            "labwareId": "UUID"
+          },
+          {
+            "addressableAreaName": "D2",
+            "kind": "onAddressableArea",
+            "slotName": "D2"
+          }
+        ],
+        "immediateDestinationLocationSequence": [
+          {
+            "kind": "onLabware",
+            "labwareId": "UUID"
+          },
+          {
+            "addressableAreaName": "D2",
+            "kind": "onAddressableArea",
+            "slotName": "D2"
+          }
+        ],
+        "originLocationSequence": [
+          {
+            "addressableAreaName": "D4",
+            "kind": "onAddressableArea",
+            "slotName": "D3"
+          }
+        ]
+      },
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
     },
@@ -13651,7 +13848,32 @@
         },
         "strategy": "usingGripper"
       },
-      "result": {},
+      "result": {
+        "eventualDestinationLocationSequence": [
+          {
+            "kind": "notOnDeck",
+            "logicalLocationName": "offDeck"
+          }
+        ],
+        "immediateDestinationLocationSequence": [
+          {
+            "addressableAreaName": "gripperWasteChute",
+            "kind": "onAddressableArea",
+            "slotName": "D3"
+          }
+        ],
+        "originLocationSequence": [
+          {
+            "kind": "onLabware",
+            "labwareId": "UUID"
+          },
+          {
+            "addressableAreaName": "C3",
+            "kind": "onAddressableArea",
+            "slotName": "C3"
+          }
+        ]
+      },
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
     },
@@ -13669,7 +13891,32 @@
         },
         "strategy": "usingGripper"
       },
-      "result": {},
+      "result": {
+        "eventualDestinationLocationSequence": [
+          {
+            "kind": "notOnDeck",
+            "logicalLocationName": "offDeck"
+          }
+        ],
+        "immediateDestinationLocationSequence": [
+          {
+            "addressableAreaName": "gripperWasteChute",
+            "kind": "onAddressableArea",
+            "slotName": "D3"
+          }
+        ],
+        "originLocationSequence": [
+          {
+            "kind": "onLabware",
+            "labwareId": "UUID"
+          },
+          {
+            "addressableAreaName": "D2",
+            "kind": "onAddressableArea",
+            "slotName": "D2"
+          }
+        ]
+      },
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
     },
@@ -13687,7 +13934,36 @@
         },
         "strategy": "manualMoveWithPause"
       },
-      "result": {},
+      "result": {
+        "eventualDestinationLocationSequence": [
+          {
+            "kind": "onLabware",
+            "labwareId": "UUID"
+          },
+          {
+            "addressableAreaName": "C3",
+            "kind": "onAddressableArea",
+            "slotName": "C3"
+          }
+        ],
+        "immediateDestinationLocationSequence": [
+          {
+            "kind": "onLabware",
+            "labwareId": "UUID"
+          },
+          {
+            "addressableAreaName": "C3",
+            "kind": "onAddressableArea",
+            "slotName": "C3"
+          }
+        ],
+        "originLocationSequence": [
+          {
+            "kind": "notOnDeck",
+            "logicalLocationName": "offDeck"
+          }
+        ]
+      },
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
     },
@@ -13705,7 +13981,36 @@
         },
         "strategy": "manualMoveWithPause"
       },
-      "result": {},
+      "result": {
+        "eventualDestinationLocationSequence": [
+          {
+            "kind": "onLabware",
+            "labwareId": "UUID"
+          },
+          {
+            "addressableAreaName": "D2",
+            "kind": "onAddressableArea",
+            "slotName": "D2"
+          }
+        ],
+        "immediateDestinationLocationSequence": [
+          {
+            "kind": "onLabware",
+            "labwareId": "UUID"
+          },
+          {
+            "addressableAreaName": "D2",
+            "kind": "onAddressableArea",
+            "slotName": "D2"
+          }
+        ],
+        "originLocationSequence": [
+          {
+            "kind": "notOnDeck",
+            "logicalLocationName": "offDeck"
+          }
+        ]
+      },
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
     },
@@ -14023,7 +14328,37 @@
         },
         "strategy": "usingGripper"
       },
-      "result": {},
+      "result": {
+        "eventualDestinationLocationSequence": [
+          {
+            "kind": "onModule",
+            "moduleId": "UUID"
+          },
+          {
+            "addressableAreaName": "thermocyclerModuleV2",
+            "kind": "onAddressableArea",
+            "slotName": "B1"
+          }
+        ],
+        "immediateDestinationLocationSequence": [
+          {
+            "kind": "onModule",
+            "moduleId": "UUID"
+          },
+          {
+            "addressableAreaName": "thermocyclerModuleV2",
+            "kind": "onAddressableArea",
+            "slotName": "B1"
+          }
+        ],
+        "originLocationSequence": [
+          {
+            "addressableAreaName": "C2",
+            "kind": "onAddressableArea",
+            "slotName": "C2"
+          }
+        ]
+      },
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
     },
@@ -14041,7 +14376,41 @@
         },
         "strategy": "usingGripper"
       },
-      "result": {},
+      "result": {
+        "eventualDestinationLocationSequence": [
+          {
+            "kind": "onModule",
+            "moduleId": "UUID"
+          },
+          {
+            "addressableAreaName": "magneticBlockV1A2",
+            "kind": "onAddressableArea",
+            "slotName": "A2"
+          }
+        ],
+        "immediateDestinationLocationSequence": [
+          {
+            "kind": "onModule",
+            "moduleId": "UUID"
+          },
+          {
+            "addressableAreaName": "magneticBlockV1A2",
+            "kind": "onAddressableArea",
+            "slotName": "A2"
+          }
+        ],
+        "originLocationSequence": [
+          {
+            "kind": "onModule",
+            "moduleId": "UUID"
+          },
+          {
+            "addressableAreaName": "thermocyclerModuleV2",
+            "kind": "onAddressableArea",
+            "slotName": "B1"
+          }
+        ]
+      },
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
     },
@@ -14059,7 +14428,49 @@
         },
         "strategy": "usingGripper"
       },
-      "result": {},
+      "result": {
+        "eventualDestinationLocationSequence": [
+          {
+            "kind": "onLabware",
+            "labwareId": "UUID"
+          },
+          {
+            "kind": "onModule",
+            "moduleId": "UUID"
+          },
+          {
+            "addressableAreaName": "temperatureModuleV2B3",
+            "kind": "onAddressableArea",
+            "slotName": "B3"
+          }
+        ],
+        "immediateDestinationLocationSequence": [
+          {
+            "kind": "onLabware",
+            "labwareId": "UUID"
+          },
+          {
+            "kind": "onModule",
+            "moduleId": "UUID"
+          },
+          {
+            "addressableAreaName": "temperatureModuleV2B3",
+            "kind": "onAddressableArea",
+            "slotName": "B3"
+          }
+        ],
+        "originLocationSequence": [
+          {
+            "kind": "onModule",
+            "moduleId": "UUID"
+          },
+          {
+            "addressableAreaName": "magneticBlockV1A2",
+            "kind": "onAddressableArea",
+            "slotName": "A2"
+          }
+        ]
+      },
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
     },
@@ -14077,7 +14488,28 @@
         },
         "strategy": "usingGripper"
       },
-      "result": {},
+      "result": {
+        "eventualDestinationLocationSequence": [
+          {
+            "kind": "notOnDeck",
+            "logicalLocationName": "offDeck"
+          }
+        ],
+        "immediateDestinationLocationSequence": [
+          {
+            "addressableAreaName": "gripperWasteChute",
+            "kind": "onAddressableArea",
+            "slotName": "D3"
+          }
+        ],
+        "originLocationSequence": [
+          {
+            "addressableAreaName": "B2",
+            "kind": "onAddressableArea",
+            "slotName": "B2"
+          }
+        ]
+      },
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
     },
@@ -14095,7 +14527,36 @@
         },
         "strategy": "usingGripper"
       },
-      "result": {},
+      "result": {
+        "eventualDestinationLocationSequence": [
+          {
+            "kind": "notOnDeck",
+            "logicalLocationName": "offDeck"
+          }
+        ],
+        "immediateDestinationLocationSequence": [
+          {
+            "addressableAreaName": "gripperWasteChute",
+            "kind": "onAddressableArea",
+            "slotName": "D3"
+          }
+        ],
+        "originLocationSequence": [
+          {
+            "kind": "onLabware",
+            "labwareId": "UUID"
+          },
+          {
+            "kind": "onModule",
+            "moduleId": "UUID"
+          },
+          {
+            "addressableAreaName": "temperatureModuleV2B3",
+            "kind": "onAddressableArea",
+            "slotName": "B3"
+          }
+        ]
+      },
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
     }
