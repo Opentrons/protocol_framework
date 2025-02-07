@@ -5,7 +5,7 @@ metadata = {"protocolName": ""}
 def run(protocol_context):
     tiprack1 = protocol_context.load_labware("opentrons_flex_96_tiprack_50ul", "C1")
     trash = protocol_context.load_trash_bin("A3")
-    #pipette_50 = protocol_context.load_instrument("flex_1channel_50", "right", tip_racks=[tiprack1])
+    # pipette_50 = protocol_context.load_instrument("flex_1channel_50", "right", tip_racks=[tiprack1])
     # pipette_50 = protocol_context.load_instrument("flex_1channel_1000", "right", tip_racks=[tiprack1])
     pipette_50 = protocol_context.load_instrument("flex_1channel_50", "right", tip_racks=[tiprack1], liquid_presence_detection=True)
     nest_plate = protocol_context.load_labware("nest_96_wellplate_100ul_pcr_full_skirt", "D3")
@@ -17,13 +17,17 @@ def run(protocol_context):
     water_class = protocol_context.define_liquid_class("water")
 
     pipette_50.transfer_liquid(
-        liquid_class=water_class, # if commented TypeError [line 14]: InstrumentContext.transfer_liquid() missing 1 required positional argument: 'liquid_class'
+        liquid_class=water_class,  # if commented TypeError [line 14]: InstrumentContext.transfer_liquid() missing 1 required positional argument: 'liquid_class'
         volume=26.57,
         # volume=60,
         # volume=51, - no protection against pipetting more than the tip's max volume
         # breaks it up - divides by 2?
-        source=nest_plate.rows()[1][1], # TypeError [line 16]: InstrumentContext.transfer_liquid() missing 1 required positional argument: 'source'
-        dest=arma_plate.rows()[1][1], # TypeError [line 16]: InstrumentContext.transfer_liquid() missing 1 required positional argument: 'dest'
+        source=nest_plate.rows()[1][
+            1
+        ],  # TypeError [line 16]: InstrumentContext.transfer_liquid() missing 1 required positional argument: 'source'
+        dest=arma_plate.rows()[1][
+            1
+        ],  # TypeError [line 16]: InstrumentContext.transfer_liquid() missing 1 required positional argument: 'dest'
         # new_tip is optional and the default it seems is "once"
         # the options are "once", "always"
         new_tip="always",
