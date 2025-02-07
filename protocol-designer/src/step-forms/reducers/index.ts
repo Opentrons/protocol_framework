@@ -1016,9 +1016,15 @@ export const labwareInvariantProperties: Reducer<
       const labware: NormalizedLabwareById = Object.entries(
         metadata.labware
       ).reduce((acc: NormalizedLabwareById, [id, labwareLoadInfo]) => {
+        if (labwareDefinitions[labwareLoadInfo.labwareDefURI] == null) {
+          console.error(
+            `expected to find matching labware definiton with labwareDefURI ${labwareLoadInfo.labwareDefURI} but could not`
+          )
+        }
         const displayCategory =
           labwareDefinitions[labwareLoadInfo.labwareDefURI]?.metadata
-            .displayCategory ?? 'other'
+            .displayCategory ?? 'otherLabware'
+
         const displayCategoryCount = Object.values(acc).filter(
           lw => lw.displayCategory === displayCategory
         ).length

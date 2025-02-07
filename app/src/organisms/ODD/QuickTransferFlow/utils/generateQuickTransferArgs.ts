@@ -103,7 +103,7 @@ function getInvariantContextAndRobotState(
   const destDisplayCategory =
     quickTransferState.destination !== 'source'
       ? quickTransferState.destination.metadata.displayCategory
-      : 'unknown'
+      : sourceDisplayCategory
 
   const isSameDisplayCategory = sourceDisplayCategory === destDisplayCategory
 
