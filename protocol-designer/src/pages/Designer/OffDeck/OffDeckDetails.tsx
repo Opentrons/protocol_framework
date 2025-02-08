@@ -21,7 +21,7 @@ import {
 import * as wellContentsSelectors from '../../../top-selectors/well-contents'
 import { selectors } from '../../../labware-ingred/selectors'
 import { getDeckSetupForActiveItem } from '../../../top-selectors/labware-locations'
-import { DeckItemHover } from '../DeckSetup/DeckItemHover'
+import { OffDeckControls } from './OffDeckControls'
 import { SlotDetailsContainer } from '../../../organisms'
 import { wellFillFromWellContents } from '../../../organisms/LabwareOnDeck/utils'
 import { getRobotType } from '../../../file-data/selectors'
@@ -166,16 +166,16 @@ export function OffDeckDetails(props: OffDeckDetailsProps): JSX.Element {
                         )}
                       />
 
-                      {/* <DeckItemHover
+                      <OffDeckControls
                         hover={hoverSlot}
                         setShowMenuListForId={setShowMenuListForId}
                         menuListId={menuListId}
                         setHover={setHoverSlot}
                         slotBoundingBox={xyzDimensions}
                         slotPosition={ZERO_SLOT_POSITION}
-                        itemId={lw.id}
+                        labwareId={lw.id}
                         tab={tab}
-                      /> */}
+                      />
                     </>
                   )}
                 </RobotWorkSpace>

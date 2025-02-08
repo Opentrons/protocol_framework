@@ -1,18 +1,12 @@
 import { useTranslation } from 'react-i18next'
-import { Dispatch, SetStateAction, useRef } from 'react'
+import { useRef } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { useDrop, useDrag } from 'react-dnd'
 import {
   ALIGN_CENTER,
-  BORDERS,
-  COLORS,
-  CURSOR_POINTER,
-  DISPLAY_FLEX,
   Flex,
   JUSTIFY_CENTER,
   Link,
-  POSITION_ABSOLUTE,
-  PRODUCT,
   RobotCoordsForeignDiv,
   StyledText,
 } from '@opentrons/components'
@@ -24,29 +18,18 @@ import {
 import { moveDeckItem } from '../../../labware-ingred/actions'
 import { selectors as labwareDefSelectors } from '../../../labware-defs'
 import { BlockedSlot } from './BlockedSlot'
+import { DECK_CONTROLS_STYLE } from './constants'
 
 import type { DropTargetMonitor } from 'react-dnd'
-import type {
-  CoordinateTuple,
-  DeckSlotId,
-  Dimensions,
-  ModuleType,
-} from '@opentrons/shared-data'
+import type { Dimensions, ModuleType } from '@opentrons/shared-data'
 import type { LabwareOnDeck } from '../../../step-forms'
-import type { DeckSetupTabType } from '../types'
+import type { SharedControlsType } from './types'
 
-interface SlotControlsProps extends DeckSetupTabType {
-  slotPosition: CoordinateTuple | null
+interface SlotControlsProps extends SharedControlsType {
   slotBoundingBox: Dimensions
-  //  slotId can be either AddressableAreaName or moduleId
+  //  NOTE: slotId can be either AddressableAreaName or moduleId
   slotId: string
   moduleType: ModuleType | null
-  setHover: Dispatch<SetStateAction<string | null>>
-  hover: string | null
-  itemId: string
-  menuListId: DeckSlotId | null
-  setShowMenuListForId: Dispatch<SetStateAction<string | null>>
-  isSelected?: boolean
   handleDragHover?: () => void
 }
 
@@ -60,23 +43,21 @@ export const SlotControls = (props: SlotControlsProps): JSX.Element | null => {
     slotPosition,
     slotId,
     moduleType,
-    handleDragHover,
-    itemId,
     hover,
+    handleDragHover,
     setHover,
-    isSelected,
-    tab,
-    menuListId,
     setShowMenuListForId,
+    itemId,
+    tab,
+    isSelected,
   } = props
-  const { t } = useTranslation(['deck', 'starting_deck_state'])
-  const hoverOpacity =
-    (hover != null && hover === itemId) || menuListId === itemId ? '1' : '0'
   const customLabwareDefs = useSelector(
     labwareDefSelectors.getCustomLabwareDefsByURI
   )
   const ref = useRef(null)
   const dispatch = useDispatch()
+
+  const { t } = useTranslation(['deck', 'starting_deck_state'])
 
   const [, drag] = useDrag({
     type: DND_TYPES.LABWARE,
@@ -92,7 +73,7 @@ export const SlotControls = (props: SlotControlsProps): JSX.Element | null => {
           draggedDef,
           'no labware def of dragged item, expected it on drop'
         )
-        console.log('hello hit here', moduleType, draggedDef)
+
         if (moduleType != null && draggedDef != null) {
           // this is a module slot, prevent drop if the dragged labware is not compatible
           const isCustomLabware = getLabwareIsCustom(
@@ -129,40 +110,32 @@ export const SlotControls = (props: SlotControlsProps): JSX.Element | null => {
 
   if (
     (itemType !== DND_TYPES.LABWARE && itemType !== null) ||
-    slotPosition == null
+    slotPosition == null ||
+    tab === 'protocolSteps' ||
+    isSelected
   )
     return null
 
   const draggedDef = draggedItem?.labwareOnDeck?.def
-  console.log('dragged item', draggedItem)
-  const isCustomLabware =
-    draggedItem != null && draggedItem.labwareOnDeck != null
-      ? getLabwareIsCustom(customLabwareDefs, draggedItem.labwareOnDeck)
-      : false
 
-  drag(drop(ref))
+  const isCustomLabware = draggedItem
+    ? getLabwareIsCustom(customLabwareDefs, draggedItem.labwareOnDeck)
+    : false
 
-  if (tab === 'protocolSteps' || slotPosition === null || isSelected)
-    return null
-
-  const x = slotPosition[0]
-  const y = slotPosition[1]
-  const width = slotBoundingBox.xDimension
-  const height = slotBoundingBox.yDimension
-
-  let slotBlocked: string | null = null
-  if (
+  const isSlotBlocked =
     isOver &&
     moduleType != null &&
     draggedDef != null &&
-    !getLabwareIsCompatible(draggedDef, moduleType)
-  ) {
-    slotBlocked = 'Labware incompatible with this module'
-  }
+    !getLabwareIsCompatible(draggedDef, moduleType) &&
+    !isCustomLabware
+
+  drag(drop(ref))
+
+  const hoverOpacity = (hover != null && hover === itemId) || isOver ? '1' : '0'
 
   return (
     <g ref={ref}>
-      {slotBlocked ? (
+      {isSlotBlocked ? (
         <BlockedSlot
           x={slotPosition[0]}
           y={slotPosition[1]}
@@ -172,27 +145,14 @@ export const SlotControls = (props: SlotControlsProps): JSX.Element | null => {
         />
       ) : (
         <RobotCoordsForeignDiv
-          x={x}
-          y={y}
-          width={width}
-          height={height}
+          x={slotPosition[0]}
+          y={slotPosition[1]}
+          width={slotBoundingBox.xDimension}
+          height={slotBoundingBox.yDimension}
           innerDivProps={{
             style: {
               opacity: hoverOpacity,
-              position: POSITION_ABSOLUTE,
-              top: 0,
-              right: 0,
-              bottom: 0,
-              left: 0,
-              transform: 'rotate(180deg) scaleX(-1)',
-              zIndex: 1,
-              backgroundColor: `${COLORS.black90}cc`,
-              display: DISPLAY_FLEX,
-              alignItems: ALIGN_CENTER,
-              color: COLORS.white,
-              fontSize: PRODUCT.TYPOGRAPHY.fontSizeBodyDefaultSemiBold,
-              borderRadius: BORDERS.borderRadius8,
-              cursor: CURSOR_POINTER,
+              ...DECK_CONTROLS_STYLE,
             },
             onMouseEnter: () => {
               setHover(itemId)
@@ -201,21 +161,23 @@ export const SlotControls = (props: SlotControlsProps): JSX.Element | null => {
               setHover(null)
             },
             onClick: () => {
-              setShowMenuListForId(itemId)
+              if (!isOver) {
+                setShowMenuListForId(itemId)
+              }
             },
           }}
         >
           <Flex
-            height={height}
-            width={width}
+            width={slotBoundingBox.xDimension}
+            height={slotBoundingBox.yDimension}
             alignItems={ALIGN_CENTER}
             justifyContent={JUSTIFY_CENTER}
           >
             <Link role="button">
               <StyledText desktopStyle="bodyDefaultSemiBold">
                 {isOver
-                  ? t('overlay.slot.place_here')
-                  : t('starting_deck_state:edit_slot')}
+                  ? t(`overlay.slot.place_here`)
+                  : t('starting_deck_state:edit_labware')}
               </StyledText>
             </Link>
           </Flex>

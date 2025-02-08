@@ -15,7 +15,7 @@ import {
 import { getSelectedTerminalItemId } from '../../../../ui/steps'
 import { getDisableModuleRestrictions } from '../../../../feature-flags/selectors'
 import { getRobotType } from '../../../../file-data/selectors'
-import { DeckSetupDetails } from '../DeckSetupDetails.1'
+import { DeckSetupDetails } from '../DeckSetupDetails'
 import { DeckSetupTools } from '../DeckSetupTools'
 import { DeckSetupContainer } from '../DeckSetupContainer'
 import type * as OpentronsComponents from '@opentrons/components'

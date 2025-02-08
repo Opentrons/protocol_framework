@@ -1,38 +1,32 @@
-import * as React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
+import { useRef } from 'react'
 import { useDrop } from 'react-dnd'
-import cx from 'classnames'
-import noop from 'lodash/noop'
-import { Icon, RobotCoordsForeignDiv } from '@opentrons/components'
+import {
+  ALIGN_CENTER,
+  Flex,
+  JUSTIFY_CENTER,
+  Link,
+  RobotCoordsForeignDiv,
+  StyledText,
+} from '@opentrons/components'
+import { getLabwareEntities } from '../../../step-forms/selectors'
 import { DND_TYPES } from '../../../constants'
-import {
-  getAdapterLabwareIsAMatch,
-  getLabwareIsCustom,
-} from '../../../utils/labwareModuleCompatibility'
-import {
-  deleteContainer,
-  moveDeckItem,
-  openAddLabwareModal,
-} from '../../../labware-ingred/actions'
+import { getLabwareIsCustom } from '../../../utils/labwareModuleCompatibility'
+import { moveDeckItem } from '../../../labware-ingred/actions'
 import { selectors as labwareDefSelectors } from '../../../labware-defs'
-// import { START_TERMINAL_ITEM_ID } from '../../../steplist'
 import { BlockedSlot } from './BlockedSlot'
+import { DECK_CONTROLS_STYLE } from './constants'
 
 import type { DropTargetMonitor } from 'react-dnd'
-import type { CoordinateTuple, Dimensions } from '@opentrons/shared-data'
-import type { TerminalItemId } from '../../../steplist'
+import type { Dimensions } from '@opentrons/shared-data'
 import type { LabwareOnDeck } from '../../../step-forms'
+import type { SharedControlsType } from './types'
 
-// import styles from './LabwareOverlays.module.css'
-
-interface AdapterControlsProps {
-  slotPosition: CoordinateTuple
+interface AdapterControlsProps extends SharedControlsType {
   slotBoundingBox: Dimensions
-  //    labwareId is the adapter's labwareId
+  //    the adapter's labwareId
   labwareId: string
-  allLabware: LabwareOnDeck[]
   onDeck: boolean
-  //   selectedTerminalItemId?: TerminalItemId | null
   handleDragHover?: () => void
 }
 
@@ -49,17 +43,21 @@ export const AdapterControls = (
     labwareId,
     onDeck,
     handleDragHover,
-    allLabware,
+    hover,
+    setHover,
+    setShowMenuListForId,
+    itemId,
+    isSelected,
+    tab,
   } = props
   const customLabwareDefs = useSelector(
     labwareDefSelectors.getCustomLabwareDefsByURI
   )
-  const ref = React.useRef(null)
-  const dispatch = useDispatch()
+  const labwareEntities = useSelector(getLabwareEntities)
+  const adapterLoadName = labwareEntities[labwareId].def.parameters.loadName
 
-  const adapterName =
-    allLabware.find(labware => labware.id === labwareId)?.def.metadata
-      .displayName ?? ''
+  const ref = useRef(null)
+  const dispatch = useDispatch()
 
   const [{ itemType, draggedItem, isOver }, drop] = useDrop(
     () => ({
@@ -76,13 +74,10 @@ export const AdapterControls = (
             customLabwareDefs,
             item.labwareOnDeck
           )
-          return (
-            getAdapterLabwareIsAMatch(
-              labwareId,
-              allLabware,
-              draggedDef.parameters.loadName
-            ) || isCustomLabware
-          )
+          const adapterLabwareIsMatch =
+            draggedDef.stackingOffsetWithLabware?.[adapterLoadName] != null
+
+          return adapterLabwareIsMatch || isCustomLabware
         }
         return true
       },
@@ -107,33 +102,33 @@ export const AdapterControls = (
     []
   )
 
-  if (itemType !== DND_TYPES.LABWARE && itemType !== null) return null
+  if (
+    (itemType !== DND_TYPES.LABWARE && itemType !== null) ||
+    tab === 'protocolSteps' ||
+    isSelected ||
+    slotPosition == null
+  ) {
+    return null
+  }
+
   const draggedDef = draggedItem?.labwareOnDeck?.def
   const isCustomLabware = draggedItem
     ? getLabwareIsCustom(customLabwareDefs, draggedItem.labwareOnDeck)
     : false
 
-  let slotBlocked: string | null = null
-
-  if (isOver && draggedDef != null && isCustomLabware) {
-    slotBlocked = 'Custom Labware incompatible with this adapter'
-  } else if (
+  const isSlotBlocked =
     isOver &&
     draggedDef != null &&
-    !getAdapterLabwareIsAMatch(
-      labwareId,
-      allLabware,
-      draggedDef.parameters.loadName
-    )
-  ) {
-    slotBlocked = 'Labware incompatible with this adapter'
-  }
+    draggedDef.stackingOffsetWithLabware?.[adapterLoadName] == null &&
+    !isCustomLabware
 
   drop(ref)
 
+  const hoverOpacity = (hover != null && hover === itemId) || isOver ? '1' : '0'
+
   return (
     <g ref={ref}>
-      {slotBlocked ? (
+      {isSlotBlocked ? (
         <BlockedSlot
           x={slotPosition[0]}
           y={slotPosition[1]}
@@ -148,30 +143,35 @@ export const AdapterControls = (
           width={slotBoundingBox.xDimension}
           height={slotBoundingBox.yDimension}
           innerDivProps={{
-            // className: cx(styles.slot_overlay, styles.appear_on_mouseover, {
-            //   [styles.appear]: isOver,
-            // }),
-            onClick: isOver ? noop : undefined,
+            style: {
+              opacity: hoverOpacity,
+              ...DECK_CONTROLS_STYLE,
+            },
+            onMouseEnter: () => {
+              setHover(itemId)
+            },
+            onMouseLeave: () => {
+              setHover(null)
+            },
+            onClick: () => {
+              if (!isOver) {
+                setShowMenuListForId(itemId)
+              }
+            },
           }}
         >
-          <a
-            // className={styles.overlay_button}
-            onClick={() => dispatch(openAddLabwareModal({ slot: labwareId }))}
+          <Flex
+            width={slotBoundingBox.xDimension}
+            height={slotBoundingBox.yDimension}
+            alignItems={ALIGN_CENTER}
+            justifyContent={JUSTIFY_CENTER}
           >
-            {!isOver && <Icon name="plus" />}
-            {isOver ? 'Place Here' : 'Add Labware'}
-          </a>
-          <a
-            // className={styles.overlay_button}
-            onClick={() => {
-              window.confirm(
-                `"Are you sure you want to remove this ${adapterName}?`
-              ) && dispatch(deleteContainer({ labwareId: labwareId }))
-            }}
-          >
-            {!isOver && <Icon name="close" />}
-            {'Delete'}
-          </a>
+            <Link role="button">
+              <StyledText desktopStyle="bodyDefaultSemiBold">
+                {isOver ? 'Place Here' : 'Edit Labware'}
+              </StyledText>
+            </Link>
+          </Flex>
         </RobotCoordsForeignDiv>
       )}
     </g>

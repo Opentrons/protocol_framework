@@ -356,13 +356,7 @@ export const getSwapBlocked = (args: SwapBlockedArgs): boolean => {
     modulesById,
     customLabwareDefs,
   } = args
-  console.log(
-    'swap',
-    hoveredLabware,
-    draggedLabware,
-    modulesById,
-    customLabwareDefs
-  )
+
   if (!hoveredLabware || !draggedLabware) {
     return false
   }
