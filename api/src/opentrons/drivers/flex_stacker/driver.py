@@ -424,7 +424,7 @@ class FlexStackerDriver(AbstractFlexStackerDriver):
     async def get_tof_sensor_status(self, sensor: TOFSensor) -> TOFSensorStatus:
         """Get the status of the tof sensor."""
         response = await self._connection.send_command(
-            GCODE.GET_TOF_SENSOR_STATUS.build_command()
+            GCODE.GET_TOF_SENSOR_STATUS.build_command().add_element(sensor.name)
         )
         return self.parse_tof_sensor_status(response)
 
