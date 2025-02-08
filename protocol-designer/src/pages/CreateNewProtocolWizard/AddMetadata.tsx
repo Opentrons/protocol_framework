@@ -14,6 +14,7 @@ import {
   TYPOGRAPHY,
 } from '@opentrons/components'
 import { HandleEnter } from '../../atoms/HandleEnter'
+import { TextAreaField } from '../../modules/TextAreaField'
 import { analyticsEvent } from '../../analytics/actions'
 import { ONBOARDING_FLOW_DURATION_EVENT } from '../../analytics/constants'
 import { WizardBody } from './WizardBody'
@@ -73,10 +74,16 @@ export function AddMetadata(props: AddMetadataProps): JSX.Element | null {
             />
           </Flex>
           <Flex flexDirection={DIRECTION_COLUMN} gridGap={SPACING.spacing4}>
-            <StyledText desktopStyle="captionRegular" color={COLORS.grey60}>
+            {/* <StyledText desktopStyle="captionRegular" color={COLORS.grey60}>
               {t('description')}
-            </StyledText>
-            <DescriptionField {...register('fields.description')} />
+            </StyledText> */}
+            {/* <DescriptionField {...register('fields.description')} /> */}
+            <TextAreaField
+              title={t('description')}
+              {...register('fields.description')}
+              value={watch('fields.description')}
+              height="6.8125rem"
+            />
           </Flex>
           <Flex flexDirection={DIRECTION_COLUMN} gridGap={SPACING.spacing4}>
             <StyledText desktopStyle="captionRegular" color={COLORS.grey60}>
