@@ -30,6 +30,7 @@ from opentrons_hardware.hardware_control.motion_planning import move_utils
 
 from opentrons.protocol_api import InstrumentContext, ProtocolContext
 from opentrons.protocol_engine.types import LabwareOffset
+from opentrons.config.defaults_ot3 import DEFAULT_LIQUID_PROBE_SETTINGS
 
 from hardware_testing.liquid_sense import execute
 from .report import build_ls_report, store_config, store_serial_numbers
@@ -279,14 +280,19 @@ if __name__ == "__main__":
     parser.add_argument("--return-tip", action="store_true")
     parser.add_argument("--trials", type=int, default=10)
     parser.add_argument("--trials-before-jog", type=int, default=10)
-    parser.add_argument("--z-speed", type=float, default=5)
+    parser.add_argument(
+        "--z-speed", type=float, default=DEFAULT_LIQUID_PROBE_SETTINGS.mount_speed
+    )
     parser.add_argument("--aspirate", action="store_true")
-    parser.add_argument("--plunger-speed", type=float, default=5)
+    parser.add_argument(
+        "--plunger-speed",
+        type=float,
+        default=DEFAULT_LIQUID_PROBE_SETTINGS.plunger_speed,
+    )
     parser.add_argument("--no-multi-pass", action="store_true")
     parser.add_argument("--wet", action="store_true")
     parser.add_argument("--starting-tip", type=str, default="A1")
     parser.add_argument("--test-well", type=str, default="A1")
-    parser.add_argument("--p-solo-time", type=float, default=0)
     parser.add_argument(
         "--google-sheet-name", type=str, default="LLD-Shared-Data-96ch-200ul"
     )
@@ -296,6 +302,8 @@ if __name__ == "__main__":
     parser.add_argument("--liquid", type=str, default="unknown")
     parser.add_argument("--skip-labware-offsets", action="store_true")
     parser.add_argument("--dial-front-channel", action="store_true")
+    parser.add_argument("--log-can", action="store_true")
+    parser.add_argument("--google-drive", action="store_true")
 
     args = parser.parse_args()
 
@@ -303,29 +311,35 @@ if __name__ == "__main__":
     exit_error = 0
     serial_logger: Optional[subprocess.Popen] = None
     data_dir = get_testing_data_directory()
-    data_file = f"/{data_dir}/{run_args.name}/{run_args.run_id}/serial.log"
+    test_directory = f"{data_dir}/{run_args.name}/{run_args.run_id}"
+    data_file = f"/{test_directory}/serial.log"
+    google_sheet: Optional[google_sheets_tool.google_sheet] = None
+    sheet_id: Optional[str] = None
+    google_drive: Optional[google_drive_tool.google_drive] = None
     try:
         if not run_args.ctx.is_simulating():
-            ui.print_info(f"logging can data to {data_file}")
-            serial_logger = subprocess.Popen(
-                [f"python3 -m opentrons_hardware.scripts.can_mon > {data_file}"],
-                shell=True,
-            )
-            sleep(1)
-            # Connect to Google Sheet
-            ui.print_info(f"robot has credentials: {os.path.exists(CREDENTIALS_PATH)}")
-            google_sheet: Optional[
-                google_sheets_tool.google_sheet
-            ] = google_sheets_tool.google_sheet(
-                CREDENTIALS_PATH, args.google_sheet_name, 0
-            )
-            sheet_id = google_sheet.create_worksheet(run_args.run_id)  # type: ignore[union-attr]
+            if args.log_can:
+                ui.print_info(f"logging can data to {data_file}")
+                serial_logger = subprocess.Popen(
+                    [f"python3 -m opentrons_hardware.scripts.can_mon > {data_file}"],
+                    shell=True,
+                )
+                sleep(1)
+            if args.google_drive:
+                # Connect to Google Sheet
+                ui.print_info(
+                    f"robot has credentials: {os.path.exists(CREDENTIALS_PATH)}"
+                )
+                google_sheet = google_sheets_tool.google_sheet(
+                    CREDENTIALS_PATH, args.google_sheet_name, 0
+                )
+                sheet_id = google_sheet.create_worksheet(
+                    run_args.run_id  # type: ignore[union-attr]
+                )
             try:
                 sys.path.insert(0, "/var/lib/jupyter/notebooks/")
 
-                google_drive: Optional[
-                    google_drive_tool.google_drive
-                ] = google_drive_tool.google_drive(
+                google_drive = google_drive_tool.google_drive(
                     CREDENTIALS_PATH,
                     args.gd_parent_folder,
                     "rhyann.clarke@opentrons.com",
@@ -334,10 +348,6 @@ if __name__ == "__main__":
                 raise ImportError(
                     "Run on robot. Make sure google_drive_tool.py is in jupyter notebook."
                 )
-        else:
-            google_sheet = None
-            sheet_id = None
-            google_drive = None
         hw = run_args.ctx._core.get_hardware()
         ui.print_info("homing...")
         run_args.ctx.home()
@@ -364,7 +374,7 @@ if __name__ == "__main__":
             )
             try:
                 process_csv_directory(
-                    f"{data_dir}/{run_args.name}/{run_args.run_id}",
+                    test_directory,
                     run_args.tip_volumes,
                     run_args.trials,
                     google_sheet,

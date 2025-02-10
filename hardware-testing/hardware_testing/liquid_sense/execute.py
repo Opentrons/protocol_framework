@@ -1,6 +1,7 @@
 """Logic for running a single liquid probe test."""
 import csv
 import time
+from dataclasses import replace as copy_dataclass
 from enum import Enum
 from typing import Dict, Any, List, Tuple, Optional
 from .report import store_tip_results, store_trial, store_baseline_trial
@@ -22,6 +23,7 @@ from opentrons.hardware_control.types import (
     PipetteSensorResponseQueue,
 )
 from opentrons.hardware_control.dev_types import PipetteDict
+from opentrons.config.defaults_ot3 import DEFAULT_LIQUID_PROBE_SETTINGS
 
 from hardware_testing.gravimetric.measurement.scale import Scale
 from hardware_testing.gravimetric.measurement.record import (
@@ -443,17 +445,10 @@ def _run_trial(
     else:
         z_distance = sum(z_distances)
 
-    lps = LiquidProbeSettings(
-        mount_speed=run_args.z_speed,
-        plunger_speed=plunger_speed,
-        plunger_impulse_time=0.2,
-        sensor_threshold_pascals=lqid_cfg["sensor_threshold_pascals"],
-        aspirate_while_sensing=run_args.aspirate,
-        z_overlap_between_passes_mm=0.1,
-        plunger_reset_offset=2.0,
-        samples_for_baselining=20,
-        sample_time_sec=0.004,
-    )
+    lps = copy_dataclass(DEFAULT_LIQUID_PROBE_SETTINGS)
+    lps.mount_speed = run_args.z_speed
+    lps.plunger_speed = plunger_speed
+    lps.aspirate_while_sensing = run_args.aspirate
 
     hw_mount = OT3Mount.LEFT if run_args.pipette.mount == "left" else OT3Mount.RIGHT
     run_args.recorder.set_sample_tag(f"trial-{trial}-{tip}ul")
