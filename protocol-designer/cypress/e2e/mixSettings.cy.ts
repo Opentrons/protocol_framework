@@ -1,13 +1,8 @@
 import '../support/commands'
-import {
-  MixActions,
-  MixVerifications,
-} from '../support/mixSetting'
+import { MixActions, MixVerifications } from '../support/mixSetting'
 import { UniversalActions } from '../support/universalActions'
 import { TestFilePath, getTestFile } from '../support/testFiles'
-import {
-  verifyImportProtocolPage,
-} from '../support/import'
+import { verifyImportProtocolPage } from '../support/import'
 import { runSteps } from '../support/StepExecution'
 import type { StepsList } from '../support/StepExecution'
 
@@ -18,14 +13,13 @@ describe('Redesigned Mixing Steps - Happy Path', () => {
     const protocol = getTestFile(TestFilePath.DoItAllV8)
     cy.importProtocol(protocol.path)
     verifyImportProtocolPage(protocol)
-    
-    // NOTE: vv make this chunk better//
-    cy.contains("Edit protocol").click()
-    cy.contains("Protocol steps").click()
-    cy.get('[id="AddStepButton"]').contains("Add Step").click()
-    cy.verifyOverflowBtn()
-  });
 
+    // NOTE: vv make this chunk better//
+    cy.contains('Edit protocol').click()
+    cy.contains('Protocol steps').click()
+    cy.get('[id="AddStepButton"]').contains('Add Step').click()
+    cy.verifyOverflowBtn()
+  })
 
   it('It should verify the working function of every permutation of mix checkboxes', () => {
     const steps: StepsList = [
@@ -66,11 +60,11 @@ describe('Redesigned Mixing Steps - Happy Path', () => {
       MixActions.Rename,
       MixActions.Save,
       MixVerifications.Rename,
-      MixActions.Save
+      MixActions.Save,
     ]
     runSteps(steps)
-  });
-});
+  })
+})
 
 /*
 To Add:

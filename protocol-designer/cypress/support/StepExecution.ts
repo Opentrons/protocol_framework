@@ -17,7 +17,7 @@ import {
   MixActions,
   MixVerifications,
   executeMixAction,
-  executeVerifyMixStep
+  executeVerifyMixStep,
 } from './mixSetting'
 
 export type StepsList = Array<
@@ -38,7 +38,7 @@ export const runSteps = (steps: StepsList): void => {
     SetupVerifications,
     UniversalActions,
     MixActions,
-    MixVerifications
+    MixVerifications,
   ]
 
   if (!isEnumValue(enumsToCheck, steps)) {
@@ -60,6 +60,6 @@ export const runSteps = (steps: StepsList): void => {
       executeMixAction(step as MixActions)
     } else if (isEnumValue([MixVerifications], step)) {
       executeVerifyMixStep(step as MixVerifications)
-   }
+    }
   })
 }

@@ -51,12 +51,12 @@ export const content = {
   appSettings: 'App Info',
   privacy: 'Privacy',
   shareSessions: 'Share analytics with Opentrons',
-  move: "Move",
-  transfer: "Transfer",
-  mix: "Mix",
-  pause: "Pause",
-  heaterShaker: "Heater-shaker",
-  thermocyler: "Thermocycler",
+  move: 'Move',
+  transfer: 'Transfer',
+  mix: 'Mix',
+  pause: 'Pause',
+  heaterShaker: 'Heater-shaker',
+  thermocyler: 'Thermocycler',
 }
 
 export const locators = {
@@ -204,7 +204,9 @@ Cypress.Commands.add('openFilePage', () => {
 // Pipette Page Actions
 //
 
-Cypress.Commands.add('choosePipettes', (leftPipetteSelector, rightPipetteSelector) => {
+Cypress.Commands.add(
+  'choosePipettes',
+  (leftPipetteSelector, rightPipetteSelector) => {
     cy.get('[id="PipetteSelect_left"]').click()
     cy.get(leftPipetteSelector).click()
     cy.get('[id="PipetteSelect_right"]').click()
