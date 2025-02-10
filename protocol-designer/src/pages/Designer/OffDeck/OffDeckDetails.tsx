@@ -12,6 +12,7 @@ import {
   EmptySelectorButton,
   Flex,
   JUSTIFY_CENTER,
+  JUSTIFY_FLEX_END,
   LabwareRender,
   OVERFLOW_AUTO,
   RobotWorkSpace,
@@ -59,16 +60,8 @@ export function OffDeckDetails(props: OffDeckDetailsProps): JSX.Element {
   )
   const containerWidth = tab === 'startingDeck' ? '100vw' : '75vw'
 
-  const paddingLeftWithHover =
-    hoverSlot == null
-      ? `calc((${containerWidth} - (${SPACING.spacing24}  * 2) - ${OFF_DECK_MAP_WIDTH}) / 2)`
-      : SPACING.spacing24
-  const paddingLeft = tab === 'startingDeck' ? paddingLeftWithHover : undefined
-  const padding =
-    tab === 'protocolSteps'
-      ? SPACING.spacing24
-      : `${SPACING.spacing40} ${paddingLeft}`
   const stepDetailsContainerWidth = `calc(((${containerWidth} - ${OFF_DECK_MAP_WIDTH}) / 2) - (${SPACING.spacing24}  * 3))`
+  const paddingRight = `calc((100% - ${OFF_DECK_MAP_WIDTH}) / 2)`
 
   return (
     <Flex
@@ -76,10 +69,10 @@ export function OffDeckDetails(props: OffDeckDetailsProps): JSX.Element {
       borderRadius={BORDERS.borderRadius12}
       width="100%"
       height="100%"
-      padding={padding}
+      padding={`${SPACING.spacing24} ${paddingRight} ${SPACING.spacing24} 0`}
       gridGap={SPACING.spacing24}
       alignItems={ALIGN_CENTER}
-      justifyContent={JUSTIFY_CENTER}
+      justifyContent={JUSTIFY_FLEX_END}
     >
       {hoverSlot != null ? (
         <Flex width={stepDetailsContainerWidth} height="6.25rem">
