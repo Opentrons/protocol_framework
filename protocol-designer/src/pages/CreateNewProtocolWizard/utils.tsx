@@ -32,6 +32,8 @@ import type {
 } from '@opentrons/shared-data'
 import type { DropdownOption } from '@opentrons/components'
 import type { AdditionalEquipment, WizardFormState } from './types'
+import { he } from 'date-fns/locale'
+import { N } from 'vitest/dist/chunks/reporters.D7Jzd9GS'
 
 const NUM_SLOTS_OUTER = 8
 const NUM_SLOTS_MIDDLE = 4
@@ -205,14 +207,33 @@ export const getNumSlotsAvailable = (
     }
 
     case MAGNETIC_BLOCK_V1: {
-      const filteredAdditionalEquipmentForMagneticBlockLength = additionalEquipment.filter(
-        ae => ae !== 'gripper' && ae !== 'stagingArea'
-      )?.length
-      return (
-        NUM_SLOTS_MAGNETIC_BLOCK -
-        (filteredModuleLength +
-          filteredAdditionalEquipmentForMagneticBlockLength)
-      )
+      const {
+        heaterShakerCount,
+        magneticBlockCount,
+        plateReaderCount,
+        temperatureCount,
+      } = countModules(modules)
+      const thermocyclerModuleCount = hasTC ? 2 : 0
+      const totalModules =
+        heaterShakerCount +
+        magneticBlockCount +
+        plateReaderCount +
+        temperatureCount +
+        thermocyclerModuleCount
+
+      const requiredSlotInColumn3 =
+        totalModules - NUM_SLOTS_COLUMN1 >= 0 ? 1 : 0
+
+      const magneticBlockInOuterSlots =
+        magneticBlockCount - NUM_SLOTS_MIDDLE > 0
+          ? magneticBlockCount - NUM_SLOTS_MIDDLE
+          : 0
+      return magneticBlockInOuterSlots > 0
+        ? NUM_SLOTS_MAGNETIC_BLOCK -
+            totalModules -
+            NUM_SLOTS_MIDDLE -
+            requiredSlotInColumn3
+        : NUM_SLOTS_MAGNETIC_BLOCK - totalModules - requiredSlotInColumn3
     }
   }
 }
