@@ -11,7 +11,7 @@ import {
   StyledText,
 } from '@opentrons/components'
 import { HandleEnter } from '../../atoms/HandleEnter'
-import { TextAreaField } from '../../modules/TextAreaField'
+import { TextAreaField } from '../../molecules'
 import { analyticsEvent } from '../../analytics/actions'
 import { ONBOARDING_FLOW_DURATION_EVENT } from '../../analytics/constants'
 import { WizardBody } from './WizardBody'
