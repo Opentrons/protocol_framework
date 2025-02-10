@@ -19,6 +19,7 @@ export enum SetupActions {
   AddHeaterShaker = 'Heater-Shaker Module GEN1',
   AddTempdeck2 = 'Temperature Module GEN2',
   AddMagBlock = 'Magnetic Block GEN1',
+  AddPlateReader = 'Add Plate Reader',
   EditProtocolA = 'Blue button edit protocol',
   choseDeckSlot = 'Chose each deck slot',
   ChoseDeckSlotA1 = 'Choose deck slot A1',
@@ -30,6 +31,7 @@ export enum SetupActions {
   ChoseDeckSlotC1 = 'Choose deck slot C1',
   ChoseDeckSlotC2 = 'Choose deck slot C2',
   ChoseDeckSlotC2Labware = 'Chose labware on deck slot C2',
+  ChoseDeckSlotC3Labware = 'Chose labware on deck slot C3',
   ChoseDeckSlotC3 = 'Choose deck slot C3',
   ChoseDeckSlotD1 = 'Choose deck slot D1',
   ChoseDeckSlotD2 = 'Choose deck slot D2',
@@ -51,9 +53,54 @@ export enum SetupActions {
   SetVolumeAndSaveforWells = 'Set volume and save for wells',
   ProtocolStepsH = 'Select Protocol Steps Header',
   AddStep = 'Use after making sure you are on ProtocolStepsH or have already made a step',
+  AddMoveStep = 'Add Move step after selecting move step',
+  UseGripperinMove = 'Select use gripper checkbox',
   DeepWellTempModAdapter = 'Select Opentrons 96 Deep Well Temperature Module Adapter',
   AddNest96DeepWellPlate = 'Adds Nest 96 Deep Well Plate',
+  SelectArmadillo96WellPlateDefinition = 'Select Armadillo 96 Well Plate to define it on deck',
+  SelectArmadillo96WellPlateTransfer = 'Select Select Armadillo 96 Well Plate for transfer',
+  SelectBioRad96WellPlateDefinition = 'Select Bio-Rad 96 Well Plate to define it on deck',
   Done = 'Select Done on a step form',
+  ChoseOption = 'Chose option',
+  SourceLabware = 'Source labware',
+  SelectSourceWells = 'Select source wells',
+  DestinationLabware = 'Destination labware',
+  VolumePerWell = 'Volume per well',
+  TipHandling = 'Tip handling',
+  TipDrop = 'Tip drop location',
+  ChoseOptionSource = 'Choose option',
+  Delay = 'Delay',
+  PreWetTip = 'Pre-wet tip',
+  TouchTip = 'Touch tip',
+  AirGap = 'Air gap',
+  Save = 'Save',
+  ChoseSourceLabware = 'Chose source labware dropdown',
+  ChoseDestinationMoveLabware = 'Chose desitination labware dropdown',
+  ChoseSourceMoveLabware = 'Select labware you want to move',
+  SelectTransfer = 'Select Transfer from add step dropdown',
+  ChoseDestinationLabware = 'Chose desitination labware',
+  SourceWellPopout = 'Brings you to selecting the wells',
+  SelectBiorad = 'Biorad source transfer',
+  WellSelector_A1 = 'Select A1',
+  SaveSelectedWells = 'Save selected source or destination wells',
+  SelectDestinationWells = 'Select Desintation wells for transfer',
+  InputTransferVolume30 = 'Input volume per well', // TODO: Please refactor for any volume input
+  Continue = 'Continue button on forms',
+  PrewetAspirate = 'Enable Pre-wet tip for aspiration',
+  DelayAspirate = 'Enable Delay for aspiration',
+  TouchTipAspirate = 'Enable Touch tip for aspiration',
+  MixAspirate = 'Enable Mix for aspiration',
+  AirGapAspirate = 'Enable Air gap for aspiration',
+  AspirateMixVolume = 'Mix volume for transfer aspirate',
+  AspirateMixTimes = 'Mix times for transfer aspirate',
+  AspirateAirGapVolume = 'Air gap volume for transfer aspirate',
+  AddSourceLabwareDropdown = 'List the available options',
+  SelectDispense = 'Dispense tab in the transfer step form',
+  DispenseMixVolume = 'Mix volume for transfer dispense',
+  DispenseMixTimes = 'Mix times for transfer dispense',
+  DispenseAirGapVolume = 'Air gap volume for transfer dispense',
+  BlowoutTransferDestination = 'Select Destination well',
+  DeleteSteps = 'This is how you delete a protocol step',
 }
 
 export enum SetupVerifications {
@@ -67,6 +114,7 @@ export enum SetupVerifications {
   StepTwo50uL = 'Step Two part two',
   StepTwoPart3 = 'Step Two part three',
   Step4Verification = 'Step 4 part 1',
+  AbsorbanceNotSelectable = 'Verify that Absorbance plate reader is not selectable',
   ThermocyclerImg = 'Thermocycler Module GEN2',
   HeaterShakerImg = 'Heater-Shaker Module GEN1',
   Tempdeck2Img = 'Temperature Module GEN2',
@@ -75,6 +123,12 @@ export enum SetupVerifications {
   TransferPopOut = 'Verify Step 1 of the transfer function is present',
   TempeDeckInitialForm = 'Verify that the tempdseteck stepform opens correctly',
   Temp4CPauseTextVerification = 'Verify that the pause step has the right information in step preview',
+  Delay = 'Delay option is unchecked',
+  PreWet = 'Pre-wet tip option is unchecked',
+  TouchTip = 'Touch tip option is unchecked',
+  MixT = 'Mix option is unchecked',
+  AirGap = 'Air gap option is unchecked',
+  ExtraDispenseTransfer = 'These are the extra dispense transfer',
 }
 export enum SetupContent {
   Step1Title = 'Step 1',
@@ -102,6 +156,7 @@ export enum SetupContent {
   Tiprack50 = 'Tip Rack 50 µL',
   Yes = 'Yes',
   No = 'No',
+  PlateReader = 'Absorbance Plate Reader Module GEN1',
   Thermocycler = 'Thermocycler Module GEN2',
   HeaterShaker = 'Heater-Shaker Module GEN1',
   Tempdeck2 = 'Temperature Module GEN2',
@@ -147,6 +202,12 @@ export enum SetupLocators {
   Div = 'div',
   Button = 'button',
   TempdeckTempInput = 'input[name="targetTemperature"]',
+  AspirateWells = 'input[name="aspirate_wells"]',
+  div = 'div',
+  button = 'button',
+  svg = 'svg',
+  exist = 'exist',
+  StepOptionsTestIDThreeDots = 'button.Btn-sc-o3dtr1-0.OverflowBtn___StyledBtn-sc-1mslfxo-0',
 }
 
 const chooseDeckSlot = (
@@ -260,6 +321,9 @@ export const executeSetupSteps = (action: SetupActions): void => {
       // instead of clicking the filter tiprack?
       // cy.contains(SetupContent.FilterTiprack50).click()
       break
+    case SetupActions.AddPlateReader:
+      cy.contains(SetupContent.PlateReader).click()
+      break
     case SetupActions.AddThermocycler:
       cy.contains(SetupContent.Thermocycler).click()
       break
@@ -338,6 +402,16 @@ export const executeSetupSteps = (action: SetupActions): void => {
         .contains(SetupContent.EditSlot)
         .click({ force: true })
       break
+    case SetupActions.ChoseDeckSlotC3Labware:
+      // Todo Investigate making a dictionary of slot editing.
+      // Maybe next PR
+      chooseDeckSlot('C3')
+        .find('.Box-sc-8ozbhb-0.kIDovv')
+        .find('a[role="button"]')
+        .contains(SetupContent.EditSlot)
+        .click({ force: true })
+      break
+
     case SetupActions.SelectArmadillo96WellPlate: // New case for selecting Armadillo plate
       cy.contains(SetupContent.Armadillo96WellPlate200uL).click({ force: true })
       cy.get(SetupLocators.LabwareSelectionLocation).click({ force: true })
@@ -348,7 +422,7 @@ export const executeSetupSteps = (action: SetupActions): void => {
       break
 
     case SetupActions.AddLiquid: // New case for "Add liquid"
-      cy.contains('button', SetupContent.AddLiquid).click()
+      cy.contains('button', SetupContent.AddLiquid).click({ force: true })
       break
     case SetupActions.ClickLiquidButton: // New case for "Liquid button"
       cy.contains('button', SetupContent.LiquidButton).click()
@@ -407,7 +481,109 @@ export const executeSetupSteps = (action: SetupActions): void => {
         .contains('Done')
         .click({ force: true })
       break
+    case SetupActions.SelectArmadillo96WellPlateTransfer: // New case for selecting Armadillo plate
+      cy.contains(SetupContent.Armadillo96WellPlate200uL).click({ force: true })
+      break
+    case SetupActions.SelectBiorad: // New case for selecting Armadillo plate
+      cy.contains('Bio-Rad 96 Well Plate 200 µL PCR').click({ force: true })
+      break
+    case SetupActions.SelectTransfer:
+      cy.contains('button', 'Transfer').should('be.visible').click()
+      break
+    case SetupActions.AddMoveStep:
+      cy.contains('button', 'Move').should('be.visible').click()
+      break
+    case SetupActions.UseGripperinMove:
+      cy.contains('button', 'Use gripper').should('be.visible').click()
+      break
+    case SetupActions.ChoseSourceLabware:
+      cy.contains('p', 'Choose option').closest('div[tabindex="0"]').click()
+      // cy.contains('p', Content.ChoseOption).click()
+      break
+    case SetupActions.ChoseSourceMoveLabware:
+      cy.contains('Choose option').eq(0).click()
+      break
+    case SetupActions.ChoseDestinationMoveLabware:
+      cy.contains('Choose option').click()
+      // cy.contains('Choose option').eq(1).click()
+      break
+    case SetupActions.ChoseDestinationLabware:
+      // ToDo: Please make a better selector
+      cy.get('div.Flex-sc-1qhp8l7-0.sc-bqWxrE.jKLbYH.gEhMNQ')
+        .eq(1)
+        .contains('Choose option')
+        .click()
+      break
+    case SetupActions.AddSourceLabwareDropdown:
+      cy.get(SetupLocators.AspirateWells)
+        .should('have.value', 'Choose wells')
+        .click()
+      break
+    case SetupActions.SelectDestinationWells:
+      cy.get('input[name="dispense_wells"]')
+        .should('have.value', 'Choose wells') // Verify initial value
+        .click()
+      break
 
+    case SetupActions.SaveSelectedWells:
+      cy.contains(SetupContent.Save).click({ force: true })
+      break
+    case SetupActions.Save:
+      cy.contains(SetupContent.Save).click({ force: true })
+      break
+
+    case SetupActions.InputTransferVolume30:
+      cy.get('input[name="volume"]').type('30')
+      break
+    case SetupActions.Continue:
+      cy.contains('Continue').click()
+      break
+    case SetupActions.PrewetAspirate:
+      cy.contains('Pre-wet tip').closest('div').find('button').click()
+      break
+    case SetupActions.DelayAspirate:
+      cy.contains('Delay').closest('div').find('button').click()
+      break
+    case SetupActions.TouchTipAspirate:
+      cy.contains('Touch tip').closest('div').find('button').click()
+      break
+    case SetupActions.MixAspirate:
+      cy.contains('Mix').closest('div').find('button').click()
+      break
+    case SetupActions.AirGap:
+      cy.contains('Air gap').closest('div').find('button').click()
+      break
+    case SetupActions.AspirateMixVolume:
+      cy.get('input[name = "aspirate_mix_volume"]').type('20')
+      break
+    case SetupActions.AspirateMixTimes:
+      cy.get('input[name = "aspirate_mix_times"]').type('2')
+      break
+    case SetupActions.AspirateAirGapVolume:
+      cy.get('input[name = "aspirate_airGap_volume"]').type('10')
+      break
+    case SetupActions.SelectDispense:
+      cy.contains('Dispense').click()
+      break
+    case SetupActions.DispenseMixVolume:
+      cy.get('input[name = "dispense_mix_volume"]').type('20')
+      break
+    case SetupActions.DispenseMixTimes:
+      cy.get('input[name = "dispense_mix_times"]').type('2')
+      break
+    case SetupActions.DispenseAirGapVolume:
+      cy.get('input[name = "dispense_airGap_volume"]').type('10')
+      break
+    case SetupActions.BlowoutTransferDestination:
+      cy.contains('Blowout').closest('div').find('button').click()
+      cy.contains('Choose option').click()
+      cy.contains('Destination Well').click()
+      break
+    case SetupActions.DeleteSteps:
+      cy.get(SetupLocators.StepOptionsTestIDThreeDots).click()
+      cy.contains('Delete step').click()
+      cy.contains('button', 'Delete step').click()
+      break
     default:
       throw new Error(`Unrecognized action: ${action as string}`)
   }
@@ -477,6 +653,9 @@ export const executeVerificationStep = (
       cy.contains(SetupContent.MagBlock).should('be.visible')
       cy.contains(SetupContent.Tempdeck2).should('be.visible')
       break
+    case SetupVerifications.AbsorbanceNotSelectable:
+      cy.contains('button', SetupContent.PlateReader).should('be.disabled')
+      break
     case SetupVerifications.ThermocyclerImg:
       cy.get(SetupLocators.TemperatureModuleImage).should('be.visible')
       break
@@ -501,6 +680,52 @@ export const executeVerificationStep = (
       cy.contains('Tip handling')
       cy.contains('Tip handling')
       cy.contains('Tip drop location')
+      break
+    case SetupVerifications.Delay:
+      cy.contains('Delay')
+        .closest('div')
+        .find('button')
+        .find('svg')
+        .should('exist')
+        .and('have.attr', 'aria-hidden', 'true')
+      break
+    case SetupVerifications.PreWet:
+      cy.contains('Pre-wet tip')
+        .closest('div')
+        .find('button')
+        .find('svg')
+        .should('exist')
+        .and('have.attr', 'aria-hidden', 'true')
+      break
+    case SetupVerifications.TouchTip:
+      cy.contains('Touch tip')
+        .closest('div')
+        .find('button')
+        .find('svg')
+        .should('exist')
+        .and('have.attr', 'aria-hidden', 'true')
+      break
+    case SetupVerifications.MixT:
+      cy.contains('Mix')
+        .closest('div')
+        .find('button')
+        .find('svg')
+        .should('exist')
+        .and('have.attr', 'aria-hidden', 'true')
+      break
+    case SetupVerifications.AirGap:
+      cy.contains('Air gap')
+        .closest('div')
+        .find('button')
+        .find('svg')
+        .should('exist')
+        .and('have.attr', 'aria-hidden', 'true')
+      break
+    case SetupVerifications.ExtraDispenseTransfer:
+      cy.contains('Blowout location')
+      cy.contains('Blowout flow rate')
+      cy.contains('Blowout position from top')
+      cy.contains('Choose option')
       break
   }
 }

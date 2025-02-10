@@ -10,7 +10,7 @@ describe('The Redesigned Create Protocol Landing Page', () => {
     cy.closeAnalyticsModal()
   })
 
-  it('content and step 1 flow works', () => {
+  it('Tests transfer', () => {
     cy.clickCreateNew()
     cy.verifyCreateNewHeader()
     const steps: StepsList = [
@@ -73,7 +73,44 @@ describe('The Redesigned Create Protocol Landing Page', () => {
       SetupActions.AddStep,
       SetupVerifications.TransferPopOut,
       UniversalActions.Snapshot,
+      SetupActions.ChoseSourceLabware,
+      SetupActions.SelectArmadillo96WellPlateTransfer,
+      SetupActions.AddSourceLabwareDropdown,
+      SetupActions.WellSelector,
+      SetupActions.SaveSelectedWells,
+      SetupActions.ChoseDestinationLabware,
+      SetupActions.SelectBiorad,
+      SetupActions.SelectDestinationWells,
+      SetupActions.WellSelector,
+      SetupActions.SaveSelectedWells,
+      SetupActions.InputTransferVolume30,
+      SetupActions.Continue,
+      SetupActions.PrewetAspirate,
+      SetupActions.DelayAspirate,
+      SetupActions.TouchTipAspirate,
+      SetupActions.MixAspirate,
+      SetupActions.AirGapAspirate,
+      SetupVerifications.Delay,
+      SetupVerifications.PreWet,
+      SetupVerifications.TouchTip,
+      SetupVerifications.MixT,
+      SetupVerifications.AirGap,
+      SetupActions.AspirateMixVolume,
+      SetupActions.AspirateMixTimes,
+      SetupActions.AspirateAirGapVolume,
+      SetupActions.SelectDispense,
+      SetupActions.DelayAspirate,
+      SetupActions.TouchTipAspirate,
+      SetupActions.MixAspirate,
+      SetupActions.AirGapAspirate,
+      SetupActions.DispenseMixVolume,
+      SetupActions.DispenseMixTimes,
+      SetupActions.DispenseAirGapVolume,
+      SetupActions.BlowoutTransferDestination,
+      SetupVerifications.ExtraDispenseTransfer,
     ]
     runSteps(steps)
+    cy.contains('Save').click()
+    cy.contains('button', 'Transfer').should('be.visible').click()
   })
 })
