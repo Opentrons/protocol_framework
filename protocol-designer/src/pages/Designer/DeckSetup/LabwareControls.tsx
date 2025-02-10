@@ -137,6 +137,7 @@ export const LabwareControls = (
       ) : (
         <RobotCoordsForeignDiv
           {...{ x, y, width, height }}
+          dataTestId={itemId}
           innerDivProps={{
             style: {
               opacity: hoverOpacity,

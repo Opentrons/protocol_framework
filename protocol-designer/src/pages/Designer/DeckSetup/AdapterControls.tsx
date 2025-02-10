@@ -141,6 +141,7 @@ export const AdapterControls = (
         />
       ) : (
         <RobotCoordsForeignDiv
+          dataTestId={itemId}
           x={onDeck ? slotPosition[0] : 0}
           y={onDeck ? slotPosition[1] : 0}
           width={slotBoundingBox.xDimension}

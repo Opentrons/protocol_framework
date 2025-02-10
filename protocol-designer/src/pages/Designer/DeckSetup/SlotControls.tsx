@@ -141,6 +141,7 @@ export const SlotControls = (props: SlotControlsProps): JSX.Element | null => {
         />
       ) : (
         <RobotCoordsForeignDiv
+          dataTestId={itemId}
           x={slotPosition[0]}
           y={slotPosition[1]}
           width={slotBoundingBox.xDimension}
@@ -173,7 +174,7 @@ export const SlotControls = (props: SlotControlsProps): JSX.Element | null => {
               <StyledText desktopStyle="bodyDefaultSemiBold">
                 {isOver
                   ? t(`overlay.slot.place_here`)
-                  : t('starting_deck_state:edit_labware')}
+                  : t('starting_deck_state:edit_slot')}
               </StyledText>
             </Link>
           </Flex>
