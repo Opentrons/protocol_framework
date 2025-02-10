@@ -159,19 +159,25 @@ export interface OnModuleLocationSequenceComponent {
 export interface OnAddressableAreaLocationSequenceComponent {
   kind: 'onAddressableArea'
   addressableAreaName: string
-  slotName: string | null
 }
 
-export interface NotOnDeckLocationSequenceCompoennt {
+export interface NotOnDeckLocationSequenceComponent {
   kind: 'notOnDeck'
   logicalLocationName: 'offDeck' | 'systemLocation'
+}
+
+export interface OnCutoutFixtureLocationSequenceComponent {
+  kind: 'onCutoutFixture'
+  cutoutId: string
+  possibleCutoutFixtureIds: string[]
 }
 
 export type LocationSequenceComponent =
   | OnLabwareLocationSequenceComponent
   | OnModuleLocationSequenceComponent
   | OnAddressableAreaLocationSequenceComponent
-  | NotOnDeckLocationSequenceCompoennt
+  | NotOnDeckLocationSequenceComponent
+  | OnCutoutFixtureLocationSequenceComponent
 
 export type LabwareLocationSequence = LocationSequenceComponent[]
 
