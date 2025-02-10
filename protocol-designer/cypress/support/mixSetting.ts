@@ -122,6 +122,7 @@ export enum MixContent {
   StepName = 'Step Name',
   StepNotes = 'Step Notes',
   CypressTest = 'Cypress Mix Test',
+  TouchTipFromTop = 'Touch tip position from top',
 }
 
 export enum MixLocators {
@@ -155,9 +156,10 @@ export enum MixLocators {
   BlowoutPos = '[id="TipPositionField_blowout_z_offset"]',
   BlowoutZPosition = '[data-testid="TipPositionModal_custom_input"]',
   PosFromBottom = '[id="TipPositionField_mix_touchTip_mmFromBottom"]',
-  RenameBtn = '[class="Btn-sc-o3dtr1-0 sc-hOzowv evqcJP dFLkGR"]',
+  RenameBtn = 'button:contains("Rename")',
   StepNameInput = '[class="InputField__StyledInput-sc-1gyyvht-0 cLVzBl"]',
   StepNotesInput = '[class="RenameStepModal__DescriptionField-sc-1k5vjxe-0 lkzOSf"]',
+  PosFromTop = '[data-testid="TipPositionField_mix_touchTip_mmFromTop"]',
 }
 
 export const executeMixAction = (
@@ -287,11 +289,11 @@ export const executeMixAction = (
         .should('be.visible')
         .eq(0)
         .click()
-      cy.get(MixLocators.PosFromBottom).should('have.prop', 'value')
-      cy.get(MixLocators.PosFromBottom).click()
+      cy.get(MixLocators.PosFromTop).should('have.prop', 'value')
+      cy.get(MixLocators.PosFromTop).click({force : true})
       cy.get(MixLocators.BlowoutZPosition).type('{selectAll}, {backspace}, 2')
       cy.get(MixLocators.ResetToDefault).click()
-      cy.get(MixLocators.BlowoutZPosition).type('{selectAll}, {backspace}, 7')
+      cy.get(MixLocators.BlowoutZPosition).type('{selectAll}, {backspace}, -7')
       break
     case MixActions.Save:
       cy.get(MixLocators.Save)
@@ -495,8 +497,8 @@ export const executeVerifyMixStep = (verification: MixVerifications): void => {
       break
     case MixVerifications.TouchTip:
       cy.contains(MixContent.TouchTip).should('exist').should('be.visible')
-      cy.contains(MixContent.TouchTipPos).should('exist').should('be.visible')
-      cy.get(MixLocators.PosFromBottom).should('have.prop', 'value')
+      cy.contains(MixContent.TouchTipFromTop).should('exist').should('be.visible')
+      cy.get(MixLocators.PosFromTop).should('have.prop', 'value')
       break
     case MixVerifications.TouchTipPopout:
       cy.contains(MixContent.EditTouchTipPos)
