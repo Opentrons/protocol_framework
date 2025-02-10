@@ -1,5 +1,6 @@
 import type { Dispatch, SetStateAction } from 'react'
 import type { CoordinateTuple } from '@opentrons/shared-data'
+import type { LabwareOnDeck } from '../../../step-forms'
 import type { DeckSetupTabType } from '../types'
 
 export interface SharedControlsType extends DeckSetupTabType {
@@ -10,4 +11,8 @@ export interface SharedControlsType extends DeckSetupTabType {
   setHover: Dispatch<SetStateAction<string | null>>
   setShowMenuListForId: Dispatch<SetStateAction<string | null>>
   isSelected: boolean
+}
+
+export interface DroppedItem {
+  labwareOnDeck: LabwareOnDeck
 }
