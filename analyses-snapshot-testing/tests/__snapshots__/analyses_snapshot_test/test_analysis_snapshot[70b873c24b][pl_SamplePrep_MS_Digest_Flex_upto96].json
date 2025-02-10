@@ -1306,13 +1306,17 @@
         "labwareId": "UUID",
         "locationSequence": [
           {
+            "addressableAreaName": "thermocyclerModuleV2",
+            "kind": "onAddressableArea"
+          },
+          {
             "kind": "onModule",
             "moduleId": "UUID"
           },
           {
-            "addressableAreaName": "thermocyclerModuleV2",
-            "kind": "onAddressableArea",
-            "slotName": "B1"
+            "cutoutId": "cutoutB1",
+            "kind": "onCutoutFixture",
+            "possibleCutoutFixtureIds": []
           }
         ]
       },
@@ -2602,8 +2606,18 @@
         "locationSequence": [
           {
             "addressableAreaName": "D3",
-            "kind": "onAddressableArea",
-            "slotName": "D3"
+            "kind": "onAddressableArea"
+          },
+          {
+            "cutoutId": "cutoutD3",
+            "kind": "onCutoutFixture",
+            "possibleCutoutFixtureIds": [
+              "flexStackerModuleV1",
+              "flexStackerModuleV1WithWasteChuteRightAdapterCovered",
+              "flexStackerModuleV1WithWasteChuteRightAdapterNoCover",
+              "singleRightSlot",
+              "stagingAreaRightSlot"
+            ]
           }
         ]
       },
@@ -3768,8 +3782,16 @@
         "locationSequence": [
           {
             "addressableAreaName": "B3",
-            "kind": "onAddressableArea",
-            "slotName": "B3"
+            "kind": "onAddressableArea"
+          },
+          {
+            "cutoutId": "cutoutB3",
+            "kind": "onCutoutFixture",
+            "possibleCutoutFixtureIds": [
+              "flexStackerModuleV1",
+              "singleRightSlot",
+              "stagingAreaRightSlot"
+            ]
           }
         ]
       },
@@ -4934,8 +4956,16 @@
         "locationSequence": [
           {
             "addressableAreaName": "C3",
-            "kind": "onAddressableArea",
-            "slotName": "C3"
+            "kind": "onAddressableArea"
+          },
+          {
+            "cutoutId": "cutoutC3",
+            "kind": "onCutoutFixture",
+            "possibleCutoutFixtureIds": [
+              "flexStackerModuleV1",
+              "singleRightSlot",
+              "stagingAreaRightSlot"
+            ]
           }
         ]
       },
@@ -5944,8 +5974,14 @@
         "locationSequence": [
           {
             "addressableAreaName": "A2",
-            "kind": "onAddressableArea",
-            "slotName": "A2"
+            "kind": "onAddressableArea"
+          },
+          {
+            "cutoutId": "cutoutA2",
+            "kind": "onCutoutFixture",
+            "possibleCutoutFixtureIds": [
+              "singleCenterSlot"
+            ]
           }
         ]
       },
@@ -13440,8 +13476,14 @@
         "locationSequence": [
           {
             "addressableAreaName": "B2",
-            "kind": "onAddressableArea",
-            "slotName": "B2"
+            "kind": "onAddressableArea"
+          },
+          {
+            "cutoutId": "cutoutB2",
+            "kind": "onCutoutFixture",
+            "possibleCutoutFixtureIds": [
+              "singleCenterSlot"
+            ]
           }
         ]
       },
@@ -20936,8 +20978,14 @@
         "locationSequence": [
           {
             "addressableAreaName": "C2",
-            "kind": "onAddressableArea",
-            "slotName": "C2"
+            "kind": "onAddressableArea"
+          },
+          {
+            "cutoutId": "cutoutC2",
+            "kind": "onCutoutFixture",
+            "possibleCutoutFixtureIds": [
+              "singleCenterSlot"
+            ]
           }
         ]
       },
@@ -28432,8 +28480,14 @@
         "locationSequence": [
           {
             "addressableAreaName": "D2",
-            "kind": "onAddressableArea",
-            "slotName": "D2"
+            "kind": "onAddressableArea"
+          },
+          {
+            "cutoutId": "cutoutD2",
+            "kind": "onCutoutFixture",
+            "possibleCutoutFixtureIds": [
+              "singleCenterSlot"
+            ]
           }
         ]
       },

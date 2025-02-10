@@ -1164,8 +1164,14 @@
         "locationSequence": [
           {
             "addressableAreaName": "9",
-            "kind": "onAddressableArea",
-            "slotName": "9"
+            "kind": "onAddressableArea"
+          },
+          {
+            "cutoutId": "cutout9",
+            "kind": "onCutoutFixture",
+            "possibleCutoutFixtureIds": [
+              "singleStandardSlot"
+            ]
           }
         ]
       },
@@ -1538,8 +1544,14 @@
         "locationSequence": [
           {
             "addressableAreaName": "10",
-            "kind": "onAddressableArea",
-            "slotName": "10"
+            "kind": "onAddressableArea"
+          },
+          {
+            "cutoutId": "cutout10",
+            "kind": "onCutoutFixture",
+            "possibleCutoutFixtureIds": [
+              "singleStandardSlot"
+            ]
           }
         ]
       },

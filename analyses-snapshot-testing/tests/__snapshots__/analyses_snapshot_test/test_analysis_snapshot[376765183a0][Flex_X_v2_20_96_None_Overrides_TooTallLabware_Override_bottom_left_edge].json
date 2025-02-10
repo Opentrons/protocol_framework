@@ -1164,8 +1164,14 @@
         "locationSequence": [
           {
             "addressableAreaName": "D1",
-            "kind": "onAddressableArea",
-            "slotName": "D1"
+            "kind": "onAddressableArea"
+          },
+          {
+            "cutoutId": "cutoutD1",
+            "kind": "onCutoutFixture",
+            "possibleCutoutFixtureIds": [
+              "singleLeftSlot"
+            ]
           }
         ]
       },

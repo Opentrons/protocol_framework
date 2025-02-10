@@ -124,8 +124,14 @@
         "locationSequence": [
           {
             "addressableAreaName": "7",
-            "kind": "onAddressableArea",
-            "slotName": "7"
+            "kind": "onAddressableArea"
+          },
+          {
+            "cutoutId": "cutout7",
+            "kind": "onCutoutFixture",
+            "possibleCutoutFixtureIds": [
+              "singleStandardSlot"
+            ]
           }
         ]
       },
@@ -379,8 +385,14 @@
         "locationSequence": [
           {
             "addressableAreaName": "8",
-            "kind": "onAddressableArea",
-            "slotName": "8"
+            "kind": "onAddressableArea"
+          },
+          {
+            "cutoutId": "cutout8",
+            "kind": "onCutoutFixture",
+            "possibleCutoutFixtureIds": [
+              "singleStandardSlot"
+            ]
           }
         ]
       },
@@ -537,8 +549,14 @@
         "locationSequence": [
           {
             "addressableAreaName": "3",
-            "kind": "onAddressableArea",
-            "slotName": "3"
+            "kind": "onAddressableArea"
+          },
+          {
+            "cutoutId": "cutout3",
+            "kind": "onCutoutFixture",
+            "possibleCutoutFixtureIds": [
+              "singleStandardSlot"
+            ]
           }
         ]
       },
@@ -1698,8 +1716,14 @@
         "locationSequence": [
           {
             "addressableAreaName": "1",
-            "kind": "onAddressableArea",
-            "slotName": "1"
+            "kind": "onAddressableArea"
+          },
+          {
+            "cutoutId": "cutout1",
+            "kind": "onCutoutFixture",
+            "possibleCutoutFixtureIds": [
+              "singleStandardSlot"
+            ]
           }
         ]
       },

@@ -535,13 +535,17 @@
         "labwareId": "UUID",
         "locationSequence": [
           {
+            "addressableAreaName": "heaterShakerV1D1",
+            "kind": "onAddressableArea"
+          },
+          {
             "kind": "onModule",
             "moduleId": "UUID"
           },
           {
-            "addressableAreaName": "heaterShakerV1D1",
-            "kind": "onAddressableArea",
-            "slotName": "D1"
+            "cutoutId": "cutoutD1",
+            "kind": "onCutoutFixture",
+            "possibleCutoutFixtureIds": []
           }
         ]
       },
@@ -1834,13 +1838,17 @@
             "labwareId": "UUID"
           },
           {
+            "addressableAreaName": "heaterShakerV1D1",
+            "kind": "onAddressableArea"
+          },
+          {
             "kind": "onModule",
             "moduleId": "UUID"
           },
           {
-            "addressableAreaName": "heaterShakerV1D1",
-            "kind": "onAddressableArea",
-            "slotName": "D1"
+            "cutoutId": "cutoutD1",
+            "kind": "onCutoutFixture",
+            "possibleCutoutFixtureIds": []
           }
         ]
       },
@@ -3544,13 +3552,17 @@
         "labwareId": "UUID",
         "locationSequence": [
           {
+            "addressableAreaName": "temperatureModuleV2A3",
+            "kind": "onAddressableArea"
+          },
+          {
             "kind": "onModule",
             "moduleId": "UUID"
           },
           {
-            "addressableAreaName": "temperatureModuleV2A3",
-            "kind": "onAddressableArea",
-            "slotName": "A3"
+            "cutoutId": "cutoutA3",
+            "kind": "onCutoutFixture",
+            "possibleCutoutFixtureIds": []
           }
         ]
       },
@@ -4738,13 +4750,17 @@
             "labwareId": "UUID"
           },
           {
+            "addressableAreaName": "temperatureModuleV2A3",
+            "kind": "onAddressableArea"
+          },
+          {
             "kind": "onModule",
             "moduleId": "UUID"
           },
           {
-            "addressableAreaName": "temperatureModuleV2A3",
-            "kind": "onAddressableArea",
-            "slotName": "A3"
+            "cutoutId": "cutoutA3",
+            "kind": "onCutoutFixture",
+            "possibleCutoutFixtureIds": []
           }
         ]
       },
@@ -7762,8 +7778,14 @@
         "locationSequence": [
           {
             "addressableAreaName": "D2",
-            "kind": "onAddressableArea",
-            "slotName": "D2"
+            "kind": "onAddressableArea"
+          },
+          {
+            "cutoutId": "cutoutD2",
+            "kind": "onCutoutFixture",
+            "possibleCutoutFixtureIds": [
+              "singleCenterSlot"
+            ]
           }
         ]
       },
@@ -10781,8 +10803,16 @@
         "locationSequence": [
           {
             "addressableAreaName": "C3",
-            "kind": "onAddressableArea",
-            "slotName": "C3"
+            "kind": "onAddressableArea"
+          },
+          {
+            "cutoutId": "cutoutC3",
+            "kind": "onCutoutFixture",
+            "possibleCutoutFixtureIds": [
+              "flexStackerModuleV1",
+              "singleRightSlot",
+              "stagingAreaRightSlot"
+            ]
           }
         ]
       },
@@ -15528,8 +15558,14 @@
         "locationSequence": [
           {
             "addressableAreaName": "C2",
-            "kind": "onAddressableArea",
-            "slotName": "C2"
+            "kind": "onAddressableArea"
+          },
+          {
+            "cutoutId": "cutoutC2",
+            "kind": "onCutoutFixture",
+            "possibleCutoutFixtureIds": [
+              "singleCenterSlot"
+            ]
           }
         ]
       },
@@ -18546,13 +18582,17 @@
         "labwareId": "UUID",
         "locationSequence": [
           {
+            "addressableAreaName": "magneticBlockV1C1",
+            "kind": "onAddressableArea"
+          },
+          {
             "kind": "onModule",
             "moduleId": "UUID"
           },
           {
-            "addressableAreaName": "magneticBlockV1C1",
-            "kind": "onAddressableArea",
-            "slotName": "C1"
+            "cutoutId": "cutoutC1",
+            "kind": "onCutoutFixture",
+            "possibleCutoutFixtureIds": []
           }
         ]
       },
@@ -21570,8 +21610,14 @@
         "locationSequence": [
           {
             "addressableAreaName": "B1",
-            "kind": "onAddressableArea",
-            "slotName": "B1"
+            "kind": "onAddressableArea"
+          },
+          {
+            "cutoutId": "cutoutB1",
+            "kind": "onCutoutFixture",
+            "possibleCutoutFixtureIds": [
+              "singleLeftSlot"
+            ]
           }
         ]
       },
@@ -24484,8 +24530,16 @@
         "locationSequence": [
           {
             "addressableAreaName": "B3",
-            "kind": "onAddressableArea",
-            "slotName": "B3"
+            "kind": "onAddressableArea"
+          },
+          {
+            "cutoutId": "cutoutB3",
+            "kind": "onCutoutFixture",
+            "possibleCutoutFixtureIds": [
+              "flexStackerModuleV1",
+              "singleRightSlot",
+              "stagingAreaRightSlot"
+            ]
           }
         ]
       },
@@ -27503,8 +27557,14 @@
         "locationSequence": [
           {
             "addressableAreaName": "B2",
-            "kind": "onAddressableArea",
-            "slotName": "B2"
+            "kind": "onAddressableArea"
+          },
+          {
+            "cutoutId": "cutoutB2",
+            "kind": "onCutoutFixture",
+            "possibleCutoutFixtureIds": [
+              "singleCenterSlot"
+            ]
           }
         ]
       },
@@ -31035,8 +31095,14 @@
         "locationSequence": [
           {
             "addressableAreaName": "A1",
-            "kind": "onAddressableArea",
-            "slotName": "A1"
+            "kind": "onAddressableArea"
+          },
+          {
+            "cutoutId": "cutoutA1",
+            "kind": "onCutoutFixture",
+            "possibleCutoutFixtureIds": [
+              "singleLeftSlot"
+            ]
           }
         ]
       },
@@ -32204,8 +32270,14 @@
           },
           {
             "addressableAreaName": "A1",
-            "kind": "onAddressableArea",
-            "slotName": "A1"
+            "kind": "onAddressableArea"
+          },
+          {
+            "cutoutId": "cutoutA1",
+            "kind": "onCutoutFixture",
+            "possibleCutoutFixtureIds": [
+              "singleLeftSlot"
+            ]
           }
         ]
       },
@@ -32280,8 +32352,14 @@
         "locationSequence": [
           {
             "addressableAreaName": "A2",
-            "kind": "onAddressableArea",
-            "slotName": "A2"
+            "kind": "onAddressableArea"
+          },
+          {
+            "cutoutId": "cutoutA2",
+            "kind": "onCutoutFixture",
+            "possibleCutoutFixtureIds": [
+              "singleCenterSlot"
+            ]
           }
         ]
       },
@@ -33449,8 +33527,14 @@
           },
           {
             "addressableAreaName": "A2",
-            "kind": "onAddressableArea",
-            "slotName": "A2"
+            "kind": "onAddressableArea"
+          },
+          {
+            "cutoutId": "cutoutA2",
+            "kind": "onCutoutFixture",
+            "possibleCutoutFixtureIds": [
+              "singleCenterSlot"
+            ]
           }
         ]
       },
@@ -35887,22 +35971,40 @@
         "eventualDestinationLocationSequence": [
           {
             "addressableAreaName": "C4",
-            "kind": "onAddressableArea",
-            "slotName": "C3"
+            "kind": "onAddressableArea"
+          },
+          {
+            "cutoutId": "cutoutC3",
+            "kind": "onCutoutFixture",
+            "possibleCutoutFixtureIds": [
+              "stagingAreaRightSlot"
+            ]
           }
         ],
         "immediateDestinationLocationSequence": [
           {
             "addressableAreaName": "C4",
-            "kind": "onAddressableArea",
-            "slotName": "C3"
+            "kind": "onAddressableArea"
+          },
+          {
+            "cutoutId": "cutoutC3",
+            "kind": "onCutoutFixture",
+            "possibleCutoutFixtureIds": [
+              "stagingAreaRightSlot"
+            ]
           }
         ],
         "originLocationSequence": [
           {
             "addressableAreaName": "D2",
-            "kind": "onAddressableArea",
-            "slotName": "D2"
+            "kind": "onAddressableArea"
+          },
+          {
+            "cutoutId": "cutoutD2",
+            "kind": "onCutoutFixture",
+            "possibleCutoutFixtureIds": [
+              "singleCenterSlot"
+            ]
           }
         ]
       },
@@ -35927,26 +36029,42 @@
         "eventualDestinationLocationSequence": [
           {
             "addressableAreaName": "D2",
-            "kind": "onAddressableArea",
-            "slotName": "D2"
+            "kind": "onAddressableArea"
+          },
+          {
+            "cutoutId": "cutoutD2",
+            "kind": "onCutoutFixture",
+            "possibleCutoutFixtureIds": [
+              "singleCenterSlot"
+            ]
           }
         ],
         "immediateDestinationLocationSequence": [
           {
             "addressableAreaName": "D2",
-            "kind": "onAddressableArea",
-            "slotName": "D2"
+            "kind": "onAddressableArea"
+          },
+          {
+            "cutoutId": "cutoutD2",
+            "kind": "onCutoutFixture",
+            "possibleCutoutFixtureIds": [
+              "singleCenterSlot"
+            ]
           }
         ],
         "originLocationSequence": [
+          {
+            "addressableAreaName": "magneticBlockV1C1",
+            "kind": "onAddressableArea"
+          },
           {
             "kind": "onModule",
             "moduleId": "UUID"
           },
           {
-            "addressableAreaName": "magneticBlockV1C1",
-            "kind": "onAddressableArea",
-            "slotName": "C1"
+            "cutoutId": "cutoutC1",
+            "kind": "onCutoutFixture",
+            "possibleCutoutFixtureIds": []
           }
         ]
       },
@@ -38233,24 +38351,32 @@
       "result": {
         "eventualDestinationLocationSequence": [
           {
+            "addressableAreaName": "magneticBlockV1C1",
+            "kind": "onAddressableArea"
+          },
+          {
             "kind": "onModule",
             "moduleId": "UUID"
           },
           {
-            "addressableAreaName": "magneticBlockV1C1",
-            "kind": "onAddressableArea",
-            "slotName": "C1"
+            "cutoutId": "cutoutC1",
+            "kind": "onCutoutFixture",
+            "possibleCutoutFixtureIds": []
           }
         ],
         "immediateDestinationLocationSequence": [
           {
+            "addressableAreaName": "magneticBlockV1C1",
+            "kind": "onAddressableArea"
+          },
+          {
             "kind": "onModule",
             "moduleId": "UUID"
           },
           {
-            "addressableAreaName": "magneticBlockV1C1",
-            "kind": "onAddressableArea",
-            "slotName": "C1"
+            "cutoutId": "cutoutC1",
+            "kind": "onCutoutFixture",
+            "possibleCutoutFixtureIds": []
           }
         ],
         "originLocationSequence": [
@@ -38259,13 +38385,17 @@
             "labwareId": "UUID"
           },
           {
+            "addressableAreaName": "heaterShakerV1D1",
+            "kind": "onAddressableArea"
+          },
+          {
             "kind": "onModule",
             "moduleId": "UUID"
           },
           {
-            "addressableAreaName": "heaterShakerV1D1",
-            "kind": "onAddressableArea",
-            "slotName": "D1"
+            "cutoutId": "cutoutD1",
+            "kind": "onCutoutFixture",
+            "possibleCutoutFixtureIds": []
           }
         ]
       },
@@ -38605,13 +38735,17 @@
             "labwareId": "UUID"
           },
           {
+            "addressableAreaName": "heaterShakerV1D1",
+            "kind": "onAddressableArea"
+          },
+          {
             "kind": "onModule",
             "moduleId": "UUID"
           },
           {
-            "addressableAreaName": "heaterShakerV1D1",
-            "kind": "onAddressableArea",
-            "slotName": "D1"
+            "cutoutId": "cutoutD1",
+            "kind": "onCutoutFixture",
+            "possibleCutoutFixtureIds": []
           }
         ],
         "immediateDestinationLocationSequence": [
@@ -38620,24 +38754,32 @@
             "labwareId": "UUID"
           },
           {
+            "addressableAreaName": "heaterShakerV1D1",
+            "kind": "onAddressableArea"
+          },
+          {
             "kind": "onModule",
             "moduleId": "UUID"
           },
           {
-            "addressableAreaName": "heaterShakerV1D1",
-            "kind": "onAddressableArea",
-            "slotName": "D1"
+            "cutoutId": "cutoutD1",
+            "kind": "onCutoutFixture",
+            "possibleCutoutFixtureIds": []
           }
         ],
         "originLocationSequence": [
           {
+            "addressableAreaName": "magneticBlockV1C1",
+            "kind": "onAddressableArea"
+          },
+          {
             "kind": "onModule",
             "moduleId": "UUID"
           },
           {
-            "addressableAreaName": "magneticBlockV1C1",
-            "kind": "onAddressableArea",
-            "slotName": "C1"
+            "cutoutId": "cutoutC1",
+            "kind": "onCutoutFixture",
+            "possibleCutoutFixtureIds": []
           }
         ]
       },
@@ -38869,24 +39011,32 @@
       "result": {
         "eventualDestinationLocationSequence": [
           {
+            "addressableAreaName": "magneticBlockV1C1",
+            "kind": "onAddressableArea"
+          },
+          {
             "kind": "onModule",
             "moduleId": "UUID"
           },
           {
-            "addressableAreaName": "magneticBlockV1C1",
-            "kind": "onAddressableArea",
-            "slotName": "C1"
+            "cutoutId": "cutoutC1",
+            "kind": "onCutoutFixture",
+            "possibleCutoutFixtureIds": []
           }
         ],
         "immediateDestinationLocationSequence": [
           {
+            "addressableAreaName": "magneticBlockV1C1",
+            "kind": "onAddressableArea"
+          },
+          {
             "kind": "onModule",
             "moduleId": "UUID"
           },
           {
-            "addressableAreaName": "magneticBlockV1C1",
-            "kind": "onAddressableArea",
-            "slotName": "C1"
+            "cutoutId": "cutoutC1",
+            "kind": "onCutoutFixture",
+            "possibleCutoutFixtureIds": []
           }
         ],
         "originLocationSequence": [
@@ -38895,13 +39045,17 @@
             "labwareId": "UUID"
           },
           {
+            "addressableAreaName": "heaterShakerV1D1",
+            "kind": "onAddressableArea"
+          },
+          {
             "kind": "onModule",
             "moduleId": "UUID"
           },
           {
-            "addressableAreaName": "heaterShakerV1D1",
-            "kind": "onAddressableArea",
-            "slotName": "D1"
+            "cutoutId": "cutoutD1",
+            "kind": "onCutoutFixture",
+            "possibleCutoutFixtureIds": []
           }
         ]
       },
@@ -39181,13 +39335,17 @@
             "labwareId": "UUID"
           },
           {
+            "addressableAreaName": "heaterShakerV1D1",
+            "kind": "onAddressableArea"
+          },
+          {
             "kind": "onModule",
             "moduleId": "UUID"
           },
           {
-            "addressableAreaName": "heaterShakerV1D1",
-            "kind": "onAddressableArea",
-            "slotName": "D1"
+            "cutoutId": "cutoutD1",
+            "kind": "onCutoutFixture",
+            "possibleCutoutFixtureIds": []
           }
         ],
         "immediateDestinationLocationSequence": [
@@ -39196,24 +39354,32 @@
             "labwareId": "UUID"
           },
           {
+            "addressableAreaName": "heaterShakerV1D1",
+            "kind": "onAddressableArea"
+          },
+          {
             "kind": "onModule",
             "moduleId": "UUID"
           },
           {
-            "addressableAreaName": "heaterShakerV1D1",
-            "kind": "onAddressableArea",
-            "slotName": "D1"
+            "cutoutId": "cutoutD1",
+            "kind": "onCutoutFixture",
+            "possibleCutoutFixtureIds": []
           }
         ],
         "originLocationSequence": [
           {
+            "addressableAreaName": "magneticBlockV1C1",
+            "kind": "onAddressableArea"
+          },
+          {
             "kind": "onModule",
             "moduleId": "UUID"
           },
           {
-            "addressableAreaName": "magneticBlockV1C1",
-            "kind": "onAddressableArea",
-            "slotName": "C1"
+            "cutoutId": "cutoutC1",
+            "kind": "onCutoutFixture",
+            "possibleCutoutFixtureIds": []
           }
         ]
       },
@@ -39445,24 +39611,32 @@
       "result": {
         "eventualDestinationLocationSequence": [
           {
+            "addressableAreaName": "magneticBlockV1C1",
+            "kind": "onAddressableArea"
+          },
+          {
             "kind": "onModule",
             "moduleId": "UUID"
           },
           {
-            "addressableAreaName": "magneticBlockV1C1",
-            "kind": "onAddressableArea",
-            "slotName": "C1"
+            "cutoutId": "cutoutC1",
+            "kind": "onCutoutFixture",
+            "possibleCutoutFixtureIds": []
           }
         ],
         "immediateDestinationLocationSequence": [
           {
+            "addressableAreaName": "magneticBlockV1C1",
+            "kind": "onAddressableArea"
+          },
+          {
             "kind": "onModule",
             "moduleId": "UUID"
           },
           {
-            "addressableAreaName": "magneticBlockV1C1",
-            "kind": "onAddressableArea",
-            "slotName": "C1"
+            "cutoutId": "cutoutC1",
+            "kind": "onCutoutFixture",
+            "possibleCutoutFixtureIds": []
           }
         ],
         "originLocationSequence": [
@@ -39471,13 +39645,17 @@
             "labwareId": "UUID"
           },
           {
+            "addressableAreaName": "heaterShakerV1D1",
+            "kind": "onAddressableArea"
+          },
+          {
             "kind": "onModule",
             "moduleId": "UUID"
           },
           {
-            "addressableAreaName": "heaterShakerV1D1",
-            "kind": "onAddressableArea",
-            "slotName": "D1"
+            "cutoutId": "cutoutD1",
+            "kind": "onCutoutFixture",
+            "possibleCutoutFixtureIds": []
           }
         ]
       },
@@ -39757,13 +39935,17 @@
             "labwareId": "UUID"
           },
           {
+            "addressableAreaName": "heaterShakerV1D1",
+            "kind": "onAddressableArea"
+          },
+          {
             "kind": "onModule",
             "moduleId": "UUID"
           },
           {
-            "addressableAreaName": "heaterShakerV1D1",
-            "kind": "onAddressableArea",
-            "slotName": "D1"
+            "cutoutId": "cutoutD1",
+            "kind": "onCutoutFixture",
+            "possibleCutoutFixtureIds": []
           }
         ],
         "immediateDestinationLocationSequence": [
@@ -39772,24 +39954,32 @@
             "labwareId": "UUID"
           },
           {
+            "addressableAreaName": "heaterShakerV1D1",
+            "kind": "onAddressableArea"
+          },
+          {
             "kind": "onModule",
             "moduleId": "UUID"
           },
           {
-            "addressableAreaName": "heaterShakerV1D1",
-            "kind": "onAddressableArea",
-            "slotName": "D1"
+            "cutoutId": "cutoutD1",
+            "kind": "onCutoutFixture",
+            "possibleCutoutFixtureIds": []
           }
         ],
         "originLocationSequence": [
           {
+            "addressableAreaName": "magneticBlockV1C1",
+            "kind": "onAddressableArea"
+          },
+          {
             "kind": "onModule",
             "moduleId": "UUID"
           },
           {
-            "addressableAreaName": "magneticBlockV1C1",
-            "kind": "onAddressableArea",
-            "slotName": "C1"
+            "cutoutId": "cutoutC1",
+            "kind": "onCutoutFixture",
+            "possibleCutoutFixtureIds": []
           }
         ]
       },
@@ -40021,24 +40211,32 @@
       "result": {
         "eventualDestinationLocationSequence": [
           {
+            "addressableAreaName": "magneticBlockV1C1",
+            "kind": "onAddressableArea"
+          },
+          {
             "kind": "onModule",
             "moduleId": "UUID"
           },
           {
-            "addressableAreaName": "magneticBlockV1C1",
-            "kind": "onAddressableArea",
-            "slotName": "C1"
+            "cutoutId": "cutoutC1",
+            "kind": "onCutoutFixture",
+            "possibleCutoutFixtureIds": []
           }
         ],
         "immediateDestinationLocationSequence": [
           {
+            "addressableAreaName": "magneticBlockV1C1",
+            "kind": "onAddressableArea"
+          },
+          {
             "kind": "onModule",
             "moduleId": "UUID"
           },
           {
-            "addressableAreaName": "magneticBlockV1C1",
-            "kind": "onAddressableArea",
-            "slotName": "C1"
+            "cutoutId": "cutoutC1",
+            "kind": "onCutoutFixture",
+            "possibleCutoutFixtureIds": []
           }
         ],
         "originLocationSequence": [
@@ -40047,13 +40245,17 @@
             "labwareId": "UUID"
           },
           {
+            "addressableAreaName": "heaterShakerV1D1",
+            "kind": "onAddressableArea"
+          },
+          {
             "kind": "onModule",
             "moduleId": "UUID"
           },
           {
-            "addressableAreaName": "heaterShakerV1D1",
-            "kind": "onAddressableArea",
-            "slotName": "D1"
+            "cutoutId": "cutoutD1",
+            "kind": "onCutoutFixture",
+            "possibleCutoutFixtureIds": []
           }
         ]
       },
@@ -40333,13 +40535,17 @@
             "labwareId": "UUID"
           },
           {
+            "addressableAreaName": "heaterShakerV1D1",
+            "kind": "onAddressableArea"
+          },
+          {
             "kind": "onModule",
             "moduleId": "UUID"
           },
           {
-            "addressableAreaName": "heaterShakerV1D1",
-            "kind": "onAddressableArea",
-            "slotName": "D1"
+            "cutoutId": "cutoutD1",
+            "kind": "onCutoutFixture",
+            "possibleCutoutFixtureIds": []
           }
         ],
         "immediateDestinationLocationSequence": [
@@ -40348,24 +40554,32 @@
             "labwareId": "UUID"
           },
           {
+            "addressableAreaName": "heaterShakerV1D1",
+            "kind": "onAddressableArea"
+          },
+          {
             "kind": "onModule",
             "moduleId": "UUID"
           },
           {
-            "addressableAreaName": "heaterShakerV1D1",
-            "kind": "onAddressableArea",
-            "slotName": "D1"
+            "cutoutId": "cutoutD1",
+            "kind": "onCutoutFixture",
+            "possibleCutoutFixtureIds": []
           }
         ],
         "originLocationSequence": [
           {
+            "addressableAreaName": "magneticBlockV1C1",
+            "kind": "onAddressableArea"
+          },
+          {
             "kind": "onModule",
             "moduleId": "UUID"
           },
           {
-            "addressableAreaName": "magneticBlockV1C1",
-            "kind": "onAddressableArea",
-            "slotName": "C1"
+            "cutoutId": "cutoutC1",
+            "kind": "onCutoutFixture",
+            "possibleCutoutFixtureIds": []
           }
         ]
       },
@@ -45224,24 +45438,32 @@
       "result": {
         "eventualDestinationLocationSequence": [
           {
+            "addressableAreaName": "magneticBlockV1C1",
+            "kind": "onAddressableArea"
+          },
+          {
             "kind": "onModule",
             "moduleId": "UUID"
           },
           {
-            "addressableAreaName": "magneticBlockV1C1",
-            "kind": "onAddressableArea",
-            "slotName": "C1"
+            "cutoutId": "cutoutC1",
+            "kind": "onCutoutFixture",
+            "possibleCutoutFixtureIds": []
           }
         ],
         "immediateDestinationLocationSequence": [
           {
+            "addressableAreaName": "magneticBlockV1C1",
+            "kind": "onAddressableArea"
+          },
+          {
             "kind": "onModule",
             "moduleId": "UUID"
           },
           {
-            "addressableAreaName": "magneticBlockV1C1",
-            "kind": "onAddressableArea",
-            "slotName": "C1"
+            "cutoutId": "cutoutC1",
+            "kind": "onCutoutFixture",
+            "possibleCutoutFixtureIds": []
           }
         ],
         "originLocationSequence": [
@@ -45250,13 +45472,17 @@
             "labwareId": "UUID"
           },
           {
+            "addressableAreaName": "heaterShakerV1D1",
+            "kind": "onAddressableArea"
+          },
+          {
             "kind": "onModule",
             "moduleId": "UUID"
           },
           {
-            "addressableAreaName": "heaterShakerV1D1",
-            "kind": "onAddressableArea",
-            "slotName": "D1"
+            "cutoutId": "cutoutD1",
+            "kind": "onCutoutFixture",
+            "possibleCutoutFixtureIds": []
           }
         ]
       },
@@ -45566,13 +45792,17 @@
             "labwareId": "UUID"
           },
           {
+            "addressableAreaName": "heaterShakerV1D1",
+            "kind": "onAddressableArea"
+          },
+          {
             "kind": "onModule",
             "moduleId": "UUID"
           },
           {
-            "addressableAreaName": "heaterShakerV1D1",
-            "kind": "onAddressableArea",
-            "slotName": "D1"
+            "cutoutId": "cutoutD1",
+            "kind": "onCutoutFixture",
+            "possibleCutoutFixtureIds": []
           }
         ],
         "immediateDestinationLocationSequence": [
@@ -45581,24 +45811,32 @@
             "labwareId": "UUID"
           },
           {
+            "addressableAreaName": "heaterShakerV1D1",
+            "kind": "onAddressableArea"
+          },
+          {
             "kind": "onModule",
             "moduleId": "UUID"
           },
           {
-            "addressableAreaName": "heaterShakerV1D1",
-            "kind": "onAddressableArea",
-            "slotName": "D1"
+            "cutoutId": "cutoutD1",
+            "kind": "onCutoutFixture",
+            "possibleCutoutFixtureIds": []
           }
         ],
         "originLocationSequence": [
           {
+            "addressableAreaName": "magneticBlockV1C1",
+            "kind": "onAddressableArea"
+          },
+          {
             "kind": "onModule",
             "moduleId": "UUID"
           },
           {
-            "addressableAreaName": "magneticBlockV1C1",
-            "kind": "onAddressableArea",
-            "slotName": "C1"
+            "cutoutId": "cutoutC1",
+            "kind": "onCutoutFixture",
+            "possibleCutoutFixtureIds": []
           }
         ]
       },
@@ -45830,24 +46068,32 @@
       "result": {
         "eventualDestinationLocationSequence": [
           {
+            "addressableAreaName": "magneticBlockV1C1",
+            "kind": "onAddressableArea"
+          },
+          {
             "kind": "onModule",
             "moduleId": "UUID"
           },
           {
-            "addressableAreaName": "magneticBlockV1C1",
-            "kind": "onAddressableArea",
-            "slotName": "C1"
+            "cutoutId": "cutoutC1",
+            "kind": "onCutoutFixture",
+            "possibleCutoutFixtureIds": []
           }
         ],
         "immediateDestinationLocationSequence": [
           {
+            "addressableAreaName": "magneticBlockV1C1",
+            "kind": "onAddressableArea"
+          },
+          {
             "kind": "onModule",
             "moduleId": "UUID"
           },
           {
-            "addressableAreaName": "magneticBlockV1C1",
-            "kind": "onAddressableArea",
-            "slotName": "C1"
+            "cutoutId": "cutoutC1",
+            "kind": "onCutoutFixture",
+            "possibleCutoutFixtureIds": []
           }
         ],
         "originLocationSequence": [
@@ -45856,13 +46102,17 @@
             "labwareId": "UUID"
           },
           {
+            "addressableAreaName": "heaterShakerV1D1",
+            "kind": "onAddressableArea"
+          },
+          {
             "kind": "onModule",
             "moduleId": "UUID"
           },
           {
-            "addressableAreaName": "heaterShakerV1D1",
-            "kind": "onAddressableArea",
-            "slotName": "D1"
+            "cutoutId": "cutoutD1",
+            "kind": "onCutoutFixture",
+            "possibleCutoutFixtureIds": []
           }
         ]
       },
@@ -46142,13 +46392,17 @@
             "labwareId": "UUID"
           },
           {
+            "addressableAreaName": "heaterShakerV1D1",
+            "kind": "onAddressableArea"
+          },
+          {
             "kind": "onModule",
             "moduleId": "UUID"
           },
           {
-            "addressableAreaName": "heaterShakerV1D1",
-            "kind": "onAddressableArea",
-            "slotName": "D1"
+            "cutoutId": "cutoutD1",
+            "kind": "onCutoutFixture",
+            "possibleCutoutFixtureIds": []
           }
         ],
         "immediateDestinationLocationSequence": [
@@ -46157,24 +46411,32 @@
             "labwareId": "UUID"
           },
           {
+            "addressableAreaName": "heaterShakerV1D1",
+            "kind": "onAddressableArea"
+          },
+          {
             "kind": "onModule",
             "moduleId": "UUID"
           },
           {
-            "addressableAreaName": "heaterShakerV1D1",
-            "kind": "onAddressableArea",
-            "slotName": "D1"
+            "cutoutId": "cutoutD1",
+            "kind": "onCutoutFixture",
+            "possibleCutoutFixtureIds": []
           }
         ],
         "originLocationSequence": [
           {
+            "addressableAreaName": "magneticBlockV1C1",
+            "kind": "onAddressableArea"
+          },
+          {
             "kind": "onModule",
             "moduleId": "UUID"
           },
           {
-            "addressableAreaName": "magneticBlockV1C1",
-            "kind": "onAddressableArea",
-            "slotName": "C1"
+            "cutoutId": "cutoutC1",
+            "kind": "onCutoutFixture",
+            "possibleCutoutFixtureIds": []
           }
         ]
       },
@@ -46406,24 +46668,32 @@
       "result": {
         "eventualDestinationLocationSequence": [
           {
+            "addressableAreaName": "magneticBlockV1C1",
+            "kind": "onAddressableArea"
+          },
+          {
             "kind": "onModule",
             "moduleId": "UUID"
           },
           {
-            "addressableAreaName": "magneticBlockV1C1",
-            "kind": "onAddressableArea",
-            "slotName": "C1"
+            "cutoutId": "cutoutC1",
+            "kind": "onCutoutFixture",
+            "possibleCutoutFixtureIds": []
           }
         ],
         "immediateDestinationLocationSequence": [
           {
+            "addressableAreaName": "magneticBlockV1C1",
+            "kind": "onAddressableArea"
+          },
+          {
             "kind": "onModule",
             "moduleId": "UUID"
           },
           {
-            "addressableAreaName": "magneticBlockV1C1",
-            "kind": "onAddressableArea",
-            "slotName": "C1"
+            "cutoutId": "cutoutC1",
+            "kind": "onCutoutFixture",
+            "possibleCutoutFixtureIds": []
           }
         ],
         "originLocationSequence": [
@@ -46432,13 +46702,17 @@
             "labwareId": "UUID"
           },
           {
+            "addressableAreaName": "heaterShakerV1D1",
+            "kind": "onAddressableArea"
+          },
+          {
             "kind": "onModule",
             "moduleId": "UUID"
           },
           {
-            "addressableAreaName": "heaterShakerV1D1",
-            "kind": "onAddressableArea",
-            "slotName": "D1"
+            "cutoutId": "cutoutD1",
+            "kind": "onCutoutFixture",
+            "possibleCutoutFixtureIds": []
           }
         ]
       },
@@ -46718,13 +46992,17 @@
             "labwareId": "UUID"
           },
           {
+            "addressableAreaName": "heaterShakerV1D1",
+            "kind": "onAddressableArea"
+          },
+          {
             "kind": "onModule",
             "moduleId": "UUID"
           },
           {
-            "addressableAreaName": "heaterShakerV1D1",
-            "kind": "onAddressableArea",
-            "slotName": "D1"
+            "cutoutId": "cutoutD1",
+            "kind": "onCutoutFixture",
+            "possibleCutoutFixtureIds": []
           }
         ],
         "immediateDestinationLocationSequence": [
@@ -46733,24 +47011,32 @@
             "labwareId": "UUID"
           },
           {
+            "addressableAreaName": "heaterShakerV1D1",
+            "kind": "onAddressableArea"
+          },
+          {
             "kind": "onModule",
             "moduleId": "UUID"
           },
           {
-            "addressableAreaName": "heaterShakerV1D1",
-            "kind": "onAddressableArea",
-            "slotName": "D1"
+            "cutoutId": "cutoutD1",
+            "kind": "onCutoutFixture",
+            "possibleCutoutFixtureIds": []
           }
         ],
         "originLocationSequence": [
           {
+            "addressableAreaName": "magneticBlockV1C1",
+            "kind": "onAddressableArea"
+          },
+          {
             "kind": "onModule",
             "moduleId": "UUID"
           },
           {
-            "addressableAreaName": "magneticBlockV1C1",
-            "kind": "onAddressableArea",
-            "slotName": "C1"
+            "cutoutId": "cutoutC1",
+            "kind": "onCutoutFixture",
+            "possibleCutoutFixtureIds": []
           }
         ]
       },
@@ -46982,24 +47268,32 @@
       "result": {
         "eventualDestinationLocationSequence": [
           {
+            "addressableAreaName": "magneticBlockV1C1",
+            "kind": "onAddressableArea"
+          },
+          {
             "kind": "onModule",
             "moduleId": "UUID"
           },
           {
-            "addressableAreaName": "magneticBlockV1C1",
-            "kind": "onAddressableArea",
-            "slotName": "C1"
+            "cutoutId": "cutoutC1",
+            "kind": "onCutoutFixture",
+            "possibleCutoutFixtureIds": []
           }
         ],
         "immediateDestinationLocationSequence": [
           {
+            "addressableAreaName": "magneticBlockV1C1",
+            "kind": "onAddressableArea"
+          },
+          {
             "kind": "onModule",
             "moduleId": "UUID"
           },
           {
-            "addressableAreaName": "magneticBlockV1C1",
-            "kind": "onAddressableArea",
-            "slotName": "C1"
+            "cutoutId": "cutoutC1",
+            "kind": "onCutoutFixture",
+            "possibleCutoutFixtureIds": []
           }
         ],
         "originLocationSequence": [
@@ -47008,13 +47302,17 @@
             "labwareId": "UUID"
           },
           {
+            "addressableAreaName": "heaterShakerV1D1",
+            "kind": "onAddressableArea"
+          },
+          {
             "kind": "onModule",
             "moduleId": "UUID"
           },
           {
-            "addressableAreaName": "heaterShakerV1D1",
-            "kind": "onAddressableArea",
-            "slotName": "D1"
+            "cutoutId": "cutoutD1",
+            "kind": "onCutoutFixture",
+            "possibleCutoutFixtureIds": []
           }
         ]
       },
@@ -47294,13 +47592,17 @@
             "labwareId": "UUID"
           },
           {
+            "addressableAreaName": "heaterShakerV1D1",
+            "kind": "onAddressableArea"
+          },
+          {
             "kind": "onModule",
             "moduleId": "UUID"
           },
           {
-            "addressableAreaName": "heaterShakerV1D1",
-            "kind": "onAddressableArea",
-            "slotName": "D1"
+            "cutoutId": "cutoutD1",
+            "kind": "onCutoutFixture",
+            "possibleCutoutFixtureIds": []
           }
         ],
         "immediateDestinationLocationSequence": [
@@ -47309,24 +47611,32 @@
             "labwareId": "UUID"
           },
           {
+            "addressableAreaName": "heaterShakerV1D1",
+            "kind": "onAddressableArea"
+          },
+          {
             "kind": "onModule",
             "moduleId": "UUID"
           },
           {
-            "addressableAreaName": "heaterShakerV1D1",
-            "kind": "onAddressableArea",
-            "slotName": "D1"
+            "cutoutId": "cutoutD1",
+            "kind": "onCutoutFixture",
+            "possibleCutoutFixtureIds": []
           }
         ],
         "originLocationSequence": [
           {
+            "addressableAreaName": "magneticBlockV1C1",
+            "kind": "onAddressableArea"
+          },
+          {
             "kind": "onModule",
             "moduleId": "UUID"
           },
           {
-            "addressableAreaName": "magneticBlockV1C1",
-            "kind": "onAddressableArea",
-            "slotName": "C1"
+            "cutoutId": "cutoutC1",
+            "kind": "onCutoutFixture",
+            "possibleCutoutFixtureIds": []
           }
         ]
       },
@@ -49590,24 +49900,32 @@
       "result": {
         "eventualDestinationLocationSequence": [
           {
+            "addressableAreaName": "magneticBlockV1C1",
+            "kind": "onAddressableArea"
+          },
+          {
             "kind": "onModule",
             "moduleId": "UUID"
           },
           {
-            "addressableAreaName": "magneticBlockV1C1",
-            "kind": "onAddressableArea",
-            "slotName": "C1"
+            "cutoutId": "cutoutC1",
+            "kind": "onCutoutFixture",
+            "possibleCutoutFixtureIds": []
           }
         ],
         "immediateDestinationLocationSequence": [
           {
+            "addressableAreaName": "magneticBlockV1C1",
+            "kind": "onAddressableArea"
+          },
+          {
             "kind": "onModule",
             "moduleId": "UUID"
           },
           {
-            "addressableAreaName": "magneticBlockV1C1",
-            "kind": "onAddressableArea",
-            "slotName": "C1"
+            "cutoutId": "cutoutC1",
+            "kind": "onCutoutFixture",
+            "possibleCutoutFixtureIds": []
           }
         ],
         "originLocationSequence": [
@@ -49616,13 +49934,17 @@
             "labwareId": "UUID"
           },
           {
+            "addressableAreaName": "heaterShakerV1D1",
+            "kind": "onAddressableArea"
+          },
+          {
             "kind": "onModule",
             "moduleId": "UUID"
           },
           {
-            "addressableAreaName": "heaterShakerV1D1",
-            "kind": "onAddressableArea",
-            "slotName": "D1"
+            "cutoutId": "cutoutD1",
+            "kind": "onCutoutFixture",
+            "possibleCutoutFixtureIds": []
           }
         ]
       },
