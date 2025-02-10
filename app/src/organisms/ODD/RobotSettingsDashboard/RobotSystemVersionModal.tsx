@@ -7,11 +7,11 @@ import {
   Flex,
   OVERFLOW_AUTO,
   SPACING,
+  ReleaseNotes,
 } from '@opentrons/components'
-
+import { useIsOEMMode } from '/app/resources/robot-settings'
 import { SmallButton } from '/app/atoms/buttons'
 import { InlineNotification } from '/app/atoms/InlineNotification'
-import { ReleaseNotes } from '/app/molecules/ReleaseNotes'
 import { OddModal } from '/app/molecules/OddModal'
 
 import type { OddModalHeaderBaseProps } from '/app/molecules/OddModal/types'
@@ -29,6 +29,7 @@ export function RobotSystemVersionModal({
 }: RobotSystemVersionModalProps): JSX.Element {
   const { t } = useTranslation(['device_settings', 'shared'])
   const navigate = useNavigate()
+  const isOEMMode = useIsOEMMode()
 
   const modalHeader: OddModalHeaderBaseProps = {
     title: t('robot_system_version_available', {
@@ -53,7 +54,7 @@ export function RobotSystemVersionModal({
             heading={t('update_requires_restarting_robot')}
             hug
           />
-          <ReleaseNotes source={releaseNotes} />
+          <ReleaseNotes source={releaseNotes} isOEMMode={isOEMMode} />
         </Flex>
         <Flex flexDirection={DIRECTION_ROW} gridGap={SPACING.spacing8}>
           <SmallButton

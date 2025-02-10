@@ -27,7 +27,6 @@ export const AnnouncementModal = (
   const { onClose, isViewReleaseNotes = false } = props
   const { i18n, t } = useTranslation(['modal', 'button'])
   const announcements = useAnnouncements()
-
   const { announcementKey, message, heading, image } = announcements[
     announcements.length - 1
   ]
@@ -67,14 +66,16 @@ export const AnnouncementModal = (
             </Flex>
           }
         >
-          <Flex
-            flexDirection={DIRECTION_COLUMN}
-            justifyContent={JUSTIFY_CENTER}
-            gridGap={SPACING.spacing12}
-          >
-            {image != null && image}
-            {message}
-          </Flex>
+          <>
+            <Flex
+              flexDirection={DIRECTION_COLUMN}
+              justifyContent={JUSTIFY_CENTER}
+              gridGap={SPACING.spacing12}
+            >
+              {image != null && image}
+              {message}
+            </Flex>
+          </>
         </Modal>
       )}
     </>
