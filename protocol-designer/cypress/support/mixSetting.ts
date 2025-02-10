@@ -290,7 +290,7 @@ export const executeMixAction = (
         .eq(0)
         .click()
       cy.get(MixLocators.PosFromTop).should('have.prop', 'value')
-      cy.get(MixLocators.PosFromTop).click({force : true})
+      cy.get(MixLocators.PosFromTop).click({ force: true })
       cy.get(MixLocators.BlowoutZPosition).type('{selectAll}, {backspace}, 2')
       cy.get(MixLocators.ResetToDefault).click()
       cy.get(MixLocators.BlowoutZPosition).type('{selectAll}, {backspace}, -7')
@@ -497,7 +497,9 @@ export const executeVerifyMixStep = (verification: MixVerifications): void => {
       break
     case MixVerifications.TouchTip:
       cy.contains(MixContent.TouchTip).should('exist').should('be.visible')
-      cy.contains(MixContent.TouchTipFromTop).should('exist').should('be.visible')
+      cy.contains(MixContent.TouchTipFromTop)
+        .should('exist')
+        .should('be.visible')
       cy.get(MixLocators.PosFromTop).should('have.prop', 'value')
       break
     case MixVerifications.TouchTipPopout:
