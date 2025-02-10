@@ -96,14 +96,20 @@ def run(protocol: ProtocolContext) -> None:
         )
         pipette.configure_nozzle_layout(style=ALL, tip_racks=[tip_rack])
         pipette.transfer(
-            200, src_reservoir["A1"], sample_plate["A1"].top(), trash=False
+            200, src_reservoir["A1"], sample_plate["A1"].top(), trash=False,
+            blow_out = True,
+            blowout_location = "destination well"
         )
         pipette.reset_tipracks()
         pipette.transfer(
-            100, src_reservoir["A1"], elution_plate["A1"].top(), trash=False
+            100, src_reservoir["A1"], elution_plate["A1"].top(), trash=False,
+            blow_out = True,
+            blowout_location = "destination well"
         )
         pipette.reset_tipracks()
-        pipette.transfer(600, src_reservoir["A1"], res1["A1"].top(), trash=False)
+        pipette.transfer(600, src_reservoir["A1"], res1["A1"].top(), trash=False,
+            blow_out = True,
+            blowout_location = "destination well")
         pipette.reset_tipracks()
         pvt1abr7_labware = [res1, elution_plate, sample_plate]
         for lw in pvt1abr7_labware:
@@ -123,7 +129,7 @@ def run(protocol: ProtocolContext) -> None:
         )
         pipette.configure_nozzle_layout(style=ALL, tip_racks=[tip_rack])
         pipette.transfer(
-            9500 / 8, src_reservoir["A1"], res1["A1"].top(), trash=False, blow_out=True
+            9500 / 8, src_reservoir["A1"], res1["A1"].top(), trash=False, blow_out = True, blowout_location = "destination well"
         )
         pipette.reset_tipracks()
         pipette.transfer(
@@ -132,6 +138,7 @@ def run(protocol: ProtocolContext) -> None:
             elution_plate["A1"].bottom(z=1),
             trash=False,
             blow_out=True,
+            blowout_location = "destination well"
         )
         pipette.reset_tipracks()
         pipette.transfer(
@@ -140,6 +147,7 @@ def run(protocol: ProtocolContext) -> None:
             sample_plate["A1"].top(),
             trash=False,
             blow_out=True,
+            blowout_location = "destination well"
         )
         pipette.reset_tipracks()
         pvt1abr9_labware = [res1, elution_plate, sample_plate]
@@ -161,7 +169,7 @@ def run(protocol: ProtocolContext) -> None:
         binding2 = 13500 / 8
         wash2 = 9800 / 8
         pipette.configure_nozzle_layout(style=ALL, tip_racks=[tip_rack])
-        pipette.transfer(1225, src_reservoir["A1"], res2["A1"].top(), trash=False)
+        pipette.transfer(1225, src_reservoir["A1"], res2["A1"].top(), trash=False, blow_out = True, blowout_location = "destination well")
         pipette.reset_tipracks()
         pipette.configure_nozzle_layout(
             style=COLUMN, start="A1", tip_racks=[tip_rack_partial]
@@ -201,7 +209,7 @@ def run(protocol: ProtocolContext) -> None:
                 res3["A2"].top(),
             ],
             blow_out=True,
-            blowout_location="source well",
+            blowout_location="destination well",
             trash=True,
         )
         pipette.reset_tipracks()
@@ -255,7 +263,7 @@ def run(protocol: ProtocolContext) -> None:
                 sample_plate_2["A12"].top(),
             ],
             blow_out=True,
-            blowout_location="source well",
+            blowout_location="destination well",
             trash=True,
         )
         pipette.configure_nozzle_layout(
@@ -272,7 +280,7 @@ def run(protocol: ProtocolContext) -> None:
                 reagent_plate_1["A7"].top(),
             ],
             blow_out=True,
-            blowout_location="source well",
+            blowout_location="destination well",
             trash=True,
         )
         dvt1abr4_labware = [
@@ -311,6 +319,8 @@ def run(protocol: ProtocolContext) -> None:
             source=3 * [src_reservoir["A1"]],
             dest=[reservoir["A1"], indices_plate["A1"], dna_plate["A1"]],
             trash=False,
+            blow_out = True, 
+            blowout_destination = "destination well"
         )
         pipette.reset_tipracks()
         # partial tip for pcr_reagents_plate
@@ -322,6 +332,8 @@ def run(protocol: ProtocolContext) -> None:
             source=2 * [src_reservoir["A1"]],
             dest=[pcr_reagents_plate["A1"], pcr_reagents_plate["A2"]],
             trash=True,
+            blow_out = True,
+            blowout_location = "destination well"
         )
         dvt2abr5_plates = [reservoir, pcr_reagents_plate, indices_plate, dna_plate]
         for plate in dvt2abr5_plates:
@@ -343,6 +355,8 @@ def run(protocol: ProtocolContext) -> None:
             source=2 * [src_reservoir["A1"]],
             dest=[reservoir["A1"], sample_and_control_plate["A1"]],
             trash=False,
+            blow_out= True, 
+            blowout_location = "destination well"
         )
         dvt2abr6_plates = [reservoir, sample_and_control_plate]
         for plate in dvt2abr6_plates:
@@ -389,9 +403,9 @@ def run(protocol: ProtocolContext) -> None:
                 sample_plate_2["A11"].top(),
                 sample_plate_2["A12"].top(),
             ],
-            blow_out=True,
-            blowout_location="source well",
             trash=True,
+            blow_out = True,
+            blowout_location = "destination well"
         )
         pipette.configure_nozzle_layout(
             style=COLUMN, start="A12", tip_racks=[tip_rack_partial_200]
@@ -406,9 +420,9 @@ def run(protocol: ProtocolContext) -> None:
                 reagent_plate_1["A6"].bottom(z=1),
                 reagent_plate_1["A7"].bottom(z=1),
             ],
-            blow_out=True,
-            blowout_location="source well",
             trash=True,
+            blow_out = True,
+            blowout_location = "destination well"
         )
         pvt1abr8_labware = [
             reservoir_1,
