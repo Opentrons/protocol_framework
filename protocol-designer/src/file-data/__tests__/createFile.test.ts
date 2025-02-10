@@ -119,6 +119,9 @@ requirements = {
     "robotType": "OT-2",
     "apiLevel": "2.23",
 }
+
+def run(protocol: protocol_api.ProtocolContext):
+    pass
 `.trimStart()
     )
   })

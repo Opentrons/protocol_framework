@@ -1,5 +1,11 @@
 /** Utility functions for Python code generation. */
 
+/** The variable name for the ProtocolContext object in the run() function.
+ * Our docs call it `protocol`, which is slightly misleading since the object is not
+ * the protocol itself, but we'll try to stay consistent with the docs.
+ */
+export const PROTOCOL_CONTEXT_NAME = 'protocol'
+
 const INDENT = '    '
 
 /** Indent each of the lines in `text`. */
