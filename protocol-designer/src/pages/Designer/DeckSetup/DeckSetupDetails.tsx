@@ -98,6 +98,14 @@ export function DeckSetupDetails(props: DeckSetupDetailsProps): JSX.Element {
   const [menuListId, setShowMenuListForId] = useState<DeckSlotId | null>(null)
   const dispatch = useDispatch<any>()
 
+  // handling module<>labware compat when moving labware to empty module
+  // is handled by SlotControls. But when swapping labware when at least
+  // one is on a module, we need to be aware of not only what labware is
+  // being dragged, but also what labware is **being hovered over**.
+  // The intrinsic state of `react-dnd` is not designed to handle that.
+  // So we need to use our own state here to determine whether swapping
+  // will be blocked due to labware<>module compatibility. That is what
+  // hoveredLabware and draggedLabare are for.
   const [hoveredLabware, setHoveredLabware] = useState<
     LabwareOnDeckType | null | undefined
   >(null)

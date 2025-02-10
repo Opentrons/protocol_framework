@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { css } from 'styled-components'
-import { RobotCoordsForeignDiv } from '@opentrons/components'
+import { COLORS, RobotCoordsForeignDiv } from '@opentrons/components'
 
 type BlockedSlotMessage =
   | 'MODULE_INCOMPATIBLE_SINGLE_LABWARE'
@@ -41,7 +41,7 @@ export const BlockedSlot = (props: BlockedSlotProps): JSX.Element => {
           style: {
             height: '100%',
             fontSize: '12px',
-            color: 'white',
+            color: COLORS.white,
             margin: '-1.5rem 0.5rem',
             transform: 'rotate(180deg) scaleX(-1)',
           },

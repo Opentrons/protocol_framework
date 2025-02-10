@@ -22,8 +22,7 @@ import { DECK_CONTROLS_STYLE } from './constants'
 
 import type { DropTargetMonitor } from 'react-dnd'
 import type { Dimensions, ModuleType } from '@opentrons/shared-data'
-import type { LabwareOnDeck } from '../../../step-forms'
-import type { SharedControlsType } from './types'
+import type { SharedControlsType, DroppedItem } from './types'
 
 interface SlotControlsProps extends SharedControlsType {
   slotBoundingBox: Dimensions
@@ -31,10 +30,6 @@ interface SlotControlsProps extends SharedControlsType {
   slotId: string
   moduleType: ModuleType | null
   handleDragHover?: () => void
-}
-
-interface DroppedItem {
-  labwareOnDeck: LabwareOnDeck
 }
 
 export const SlotControls = (props: SlotControlsProps): JSX.Element | null => {
@@ -118,9 +113,10 @@ export const SlotControls = (props: SlotControlsProps): JSX.Element | null => {
 
   const draggedDef = draggedItem?.labwareOnDeck?.def
 
-  const isCustomLabware = draggedItem
-    ? getLabwareIsCustom(customLabwareDefs, draggedItem.labwareOnDeck)
-    : false
+  const isCustomLabware =
+    draggedItem != null
+      ? getLabwareIsCustom(customLabwareDefs, draggedItem.labwareOnDeck)
+      : false
 
   const isSlotBlocked =
     isOver &&

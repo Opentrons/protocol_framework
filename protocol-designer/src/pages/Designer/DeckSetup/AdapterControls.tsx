@@ -1,4 +1,5 @@
 import { useDispatch, useSelector } from 'react-redux'
+import { useTranslation } from 'react-i18next'
 import { useRef } from 'react'
 import { useDrop } from 'react-dnd'
 import {
@@ -19,8 +20,7 @@ import { DECK_CONTROLS_STYLE } from './constants'
 
 import type { DropTargetMonitor } from 'react-dnd'
 import type { Dimensions } from '@opentrons/shared-data'
-import type { LabwareOnDeck } from '../../../step-forms'
-import type { SharedControlsType } from './types'
+import type { SharedControlsType, DroppedItem } from './types'
 
 interface AdapterControlsProps extends SharedControlsType {
   slotBoundingBox: Dimensions
@@ -28,10 +28,6 @@ interface AdapterControlsProps extends SharedControlsType {
   labwareId: string
   onDeck: boolean
   handleDragHover?: () => void
-}
-
-interface DroppedItem {
-  labwareOnDeck: LabwareOnDeck
 }
 
 export const AdapterControls = (
@@ -50,11 +46,18 @@ export const AdapterControls = (
     isSelected,
     tab,
   } = props
+  const { t } = useTranslation(['deck', 'starting_deck_state'])
   const customLabwareDefs = useSelector(
     labwareDefSelectors.getCustomLabwareDefsByURI
   )
   const labwareEntities = useSelector(getLabwareEntities)
-  const adapterLoadName = labwareEntities[labwareId].def.parameters.loadName
+  const adapterLoadName = labwareEntities[labwareId]?.def.parameters.loadName
+
+  if (adapterLoadName == null) {
+    console.error(
+      `expected to find the adapter loadname from labwareId ${labwareId} but could not`
+    )
+  }
 
   const ref = useRef(null)
   const dispatch = useDispatch()
@@ -168,7 +171,9 @@ export const AdapterControls = (
           >
             <Link role="button">
               <StyledText desktopStyle="bodyDefaultSemiBold">
-                {isOver ? 'Place Here' : 'Edit Labware'}
+                {isOver
+                  ? t('overlay.slot.place_here')
+                  : t('starting_deck_state:edit_labware')}
               </StyledText>
             </Link>
           </Flex>

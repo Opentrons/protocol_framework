@@ -132,7 +132,7 @@ export const DECK_CONTROLS_STYLE = {
   display: DISPLAY_FLEX,
   alignItems: ALIGN_CENTER,
   color: COLORS.white,
-  fontSize: PRODUCT.TYPOGRAPHY.fontSizeBodyDefaultSemiBold,
+  fontSize: PRODUCT.TYPOGRAPHY.fontFamilyBodyDefaultRegular,
   borderRadius: BORDERS.borderRadius8,
   cursor: CURSOR_POINTER,
 }

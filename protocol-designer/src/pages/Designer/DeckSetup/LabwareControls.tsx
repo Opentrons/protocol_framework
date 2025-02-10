@@ -10,25 +10,21 @@ import {
   RobotCoordsForeignDiv,
   StyledText,
 } from '@opentrons/components'
-import { BlockedSlot } from './BlockedSlot'
 import { DND_TYPES } from '../../../constants'
 import { moveDeckItem } from '../../../labware-ingred/actions'
 import { DECK_CONTROLS_STYLE } from './constants'
+import { BlockedSlot } from './BlockedSlot'
 
 import type { DropTargetMonitor } from 'react-dnd'
 import type { LabwareOnDeck } from '../../../step-forms'
 import type { ThunkDispatch } from '../../../types'
-import type { SharedControlsType } from './types'
+import type { SharedControlsType, DroppedItem } from './types'
 
 interface LabwareControlsProps extends SharedControlsType {
   labwareOnDeck: LabwareOnDeck
   setHoveredLabware: (labware?: LabwareOnDeck | null) => void
   setDraggedLabware: (labware?: LabwareOnDeck | null) => void
   swapBlocked: boolean
-}
-
-interface DroppedItem {
-  labwareOnDeck: LabwareOnDeck
 }
 
 export const LabwareControls = (
@@ -49,17 +45,20 @@ export const LabwareControls = (
   } = props
   const dispatch = useDispatch<ThunkDispatch<any>>()
   const ref = useRef(null)
-  const { t } = useTranslation('starting_deck_state')
+  const { t } = useTranslation(['starting_deck_state', 'deck'])
 
-  const [, drag] = useDrag(
+  const [{ isDragging }, drag] = useDrag(
     () => ({
       type: DND_TYPES.LABWARE,
       item: { labwareOnDeck },
+      collect: monitor => ({
+        isDragging: monitor.isDragging(),
+      }),
     }),
     [labwareOnDeck]
   )
 
-  const [{ draggedLabware }, drop] = useDrop(
+  const [{ isOver, draggedLabware, canDrop }, drop] = useDrop(
     () => ({
       accept: DND_TYPES.LABWARE,
       canDrop: (item: DroppedItem) => {
@@ -80,6 +79,7 @@ export const LabwareControls = (
       collect: (monitor: DropTargetMonitor) => ({
         isOver: monitor.isOver(),
         draggedLabware: monitor.getItem() as DroppedItem,
+        canDrop: monitor.canDrop(),
       }),
     }),
     [labwareOnDeck]
@@ -107,10 +107,23 @@ export const LabwareControls = (
   const width = labwareOnDeck.def.dimensions.xDimension
   const height = labwareOnDeck.def.dimensions.yDimension
 
+  const getDisplayText = (): string => {
+    if (isDragging) {
+      return t('deck:overlay.slot.drag_to_new_slot')
+    }
+    if (isBeingDragged) {
+      return ''
+    }
+    if (isOver && canDrop) {
+      return t('deck:overlay.slot.place_here')
+    }
+    return t('edit_labware')
+  }
+
   let hoverOpacity = '0'
-  if (isBeingDragged) {
-    hoverOpacity = '0.2'
-  } else if (hover != null && hover === itemId) {
+  if (isOver && canDrop) {
+    hoverOpacity = '0.8'
+  } else if (hover === itemId) {
     hoverOpacity = '1'
   }
 
@@ -128,6 +141,7 @@ export const LabwareControls = (
             style: {
               opacity: hoverOpacity,
               ...DECK_CONTROLS_STYLE,
+              zIndex: isOver && canDrop ? 50 : 'auto',
             },
             onMouseEnter: () => {
               setHover(itemId)
@@ -151,7 +165,7 @@ export const LabwareControls = (
           >
             <Link role="button">
               <StyledText desktopStyle="bodyDefaultSemiBold">
-                {isBeingDragged ? 'dragging' : t('edit_labware')}
+                {getDisplayText()}
               </StyledText>
             </Link>
           </Flex>

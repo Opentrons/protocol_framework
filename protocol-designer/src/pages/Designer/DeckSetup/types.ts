@@ -4,7 +4,7 @@ import type { DeckSetupTabType } from '../types'
 
 export interface SharedControlsType extends DeckSetupTabType {
   slotPosition: CoordinateTuple | null
-  //  this is either the slotId or offDeck labwareId
+  //  this is the slotId (i.e. D1, A1, 1, 2, 3)
   itemId: string
   hover: string | null
   setHover: Dispatch<SetStateAction<string | null>>
