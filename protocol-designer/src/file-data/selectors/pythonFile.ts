@@ -4,7 +4,10 @@ import { FLEX_ROBOT_TYPE, OT2_ROBOT_TYPE } from '@opentrons/shared-data'
 import {
   formatPyDict,
   indentPyLines,
+  InvariantContext,
+  ModuleEntities,
   PROTOCOL_CONTEXT_NAME,
+  TimelineFrame,
 } from '@opentrons/step-generation'
 import type { FileMetadataFields } from '../types'
 import type { RobotType } from '@opentrons/shared-data'
@@ -51,9 +54,32 @@ export function pythonRequirements(robotType: RobotType): string {
   return `requirements = ${formatPyDict(requirements)}`
 }
 
-export function pythonDefRun(): string {
+function getLoadModules(
+  moduleEntities: ModuleEntities,
+  moduleRobotState: TimelineFrame['modules']
+): string[] {
+  const pythonModules = Object.values(moduleEntities).reduce<string[]>(
+    (acc, moduleEntity) => [
+      ...acc,
+      `${moduleEntity.pythonName} = ${PROTOCOL_CONTEXT_NAME}.load_module("${
+        moduleEntity.model
+      }", "${moduleRobotState[moduleEntity.id].slot}")`,
+    ],
+    []
+  )
+  return pythonModules
+}
+
+export function pythonDefRun(
+  invariantContext: InvariantContext,
+  robotState: TimelineFrame
+): string {
+  const loadModules = getLoadModules(
+    invariantContext.moduleEntities,
+    robotState.modules
+  )
   const sections: string[] = [
-    // loadModules(),
+    ...loadModules,
     // loadLabware(),
     // loadInstruments(),
     // defineLiquids(),
