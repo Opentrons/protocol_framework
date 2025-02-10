@@ -28,7 +28,7 @@ metadata = {
 
 requirements = {"robotType": "Flex", "apiLevel": "2.21"}
 
-HELLMA_PLATE_SLOT = "D4"
+HELLMA_PLATE_SLOT = "D3"
 PLATE_READER_SLOT = "C3"
 
 # SCRIPT SETTINGS
