@@ -105,8 +105,15 @@
         "locationSequence": [
           {
             "addressableAreaName": "C4",
-            "kind": "onAddressableArea",
-            "slotName": "C3"
+            "kind": "onAddressableArea"
+          },
+          {
+            "cutoutId": "cutoutC3",
+            "kind": "onCutoutFixture",
+            "possibleCutoutFixtureIds": [
+              "stagingAreaRightSlot",
+              "stagingAreaSlotWithMagneticBlockV1"
+            ]
           }
         ]
       },
@@ -181,8 +188,18 @@
         "locationSequence": [
           {
             "addressableAreaName": "D3",
-            "kind": "onAddressableArea",
-            "slotName": "D3"
+            "kind": "onAddressableArea"
+          },
+          {
+            "cutoutId": "cutoutD3",
+            "kind": "onCutoutFixture",
+            "possibleCutoutFixtureIds": [
+              "flexStackerModuleV1",
+              "flexStackerModuleV1WithWasteChuteRightAdapterCovered",
+              "flexStackerModuleV1WithWasteChuteRightAdapterNoCover",
+              "singleRightSlot",
+              "stagingAreaRightSlot"
+            ]
           }
         ]
       },
@@ -1350,8 +1367,18 @@
           },
           {
             "addressableAreaName": "D3",
-            "kind": "onAddressableArea",
-            "slotName": "D3"
+            "kind": "onAddressableArea"
+          },
+          {
+            "cutoutId": "cutoutD3",
+            "kind": "onCutoutFixture",
+            "possibleCutoutFixtureIds": [
+              "flexStackerModuleV1",
+              "flexStackerModuleV1WithWasteChuteRightAdapterCovered",
+              "flexStackerModuleV1WithWasteChuteRightAdapterNoCover",
+              "singleRightSlot",
+              "stagingAreaRightSlot"
+            ]
           }
         ]
       },

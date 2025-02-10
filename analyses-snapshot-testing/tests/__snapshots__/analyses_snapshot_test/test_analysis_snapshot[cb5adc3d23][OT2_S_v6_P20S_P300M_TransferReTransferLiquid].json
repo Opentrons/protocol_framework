@@ -1200,8 +1200,14 @@
         "locationSequence": [
           {
             "addressableAreaName": "1",
-            "kind": "onAddressableArea",
-            "slotName": "1"
+            "kind": "onAddressableArea"
+          },
+          {
+            "cutoutId": "cutout1",
+            "kind": "onCutoutFixture",
+            "possibleCutoutFixtureIds": [
+              "singleStandardSlot"
+            ]
           }
         ]
       },
@@ -2361,8 +2367,14 @@
         "locationSequence": [
           {
             "addressableAreaName": "2",
-            "kind": "onAddressableArea",
-            "slotName": "2"
+            "kind": "onAddressableArea"
+          },
+          {
+            "cutoutId": "cutout2",
+            "kind": "onCutoutFixture",
+            "possibleCutoutFixtureIds": [
+              "singleStandardSlot"
+            ]
           }
         ]
       },
@@ -2628,8 +2640,14 @@
         "locationSequence": [
           {
             "addressableAreaName": "10",
-            "kind": "onAddressableArea",
-            "slotName": "10"
+            "kind": "onAddressableArea"
+          },
+          {
+            "cutoutId": "cutout10",
+            "kind": "onCutoutFixture",
+            "possibleCutoutFixtureIds": [
+              "singleStandardSlot"
+            ]
           }
         ]
       },
@@ -3792,8 +3810,14 @@
         "locationSequence": [
           {
             "addressableAreaName": "8",
-            "kind": "onAddressableArea",
-            "slotName": "8"
+            "kind": "onAddressableArea"
+          },
+          {
+            "cutoutId": "cutout8",
+            "kind": "onCutoutFixture",
+            "possibleCutoutFixtureIds": [
+              "singleStandardSlot"
+            ]
           }
         ]
       },
@@ -4025,8 +4049,14 @@
         "locationSequence": [
           {
             "addressableAreaName": "6",
-            "kind": "onAddressableArea",
-            "slotName": "6"
+            "kind": "onAddressableArea"
+          },
+          {
+            "cutoutId": "cutout6",
+            "kind": "onCutoutFixture",
+            "possibleCutoutFixtureIds": [
+              "singleStandardSlot"
+            ]
           }
         ]
       },
