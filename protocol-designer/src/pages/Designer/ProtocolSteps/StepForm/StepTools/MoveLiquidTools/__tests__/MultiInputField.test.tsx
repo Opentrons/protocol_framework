@@ -3,6 +3,7 @@ import { COLORS } from '@opentrons/components'
 import { fireEvent, screen } from '@testing-library/react'
 import { i18n } from '../../../../../../../assets/localization'
 import { renderWithProviders } from '../../../../../../../__testing-utils__'
+import { PositionField } from '../../../PipetteFields'
 import { MultiInputField } from '../MultiInputField'
 
 import type { ComponentProps } from 'react'
@@ -54,35 +55,9 @@ describe('MultiInputField', () => {
           updateValue: vi.fn(),
           value: '',
         },
-        aspirate_retract_mmFromBottom: {
-          onFieldFocus: vi.fn(),
-          onFieldBlur: vi.fn(),
-          errorToShow: null,
-          disabled: false,
-          name: 'aspirate_retract_mmFromBottom',
-          updateValue: vi.fn(),
-          value: null,
-        },
-        aspirate_retract_x_position: {
-          onFieldFocus: vi.fn(),
-          onFieldBlur: vi.fn(),
-          errorToShow: null,
-          disabled: false,
-          name: 'aspirate_retract_mmFromBottom',
-          updateValue: vi.fn(),
-          value: 0,
-        },
-        aspirate_retract_y_position: {
-          onFieldFocus: vi.fn(),
-          onFieldBlur: vi.fn(),
-          errorToShow: null,
-          disabled: false,
-          name: 'aspirate_retract_mmFromBottom',
-          updateValue: vi.fn(),
-          value: 0,
-        },
       },
     }
+    vi.mocked(PositionField).mockReturnValue(<div>mock PositionField</div>)
   })
 
   it('should render input fields with caption and units wrapped by ListItem', () => {
@@ -108,11 +83,10 @@ describe('MultiInputField', () => {
     ).toHaveBeenCalled()
   })
 
-  it('should render a well position listbutton when isWellPosition is true', () => {
+  it('should render a well position component when isWellPosition is true', () => {
     props.isWellPosition = true
     props.labwareId = 'mockID'
     render(props)
-    const listButton = screen.getByTestId('ListButton_onColor')
-    expect(listButton).toHaveStyle(`backgroundColor: ${COLORS.white}`)
+    screen.getByText('mock PositionField')
   })
 })
