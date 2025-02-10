@@ -47,22 +47,18 @@ export function SingleStepMoveLiquidTools({
   )
   const enableReturnTip = useSelector(getEnableReturnTip)
 
-  const { dropTip_location, pipette, tipRack } = propsForFields
-
+  const { pipette, tipRack } = propsForFields
   const is96Channel =
     pipette.value != null && pipettes[String(pipette.value)].name === 'p1000_96'
-
   const userSelectedDropTipLocation =
-    labwares[String(dropTip_location.value)] != null
+    labwares[String(propsForFields.dropTip_location.value)] != null
   const userSelectedPickUpTipLocation =
     labwares[String(propsForFields.pickUpTip_location.value)] != null
-
   const isDisposalLocation =
     additionalEquipmentEntities[String(propsForFields.dispense_labware.value)]
       ?.name === 'wasteChute' ||
     additionalEquipmentEntities[String(propsForFields.dispense_labware.value)]
       ?.name === 'trashBin'
-
   const mappedErrorsToField = getFormErrorsMappedToField(visibleFormErrors)
 
   return (
