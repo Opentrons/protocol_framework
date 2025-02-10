@@ -6,6 +6,7 @@ import {
   indentPyLines,
   PROTOCOL_CONTEXT_NAME,
 } from '@opentrons/step-generation'
+import { getModulePythonIdentifier } from './utils'
 import type {
   InvariantContext,
   ModuleEntities,
@@ -59,17 +60,18 @@ export function pythonRequirements(robotType: RobotType): string {
 function getLoadModules(
   moduleEntities: ModuleEntities,
   moduleRobotState: TimelineFrame['modules']
-): string[] {
-  const pythonModules = Object.values(moduleEntities).reduce<string[]>(
-    (acc, moduleEntity) => [
-      ...acc,
-      `${moduleEntity.pythonName} = ${PROTOCOL_CONTEXT_NAME}.load_module("${
-        moduleEntity.model
-      }", "${moduleRobotState[moduleEntity.id].slot}")`,
-    ],
-    []
-  )
-  return pythonModules
+): string {
+  const pythonModules = Object.values(moduleEntities)
+    .map(module => {
+      const pythonIdentifier = getModulePythonIdentifier(module.model)
+      return `${
+        module.pythonName
+      } = ${PROTOCOL_CONTEXT_NAME}.load_module("${pythonIdentifier}", "${
+        moduleRobotState[module.id].slot
+      }")`
+    })
+    .join('\n')
+  return `# Load Modules:\n${pythonModules}`
 }
 
 export function pythonDefRun(
@@ -81,7 +83,7 @@ export function pythonDefRun(
   const loadModules = getLoadModules(moduleEntities, robotState.modules)
 
   const sections: string[] = [
-    ...loadModules,
+    loadModules,
     // loadLabware(),
     // loadInstruments(),
     // defineLiquids(),
@@ -93,7 +95,7 @@ export function pythonDefRun(
       .filter(section => section) // skip empty sections
       .join('\n\n') || 'pass'
   return (
-    `def run(${PROTOCOL_CONTEXT_NAME}: protocol_api.ProtocolContext):\n` +
+    `def run(${PROTOCOL_CONTEXT_NAME}: protocol_api.ProtocolContext):\n\n` +
     `${indentPyLines(functionBody)}`
   )
 }

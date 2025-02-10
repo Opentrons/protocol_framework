@@ -10,6 +10,7 @@ import type {
   LoadLabwareCreateCommand,
   LoadModuleCreateCommand,
   LoadPipetteCreateCommand,
+  ModuleModel,
   PipetteName,
 } from '@opentrons/shared-data'
 import type {
@@ -236,4 +237,26 @@ export const getLabwareLoadInfo = (
     }),
     {}
   )
+}
+
+export const getModulePythonIdentifier = (model: ModuleModel): string => {
+  switch (model) {
+    case 'thermocyclerModuleV1': {
+      return 'thermocycler'
+    }
+    case 'magneticModuleV2': {
+      return 'magnetic module gen2'
+    }
+    case 'temperatureModuleV2': {
+      return 'temperature moduel gen2'
+    }
+    case 'magneticModuleV1': {
+      return 'magdeck'
+    }
+    case 'temperatureModuleV1': {
+      return 'tempdeck'
+    }
+    default:
+      return model
+  }
 }
