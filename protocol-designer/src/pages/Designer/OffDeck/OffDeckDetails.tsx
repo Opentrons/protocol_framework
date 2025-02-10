@@ -69,7 +69,7 @@ export function OffDeckDetails(props: OffDeckDetailsProps): JSX.Element {
       borderRadius={BORDERS.borderRadius12}
       width="100%"
       height="100%"
-      padding={`${SPACING.spacing24} ${paddingRight} ${SPACING.spacing24} 0`}
+      padding={`${SPACING.spacing40} ${paddingRight} ${SPACING.spacing40} 0`}
       gridGap={SPACING.spacing24}
       alignItems={ALIGN_CENTER}
       justifyContent={JUSTIFY_FLEX_END}
