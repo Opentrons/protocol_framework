@@ -16,6 +16,10 @@ import {
 
 import { getStagingAreaAddressableAreas } from '../../../utils'
 import {
+  getLabwareIsCompatible,
+  getLabwareIsCustom,
+} from '../../../utils/labwareModuleCompatibility'
+import {
   FLEX_MODULE_MODELS,
   OT2_MODULE_MODELS,
   RECOMMENDED_LABWARE_BY_MODULE,
@@ -40,10 +44,6 @@ import type {
   LabwareOnDeck,
 } from '../../../step-forms'
 import type { Fixture } from './constants'
-import {
-  getLabwareIsCompatible,
-  getLabwareIsCustom,
-} from '../../../utils/labwareModuleCompatibility'
 
 const OT2_TC_SLOTS = ['7', '8', '10', '11']
 const FLEX_TC_SLOTS = ['A1', 'B1']
@@ -342,14 +342,14 @@ export function useDeckSetupWindowBreakPoint(): BreakPoint {
   return size
 }
 
-export interface SwapBlockedArgs {
+export interface SwapBlockedModuleArgs {
   modulesById: InitialDeckSetup['modules']
   customLabwareDefs: LabwareDefByDefURI
   hoveredLabware?: LabwareOnDeck | null
   draggedLabware?: LabwareOnDeck | null
 }
 
-export const getSwapBlocked = (args: SwapBlockedArgs): boolean => {
+export const getSwapBlockedModule = (args: SwapBlockedModuleArgs): boolean => {
   const {
     hoveredLabware,
     draggedLabware,
@@ -375,7 +375,7 @@ export const getSwapBlocked = (args: SwapBlockedArgs): boolean => {
     hoveredLabware
   )
 
-  // dragging custom labware to module gives not compat error
+  // dragging custom labware to module gives no compat error
   const labwareSourceToDestBlocked = sourceModuleType
     ? !getLabwareIsCompatible(hoveredLabware.def, sourceModuleType) &&
       !hoveredLabwareIsCustom
@@ -384,6 +384,42 @@ export const getSwapBlocked = (args: SwapBlockedArgs): boolean => {
     ? !getLabwareIsCompatible(draggedLabware.def, destModuleType) &&
       !draggedLabwareIsCustom
     : false
+
+  return labwareSourceToDestBlocked || labwareDestToSourceBlocked
+}
+
+export interface SwapBlockedAdapterArgs {
+  labwareById: InitialDeckSetup['labware']
+  hoveredLabware?: LabwareOnDeck | null
+  draggedLabware?: LabwareOnDeck | null
+}
+
+export const getSwapBlockedAdapter = (
+  args: SwapBlockedAdapterArgs
+): boolean => {
+  const { hoveredLabware, draggedLabware, labwareById } = args
+
+  if (!hoveredLabware || !draggedLabware) {
+    return false
+  }
+
+  const adapterSourceToDestLoadname: string | null =
+    labwareById[draggedLabware.slot]?.def.parameters.loadName ?? null
+  const adapterDestToSourceLoadname: string | null =
+    labwareById[hoveredLabware.slot]?.def.parameters.loadName ?? null
+
+  const labwareSourceToDestBlocked =
+    adapterSourceToDestLoadname != null
+      ? hoveredLabware.def.stackingOffsetWithLabware?.[
+          adapterSourceToDestLoadname
+        ] == null
+      : false
+  const labwareDestToSourceBlocked =
+    adapterDestToSourceLoadname != null
+      ? draggedLabware.def.stackingOffsetWithLabware?.[
+          adapterDestToSourceLoadname
+        ] == null
+      : false
 
   return labwareSourceToDestBlocked || labwareDestToSourceBlocked
 }

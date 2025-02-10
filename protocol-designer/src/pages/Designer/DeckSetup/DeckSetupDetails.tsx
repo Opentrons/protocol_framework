@@ -30,7 +30,11 @@ import { HighlightLabware } from '../HighlightLabware'
 import { SlotOverflowMenu } from './SlotOverflowMenu'
 import { HoveredItems } from './HoveredItems'
 import { SelectedHoveredItems } from './SelectedHoveredItems'
-import { getAdjacentLabware, getSwapBlocked } from './utils'
+import {
+  getAdjacentLabware,
+  getSwapBlockedAdapter,
+  getSwapBlockedModule,
+} from './utils'
 import { SlotWarning } from './SlotWarning'
 import { HighlightItems } from './HighlightItems'
 import { SlotControls } from './SlotControls'
@@ -113,11 +117,16 @@ export function DeckSetupDetails(props: DeckSetupDetailsProps): JSX.Element {
     LabwareOnDeckType | null | undefined
   >(null)
   const customLabwareDefs = useSelector(getCustomLabwareDefsByURI)
-  const swapBlocked = getSwapBlocked({
-    hoveredLabware,
-    draggedLabware,
+  const swapBlockedModule = getSwapBlockedModule({
     modulesById: activeDeckSetup.modules,
     customLabwareDefs,
+    hoveredLabware,
+    draggedLabware,
+  })
+  const swapBlockedAdapter = getSwapBlockedAdapter({
+    labwareById: activeDeckSetup.labware,
+    hoveredLabware,
+    draggedLabware,
   })
 
   const handleHoverEmptySlot = useCallback(() => {
@@ -279,6 +288,7 @@ export function DeckSetupDetails(props: DeckSetupDetailsProps): JSX.Element {
                   {isAdapter ? (
                     <AdapterControls
                       itemId={slotId}
+                      swapBlocked={swapBlockedAdapter}
                       hover={hover}
                       onDeck={false}
                       setHover={setHover}
@@ -302,7 +312,7 @@ export function DeckSetupDetails(props: DeckSetupDetailsProps): JSX.Element {
                       setHoveredLabware={setHoveredLabware}
                       setDraggedLabware={setDraggedLabware}
                       swapBlocked={
-                        swapBlocked &&
+                        (swapBlockedModule || swapBlockedAdapter) &&
                         (labwareLoadedOnModule.id === hoveredLabware?.id ||
                           labwareLoadedOnModule.id === draggedLabware?.id)
                       }
@@ -422,6 +432,7 @@ export function DeckSetupDetails(props: DeckSetupDetailsProps): JSX.Element {
             {labwareIsAdapter ? (
               <AdapterControls
                 tab={tab}
+                swapBlocked={swapBlockedAdapter}
                 itemId={labware.slot}
                 hover={hover}
                 onDeck={true}
@@ -445,7 +456,7 @@ export function DeckSetupDetails(props: DeckSetupDetailsProps): JSX.Element {
                 setHover={setHover}
                 setShowMenuListForId={setShowMenuListForId}
                 swapBlocked={
-                  swapBlocked &&
+                  (swapBlockedModule || swapBlockedAdapter) &&
                   (labware.id === hoveredLabware?.id ||
                     labware.id === draggedLabware?.id)
                 }
@@ -511,7 +522,7 @@ export function DeckSetupDetails(props: DeckSetupDetailsProps): JSX.Element {
               setHover={setHover}
               setShowMenuListForId={setShowMenuListForId}
               swapBlocked={
-                swapBlocked &&
+                (swapBlockedModule || swapBlockedAdapter) &&
                 (labware.id === hoveredLabware?.id ||
                   labware.id === draggedLabware?.id)
               }

@@ -153,7 +153,7 @@ export enum SetupLocators {
   TempdeckTempInput = 'input[name="targetTemperature"]',
 }
 
-export const chooseDeckSlot = (
+const chooseDeckSlot = (
   slot: string
 ): Cypress.Chainable<JQuery<HTMLElement>> => {
   const deckSlots: Record<

@@ -27,6 +27,7 @@ interface AdapterControlsProps extends SharedControlsType {
   //    the adapter's labwareId
   labwareId: string
   onDeck: boolean
+  swapBlocked: boolean
   handleDragHover?: () => void
 }
 
@@ -45,6 +46,7 @@ export const AdapterControls = (
     itemId,
     isSelected,
     tab,
+    swapBlocked,
   } = props
   const { t } = useTranslation(['deck', 'starting_deck_state'])
   const customLabwareDefs = useSelector(
@@ -80,9 +82,9 @@ export const AdapterControls = (
           const adapterLabwareIsMatch =
             draggedDef.stackingOffsetWithLabware?.[adapterLoadName] != null
 
-          return adapterLabwareIsMatch || isCustomLabware
+          return (adapterLabwareIsMatch || isCustomLabware) && !swapBlocked
         }
-        return true
+        return !swapBlocked
       },
       drop: (item: DroppedItem) => {
         const droppedLabware = item
@@ -120,10 +122,11 @@ export const AdapterControls = (
     : false
 
   const isSlotBlocked =
-    isOver &&
-    draggedDef != null &&
-    draggedDef.stackingOffsetWithLabware?.[adapterLoadName] == null &&
-    !isCustomLabware
+    swapBlocked ||
+    (isOver &&
+      draggedDef != null &&
+      draggedDef.stackingOffsetWithLabware?.[adapterLoadName] == null &&
+      !isCustomLabware)
 
   drop(ref)
 
