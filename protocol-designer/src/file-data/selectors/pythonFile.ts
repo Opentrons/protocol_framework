@@ -61,17 +61,20 @@ function getLoadModules(
   moduleEntities: ModuleEntities,
   moduleRobotState: TimelineFrame['modules']
 ): string {
-  const pythonModules = Object.values(moduleEntities)
-    .map(module => {
-      const pythonIdentifier = getModulePythonIdentifier(module.model)
-      return `${
-        module.pythonName
-      } = ${PROTOCOL_CONTEXT_NAME}.load_module("${pythonIdentifier}", "${
-        moduleRobotState[module.id].slot
-      }")`
-    })
-    .join('\n')
-  return `# Load Modules:\n${pythonModules}`
+  const hasModules = Object.keys(moduleEntities).length > 0
+  const pythonModules = hasModules
+    ? Object.values(moduleEntities)
+        .map(module => {
+          const pythonIdentifier = getModulePythonIdentifier(module.model)
+          return `${
+            module.pythonName
+          } = ${PROTOCOL_CONTEXT_NAME}.load_module("${pythonIdentifier}", "${
+            moduleRobotState[module.id].slot
+          }")`
+        })
+        .join('\n')
+    : ''
+  return hasModules ? `# Load Modules:\n${pythonModules}` : ''
 }
 
 export function pythonDefRun(
@@ -95,7 +98,7 @@ export function pythonDefRun(
       .filter(section => section) // skip empty sections
       .join('\n\n') || 'pass'
   return (
-    `def run(${PROTOCOL_CONTEXT_NAME}: protocol_api.ProtocolContext):\n\n` +
+    `def run(${PROTOCOL_CONTEXT_NAME}: protocol_api.ProtocolContext):\n` +
     `${indentPyLines(functionBody)}`
   )
 }

@@ -89,7 +89,6 @@ describe('pythonDefRun', () => {
     expect(pythonDefRun(mockInvariantContext, mockInitialRobotState)).toBe(
       `
 def run(protocol: protocol_api.ProtocolContext):
-
     # Load Modules:
     magnetic_block_1 = protocol.load_module("magneticBlockV1", "B1")`.trimStart()
     )
