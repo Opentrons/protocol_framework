@@ -211,9 +211,9 @@ class AddressableAreaStore(HasState[AddressableAreaState], HandlesActions):
                     deck_definition=self._state.deck_definition,
                 )
             )
-            self._state.loaded_addressable_areas_by_name[
-                addressable_area.area_name
-            ] = addressable_area
+            self._state.loaded_addressable_areas_by_name[addressable_area.area_name] = (
+                addressable_area
+            )
 
     def _validate_addressable_area_for_simulation(
         self, addressable_area_name: str
@@ -236,9 +236,9 @@ class AddressableAreaStore(HasState[AddressableAreaState], HandlesActions):
                 set(potential_fixtures)
             )
 
-            self._state.potential_cutout_fixtures_by_cutout_id[
-                cutout_id
-            ] = remaining_fixtures
+            self._state.potential_cutout_fixtures_by_cutout_id[cutout_id] = (
+                remaining_fixtures
+            )
         else:
             self._state.potential_cutout_fixtures_by_cutout_id[cutout_id] = set(
                 potential_fixtures
@@ -643,9 +643,18 @@ class AddressableAreaView:
         ) = deck_configuration_provider.get_potential_cutout_fixtures(
             addressable_area_name, self._state.deck_definition
         )
-        loaded_potential_fixtures = self._state.potential_cutout_fixtures_by_cutout_id[
-            cutout_id
-        ]
-        return cutout_id, loaded_potential_fixtures.intersection(
-            base_potential_fixtures
-        )
+        try:
+            loaded_potential_fixtures = (
+                self._state.potential_cutout_fixtures_by_cutout_id[cutout_id]
+            )
+            return cutout_id, loaded_potential_fixtures.intersection(
+                base_potential_fixtures
+            )
+        except KeyError:
+            # If there was a key error here, it's because this function was (eventually) called
+            # from the body of a command implementation whose state update will load the
+            # addressable area it's querying... but that state update has not been submitted
+            # and processed, so nothing has created the entry for this cutout id yet. Do what
+            # we'll do when we actually get to that state update, which is apply the base
+            # potential fixtures from the deck def.
+            return cutout_id, base_potential_fixtures
