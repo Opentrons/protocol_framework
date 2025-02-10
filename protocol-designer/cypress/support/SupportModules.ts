@@ -1,6 +1,3 @@
-import 'cypress-file-upload'
-// eslint-disable-next-line @typescript-eslint/consistent-type-imports
-import { StepListItem } from './StepExecution'
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace Cypress {
@@ -40,61 +37,88 @@ export enum ModLocators {
   TempdeckTempInput = 'input[name="targetTemperature"]',
 }
 
-export const executeModSteps = (action: StepListItem): void => {
-  switch (action.step) {
-    case ModActions.Done:
+export const modStepHandlers = {
+  [ModActions.Done]: {
+    handler: (): void => {
       cy.get(ModLocators.DoneButtonLabwareSelection)
         .contains('Done')
         .click({ force: true })
-      break
-    case ModActions.AddTemperatureStep:
+    },
+    paramType: undefined,
+  },
+  [ModActions.AddTemperatureStep]: {
+    handler: (): void => {
       cy.contains('button', 'Temperature').click({ force: true })
-      break
-    case ModActions.ActivateTempdeck:
+    },
+    paramType: undefined,
+  },
+  [ModActions.ActivateTempdeck]: {
+    handler: (): void => {
       cy.contains(ModContent.DeactivateTempDeck)
         .closest(ModLocators.Div)
         .find(ModLocators.Button)
         .click()
-      break
-    case ModActions.InputTempDeck4:
+    },
+    paramType: undefined,
+  },
+  [ModActions.InputTempDeck4]: {
+    handler: (): void => {
       cy.get(ModLocators.TempdeckTempInput).type('4')
-      break
-    case ModActions.InputTempDeck95:
+    },
+    paramType: undefined,
+  },
+  [ModActions.InputTempDeck95]: {
+    handler: (): void => {
       cy.get(ModLocators.TempdeckTempInput).type('95')
-      break
-    case ModActions.InputTempDeck100:
+    },
+    paramType: undefined,
+  },
+  [ModActions.InputTempDeck100]: {
+    handler: (): void => {
       cy.get(ModLocators.TempdeckTempInput).type('100')
-      break
-    case ModActions.ExitTempdeckCommand:
-      break
-    case ModActions.PauseAfterSettingTempdeck:
+    },
+    paramType: undefined,
+  },
+  [ModActions.ExitTempdeckCommand]: {
+    handler: (): void => {
+      // No operation required
+    },
+    paramType: undefined,
+  },
+  [ModActions.PauseAfterSettingTempdeck]: {
+    handler: (): void => {
       cy.contains(ModLocators.Button, 'Pause protocol')
         .should('exist')
         .and('be.visible')
         .click()
-      break
-    case ModActions.SaveButtonTempdeck:
+    },
+    paramType: undefined,
+  },
+  [ModActions.SaveButtonTempdeck]: {
+    handler: (): void => {
       cy.contains(ModContent.Save).click({ force: true })
-      break
-    default:
-      throw new Error(`Unrecognized action: ${action.step as string}`)
-  }
-}
+    },
+    paramType: undefined,
+  },
+} as const
 
-export const executeVerifyModStep = (verification: StepListItem): void => {
-  switch (verification.step) {
-    case ModVerifications.TempeDeckInitialForm:
+export const modVerificationHandlers = {
+  [ModVerifications.TempeDeckInitialForm]: {
+    handler: (): void => {
       cy.contains(ModContent.ModState)
       cy.contains(ModContent.DeactivateTempDeck)
       cy.contains(ModContent.Temperature)
-      break
-    case ModVerifications.Temp4CPauseTextVerification:
-      // This takes place
+    },
+    paramType: undefined,
+  },
+  [ModVerifications.Temp4CPauseTextVerification]: {
+    handler: (): void => {
       cy.contains('div', 'Pausing until')
         .should('contain', 'Temperature Module GEN2')
         .and('contain', 'reaches')
         .find('[data-testid="Tag_default"]')
         .should('contain', '4°C')
-      break
-  }
-}
+    },
+    paramType: undefined,
+  },
+} as const

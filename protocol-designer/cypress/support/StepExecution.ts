@@ -1,80 +1,54 @@
-import { executeUniversalAction, UniversalActions } from './universalActions'
-import { isEnumValue, isFunctionInRecord } from './utils'
-// eslint-disable-next-line @typescript-eslint/consistent-type-imports
-import {
-  SetupActions,
-  SetupVerifications,
-  executeVerificationStep,
-  executeSetupSteps,
-  SetupFunctionMap,
-  setupFunctions,
-} from './SetupSteps'
-import {
-  ModActions,
-  ModVerifications,
-  executeModSteps,
-  executeVerifyModStep,
-} from './SupportModules'
+/* eslint-disable @typescript-eslint/consistent-type-imports */
+import { universalActionHandlers } from './universalActions'
+import { setupStepHandlers, setupVerificationHandlers } from './SetupSteps'
+import { modStepHandlers, modVerificationHandlers } from './SupportModules'
 
-export interface EnumBasedStep {
-  type: 'enum'
-  step:
-    | SetupActions
-    | SetupVerifications
-    | UniversalActions
-    | ModActions
-    | ModVerifications
-  params?: string | string[] | number | boolean
+export const stepHandlers = {
+  ...universalActionHandlers,
+  ...setupStepHandlers,
+  ...setupVerificationHandlers,
+  ...modStepHandlers,
+  ...modVerificationHandlers,
+} as const
+
+export type StepAction = keyof typeof stepHandlers
+
+type HandlerParam<A extends StepAction> = typeof stepHandlers[A]['paramType']
+
+export interface StepItem<A extends StepAction = StepAction> {
+  action: A
+  param?: HandlerParam<A>
 }
 
-export interface FunctionBasedStep {
-  type: 'function'
+export type StepList = StepItem[]
 
-  step: SetupFunctionMap['name']
-  // add other support modules function maps here
-
-  // This is optional because we want to allow functions that don't take any parameters
-  params?: SetupFunctionMap['param']
-  // add other support modules function maps here
-}
-
-export type StepListItem = FunctionBasedStep | EnumBasedStep
-export type StepsList = StepListItem[]
-
-export const runSteps = (steps: StepsList): void => {
-  const enumsToCheck = [
-    SetupActions,
-    ModActions,
-    ModVerifications,
-    SetupVerifications,
-    UniversalActions,
-  ]
-
-  if (
-    !isEnumValue(
-      enumsToCheck,
-      steps
-        .filter(item => typeof item.step !== 'function')
-        .map(item => item.step)
-    )
-  ) {
-    throw new Error('One or more steps are unrecognized.')
+export class StepListBuilder {
+  private readonly steps: StepList = []
+  addStep<A extends StepAction>(action: A, param?: HandlerParam<A>): this {
+    this.steps.push({ action, param })
+    return this
   }
 
-  steps.forEach(item => {
-    if (
-      (item.type === 'enum' && isEnumValue([SetupActions], item.step)) ||
-      (item.type === 'function' && isFunctionInRecord(setupFunctions, item.step))
-    ) {
-      executeSetupSteps(item)
-    } else if (isEnumValue([SetupVerifications], item.step)) {
-      executeVerificationStep(item)
-    } else if (isEnumValue([UniversalActions], item.step)) {
-      executeUniversalAction(item)
-    } else if (isEnumValue([ModActions], item.step)) {
-      executeModSteps(item)
-    } else if (isEnumValue([ModVerifications], item.step)) {
-      executeVerifyModStep(item)
+  build(): StepList {
+    return this.steps
+  }
+}
+
+export function runSteps(stepList: StepList): void {
+  stepList.forEach(item => {
+    const { action, param } = item
+    const entry = stepHandlers[action]
+    if (param !== undefined) {
+      ;(entry.handler as (p: typeof param) => void)(param)
+    } else {
+      if (entry.handler.length > 0) {
+        throw new Error(
+          `Step action "${String(
+            action
+          )}" expects a parameter but none was provided`
+        )
+      }
+      ;(entry.handler as () => void)()
     }
   })
 }
