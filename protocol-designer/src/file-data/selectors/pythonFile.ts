@@ -4,13 +4,15 @@ import { FLEX_ROBOT_TYPE, OT2_ROBOT_TYPE } from '@opentrons/shared-data'
 import {
   formatPyDict,
   indentPyLines,
+  PROTOCOL_CONTEXT_NAME,
+} from '@opentrons/step-generation'
+import type {
   InvariantContext,
   ModuleEntities,
-  PROTOCOL_CONTEXT_NAME,
   TimelineFrame,
 } from '@opentrons/step-generation'
-import type { FileMetadataFields } from '../types'
 import type { RobotType } from '@opentrons/shared-data'
+import type { FileMetadataFields } from '../types'
 
 const PAPI_VERSION = '2.23' // latest version from api/src/opentrons/protocols/api_support/definitions.py
 
