@@ -301,9 +301,9 @@ export function ProtocolOverview(): JSX.Element {
             {enablePythonExport ? (
               <LargeButton
                 buttonType="stroke"
-                buttonText="Export python"
+                buttonText="Export Python"
                 onClick={() => {
-                  console.log('wire this up')
+                  dispatch(loadFileActions.savePythonProtocolFile())
                 }}
                 whiteSpace={NO_WRAP}
                 height="3.5rem"

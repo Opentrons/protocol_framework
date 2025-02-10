@@ -18,7 +18,6 @@ from opentrons_hardware.firmware_bindings.messages.message_definitions import (
 from opentrons_hardware.firmware_bindings.messages.messages import MessageDefinition
 from opentrons_hardware.firmware_bindings.constants import SensorType, SensorId
 
-from opentrons.config.types import LiquidProbeSettings
 from opentrons.hardware_control.types import (
     TipStateType,
     FailedTipStateCheck,
@@ -1324,41 +1323,6 @@ async def _test_tip_presence_flag(
     return pick_up_result and drop_result and wiggle_passed
 
 
-@dataclass
-class _LiqProbeCfg:
-    mount_speed: float
-    plunger_speed: float
-    sensor_threshold_pascals: float
-
-
-PROBE_SETTINGS: Dict[int, Dict[int, _LiqProbeCfg]] = {
-    50: {
-        50: _LiqProbeCfg(
-            mount_speed=11,
-            plunger_speed=21,
-            sensor_threshold_pascals=150,
-        ),
-    },
-    1000: {
-        50: _LiqProbeCfg(
-            mount_speed=5,
-            plunger_speed=10,
-            sensor_threshold_pascals=200,
-        ),
-        200: _LiqProbeCfg(
-            mount_speed=5,
-            plunger_speed=10,
-            sensor_threshold_pascals=200,
-        ),
-        1000: _LiqProbeCfg(
-            mount_speed=5,
-            plunger_speed=11,
-            sensor_threshold_pascals=150,
-        ),
-    },
-}
-
-
 async def _test_liquid_probe(
     api: OT3API,
     mount: OT3Mount,
@@ -1368,7 +1332,6 @@ async def _test_liquid_probe(
 ) -> Dict[InstrumentProbeType, List[float]]:
     pip = api.hardware_pipettes[mount.to_mount()]
     assert pip
-    pip_vol = int(pip.working_volume)
     trial_results: Dict[InstrumentProbeType, List[float]] = {
         probe: [] for probe in probes
     }
@@ -1383,20 +1346,8 @@ async def _test_liquid_probe(
         await _pick_up_tip_for_tip_volume(api, mount, tip_volume)
         for probe in probes:
             await _move_to_above_plate_liquid(api, mount, probe, height_mm=hover_mm)
-            probe_cfg = PROBE_SETTINGS[pip_vol][tip_volume]
-            probe_settings = LiquidProbeSettings(
-                mount_speed=probe_cfg.mount_speed,
-                plunger_speed=probe_cfg.plunger_speed,
-                plunger_impulse_time=0.2,
-                sensor_threshold_pascals=probe_cfg.sensor_threshold_pascals,
-                aspirate_while_sensing=False,
-                z_overlap_between_passes_mm=0.1,
-                plunger_reset_offset=2.0,
-                samples_for_baselining=20,
-                sample_time_sec=0.004,
-            )
             end_z = await api.liquid_probe(
-                mount, max_z_distance_machine_coords, probe_settings, probe=probe
+                mount, max_z_distance_machine_coords, probe=probe
             )
             if probe == InstrumentProbeType.PRIMARY:
                 pz = CALIBRATED_LABWARE_LOCATIONS.plate_primary.z
