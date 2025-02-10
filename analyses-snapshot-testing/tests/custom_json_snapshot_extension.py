@@ -25,6 +25,7 @@ class CustomJSONSnapshotExtension(JSONSnapshotExtension):
             "moduleId",
             "liquidId",
             "offsetId",
+            "lidId"
         ]
         self.timestamp_keys_to_replace = [
             "createdAt",
