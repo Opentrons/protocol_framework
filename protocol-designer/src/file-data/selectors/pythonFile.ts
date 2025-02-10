@@ -76,10 +76,10 @@ export function pythonDefRun(
   invariantContext: InvariantContext,
   robotState: TimelineFrame
 ): string {
-  const loadModules = getLoadModules(
-    invariantContext.moduleEntities,
-    robotState.modules
-  )
+  const { moduleEntities } = invariantContext
+
+  const loadModules = getLoadModules(moduleEntities, robotState.modules)
+
   const sections: string[] = [
     ...loadModules,
     // loadLabware(),
