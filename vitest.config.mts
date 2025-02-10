@@ -17,7 +17,7 @@ export default mergeConfig(
       coverage: {
         exclude: ['**/node_modules/**', '**/dist/**', '**/__tests__/**'],
         provider: 'v8',
-        reporter: ['text', 'json', 'html'],
+        reporter: ['text', 'json', 'html', 'lcov'],
       },
     },
     resolve: {

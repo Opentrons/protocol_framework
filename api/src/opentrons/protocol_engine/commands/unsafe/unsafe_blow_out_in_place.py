@@ -82,7 +82,7 @@ class UnsafeBlowOutInPlace(
 
     commandType: UnsafeBlowOutInPlaceCommandType = "unsafe/blowOutInPlace"
     params: UnsafeBlowOutInPlaceParams
-    result: Optional[UnsafeBlowOutInPlaceResult]
+    result: Optional[UnsafeBlowOutInPlaceResult] = None
 
     _ImplementationCls: Type[
         UnsafeBlowOutInPlaceImplementation

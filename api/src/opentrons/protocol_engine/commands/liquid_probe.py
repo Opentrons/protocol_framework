@@ -19,12 +19,14 @@ from opentrons.types import MountType
 from opentrons_shared_data.errors.exceptions import (
     PipetteLiquidNotFoundError,
     UnsupportedHardwareCommand,
+    PipetteOverpressureError,
 )
 
 from ..types import DeckPoint
 from .pipetting_common import (
     LiquidNotFoundError,
     PipetteIdMixin,
+    OverpressureError,
 )
 from .movement_common import (
     WellLocationMixin,
@@ -43,7 +45,7 @@ from .command import (
 from ..errors.error_occurrence import ErrorOccurrence
 
 if TYPE_CHECKING:
-    from ..execution import MovementHandler, PipettingHandler
+    from ..execution import MovementHandler, PipettingHandler, GantryMover
     from ..resources import ModelUtils
     from ..state.state import StateView
 
@@ -99,10 +101,14 @@ class TryLiquidProbeResult(DestinationPositionResult):
 
 _LiquidProbeExecuteReturn = Union[
     SuccessData[LiquidProbeResult],
-    DefinedErrorData[LiquidNotFoundError] | DefinedErrorData[StallOrCollisionError],
+    DefinedErrorData[LiquidNotFoundError]
+    | DefinedErrorData[StallOrCollisionError]
+    | DefinedErrorData[OverpressureError],
 ]
 _TryLiquidProbeExecuteReturn = (
-    SuccessData[TryLiquidProbeResult] | DefinedErrorData[StallOrCollisionError]
+    SuccessData[TryLiquidProbeResult]
+    | DefinedErrorData[StallOrCollisionError]
+    | DefinedErrorData[OverpressureError]
 )
 
 
@@ -110,19 +116,22 @@ class _ExecuteCommonResult(NamedTuple):
     # If the probe succeeded, the z_pos that it returned.
     # Or, if the probe found no liquid, the error representing that,
     # so calling code can propagate those details up.
-    z_pos_or_error: float | PipetteLiquidNotFoundError
+    z_pos_or_error: float | PipetteLiquidNotFoundError | PipetteOverpressureError
 
     state_update: update_types.StateUpdate
     deck_point: DeckPoint
 
 
-async def _execute_common(
+async def _execute_common(  # noqa: C901
     state_view: StateView,
     movement: MovementHandler,
+    gantry_mover: GantryMover,
     pipetting: PipettingHandler,
     model_utils: ModelUtils,
     params: _CommonParams,
-) -> _ExecuteCommonResult | DefinedErrorData[StallOrCollisionError]:
+) -> _ExecuteCommonResult | DefinedErrorData[StallOrCollisionError] | DefinedErrorData[
+    OverpressureError
+]:
     pipette_id = params.pipetteId
     labware_id = params.labwareId
     well_name = params.wellName
@@ -173,6 +182,7 @@ async def _execute_common(
     if isinstance(move_result, DefinedErrorData):
         return move_result
     try:
+        current_position = await gantry_mover.get_position(params.pipetteId)
         z_pos = await pipetting.liquid_probe_in_place(
             pipette_id=pipette_id,
             labware_id=labware_id,
@@ -184,6 +194,33 @@ async def _execute_common(
             z_pos_or_error=exception,
             state_update=move_result.state_update,
             deck_point=move_result.public.position,
+        )
+    except PipetteOverpressureError as e:
+        return DefinedErrorData(
+            public=OverpressureError(
+                id=model_utils.generate_id(),
+                createdAt=model_utils.get_timestamp(),
+                wrappedErrors=[
+                    ErrorOccurrence.from_failed(
+                        id=model_utils.generate_id(),
+                        createdAt=model_utils.get_timestamp(),
+                        error=e,
+                    )
+                ],
+                errorInfo=(
+                    {
+                        # This is here bc its not optional in the type but we are not using the retry location for this case
+                        "retryLocation": (
+                            current_position.x,
+                            current_position.y,
+                            current_position.z,
+                        )
+                    }
+                ),
+            ),
+            state_update=move_result.state_update.set_fluid_unknown(
+                pipette_id=pipette_id
+            ),
         )
     else:
         return _ExecuteCommonResult(
@@ -202,12 +239,14 @@ class LiquidProbeImplementation(
         self,
         state_view: StateView,
         movement: MovementHandler,
+        gantry_mover: GantryMover,
         pipetting: PipettingHandler,
         model_utils: ModelUtils,
         **kwargs: object,
     ) -> None:
         self._state_view = state_view
         self._movement = movement
+        self._gantry_mover = gantry_mover
         self._pipetting = pipetting
         self._model_utils = model_utils
 
@@ -230,6 +269,7 @@ class LiquidProbeImplementation(
         result = await _execute_common(
             state_view=self._state_view,
             movement=self._movement,
+            gantry_mover=self._gantry_mover,
             pipetting=self._pipetting,
             model_utils=self._model_utils,
             params=params,
@@ -237,7 +277,9 @@ class LiquidProbeImplementation(
         if isinstance(result, DefinedErrorData):
             return result
         z_pos_or_error, state_update, deck_point = result
-        if isinstance(z_pos_or_error, PipetteLiquidNotFoundError):
+        if isinstance(
+            z_pos_or_error, (PipetteLiquidNotFoundError, PipetteOverpressureError)
+        ):
             state_update.set_liquid_probed(
                 labware_id=params.labwareId,
                 well_name=params.wellName,
@@ -294,12 +336,14 @@ class TryLiquidProbeImplementation(
         self,
         state_view: StateView,
         movement: MovementHandler,
+        gantry_mover: GantryMover,
         pipetting: PipettingHandler,
         model_utils: ModelUtils,
         **kwargs: object,
     ) -> None:
         self._state_view = state_view
         self._movement = movement
+        self._gantry_mover = gantry_mover
         self._pipetting = pipetting
         self._model_utils = model_utils
 
@@ -313,6 +357,7 @@ class TryLiquidProbeImplementation(
         result = await _execute_common(
             state_view=self._state_view,
             movement=self._movement,
+            gantry_mover=self._gantry_mover,
             pipetting=self._pipetting,
             model_utils=self._model_utils,
             params=params,
@@ -321,7 +366,9 @@ class TryLiquidProbeImplementation(
             return result
         z_pos_or_error, state_update, deck_point = result
 
-        if isinstance(z_pos_or_error, PipetteLiquidNotFoundError):
+        if isinstance(
+            z_pos_or_error, (PipetteLiquidNotFoundError, PipetteOverpressureError)
+        ):
             z_pos = None
             well_volume: float | update_types.ClearType = update_types.CLEAR
         else:
@@ -354,26 +401,30 @@ class LiquidProbe(
     BaseCommand[
         LiquidProbeParams,
         LiquidProbeResult,
-        LiquidNotFoundError | StallOrCollisionError,
+        LiquidNotFoundError | StallOrCollisionError | OverpressureError,
     ]
 ):
     """The model for a full `liquidProbe` command."""
 
     commandType: LiquidProbeCommandType = "liquidProbe"
     params: LiquidProbeParams
-    result: Optional[LiquidProbeResult]
+    result: Optional[LiquidProbeResult] = None
 
     _ImplementationCls: Type[LiquidProbeImplementation] = LiquidProbeImplementation
 
 
 class TryLiquidProbe(
-    BaseCommand[TryLiquidProbeParams, TryLiquidProbeResult, StallOrCollisionError]
+    BaseCommand[
+        TryLiquidProbeParams,
+        TryLiquidProbeResult,
+        StallOrCollisionError | OverpressureError,
+    ]
 ):
     """The model for a full `tryLiquidProbe` command."""
 
     commandType: TryLiquidProbeCommandType = "tryLiquidProbe"
     params: TryLiquidProbeParams
-    result: Optional[TryLiquidProbeResult]
+    result: Optional[TryLiquidProbeResult] = None
 
     _ImplementationCls: Type[
         TryLiquidProbeImplementation

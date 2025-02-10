@@ -32,7 +32,7 @@ export const protocolRunReducer: Reducer<ProtocolRunState, Action> = (
     case Constants.START_LPC:
     case Constants.FINISH_LPC:
     case Constants.PROCEED_STEP:
-    case Constants.GO_BACK_STEP:
+    case Constants.GO_BACK_LAST_STEP:
     case Constants.SET_SELECTED_LABWARE_NAME:
     case Constants.SET_SELECTED_LABWARE:
     case Constants.CLEAR_SELECTED_LABWARE:

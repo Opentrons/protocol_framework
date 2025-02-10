@@ -4,11 +4,7 @@ import {
   fixture_tiprack_10_ul,
   fixture_trash,
 } from '@opentrons/shared-data/labware/fixtures/2'
-import {
-  OT2_ROBOT_TYPE,
-  OT2_STANDARD_DECKID,
-  fixtureP10SingleV2Specs,
-} from '@opentrons/shared-data'
+import { fixtureP10SingleV2Specs } from '@opentrons/shared-data'
 import type { LabwareDefinition2 } from '@opentrons/shared-data'
 import type {
   LabwareLiquidState,
@@ -40,16 +36,19 @@ export const labwareEntities: LabwareEntities = {
     labwareDefURI: 'opentrons/opentrons_1_trash_1100ml_fixed/1',
     id: 'fixedTrash',
     def: fixtureTrash,
+    pythonName: 'mockPythonName',
   },
   tiprackId: {
     labwareDefURI: 'opentrons/opentrons_96_tiprack_10ul/1',
     id: 'tiprackId',
     def: fixtureTiprack10ul,
+    pythonName: 'mockPythonName',
   },
   plateId: {
     labwareDefURI: 'opentrons/nest_96_wellplate_100ul_pcr_full_skirt/1',
     id: 'plateId',
     def: fixture96Plate,
+    pythonName: 'mockPythonName',
   },
 }
 export const pipetteEntities: PipetteEntities = {
@@ -59,6 +58,7 @@ export const pipetteEntities: PipetteEntities = {
     spec: fixtureP10SingleV2Specs,
     tiprackDefURI: ['opentrons/opentrons_96_tiprack_10ul/1'],
     tiprackLabwareDef: [fixtureTiprack10ul],
+    pythonName: 'mockPythonName',
   },
 }
 export const labwareNicknamesById: Record<string, string> = {
@@ -71,5 +71,3 @@ export const labwareDefsByURI: LabwareDefByDefURI = {
   'opentrons/nest_96_wellplate_100ul_pcr_full_skirt/1': fixture96Plate,
   'opentrons/opentrons_1_trash_1100ml_fixed/1': fixtureTrash,
 }
-
-export const ot2Robot = { model: OT2_ROBOT_TYPE, deckId: OT2_STANDARD_DECKID }
