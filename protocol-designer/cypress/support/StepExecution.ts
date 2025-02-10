@@ -1,12 +1,13 @@
 import { executeUniversalAction, UniversalActions } from './universalActions'
-import { isEnumValue } from './utils'
+import { isEnumValue, isFunctionInRecord } from './utils'
 // eslint-disable-next-line @typescript-eslint/consistent-type-imports
 import {
   SetupActions,
   SetupVerifications,
   executeVerificationStep,
   executeSetupSteps,
-  SetupFunction,
+  SetupFunctionMap,
+  setupFunctions,
 } from './SetupSteps'
 import {
   ModActions,
@@ -15,17 +16,29 @@ import {
   executeVerifyModStep,
 } from './SupportModules'
 
-export interface StepListItem {
+export interface EnumBasedStep {
+  type: 'enum'
   step:
     | SetupActions
     | SetupVerifications
     | UniversalActions
     | ModActions
     | ModVerifications
-    | SetupFunction
-  params?: string | string[] | number | boolean | undefined
+  params?: string | string[] | number | boolean
 }
 
+export interface FunctionBasedStep {
+  type: 'function'
+
+  step: SetupFunctionMap['name']
+  // add other support modules function maps here
+
+  // This is optional because we want to allow functions that don't take any parameters
+  params?: SetupFunctionMap['param']
+  // add other support modules function maps here
+}
+
+export type StepListItem = FunctionBasedStep | EnumBasedStep
 export type StepsList = StepListItem[]
 
 export const runSteps = (steps: StepsList): void => {
@@ -50,8 +63,8 @@ export const runSteps = (steps: StepsList): void => {
 
   steps.forEach(item => {
     if (
-      isEnumValue([SetupActions], item.step) ||
-      typeof item.step === 'function'
+      (item.type === 'enum' && isEnumValue([SetupActions], item.step)) ||
+      (item.type === 'function' && isFunctionInRecord(setupFunctions, item.step))
     ) {
       executeSetupSteps(item)
     } else if (isEnumValue([SetupVerifications], item.step)) {

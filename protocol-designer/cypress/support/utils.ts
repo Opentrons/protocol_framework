@@ -9,3 +9,10 @@ export const isEnumValue = <T extends object>(
     )
   )
 }
+
+export function isFunctionInRecord(
+  functionMap: Record<string, any>,
+  step: string
+): boolean {
+  return Object.keys(functionMap).includes(step)
+}

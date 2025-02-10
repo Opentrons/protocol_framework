@@ -148,6 +148,7 @@ export enum SetupLocators {
   DoneButtonLabwareSelection = '[data-testid="Toolbox_confirmButton"]',
 }
 
+// #region Functions
 // The alternative to enums is defining functions
 
 function selectLabwareByDisplayName(displayName: string): void {
@@ -158,9 +159,21 @@ function selectLabwareByDisplayName(displayName: string): void {
 // all function definitions must be added here
 export const setupFunctions = {
   selectLabwareByDisplayName,
+  // Add more functions here
 }
 
 export type SetupFunction = typeof setupFunctions[keyof typeof setupFunctions]
+
+export type SetupFunctionMap = {
+  [K in keyof typeof setupFunctions]: {
+    name: K
+    param: Parameters<typeof setupFunctions[K]>[0]
+  }
+}[keyof typeof setupFunctions]
+// This becomes a union of { name: 'selectLabwareByDisplayName', param: string }
+// and { name: 'anotherFn', param: number }, etc.
+
+// #endregion Functions
 
 const chooseDeckSlot = (
   slot: string
@@ -248,15 +261,18 @@ const selectWells = (wells: string[]): void => {
 // selectWells(['A1', 'B3', 'H12'])
 
 export const executeSetupSteps = (action: StepListItem): void => {
-  if (typeof action.step === 'function') {
-    action.step(action.params)
+  if (action.type === 'function') {
+    const fn = setupFunctions[action.step]
+    if (action.params === undefined || action.params === null) {
+      throw new Error(`Function ${action.step} requires a parameter.`)
+    }
+    fn(action.params)
     return
   }
   switch (action.step) {
     case SetupActions.SelectFlex:
       cy.contains(SetupContent.OpentronsFlex).should('be.visible').click()
       break
-
     case SetupActions.SelectOT2:
       cy.contains(SetupContent.OpentronsOT2).should('be.visible').click()
       break
