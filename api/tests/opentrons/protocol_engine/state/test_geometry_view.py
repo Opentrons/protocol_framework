@@ -3678,7 +3678,7 @@ def test_get_location_sequence_deck_slot(
     nice_labware_definition: LabwareDefinition,
     subject: GeometryView,
 ) -> None:
-    """Test if you can get the offset location of a labware in a deck slot."""
+    """Test if you can get the location sequence of a labware in a deck slot."""
     action = SucceedCommandAction(
         command=LoadLabware(
             id="load-labware-1",
@@ -3710,8 +3710,8 @@ def test_get_location_sequence_deck_slot(
     )
     labware_store.handle_action(action)
     addressable_area_store.handle_action(action)
-    offset_location = subject.get_location_sequence("labware-id-1")
-    assert offset_location == [
+    location_sequence = subject.get_location_sequence("labware-id-1")
+    assert location_sequence == [
         OnAddressableAreaLocationSequenceComponent(addressableAreaName="C2"),
         OnCutoutFixtureLocationSequenceComponent(
             cutoutId="cutoutC2", possibleCutoutFixtureIds=["singleCenterSlot"]
@@ -3729,7 +3729,7 @@ def test_get_location_sequence_module(
     tempdeck_v2_def: ModuleDefinition,
     subject: GeometryView,
 ) -> None:
-    """Test if you can get the offset of a labware directly on a module."""
+    """Test if you can get the location sequence of a labware directly on a module."""
     load_module = SucceedCommandAction(
         command=LoadModule(
             params=LoadModuleParams(
@@ -3809,7 +3809,7 @@ def test_get_location_sequence_module_with_adapter(
     labware_view: LabwareView,
     subject: GeometryView,
 ) -> None:
-    """Test if you can get the offset of a labware directly on a module."""
+    """Test if you can get the location sequence of a labware directly on a module."""
     load_module = SucceedCommandAction(
         command=LoadModule(
             params=LoadModuleParams(
@@ -3912,7 +3912,7 @@ def test_get_location_sequence_off_deck(
     nice_labware_definition: LabwareDefinition,
     subject: GeometryView,
 ) -> None:
-    """You cannot get the offset location for a labware loaded OFF_DECK."""
+    """You cannot get the location sequence for a labware loaded OFF_DECK."""
     action = SucceedCommandAction(
         command=LoadLabware(
             id="load-labware-1",
@@ -3958,7 +3958,7 @@ def test_get_location_sequence_stacker_hopper(
     flex_stacker_v1_def: ModuleDefinition,
     subject: GeometryView,
 ) -> None:
-    """Test if you can get the offset of a labware directly on a module."""
+    """Test if you can get the location sequence of a labware in the stacker hopper."""
     load_module = SucceedCommandAction(
         command=LoadModule(
             params=LoadModuleParams(
