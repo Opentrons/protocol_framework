@@ -26,7 +26,12 @@ import {
   getModulesLoadInfo,
   getPipettesLoadInfo,
 } from './utils'
-import { pythonImports, pythonMetadata, pythonRequirements } from './pythonFile'
+import {
+  pythonDefRun,
+  pythonImports,
+  pythonMetadata,
+  pythonRequirements,
+} from './pythonFile'
 
 import type { SecondOrderCommandAnnotation } from '@opentrons/shared-data/commandAnnotation/types'
 import type {
@@ -310,6 +315,7 @@ export const createPythonFile: Selector<string> = createSelector(
         pythonImports(),
         pythonMetadata(fileMetadata),
         pythonRequirements(robotType),
+        pythonDefRun(),
       ]
         .filter(section => section) // skip any blank sections
         .join('\n\n') + '\n'

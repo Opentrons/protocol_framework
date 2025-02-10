@@ -1,7 +1,11 @@
 /** Generate sections of the Python file for fileCreator.ts */
 
 import { FLEX_ROBOT_TYPE, OT2_ROBOT_TYPE } from '@opentrons/shared-data'
-import { formatPyDict } from '@opentrons/step-generation'
+import {
+  formatPyDict,
+  indentPyLines,
+  PROTOCOL_CONTEXT_NAME,
+} from '@opentrons/step-generation'
 import type { FileMetadataFields } from '../types'
 import type { RobotType } from '@opentrons/shared-data'
 
@@ -45,4 +49,23 @@ export function pythonRequirements(robotType: RobotType): string {
     apiLevel: PAPI_VERSION,
   }
   return `requirements = ${formatPyDict(requirements)}`
+}
+
+export function pythonDefRun(): string {
+  const sections: string[] = [
+    // loadModules(),
+    // loadLabware(),
+    // loadInstruments(),
+    // defineLiquids(),
+    // loadLiquids(),
+    // stepCommands(),
+  ]
+  const functionBody =
+    sections
+      .filter(section => section) // skip empty sections
+      .join('\n\n') || 'pass'
+  return (
+    `def run(${PROTOCOL_CONTEXT_NAME}: protocol_api.ProtocolContext):\n` +
+    `${indentPyLines(functionBody)}`
+  )
 }
