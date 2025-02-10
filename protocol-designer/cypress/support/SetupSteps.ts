@@ -131,7 +131,7 @@ export enum SetupLocators {
   FlexOption = 'button:contains("Opentrons Flex")',
   OT2Option = 'button:contains("Opentrons OT-2")',
   NinetySixChannel = 'div:contains("96-Channel")',
-  ThermocyclerImage = 'img[alt="temperatureModuleType"]',
+  ThermocyclerImage = 'img[alt="thermocyclerModuleType"]',
   MagblockImage = 'img[alt="magneticBlockType"]',
   HeaterShakerImage = 'img[alt="heaterShakerModuleType"]',
   TemperatureModuleImage = 'img[alt="temperatureModuleType"]',
@@ -630,7 +630,7 @@ export const setupVerificationHandlers = {
   },
   [SetupVerifications.ThermocyclerImg]: {
     handler: (): void => {
-      cy.get(SetupLocators.TemperatureModuleImage).should('be.visible')
+      cy.get(SetupLocators.ThermocyclerImage).should('be.visible')
     },
     paramType: undefined,
   },
