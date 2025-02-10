@@ -144,8 +144,6 @@ export const TextAreaField = forwardRef<
       <Flex
         width="100%"
         alignItems={ALIGN_CENTER}
-        fontSize={TYPOGRAPHY.fontSizeP}
-        fontWeight={TYPOGRAPHY.fontWeightRegular}
         color={error ? COLOR_WARNING_DARK : COLORS.black90}
         opacity={disabled === true ? 0.5 : ''}
       >
@@ -192,6 +190,7 @@ export const TextAreaField = forwardRef<
                 </Flex>
               )}
               <StyledTextArea
+                data-testid="TextAreaField"
                 hasBackgroundError={hasBackgroundError}
                 hasError={hasError}
                 height={height}
@@ -199,7 +198,6 @@ export const TextAreaField = forwardRef<
                 borderRadius={borderRadius}
                 resize={resize}
                 {...textAreaProps}
-                data-testid={props.id}
                 value={value}
                 placeholder={placeHolder}
                 onWheel={event => {
@@ -207,6 +205,7 @@ export const TextAreaField = forwardRef<
                 }} // prevent value change with scrolling
                 ref={ref}
                 isKeyboardFocus={isKeyboardFocus}
+                disabled={disabled}
               />
               {showDeleteIcon && (
                 <Flex
@@ -250,6 +249,7 @@ interface StyledTextAreaProps {
   padding?: string
   borderRadius?: string
   isKeyboardFocus: boolean
+  disabled?: boolean
 }
 
 // Styled component with correct focus behavior
@@ -265,6 +265,7 @@ const StyledTextArea = styled.textarea<StyledTextAreaProps>`
           hasError === true ? COLORS.red50 : COLORS.grey50
         }`};
   font-size: ${PRODUCT.TYPOGRAPHY.fontSizeBodyDefaultSemiBold};
+  font-weight: ${TYPOGRAPHY.fontWeightRegular};
   width: 100%;
   height: ${({ height }) => height ?? '100%'};
   resize: ${({ resize }) => resize};
