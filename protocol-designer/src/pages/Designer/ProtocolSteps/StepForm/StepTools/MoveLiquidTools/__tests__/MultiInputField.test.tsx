@@ -7,6 +7,8 @@ import { MultiInputField } from '../MultiInputField'
 
 import type { ComponentProps } from 'react'
 
+vi.mock('../../../PipetteFields')
+
 const render = (props: ComponentProps<typeof MultiInputField>) => {
   return renderWithProviders(<MultiInputField {...props} />, {
     i18nInstance: i18n,
@@ -18,39 +20,66 @@ describe('MultiInputField', () => {
 
   beforeEach(() => {
     props = {
-      name: 'Submerge',
+      name: 'Retract',
       tooltipContent: 'some tooltip content',
-      prefix: 'aspirate',
+      prefix: 'aspirate_retract',
       fields: [
         {
-          fieldTitle: 'submerge speed',
-          fieldKey: 'aspirate_submerge_speed',
+          fieldTitle: 'retract speed',
+          fieldKey: 'aspirate_retract_speed',
           units: 'mm/s',
         },
         {
-          fieldTitle: 'submerge delay seconds',
-          fieldKey: 'aspirate_submerge_delay_seconds',
+          fieldTitle: 'retract delay seconds',
+          fieldKey: 'aspirate_retract_delay_seconds',
           units: 'mm',
         },
       ],
       propsForFields: {
-        aspirate_submerge_speed: {
+        aspirate_retract_speed: {
           onFieldFocus: vi.fn(),
           onFieldBlur: vi.fn(),
           errorToShow: null,
           disabled: false,
-          name: 'aspirate_submerge_speed',
+          name: 'aspirate_retract_speed',
           updateValue: vi.fn(),
           value: null,
         },
-        aspirate_submerge_delay_seconds: {
+        aspirate_retract_delay_seconds: {
           onFieldFocus: vi.fn(),
           onFieldBlur: vi.fn(),
           errorToShow: null,
           disabled: false,
-          name: 'aspirate_submerge_delay_seconds',
+          name: 'aspirate_retract_delay_seconds',
           updateValue: vi.fn(),
           value: '',
+        },
+        aspirate_retract_mmFromBottom: {
+          onFieldFocus: vi.fn(),
+          onFieldBlur: vi.fn(),
+          errorToShow: null,
+          disabled: false,
+          name: 'aspirate_retract_mmFromBottom',
+          updateValue: vi.fn(),
+          value: null,
+        },
+        aspirate_retract_x_position: {
+          onFieldFocus: vi.fn(),
+          onFieldBlur: vi.fn(),
+          errorToShow: null,
+          disabled: false,
+          name: 'aspirate_retract_mmFromBottom',
+          updateValue: vi.fn(),
+          value: 0,
+        },
+        aspirate_retract_y_position: {
+          onFieldFocus: vi.fn(),
+          onFieldBlur: vi.fn(),
+          errorToShow: null,
+          disabled: false,
+          name: 'aspirate_retract_mmFromBottom',
+          updateValue: vi.fn(),
+          value: 0,
         },
       },
     }
@@ -58,29 +87,32 @@ describe('MultiInputField', () => {
 
   it('should render input fields with caption and units wrapped by ListItem', () => {
     render(props)
-    screen.getByText('Submerge')
+    screen.getByText('Retract')
     screen.getByTestId('information_icon')
     const listItem = screen.getByTestId('ListItem_noActive')
     expect(listItem).toHaveStyle(`backgroundColor: ${COLORS.grey20}`)
-    screen.getByText('submerge speed')
+    screen.getByText('retract speed')
     screen.getByText('mm/s')
-    screen.getByText('submerge delay seconds')
+    screen.getByText('retract delay seconds')
     screen.getByText('mm')
     const inputs = screen.getAllByRole('textbox', { name: '' })
     expect(inputs).toHaveLength(2)
     fireEvent.change(inputs[0], { target: { value: ['5'] } })
     fireEvent.change(inputs[0], { target: { value: ['5'] } })
     expect(
-      props.propsForFields.aspirate_submerge_speed.updateValue
+      props.propsForFields.aspirate_retract_speed.updateValue
     ).toHaveBeenCalled()
     fireEvent.change(inputs[1], { target: { value: ['10'] } })
     expect(
-      props.propsForFields.aspirate_submerge_delay_seconds.updateValue
+      props.propsForFields.aspirate_retract_delay_seconds.updateValue
     ).toHaveBeenCalled()
   })
 
-  //   it('should render a well position listbutton when isWellPosition is true', () => {
-  //     props.isWellPosition = true
-  //     render(props)
-  //   })
+  it('should render a well position listbutton when isWellPosition is true', () => {
+    props.isWellPosition = true
+    props.labwareId = 'mockID'
+    render(props)
+    const listButton = screen.getByTestId('ListButton_onColor')
+    expect(listButton).toHaveStyle(`backgroundColor: ${COLORS.white}`)
+  })
 })
