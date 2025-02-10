@@ -14628,7 +14628,7 @@
           {
             "kind": "onLabware",
             "labwareId": "UUID",
-            "lidId": "bef28e38-f2c9-47e3-abf8-f86ebc665af6"
+            "lidId": "UUID"
           },
           {
             "addressableAreaName": "thermocyclerModuleV2",
