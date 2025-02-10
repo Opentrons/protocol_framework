@@ -106,12 +106,12 @@ def patch_mock_pipette_movement_safety_check(
 
 
 @pytest.fixture(autouse=True)
-def patch_mock_check_valid_volume_parameters(
+def patch_mock_check_valid_liquid_class_volume_parameters(
     decoy: Decoy, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    """Replace tx_commons.check_valid_volume_parameters() with a mock."""
-    mock = decoy.mock(func=tx_commons.check_valid_volume_parameters)
-    monkeypatch.setattr(tx_commons, "check_valid_volume_parameters", mock)
+    """Replace tx_commons.check_valid_liquid_class_volume_parameters() with a mock."""
+    mock = decoy.mock(func=tx_commons.check_valid_liquid_class_volume_parameters)
+    monkeypatch.setattr(tx_commons, "check_valid_liquid_class_volume_parameters", mock)
 
 
 @pytest.fixture(autouse=True)
@@ -1879,7 +1879,8 @@ def test_aspirate_liquid_class_raises_for_more_than_max_volume(
         mock_engine_client.state.pipettes.get_working_volume("abc123")
     ).then_return(100)
     decoy.when(
-        tx_commons.check_valid_volume_parameters(
+        tx_commons.check_valid_liquid_class_volume_parameters(
+            aspirate_volume=123,
             disposal_volume=0,
             air_gap=test_transfer_properties.aspirate.retract.air_gap_by_volume.get_for_volume(
                 123

@@ -1334,16 +1334,9 @@ class InstrumentCore(AbstractInstrument[WellCore, LabwareCore]):
         is_last_step = False
         while not is_last_step:
             total_dispense_volume = 0.0
-            air_gap_volume = (
-                transfer_props.aspirate.retract.air_gap_by_volume.get_for_volume(
-                    next_step_volume
-                )
-            )
             vol_aspirate_combo = []
             # Take air gap into account because there will be a final air gap before the dispense
-            while (
-                total_dispense_volume + next_step_volume + air_gap_volume <= max_volume
-            ):
+            while total_dispense_volume + next_step_volume <= max_volume:
                 total_dispense_volume += next_step_volume
                 vol_aspirate_combo.append((next_step_volume, next_source))
                 try:
@@ -1351,11 +1344,6 @@ class InstrumentCore(AbstractInstrument[WellCore, LabwareCore]):
                 except StopIteration:
                     is_last_step = True
                     break
-                air_gap_volume = (
-                    transfer_props.aspirate.retract.air_gap_by_volume.get_for_volume(
-                        total_dispense_volume + next_step_volume
-                    )
-                )
 
             if new_tip == TransferTipPolicyV2.ALWAYS:
                 if prev_src is not None:
@@ -1432,9 +1420,10 @@ class InstrumentCore(AbstractInstrument[WellCore, LabwareCore]):
         """
         aspirate_props = transfer_properties.aspirate
         # TODO (spp, 2025-01-30): check if check_valid_volume_parameters is necessary and is enough.
-        tx_commons.check_valid_volume_parameters(
-            disposal_volume=0,  # No disposal volume for 1-to-1 transfer
+        tx_commons.check_valid_liquid_class_volume_parameters(
+            aspirate_volume=volume,
             air_gap=aspirate_props.retract.air_gap_by_volume.get_for_volume(volume),
+            disposal_volume=0,
             max_volume=self.get_working_volume(),
         )
         source_loc, source_well = source

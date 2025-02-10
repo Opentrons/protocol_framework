@@ -33,6 +33,29 @@ def check_valid_volume_parameters(
         )
 
 
+def check_valid_liquid_class_volume_parameters(
+    aspirate_volume: float, air_gap: float, disposal_volume: float, max_volume: float
+) -> None:
+    if air_gap + aspirate_volume > max_volume:
+        raise ValueError(
+            f"Cannot have an air gap of {air_gap} µL for an aspiration of {aspirate_volume} µL"
+            f" with a max volume of {max_volume} µL. Please adjust the retract air gap to fit within"
+            f" the bounds of the tip."
+        )
+    elif disposal_volume + aspirate_volume > max_volume:
+        raise ValueError(
+            f"Cannot have a dispense volume of {disposal_volume} µL for an aspiration of {aspirate_volume} µL"
+            f" with a max volume of {max_volume} µL. Please adjust the dispense volume to fit within"
+            f" the bounds of the tip."
+        )
+    elif air_gap + disposal_volume + aspirate_volume > max_volume:
+        raise ValueError(
+            f"Cannot have an air gap of {air_gap} µL and a  dispense volume of {disposal_volume} µL for an"
+            f" aspiration of {aspirate_volume} µL with a max volume of {max_volume} µL. Please adjust the"
+            f" air gap and/or the dispense volume to fit within the bounds of the tip."
+        )
+
+
 def expand_for_volume_constraints(
     volumes: Iterable[float],
     targets: Iterable[Target],
