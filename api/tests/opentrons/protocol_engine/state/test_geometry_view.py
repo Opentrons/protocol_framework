@@ -76,7 +76,6 @@ from opentrons.protocol_engine.types import (
     OnLabwareLocationSequenceComponent,
     NotOnDeckLocationSequenceComponent,
     OnCutoutFixtureLocationSequenceComponent,
-    PotentialCutoutFixture,
 )
 from opentrons.protocol_engine.commands import (
     CommandStatus,
