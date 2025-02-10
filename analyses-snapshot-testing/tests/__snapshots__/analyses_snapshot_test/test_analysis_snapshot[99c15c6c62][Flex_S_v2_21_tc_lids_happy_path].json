@@ -2100,7 +2100,7 @@
           {
             "kind": "onLabware",
             "labwareId": "UUID",
-            "lidId": "5160024a-69c7-40f1-8171-f648077ed673"
+            "lidId": "UUID"
           },
           {
             "addressableAreaName": "thermocyclerModuleV2",
@@ -2271,7 +2271,7 @@
           {
             "kind": "onLabware",
             "labwareId": "UUID",
-            "lidId": "332794b4-9d9c-4a74-9cfa-2b9206640719"
+            "lidId": "UUID"
           },
           {
             "addressableAreaName": "thermocyclerModuleV2",
@@ -2446,7 +2446,7 @@
           {
             "kind": "onLabware",
             "labwareId": "UUID",
-            "lidId": "60ee76c7-227d-4a9f-ae7c-6d3c18fe8ee4"
+            "lidId": "UUID"
           },
           {
             "addressableAreaName": "thermocyclerModuleV2",
