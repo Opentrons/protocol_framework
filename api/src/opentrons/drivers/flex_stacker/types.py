@@ -132,18 +132,19 @@ class Direction(Enum):
 class TOFSensorState(Enum):
     """TOF Sensor state."""
 
-    INITIALIZING = 0
-    IDLE = 1
-    MEASURING = 2
-    ERROR = 3
+    DISABLED = 0
+    INITIALIZING = 1
+    IDLE = 2
+    MEASURING = 3
+    ERROR = 4
 
 
 class TOFSensorMode(Enum):
     """The mode the sensor is in."""
 
     UNKNOWN = 0
-    BOOTLOADER = 1
-    MEASURE = 2
+    MEASURE = 0x03
+    BOOTLOADER = 0x80
 
 
 @dataclass
@@ -203,8 +204,7 @@ class TOFSensorStatus:
     sensor: TOFSensor
     state: TOFSensorState
     mode: TOFSensorMode
-    enabled: bool
-    ready: bool
+    ok: bool
 
 
 @dataclass

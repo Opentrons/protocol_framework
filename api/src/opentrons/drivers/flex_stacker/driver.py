@@ -30,6 +30,7 @@ from .types import (
 FS_BAUDRATE = 115200
 DEFAULT_FS_TIMEOUT = 1
 FS_MOVE_TIMEOUT = 20
+FS_TOF_TIMEOUT = 20
 FS_ACK = "OK\n"
 FS_ERROR_KEYWORD = "err"
 FS_ASYNC_ERROR_ACK = "async"
@@ -219,7 +220,7 @@ class FlexStackerDriver(AbstractFlexStackerDriver):
     @classmethod
     def parse_tof_sensor_status(cls, response: str) -> TOFSensorStatus:
         """Parse get tof sensor status response."""
-        pattern = r"(?P<S>[XZ]):(?P<R>\d) T:(?P<T>\d M:(?P<M>\d) E:(?P<E>\d))"
+        pattern = r"(?P<S>[XZ]):(?P<O>\d) T:(?P<T>\d) M:(?P<M>\d)"
         _RE = re.compile(f"^{GCODE.GET_TOF_SENSOR_STATUS} {pattern}$")
         m = _RE.match(response)
         if not m:
@@ -228,10 +229,9 @@ class FlexStackerDriver(AbstractFlexStackerDriver):
             )
         return TOFSensorStatus(
             sensor=TOFSensor(m.group("S")),
-            state=TOFSensorState(m.group("T")),
-            mode=TOFSensorMode(m.group("M")),
-            enabled=bool(m.group("E")),
-            ready=bool(m.group("R")),
+            state=TOFSensorState(int(m.group("T"))),
+            mode=TOFSensorMode(int(m.group("M"))),
+            ok=bool(int(m.group("O"))),
         )
 
     @classmethod
@@ -370,8 +370,11 @@ class FlexStackerDriver(AbstractFlexStackerDriver):
 
     async def enable_tof_sensor(self, sensor: TOFSensor, enable: bool) -> bool:
         """Enable or disable the TOF sensor."""
+        # Enabling the TOF sensor takes a while, so give extra timeout.
+        timeout = FS_TOF_TIMEOUT if enable else DEFAULT_FS_TIMEOUT
         resp = await self._connection.send_command(
-            GCODE.ENABLE_TOF_SENSOR.build_command().add_int(sensor.name, int(enable))
+            GCODE.ENABLE_TOF_SENSOR.build_command().add_int(sensor.name, int(enable)),
+            timeout=timeout,
         )
         if not re.match(rf"^{GCODE.ENABLE_TOF_SENSOR}$", resp):
             raise ValueError(f"Incorrect Response for enable TOF sensor: {resp}")
