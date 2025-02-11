@@ -16,6 +16,7 @@ from .pipetting_common import (
 from .movement_common import StallOrCollisionError
 
 from . import absorbance_reader
+from . import flex_stacker
 from . import heater_shaker
 from . import magnetic_module
 from . import temperature_module
@@ -457,6 +458,8 @@ Command = Annotated[
         absorbance_reader.OpenLid,
         absorbance_reader.Initialize,
         absorbance_reader.ReadAbsorbance,
+        flex_stacker.Retrieve,
+        flex_stacker.Store,
         calibration.CalibrateGripper,
         calibration.CalibratePipette,
         calibration.CalibrateModule,
@@ -548,6 +551,8 @@ CommandParams = Union[
     absorbance_reader.OpenLidParams,
     absorbance_reader.InitializeParams,
     absorbance_reader.ReadAbsorbanceParams,
+    flex_stacker.RetrieveParams,
+    flex_stacker.StoreParams,
     calibration.CalibrateGripperParams,
     calibration.CalibratePipetteParams,
     calibration.CalibrateModuleParams,
@@ -637,6 +642,8 @@ CommandType = Union[
     absorbance_reader.OpenLidCommandType,
     absorbance_reader.InitializeCommandType,
     absorbance_reader.ReadAbsorbanceCommandType,
+    flex_stacker.RetrieveCommandType,
+    flex_stacker.StoreCommandType,
     calibration.CalibrateGripperCommandType,
     calibration.CalibratePipetteCommandType,
     calibration.CalibrateModuleCommandType,
@@ -727,6 +734,8 @@ CommandCreate = Annotated[
         absorbance_reader.OpenLidCreate,
         absorbance_reader.InitializeCreate,
         absorbance_reader.ReadAbsorbanceCreate,
+        flex_stacker.RetrieveCreate,
+        flex_stacker.StoreCreate,
         calibration.CalibrateGripperCreate,
         calibration.CalibratePipetteCreate,
         calibration.CalibrateModuleCreate,
@@ -825,6 +834,8 @@ CommandResult = Union[
     absorbance_reader.OpenLidResult,
     absorbance_reader.InitializeResult,
     absorbance_reader.ReadAbsorbanceResult,
+    flex_stacker.RetrieveResult,
+    flex_stacker.StoreResult,
     calibration.CalibrateGripperResult,
     calibration.CalibratePipetteResult,
     calibration.CalibrateModuleResult,

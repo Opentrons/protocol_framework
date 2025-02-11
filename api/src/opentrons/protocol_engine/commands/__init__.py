@@ -14,6 +14,7 @@ and/or schema generation.
 """
 
 from . import absorbance_reader
+from . import flex_stacker
 from . import heater_shaker
 from . import magnetic_module
 from . import temperature_module
@@ -636,6 +637,7 @@ __all__ = [
     # hardware control command models
     # hardware module command bundles
     "absorbance_reader",
+    "flex_stacker",
     "heater_shaker",
     "magnetic_module",
     "temperature_module",
