@@ -31,7 +31,7 @@ from opentrons_shared_data.pipette.types import PipetteNameType
 from opentrons_shared_data.labware.labware_definition import (
     Dimensions as LabwareDimensions,
     Parameters as LabwareDefinitionParameters,
-    CornerOffsetFromSlot,
+    OffsetVector as LabwareDefinitionOffsetVector,
     ConicalFrustum,
 )
 
@@ -2953,7 +2953,9 @@ def test_check_gripper_labware_tip_collision(
             isTiprack=True,
             isMagneticModuleCompatible=False,
         ),
-        cornerOffsetFromSlot=CornerOffsetFromSlot.model_construct(x=1, y=2, z=3),
+        cornerOffsetFromSlot=LabwareDefinitionOffsetVector.model_construct(
+            x=1, y=2, z=3
+        ),
         ordering=[],
     )
 

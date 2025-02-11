@@ -50,18 +50,6 @@ _NonNegativeNumber = Union[_StrictNonNegativeInt, _StrictNonNegativeFloat]
 """Non-negative JSON number type, written to preserve lack of decimal point."""
 
 
-class CornerOffsetFromSlot(BaseModel):
-    """
-    Distance from left-front-bottom corner of slot to left-front-bottom corner
-     of labware bounding box. Used for labware that spans multiple slots. For
-      labware that does not span multiple slots, x/y/z should all be zero.
-    """
-
-    x: _Number
-    y: _Number
-    z: _Number
-
-
 class OverlapOffset(BaseModel):
     """
     Overlap dimensions of labware with another labware/module that it can be stacked on top of.
@@ -713,7 +701,7 @@ class LabwareDefinition(BaseModel):
         description="Generated array that keeps track of how wells should be "
         "ordered in a labware",
     )
-    cornerOffsetFromSlot: CornerOffsetFromSlot = Field(
+    cornerOffsetFromSlot: OffsetVector = Field(
         ...,
         description="Distance from left-front-bottom corner of slot to "
         "left-front-bottom corner of labware bounding box. Used for "
