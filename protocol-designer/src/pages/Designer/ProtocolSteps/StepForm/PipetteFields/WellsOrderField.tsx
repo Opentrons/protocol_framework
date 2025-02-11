@@ -13,11 +13,13 @@ import {
   ALIGN_CENTER,
 } from '@opentrons/components'
 import { WellOrderModal } from '../../../../../organisms'
-import type { WellOrderOption } from '../../../../../form-types'
+
 import type { FieldProps } from '../types'
+import type { WellOrderOption } from '../../../../../form-types'
+import type { MoveLiquidPrefixType } from '../../../../../resources/types'
 
 export interface WellsOrderFieldProps {
-  prefix: 'aspirate' | 'dispense' | 'mix'
+  prefix: MoveLiquidPrefixType
   firstName: string
   secondName: string
   updateFirstWellOrder: FieldProps['updateValue']
