@@ -50,7 +50,20 @@
       "type": "string",
       "pattern": "^[a-z0-9._]+$"
     },
-    "coordinates": {
+    "coordinates2D": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["x", "y"],
+      "properties": {
+        "x": {
+          "type": "number"
+        },
+        "y": {
+          "type": "number"
+        }
+      }
+    },
+    "coordinates3D": {
       "type": "object",
       "additionalProperties": false,
       "required": ["x", "y", "z"],
@@ -66,16 +79,46 @@
         }
       }
     },
+    "axisAlignedBoundingBox2D": {
+      "type": "object",
+      "required": ["backLeft", "frontRight"],
+      "additionalProperties": false,
+      "properties": {
+        "backLeft": {
+          "description": "The back-left (+y, -x) corner.",
+          "$ref": "#/definitions/coordinates2D"
+        },
+        "frontRight": {
+          "description": "The front-right (-y, +x) corner.",
+          "$ref": "#/definitions/coordinates2D"
+        }
+      }
+    },
+    "axisAlignedBoundingBox3D": {
+      "type": "object",
+      "required": ["backLeftBottom", "frontRightTop"],
+      "additionalProperties": false,
+      "properties": {
+        "backLeftBottom": {
+          "description": "The back-left-bottom (+y, -x, -z) corner.",
+          "$ref": "#/definitions/coordinates3D"
+        },
+        "frontRightTop": {
+          "description": "The front-right-top (-y, +x, +z) corner.",
+          "$ref": "#/definitions/coordinates3D"
+        }
+      }
+    },
     "pickUpAndDropOffsets": {
       "type": "object",
       "required": ["pickUpOffset", "dropOffset"],
       "properties": {
         "pickUpOffset": {
-          "$ref": "#/definitions/coordinates",
+          "$ref": "#/definitions/coordinates3D",
           "description": "Offset added to calculate pick-up coordinates."
         },
         "dropOffset": {
-          "$ref": "#/definitions/coordinates",
+          "$ref": "#/definitions/coordinates3D",
           "description": "Offset added to calculate drop coordinates."
         }
       }
@@ -301,6 +344,16 @@
           }
         }
       }
+    },
+    "locatableFeature": {
+      "type": "object",
+      "required": ["coordinates"],
+      "additionalProperties": false,
+      "properties": {
+        "coordinates": {
+          "$ref": "#/definitions/coordinates3D"
+        }
+      }
     }
   },
   "type": "object",
@@ -312,9 +365,8 @@
     "metadata",
     "brand",
     "parameters",
-    "cornerOffsetFromSlot",
     "ordering",
-    "dimensions",
+    "extents",
     "wells",
     "groups"
   ],
@@ -428,31 +480,19 @@
         }
       }
     },
-    "cornerOffsetFromSlot": {
+    "extents": {
+      "description": "The outer dimensions of the labware.",
       "type": "object",
+      "required": ["total", "footprint"],
       "additionalProperties": false,
-      "description": "Distance from left-front-bottom corner of slot to left-front-bottom corner of labware bounding box. Used for labware that spans multiple slots. For labware that does not span multiple slots, x/y/z should all be zero.",
-      "required": ["x", "y", "z"],
       "properties": {
-        "x": { "type": "number" },
-        "y": { "type": "number" },
-        "z": { "type": "number" }
-      }
-    },
-    "dimensions": {
-      "type": "object",
-      "additionalProperties": false,
-      "description": "Outer dimensions of a labware",
-      "required": ["xDimension", "yDimension", "zDimension"],
-      "properties": {
-        "yDimension": {
-          "$ref": "#/definitions/positiveNumber"
+        "total": {
+          "description": "The all-encompassing outer dimensions of the labware.",
+          "$ref": "#/definitions/axisAlignedBoundingBox3D"
         },
-        "zDimension": {
-          "$ref": "#/definitions/positiveNumber"
-        },
-        "xDimension": {
-          "$ref": "#/definitions/positiveNumber"
+        "footprint": {
+          "description": "The outer dimensions of the labware where it meets the deck.",
+          "$ref": "#/definitions/axisAlignedBoundingBox2D"
         }
       }
     },
@@ -583,14 +623,14 @@
       "type": "object",
       "description": "Supported labware that can be stacked upon, with overlap height between both labware.",
       "additionalProperties": {
-        "$ref": "#/definitions/coordinates"
+        "$ref": "#/definitions/coordinates3D"
       }
     },
     "stackingOffsetWithModule": {
       "type": "object",
       "description": "Supported module that can be stacked upon, with overlap height between labware and module.",
       "additionalProperties": {
-        "$ref": "#/definitions/coordinates"
+        "$ref": "#/definitions/coordinates3D"
       }
     },
     "stackLimit": {
@@ -640,6 +680,22 @@
       "description": "A dictionary holding all unique inner well geometries in a labware.",
       "additionalProperties": {
         "$ref": "#/definitions/InnerWellGeometry"
+      }
+    },
+    "locatableFeatures": {
+      "description": "How this labware fits into its parent (which could be, for example, a deck slot or module). Each property represents a \"locatable feature\", which is a point in this labware. The system will pick the best locatable feature depending on context, then position this labware to make that feature coincident with a matching feature in the parent. Only provide features for which you have accurate values. New locatable features may be added in the future without bumping the schema version. To avoid colliding with them, do not provide any properties that are not present in the schema today.",
+      "type": "object",
+      "required": [],
+      "additionalProperties": { "$ref": "#/definitions/locatableFeature" },
+      "properties": {
+        "backLeft": {
+          "description": "The back-left-bottom (+y, -x, -z) of the labware, i.e. the point that would fit against the back-left of a standard deck slot. Because the labware's origin is typically also placed there, this should typically be (0, 0, 0).",
+          "$ref": "#/definitions/locatableFeature"
+        },
+        "frontLeft": {
+          "description": "The front-left-bottom (-y, -x, -z) of the labware, i.e. the point that would fit against the front-left of a standard deck slot.",
+          "$ref": "#/definitions/locatableFeature"
+        }
       }
     }
   }
