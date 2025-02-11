@@ -68,27 +68,19 @@ class StackerInfo:
         }
 
 
-class StackerAxis(Enum):
+class StackerAxis(str, Enum):
     """Stacker Axis."""
 
     X = "X"
     Z = "Z"
     L = "L"
 
-    def __str__(self) -> str:
-        """Name."""
-        return self.name
 
-
-class TOFSensor(Enum):
+class TOFSensor(str, Enum):
     """Stacker TOF sensor."""
 
     X = "X"
     Z = "Z"
-
-    def __str__(self) -> str:
-        """Name."""
-        return self.name
 
 
 class LEDColor(Enum):
