@@ -9,7 +9,7 @@ from opentrons_shared_data.labware.labware_definition import (
     Metadata,
     DisplayCategory,
     BrandData,
-    OffsetVector as SD_Labware_OffsetVector,
+    Vector as SD_Labware_Vector,
     Dimensions,
     Group,
     GroupMetadata,
@@ -692,7 +692,7 @@ def _load_labware_definition_data() -> LabwareDefinition:
             )
         },
         dimensions=Dimensions(yDimension=85.5, zDimension=100, xDimension=127.75),
-        cornerOffsetFromSlot=SD_Labware_OffsetVector(x=0, y=0, z=0),
+        cornerOffsetFromSlot=SD_Labware_Vector(x=0, y=0, z=0),
         innerLabwareGeometry={
             "welldefinition1111": InnerWellGeometry(
                 sections=[

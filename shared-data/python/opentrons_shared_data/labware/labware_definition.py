@@ -50,7 +50,7 @@ _NonNegativeNumber = Union[_StrictNonNegativeInt, _StrictNonNegativeFloat]
 """Non-negative JSON number type, written to preserve lack of decimal point."""
 
 
-class OffsetVector(BaseModel):
+class Vector(BaseModel):
     """
     A generic 3-D offset vector.
     """
@@ -65,8 +65,8 @@ class GripperOffsets(BaseModel):
     Offsets used when calculating coordinates for gripping labware during labware movement.
     """
 
-    pickUpOffset: OffsetVector
-    dropOffset: OffsetVector
+    pickUpOffset: Vector
+    dropOffset: Vector
 
 
 class BrandData(BaseModel):
@@ -691,7 +691,7 @@ class LabwareDefinition(BaseModel):
         description="Generated array that keeps track of how wells should be "
         "ordered in a labware",
     )
-    cornerOffsetFromSlot: OffsetVector = Field(
+    cornerOffsetFromSlot: Vector = Field(
         ...,
         description="Distance from left-front-bottom corner of slot to "
         "left-front-bottom corner of labware bounding box. Used for "
@@ -713,12 +713,12 @@ class LabwareDefinition(BaseModel):
         default_factory=list,
         description="Allowed behaviors and usage of a labware in a protocol.",
     )
-    stackingOffsetWithLabware: Dict[str, OffsetVector] = Field(
+    stackingOffsetWithLabware: Dict[str, Vector] = Field(
         default_factory=dict,
         description="Supported labware that can be stacked upon,"
         " with overlap vector offset between both labware.",
     )
-    stackingOffsetWithModule: Dict[str, OffsetVector] = Field(
+    stackingOffsetWithModule: Dict[str, Vector] = Field(
         default_factory=dict,
         description="Supported module that can be stacked upon,"
         " with overlap vector offset between labware and module.",

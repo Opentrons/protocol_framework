@@ -44,15 +44,15 @@ LabwareRoles = Literal[
 ]
 
 
-class NamedOffset(TypedDict):
+class Vector(TypedDict):
     x: float
     y: float
     z: float
 
 
 class GripperOffsets(TypedDict):
-    pickUpOffset: NamedOffset
-    dropOffset: NamedOffset
+    pickUpOffset: Vector
+    dropOffset: Vector
 
 
 class LabwareParameters(TypedDict):
@@ -131,13 +131,13 @@ class LabwareDefinition(TypedDict):
     metadata: LabwareMetadata
     brand: LabwareBrandData
     parameters: LabwareParameters
-    cornerOffsetFromSlot: NamedOffset
+    cornerOffsetFromSlot: Vector
     ordering: list[list[str]]
     dimensions: LabwareDimensions
     wells: dict[str, WellDefinition]
     groups: list[WellGroup]
-    stackingOffsetWithLabware: NotRequired[dict[str, NamedOffset]]
-    stackingOffsetWithModule: NotRequired[dict[str, NamedOffset]]
+    stackingOffsetWithLabware: NotRequired[dict[str, Vector]]
+    stackingOffsetWithModule: NotRequired[dict[str, Vector]]
     allowedRoles: NotRequired[list[LabwareRoles]]
     gripperOffsets: NotRequired[dict[str, GripperOffsets]]
     gripForce: NotRequired[float]
