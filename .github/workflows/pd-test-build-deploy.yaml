@@ -197,7 +197,7 @@ jobs:
             const { buildComplexEnvVars } = require(`${process.env.GITHUB_WORKSPACE}/.github/workflows/utils.js`)
             buildComplexEnvVars(core, context)
       - name: 'download PD build'
-        uses: 'actions/download-artifact@v3'
+        uses: 'actions/download-artifact@v4'
         with:
           name: pd-artifact
           path: ./dist
