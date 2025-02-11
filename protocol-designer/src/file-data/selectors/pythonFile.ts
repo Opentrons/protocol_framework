@@ -3,11 +3,17 @@
 import { FLEX_ROBOT_TYPE, OT2_ROBOT_TYPE } from '@opentrons/shared-data'
 import {
   formatPyDict,
+  formatPyStr,
   indentPyLines,
   PROTOCOL_CONTEXT_NAME,
 } from '@opentrons/step-generation'
-import type { FileMetadataFields } from '../types'
+import type {
+  InvariantContext,
+  ModuleEntities,
+  TimelineFrame,
+} from '@opentrons/step-generation'
 import type { RobotType } from '@opentrons/shared-data'
+import type { FileMetadataFields } from '../types'
 
 const PAPI_VERSION = '2.23' // latest version from api/src/opentrons/protocols/api_support/definitions.py
 
@@ -51,9 +57,36 @@ export function pythonRequirements(robotType: RobotType): string {
   return `requirements = ${formatPyDict(requirements)}`
 }
 
-export function pythonDefRun(): string {
+export function getLoadModules(
+  moduleEntities: ModuleEntities,
+  moduleRobotState: TimelineFrame['modules']
+): string {
+  const hasModules = Object.keys(moduleEntities).length > 0
+  const pythonModules = hasModules
+    ? Object.values(moduleEntities)
+        .map(module => {
+          // pythonIdentifier (module.model) from api/src/opentrons/protocol_api/validation.py#L373
+          return `${
+            module.pythonName
+          } = ${PROTOCOL_CONTEXT_NAME}.load_module(${formatPyStr(
+            module.model
+          )}, ${formatPyStr(moduleRobotState[module.id].slot)})`
+        })
+        .join('\n')
+    : ''
+  return hasModules ? `# Load Modules:\n${pythonModules}` : ''
+}
+
+export function pythonDefRun(
+  invariantContext: InvariantContext,
+  robotState: TimelineFrame
+): string {
+  const { moduleEntities } = invariantContext
+
+  const loadModules = getLoadModules(moduleEntities, robotState.modules)
+
   const sections: string[] = [
-    // loadModules(),
+    loadModules,
     // loadLabware(),
     // loadInstruments(),
     // defineLiquids(),
