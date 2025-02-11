@@ -10,6 +10,7 @@ import {
   SPACING,
   StyledText,
   TEXT_DECORATION_UNDERLINE,
+  TYPOGRAPHY,
 } from '@opentrons/components'
 
 import magTempCombined from '../../assets/images/modules/magdeck_tempdeck_combined.png'
@@ -445,7 +446,7 @@ export const useAnnouncements = (): Announcement[] => {
                   <LinkComponent
                     external
                     href={DOC_URL}
-                    textDecoration={TEXT_DECORATION_UNDERLINE}
+                    textDecoration={TYPOGRAPHY.textDecorationUnderline}
                     color={COLORS.black90}
                   />
                 ),
@@ -453,7 +454,7 @@ export const useAnnouncements = (): Announcement[] => {
                   <LinkComponent
                     external
                     href={RELEASE_NOTES_URL}
-                    textDecoration={TEXT_DECORATION_UNDERLINE}
+                    textDecoration={TYPOGRAPHY.textDecorationUnderline}
                     color={COLORS.black90}
                   />
                 ),

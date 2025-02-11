@@ -6,13 +6,13 @@ import {
   DIRECTION_ROW,
   Flex,
   OVERFLOW_AUTO,
-  SPACING,
   ReleaseNotes,
+  SPACING,
 } from '@opentrons/components'
-import { useIsOEMMode } from '/app/resources/robot-settings'
 import { SmallButton } from '/app/atoms/buttons'
 import { InlineNotification } from '/app/atoms/InlineNotification'
 import { OddModal } from '/app/molecules/OddModal'
+import { useIsOEMMode } from '/app/resources/robot-settings'
 
 import type { OddModalHeaderBaseProps } from '/app/molecules/OddModal/types'
 

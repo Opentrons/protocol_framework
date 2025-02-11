@@ -1,7 +1,7 @@
 import Markdown from 'react-markdown'
 import { LegacyStyledText } from '../../atoms'
-import { Box } from '../../primitives'
 import { COLORS } from '../../helix-design-system'
+import { Box } from '../../primitives'
 import { SPACING } from '../../ui-style-constants'
 
 import styles from './styles.module.css'
