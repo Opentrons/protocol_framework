@@ -350,7 +350,7 @@ async def liquid_probe(
         stop_condition=MoveStopCondition.sync_line,
         binding_flags=sensor_binding,
     )
-    sensor_runner = MoveGroupRunner(move_groups=[[lower_plunger], [sensor_group]])
+    sensor_runner = MoveGroupRunner(move_groups=[[lower_plunger, sensor_group]])
 
     # Only raise the z a little so we don't do a huge slow travel
     raise_z = create_step(
