@@ -32,8 +32,6 @@ import type {
 } from '@opentrons/shared-data'
 import type { DropdownOption } from '@opentrons/components'
 import type { AdditionalEquipment, WizardFormState } from './types'
-import { he } from 'date-fns/locale'
-import { N } from 'vitest/dist/chunks/reporters.D7Jzd9GS'
 
 const NUM_SLOTS_OUTER = 8
 const NUM_SLOTS_MIDDLE = 4
