@@ -13,34 +13,34 @@ from .constants import (
 
 LabwareUri = NewType("LabwareUri", str)
 
-LabwareDisplayCategory = Union[
-    Literal["tipRack"],
-    Literal["tubeRack"],
-    Literal["reservoir"],
-    Literal["trash"],
-    Literal["wellPlate"],
-    Literal["aluminumBlock"],
-    Literal["adapter"],
-    Literal["other"],
-    Literal["lid"],
-    Literal["system"],
+LabwareDisplayCategory = Literal[
+    "tipRack",
+    "tubeRack",
+    "reservoir",
+    "trash",
+    "wellPlate",
+    "aluminumBlock",
+    "adapter",
+    "other",
+    "lid",
+    "system",
 ]
 
-LabwareFormat = Union[
-    Literal["96Standard"],
-    Literal["384Standard"],
-    Literal["trough"],
-    Literal["irregular"],
-    Literal["trash"],
+LabwareFormat = Literal[
+    "96Standard",
+    "384Standard",
+    "trough",
+    "irregular",
+    "trash",
 ]
 
-LabwareRoles = Union[
-    Literal["labware"],
-    Literal["fixture"],
-    Literal["adapter"],
-    Literal["maintenance"],
-    Literal["lid"],
-    Literal["system"],
+LabwareRoles = Literal[
+    "labware",
+    "fixture",
+    "adapter",
+    "maintenance",
+    "lid",
+    "system",
 ]
 
 
@@ -76,7 +76,7 @@ class LabwareBrandData(TypedDict, total=False):
 class LabwareMetadata(TypedDict, total=False):
     displayName: str
     displayCategory: LabwareDisplayCategory
-    displayVolumeUnits: Union[Literal["µL"], Literal["mL"], Literal["L"]]
+    displayVolumeUnits: Literal["µL", "mL", "L"]
     tags: List[str]
 
 
@@ -115,7 +115,7 @@ WellDefinition = Union[CircularWellDefinition, RectangularWellDefinition]
 class WellGroupMetadata(TypedDict, total=False):
     displayName: str
     displayCategory: LabwareDisplayCategory
-    wellBottomShape: Union[Literal["flat"], Literal["u"], Literal["v"]]
+    wellBottomShape: Literal["flat", "u", "v"]
 
 
 class WellGroup(TypedDict, total=False):
