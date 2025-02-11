@@ -17,22 +17,28 @@ import { selectors as ingredSelectors } from '../../labware-ingred/selectors'
 import { selectors as stepFormSelectors } from '../../step-forms'
 import { selectors as uiLabwareSelectors } from '../../ui/labware'
 import { swatchColors } from '../../organisms/DefineLiquidsModal/swatchColors'
-import {
-  DEFAULT_MM_TOUCH_TIP_OFFSET_FROM_TOP,
-  DEFAULT_MM_BLOWOUT_OFFSET_FROM_TOP,
-  DEFAULT_MM_OFFSET_FROM_BOTTOM,
-} from '../../constants'
 import { getStepGroups } from '../../step-forms/selectors'
 import { getFileMetadata, getRobotType } from './fileFields'
 import { getInitialRobotState, getRobotStateTimeline } from './commands'
-import { getLoadCommands } from './utils'
+import {
+  getLabwareLoadInfo,
+  getLoadCommands,
+  getModulesLoadInfo,
+  getPipettesLoadInfo,
+} from './utils'
+import {
+  pythonDefRun,
+  pythonImports,
+  pythonMetadata,
+  pythonRequirements,
+} from './pythonFile'
 
 import type { SecondOrderCommandAnnotation } from '@opentrons/shared-data/commandAnnotation/types'
 import type {
   PipetteEntity,
   LabwareEntities,
   PipetteEntities,
-  LiquidEntities,
+  Ingredients,
 } from '@opentrons/step-generation'
 import type {
   CommandAnnotationV1Mixin,
@@ -45,23 +51,9 @@ import type {
   ProtocolBase,
   ProtocolFile,
 } from '@opentrons/shared-data'
-import type { DismissedWarningState } from '../../dismiss/reducers'
 import type { LabwareDefByDefURI } from '../../labware-defs'
 import type { Selector } from '../../types'
-
-//  DesignerApplication type for version 8_5
-export interface DesignerApplicationDataV8_5 {
-  ingredients: LiquidEntities
-  ingredLocations: {
-    [labwareId: string]: {
-      [wellName: string]: { [liquidId: string]: { volume: number } }
-    }
-  }
-  savedStepForms: Record<string, any>
-  orderedStepIds: string[]
-  pipetteTiprackAssignments: Record<string, string[]>
-  dismissedWarnings: DismissedWarningState
-}
+import type { PDMetadata } from '../../file-types'
 
 // TODO: BC: 2018-02-21 uncomment this assert, causes test failures
 // console.assert(!isEmpty(process.env.OT_PD_VERSION), 'Could not find application version!')
@@ -107,34 +99,34 @@ export const createFile: Selector<ProtocolFile> = createSelector(
   getRobotStateTimeline,
   getRobotType,
   dismissSelectors.getAllDismissedWarnings,
-  stepFormSelectors.getLiquidEntities,
   ingredSelectors.getLiquidsByLabwareId,
   stepFormSelectors.getSavedStepForms,
   stepFormSelectors.getOrderedStepIds,
-  stepFormSelectors.getLabwareEntities,
-  stepFormSelectors.getModuleEntities,
-  stepFormSelectors.getPipetteEntities,
   uiLabwareSelectors.getLabwareNicknamesById,
   labwareDefSelectors.getLabwareDefsByURI,
   getStepGroups,
+  stepFormSelectors.getInvariantContext,
   (
     fileMetadata,
     initialRobotState,
     robotStateTimeline,
     robotType,
     dismissedWarnings,
-    liquidEntities,
     ingredLocations,
     savedStepForms,
     orderedStepIds,
-    labwareEntities,
-    moduleEntities,
-    pipetteEntities,
     labwareNicknamesById,
     labwareDefsByURI,
-    stepGroups
+    stepGroups,
+    invariantContext
   ) => {
     const { author, description, created } = fileMetadata
+    const {
+      pipetteEntities,
+      labwareEntities,
+      liquidEntities,
+      moduleEntities,
+    } = invariantContext
 
     const loadCommands = getLoadCommands(
       initialRobotState,
@@ -154,30 +146,47 @@ export const createFile: Selector<ProtocolFile> = createSelector(
     const savedOrderedStepIds = orderedStepIds.filter(
       stepId => savedStepForms[stepId]
     )
+
+    const ingredients: Ingredients = Object.entries(liquidEntities).reduce(
+      (acc: Ingredients, [liquidId, liquidData]) => {
+        const {
+          displayName,
+          description,
+          displayColor,
+          liquidGroupId,
+          liquidClass,
+        } = liquidData
+
+        acc[liquidId] = {
+          displayName,
+          description,
+          displayColor,
+          liquidGroupId,
+          liquidClass,
+        }
+        return acc
+      },
+      {}
+    )
+
     const designerApplication = {
       name: 'opentrons/protocol-designer',
       version: applicationVersion,
       data: {
         _internalAppBuildDate,
-        defaultValues: {
-          // TODO: Ian 2019-06-13 load these into redux and always get them from redux, not constants.js
-          // This `defaultValues` key is not yet read by anything, but is populated here for auditability
-          // and so that later we can do #3587 without a PD migration
-          aspirate_mmFromBottom: DEFAULT_MM_OFFSET_FROM_BOTTOM,
-          dispense_mmFromBottom: DEFAULT_MM_OFFSET_FROM_BOTTOM,
-          touchTip_mmFromTop: DEFAULT_MM_TOUCH_TIP_OFFSET_FROM_TOP,
-          blowout_mmFromTop: DEFAULT_MM_BLOWOUT_OFFSET_FROM_TOP,
-        },
         pipetteTiprackAssignments: mapValues(
           pipetteEntities,
           (p: typeof pipetteEntities[keyof typeof pipetteEntities]): string[] =>
             p.tiprackDefURI
         ),
         dismissedWarnings,
-        ingredients: liquidEntities,
+        ingredients,
         ingredLocations,
         savedStepForms,
         orderedStepIds: savedOrderedStepIds,
+        pipettes: getPipettesLoadInfo(pipetteEntities),
+        modules: getModulesLoadInfo(moduleEntities),
+        labware: getLabwareLoadInfo(labwareEntities, labwareNicknamesById),
       },
     }
 
@@ -268,7 +277,7 @@ export const createFile: Selector<ProtocolFile> = createSelector(
       commandAnnotations,
     }
 
-    const protocolBase: ProtocolBase<DesignerApplicationDataV8_5> = {
+    const protocolBase: ProtocolBase<PDMetadata> = {
       $otSharedSchema: '#/protocol/schemas/8',
       schemaVersion: 8,
       metadata: {
@@ -293,5 +302,32 @@ export const createFile: Selector<ProtocolFile> = createSelector(
       ...commandv8Mixin,
       ...commandAnnotionaV1Mixin,
     }
+  }
+)
+
+export const createPythonFile: Selector<string> = createSelector(
+  getFileMetadata,
+  getRobotType,
+  stepFormSelectors.getInvariantContext,
+  getInitialRobotState,
+  getRobotStateTimeline,
+  (
+    fileMetadata,
+    robotType,
+    invariantContext,
+    robotState,
+    robotStateTimeline
+  ) => {
+    return (
+      [
+        // Here are the sections of the Python file:
+        pythonImports(),
+        pythonMetadata(fileMetadata),
+        pythonRequirements(robotType),
+        pythonDefRun(invariantContext, robotState, robotStateTimeline),
+      ]
+        .filter(section => section) // skip any blank sections
+        .join('\n\n') + '\n'
+    )
   }
 )

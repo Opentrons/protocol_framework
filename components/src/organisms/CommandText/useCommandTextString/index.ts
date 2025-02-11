@@ -93,6 +93,9 @@ export function useCommandTextString(
     case 'dropTipInPlace':
     case 'pickUpTip':
     case 'airGapInPlace':
+    case 'evotipSealPipette':
+    case 'evotipUnsealPipette':
+    case 'evotipDispense':
       return {
         kind: 'generic',
         commandText: utils.getPipettingCommandText(fullParams),

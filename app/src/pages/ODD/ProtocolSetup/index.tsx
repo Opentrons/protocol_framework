@@ -568,6 +568,16 @@ function PrepareToRun({
           <>
             <ProtocolSetupStep
               onClickSetupStep={() => {
+                setSetupScreen('view only parameters')
+              }}
+              title={t('parameters')}
+              detail={parametersDetail}
+              subDetail={null}
+              status="ready"
+              interactionDisabled={!hasRunTimeParameters}
+            />
+            <ProtocolSetupStep
+              onClickSetupStep={() => {
                 setSetupScreen('instruments')
               }}
               title={t('instruments')}
@@ -599,16 +609,6 @@ function PrepareToRun({
                   : null
               }
               status={offsetsConfirmed ? 'ready' : 'general'}
-            />
-            <ProtocolSetupStep
-              onClickSetupStep={() => {
-                setSetupScreen('view only parameters')
-              }}
-              title={t('parameters')}
-              detail={parametersDetail}
-              subDetail={null}
-              status="ready"
-              interactionDisabled={!hasRunTimeParameters}
             />
             <ProtocolSetupStep
               onClickSetupStep={() => {

@@ -120,6 +120,7 @@ export const FLEX_SINGLE_SLOT_BY_CUTOUT_ID: { [CutoutId: string]: string } = {
   cutoutD3: 'D3',
 }
 
+// TODO(jh 01-15-25): Instead of typing slotId as `string`, type it as `AddressableAreaName`.
 // returns the position associated with a slot id
 export function getPositionFromSlotId(
   slotId: string,
