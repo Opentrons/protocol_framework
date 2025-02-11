@@ -168,6 +168,7 @@ export const TextAreaField = forwardRef<
                       name="information"
                       size={SPACING.spacing12}
                       color={COLORS.grey60}
+                      data-testid="tooltip-icon"
                     />
                   </Flex>
                   <Tooltip tooltipProps={tooltipProps}>{tooltipText}</Tooltip>
@@ -186,7 +187,12 @@ export const TextAreaField = forwardRef<
             >
               {leftIcon !== undefined && (
                 <Flex>
-                  <Icon name={leftIcon} color={COLORS.grey60} size="1.25rem" />
+                  <Icon
+                    name={leftIcon}
+                    color={COLORS.grey60}
+                    size="1.25rem"
+                    data-testid="left-icon"
+                  />
                 </Flex>
               )}
               <StyledTextArea

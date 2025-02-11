@@ -54,4 +54,16 @@ describe('TextAreaField', () => {
 
     expect(screen.getByText('Error: Invalid input')).toBeInTheDocument()
   })
+
+  it('display an icon when tooltip prop is provided', () => {
+    props.tooltipText = 'ot-icon-check'
+    render(props)
+    screen.getByTestId('tooltip-icon')
+  })
+
+  it('display left icon when leftIcon prop is provided', () => {
+    props.leftIcon = 'information'
+    render(props)
+    screen.getByTestId('left-icon')
+  })
 })
