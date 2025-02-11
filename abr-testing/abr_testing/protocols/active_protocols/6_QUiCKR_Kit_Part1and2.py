@@ -30,12 +30,12 @@ def run(protocol: ProtocolContext) -> None:
     """Quick V2 Kit Part 1 and 2."""
     num_plate_pairs = protocol.params.num_plate_pairs  # type: ignore[attr-defined]
     buffer_filling = protocol.params.buffer_filling  # type: ignore[attr-defined]
+    protocol.load_trash_bin("A3")
     # deck layout
     plate_384_slots = ["C1", "B1", "A1"]
     plate_384_name = ["Assay Plate #1", "Assay Plate #2", "Assay Plate #3"]
     plate_96_slots = ["C2", "B2", "A2"]
     plate_96_name = ["Sample Plate #1", "Sample Plate #2", "Sample Plate #3"]
-    protocol.load_waste_chute()
     plate_384 = [
         protocol.load_labware("biorad_384_wellplate_50ul", slot, name)
         for slot, name in zip(
@@ -81,7 +81,7 @@ def run(protocol: ProtocolContext) -> None:
         tips = [tiprack_50[0], tiprack_50[1]]
 
     elif num_plate_pairs == 2:
-        deck_slots_50 = ["C3", "B3", "A3"]
+        deck_slots_50 = ["C3", "B3", "A1"]
         tiprack_adapter = [
             protocol.load_adapter("opentrons_flex_96_tiprack_adapter", slot)
             for slot in deck_slots_50
