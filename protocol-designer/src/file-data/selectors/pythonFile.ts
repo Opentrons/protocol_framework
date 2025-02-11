@@ -86,28 +86,22 @@ export function getLoadAdapters(
   const adapterEntities = Object.values(labwareEntities).filter(lw =>
     lw.def.allowedRoles?.includes('adapter')
   )
-  const hasAdapters = Object.keys(adapterEntities).length > 0
+  const pythonAdapters = Object.values(adapterEntities)
+    .map(adapter => {
+      const adapterSlot = labwareRobotState[adapter.id].slot
+      const onModule = moduleEntities[adapterSlot] != null
+      const location = onModule
+        ? moduleEntities[adapterSlot].pythonName
+        : PROTOCOL_CONTEXT_NAME
+      const slotInfo = onModule ? '' : `, ${formatPyStr(adapterSlot)}`
 
-  const pythonAdapters = hasAdapters
-    ? Object.values(adapterEntities)
-        .map(adapter => {
-          const adapterSlot = labwareRobotState[adapter.id].slot
-          const onModule = moduleEntities[adapterSlot] != null
-          const location = onModule
-            ? moduleEntities[adapterSlot].pythonName
-            : PROTOCOL_CONTEXT_NAME
-          const slotInfo = onModule ? '' : `, ${formatPyStr(adapterSlot)}`
+      return `${adapter.pythonName} = ${location}.load_adapter(${formatPyStr(
+        adapter.def.parameters.loadName
+      )}${slotInfo})`
+    })
+    .join('\n')
 
-          return `${
-            adapter.pythonName
-          } = ${location}.load_adapter(${formatPyStr(
-            adapter.def.parameters.loadName
-          )}${slotInfo})`
-        })
-        .join('\n')
-    : ''
-
-  return hasAdapters ? `# Load Adapters:\n${pythonAdapters}` : ''
+  return pythonAdapters ? `# Load Adapters:\n${pythonAdapters}` : ''
 }
 
 export function getLoadLabware(
@@ -118,33 +112,27 @@ export function getLoadLabware(
   const labwareEntities = Object.values(allLabwareEntities).filter(
     lw => !lw.def.allowedRoles?.includes('adapter')
   )
-  const hasLabware = Object.keys(labwareEntities).length > 0
+  const pythonLabware = Object.values(labwareEntities)
+    .map(labware => {
+      const labwareSlot = labwareRobotState[labware.id].slot
+      const onModule = moduleEntities[labwareSlot] != null
+      const onAdapter = allLabwareEntities[labwareSlot] != null
+      let location = PROTOCOL_CONTEXT_NAME
+      if (onAdapter) {
+        location = allLabwareEntities[labwareSlot].pythonName
+      } else if (onModule) {
+        location = moduleEntities[labwareSlot].pythonName
+      }
+      const slotInfo =
+        onModule || onAdapter ? '' : `, ${formatPyStr(labwareSlot)}`
 
-  const pythonLabware = hasLabware
-    ? Object.values(labwareEntities)
-        .map(labware => {
-          const labwareSlot = labwareRobotState[labware.id].slot
-          const onModule = moduleEntities[labwareSlot] != null
-          const onAdapter = allLabwareEntities[labwareSlot] != null
-          let location = PROTOCOL_CONTEXT_NAME
-          if (onAdapter) {
-            location = allLabwareEntities[labwareSlot].pythonName
-          } else if (onModule) {
-            location = moduleEntities[labwareSlot].pythonName
-          }
-          const slotInfo =
-            onModule || onAdapter ? '' : `, ${formatPyStr(labwareSlot)}`
+      return `${labware.pythonName} = ${location}.load_labware(${formatPyStr(
+        labware.def.parameters.loadName
+      )}${slotInfo})`
+    })
+    .join('\n')
 
-          return `${
-            labware.pythonName
-          } = ${location}.load_labware(${formatPyStr(
-            labware.def.parameters.loadName
-          )}${slotInfo})`
-        })
-        .join('\n')
-    : ''
-
-  return hasLabware ? `# Load Labware:\n${pythonLabware}` : ''
+  return pythonLabware ? `# Load Labware:\n${pythonLabware}` : ''
 }
 
 export function pythonDefRun(

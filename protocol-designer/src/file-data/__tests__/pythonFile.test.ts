@@ -92,15 +92,15 @@ const mockModuleEntities: ModuleEntities = {
     pythonName: 'magnetic_block_2',
   },
 }
-const labwareId = 'labwareId1'
+const labwareId1 = 'labwareId1'
 const labwareId2 = 'labwareId2'
 const labwareId3 = 'labwareId3'
 const labwareId4 = 'labwareId4'
 const labwareId5 = 'labwareId5'
 
 const mockLabwareEntities: LabwareEntities = {
-  [labwareId]: {
-    id: labwareId,
+  [labwareId1]: {
+    id: labwareId1,
     labwareDefURI: 'fixture/fixture_flex_96_tiprack_adapter/1',
     def: fixtureTiprackAdapter as LabwareDefinition2,
     pythonName: 'adapter_1',
@@ -133,7 +133,7 @@ const mockLabwareEntities: LabwareEntities = {
 
 const labwareRobotState: TimelineFrame['labware'] = {
   //  adapter on a module
-  [labwareId]: { slot: moduleId },
+  [labwareId1]: { slot: moduleId },
   //  adapter on a slot
   [labwareId2]: { slot: 'B2' },
   //  labware on an adapter on a slot
@@ -153,10 +153,11 @@ describe('getLoadModules', () => {
     }
 
     expect(getLoadModules(mockModuleEntities, modules)).toBe(
-      `# Load Modules:
+      `
+# Load Modules:
 magnetic_block_1 = protocol.load_module("magneticBlockV1", "B1")
 heater_shaker_1 = protocol.load_module("heaterShakerModuleV1", "A1")
-magnetic_block_2 = protocol.load_module("magneticBlockV1", "A2")`
+magnetic_block_2 = protocol.load_module("magneticBlockV1", "A2")`.trimStart()
     )
   })
 })
@@ -170,9 +171,10 @@ describe('getLoadAdapters', () => {
         labwareRobotState
       )
     ).toBe(
-      `# Load Adapters:
+      `
+# Load Adapters:
 adapter_1 = magnetic_block_1.load_adapter("fixture_flex_96_tiprack_adapter")
-adapter_2 = protocol.load_adapter("fixture_flex_96_tiprack_adapter", "B2")`
+adapter_2 = protocol.load_adapter("fixture_flex_96_tiprack_adapter", "B2")`.trimStart()
     )
   })
 })
@@ -182,10 +184,11 @@ describe('getLoadLabware', () => {
     expect(
       getLoadLabware(mockModuleEntities, mockLabwareEntities, labwareRobotState)
     ).toBe(
-      `# Load Labware:
+      `
+# Load Labware:
 well_plate_1 = adapter_2.load_labware("fixture_96_plate")
 well_plate_2 = magnetic_block_2.load_labware("fixture_96_plate")
-well_plate_3 = protocol.load_labware("fixture_96_plate", "C2")`
+well_plate_3 = protocol.load_labware("fixture_96_plate", "C2")`.trimStart()
     )
   })
 })
