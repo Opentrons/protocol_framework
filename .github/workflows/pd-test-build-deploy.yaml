@@ -164,7 +164,7 @@ jobs:
         run: |
           make -C protocol-designer NODE_ENV=development
       - name: 'upload github artifact'
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: 'pd-artifact'
           path: protocol-designer/dist
