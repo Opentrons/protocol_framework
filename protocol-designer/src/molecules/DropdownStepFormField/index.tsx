@@ -145,6 +145,11 @@ export function DropdownStepFormField(
               </Flex>
             </Flex>
           </ListItem>
+          {errorToShow != null ? (
+            <StyledText desktopStyle="bodyDefaultRegular" color={COLORS.red50}>
+              {errorToShow}
+            </StyledText>
+          ) : null}
         </Flex>
       )}
     </Flex>
