@@ -10,6 +10,7 @@ import {
 import type {
   InvariantContext,
   ModuleEntities,
+  Timeline,
   TimelineFrame,
 } from '@opentrons/step-generation'
 import type { RobotType } from '@opentrons/shared-data'
@@ -77,9 +78,22 @@ export function getLoadModules(
   return hasModules ? `# Load Modules:\n${pythonModules}` : ''
 }
 
+export function stepCommands(robotStateTimeline: Timeline): string {
+  return (
+    '# PROTOCOL STEPS\n\n' +
+    robotStateTimeline.timeline
+      .map(
+        (timelineFrame, idx) =>
+          `# Step ${idx + 1}:\n${timelineFrame.python || 'pass'}`
+      )
+      .join('\n\n')
+  )
+}
+
 export function pythonDefRun(
   invariantContext: InvariantContext,
-  robotState: TimelineFrame
+  robotState: TimelineFrame,
+  robotStateTimeline: Timeline
 ): string {
   const { moduleEntities } = invariantContext
 
@@ -91,7 +105,7 @@ export function pythonDefRun(
     // loadInstruments(),
     // defineLiquids(),
     // loadLiquids(),
-    // stepCommands(),
+    stepCommands(robotStateTimeline),
   ]
   const functionBody =
     sections

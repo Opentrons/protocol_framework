@@ -310,14 +310,21 @@ export const createPythonFile: Selector<string> = createSelector(
   getRobotType,
   stepFormSelectors.getInvariantContext,
   getInitialRobotState,
-  (fileMetadata, robotType, invariantContext, robotState) => {
+  getRobotStateTimeline,
+  (
+    fileMetadata,
+    robotType,
+    invariantContext,
+    robotState,
+    robotStateTimeline
+  ) => {
     return (
       [
         // Here are the sections of the Python file:
         pythonImports(),
         pythonMetadata(fileMetadata),
         pythonRequirements(robotType),
-        pythonDefRun(invariantContext, robotState),
+        pythonDefRun(invariantContext, robotState, robotStateTimeline),
       ]
         .filter(section => section) // skip any blank sections
         .join('\n\n') + '\n'

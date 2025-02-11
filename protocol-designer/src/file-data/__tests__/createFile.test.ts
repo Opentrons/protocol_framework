@@ -106,7 +106,8 @@ describe('createFile selector', () => {
       fileMetadata,
       OT2_ROBOT_TYPE,
       entities,
-      v7Fixture.initialRobotState
+      v7Fixture.initialRobotState,
+      v7Fixture.robotStateTimeline
     )
     // This is just a quick smoke test to make sure createPythonFile() produces
     // something that looks like a Python file. The individual sections of the
@@ -129,6 +130,9 @@ requirements = {
 }
 
 def run(protocol: protocol_api.ProtocolContext):
+    # PROTOCOL STEPS
+
+    # Step 1:
     pass
 `.trimStart()
     )
