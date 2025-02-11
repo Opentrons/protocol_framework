@@ -106,7 +106,7 @@ class RectangularWellDefinition(TypedDict):
     z: float
     xDimension: float
     yDimension: float
-    geometryDefinitionId: NotRequired[str]
+    geometryDefinitionId: NotRequired[str | None]
 
 
 WellDefinition = CircularWellDefinition | RectangularWellDefinition
@@ -142,6 +142,6 @@ class LabwareDefinition(TypedDict):
     gripperOffsets: NotRequired[dict[str, GripperOffsets]]
     gripForce: NotRequired[float]
     gripHeightFromLabwareBottom: NotRequired[float]
-    innerLabwareGeometry: NotRequired[dict[str, InnerWellGeometry]]
+    innerLabwareGeometry: NotRequired[dict[str, InnerWellGeometry] | None]
     compatibleParentLabware: NotRequired[list[str]]
     stackLimit: NotRequired[int]
