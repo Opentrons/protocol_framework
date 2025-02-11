@@ -130,6 +130,11 @@ requirements = {
 }
 
 def run(protocol: protocol_api.ProtocolContext):
+    # Load Labware:
+    mockPythonName = protocol.load_labware("fixture_trash", "12")
+    mockPythonName = protocol.load_labware("fixture_tiprack_10_ul", "1")
+    mockPythonName = protocol.load_labware("fixture_96_plate", "7")
+
     # PROTOCOL STEPS
 
     # Step 1:
