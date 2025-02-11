@@ -11,6 +11,7 @@ import type {
   InvariantContext,
   LabwareEntities,
   ModuleEntities,
+  Timeline,
   TimelineFrame,
 } from '@opentrons/step-generation'
 import type { RobotType } from '@opentrons/shared-data'
@@ -135,9 +136,22 @@ export function getLoadLabware(
   return pythonLabware ? `# Load Labware:\n${pythonLabware}` : ''
 }
 
+export function stepCommands(robotStateTimeline: Timeline): string {
+  return (
+    '# PROTOCOL STEPS\n\n' +
+    robotStateTimeline.timeline
+      .map(
+        (timelineFrame, idx) =>
+          `# Step ${idx + 1}:\n${timelineFrame.python || 'pass'}`
+      )
+      .join('\n\n')
+  )
+}
+
 export function pythonDefRun(
   invariantContext: InvariantContext,
-  robotState: TimelineFrame
+  robotState: TimelineFrame,
+  robotStateTimeline: Timeline
 ): string {
   const { moduleEntities, labwareEntities } = invariantContext
   const { modules, labware } = robotState
@@ -152,7 +166,7 @@ export function pythonDefRun(
     // loadInstruments(),
     // defineLiquids(),
     // loadLiquids(),
-    // stepCommands(),
+    stepCommands(robotStateTimeline),
   ]
   const functionBody =
     sections

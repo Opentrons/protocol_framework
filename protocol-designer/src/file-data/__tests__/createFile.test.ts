@@ -106,7 +106,8 @@ describe('createFile selector', () => {
       fileMetadata,
       OT2_ROBOT_TYPE,
       entities,
-      v7Fixture.initialRobotState
+      v7Fixture.initialRobotState,
+      v7Fixture.robotStateTimeline
     )
     // This is just a quick smoke test to make sure createPythonFile() produces
     // something that looks like a Python file. The individual sections of the
@@ -133,6 +134,11 @@ def run(protocol: protocol_api.ProtocolContext):
     mockPythonName = protocol.load_labware("fixture_trash", "12")
     mockPythonName = protocol.load_labware("fixture_tiprack_10_ul", "1")
     mockPythonName = protocol.load_labware("fixture_96_plate", "7")
+
+    # PROTOCOL STEPS
+
+    # Step 1:
+    pass
 `.trimStart()
     )
   })
