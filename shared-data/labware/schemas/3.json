@@ -588,8 +588,7 @@
     },
     "stackLimit": {
       "type": "number",
-      "description": "The limit representing the maximum stack size for a given labware.",
-      "additionalProperties": false
+      "description": "The limit representing the maximum stack size for a given labware."
     },
     "compatibleParentLabware": {
       "type": "array",
