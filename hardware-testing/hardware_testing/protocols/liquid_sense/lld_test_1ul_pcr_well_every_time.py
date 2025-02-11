@@ -8,21 +8,21 @@ from hardware_testing.protocols import (
 import math
 
 metadata = {"protocolName": "LLD 1uL PCR-to-MVS-04feb-TEST-MATRIX-T-B-M"}
-requirements = {"robotType": "Flex", "apiLevel": "2.22"}
+requirements = {"robotType": "Flex", "apiLevel": "2.23"}
 
 SLOTS = {
-    "tips": ["A2", "B1", "A3", OFF_DECK],
+    "tips": ["A2", "A3", "B2", "B3", "A4", "B4"],
     "src": "C2",
-    "src_tube": "B2",
-    "dst": ["D3", "D2", "D1", "C1", "C2"],
+    "src_tube": "B1",
+    "dst": ["D3", "D2", "D1", "C1"],
     "tips_200": "A1",
     "diluent_reservoir": "C3",
+    "lids": "D4"
 }
 
 TARGET_UL = 1
 SUBMERGE_MM = -1.5
 BOTTOM_MM = 3.0
-DILUENT_UL = max(0, 200 - TARGET_UL)
 
 TIP_VOLUME = 50
 PIP_VOLUME = 50
@@ -51,8 +51,8 @@ def add_parameters(parameters: ParameterContext) -> None:
         variable_name="num_of_plates",
         display_name="Number of Plates",
         minimum=1,
-        maximum=5,
-        default=1,
+        maximum=4,
+        default=4,
     )
     parameters.add_bool(
         variable_name="skip_diluent", display_name="Skip Diluent", default=False
@@ -82,11 +82,9 @@ def get_latest_version(load_name: str) -> int:
 
 
 def run(ctx: ProtocolContext) -> None:
-    global TRIALS, DILUENT_UL
-    ctx.load_trash_bin("A3")
+    global TRIALS
     columns = ctx.params.columns  # type: ignore[attr-defined]
     baseline = ctx.params.baseline  # type: ignore[attr-defined]
-    SRC_WELL = ctx.params.dye_source_well  # type: ignore[attr-defined]
     num_of_plates = ctx.params.num_of_plates  # type: ignore[attr-defined]
     skip_diluent = ctx.params.skip_diluent  # type: ignore[attr-defined]
     push_out = ctx.params.push_out  # type: ignore[attr-defined]
@@ -94,15 +92,14 @@ def run(ctx: ProtocolContext) -> None:
     TRIALS = columns * 8 * num_of_plates
     # Test Matrix
     test_matrix = {
-        "A": {"ASP": "M_LLD", "DSP": "M"},
-        "B": {"ASP": "M_LLD", "DSP": "M"},
-        "C": {"ASP": "M", "DSP": "M"},
-        "D": {"ASP": "M", "DSP": "M"},
-        "E": {"ASP": "B", "DSP": "T"},
-        "F": {"ASP": "B", "DSP": "B"},
-        "G": {"ASP": "M_LLD_TIP", "DSP": "M"},
-        "H": {"ASP": "M_LLD_TIP", "DSP": "M"},
-        
+        "A": {"ASP": "M_LLD", "DSP": "M", "SRC_WELL":"A1"},
+        "B": {"ASP": "M_LLD", "DSP": "M", "SRC_WELL": "A1"},
+        "C": {"ASP": "M", "DSP": "M", "SRC_WELL":"A2"},
+        "D": {"ASP": "M", "DSP": "M", "SRC_WELL": "A2"},
+        "E": {"ASP": "B", "DSP": "T", "SRC_WELL": "A3"},
+        "F": {"ASP": "B", "DSP": "B", "SRC_WELL": "A3"},
+        "G": {"ASP": "M_LLD_TIP", "DSP": "M", "SRC_WELL": "A4"},
+        "H": {"ASP": "M_LLD_TIP", "DSP": "M", "SRC_WELL": "A4"},
     }
 
     # LOAD 50 UL TIPS based on # of plates
@@ -116,10 +113,10 @@ def run(ctx: ProtocolContext) -> None:
             )
             tip_racks_50s.append(tip_rack)
     else:
-        for i in range(2):
+        for i in SLOTS["tips"]:
             tip_rack = ctx.load_labware(
                 f"opentrons_flex_96_tiprack_{TIP_VOLUME}ul",
-                location=SLOTS["tips"][i],
+                location=i,
                 version=1,
             )
             tip_racks_50s.append(tip_rack)
@@ -141,9 +138,7 @@ def run(ctx: ProtocolContext) -> None:
     src_tube = ctx.load_labware(
         "opentrons_24_aluminumblock_nest_1.5ml_snapcap",
         location=SLOTS["src_tube"],
-        version=get_latest_version(
-            "opentrons_24_aluminumblock_nest_1.5ml_snapcap"
-        ),
+        version=get_latest_version("opentrons_24_aluminumblock_nest_1.5ml_snapcap"),
     )
     src_labware = ctx.load_labware(
         SRC_LABWARE, location=SLOTS["src"], version=get_latest_version(SRC_LABWARE)
@@ -160,7 +155,7 @@ def run(ctx: ProtocolContext) -> None:
             label=f"DST Labware {i}",
         )
         dst_labwares.append(dst_labware_XX)
-
+    plate_lids = ctx.load_lid_stack("plate_lid", SLOTS["lids"], num_of_plates)
     # define starting liquid volumes
     # load diluent wells
     diluent = ctx.define_liquid("diluent", "#0000FF")
@@ -179,7 +174,7 @@ def run(ctx: ProtocolContext) -> None:
         diluent_reservoir["A11"],
         diluent_reservoir["A12"],
     ]
-    total_diluent_needed = DILUENT_UL * TRIALS  # total diluent needed
+    total_diluent_needed = 200 * TRIALS  # total diluent needed
     number_of_wells_needed = math.ceil(
         total_diluent_needed / 9000
     )  # total number of wells needed
@@ -189,95 +184,107 @@ def run(ctx: ProtocolContext) -> None:
     diluent_wells_used = diluent_wells[:number_of_wells_needed]
     diluent_reservoir.load_liquid(diluent_wells_used, total_vol_per_well, diluent)
     # load dye based on number of trials
-    total_dye_needed = TARGET_UL * TRIALS
-    total_wells_needed = math.ceil(
-        total_dye_needed / (src_labware.wells()[0].max_volume - DEAD_VOL_DYE)
+    volume_list = [1.0, 1.2, 1.5, 2.0]
+    total_dye_needed = (
+        sum([(vol * 12) + 10 for vol in volume_list[:num_of_plates]]) * num_of_plates
     )
-    src_labware_wells = []
-    for well in range(total_wells_needed):
-        source_column = SRC_WELL[0]
-        source_row = int(SRC_WELL[1]) + well
-        new_well = source_column + str(source_row)
-        src_labware_wells.append(src_labware[new_well])
-    dye_per_well = (total_dye_needed / total_wells_needed) + DEAD_VOL_DYE
+    dye_per_well = sum([(vol * 12) for vol in volume_list]) + 10
+    src_labware_wells = [
+        src_labware["A1"],
+        src_labware["A2"],
+        src_labware["A3"],
+        src_labware["A4"],
+    ]
+    print(dye_per_well)
+    dye_per_well_list = len(src_labware_wells) * [dye_per_well]
+    src_tube_list = len(src_labware_wells) * [src_tube["A1"]]
     dye = ctx.define_liquid("dye", "#FF0000")
-    dye_per_well_list = []
-    dye_per_well_list += total_wells_needed * [dye_per_well]
-    src_tube_list = []
-    src_tube_list += total_wells_needed * [src_tube["A1"]]
+
     if baseline:
         src_tube.load_empty([src_tube["A1"]])
     else:
-        src_tube.load_liquid([src_tube["A1"]], total_dye_needed+100, dye)
-        pipette.transfer(dye_per_well_list, src_tube_list, src_labware_wells)
+        src_tube.load_liquid([src_tube["A1"]], total_dye_needed + 100, dye)
+        pipette.transfer(
+            volume = dye_per_well_list, source=src_tube_list, dest=src_labware_wells, trash=False
+        )
+        tip_counter = 1
     for dst_labware in dst_labwares:
         if not diluent:
             dst_labware.load_liquid(dst_labware.wells(), 199, diluent)
         else:
             dst_labware.load_empty(dst_labware.wells())
 
-    def _run_trial(dst_well: Well, use_lld: bool, dye_used: int) -> None:
+    def _run_trial(
+        dst_well: Well, dye_used: int, tip_counter: int, target_ul: float
+    ) -> int:
         # change tip before every aspirate
         well_name_letter = dst_well.well_name[0]
+        well_number = dst_well.well_name[1]
         asp_behavior = test_matrix[well_name_letter]["ASP"]
         dsp_behavior = test_matrix[well_name_letter]["DSP"]
+        src_well_str = test_matrix[well_name_letter]["SRC_WELL"]
+        src_well = src_labware[src_well_str]
+        if tip_counter > (4 * 96):
+            print("started moving tip racks")
+            ctx.move_labware(tip_racks_50s[0], "C4", use_gripper=True)
+            ctx.move_labware(tip_racks_50s[4], SLOTS["tips"][0], use_gripper=True)
+            ctx.move_labware(tip_racks_50s[2], SLOTS["tips"][4], use_gripper=True)
+            ctx.move_labware(tip_racks_50s[5], SLOTS["tips"][2], use_gripper=True)
+            tip_counter = 0
+        tip_counter += 1
         pipette.pick_up_tip()
-        well_num = 0
-        src_well = src_labware_wells[well_num]
+
         if "LLD" in asp_behavior:
             pipette.require_liquid_presence(src_well)
             if "T" in asp_behavior:
                 # switch tip
-                pipette.drop_tip()
+                pipette.return_tip()
                 pipette.pick_up_tip()
-        pipette.configure_for_volume(TARGET_UL)
+                tip_counter += 1
+        pipette.configure_for_volume(target_ul)
+        # ASPIRATE
         if "M" in asp_behavior:
             # NOTE: if liquid height is <2.5mm, protocol may error out
             #       this can be avoided by adding extra starting liquid in the SRC labware
-            pipette.aspirate(TARGET_UL, src_well.meniscus(SUBMERGE_MM))
+            # need to probe new well before doing meniscus relative
+            if int(well_number) == 1 and asp_behavior == "M":
+                pipette.require_liquid_presence(src_well)
+                pipette.return_tip()
+                pipette.pick_up_tip()
+                tip_counter +=2
+            pipette.aspirate(target_ul, src_well.meniscus(SUBMERGE_MM))
         else:
-            pipette.aspirate(TARGET_UL, src_well.bottom(BOTTOM_MM))
+            pipette.aspirate(target_ul, src_well.bottom(BOTTOM_MM))
+        # DISPENSE
         if "M" in dsp_behavior:
             pipette.dispense(
-                TARGET_UL, dst_well.meniscus(SUBMERGE_MM), push_out=push_out
+                target_ul, dst_well.meniscus(SUBMERGE_MM), push_out=push_out
             )  # contact
         elif "B" in dsp_behavior:
             pipette.dispense(
-                TARGET_UL, dst_well.bottom(BOTTOM_MM), push_out=push_out
+                target_ul, dst_well.bottom(BOTTOM_MM), push_out=push_out
             )  # contact
         else:
-            pipette.dispense(TARGET_UL, dst_well.top(), push_out = push_out)
-        dye_used += TARGET_UL
-        if dye_used > dye_per_well:
-            dye_used = 0
-            well_num += 1
-            src_well = src_labware[well_num]
+            pipette.dispense(target_ul, dst_well.top(), push_out=push_out) # top
         pipette.return_tip()
+        print(tip_counter)
+        return tip_counter
 
     # fill with diluent
     if not skip_diluent:
         ctx.comment("FILLING DESTINATION PLATE WITH DILUENT")
         if baseline:
-            DILUENT_UL += TARGET_UL
-        for plate in dst_labwares:
+            diluent_ul = 200
+        for (vol, plate) in zip(volume_list, dst_labwares):
+            diluent_ul = 200 - vol
             dst_labware = plate
             diluent_pipette.reset_tipracks()
             # CHECK IF THIS IS 5TH PLATE
-            if (dst_labwares[-1] == dst_labware) and (len(dst_labwares) == 5):
-                # MOVE 50 UL TIP RACK FROM OFF DECK
-                tip_rack_location = tip_racks_50s[-2].parent
-                ctx.move_labware(
-                    tip_racks_50s[-2], new_location=OFF_DECK, use_gripper=False
-                )
-                ctx.move_labware(
-                    tip_racks_50s[-1], new_location=tip_rack_location, use_gripper=False
-                )
             i = 0
             # fill with diluent
             for i in range(columns):
-                if i >= columns/2:
-                    if use_test_matrix:
-                        DILUENT_UL = 100
+                if i >= columns / 2 and use_test_matrix:
+                    diluent_ul = (200 / 2) - vol
                 diluent_well = diluent_wells[i % len(diluent_wells_used)]
                 if i < len(diluent_wells_used):
                     if diluent_pipette.has_tip:
@@ -286,35 +293,48 @@ def run(ctx: ProtocolContext) -> None:
                         diluent_pipette.require_liquid_presence(diluent_well)
                 if not diluent_pipette.has_tip:
                     diluent_pipette.pick_up_tip()
-                diluent_pipette.aspirate(DILUENT_UL, diluent_well.bottom(0.5))
+                diluent_pipette.aspirate(diluent_ul, diluent_well.bottom(0.5))
                 diluent_pipette.dispense(
-                    DILUENT_UL, dst_labware[f"A{i+1}"].top(), push_out=20
+                    diluent_ul, dst_labware[f"A{i+1}"].top(), push_out=20
                 )
             diluent_pipette.return_tip()
-    dye_used = 0
-
+    n = 0 
+    dye_used = 0.0
     if not baseline:
-        for i, w in enumerate(dst_labware.wells()[:TRIALS]):
-            _run_trial(
-                w, use_lld=bool((i % 2) == 0), dye_used=dye_used
-            )  # switch using LLD every-other trial
+        for (vol, dst_labware) in zip(volume_list, dst_labwares):
+            for i, w in enumerate(dst_labware.wells()[:TRIALS]):
+                tip_counter = _run_trial(
+                    w, dye_used=dye_used, tip_counter=tip_counter, target_ul=vol
+                )  # switch using LLD every-other trial
+            ctx.move_lid(plate_lids, dst_labware, use_gripper = True)
+    diluent_tip_counter = 0
+    diluent_pipette.reset_tipracks()
     if use_test_matrix:
         diluent_pipette.pick_up_tip()
-        dst_labware = dst_labwares[0]
-        columns_list = list(range(columns))
-        halfway = int(len(columns_list)/2)
-        print(halfway)
-        for i in columns_list[halfway:]:
-            DILUENT_UL = 99
-            diluent_well = diluent_wells[i % len(diluent_wells_used)]
-            if i < len(diluent_wells_used):
-                if diluent_pipette.has_tip:
-                    diluent_pipette.return_tip()
+        for (vol, dst_labware) in zip(volume_list, dst_labwares):
+            columns_list = list(range(columns))
+            halfway = int(len(columns_list) / 2)
+            ctx.move_lid(dst_labware, "D4", use_gripper =True)
+            for i in columns_list[halfway:]:
+                diluent_ul = 200 - ((200 / 2) - vol)
+                diluent_well = diluent_wells[i % len(diluent_wells_used)]
+                if i < len(diluent_wells_used):
+                    if diluent_pipette.has_tip:
+                        diluent_pipette.return_tip()
+                        diluent_tip_counter += 1
+                        if diluent_tip_counter >= 12:
+                            diluent_pipette.reset_tipracks()
+                            diluent_tip_counter = 0
+                        diluent_pipette.pick_up_tip()
+                        diluent_pipette.require_liquid_presence(diluent_well)
+                if not diluent_pipette.has_tip:
                     diluent_pipette.pick_up_tip()
-                    diluent_pipette.require_liquid_presence(diluent_well)
-            if not diluent_pipette.has_tip:
-                diluent_pipette.pick_up_tip()
-            diluent_pipette.aspirate(DILUENT_UL, diluent_well.bottom(0.5))
-            diluent_pipette.dispense(
-                DILUENT_UL, dst_labware[f"A{i+1}"].top(), push_out=20
-            )
+                    diluent_tip_counter += 1
+                    if diluent_tip_counter >= 12:
+                        diluent_pipette.reset_tipracks()
+                        diluent_tip_counter = 0
+                diluent_pipette.aspirate(diluent_ul, diluent_well.bottom(0.5))
+                diluent_pipette.dispense(
+                    diluent_ul, dst_labware[f"A{i+1}"].top(), push_out=20
+                )
+            ctx.move_lid("D4", dst_labware, use_gripper = True)
