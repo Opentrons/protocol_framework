@@ -667,12 +667,13 @@ class Group(BaseModel):
     )
 
 
-WellSegment = Union[
-    ConicalFrustum,
-    CuboidalFrustum,
-    SquaredConeSegment,
-    RoundedCuboidSegment,
-    SphericalSegment,
+WellSegment = Annotated[
+    ConicalFrustum
+    | CuboidalFrustum
+    | SquaredConeSegment
+    | RoundedCuboidSegment
+    | SphericalSegment,
+    Field(discriminator="shape"),
 ]
 
 
