@@ -441,9 +441,9 @@
     ]
   },
   "metadata": {
-    "displayName": "Applied Biosystems MicroAmp 384 Well Plate 40 \u00b5L",
+    "displayName": "Applied Biosystems MicroAmp 384 Well Plate 40 µL",
     "displayCategory": "wellPlate",
-    "displayVolumeUnits": "\u00b5L",
+    "displayVolumeUnits": "µL",
     "tags": []
   },
   "dimensions": {
