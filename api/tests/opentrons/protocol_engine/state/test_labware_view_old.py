@@ -18,7 +18,6 @@ from opentrons_shared_data.labware.labware_definition import (
     Parameters,
     LabwareDefinition,
     LabwareRole,
-    OverlapOffset as SharedDataOverlapOffset,
     GripperOffsets,
     OffsetVector,
 )
@@ -698,7 +697,7 @@ def test_get_labware_overlap_offsets() -> None:
     result = subject.get_labware_overlap_offsets(
         definition=LabwareDefinition.model_construct(  # type: ignore[call-arg]
             stackingOffsetWithLabware={
-                "bottom-labware-name": SharedDataOverlapOffset(x=1, y=2, z=3)
+                "bottom-labware-name": OffsetVector(x=1, y=2, z=3)
             }
         ),
         below_labware_name="bottom-labware-name",
@@ -712,7 +711,7 @@ class ModuleOverlapSpec(NamedTuple):
 
     spec_deck_definition: DeckDefinitionV5
     module_model: ModuleModel
-    stacking_offset_with_module: Dict[str, SharedDataOverlapOffset]
+    stacking_offset_with_module: Dict[str, OffsetVector]
     expected_offset: OverlapOffset
 
 
@@ -722,9 +721,7 @@ module_overlap_specs: List[ModuleOverlapSpec] = [
         spec_deck_definition=load_deck(STANDARD_OT2_DECK, 5),
         module_model=ModuleModel.TEMPERATURE_MODULE_V2,
         stacking_offset_with_module={
-            str(ModuleModel.TEMPERATURE_MODULE_V2.value): SharedDataOverlapOffset(
-                x=1, y=2, z=3
-            ),
+            str(ModuleModel.TEMPERATURE_MODULE_V2.value): OffsetVector(x=1, y=2, z=3),
         },
         expected_offset=OverlapOffset(x=1, y=2, z=3),
     ),
@@ -733,7 +730,7 @@ module_overlap_specs: List[ModuleOverlapSpec] = [
         spec_deck_definition=load_deck(STANDARD_OT2_DECK, 5),
         module_model=ModuleModel.THERMOCYCLER_MODULE_V1,
         stacking_offset_with_module={
-            str(ModuleModel.THERMOCYCLER_MODULE_V1.value): SharedDataOverlapOffset(
+            str(ModuleModel.THERMOCYCLER_MODULE_V1.value): OffsetVector(
                 x=11, y=22, z=33
             ),
         },
@@ -758,7 +755,7 @@ module_overlap_specs: List[ModuleOverlapSpec] = [
         spec_deck_definition=load_deck(STANDARD_OT3_DECK, 5),
         module_model=ModuleModel.THERMOCYCLER_MODULE_V2,
         stacking_offset_with_module={
-            str(ModuleModel.THERMOCYCLER_MODULE_V2.value): SharedDataOverlapOffset(
+            str(ModuleModel.THERMOCYCLER_MODULE_V2.value): OffsetVector(
                 x=111, y=222, z=333
             ),
         },
@@ -774,7 +771,7 @@ module_overlap_specs: List[ModuleOverlapSpec] = [
 def test_get_module_overlap_offsets(
     spec_deck_definition: DeckDefinitionV5,
     module_model: ModuleModel,
-    stacking_offset_with_module: Dict[str, SharedDataOverlapOffset],
+    stacking_offset_with_module: Dict[str, OffsetVector],
     expected_offset: OverlapOffset,
 ) -> None:
     """It should get the labware overlap offsets."""
@@ -1408,9 +1405,7 @@ def test_raise_if_labware_cannot_be_stacked_on_module_not_adapter() -> None:
         subject.raise_if_labware_cannot_be_stacked(
             top_labware_definition=LabwareDefinition.model_construct(  # type: ignore[call-arg]
                 parameters=Parameters.model_construct(loadName="name"),  # type: ignore[call-arg]
-                stackingOffsetWithLabware={
-                    "test": SharedDataOverlapOffset(x=0, y=0, z=0)
-                },
+                stackingOffsetWithLabware={"test": OffsetVector(x=0, y=0, z=0)},
             ),
             bottom_labware_id="labware-id",
         )
@@ -1450,9 +1445,7 @@ def test_raise_if_labware_cannot_be_stacked_on_labware_on_adapter() -> None:
         subject.raise_if_labware_cannot_be_stacked(
             top_labware_definition=LabwareDefinition.model_construct(  # type: ignore[call-arg]
                 parameters=Parameters.model_construct(loadName="name"),  # type: ignore[call-arg]
-                stackingOffsetWithLabware={
-                    "test": SharedDataOverlapOffset(x=0, y=0, z=0)
-                },
+                stackingOffsetWithLabware={"test": OffsetVector(x=0, y=0, z=0)},
             ),
             bottom_labware_id="labware-id",
         )
@@ -1533,9 +1526,7 @@ def test_labware_stacking_height_passes_or_raises(
                     loadName="name",
                     isMagneticModuleCompatible=False,
                 ),
-                stackingOffsetWithLabware={
-                    "test": SharedDataOverlapOffset(x=0, y=0, z=0)
-                },
+                stackingOffsetWithLabware={"test": OffsetVector(x=0, y=0, z=0)},
                 stackLimit=stack_limit,
             ),
             bottom_labware_id="labware-id4",

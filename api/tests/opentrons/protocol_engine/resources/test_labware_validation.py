@@ -4,7 +4,7 @@ import pytest
 from opentrons_shared_data.labware.labware_definition import (
     LabwareDefinition,
     LabwareRole,
-    OverlapOffset,
+    OffsetVector,
     Parameters,
 )
 
@@ -64,13 +64,13 @@ def test_validate_definition_is_adapter(
     [
         (
             LabwareDefinition.model_construct(  # type: ignore[call-arg]
-                stackingOffsetWithLabware={"labware123": OverlapOffset(x=4, y=5, z=6)}
+                stackingOffsetWithLabware={"labware123": OffsetVector(x=4, y=5, z=6)}
             ),
             True,
         ),
         (
             LabwareDefinition.model_construct(  # type: ignore[call-arg]
-                stackingOffsetWithLabware={"labwareXYZ": OverlapOffset(x=4, y=5, z=6)}
+                stackingOffsetWithLabware={"labwareXYZ": OffsetVector(x=4, y=5, z=6)}
             ),
             False,
         ),

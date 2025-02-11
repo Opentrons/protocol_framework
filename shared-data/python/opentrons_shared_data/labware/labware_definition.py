@@ -50,16 +50,6 @@ _NonNegativeNumber = Union[_StrictNonNegativeInt, _StrictNonNegativeFloat]
 """Non-negative JSON number type, written to preserve lack of decimal point."""
 
 
-class OverlapOffset(BaseModel):
-    """
-    Overlap dimensions of labware with another labware/module that it can be stacked on top of.
-    """
-
-    x: _Number
-    y: _Number
-    z: _Number
-
-
 class OffsetVector(BaseModel):
     """
     A generic 3-D offset vector.
@@ -723,12 +713,12 @@ class LabwareDefinition(BaseModel):
         default_factory=list,
         description="Allowed behaviors and usage of a labware in a protocol.",
     )
-    stackingOffsetWithLabware: Dict[str, OverlapOffset] = Field(
+    stackingOffsetWithLabware: Dict[str, OffsetVector] = Field(
         default_factory=dict,
         description="Supported labware that can be stacked upon,"
         " with overlap vector offset between both labware.",
     )
-    stackingOffsetWithModule: Dict[str, OverlapOffset] = Field(
+    stackingOffsetWithModule: Dict[str, OffsetVector] = Field(
         default_factory=dict,
         description="Supported module that can be stacked upon,"
         " with overlap vector offset between labware and module.",
