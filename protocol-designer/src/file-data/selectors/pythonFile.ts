@@ -65,12 +65,11 @@ export function getLoadModules(
   const pythonModules = hasModules
     ? Object.values(moduleEntities)
         .map(module => {
-          // pythonIdentifier from api/src/opentrons/protocol_api/validation.py#L373
-          const pythonIdentifier = module.model
+          // pythonIdentifier (module.model) from api/src/opentrons/protocol_api/validation.py#L373
           return `${
             module.pythonName
           } = ${PROTOCOL_CONTEXT_NAME}.load_module(${formatPyStr(
-            pythonIdentifier
+            module.model
           )}, ${formatPyStr(moduleRobotState[module.id].slot)})`
         })
         .join('\n')
