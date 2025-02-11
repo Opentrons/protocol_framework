@@ -9,6 +9,7 @@ import {
 } from '@opentrons/step-generation'
 import type {
   InvariantContext,
+  LabwareEntities,
   ModuleEntities,
   TimelineFrame,
 } from '@opentrons/step-generation'
@@ -77,17 +78,77 @@ export function getLoadModules(
   return hasModules ? `# Load Modules:\n${pythonModules}` : ''
 }
 
+export function getLoadAdapters(
+  moduleEntities: ModuleEntities,
+  labwareEntities: LabwareEntities,
+  labwareRobotState: TimelineFrame['labware']
+): string {
+  const adapterEntities = Object.values(labwareEntities).filter(lw =>
+    lw.def.allowedRoles?.includes('adapter')
+  )
+  const pythonAdapters = Object.values(adapterEntities)
+    .map(adapter => {
+      const adapterSlot = labwareRobotState[adapter.id].slot
+      const onModule = moduleEntities[adapterSlot] != null
+      const location = onModule
+        ? moduleEntities[adapterSlot].pythonName
+        : PROTOCOL_CONTEXT_NAME
+      const slotInfo = onModule ? '' : `, ${formatPyStr(adapterSlot)}`
+
+      return `${adapter.pythonName} = ${location}.load_adapter(${formatPyStr(
+        adapter.def.parameters.loadName
+      )}${slotInfo})`
+    })
+    .join('\n')
+
+  return pythonAdapters ? `# Load Adapters:\n${pythonAdapters}` : ''
+}
+
+export function getLoadLabware(
+  moduleEntities: ModuleEntities,
+  allLabwareEntities: LabwareEntities,
+  labwareRobotState: TimelineFrame['labware']
+): string {
+  const labwareEntities = Object.values(allLabwareEntities).filter(
+    lw => !lw.def.allowedRoles?.includes('adapter')
+  )
+  const pythonLabware = Object.values(labwareEntities)
+    .map(labware => {
+      const labwareSlot = labwareRobotState[labware.id].slot
+      const onModule = moduleEntities[labwareSlot] != null
+      const onAdapter = allLabwareEntities[labwareSlot] != null
+      let location = PROTOCOL_CONTEXT_NAME
+      if (onAdapter) {
+        location = allLabwareEntities[labwareSlot].pythonName
+      } else if (onModule) {
+        location = moduleEntities[labwareSlot].pythonName
+      }
+      const slotInfo =
+        onModule || onAdapter ? '' : `, ${formatPyStr(labwareSlot)}`
+
+      return `${labware.pythonName} = ${location}.load_labware(${formatPyStr(
+        labware.def.parameters.loadName
+      )}${slotInfo})`
+    })
+    .join('\n')
+
+  return pythonLabware ? `# Load Labware:\n${pythonLabware}` : ''
+}
+
 export function pythonDefRun(
   invariantContext: InvariantContext,
   robotState: TimelineFrame
 ): string {
-  const { moduleEntities } = invariantContext
-
-  const loadModules = getLoadModules(moduleEntities, robotState.modules)
+  const { moduleEntities, labwareEntities } = invariantContext
+  const { modules, labware } = robotState
+  const loadModules = getLoadModules(moduleEntities, modules)
+  const loadAdapters = getLoadAdapters(moduleEntities, labwareEntities, labware)
+  const loadLabware = getLoadLabware(moduleEntities, labwareEntities, labware)
 
   const sections: string[] = [
     loadModules,
-    // loadLabware(),
+    loadAdapters,
+    loadLabware,
     // loadInstruments(),
     // defineLiquids(),
     // loadLiquids(),
