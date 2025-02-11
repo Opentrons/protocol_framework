@@ -16,10 +16,10 @@ import { WellOrderModal } from '../../../../../organisms'
 
 import type { FieldProps } from '../types'
 import type { WellOrderOption } from '../../../../../form-types'
-import type { PrefixType } from '../../../../../resources/types'
+import type { MoveLiquidPrefixType } from '../../../../../resources/types'
 
 export interface WellsOrderFieldProps {
-  prefix: PrefixType
+  prefix: MoveLiquidPrefixType
   firstName: string
   secondName: string
   updateFirstWellOrder: FieldProps['updateValue']

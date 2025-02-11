@@ -27,9 +27,9 @@ import type {
 } from '../../../../../form-types'
 import type { PositionSpecs } from '../../../../../organisms'
 import type { FieldPropsByName } from '../types'
-import type { PrefixType } from '../../../../../resources/types'
+import type { MoveLiquidPrefixType } from '../../../../../resources/types'
 interface PositionFieldProps {
-  prefix: PrefixType
+  prefix: MoveLiquidPrefixType
   propsForFields: FieldPropsByName
   zField: TipZOffsetFields
   xField?: TipXOffsetFields
