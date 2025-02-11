@@ -1144,6 +1144,8 @@
   "namespace": "opentrons",
   "version": 3,
   "schemaVersion": 3,
+  "stackLimit": 5,
+  "compatibleParentLabware": ["corning_96_wellplate_360ul_flat"],
   "stackingOffsetWithLabware": {
     "opentrons_universal_flat_adapter": {
       "x": 0,
@@ -1154,6 +1156,11 @@
       "x": 0,
       "y": 0,
       "z": 5.45
+    },
+    "corning_96_wellplate_360ul_flat": {
+      "x": 0, 
+      "y": 0,
+      "z": 0
     }
   },
   "innerLabwareGeometry": {

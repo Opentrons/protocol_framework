@@ -8,7 +8,7 @@ from hardware_testing.protocols import (
 import math
 
 metadata = {"protocolName": "LLD 1uL PCR-to-MVS-04feb-TEST-MATRIX-T-B-M"}
-requirements = {"robotType": "Flex", "apiLevel": "2.23"}
+requirements = {"robotType": "Flex", "apiLevel": "2.22"}
 
 SLOTS = {
     "tips": ["A2", "A3", "B2", "B3", "A4", "B4"],
@@ -128,6 +128,7 @@ def run(ctx: ProtocolContext) -> None:
         location=SLOTS["diluent_reservoir"],
         version=get_latest_version(DILUENT_LABWARE),
     )
+    # diluent_reservoir_lid = diluent_reservoir.load_labware(DILUENT_LABWARE)
     pipette = ctx.load_instrument(
         f"flex_1channel_{PIP_VOLUME}", mount="left", tip_racks=tip_racks_50s
     )
@@ -155,7 +156,11 @@ def run(ctx: ProtocolContext) -> None:
             label=f"DST Labware {i}",
         )
         dst_labwares.append(dst_labware_XX)
-    plate_lids = ctx.load_lid_stack("plate_lid", SLOTS["lids"], num_of_plates)
+    # LOAD LIDS
+    lids = [ctx.load_labware("plate_lid", SLOTS["lids"])]
+    for i in range(num_of_plates):
+        lids.append(lids[-1].load_labware("plate_lid"))
+    lids.reverse()
     # define starting liquid volumes
     # load diluent wells
     diluent = ctx.define_liquid("diluent", "#0000FF")
@@ -195,7 +200,6 @@ def run(ctx: ProtocolContext) -> None:
         src_labware["A3"],
         src_labware["A4"],
     ]
-    print(dye_per_well)
     dye_per_well_list = len(src_labware_wells) * [dye_per_well]
     src_tube_list = len(src_labware_wells) * [src_tube["A1"]]
     dye = ctx.define_liquid("dye", "#FF0000")
@@ -267,7 +271,6 @@ def run(ctx: ProtocolContext) -> None:
         else:
             pipette.dispense(target_ul, dst_well.top(), push_out=push_out) # top
         pipette.return_tip()
-        print(tip_counter)
         return tip_counter
 
     # fill with diluent
@@ -306,15 +309,19 @@ def run(ctx: ProtocolContext) -> None:
                 tip_counter = _run_trial(
                     w, dye_used=dye_used, tip_counter=tip_counter, target_ul=vol
                 )  # switch using LLD every-other trial
-            ctx.move_lid(plate_lids, dst_labware, use_gripper = True)
+            ctx.move_labware(lids[n], dst_labware, use_gripper = True)
+            n+=1
+            print(f"moved lid {dst_labware}")
     diluent_tip_counter = 0
     diluent_pipette.reset_tipracks()
+    n = 0
     if use_test_matrix:
         diluent_pipette.pick_up_tip()
         for (vol, dst_labware) in zip(volume_list, dst_labwares):
             columns_list = list(range(columns))
             halfway = int(len(columns_list) / 2)
-            ctx.move_lid(dst_labware, "D4", use_gripper =True)
+            ctx.move_labware(lids[n], lids[4], use_gripper =True)
+            print(f"moved_lid {dst_labware} to D4")
             for i in columns_list[halfway:]:
                 diluent_ul = 200 - ((200 / 2) - vol)
                 diluent_well = diluent_wells[i % len(diluent_wells_used)]
@@ -337,4 +344,5 @@ def run(ctx: ProtocolContext) -> None:
                 diluent_pipette.dispense(
                     diluent_ul, dst_labware[f"A{i+1}"].top(), push_out=20
                 )
-            ctx.move_lid("D4", dst_labware, use_gripper = True)
+            ctx.move_labware(lids[n], dst_labware, use_gripper = True)
+            n +=1
