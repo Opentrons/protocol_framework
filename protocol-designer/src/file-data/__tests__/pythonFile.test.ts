@@ -1,16 +1,19 @@
 import { describe, it, expect } from 'vitest'
 import {
   FLEX_ROBOT_TYPE,
+  HEATERSHAKER_MODULE_TYPE,
+  HEATERSHAKER_MODULE_V1,
   MAGNETIC_BLOCK_TYPE,
   MAGNETIC_BLOCK_V1,
   OT2_ROBOT_TYPE,
 } from '@opentrons/shared-data'
 import {
-  pythonDefRun,
+  getLoadModules,
   pythonMetadata,
   pythonRequirements,
 } from '../selectors/pythonFile'
-import { InvariantContext, TimelineFrame } from '@opentrons/step-generation'
+import type { TimelineFrame } from '@opentrons/step-generation'
+import type { ModuleEntities } from '../../step-forms'
 
 describe('pythonMetadata', () => {
   it('should generate metadata section', () => {
@@ -61,36 +64,42 @@ requirements = {
   })
 })
 
-const moduleId = '1'
-const mockInvariantContext: InvariantContext = {
-  additionalEquipmentEntities: {},
-  pipetteEntities: {},
-  labwareEntities: {},
-  liquidEntities: {},
-  moduleEntities: {
-    [moduleId]: {
-      id: moduleId,
-      model: MAGNETIC_BLOCK_V1,
-      type: MAGNETIC_BLOCK_TYPE,
-      pythonName: 'magnetic_block_1',
-    },
-  },
-  config: { OT_PD_DISABLE_MODULE_RESTRICTIONS: true },
-}
-const mockInitialRobotState: TimelineFrame = {
-  pipettes: {},
-  labware: {},
-  modules: { [moduleId]: { slot: 'B1', moduleState: {} as any } },
-  tipState: { tipracks: {}, pipettes: {} },
-  liquidState: { pipettes: {}, labware: {}, additionalEquipment: {} },
-}
-describe('pythonDefRun', () => {
-  it('should generate the commands section', () => {
-    expect(pythonDefRun(mockInvariantContext, mockInitialRobotState)).toBe(
-      `
-def run(protocol: protocol_api.ProtocolContext):
-    # Load Modules:
-    magnetic_block_1 = protocol.load_module("magneticBlockV1", "B1")`.trimStart()
+describe('getLoadModules', () => {
+  it('should generate loadModules', () => {
+    const moduleId = '1'
+    const moduleId2 = '2'
+    const moduleId3 = '3'
+    const mockModuleEntities: ModuleEntities = {
+      [moduleId]: {
+        id: moduleId,
+        model: MAGNETIC_BLOCK_V1,
+        type: MAGNETIC_BLOCK_TYPE,
+        pythonName: 'magnetic_block_1',
+      },
+      [moduleId2]: {
+        id: moduleId2,
+        model: HEATERSHAKER_MODULE_V1,
+        type: HEATERSHAKER_MODULE_TYPE,
+        pythonName: 'heater_shaker_1',
+      },
+      [moduleId3]: {
+        id: moduleId3,
+        model: MAGNETIC_BLOCK_V1,
+        type: MAGNETIC_BLOCK_TYPE,
+        pythonName: 'magnetic_block_2',
+      },
+    }
+    const modules: TimelineFrame['modules'] = {
+      [moduleId]: { slot: 'B1', moduleState: {} as any },
+      [moduleId2]: { slot: 'A1', moduleState: {} as any },
+      [moduleId3]: { slot: 'A2', moduleState: {} as any },
+    }
+
+    expect(getLoadModules(mockModuleEntities, modules)).toBe(
+      `# Load Modules:
+magnetic_block_1 = protocol.load_module("magneticBlockV1", "B1")
+heater_shaker_1 = protocol.load_module("heaterShakerModuleV1", "A1")
+magnetic_block_2 = protocol.load_module("magneticBlockV1", "A2")`
     )
   })
 })

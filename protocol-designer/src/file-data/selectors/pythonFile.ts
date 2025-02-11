@@ -3,10 +3,10 @@
 import { FLEX_ROBOT_TYPE, OT2_ROBOT_TYPE } from '@opentrons/shared-data'
 import {
   formatPyDict,
+  formatPyStr,
   indentPyLines,
   PROTOCOL_CONTEXT_NAME,
 } from '@opentrons/step-generation'
-import { getModulePythonIdentifier } from './utils'
 import type {
   InvariantContext,
   ModuleEntities,
@@ -57,7 +57,7 @@ export function pythonRequirements(robotType: RobotType): string {
   return `requirements = ${formatPyDict(requirements)}`
 }
 
-function getLoadModules(
+export function getLoadModules(
   moduleEntities: ModuleEntities,
   moduleRobotState: TimelineFrame['modules']
 ): string {
@@ -65,12 +65,13 @@ function getLoadModules(
   const pythonModules = hasModules
     ? Object.values(moduleEntities)
         .map(module => {
-          const pythonIdentifier = getModulePythonIdentifier(module.model)
+          // pythonIdentifier from api/src/opentrons/protocol_api/validation.py#L373
+          const pythonIdentifier = module.model
           return `${
             module.pythonName
-          } = ${PROTOCOL_CONTEXT_NAME}.load_module("${pythonIdentifier}", "${
-            moduleRobotState[module.id].slot
-          }")`
+          } = ${PROTOCOL_CONTEXT_NAME}.load_module(${formatPyStr(
+            pythonIdentifier
+          )}, ${formatPyStr(moduleRobotState[module.id].slot)})`
         })
         .join('\n')
     : ''
