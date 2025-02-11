@@ -5,7 +5,6 @@ this module shouldn't be imported unless typing.TYPE_CHECKING is true.
 """
 from typing import NewType
 from typing_extensions import Literal, TypedDict, NotRequired
-from .labware_definition import InnerWellGeometry
 from .constants import (
     CircularType,
     RectangularType,
@@ -142,6 +141,9 @@ class LabwareDefinition(TypedDict):
     gripperOffsets: NotRequired[dict[str, GripperOffsets]]
     gripForce: NotRequired[float]
     gripHeightFromLabwareBottom: NotRequired[float]
-    innerLabwareGeometry: NotRequired[dict[str, InnerWellGeometry] | None]
+    # The innerLabwareGeometry dict values are not currently modeled in these
+    # TypedDict-based bindings. The only code that cares about them
+    # currentlyuses our Pydantic-based bindings instead.
+    innerLabwareGeometry: NotRequired[dict[str, object] | None]
     compatibleParentLabware: NotRequired[list[str]]
     stackLimit: NotRequired[int]
