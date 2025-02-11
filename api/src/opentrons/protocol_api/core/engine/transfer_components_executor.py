@@ -556,7 +556,7 @@ class TransferComponentsExecutor:
             rate=1,
             flow_rate=flow_rate,
             in_place=True,
-            is_meniscus=None,
+            is_meniscus=False,
             push_out=0,
             correction_volume=correction_volume,
         )
