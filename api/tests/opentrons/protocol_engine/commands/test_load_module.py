@@ -13,6 +13,7 @@ from opentrons.types import DeckSlotName
 from opentrons.protocol_engine.types import (
     DeckSlotLocation,
     ModuleModel,
+    AddressableAreaLocation,
 )
 from opentrons.protocol_engine.execution import EquipmentHandler, LoadedModuleData
 from opentrons.protocol_engine import ModuleModel as EngineModuleModel
@@ -119,7 +120,7 @@ async def test_load_module_implementation(
     decoy.when(
         await load_module_func(
             model=module_model,
-            location=DeckSlotLocation(slotName=load_slot_name),
+            location=AddressableAreaLocation(addressableAreaName=load_slot_name.value),
             module_id="some-id",
         )
     ).then_return(

@@ -1,7 +1,7 @@
 """Equipment command side-effect logic."""
 
 from dataclasses import dataclass
-from typing import Optional, overload, Union, List
+from typing import Optional, overload, List
 
 from opentrons_shared_data.labware.labware_definition import LabwareDefinition
 from opentrons_shared_data.pipette.types import PipetteNameType

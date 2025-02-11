@@ -29,6 +29,7 @@ from opentrons.protocol_engine.types import (
     AddressableArea,
     DeckConfigurationType,
     PotentialCutoutFixture,
+    AddressableAreaLocation,
 )
 
 from opentrons.protocol_engine.state.modules import (
@@ -117,7 +118,7 @@ def test_initial_state() -> None:
     assert subject.state == ModuleState(
         deck_type=DeckType.OT2_STANDARD,
         requested_model_by_id={},
-        slot_by_module_id={},
+        load_location_by_module_id={},
         hardware_by_module_id={},
         substate_by_module_id={},
         module_offset_by_serial={},
@@ -228,7 +229,11 @@ def test_load_module(
 
     assert subject.state == ModuleState(
         deck_type=DeckType.OT2_STANDARD,
-        slot_by_module_id={"module-id": DeckSlotName.SLOT_1},
+        load_location_by_module_id={
+            "module-id": AddressableAreaLocation(
+                addressableAreaName=DeckSlotName.SLOT_1.value
+            )
+        },
         requested_model_by_id={"module-id": params_model},
         hardware_by_module_id={
             "module-id": HardwareModule(
@@ -293,7 +298,9 @@ def test_load_thermocycler_in_thermocycler_slot(
     )
     subject.handle_action(action)
 
-    assert subject.state.slot_by_module_id == {"module-id": tc_slot}
+    assert subject.state.load_location_by_module_id == {
+        "module-id": AddressableAreaLocation(addressableAreaName=tc_slot.value)
+    }
     assert subject.state.additional_slots_occupied_by_module_id == {
         "module-id": expected_additional_slots
     }
@@ -376,7 +383,7 @@ def test_add_module_action(
 
     assert subject.state == ModuleState(
         deck_type=DeckType.OT2_STANDARD,
-        slot_by_module_id={"module-id": None},
+        load_location_by_module_id={"module-id": None},
         requested_model_by_id={"module-id": None},
         hardware_by_module_id={
             "module-id": HardwareModule(

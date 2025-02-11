@@ -11,7 +11,6 @@ from .command import AbstractCommandImpl, BaseCommand, BaseCommandCreate, Succes
 from ..errors.error_occurrence import ErrorOccurrence
 from ..types import (
     DeckSlotLocation,
-    StagingSlotLocation,
     AddressableAreaLocation,
     ModuleType,
     ModuleModel,

@@ -41,6 +41,7 @@ from opentrons.protocol_engine.types import (
     ModuleDefinition,
     OFF_DECK_LOCATION,
     FlowRates,
+    AddressableAreaLocation,
 )
 
 from opentrons.protocol_engine.state.config import Config
@@ -1155,7 +1156,9 @@ async def test_load_module(
     decoy.when(
         state_store.modules.select_hardware_module_to_load(
             model=ModuleModel.TEMPERATURE_MODULE_V1,
-            location=DeckSlotLocation(slotName=DeckSlotName.SLOT_1),
+            location=AddressableAreaLocation(
+                addressableAreaName=DeckSlotName.SLOT_1.value
+            ),
             attached_modules=[
                 HardwareModule(serial_number="serial-1", definition=tempdeck_v1_def),
                 HardwareModule(serial_number="serial-2", definition=tempdeck_v2_def),
@@ -1166,7 +1169,7 @@ async def test_load_module(
 
     result = await subject.load_module(
         model=ModuleModel.TEMPERATURE_MODULE_V1,
-        location=DeckSlotLocation(slotName=DeckSlotName.SLOT_1),
+        location=AddressableAreaLocation(addressableAreaName=DeckSlotName.SLOT_1.value),
         module_id="input-module-id",
     )
 
@@ -1204,7 +1207,7 @@ async def test_load_module_using_virtual(
 
     result = await subject.load_module(
         model=ModuleModel.TEMPERATURE_MODULE_V1,
-        location=DeckSlotLocation(slotName=DeckSlotName.SLOT_1),
+        location=AddressableAreaLocation(addressableAreaName=DeckSlotName.SLOT_1.value),
         module_id="input-module-id",
     )
 
@@ -1233,7 +1236,7 @@ async def test_load_magnetic_block(
 
     result = await subject.load_magnetic_block(
         model=ModuleModel.MAGNETIC_BLOCK_V1,
-        location=DeckSlotLocation(slotName=DeckSlotName.SLOT_1),
+        location=AddressableAreaLocation(addressableAreaName=DeckSlotName.SLOT_1.value),
         module_id="input-module-id",
     )
 

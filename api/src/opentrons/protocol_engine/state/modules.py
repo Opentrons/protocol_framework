@@ -310,7 +310,7 @@ class ModuleStore(HasState[ModuleState], HandlesActions):
         if state_update.flex_stacker_state_update != update_types.NO_CHANGE:
             self._handle_flex_stacker_commands(state_update.flex_stacker_state_update)
 
-    def _add_module_substate(
+    def _add_module_substate(  # noqa: C901
         self,
         module_id: str,
         serial_number: Optional[str],
@@ -1319,10 +1319,7 @@ class ModuleView:
     ) -> None:
         """Raise if the given location has a module in it."""
         for module in self.get_all():
-            if (
-                module.location
-                == location
-            ):
+            if module.location == location:
                 raise errors.LocationIsOccupiedError(
                     f"Module {module.model} is already present at {location}."
                 )

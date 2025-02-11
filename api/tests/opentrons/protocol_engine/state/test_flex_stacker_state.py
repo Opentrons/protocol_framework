@@ -1,5 +1,6 @@
 """Tests for the module state store handling flex stacker state."""
 import pytest
+from typing import Optional, Dict, Set, cast
 
 from opentrons.protocol_engine.state.modules import ModuleStore, ModuleView
 from opentrons.protocol_engine.state.module_substates import (
@@ -9,8 +10,61 @@ from opentrons.protocol_engine.state.module_substates import (
 from opentrons.protocol_engine.state.config import Config
 
 from opentrons.protocol_engine import actions
-from opentrons.protocol_engine.types import DeckType, ModuleDefinition
+from opentrons.protocol_engine.types import (
+    DeckType,
+    ModuleDefinition,
+    AddressableArea,
+    PotentialCutoutFixture,
+    DeckConfigurationType,
+)
+from opentrons_shared_data.robot.types import RobotType
+from opentrons_shared_data.deck.types import DeckDefinitionV5
 import opentrons.protocol_engine.errors as errors
+from opentrons.protocol_engine.state.addressable_areas import (
+    AddressableAreaView,
+    AddressableAreaState,
+)
+
+
+def get_addressable_area_view(
+    loaded_addressable_areas_by_name: Optional[Dict[str, AddressableArea]] = None,
+    potential_cutout_fixtures_by_cutout_id: Optional[
+        Dict[str, Set[PotentialCutoutFixture]]
+    ] = None,
+    deck_definition: Optional[DeckDefinitionV5] = None,
+    deck_configuration: Optional[DeckConfigurationType] = None,
+    robot_type: RobotType = "OT-3 Standard",
+    use_simulated_deck_config: bool = False,
+) -> AddressableAreaView:
+    """Get a labware view test subject."""
+    state = AddressableAreaState(
+        loaded_addressable_areas_by_name=loaded_addressable_areas_by_name or {},
+        potential_cutout_fixtures_by_cutout_id=potential_cutout_fixtures_by_cutout_id
+        or {},
+        deck_definition=deck_definition or cast(DeckDefinitionV5, {"otId": "fake"}),
+        deck_configuration=deck_configuration or [],
+        robot_definition={
+            "displayName": "OT-3",
+            "robotType": "OT-3 Standard",
+            "models": ["OT-3 Standard"],
+            "extents": [477.2, 493.8, 0.0],
+            "paddingOffsets": {
+                "rear": -177.42,
+                "front": 51.8,
+                "leftSide": 31.88,
+                "rightSide": -80.32,
+            },
+            "mountOffsets": {
+                "left": [-13.5, -60.5, 255.675],
+                "right": [40.5, -60.5, 255.675],
+                "gripper": [84.55, -12.75, 93.85],
+            },
+        },
+        robot_type=robot_type,
+        use_simulated_deck_config=use_simulated_deck_config,
+    )
+
+    return AddressableAreaView(state=state)
 
 
 @pytest.fixture
@@ -33,7 +87,9 @@ def subject(
 @pytest.fixture
 def module_view(subject: ModuleStore) -> ModuleView:
     """Get a ModuleView for the ModuleStore."""
-    return ModuleView(state=subject._state)
+    return ModuleView(
+        state=subject._state, addressable_area_view=get_addressable_area_view()
+    )
 
 
 def test_add_module_action(

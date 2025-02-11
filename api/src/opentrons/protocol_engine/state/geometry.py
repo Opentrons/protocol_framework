@@ -3,7 +3,7 @@
 import enum
 from numpy import array, dot, double as npdouble
 from numpy.typing import NDArray
-from typing import Optional, List, Tuple, Union, cast, TypeVar, Dict
+from typing import Optional, List, Tuple, Union, cast, TypeVar, Dict, Set
 from dataclasses import dataclass
 from functools import cached_property
 
@@ -60,6 +60,7 @@ from ..types import (
     OnAddressableAreaOffsetLocationSequenceComponent,
     OnLabwareOffsetLocationSequenceComponent,
     ModuleModel,
+    PotentialCutoutFixture,
 )
 from .config import Config
 from .labware import LabwareView
@@ -763,13 +764,43 @@ class GeometryView:
         desired_addressable_area: Optional[str] = None,
     ) -> _LabwareLocation:
         """Ensure that the location does not already have either Labware or a Module in it."""
-        # TODO (spp, 2023-11-27): Slot locations can also be addressable areas
-        #  so we will need to cross-check against items loaded in both location types.
-        #  Something like 'check if an item is in lists of both- labware on addressable areas
-        #  as well as labware on slots'. Same for modules.
+        # Collect set of existing fixtures, if any
+        existing_fixtures = self._get_potential_fixtures_for_location_occupation(
+            location
+        )
+        potential_fixtures = (
+            self._get_potential_fixtures_for_location_occupation(
+                AddressableAreaLocation(addressableAreaName=desired_addressable_area)
+            )
+            if desired_addressable_area is not None
+            else None
+        )
 
-        if (
-            isinstance(
+        # Handle the checking conflict on an incoming fixture
+        if potential_fixtures is not None and isinstance(location, DeckSlotLocation):
+            if (
+                existing_fixtures is not None
+                and not any(
+                    location.slotName.id in fixture.provided_addressable_areas
+                    for fixture in potential_fixtures[1].intersection(
+                        existing_fixtures[1]
+                    )
+                )
+            ) or (
+                self._labware.get_by_slot(location.slotName) is not None
+                and not any(
+                    location.slotName.id in fixture.provided_addressable_areas
+                    for fixture in potential_fixtures[1]
+                )
+            ):
+                self._labware.raise_if_labware_in_location(location)
+
+            else:
+                self._modules.raise_if_module_in_location(location)
+
+        # Otherwise handle standard conflict checking
+        else:
+            if isinstance(
                 location,
                 (
                     DeckSlotLocation,
@@ -777,68 +808,59 @@ class GeometryView:
                     OnLabwareLocation,
                     AddressableAreaLocation,
                 ),
-            )
-            and desired_addressable_area is None
-        ):
-            self._labware.raise_if_labware_in_location(location)
-        if isinstance(location, DeckSlotLocation) and desired_addressable_area is None:
-            existing_mod = self._modules.get_by_slot(location.slotName)
-            if existing_mod and self._config.robot_type is not "OT-2 Standard":
-                existing_mod_fixtures = (
-                    deck_configuration_provider.get_potential_cutout_fixtures(
-                        self._modules.ensure_and_convert_module_fixture_location(
-                            deck_slot=location.slotName, model=existing_mod.model
-                        ),
-                        self._addressable_areas.deck_definition,
-                    )
-                )
-                if not any(
-                    location.slotName.id in fixture.provided_addressable_areas
-                    for fixture in existing_mod_fixtures[1]
-                ):
-                    self._modules.raise_if_module_in_location(location)
-            
-            else:
-                self._modules.raise_if_module_in_location(location)
-
-        if (
-            isinstance(location, DeckSlotLocation)
-            and desired_addressable_area is not None
-        ):
-            potential_fixtures = (
-                deck_configuration_provider.get_potential_cutout_fixtures(
-                    desired_addressable_area, self._addressable_areas.deck_definition
-                )
-            )
-
-            # If there is labware in the current location and this desired fixture does not provide the current location as an addressable area raise
-            if self._labware.get_by_slot(location.slotName) is not None and not any(
-                location.slotName.id in fixture.provided_addressable_areas
-                for fixture in potential_fixtures[1]
             ):
                 self._labware.raise_if_labware_in_location(location)
 
-            # Check the overlap between two fixtures that may be sharing this slot
-            existing_mod = self._modules.get_by_slot(location.slotName)
-            if existing_mod and self._config.robot_type is not "OT-2 Standard":
-                existing_mod_fixtures = (
-                    deck_configuration_provider.get_potential_cutout_fixtures(
-                        self._modules.ensure_and_convert_module_fixture_location(
-                            deck_slot=location.slotName, model=existing_mod.model
-                        ),
-                        self._addressable_areas.deck_definition,
-                    )
+            area = (
+                location.slotName.id
+                if isinstance(location, DeckSlotLocation)
+                else location.addressableAreaName
+                if isinstance(location, AddressableAreaLocation)
+                else None
+            )
+            if area is not None and (
+                existing_fixtures is None
+                or not any(
+                    area in fixture.provided_addressable_areas
+                    for fixture in existing_fixtures[1]
                 )
-                if potential_fixtures[1].intersection(existing_mod_fixtures[1]):
-                    self._labware.raise_if_labware_in_location(location)
-                else:
+            ):
+                if isinstance(location, DeckSlotLocation):
                     self._modules.raise_if_module_in_location(location)
-
-            # Check OT-2 Module/Fixture overlap
-            else:
-                self._modules.raise_if_module_in_location(location)
+                elif isinstance(location, AddressableAreaLocation):
+                    self._modules.raise_if_module_in_location(
+                        DeckSlotLocation(
+                            slotName=self._addressable_areas.get_addressable_area_base_slot(
+                                location.addressableAreaName
+                            )
+                        )
+                    )
 
         return location
+
+    def _get_potential_fixtures_for_location_occupation(
+        self, location: _LabwareLocation
+    ) -> Tuple[str, Set[PotentialCutoutFixture]] | None:
+        if isinstance(location, DeckSlotLocation):
+            module = self._modules.get_by_slot(location.slotName)
+            if module is not None and self._config.robot_type != "OT-2 Standard":
+                fixtures = deck_configuration_provider.get_potential_cutout_fixtures(
+                    addressable_area_name=self._modules.ensure_and_convert_module_fixture_location(
+                        deck_slot=location.slotName,
+                        model=module.model,
+                    ),
+                    deck_definition=self._addressable_areas.deck_definition,
+                )
+            else:
+                fixtures = None
+        elif isinstance(location, AddressableAreaLocation):
+            fixtures = deck_configuration_provider.get_potential_cutout_fixtures(
+                addressable_area_name=location.addressableAreaName,
+                deck_definition=self._addressable_areas.deck_definition,
+            )
+        else:
+            fixtures = None
+        return fixtures
 
     def get_labware_grip_point(
         self,
