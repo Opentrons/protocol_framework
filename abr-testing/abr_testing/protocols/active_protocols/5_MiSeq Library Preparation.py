@@ -29,7 +29,6 @@ def add_parameters(parameters: ParameterContext) -> None:
     """Parameters."""
     helpers.create_dot_bottom_parameter(parameters)
     helpers.create_deactivate_modules_parameter(parameters)
-    helpers.create_disposable_lid_parameter(parameters)
     parameters.add_bool(
         variable_name="column_tip_pickup",
         display_name="Perform Column Tip Pickup",
@@ -42,11 +41,8 @@ def run(protocol: ProtocolContext) -> None:
     # Load Parameters
     dot_bottom = protocol.params.dot_bottom  # type: ignore[attr-defined]
     deactivate_modules_bool = protocol.params.deactivate_modules  # type: ignore[attr-defined]
-    disposable_lid = protocol.params.disposable_lid  # type: ignore[attr-defined]
     column_tip_pick_up = protocol.params.column_tip_pickup  # type: ignore[attr-defined]
-    if disposable_lid:
-        lids = protocol.load_lid_stack("opentrons_tough_pcr_auto_sealing_lid", "A2", 3)
-
+    
     def transfer(
         pipette: InstrumentContext,
         volume: float,
@@ -122,7 +118,7 @@ def run(protocol: ProtocolContext) -> None:
     )
     eppendorf_384 = protocol.load_labware(
         "appliedbiosystemsmicroamp_384_wellplate_40ul",
-        "B4",
+        "A2",
         label="Applied Biosystems 384",
     )
     pcr2_plate = protocol.load_labware(
@@ -198,9 +194,6 @@ def run(protocol: ProtocolContext) -> None:
     protocol.comment("Starting PCR1 thermal cycling")
     protocol.move_labware(pcr1_plate, thermocycler, use_gripper=True)
     heater_shaker.close_labware_latch()
-    if disposable_lid:
-        print(lids)
-        protocol.move_lid(lids, pcr1_plate, use_gripper=True)
     thermocycler.close_lid()
     thermocycler.set_lid_temperature(105)
 
@@ -230,8 +223,6 @@ def run(protocol: ProtocolContext) -> None:
 
     thermocycler.set_block_temperature(8)
     thermocycler.open_lid()
-    if disposable_lid:
-        protocol.move_lid(pcr1_plate, waste_chute, use_gripper=True)
     # Steps 7-8: Move plates
     protocol.comment("Setting up PCR2")
     protocol.move_labware(pcr1_plate, "B2", use_gripper=True)
@@ -273,8 +264,6 @@ def run(protocol: ProtocolContext) -> None:
 
     # Step 14: PCR2 thermal cycling
     protocol.comment("Starting PCR2 thermal cycling")
-    if disposable_lid:
-        protocol.move_lid(lids, pcr2_plate, use_gripper=True)
     thermocycler.close_lid()
     thermocycler.set_lid_temperature(105)
     # Initial denaturation
@@ -301,8 +290,6 @@ def run(protocol: ProtocolContext) -> None:
     )
 
     thermocycler.open_lid()
-    if disposable_lid:
-        protocol.move_lid(pcr2_plate, waste_chute, use_gripper=True)
 
     # Step 15: Move PCR2 plate
     protocol.comment("Moving PCR2 plate")

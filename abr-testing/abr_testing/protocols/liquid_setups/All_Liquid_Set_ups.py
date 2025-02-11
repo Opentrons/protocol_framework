@@ -97,32 +97,14 @@ def run(protocol: ProtocolContext) -> None:
         )
         pipette.configure_nozzle_layout(style=ALL, tip_racks=[tip_rack])
         pipette.transfer(
-            200,
+            [200, 100, 600],
             src_reservoir["A1"],
-            sample_plate["A1"].top(),
+            [sample_plate["A1"].bottom(z=1), elution_plate["A1"].bottom(z=1), res1["A1"].top()],
             trash=False,
             blow_out=True,
             blowout_location="destination well",
         )
-        pipette.reset_tipracks()
-        pipette.transfer(
-            100,
-            src_reservoir["A1"],
-            elution_plate["A1"].top(),
-            trash=False,
-            blow_out=True,
-            blowout_location="destination well",
-        )
-        pipette.reset_tipracks()
-        pipette.transfer(
-            600,
-            src_reservoir["A1"],
-            res1["A1"].top(),
-            trash=False,
-            blow_out=True,
-            blowout_location="destination well",
-        )
-        pipette.reset_tipracks()
+        
         pvt1abr7_labware = [res1, elution_plate, sample_plate]
         for lw in pvt1abr7_labware:
             protocol.move_labware(lw, OFF_DECK, use_gripper=False)
@@ -140,28 +122,11 @@ def run(protocol: ProtocolContext) -> None:
             "nest_96_wellplate_2ml_deep", str(SLOTS["LABWARE"][2]), "Sample Plate"
         )
         pipette.configure_nozzle_layout(style=ALL, tip_racks=[tip_rack])
-        pipette.transfer(
-            9500 / 8,
-            src_reservoir["A1"],
-            res1["A1"].top(),
-            trash=False,
-            blow_out=True,
-            blowout_location="destination well",
-        )
         pipette.reset_tipracks()
         pipette.transfer(
-            55,
+            [9500 / 8, 55, 100],
             src_reservoir["A1"],
-            elution_plate["A1"].bottom(z=1),
-            trash=False,
-            blow_out=True,
-            blowout_location="destination well",
-        )
-        pipette.reset_tipracks()
-        pipette.transfer(
-            100,
-            src_reservoir["A1"],
-            sample_plate["A1"].top(),
+            [res1["A1"].top(), elution_plate["A1"].bottom(z=1), sample_plate["A1"].bottom(z=1)],
             trash=False,
             blow_out=True,
             blowout_location="destination well",

@@ -372,7 +372,7 @@ def run(protocol: ProtocolContext) -> None:
                     if trash_lid:
                         protocol.move_labware(lid_on_plate, trash_bin, use_gripper=True)
                     elif len(used_lids) <= 1:
-                        protocol.move_labware(lid_on_plate, "B4", use_gripper=True)
+                        protocol.move_labware(lid_on_plate, deck_riser, use_gripper=True)
                     else:
                         protocol.move_labware(
                             lid_on_plate, used_lids[-2], use_gripper=True

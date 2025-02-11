@@ -186,7 +186,7 @@ def run(protocol: ProtocolContext) -> None:
         if i == 1:
             protocol.move_labware(
                 labware=tiprack_50[0],
-                new_location="D4",
+                new_location="D3",
                 use_gripper=True,
             )
             protocol.move_labware(
