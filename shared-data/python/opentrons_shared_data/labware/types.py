@@ -3,7 +3,7 @@
 types in this file by and large require the use of typing_extensions.
 this module shouldn't be imported unless typing.TYPE_CHECKING is true.
 """
-from typing import Dict, List, NewType, Union
+from typing import NewType
 from typing_extensions import Literal, TypedDict, NotRequired
 from .labware_definition import InnerWellGeometry
 from .constants import (
@@ -55,29 +55,29 @@ class GripperOffsets(TypedDict):
     dropOffset: NamedOffset
 
 
-class LabwareParameters(TypedDict, total=False):
+class LabwareParameters(TypedDict):
     format: LabwareFormat
     isTiprack: bool
     loadName: str
     isMagneticModuleCompatible: bool
-    isDeckSlotCompatible: bool
-    quirks: List[str]
-    tipLength: float
-    tipOverlap: float
-    magneticModuleEngageHeight: float
+    isDeckSlotCompatible: NotRequired[bool]
+    quirks: NotRequired[list[str]]
+    tipLength: NotRequired[float]
+    tipOverlap: NotRequired[float]
+    magneticModuleEngageHeight: NotRequired[float]
 
 
-class LabwareBrandData(TypedDict, total=False):
+class LabwareBrandData(TypedDict):
     brand: str
-    brandId: List[str]
-    links: List[str]
+    brandId: NotRequired[list[str]]
+    links: NotRequired[list[str]]
 
 
-class LabwareMetadata(TypedDict, total=False):
+class LabwareMetadata(TypedDict):
     displayName: str
     displayCategory: LabwareDisplayCategory
     displayVolumeUnits: Literal["µL", "mL", "L"]
-    tags: List[str]
+    tags: NotRequired[list[str]]
 
 
 class LabwareDimensions(TypedDict):
@@ -109,19 +109,19 @@ class RectangularWellDefinition(TypedDict):
     geometryDefinitionId: NotRequired[str]
 
 
-WellDefinition = Union[CircularWellDefinition, RectangularWellDefinition]
+WellDefinition = CircularWellDefinition | RectangularWellDefinition
 
 
-class WellGroupMetadata(TypedDict, total=False):
-    displayName: str
-    displayCategory: LabwareDisplayCategory
-    wellBottomShape: Literal["flat", "u", "v"]
+class WellGroupMetadata(TypedDict):
+    displayName: NotRequired[str]
+    displayCategory: NotRequired[LabwareDisplayCategory]
+    wellBottomShape: NotRequired[Literal["flat", "u", "v"]]
 
 
-class WellGroup(TypedDict, total=False):
-    wells: List[str]
+class WellGroup(TypedDict):
+    wells: list[str]
     metadata: WellGroupMetadata
-    brand: LabwareBrandData
+    brand: NotRequired[LabwareBrandData]
 
 
 class LabwareDefinition(TypedDict):
@@ -132,16 +132,16 @@ class LabwareDefinition(TypedDict):
     brand: LabwareBrandData
     parameters: LabwareParameters
     cornerOffsetFromSlot: NamedOffset
-    ordering: List[List[str]]
+    ordering: list[list[str]]
     dimensions: LabwareDimensions
-    wells: Dict[str, WellDefinition]
-    groups: List[WellGroup]
-    stackingOffsetWithLabware: NotRequired[Dict[str, NamedOffset]]
-    stackingOffsetWithModule: NotRequired[Dict[str, NamedOffset]]
-    allowedRoles: NotRequired[List[LabwareRoles]]
-    gripperOffsets: NotRequired[Dict[str, GripperOffsets]]
+    wells: dict[str, WellDefinition]
+    groups: list[WellGroup]
+    stackingOffsetWithLabware: NotRequired[dict[str, NamedOffset]]
+    stackingOffsetWithModule: NotRequired[dict[str, NamedOffset]]
+    allowedRoles: NotRequired[list[LabwareRoles]]
+    gripperOffsets: NotRequired[dict[str, GripperOffsets]]
     gripForce: NotRequired[float]
     gripHeightFromLabwareBottom: NotRequired[float]
-    innerLabwareGeometry: NotRequired[Dict[str, InnerWellGeometry]]
-    compatibleParentLabware: NotRequired[List[str]]
+    innerLabwareGeometry: NotRequired[dict[str, InnerWellGeometry]]
+    compatibleParentLabware: NotRequired[list[str]]
     stackLimit: NotRequired[int]
