@@ -38,6 +38,7 @@
       "aspirate_touchTip_checkbox": "Touch tip to each side of the well after aspirating",
       "aspirate_touchTip_mmFromTop": "Distance from the top of the well",
       "aspirate_retract": "Withdraw the tip from the liquid after aspirating",
+      "aspirate_retract_mmFromBottom": "",
       "aspirate_submerge": "Lower the tip into the liquid before aspirating",
       "aspirate_wells": "First select a source labware",
       "blowout_checkbox": "Blow extra air through the tip",

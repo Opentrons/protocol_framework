@@ -50,7 +50,6 @@ export function PositionField(props: PositionFieldProps): JSX.Element {
     padding = `0 ${SPACING.spacing16}`,
     isWhiteButton,
   } = props
-  console.log(propsForFields)
   const {
     name: zName,
     value: rawZValue,

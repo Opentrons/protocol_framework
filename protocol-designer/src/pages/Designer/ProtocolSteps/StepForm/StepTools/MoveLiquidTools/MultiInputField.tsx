@@ -13,7 +13,9 @@ import {
 } from '@opentrons/components'
 import { InputStepFormField } from '../../../../../../molecules'
 import { PositionField } from '../../PipetteFields'
+
 import type { FieldPropsByName } from '../../types'
+import type { MoveLiquidPrefixType } from '../../../../../../resources/types'
 
 export interface StepInputFieldProps {
   fieldTitle: string
@@ -26,7 +28,7 @@ interface MultiInputFieldProps {
   tooltipContent: string
   propsForFields: FieldPropsByName
   fields: StepInputFieldProps[]
-  prefix: 'aspirate' | 'dispense' | 'aspirate_retract' | 'dispense_retract'
+  prefix: MoveLiquidPrefixType
   isWellPosition?: boolean | null
   labwareId?: string | null
 }
