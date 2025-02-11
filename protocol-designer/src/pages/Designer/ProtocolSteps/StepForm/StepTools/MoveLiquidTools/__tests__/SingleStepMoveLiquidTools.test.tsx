@@ -56,6 +56,7 @@ describe('SingleStepMoveLiquidTools', () => {
         id: labwareId,
         labwareDefURI: 'mockUri',
         def: fixture96Plate as LabwareDefinition2,
+        pythonName: 'mockPythonName',
       },
     })
 
@@ -66,6 +67,7 @@ describe('SingleStepMoveLiquidTools', () => {
         id: pipetteId,
         tiprackLabwareDef: [],
         tiprackDefURI: ['mockDefURI1', 'mockDefURI2'],
+        pythonName: 'mockPythonName',
       },
     })
     vi.mocked(getAdditionalEquipmentEntities).mockReturnValue({})
