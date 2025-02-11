@@ -5,13 +5,12 @@ import { SketchPicker } from 'react-color'
 import { yupResolver } from '@hookform/resolvers/yup'
 import * as Yup from 'yup'
 import { Controller, useForm } from 'react-hook-form'
-import styled from 'styled-components'
+
 import {
   DEFAULT_LIQUID_COLORS,
   getAllLiquidClassDefs,
 } from '@opentrons/shared-data'
 import {
-  BORDERS,
   Btn,
   COLORS,
   DIRECTION_COLUMN,
@@ -34,6 +33,7 @@ import * as labwareIngredActions from '../../labware-ingred/actions'
 import { selectors as labwareIngredSelectors } from '../../labware-ingred/selectors'
 import { HandleEnter } from '../../atoms/HandleEnter'
 import { LINE_CLAMP_TEXT_STYLE } from '../../atoms'
+import { TextAreaField } from '../../molecules'
 import { getEnableLiquidClasses } from '../../feature-flags/selectors'
 import { swatchColors } from './swatchColors'
 
@@ -251,10 +251,12 @@ export function DefineLiquidsModal(
                   color={COLORS.grey60}
                   gridGap={SPACING.spacing4}
                 >
-                  <StyledText desktopStyle="bodyDefaultRegular">
-                    {t('description')}
-                  </StyledText>
-                  <DescriptionField {...register('description')} />
+                  <TextAreaField
+                    title={t('description')}
+                    {...register('description')}
+                    value={watch('description')}
+                    height="4.75rem"
+                  />
                 </Flex>
                 {enableLiquidClasses ? (
                   <Flex flexDirection={DIRECTION_COLUMN} color={COLORS.grey60}>
@@ -340,13 +342,3 @@ export function DefineLiquidsModal(
     </HandleEnter>
   )
 }
-
-export const DescriptionField = styled.textarea`
-  min-height: 5rem;
-  width: 100%;
-  border: 1px ${BORDERS.styleSolid} ${COLORS.grey50};
-  border-radius: ${BORDERS.borderRadius4};
-  padding: ${SPACING.spacing8};
-  font-size: ${TYPOGRAPHY.fontSizeP};
-  resize: none;
-`

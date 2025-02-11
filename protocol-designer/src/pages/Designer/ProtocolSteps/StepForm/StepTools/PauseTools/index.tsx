@@ -1,9 +1,7 @@
-import styled from 'styled-components'
 import { useTranslation } from 'react-i18next'
 import { useSelector } from 'react-redux'
 
 import {
-  BORDERS,
   COLORS,
   DIRECTION_COLUMN,
   Divider,
@@ -12,7 +10,6 @@ import {
   RadioButton,
   SPACING,
   StyledText,
-  TYPOGRAPHY,
 } from '@opentrons/components'
 import {
   HEATERSHAKER_MODULE_TYPE,
