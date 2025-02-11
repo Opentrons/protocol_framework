@@ -32,6 +32,8 @@ declare global {
       verifyCreateNewPage: () => Cypress.Chainable<void>
       togglePreWetTip: () => Cypress.Chainable<void>
       mixaspirate: () => Cypress.Chainable<void>
+      clickConfirm: () => Cypress.Chainable<void>
+      verifyOverflowBtn: () => Cypress.Chainable<void>
     }
   }
 }
@@ -49,6 +51,12 @@ export const content = {
   appSettings: 'App Info',
   privacy: 'Privacy',
   shareSessions: 'Share analytics with Opentrons',
+  move: 'Move',
+  transfer: 'Transfer',
+  mix: 'Mix',
+  pause: 'Pause',
+  heaterShaker: 'Heater-shaker',
+  thermocyler: 'Thermocycler',
 }
 
 export const locators = {
@@ -104,11 +112,11 @@ Cypress.Commands.add('verifyCreateNewHeader', () => {
 // Home Page
 Cypress.Commands.add('verifyHomePage', () => {
   cy.contains(content.welcome)
+  cy.get(locators.privacyPolicy).should('exist').and('be.visible')
+  cy.get(locators.eula).should('exist').and('be.visible')
   cy.contains('button', locators.createProtocol).should('be.visible')
   cy.contains('label', locators.importProtocol).should('be.visible')
   cy.getByTestId(locators.settingsDataTestid).should('be.visible')
-  cy.get(locators.privacyPolicy).should('exist').and('be.visible')
-  cy.get(locators.eula).should('exist').and('be.visible')
 })
 
 Cypress.Commands.add('clickCreateNew', () => {
@@ -120,6 +128,10 @@ Cypress.Commands.add('closeAnalyticsModal', () => {
     .contains(locators.confirm)
     .should('be.visible')
     .click({ force: true })
+})
+
+Cypress.Commands.add('clickConfirm', () => {
+  cy.contains(locators.confirm).click()
 })
 
 // Header Import
@@ -156,6 +168,15 @@ Cypress.Commands.add('verifySettingsPage', () => {
   cy.getByTestId(locators.analyticsToggleTestId)
     .should('exist')
     .should('be.visible')
+})
+
+Cypress.Commands.add('verifyOverflowBtn', () => {
+  cy.contains(content.move).should('exist').should('be.visible')
+  cy.contains(content.transfer).should('exist').should('be.visible')
+  cy.contains(content.mix).should('exist').should('be.visible')
+  cy.contains(content.pause).should('exist').should('be.visible')
+  cy.contains(content.heaterShaker).should('exist').should('be.visible')
+  cy.contains(content.thermocyler).should('exist').should('be.visible')
 })
 
 /// /////////////////////////////////////////////////////////////////

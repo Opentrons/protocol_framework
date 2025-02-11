@@ -13,6 +13,12 @@ import {
   executeModSteps,
   executeVerifyModStep,
 } from './SupportModules'
+import {
+  MixActions,
+  MixVerifications,
+  executeMixAction,
+  executeVerifyMixStep,
+} from './mixSetting'
 
 export type StepsList = Array<
   | SetupActions
@@ -20,6 +26,8 @@ export type StepsList = Array<
   | UniversalActions
   | ModActions
   | ModVerifications
+  | MixActions
+  | MixVerifications
 >
 
 export const runSteps = (steps: StepsList): void => {
@@ -29,6 +37,8 @@ export const runSteps = (steps: StepsList): void => {
     ModVerifications,
     SetupVerifications,
     UniversalActions,
+    MixActions,
+    MixVerifications,
   ]
 
   if (!isEnumValue(enumsToCheck, steps)) {
@@ -46,6 +56,10 @@ export const runSteps = (steps: StepsList): void => {
       executeModSteps(step as ModActions)
     } else if (isEnumValue([ModVerifications], step)) {
       executeVerifyModStep(step as ModVerifications)
+    } else if (isEnumValue([MixActions], step)) {
+      executeMixAction(step as MixActions)
+    } else if (isEnumValue([MixVerifications], step)) {
+      executeVerifyMixStep(step as MixVerifications)
     }
   })
 }
