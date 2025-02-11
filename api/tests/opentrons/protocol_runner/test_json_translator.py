@@ -12,7 +12,7 @@ from opentrons_shared_data.labware.labware_definition import (
     CornerOffsetFromSlot,
     Dimensions,
     Group,
-    Metadata1,
+    GroupMetadata,
     WellDefinition,
     CuboidalFrustum,
     InnerWellGeometry,
@@ -680,7 +680,7 @@ def _load_labware_definition_data() -> LabwareDefinition:
         namespace="example",
         schemaVersion=2,
         ordering=[["A1", "B1", "C1", "D1"], ["A2", "B2", "C2", "D2"]],
-        groups=[Group(wells=["A1"], metadata=Metadata1())],
+        groups=[Group(wells=["A1"], metadata=GroupMetadata())],
         wells={
             "A1": WellDefinition(
                 depth=25,

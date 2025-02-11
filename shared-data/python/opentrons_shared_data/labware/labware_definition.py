@@ -639,7 +639,7 @@ class RoundedCuboidSegment(BaseModel):
     model_config = ConfigDict(ignored_types=(cached_property,))
 
 
-class Metadata1(BaseModel):
+class GroupMetadata(BaseModel):
     """
     Metadata specific to a grid of wells in a labware
     """
@@ -659,7 +659,7 @@ class Group(BaseModel):
     wells: List[str] = Field(
         ..., description="An array of wells that contain the same metadata"
     )
-    metadata: Metadata1 = Field(
+    metadata: GroupMetadata = Field(
         ..., description="Metadata specific to a grid of wells in a labware"
     )
     brand: Optional[BrandData] = Field(
