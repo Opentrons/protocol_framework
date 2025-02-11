@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useDispatch } from 'react-redux'
 import {
@@ -79,6 +80,12 @@ export function DropdownStepFormField(
     }
   }
 
+  useEffect(() => {
+    if (options.length === 1) {
+      updateValue(options[0].value)
+    }
+  }, [options.length])
+
   return (
     <Flex padding={padding ?? SPACING.spacing16}>
       {options.length > 1 || options.length === 0 ? (
@@ -138,6 +145,11 @@ export function DropdownStepFormField(
               </Flex>
             </Flex>
           </ListItem>
+          {errorToShow != null ? (
+            <StyledText desktopStyle="bodyDefaultRegular" color={COLORS.red50}>
+              {errorToShow}
+            </StyledText>
+          ) : null}
         </Flex>
       )}
     </Flex>
