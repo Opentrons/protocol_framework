@@ -1,5 +1,5 @@
 // eslint-disable-next-line @typescript-eslint/consistent-type-imports
-import { getTestFile, TestFile, TestFilePath } from './testFiles'
+import { getTestFile, TestFile, TestFilePath } from './TestFiles'
 import path from 'path'
 import semver from 'semver'
 import cloneDeep from 'lodash/cloneDeep'
@@ -48,7 +48,7 @@ export const verifyOldProtocolModal = (): void => {
         .and('be.visible')
       cy.contains(ContentStrings.confirmButton).should('be.visible')
       cy.contains(ContentStrings.cancelButton).should('be.visible')
-      cy.contains(ContentStrings.confirmButton).click()
+      cy.contains(ContentStrings.confirmButton).click({ force: true })
     })
 }
 
@@ -80,14 +80,14 @@ export const migrateAndMatchSnapshot = ({
     }
     cy.get('button')
       .contains(ContentStrings.confirmButton, { matchCase: false })
-      .click()
+      .click({ force: true })
   }
 
-  cy.get(LocatorStrings.exportProtocol).click()
+  cy.get(LocatorStrings.exportProtocol).click({ force: true })
 
   if (unusedHardware) {
     cy.get('div').contains(ContentStrings.unusedHardwareWarning).should('exist')
-    cy.contains(ContentStrings.continueWithExport).click()
+    cy.contains(ContentStrings.continueWithExport).click({ force: true })
   }
 
   const expectedProtocol: TestFile = getTestFile(expectedTestFile)
@@ -118,7 +118,10 @@ export const migrateAndMatchSnapshot = ({
         //  a uuid is randomly generated each time you upload a protocol that is less than version 8_5_0
         //  which is the migration version that adds these keys. Due to this, we need to ignore
         //  the uuids
-        if (savedStepForms[initialDeckSetupStep] && isBelowVersion850) {
+        if (
+          Boolean(savedStepForms[initialDeckSetupStep]) &&
+          isBelowVersion850
+        ) {
           savedStepForms[initialDeckSetupStep].trashBinLocationUpdate = {
             trashBin: 'trashLocation',
           }

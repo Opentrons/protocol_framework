@@ -26,6 +26,7 @@ import type { CommandCreator, CommandCreatorError } from '../../types'
 export interface DispenseAtomicCommandParams extends DispenseParams {
   nozzles: NozzleConfigurationStyle | null
   tipRack: string
+  isAirGap?: boolean
 }
 /** Dispense with given args. Requires tip. */
 export const dispense: CommandCreator<DispenseAtomicCommandParams> = (
@@ -42,6 +43,7 @@ export const dispense: CommandCreator<DispenseAtomicCommandParams> = (
     wellLocation,
     nozzles,
     tipRack,
+    isAirGap,
   } = args
   const actionName = 'dispense'
   const labwareState = prevRobotState.labware
@@ -224,6 +226,7 @@ export const dispense: CommandCreator<DispenseAtomicCommandParams> = (
         //  pushOut will always be undefined in step-generation for now
         //  since there is no easy way to allow users to  for it in PD
       },
+      ...(isAirGap && { meta: { isAirGap } }),
     },
   ]
   return {

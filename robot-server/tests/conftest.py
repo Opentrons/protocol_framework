@@ -332,13 +332,19 @@ def minimal_labware_def() -> LabwareDefinition:
 @pytest.fixture
 def custom_tiprack_def() -> LabwareDefinition:
     return {
-        "metadata": {"displayName": "minimal labware"},
+        "metadata": {
+            "displayName": "minimal labware",
+            "displayCategory": "tipRack",
+            "displayVolumeUnits": "µL",
+        },
         "cornerOffsetFromSlot": {"x": 10, "y": 10, "z": 5},
         "parameters": {
             "isTiprack": True,
             "tipLength": 55.3,
             "tipOverlap": 2.8,
             "loadName": "minimal_labware_def",
+            "format": "96Standard",
+            "isMagneticModuleCompatible": False,
         },
         "ordering": [["A1"], ["A2"]],
         "wells": {

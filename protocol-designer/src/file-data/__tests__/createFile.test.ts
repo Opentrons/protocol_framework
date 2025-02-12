@@ -70,6 +70,12 @@ describe('createFile selector', () => {
   afterEach(() => {
     vi.restoreAllMocks()
   })
+  const entities = {
+    moduleEntities: v7Fixture.moduleEntities,
+    labwareEntities,
+    pipetteEntities,
+    liquidEntities: ingredients,
+  }
   it('should return a schema-valid JSON V8 protocol', () => {
     // @ts-expect-error(sa, 2021-6-15): resultFunc not part of Selector type
     const result = createFile.resultFunc(
@@ -78,16 +84,13 @@ describe('createFile selector', () => {
       v7Fixture.robotStateTimeline,
       OT2_ROBOT_TYPE,
       dismissedWarnings,
-      ingredients,
       ingredLocations,
       v7Fixture.savedStepForms,
       v7Fixture.orderedStepIds,
-      labwareEntities,
-      v7Fixture.moduleEntities,
-      pipetteEntities,
       labwareNicknamesById,
       labwareDefsByURI,
-      {}
+      {},
+      entities
     )
     expectResultToMatchSchema(result)
 
@@ -99,7 +102,14 @@ describe('createFile selector', () => {
 
   it('should return a valid Python protocol file', () => {
     // @ts-expect-error(sa, 2021-6-15): resultFunc not part of Selector type
-    const result = createPythonFile.resultFunc(fileMetadata, OT2_ROBOT_TYPE, {})
+    const result = createPythonFile.resultFunc(
+      fileMetadata,
+      OT2_ROBOT_TYPE,
+      entities,
+      v7Fixture.initialRobotState,
+      v7Fixture.robotStateTimeline,
+      ingredLocations
+    )
     // This is just a quick smoke test to make sure createPythonFile() produces
     // something that looks like a Python file. The individual sections of the
     // generated Python will be tested in separate unit tests.
@@ -113,6 +123,7 @@ metadata = {
     "author": "The Author",
     "description": "Protocol description",
     "created": "2020-02-25T21:48:32.515Z",
+    "protocolDesigner": "fake_PD_version",
 }
 
 requirements = {
@@ -121,6 +132,17 @@ requirements = {
 }
 
 def run(protocol: protocol_api.ProtocolContext):
+    # Load Labware:
+    mockPythonName = protocol.load_labware("fixture_trash", "12")
+    mockPythonName = protocol.load_labware("fixture_tiprack_10_ul", "1")
+    mockPythonName = protocol.load_labware("fixture_96_plate", "7")
+
+    # Load Pipettes:
+    mockPythonName = protocol.load_instrument("p10_single", "left", tip_racks=[mockPythonName])
+
+    # PROTOCOL STEPS
+
+    # Step 1:
     pass
 `.trimStart()
     )

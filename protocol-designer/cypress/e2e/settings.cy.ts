@@ -12,10 +12,20 @@ describe('The Settings Page', () => {
     cy.openSettingsPage()
     cy.verifySettingsPage()
     // Timeline editing tips defaults to true
-    cy.getByAriaLabel('Settings_hotKeys')
+    cy.getByAriaLabel('Settings_OT_PD_ENABLE_HOT_KEYS_DISPLAY')
       .should('exist')
       .should('be.visible')
       .should('have.attr', 'aria-checked', 'true')
+    // Multiple temp modules on OT-2 defaults to false
+    cy.getByAriaLabel('Settings_OT_PD_ENABLE_MULTIPLE_TEMPS_OT2')
+      .should('exist')
+      .should('be.visible')
+      .should('have.attr', 'aria-checked', 'false')
+    // Disable module restrictions defaults to false
+    cy.getByAriaLabel('Settings_OT_PD_DISABLE_MODULE_RESTRICTIONS')
+      .should('exist')
+      .should('be.visible')
+      .should('have.attr', 'aria-checked', 'false')
     // Share sessions with Opentrons toggle defaults to off
     cy.getByTestId('analyticsToggle')
       .should('exist')
@@ -37,15 +47,15 @@ describe('The Settings Page', () => {
     // Toggle off editing timeline tips
     // Navigate away from the settings page
     // Then return to see timeline tips remains toggled on
-    cy.getByAriaLabel('Settings_hotKeys').click()
-    cy.getByAriaLabel('Settings_hotKeys').should(
+    cy.getByAriaLabel('Settings_OT_PD_ENABLE_HOT_KEYS_DISPLAY').click()
+    cy.getByAriaLabel('Settings_OT_PD_ENABLE_HOT_KEYS_DISPLAY').should(
       'have.attr',
       'aria-checked',
       'false'
     )
     cy.visit('/')
     cy.openSettingsPage()
-    cy.getByAriaLabel('Settings_hotKeys').should(
+    cy.getByAriaLabel('Settings_OT_PD_ENABLE_HOT_KEYS_DISPLAY').should(
       'have.attr',
       'aria-checked',
       'false'

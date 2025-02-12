@@ -99,34 +99,34 @@ export const createFile: Selector<ProtocolFile> = createSelector(
   getRobotStateTimeline,
   getRobotType,
   dismissSelectors.getAllDismissedWarnings,
-  stepFormSelectors.getLiquidEntities,
   ingredSelectors.getLiquidsByLabwareId,
   stepFormSelectors.getSavedStepForms,
   stepFormSelectors.getOrderedStepIds,
-  stepFormSelectors.getLabwareEntities,
-  stepFormSelectors.getModuleEntities,
-  stepFormSelectors.getPipetteEntities,
   uiLabwareSelectors.getLabwareNicknamesById,
   labwareDefSelectors.getLabwareDefsByURI,
   getStepGroups,
+  stepFormSelectors.getInvariantContext,
   (
     fileMetadata,
     initialRobotState,
     robotStateTimeline,
     robotType,
     dismissedWarnings,
-    liquidEntities,
     ingredLocations,
     savedStepForms,
     orderedStepIds,
-    labwareEntities,
-    moduleEntities,
-    pipetteEntities,
     labwareNicknamesById,
     labwareDefsByURI,
-    stepGroups
+    stepGroups,
+    invariantContext
   ) => {
     const { author, description, created } = fileMetadata
+    const {
+      pipetteEntities,
+      labwareEntities,
+      liquidEntities,
+      moduleEntities,
+    } = invariantContext
 
     const loadCommands = getLoadCommands(
       initialRobotState,
@@ -308,14 +308,30 @@ export const createFile: Selector<ProtocolFile> = createSelector(
 export const createPythonFile: Selector<string> = createSelector(
   getFileMetadata,
   getRobotType,
-  (fileMetadata, robotType) => {
+  stepFormSelectors.getInvariantContext,
+  getInitialRobotState,
+  getRobotStateTimeline,
+  ingredSelectors.getLiquidsByLabwareId,
+  (
+    fileMetadata,
+    robotType,
+    invariantContext,
+    robotState,
+    robotStateTimeline,
+    liquidsByLabwareId
+  ) => {
     return (
       [
         // Here are the sections of the Python file:
         pythonImports(),
         pythonMetadata(fileMetadata),
         pythonRequirements(robotType),
-        pythonDefRun(),
+        pythonDefRun(
+          invariantContext,
+          robotState,
+          robotStateTimeline,
+          liquidsByLabwareId
+        ),
       ]
         .filter(section => section) // skip any blank sections
         .join('\n\n') + '\n'
