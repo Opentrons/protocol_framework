@@ -7,18 +7,30 @@ import {
   MAGNETIC_BLOCK_V1,
   OT2_ROBOT_TYPE,
   fixture96Plate,
+  fixtureP1000SingleV2Specs,
+  fixtureP300MultiV2Specs,
+  fixtureTiprack1000ul,
   fixtureTiprackAdapter,
 } from '@opentrons/shared-data'
 import {
+  getDefineLiquids,
   getLoadAdapters,
   getLoadLabware,
+  getLoadLiquids,
   getLoadModules,
+  getLoadPipettes,
   pythonMetadata,
   pythonRequirements,
 } from '../selectors/pythonFile'
 import type { LabwareDefinition2 } from '@opentrons/shared-data'
-import type { LabwareEntities, TimelineFrame } from '@opentrons/step-generation'
-import type { ModuleEntities } from '../../step-forms'
+import type {
+  LabwareEntities,
+  LabwareLiquidState,
+  LiquidEntities,
+  ModuleEntities,
+  PipetteEntities,
+  TimelineFrame,
+} from '@opentrons/step-generation'
 
 describe('pythonMetadata', () => {
   it('should generate metadata section', () => {
@@ -44,6 +56,7 @@ metadata = {
     "category": "PCR",
     "subcategory": "PCR Prep",
     "tags": "wombat, kangaroo, wallaby",
+    "protocolDesigner": "fake_PD_version",
 }`.trimStart()
     )
   })
@@ -189,6 +202,124 @@ describe('getLoadLabware', () => {
 well_plate_1 = adapter_2.load_labware("fixture_96_plate")
 well_plate_2 = magnetic_block_2.load_labware("fixture_96_plate")
 well_plate_3 = protocol.load_labware("fixture_96_plate", "C2")`.trimStart()
+    )
+  })
+})
+
+describe('getLoadPipettes', () => {
+  it('should generate loadPipette for 2 pipettes using the same tiprack', () => {
+    const mockTiprackDefURI = 'fixture/fixture_flex_96_tiprack_1000ul/1'
+    const tiprack1 = 'tiprack1'
+    const pipette1 = 'pipette1'
+    const pipette2 = 'pipette2'
+    const mockPipetteEntities: PipetteEntities = {
+      [pipette1]: {
+        id: pipette1,
+        pythonName: 'pipette_left',
+        name: 'p300_multi_gen2',
+        tiprackDefURI: [mockTiprackDefURI],
+        spec: fixtureP300MultiV2Specs,
+        tiprackLabwareDef: [fixtureTiprack1000ul as LabwareDefinition2],
+      },
+      [pipette2]: {
+        id: pipette2,
+        pythonName: 'pipette_left',
+        name: 'p1000_single_flex',
+        tiprackDefURI: [mockTiprackDefURI],
+        spec: fixtureP1000SingleV2Specs,
+        tiprackLabwareDef: [fixtureTiprack1000ul as LabwareDefinition2],
+      },
+    }
+    const mockTiprackEntities: LabwareEntities = {
+      [tiprack1]: {
+        id: tiprack1,
+        def: fixtureTiprack1000ul as LabwareDefinition2,
+        labwareDefURI: mockTiprackDefURI,
+        pythonName: 'tip_rack_1',
+      },
+    }
+    const pipetteRobotState: TimelineFrame['pipettes'] = {
+      [pipette1]: { mount: 'left' },
+      [pipette2]: { mount: 'right' },
+    }
+
+    expect(
+      getLoadPipettes(
+        mockPipetteEntities,
+        mockTiprackEntities,
+        pipetteRobotState
+      )
+    ).toBe(
+      `
+# Load Pipettes:
+pipette_left = protocol.load_instrument("p300_multi_gen2", "left", tip_racks=[tip_rack_1])
+pipette_left = protocol.load_instrument("flex_1channel_1000", "right", tip_racks=[tip_rack_1])`.trimStart()
+    )
+  })
+})
+
+const liquid1 = 'liquid1'
+const liquid2 = 'liquid2'
+const mockLiquidEntities: LiquidEntities = {
+  [liquid1]: {
+    liquidGroupId: liquid1,
+    pythonName: 'liquid_1',
+    displayName: 'water',
+    description: 'mock description',
+    displayColor: 'mock display color',
+  },
+  [liquid2]: {
+    liquidGroupId: liquid2,
+    pythonName: 'liquid_2',
+    description: null,
+    displayName: 'sulfur',
+    displayColor: 'mock display color 2',
+  },
+}
+
+describe('getDefineLiquids', () => {
+  it('should generate 2 liquids, 1 with description, 1 without', () => {
+    expect(getDefineLiquids(mockLiquidEntities)).toBe(
+      `
+# Define Liquids:
+liquid_1 = protocol.define_liquid(
+    name="water"
+    description="mock description"
+    display_color="mock display color"
+)
+liquid_2 = protocol.define_liquid(
+    name="sulfur"
+    display_color="mock display color 2"
+)`.trimStart()
+    )
+  })
+})
+
+describe('getLoadLiquids', () => {
+  it('should generate 2 liquids in 2 labware in 4 wells', () => {
+    const mockLiquidsBylabwareId: LabwareLiquidState = {
+      [labwareId3]: {
+        A1: { [liquid1]: { volume: 10 } },
+        A2: { [liquid1]: { volume: 10 } },
+        A3: { [liquid2]: { volume: 50 } },
+      },
+      [labwareId4]: {
+        D1: { [liquid2]: { volume: 180 } },
+      },
+    }
+    expect(
+      getLoadLiquids(
+        mockLiquidsBylabwareId,
+        mockLiquidEntities,
+        mockLabwareEntities
+      )
+    ).toBe(
+      `
+# Load Liquids:
+well_plate_1["A1"].load_liquid(liquid=liquid_1, volume=10)
+well_plate_1["A2"].load_liquid(liquid=liquid_1, volume=10)
+well_plate_1["A3"].load_liquid(liquid=liquid_2, volume=50)
+well_plate_2["D1"].load_liquid(liquid=liquid_2, volume=180)`.trimStart()
     )
   })
 })
