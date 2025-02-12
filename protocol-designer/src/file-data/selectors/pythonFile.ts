@@ -195,11 +195,11 @@ export function getDefineLiquids(liquidEntities: LiquidEntities): string {
     .map(liquid => {
       const { pythonName, displayColor, displayName, description } = liquid
       const liquidArgs = [
-        `name=${formatPyStr(displayName)}`,
-        `display_color=${formatPyStr(displayColor)}`,
+        `${formatPyStr(displayName)}`,
         ...(description != null
           ? [`description=${formatPyStr(description)}`]
           : []),
+        `display_color=${formatPyStr(displayColor)}`,
       ].join(',\n')
 
       return (
@@ -227,9 +227,7 @@ export function getLoadLiquids(
             const liquidPythonName = liquidEntities[liquidGroupId].pythonName
             return `${labwarePythonName}[${formatPyStr(
               well
-            )}].load_liquid(liquid=${liquidPythonName}, volume=${
-              volume.volume
-            })`
+            )}].load_liquid(${liquidPythonName}, ${volume.volume})`
           })
           .join('\n')
       )

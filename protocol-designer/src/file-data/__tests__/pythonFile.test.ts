@@ -313,12 +313,12 @@ describe('getDefineLiquids', () => {
       `
 # Define Liquids:
 liquid_1 = protocol.define_liquid(
-    name="water",
-    display_color="mock display color",
+    "water",
     description="mock description",
+    display_color="mock display color",
 )
 liquid_2 = protocol.define_liquid(
-    name="sulfur",
+    "sulfur",
     display_color="mock display color 2",
 )`.trimStart()
     )
@@ -346,10 +346,10 @@ describe('getLoadLiquids', () => {
     ).toBe(
       `
 # Load Liquids:
-well_plate_1["A1"].load_liquid(liquid=liquid_1, volume=10)
-well_plate_1["A2"].load_liquid(liquid=liquid_1, volume=10)
-well_plate_1["A3"].load_liquid(liquid=liquid_2, volume=50)
-well_plate_2["D1"].load_liquid(liquid=liquid_2, volume=180)`.trimStart()
+well_plate_1["A1"].load_liquid(liquid_1, 10)
+well_plate_1["A2"].load_liquid(liquid_1, 10)
+well_plate_1["A3"].load_liquid(liquid_2, 50)
+well_plate_2["D1"].load_liquid(liquid_2, 180)`.trimStart()
     )
   })
 })
