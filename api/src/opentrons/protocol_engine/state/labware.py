@@ -209,23 +209,23 @@ class LabwareStore(HasState[LabwareState], HandlesActions):
                 version=loaded_labware_update.definition.version,
             )
 
-            self._state.definitions_by_uri[
-                definition_uri
-            ] = loaded_labware_update.definition
+            self._state.definitions_by_uri[definition_uri] = (
+                loaded_labware_update.definition
+            )
 
             location = loaded_labware_update.new_location
 
             display_name = loaded_labware_update.display_name
 
-            self._state.labware_by_id[
-                loaded_labware_update.labware_id
-            ] = LoadedLabware.model_construct(
-                id=loaded_labware_update.labware_id,
-                location=location,
-                loadName=loaded_labware_update.definition.parameters.loadName,
-                definitionUri=definition_uri,
-                offsetId=loaded_labware_update.offset_id,
-                displayName=display_name,
+            self._state.labware_by_id[loaded_labware_update.labware_id] = (
+                LoadedLabware.model_construct(
+                    id=loaded_labware_update.labware_id,
+                    location=location,
+                    loadName=loaded_labware_update.definition.parameters.loadName,
+                    definitionUri=definition_uri,
+                    offsetId=loaded_labware_update.offset_id,
+                    displayName=display_name,
+                )
             )
 
     def _add_loaded_lid_stack(self, state_update: update_types.StateUpdate) -> None:
@@ -237,18 +237,18 @@ class LabwareStore(HasState[LabwareState], HandlesActions):
                 load_name=loaded_lid_stack_update.stack_object_definition.parameters.loadName,
                 version=loaded_lid_stack_update.stack_object_definition.version,
             )
-            self.state.definitions_by_uri[
-                stack_definition_uri
-            ] = loaded_lid_stack_update.stack_object_definition
-            self._state.labware_by_id[
-                loaded_lid_stack_update.stack_id
-            ] = LoadedLabware.construct(
-                id=loaded_lid_stack_update.stack_id,
-                location=loaded_lid_stack_update.stack_location,
-                loadName=loaded_lid_stack_update.stack_object_definition.parameters.loadName,
-                definitionUri=stack_definition_uri,
-                offsetId=None,
-                displayName=None,
+            self.state.definitions_by_uri[stack_definition_uri] = (
+                loaded_lid_stack_update.stack_object_definition
+            )
+            self._state.labware_by_id[loaded_lid_stack_update.stack_id] = (
+                LoadedLabware.construct(
+                    id=loaded_lid_stack_update.stack_id,
+                    location=loaded_lid_stack_update.stack_location,
+                    loadName=loaded_lid_stack_update.stack_object_definition.parameters.loadName,
+                    definitionUri=stack_definition_uri,
+                    offsetId=None,
+                    displayName=None,
+                )
             )
 
             # Add the Lids on top of the stack object
@@ -263,9 +263,9 @@ class LabwareStore(HasState[LabwareState], HandlesActions):
                     version=loaded_lid_stack_update.definition.version,
                 )
 
-                self._state.definitions_by_uri[
-                    definition_uri
-                ] = loaded_lid_stack_update.definition
+                self._state.definitions_by_uri[definition_uri] = (
+                    loaded_lid_stack_update.definition
+                )
 
                 location = loaded_lid_stack_update.new_locations_by_id[labware_id]
 
@@ -356,6 +356,19 @@ class LabwareView:
             f"There is not labware loaded onto labware {labware_id}"
         )
 
+    def raise_if_labware_has_non_lid_labware_on_top(self, labware_id: str) -> None:
+        """Raise if labware has another labware that is not its lid on top."""
+        lid_id = self.get_lid_id_by_labware_id(labware_id)
+        for candidate_id, candidate_labware in self._state.labware_by_id.items():
+            if (
+                isinstance(candidate_labware.location, OnLabwareLocation)
+                and candidate_labware.location.labwareId == labware_id
+                and candidate_id != lid_id
+            ):
+                raise errors.LabwareIsInStackError(
+                    f"Cannot access labware {labware_id} because it has a non-lid labware stacked on top."
+                )
+
     def raise_if_labware_has_labware_on_top(self, labware_id: str) -> None:
         """Raise if labware has another labware on top."""
         for labware in self._state.labware_by_id.values():
@@ -364,7 +377,7 @@ class LabwareView:
                 and labware.location.labwareId == labware_id
             ):
                 raise errors.LabwareIsInStackError(
-                    f"Cannot move to labware {labware_id}, labware has other labware stacked on top."
+                    f"Cannot access labware {labware_id} because it has another labware stacked on top."
                 )
 
     def get_by_slot(

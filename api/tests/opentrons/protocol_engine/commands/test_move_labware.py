@@ -138,7 +138,9 @@ async def test_manual_move_labware_implementation(
     result = await subject.execute(data)
     decoy.verify(await run_control.wait_for_resume(), times=times_pause_called)
     decoy.verify(
-        state_view.labware.raise_if_labware_has_labware_on_top("my-cool-labware-id")
+        state_view.labware.raise_if_labware_has_non_lid_labware_on_top(
+            "my-cool-labware-id"
+        )
     )
     assert result == SuccessData(
         public=MoveLabwareResult(
@@ -221,7 +223,9 @@ async def test_move_labware_implementation_on_labware(
 
     result = await subject.execute(data)
     decoy.verify(
-        state_view.labware.raise_if_labware_has_labware_on_top("my-cool-labware-id"),
+        state_view.labware.raise_if_labware_has_non_lid_labware_on_top(
+            "my-cool-labware-id"
+        ),
         state_view.labware.raise_if_labware_has_labware_on_top(
             "my-even-cooler-labware-id"
         ),
@@ -329,7 +333,9 @@ async def test_gripper_move_labware_implementation(
 
     result = await subject.execute(data)
     decoy.verify(
-        state_view.labware.raise_if_labware_has_labware_on_top("my-cool-labware-id"),
+        state_view.labware.raise_if_labware_has_non_lid_labware_on_top(
+            "my-cool-labware-id"
+        ),
         await labware_movement.move_labware_with_gripper(
             labware_id="my-cool-labware-id",
             current_location=sentinel.from_location_validated_for_gripper,
@@ -621,7 +627,9 @@ async def test_gripper_move_to_waste_chute_implementation(
 
     result = await subject.execute(data)
     decoy.verify(
-        state_view.labware.raise_if_labware_has_labware_on_top("my-cool-labware-id"),
+        state_view.labware.raise_if_labware_has_non_lid_labware_on_top(
+            "my-cool-labware-id"
+        ),
         await labware_movement.move_labware_with_gripper(
             labware_id="my-cool-labware-id",
             current_location=from_location,
