@@ -9,10 +9,10 @@ from opentrons_shared_data.labware.labware_definition import (
     Metadata,
     DisplayCategory,
     BrandData,
-    CornerOffsetFromSlot,
+    Vector as SD_Labware_Vector,
     Dimensions,
     Group,
-    Metadata1,
+    GroupMetadata,
     WellDefinition,
     CuboidalFrustum,
     InnerWellGeometry,
@@ -680,7 +680,7 @@ def _load_labware_definition_data() -> LabwareDefinition:
         namespace="example",
         schemaVersion=2,
         ordering=[["A1", "B1", "C1", "D1"], ["A2", "B2", "C2", "D2"]],
-        groups=[Group(wells=["A1"], metadata=Metadata1())],
+        groups=[Group(wells=["A1"], metadata=GroupMetadata())],
         wells={
             "A1": WellDefinition(
                 depth=25,
@@ -692,7 +692,7 @@ def _load_labware_definition_data() -> LabwareDefinition:
             )
         },
         dimensions=Dimensions(yDimension=85.5, zDimension=100, xDimension=127.75),
-        cornerOffsetFromSlot=CornerOffsetFromSlot(x=0, y=0, z=0),
+        cornerOffsetFromSlot=SD_Labware_Vector(x=0, y=0, z=0),
         innerLabwareGeometry={
             "welldefinition1111": InnerWellGeometry(
                 sections=[
