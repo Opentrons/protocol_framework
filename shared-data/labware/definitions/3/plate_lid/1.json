@@ -1,6 +1,6 @@
 {
   "allowedRoles": [
-    "labware"
+    "labware", "lid"
   ],
   "ordering": [],
   "brand": {
@@ -9,7 +9,7 @@
   },
   "metadata": {
     "displayName": "Plate Lid",
-    "displayCategory": "other",
+    "displayCategory": "lid",
     "displayVolumeUnits": "\u00b5L",
     "tags": []
   },
@@ -92,7 +92,8 @@
     "biorad_96_wellplate_200ul_pcr",
     "opentrons_flex_deck_riser",
     "protocol_engine_lid_stack_object",
-    "corning_96_wellplate_360ul_flat"
+    "corning_96_wellplate_360ul_flat",
+    "plate_lid"
   ],
   "gripForce": 15,
   "gripHeightFromLabwareBottom": 7.91,
