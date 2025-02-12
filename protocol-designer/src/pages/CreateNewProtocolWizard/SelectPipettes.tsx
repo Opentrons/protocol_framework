@@ -21,6 +21,7 @@ import {
   DISPLAY_FLEX,
   DISPLAY_INLINE_BLOCK,
   EmptySelectorButton,
+  FLEX_MAX_CONTENT,
   Flex,
   Icon,
   JUSTIFY_SPACE_BETWEEN,
@@ -115,8 +116,10 @@ export function SelectPipettes(props: WizardTileProps): JSX.Element | null {
     (page === 'add' &&
       pipettesByMount[mount].tiprackDefURI == null &&
       noPipette) ||
-    (pipettesByMount.left.tiprackDefURI == null &&
-      pipettesByMount.right.tiprackDefURI == null)
+    ((pipettesByMount.left.tiprackDefURI == null ||
+      pipettesByMount.left.tiprackDefURI.length === 0) &&
+      (pipettesByMount.right.tiprackDefURI == null ||
+        pipettesByMount.right.tiprackDefURI.length === 0))
 
   const targetPipetteMount =
     pipettesByMount.left.pipetteName == null ||
@@ -552,16 +555,18 @@ export function SelectPipettes(props: WizardTileProps): JSX.Element | null {
                     pipettesByMount.right.pipetteName != null &&
                     pipettesByMount.left.tiprackDefURI != null &&
                     pipettesByMount.right.tiprackDefURI != null) ? null : (
-                    <EmptySelectorButton
-                      onClick={() => {
-                        setPage('add')
-                        setMount(targetPipetteMount)
-                        resetFields()
-                      }}
-                      text={t('add_pipette')}
-                      textAlignment="left"
-                      iconName="plus"
-                    />
+                    <Flex width={FLEX_MAX_CONTENT}>
+                      <EmptySelectorButton
+                        onClick={() => {
+                          setPage('add')
+                          setMount(targetPipetteMount)
+                          resetFields()
+                        }}
+                        text={t('add_pipette')}
+                        textAlignment="left"
+                        iconName="plus"
+                      />
+                    </Flex>
                   )}
                 </>
               </Flex>

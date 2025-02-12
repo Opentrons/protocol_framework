@@ -128,6 +128,13 @@ export const getUnoccupiedLabwareLocationOptions: Selector<
 
     if (robotState == null) return null
 
+    const trashCutouts = Object.values(additionalEquipmentEntities).reduce<
+      string[]
+    >(
+      (acc, { name, location }) =>
+        name === 'trashBin' && location != null ? [...acc, location] : acc,
+      []
+    )
     const { modules, labware } = robotState
     const slotIdsOccupiedByModules = Object.entries(modules).reduce<string[]>(
       (acc, [modId, modOnDeck]) => {
@@ -233,6 +240,7 @@ export const getUnoccupiedLabwareLocationOptions: Selector<
             .map(lw => lw.slot)
             .includes(slotId) &&
           !isTrashSlot &&
+          !trashCutouts.some(cutout => cutout.includes(slotId)) &&
           !WASTE_CHUTE_ADDRESSABLE_AREAS.includes(slotId) &&
           !notSelectedStagingAreaAddressableAreas.includes(slotId) &&
           !FLEX_MODULE_ADDRESSABLE_AREAS.includes(slotId) &&
