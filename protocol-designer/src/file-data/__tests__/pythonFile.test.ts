@@ -283,13 +283,13 @@ describe('getDefineLiquids', () => {
       `
 # Define Liquids:
 liquid_1 = protocol.define_liquid(
-    name="water"
-    description="mock description"
-    display_color="mock display color"
+    name="water",
+    description="mock description",
+    display_color="mock display color",
 )
 liquid_2 = protocol.define_liquid(
-    name="sulfur"
-    display_color="mock display color 2"
+    name="sulfur",
+    display_color="mock display color 2",
 )`.trimStart()
     )
   })

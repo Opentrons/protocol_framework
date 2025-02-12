@@ -194,13 +194,13 @@ export function getDefineLiquids(liquidEntities: LiquidEntities): string {
       const { pythonName, displayColor, displayName, description } = liquid
       const pythonDescription =
         description != null
-          ? `\n${indentPyLines(`description=${formatPyStr(description)}`)}`
+          ? `\n${indentPyLines(`description=${formatPyStr(description)}`)},`
           : ''
 
       return `${pythonName} = ${PROTOCOL_CONTEXT_NAME}.define_liquid(\n${indentPyLines(
-        `name=${formatPyStr(displayName)}`
+        `name=${formatPyStr(displayName)},`
       )}${pythonDescription}\n${indentPyLines(
-        `display_color=${formatPyStr(displayColor)}`
+        `display_color=${formatPyStr(displayColor)},`
       )}\n)`
     })
     .join('\n')
