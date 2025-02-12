@@ -83,7 +83,7 @@ export function ProtocolSetupLabware({
   setIsConfirmed,
 }: ProtocolSetupLabwareProps): JSX.Element {
   const { t } = useTranslation('protocol_setup')
-  const [showMapView, setShowMapView] = useState<boolean>(false)
+  const [showMapView, setShowMapView] = useState<boolean>(true)
   const [
     showLabwareDetailsModal,
     setShowLabwareDetailsModal,
@@ -231,6 +231,7 @@ export function ProtocolSetupLabware({
               const labwareOnAdapter = onDeckItems.find(
                 item =>
                   labware.initialLocation !== 'offDeck' &&
+                  labware.initialLocation !== 'systemLocation' &&
                   'labwareId' in labware.initialLocation &&
                   item.labwareId === labware.initialLocation.labwareId
               )
@@ -451,6 +452,7 @@ function RowLabware({
 
   const matchedModule =
     initialLocation !== 'offDeck' &&
+    initialLocation !== 'systemLocation' &&
     'moduleId' in initialLocation &&
     attachedProtocolModules.length > 0
       ? attachedProtocolModules.find(
@@ -467,7 +469,7 @@ function RowLabware({
 
   let slotName: string = slot
   let location: JSX.Element = <DeckInfoLabel deckLabel={slotName} />
-  if (initialLocation === 'offDeck') {
+  if (initialLocation === 'offDeck' || initialLocation === 'systemLocation') {
     location = (
       <DeckInfoLabel deckLabel={i18n.format(t('off_deck'), 'upperCase')} />
     )

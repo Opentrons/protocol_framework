@@ -35,8 +35,8 @@ from opentrons.protocol_engine.state.module_substates.absorbance_reader_substate
     AbsorbanceReaderMeasureMode,
 )
 from opentrons.types import DeckSlotName, MountType, StagingSlotName
-from .update_types import AbsorbanceReaderStateUpdate
-from ..errors import ModuleNotConnectedError
+from .update_types import AbsorbanceReaderStateUpdate, FlexStackerStateUpdate
+from ..errors import ModuleNotConnectedError, AreaNotInDeckConfigurationError
 
 from ..types import (
     LoadedModule,
@@ -77,11 +77,13 @@ from .module_substates import (
     TemperatureModuleSubState,
     ThermocyclerModuleSubState,
     AbsorbanceReaderSubState,
+    FlexStackerSubState,
     MagneticModuleId,
     HeaterShakerModuleId,
     TemperatureModuleId,
     ThermocyclerModuleId,
     AbsorbanceReaderId,
+    FlexStackerId,
     MagneticBlockSubState,
     MagneticBlockId,
     ModuleSubStateType,
@@ -301,6 +303,8 @@ class ModuleStore(HasState[ModuleState], HandlesActions):
             self._handle_absorbance_reader_commands(
                 state_update.absorbance_reader_state_update
             )
+        if state_update.flex_stacker_state_update != update_types.NO_CHANGE:
+            self._handle_flex_stacker_commands(state_update.flex_stacker_state_update)
 
     def _add_module_substate(
         self,
@@ -327,31 +331,24 @@ class ModuleStore(HasState[ModuleState], HandlesActions):
                 model=actual_model,
             )
         elif ModuleModel.is_heater_shaker_module_model(actual_model):
-            if live_data is None:
-                labware_latch_status = HeaterShakerLatchStatus.UNKNOWN
-            elif live_data["labwareLatchStatus"] == "idle_closed":
-                labware_latch_status = HeaterShakerLatchStatus.CLOSED
-            else:
-                labware_latch_status = HeaterShakerLatchStatus.OPEN
-            self._state.substate_by_module_id[module_id] = HeaterShakerModuleSubState(
+            self._state.substate_by_module_id[
+                module_id
+            ] = HeaterShakerModuleSubState.from_live_data(
                 module_id=HeaterShakerModuleId(module_id),
-                labware_latch_status=labware_latch_status,
-                is_plate_shaking=(
-                    live_data is not None and live_data["targetSpeed"] is not None
-                ),
-                plate_target_temperature=live_data["targetTemp"] if live_data else None,  # type: ignore[arg-type]
+                data=live_data,
             )
         elif ModuleModel.is_temperature_module_model(actual_model):
-            self._state.substate_by_module_id[module_id] = TemperatureModuleSubState(
+            self._state.substate_by_module_id[
+                module_id
+            ] = TemperatureModuleSubState.from_live_data(
                 module_id=TemperatureModuleId(module_id),
-                plate_target_temperature=live_data["targetTemp"] if live_data else None,  # type: ignore[arg-type]
+                data=live_data,
             )
         elif ModuleModel.is_thermocycler_module_model(actual_model):
-            self._state.substate_by_module_id[module_id] = ThermocyclerModuleSubState(
-                module_id=ThermocyclerModuleId(module_id),
-                is_lid_open=live_data is not None and live_data["lid"] == "open",
-                target_block_temperature=live_data["targetTemp"] if live_data else None,  # type: ignore[arg-type]
-                target_lid_temperature=live_data["lidTarget"] if live_data else None,  # type: ignore[arg-type]
+            self._state.substate_by_module_id[
+                module_id
+            ] = ThermocyclerModuleSubState.from_live_data(
+                module_id=ThermocyclerModuleId(module_id), data=live_data
             )
             self._update_additional_slots_occupied_by_thermocycler(
                 module_id=module_id, slot_name=slot_name
@@ -370,6 +367,12 @@ class ModuleStore(HasState[ModuleState], HandlesActions):
                 measure_mode=None,
                 configured_wavelengths=None,
                 reference_wavelength=None,
+            )
+        elif ModuleModel.is_flex_stacker(actual_model):
+            self._state.substate_by_module_id[module_id] = FlexStackerSubState(
+                module_id=FlexStackerId(module_id),
+                in_static_mode=False,
+                hopper_labware_ids=[],
             )
 
     def _update_additional_slots_occupied_by_thermocycler(
@@ -612,6 +615,20 @@ class ModuleStore(HasState[ModuleState], HandlesActions):
             data=data,
         )
 
+    def _handle_flex_stacker_commands(
+        self, state_update: FlexStackerStateUpdate
+    ) -> None:
+        """Handle Flex Stacker state updates."""
+        module_id = state_update.module_id
+        prev_substate = self._state.substate_by_module_id[module_id]
+        assert isinstance(
+            prev_substate, FlexStackerSubState
+        ), f"{module_id} is not a Flex Stacker."
+
+        self._state.substate_by_module_id[
+            module_id
+        ] = prev_substate.new_from_state_change(state_update)
+
 
 class ModuleView:
     """Read-only view of computed module state."""
@@ -657,6 +674,15 @@ class ModuleView:
             if module_slot == slot_name:
                 return self.get(module_id)
 
+        return None
+
+    def get_by_addressable_area(
+        self, addressable_area_name: str
+    ) -> Optional[LoadedModule]:
+        """Get the module associated with this addressable area, if any."""
+        for module_id in self._state.slot_by_module_id.keys():
+            if addressable_area_name == self.get_provided_addressable_area(module_id):
+                return self.get(module_id)
         return None
 
     def _get_module_substate(
@@ -763,6 +789,20 @@ class ModuleView:
             expected_name="Absorbance Reader",
         )
 
+    def get_flex_stacker_substate(self, module_id: str) -> FlexStackerSubState:
+        """Return a `FlexStackerSubState` for the given Flex Stacker.
+
+        Raises:
+           ModuleNotLoadedError: If module_id has not been loaded.
+           WrongModuleTypeError: If module_id has been loaded,
+               but it's not a Flex Stacker.
+        """
+        return self._get_module_substate(
+            module_id=module_id,
+            expected_type=FlexStackerSubState,
+            expected_name="Flex Stacker",
+        )
+
     def get_location(self, module_id: str) -> DeckSlotLocation:
         """Get the slot location of the given module."""
         location = self.get(module_id).location
@@ -771,6 +811,26 @@ class ModuleView:
                 f"Module {module_id} is not loaded into a deck slot."
             )
         return location
+
+    def get_provided_addressable_area(self, module_id: str) -> str:
+        """Get the addressable area provided by this module.
+
+        If the current deck does not allow modules to provide locations (i.e., is an OT-2 deck)
+        then return the addressable area underneath the module.
+        """
+        module = self.get(module_id)
+
+        if isinstance(module.location, DeckSlotLocation):
+            location = module.location.slotName
+        elif module.model == ModuleModel.THERMOCYCLER_MODULE_V2:
+            location = DeckSlotName.SLOT_B1
+        else:
+            raise ValueError(
+                "Module location invalid for nominal module offset calculation."
+            )
+        if not self.get_deck_supports_module_fixtures():
+            return location.value
+        return self.ensure_and_convert_module_fixture_location(location, module.model)
 
     def get_requested_model(self, module_id: str) -> Optional[ModuleModel]:
         """Return the model by which this module was requested.
@@ -879,18 +939,7 @@ class ModuleView:
                 z=xformed[2],
             )
         else:
-            module = self.get(module_id)
-            if isinstance(module.location, DeckSlotLocation):
-                location = module.location.slotName
-            elif module.model == ModuleModel.THERMOCYCLER_MODULE_V2:
-                location = DeckSlotName.SLOT_B1
-            else:
-                raise ValueError(
-                    "Module location invalid for nominal module offset calculation."
-                )
-            module_addressable_area = self.ensure_and_convert_module_fixture_location(
-                location, module.model
-            )
+            module_addressable_area = self.get_provided_addressable_area(module_id)
             module_addressable_area_position = (
                 addressable_areas.get_addressable_area_offsets_from_cutout(
                     module_addressable_area
@@ -1167,7 +1216,10 @@ class ModuleView:
                     else:
                         return m
 
-        raise errors.ModuleNotAttachedError(f"No available {model.value} found.")
+        raise errors.ModuleNotAttachedError(
+            f"No available {model.value} with {expected_serial_number or 'any'}"
+            " serial found."
+        )
 
     def get_heater_shaker_movement_restrictors(
         self,
@@ -1194,7 +1246,10 @@ class ModuleView:
     ) -> None:
         """Raise if the given location has a module in it."""
         for module in self.get_all():
-            if module.location == location:
+            if (
+                module.location == location
+                and module.model != ModuleModel.FLEX_STACKER_MODULE_V1
+            ):
                 raise errors.LocationIsOccupiedError(
                     f"Module {module.model} is already present at {location}."
                 )
@@ -1259,6 +1314,11 @@ class ModuleView:
                 "Only readings of 96 Well labware are supported for conversion to map of values by well."
             )
 
+    def get_deck_supports_module_fixtures(self) -> bool:
+        """Check if the loaded deck supports modules as fixtures."""
+        deck_type = self._state.deck_type
+        return deck_type not in [DeckType.OT2_STANDARD, DeckType.OT2_SHORT_TRASH]
+
     def ensure_and_convert_module_fixture_location(
         self,
         deck_slot: DeckSlotName,
@@ -1270,8 +1330,8 @@ class ModuleView:
         """
         deck_type = self._state.deck_type
 
-        if deck_type == DeckType.OT2_STANDARD or deck_type == DeckType.OT2_SHORT_TRASH:
-            raise ValueError(
+        if not self.get_deck_supports_module_fixtures():
+            raise AreaNotInDeckConfigurationError(
                 f"Invalid Deck Type: {deck_type.name} - Does not support modules as fixtures."
             )
 
@@ -1296,6 +1356,10 @@ class ModuleView:
             # only allowed in column 3
             assert deck_slot.value[-1] == "3"
             return f"absorbanceReaderV1{deck_slot.value}"
+        elif model == ModuleModel.FLEX_STACKER_MODULE_V1:
+            # loaded to column 3 but the addressable area is in column 4
+            assert deck_slot.value[-1] == "3"
+            return f"flexStackerModuleV1{deck_slot.value[0]}4"
 
         raise ValueError(
             f"Unknown module {model.name} has no addressable areas to provide."

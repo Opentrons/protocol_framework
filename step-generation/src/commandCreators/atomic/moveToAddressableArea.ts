@@ -1,18 +1,13 @@
-import type { AddressableAreaName } from '@opentrons/shared-data'
-
 import { uuid } from '../../utils'
+import type { MoveToAddressableAreaParams } from '@opentrons/shared-data'
 import type { CommandCreator } from '../../types'
 
-export interface MoveToAddressableAreaArgs {
-  pipetteId: string
-  addressableAreaName: AddressableAreaName
-}
-export const moveToAddressableArea: CommandCreator<MoveToAddressableAreaArgs> = (
+export const moveToAddressableArea: CommandCreator<MoveToAddressableAreaParams> = (
   args,
   invariantContext,
   prevRobotState
 ) => {
-  const { pipetteId, addressableAreaName } = args
+  const { pipetteId, addressableAreaName, offset } = args
 
   const commands = [
     {
@@ -21,7 +16,7 @@ export const moveToAddressableArea: CommandCreator<MoveToAddressableAreaArgs> = 
       params: {
         pipetteId,
         addressableAreaName,
-        offset: { x: 0, y: 0, z: 0 },
+        offset,
       },
     },
   ]

@@ -1,13 +1,13 @@
 import {
   ALIGN_CENTER,
+  Check,
   COLORS,
   DIRECTION_COLUMN,
   Flex,
   JUSTIFY_SPACE_BETWEEN,
-  ListItem,
+  ListButton,
   SPACING,
   StyledText,
-  TOOLTIP_BOTTOM,
   Tooltip,
   useHoverTooltip,
 } from '@opentrons/components'
@@ -17,12 +17,13 @@ import { ToggleButton } from '../../atoms/ToggleButton'
 interface ToggleStepFormFieldProps {
   title: string
   isSelected: boolean
-  onLabel: string
-  offLabel: string
   toggleUpdateValue: (value: unknown) => void
   toggleValue: unknown
   tooltipContent: string | null
-  isDisabled: boolean
+  isDisabled?: boolean
+  onLabel?: string
+  offLabel?: string
+  toggleElement?: 'toggle' | 'checkbox'
 }
 export function ToggleStepFormField(
   props: ToggleStepFormFieldProps
@@ -35,50 +36,57 @@ export function ToggleStepFormField(
     toggleUpdateValue,
     toggleValue,
     tooltipContent,
-    isDisabled,
+    isDisabled = false,
+    toggleElement = 'toggle',
   } = props
-  const [targetProps, tooltipProps] = useHoverTooltip({
-    placement: TOOLTIP_BOTTOM,
-  })
+  const [targetProps, tooltipProps] = useHoverTooltip()
 
   return (
     <>
-      <ListItem type="noActive">
-        <Flex
-          padding={SPACING.spacing12}
-          width="100%"
-          flexDirection={DIRECTION_COLUMN}
-        >
+      <ListButton
+        type="noActive"
+        padding={SPACING.spacing16}
+        onClick={() => {
+          if (!isDisabled) {
+            toggleUpdateValue(!toggleValue)
+          }
+        }}
+        disabled={isDisabled}
+      >
+        <Flex width="100%" flexDirection={DIRECTION_COLUMN}>
           <Flex
             justifyContent={JUSTIFY_SPACE_BETWEEN}
             alignItems={ALIGN_CENTER}
           >
-            <StyledText desktopStyle="bodyDefaultRegular">{title}</StyledText>
+            <StyledText
+              desktopStyle="bodyDefaultRegular"
+              color={isDisabled ? COLORS.grey40 : COLORS.black90}
+              {...targetProps}
+            >
+              {title}
+            </StyledText>
             <Flex alignItems={ALIGN_CENTER} gridGap={SPACING.spacing4}>
-              {tooltipContent != null ? (
-                <Tooltip tooltipProps={tooltipProps}>{tooltipContent}</Tooltip>
-              ) : null}
               <StyledText
                 desktopStyle="bodyDefaultRegular"
-                color={COLORS.grey60}
-                {...targetProps}
+                color={isDisabled ? COLORS.grey40 : COLORS.grey60}
               >
                 {isSelected ? onLabel : offLabel}
               </StyledText>
-              {isDisabled ? null : (
+              {toggleElement === 'toggle' ? (
                 <ToggleButton
-                  disabled={isDisabled}
-                  onClick={() => {
-                    toggleUpdateValue(!toggleValue)
-                  }}
                   label={isSelected ? onLabel : offLabel}
                   toggledOn={isSelected}
                 />
+              ) : (
+                <Check color={COLORS.blue50} isChecked={isSelected} />
               )}
             </Flex>
           </Flex>
         </Flex>
-      </ListItem>
+      </ListButton>
+      {tooltipContent != null ? (
+        <Tooltip tooltipProps={tooltipProps}>{tooltipContent}</Tooltip>
+      ) : null}
     </>
   )
 }

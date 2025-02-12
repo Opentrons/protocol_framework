@@ -14,7 +14,7 @@ from opentrons_shared_data.protocol.models import (
 )
 from opentrons_shared_data.errors.exceptions import PythonException
 
-from opentrons.protocols.models import JsonProtocol as JsonProtocolUpToV5
+from opentrons.protocols.models.json_protocol import Model as JsonProtocolUpToV5
 
 from .file_identifier import (
     IdentifiedFile,

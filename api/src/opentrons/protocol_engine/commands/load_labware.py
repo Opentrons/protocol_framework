@@ -1,10 +1,11 @@
 """Load labware command request, result, and implementation models."""
+
 from __future__ import annotations
 from typing import TYPE_CHECKING, Optional, Type, Any
 
 from pydantic import BaseModel, Field
 from pydantic.json_schema import SkipJsonSchema
-from typing_extensions import Literal
+from typing_extensions import Literal, TypeGuard
 
 from opentrons_shared_data.labware.labware_definition import LabwareDefinition
 
@@ -17,9 +18,12 @@ from ..types import (
     OnLabwareLocation,
     DeckSlotLocation,
     AddressableAreaLocation,
+    LoadedModule,
+    OFF_DECK_LOCATION,
 )
 
 from .command import AbstractCommandImpl, BaseCommand, BaseCommandCreate, SuccessData
+from .labware_handling_common import LabwarePositionResultMixin
 from ..errors.error_occurrence import ErrorOccurrence
 from ..state.update_types import StateUpdate
 
@@ -71,29 +75,12 @@ class LoadLabwareParams(BaseModel):
     )
 
 
-class LoadLabwareResult(BaseModel):
+class LoadLabwareResult(LabwarePositionResultMixin):
     """Result data from the execution of a LoadLabware command."""
 
-    labwareId: str = Field(
-        ...,
-        description="An ID to reference this labware in subsequent commands.",
-    )
     definition: LabwareDefinition = Field(
         ...,
         description="The full definition data for this labware.",
-    )
-    offsetId: Optional[str] = Field(
-        # Default `None` instead of `...` so this field shows up as non-required in
-        # OpenAPI. The server is allowed to omit it or make it null.
-        None,
-        description=(
-            "An ID referencing the labware offset that will apply"
-            " to the newly-placed labware."
-            " This offset will be in effect until the labware is moved"
-            " with a `moveLabware` command."
-            " Null or undefined means no offset applies,"
-            " so the default of (0, 0, 0) will be used."
-        ),
     )
 
 
@@ -108,7 +95,16 @@ class LoadLabwareImplementation(
         self._equipment = equipment
         self._state_view = state_view
 
-    async def execute(
+    def _is_loading_to_module(
+        self, location: LabwareLocation, module_model: ModuleModel
+    ) -> TypeGuard[ModuleLocation]:
+        if not isinstance(location, ModuleLocation):
+            return False
+
+        module: LoadedModule = self._state_view.modules.get(location.moduleId)
+        return module.model == module_model
+
+    async def execute(  # noqa: C901
         self, params: LoadLabwareParams
     ) -> SuccessData[LoadLabwareResult]:
         """Load definition and calibration data necessary for a labware."""
@@ -145,9 +141,24 @@ class LoadLabwareImplementation(
             )
             state_update.set_addressable_area_used(params.location.slotName.id)
 
-        verified_location = self._state_view.geometry.ensure_location_not_occupied(
-            params.location
-        )
+        verified_location: LabwareLocation
+        if (
+            self._is_loading_to_module(
+                params.location, ModuleModel.FLEX_STACKER_MODULE_V1
+            )
+            and not self._state_view.modules.get_flex_stacker_substate(
+                params.location.moduleId
+            ).in_static_mode
+        ):
+            # labware loaded to the flex stacker hopper is considered offdeck. This is
+            # a temporary solution until the hopper can be represented as non-addressable
+            # addressable area in the deck configuration.
+            verified_location = OFF_DECK_LOCATION
+        else:
+            verified_location = self._state_view.geometry.ensure_location_not_occupied(
+                params.location
+            )
+
         loaded_labware = await self._equipment.load_labware(
             load_name=params.loadName,
             namespace=params.namespace,
@@ -186,12 +197,20 @@ class LoadLabwareImplementation(
                 )
 
         # Validate labware for the absorbance reader
-        elif isinstance(params.location, ModuleLocation):
-            module = self._state_view.modules.get(params.location.moduleId)
-            if module is not None and module.model == ModuleModel.ABSORBANCE_READER_V1:
-                self._state_view.labware.raise_if_labware_incompatible_with_plate_reader(
-                    loaded_labware.definition
-                )
+        if self._is_loading_to_module(
+            params.location, ModuleModel.ABSORBANCE_READER_V1
+        ):
+            self._state_view.labware.raise_if_labware_incompatible_with_plate_reader(
+                loaded_labware.definition
+            )
+
+        if self._is_loading_to_module(
+            params.location, ModuleModel.FLEX_STACKER_MODULE_V1
+        ):
+            state_update.load_flex_stacker_hopper_labware(
+                module_id=params.location.moduleId,
+                labware_id=loaded_labware.labware_id,
+            )
 
         self._state_view.labware.raise_if_labware_cannot_be_ondeck(
             location=params.location, labware_definition=loaded_labware.definition
@@ -202,6 +221,9 @@ class LoadLabwareImplementation(
                 labwareId=loaded_labware.labware_id,
                 definition=loaded_labware.definition,
                 offsetId=loaded_labware.offsetId,
+                locationSequence=self._state_view.geometry.get_predicted_location_sequence(
+                    params.location
+                ),
             ),
             state_update=state_update,
         )

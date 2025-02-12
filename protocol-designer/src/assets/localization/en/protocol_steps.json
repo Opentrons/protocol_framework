@@ -10,7 +10,7 @@
   "batch_edit": "Batch edit",
   "batch_edits_saved": "Batch edits saved",
   "blowout_location": "Blowout location",
-  "blowout_position": "Blowout position from bottom",
+  "blowout_position": "Blowout position from top",
   "change_tips": "Change tips",
   "column": "Column",
   "default_flow_rate": "The default flow rate is {{flowRate}}",
@@ -73,6 +73,7 @@
   "multiAspirate": "Consolidate path",
   "multiDispense": "Distribute path",
   "new_location": "New location",
+  "no_tiprack": "No tiprack available",
   "off_deck": "Off-Deck",
   "pause": {
     "untilResume": "Pausing until manually told to resume",
@@ -106,6 +107,8 @@
   "speed": "Speed",
   "starting_deck": "Starting deck",
   "step_substeps": "{{stepType}} details",
+  "submerge": "Submerge",
+  "submerge_speed": "Submerge speed",
   "temperature": "Temperature",
   "temperature_module": {
     "active": "<semiBoldText>{{module}}</semiBoldText><text>set to</text><tag/>",
@@ -143,5 +146,6 @@
   "volume_per_well": "Volume per well",
   "well_name": "Well {{wellName}}",
   "well_order_title": "{{prefix}} well order",
-  "well_position": "Well position: X {{x}} Y {{y}} Z {{z}} (mm)"
+  "well_position": "Well position: X {{x}} Y {{y}} Z {{z}} (mm)",
+  "unknown_module": "Unknown module"
 }

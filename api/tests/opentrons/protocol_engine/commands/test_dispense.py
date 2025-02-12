@@ -99,7 +99,11 @@ async def test_dispense_implementation(
 
     decoy.when(
         await pipetting.dispense_in_place(
-            pipette_id="pipette-id-abc123", volume=50, flow_rate=1.23, push_out=None
+            pipette_id="pipette-id-abc123",
+            volume=50,
+            flow_rate=1.23,
+            push_out=None,
+            correction_volume=0,
         )
     ).then_return(42)
     decoy.when(
@@ -193,7 +197,11 @@ async def test_overpressure_error(
 
     decoy.when(
         await pipetting.dispense_in_place(
-            pipette_id=pipette_id, volume=50, flow_rate=1.23, push_out=None
+            pipette_id=pipette_id,
+            volume=50,
+            flow_rate=1.23,
+            push_out=None,
+            correction_volume=0,
         ),
     ).then_raise(PipetteOverpressureError())
 

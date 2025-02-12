@@ -1,4 +1,17 @@
-import { uuid, getLabwareSlot } from '../../utils'
+import { FLEX_ROBOT_TYPE, OT2_ROBOT_TYPE } from '@opentrons/shared-data'
+import {
+  uuid,
+  getLabwareSlot,
+  modulePipetteCollision,
+  thermocyclerPipetteCollision,
+  absorbanceReaderCollision,
+  pipetteIntoHeaterShakerLatchOpen,
+  pipetteIntoHeaterShakerWhileShaking,
+  pipetteAdjacentHeaterShakerWhileShaking,
+  getIsHeaterShakerEastWestMultiChannelPipette,
+  getIsHeaterShakerEastWestWithLatchOpen,
+  getIsHeaterShakerNorthSouthOfNonTiprackWithMultiChannelPipette,
+} from '../../utils'
 import { COLUMN_4_SLOTS } from '../../constants'
 import * as errorCreators from '../../errorCreators'
 import type { CreateCommand, BlowoutParams } from '@opentrons/shared-data'
@@ -14,6 +27,10 @@ export const blowout: CommandCreator<BlowoutParams> = (
 
   const actionName = 'blowout'
   const errors: CommandCreatorError[] = []
+  const pipetteSpec = invariantContext.pipetteEntities[pipetteId]?.spec
+  const isFlexPipette =
+    (pipetteSpec?.displayCategory === 'FLEX' || pipetteSpec?.channels === 96) ??
+    false
   const pipetteData = prevRobotState.pipettes[pipetteId]
   const labwareState = prevRobotState.labware
   const slotName = getLabwareSlot(
@@ -25,6 +42,14 @@ export const blowout: CommandCreator<BlowoutParams> = (
   // is duplicated across several command creators (eg aspirate & blowout overlap).
   // You can probably make higher-level error creator util fns to be more DRY
   if (!pipetteData) {
+    errors.push(
+      errorCreators.pipetteDoesNotExist({
+        pipette: pipetteId,
+      })
+    )
+  }
+
+  if (pipetteSpec == null) {
     errors.push(
       errorCreators.pipetteDoesNotExist({
         pipette: pipetteId,
@@ -64,6 +89,94 @@ export const blowout: CommandCreator<BlowoutParams> = (
       )
     }
   }
+  if (
+    modulePipetteCollision({
+      pipette: pipetteId,
+      labware: labwareId,
+      invariantContext,
+      prevRobotState,
+    })
+  ) {
+    errors.push(errorCreators.modulePipetteCollisionDanger())
+  }
+
+  if (
+    thermocyclerPipetteCollision(
+      prevRobotState.modules,
+      prevRobotState.labware,
+      labwareId
+    )
+  ) {
+    errors.push(errorCreators.thermocyclerLidClosed())
+  }
+
+  if (
+    absorbanceReaderCollision(
+      prevRobotState.modules,
+      prevRobotState.labware,
+      labwareId
+    )
+  ) {
+    errors.push(errorCreators.absorbanceReaderLidClosed())
+  }
+
+  if (
+    pipetteIntoHeaterShakerLatchOpen(
+      prevRobotState.modules,
+      prevRobotState.labware,
+      labwareId
+    )
+  ) {
+    errors.push(errorCreators.heaterShakerLatchOpen())
+  }
+
+  if (
+    pipetteIntoHeaterShakerWhileShaking(
+      prevRobotState.modules,
+      prevRobotState.labware,
+      labwareId
+    )
+  ) {
+    errors.push(errorCreators.heaterShakerIsShaking())
+  }
+  if (
+    pipetteAdjacentHeaterShakerWhileShaking(
+      prevRobotState.modules,
+      slotName,
+      isFlexPipette ? FLEX_ROBOT_TYPE : OT2_ROBOT_TYPE
+    )
+  ) {
+    errors.push(errorCreators.heaterShakerNorthSouthEastWestShaking())
+  }
+  if (!isFlexPipette && pipetteSpec != null) {
+    if (
+      getIsHeaterShakerEastWestWithLatchOpen(prevRobotState.modules, slotName)
+    ) {
+      errors.push(errorCreators.heaterShakerEastWestWithLatchOpen())
+    }
+
+    if (
+      getIsHeaterShakerEastWestMultiChannelPipette(
+        prevRobotState.modules,
+        slotName,
+        pipetteSpec
+      )
+    ) {
+      errors.push(errorCreators.heaterShakerEastWestOfMultiChannelPipette())
+    }
+    if (
+      getIsHeaterShakerNorthSouthOfNonTiprackWithMultiChannelPipette(
+        prevRobotState.modules,
+        slotName,
+        pipetteSpec,
+        invariantContext.labwareEntities[labwareId]
+      )
+    ) {
+      errors.push(
+        errorCreators.heaterShakerNorthSouthOfNonTiprackWithMultiChannelPipette()
+      )
+    }
+  }
 
   if (errors.length > 0) {
     return {
@@ -80,12 +193,7 @@ export const blowout: CommandCreator<BlowoutParams> = (
         labwareId,
         wellName,
         flowRate,
-        wellLocation: {
-          origin: 'top',
-          offset: {
-            z: wellLocation?.offset?.z,
-          },
-        },
+        wellLocation,
       },
     },
   ]

@@ -1,4 +1,5 @@
 """Basic labware data state and store."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -20,14 +21,15 @@ from opentrons.protocol_engine.state import update_types
 from opentrons_shared_data.deck.types import DeckDefinitionV5
 from opentrons_shared_data.gripper.constants import LABWARE_GRIP_FORCE
 from opentrons_shared_data.labware.labware_definition import (
-    LabwareRole,
     InnerWellGeometry,
+    LabwareDefinition,
+    LabwareRole,
+    WellDefinition,
 )
 from opentrons_shared_data.pipette.types import LabwareUri
 
 from opentrons.types import DeckSlotName, StagingSlotName, MountType
 from opentrons.protocols.api_support.constants import OPENTRONS_NAMESPACE
-from opentrons.protocols.models import LabwareDefinition, WellDefinition
 from opentrons.calibration_storage.helpers import uri_from_details
 
 from .. import errors
@@ -40,7 +42,8 @@ from ..types import (
     Dimensions,
     LabwareOffset,
     LabwareOffsetVector,
-    LabwareOffsetLocation,
+    LabwareOffsetLocationSequence,
+    LegacyLabwareOffsetLocation,
     LabwareLocation,
     LoadedLabware,
     ModuleLocation,
@@ -49,6 +52,7 @@ from ..types import (
     LabwareMovementOffsetData,
     OnDeckLabwareLocation,
     OFF_DECK_LOCATION,
+    SYSTEM_LOCATION,
 )
 from ..actions import (
     Action,
@@ -165,7 +169,8 @@ class LabwareStore(HasState[LabwareState], HandlesActions):
                 id=action.labware_offset_id,
                 createdAt=action.created_at,
                 definitionUri=action.request.definitionUri,
-                location=action.request.location,
+                location=action.request.legacyLocation,
+                locationSequence=action.request.locationSequence,
                 vector=action.request.vector,
             )
             self._add_labware_offset(labware_offset)
@@ -247,7 +252,11 @@ class LabwareStore(HasState[LabwareState], HandlesActions):
             )
 
             # Add the Lids on top of the stack object
-            for i in range(len(loaded_lid_stack_update.labware_ids)):
+            for labware_id in loaded_lid_stack_update.new_locations_by_id:
+                if loaded_lid_stack_update.definition is None:
+                    raise ValueError(
+                        "Lid Stack Labware Definition cannot be None when multiple lids are loaded."
+                    )
                 definition_uri = uri_from_details(
                     namespace=loaded_lid_stack_update.definition.namespace,
                     load_name=loaded_lid_stack_update.definition.parameters.loadName,
@@ -258,14 +267,10 @@ class LabwareStore(HasState[LabwareState], HandlesActions):
                     definition_uri
                 ] = loaded_lid_stack_update.definition
 
-                location = loaded_lid_stack_update.new_locations_by_id[
-                    loaded_lid_stack_update.labware_ids[i]
-                ]
+                location = loaded_lid_stack_update.new_locations_by_id[labware_id]
 
-                self._state.labware_by_id[
-                    loaded_lid_stack_update.labware_ids[i]
-                ] = LoadedLabware.construct(
-                    id=loaded_lid_stack_update.labware_ids[i],
+                self._state.labware_by_id[labware_id] = LoadedLabware.construct(
+                    id=labware_id,
                     location=location,
                     loadName=loaded_lid_stack_update.definition.parameters.loadName,
                     definitionUri=definition_uri,
@@ -276,9 +281,10 @@ class LabwareStore(HasState[LabwareState], HandlesActions):
     def _set_labware_lid(self, state_update: update_types.StateUpdate) -> None:
         labware_lid_update = state_update.labware_lid
         if labware_lid_update != update_types.NO_CHANGE:
-            parent_labware_id = labware_lid_update.parent_labware_id
-            lid_id = labware_lid_update.lid_id
-            self._state.labware_by_id[parent_labware_id].lid_id = lid_id
+            parent_labware_ids = labware_lid_update.parent_labware_ids
+            for i in range(len(parent_labware_ids)):
+                lid_id = labware_lid_update.lid_ids[i]
+                self._state.labware_by_id[parent_labware_ids[i]].lid_id = lid_id
 
     def _set_labware_location(self, state_update: update_types.StateUpdate) -> None:
         labware_location_update = state_update.labware_location
@@ -461,6 +467,16 @@ class LabwareView:
             return self.get_parent_location(parent.labwareId)
         return parent
 
+    def get_highest_child_labware(self, labware_id: str) -> str:
+        """Get labware's highest child labware returning the labware ID."""
+        for labware in self._state.labware_by_id.values():
+            if (
+                isinstance(labware.location, OnLabwareLocation)
+                and labware.location.labwareId == labware_id
+            ):
+                return self.get_highest_child_labware(labware_id=labware.id)
+        return labware_id
+
     def get_labware_stack(
         self, labware_stack: List[LoadedLabware]
     ) -> List[LoadedLabware]:
@@ -470,6 +486,26 @@ class LabwareView:
             labware_stack.append(self.get(parent.labwareId))
             return self.get_labware_stack(labware_stack)
         return labware_stack
+
+    def get_lid_id_by_labware_id(self, labware_id: str) -> str | None:
+        """Get the ID of a lid labware on top of a given labware, if any."""
+        return self._state.labware_by_id[labware_id].lid_id
+
+    def get_lid_by_labware_id(self, labware_id: str) -> LoadedLabware | None:
+        """Get the Lid Labware that is currently on top of a given labware, if there is one."""
+        lid_id = self.get_lid_id_by_labware_id(labware_id)
+        if lid_id:
+            return self._state.labware_by_id[lid_id]
+        else:
+            return None
+
+    def get_labware_by_lid_id(self, lid_id: str) -> LoadedLabware | None:
+        """Get the labware that is currently covered by a given lid, if there is one."""
+        loaded_labware = list(self._state.labware_by_id.values())
+        for labware in loaded_labware:
+            if labware.lid_id == lid_id:
+                return labware
+        return None
 
     def get_all(self) -> List[LoadedLabware]:
         """Get a list of all labware entries in state."""
@@ -796,15 +832,32 @@ class LabwareView:
         """Get all labware offsets, in the order they were added."""
         return list(self._state.labware_offsets_by_id.values())
 
-    # TODO: Make this slightly more ergonomic for the caller by
-    # only returning the optional str ID, at the cost of baking redundant lookups
-    # into the API?
     def find_applicable_labware_offset(
+        self, definition_uri: str, location: LabwareOffsetLocationSequence
+    ) -> Optional[LabwareOffset]:
+        """Find a labware offset that applies to the given definition and location sequence.
+
+        Returns the *most recently* added matching offset, so later ones can override earlier ones.
+        Returns ``None`` if no loaded offset matches the location.
+
+        An offset matches a labware instance if the sequence of locations formed by following the
+        .location elements of the labware instance until you reach an addressable area has the same
+        definition URIs as the sequence of definition URIs stored by the offset.
+        """
+        for candidate in reversed(list(self._state.labware_offsets_by_id.values())):
+            if (
+                candidate.definitionUri == definition_uri
+                and candidate.locationSequence == location
+            ):
+                return candidate
+        return None
+
+    def find_applicable_labware_offset_by_legacy_location(
         self,
         definition_uri: str,
-        location: LabwareOffsetLocation,
+        location: LegacyLabwareOffsetLocation,
     ) -> Optional[LabwareOffset]:
-        """Find a labware offset that applies to the given definition and location.
+        """Find a labware offset that applies to the given definition and legacy location.
 
         Returns the *most recently* added matching offset,
         so later offsets can override earlier ones.
@@ -870,7 +923,9 @@ class LabwareView:
                     f"Cannot move pipette to {labware.loadName},"
                     f" labware is on staging slot {labware_location.addressableAreaName}"
                 )
-        elif labware_location == OFF_DECK_LOCATION:
+        elif (
+            labware_location == OFF_DECK_LOCATION or labware_location == SYSTEM_LOCATION
+        ):
             raise errors.LocationNotAccessibleByPipetteError(
                 f"Cannot move pipette to {labware.loadName}, labware is off-deck."
             )
@@ -951,7 +1006,7 @@ class LabwareView:
             for lw in labware_stack:
                 if not labware_validation.validate_definition_is_adapter(
                     self.get_definition(lw.id)
-                ):
+                ) and not labware_validation.is_lid_stack(self.get_load_name(lw.id)):
                     stack_without_adapters.append(lw)
             if len(stack_without_adapters) >= self.get_labware_stacking_maximum(
                 top_labware_definition

@@ -18,15 +18,19 @@ describe('heaterShaker compound command creator', () => {
   const HEATER_SHAKER_SLOT = '1'
   let robotState: RobotState
   let invariantContext: InvariantContext
+  const name = 'some name'
+  const description = 'description'
   beforeEach(() => {
     heaterShakerArgs = {
-      module: HEATER_SHAKER_ID,
+      moduleId: HEATER_SHAKER_ID,
       rpm: null,
       commandCreatorFnName: 'heaterShaker',
       targetTemperature: null,
       latchOpen: false,
       timerMinutes: null,
       timerSeconds: null,
+      name,
+      description,
     }
     invariantContext = {
       ...makeContext(),
@@ -35,6 +39,7 @@ describe('heaterShaker compound command creator', () => {
           id: HEATER_SHAKER_ID,
           type: HEATERSHAKER_MODULE_TYPE,
           model: HEATERSHAKER_MODULE_V1,
+          pythonName: 'mockPythonName',
         },
       },
     }
@@ -59,7 +64,7 @@ describe('heaterShaker compound command creator', () => {
   it('should return an error when there is no module id', () => {
     heaterShakerArgs = {
       ...heaterShakerArgs,
-      module: null,
+      moduleId: null,
     }
     const result = heaterShaker(heaterShakerArgs, invariantContext, robotState)
 
@@ -162,13 +167,15 @@ describe('heaterShaker compound command creator', () => {
   })
   it('should delay and emit open latch last if open latch is specified', () => {
     heaterShakerArgs = {
-      module: HEATER_SHAKER_ID,
+      moduleId: HEATER_SHAKER_ID,
       rpm: null,
       commandCreatorFnName: 'heaterShaker',
       targetTemperature: null,
       latchOpen: true,
       timerMinutes: null,
       timerSeconds: null,
+      name,
+      description,
     }
 
     heaterShakerArgs = {

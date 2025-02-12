@@ -1,4 +1,5 @@
 """ProtocolEngine shared test fixtures."""
+
 from __future__ import annotations
 
 import pytest
@@ -9,8 +10,8 @@ from opentrons_shared_data import load_shared_data
 from opentrons_shared_data.deck import load as load_deck
 from opentrons_shared_data.deck.types import DeckDefinitionV5
 from opentrons_shared_data.labware import load_definition
+from opentrons_shared_data.labware.labware_definition import LabwareDefinition
 from opentrons_shared_data.pipette import pipette_definition
-from opentrons.protocols.models import LabwareDefinition
 from opentrons.protocols.api_support.deck_type import (
     STANDARD_OT2_DECK,
     SHORT_TRASH_DECK,
@@ -156,6 +157,14 @@ def adapter_def() -> LabwareDefinition:
 
 
 @pytest.fixture(scope="session")
+def lid_stack_def() -> LabwareDefinition:
+    """Get the definition of the opentrons tiprack lid."""
+    return LabwareDefinition.model_validate(
+        load_definition("protocol_engine_lid_stack_object", 1, schema=3)
+    )
+
+
+@pytest.fixture(scope="session")
 def falcon_tuberack_def() -> LabwareDefinition:
     """Get the definition of the 6-well Falcon tuberack."""
     return LabwareDefinition.model_validate(
@@ -168,6 +177,14 @@ def magdeck_well_plate_def() -> LabwareDefinition:
     """Get the definition of a well place compatible with magdeck."""
     return LabwareDefinition.model_validate(
         load_definition("nest_96_wellplate_100ul_pcr_full_skirt", 1)
+    )
+
+
+@pytest.fixture(scope="session")
+def tiprack_lid_def() -> LabwareDefinition:
+    """Get the definition of the opentrons tiprack lid."""
+    return LabwareDefinition.model_validate(
+        load_definition("opentrons_flex_tiprack_lid", 1, schema=3)
     )
 
 
@@ -231,6 +248,13 @@ def mag_block_v1_def() -> ModuleDefinition:
 def abs_reader_v1_def() -> ModuleDefinition:
     """Get the definition of a V1 absorbance plate reader."""
     definition = load_shared_data("module/definitions/3/absorbanceReaderV1.json")
+    return ModuleDefinition.model_validate_json(definition)
+
+
+@pytest.fixture(scope="session")
+def flex_stacker_v1_def() -> ModuleDefinition:
+    """Get the definition of a V1 Flex Stacker."""
+    definition = load_shared_data("module/definitions/3/flexStackerModuleV1.json")
     return ModuleDefinition.model_validate_json(definition)
 
 

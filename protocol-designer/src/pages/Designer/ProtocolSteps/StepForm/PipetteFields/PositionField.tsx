@@ -17,8 +17,9 @@ import {
 import { getWellsDepth, getWellDimension } from '@opentrons/shared-data'
 import { TipPositionModal, ZTipPositionModal } from '../../../../../organisms'
 import { getIsDelayPositionField } from '../../../../../form-types'
-import { getDefaultMmFromBottom } from '../../../../../organisms/TipPositionModal/utils'
+import { getDefaultMmFromEdge } from '../../../../../organisms/TipPositionModal/utils'
 import { selectors as stepFormSelectors } from '../../../../../step-forms'
+
 import type {
   TipXOffsetFields,
   TipYOffsetFields,
@@ -26,8 +27,9 @@ import type {
 } from '../../../../../form-types'
 import type { PositionSpecs } from '../../../../../organisms'
 import type { FieldPropsByName } from '../types'
+import type { MoveLiquidPrefixType } from '../../../../../resources/types'
 interface PositionFieldProps {
-  prefix: 'aspirate' | 'dispense' | 'mix'
+  prefix: MoveLiquidPrefixType
   propsForFields: FieldPropsByName
   zField: TipZOffsetFields
   xField?: TipXOffsetFields
@@ -105,8 +107,7 @@ export function PositionField(props: PositionFieldProps): JSX.Element {
   const mmFromBottom = typeof rawZValue === 'number' ? rawZValue : null
   if (wellDepthMm !== null) {
     // show default value for field in parens if no mmFromBottom value is selected
-    zValue =
-      mmFromBottom ?? getDefaultMmFromBottom({ name: zName, wellDepthMm })
+    zValue = mmFromBottom ?? getDefaultMmFromEdge({ name: zName })
   }
 
   let modal = (
@@ -220,7 +221,6 @@ export function PositionField(props: PositionFieldProps): JSX.Element {
           isIndeterminate={isIndeterminate}
           units={t('units.millimeter')}
           id={`TipPositionField_${zName}`}
-          padding={padding}
         />
       )}
     </>

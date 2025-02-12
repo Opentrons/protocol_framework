@@ -37,8 +37,7 @@ import { selectors as stepFormSelectors } from '../../../step-forms'
 import { getOnlyLatestDefs } from '../../../labware-defs'
 import {
   ADAPTER_96_CHANNEL,
-  getLabwareIsCompatible as _getLabwareIsCompatible,
-  getLabwareCompatibleWithAbsorbanceReader,
+  getLabwareCompatibleWithModule,
 } from '../../../utils/labwareModuleCompatibility'
 import { getHas96Channel } from '../../../utils'
 import { createCustomLabwareDef } from '../../../labware-defs/actions'
@@ -50,7 +49,6 @@ import {
   selectLabware,
   selectNestedLabware,
 } from '../../../labware-ingred/actions'
-import { getEnableAbsorbanceReader } from '../../../feature-flags/selectors'
 import {
   ALL_ORDERED_CATEGORIES,
   CUSTOM_CATEGORY,
@@ -135,17 +133,13 @@ export function LabwareTools(props: LabwareToolsProps): JSX.Element {
     robotType === OT2_ROBOT_TYPE ? isNextToHeaterShaker : false
   )
 
-  const enablePlateReader = useSelector(getEnableAbsorbanceReader)
-
   const getLabwareCompatible = useCallback(
     (def: LabwareDefinition2) => {
       // assume that custom (non-standard) labware is (potentially) compatible
       if (moduleType == null || !getLabwareDefIsStandard(def)) {
         return true
       }
-      return moduleType === ABSORBANCE_READER_TYPE
-        ? getLabwareCompatibleWithAbsorbanceReader(def)
-        : _getLabwareIsCompatible(def, moduleType)
+      return getLabwareCompatibleWithModule(def, moduleType)
     },
     [moduleType]
   )
@@ -174,8 +168,7 @@ export function LabwareTools(props: LabwareToolsProps): JSX.Element {
           moduleType !== HEATERSHAKER_MODULE_TYPE) ||
         (isAdapter96Channel && !has96Channel) ||
         (slot === 'offDeck' && isAdapter) ||
-        (!enablePlateReader &&
-          PLATE_READER_LOADNAME === parameters.loadName &&
+        (PLATE_READER_LOADNAME === parameters.loadName &&
           moduleType !== ABSORBANCE_READER_TYPE)
       )
     },
@@ -388,7 +381,7 @@ export function LabwareTools(props: LabwareToolsProps): JSX.Element {
                             />
 
                             {uri === selectedLabwareDefUri &&
-                              getLabwareCompatibleWithAdapter(loadName)
+                              getLabwareCompatibleWithAdapter(defs, loadName)
                                 ?.length > 0 && (
                                 <ListButtonAccordionContainer
                                   id={`nestedAccordionContainer_${loadName}`}
@@ -439,9 +432,12 @@ export function LabwareTools(props: LabwareToolsProps): JSX.Element {
                                           }
                                         )
                                       : getLabwareCompatibleWithAdapter(
+                                          { ...defs, ...customLabwareDefs },
                                           loadName
                                         ).map(nestedDefUri => {
-                                          const nestedDef = defs[nestedDefUri]
+                                          const nestedDef =
+                                            defs[nestedDefUri] ??
+                                            customLabwareDefs[nestedDefUri]
 
                                           return (
                                             <ListButtonRadioButton

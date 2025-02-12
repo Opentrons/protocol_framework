@@ -14,21 +14,24 @@ from decoy import Decoy
 from opentrons.protocol_engine.state.update_types import (
     LoadedLabwareUpdate,
     StateUpdate,
+    FlexStackerLoadHopperLabware,
+    FlexStackerStateUpdate,
+    AddressableAreaUsedUpdate,
 )
 
 from opentrons_shared_data import get_shared_data_root, load_shared_data
 from opentrons_shared_data.deck.types import DeckDefinitionV5
 from opentrons_shared_data.deck import load as load_deck
+from opentrons_shared_data.labware.labware_definition import LabwareDefinition
 from opentrons_shared_data.labware.types import LabwareUri
 from opentrons_shared_data.pipette import pipette_definition
 from opentrons.calibration_storage.helpers import uri_from_details
-from opentrons.protocols.models import LabwareDefinition
 from opentrons.types import Point, DeckSlotName, MountType, StagingSlotName
 from opentrons_shared_data.pipette.types import PipetteNameType
 from opentrons_shared_data.labware.labware_definition import (
     Dimensions as LabwareDimensions,
     Parameters as LabwareDefinitionParameters,
-    CornerOffsetFromSlot,
+    Vector as LabwareDefinitionVector,
     ConicalFrustum,
 )
 
@@ -62,8 +65,17 @@ from opentrons.protocol_engine.types import (
     TipGeometry,
     ModuleDefinition,
     ProbedHeightInfo,
+    ProbedVolumeInfo,
     LoadedVolumeInfo,
     WellLiquidInfo,
+    OnAddressableAreaOffsetLocationSequenceComponent,
+    OnModuleOffsetLocationSequenceComponent,
+    OnLabwareOffsetLocationSequenceComponent,
+    OnAddressableAreaLocationSequenceComponent,
+    OnModuleLocationSequenceComponent,
+    OnLabwareLocationSequenceComponent,
+    NotOnDeckLocationSequenceComponent,
+    OnCutoutFixtureLocationSequenceComponent,
 )
 from opentrons.protocol_engine.commands import (
     CommandStatus,
@@ -315,9 +327,9 @@ def subject(
         well_view=mock_well_view if use_mocks else well_view,
         module_view=mock_module_view if use_mocks else module_view,
         pipette_view=mock_pipette_view if use_mocks else pipette_view,
-        addressable_area_view=mock_addressable_area_view
-        if use_mocks
-        else addressable_area_view,
+        addressable_area_view=(
+            mock_addressable_area_view if use_mocks else addressable_area_view
+        ),
     )
 
 
@@ -1577,10 +1589,14 @@ def test_get_well_position_with_meniscus_offset(
     decoy.when(mock_labware_view.get_well_definition("labware-id", "B2")).then_return(
         well_def
     )
+    probe_time = datetime.now()
+    decoy.when(mock_well_view.get_last_liquid_update("labware-id", "B2")).then_return(
+        probe_time
+    )
     decoy.when(mock_well_view.get_well_liquid_info("labware-id", "B2")).then_return(
         WellLiquidInfo(
             probed_volume=None,
-            probed_height=ProbedHeightInfo(height=70.5, last_probed=datetime.now()),
+            probed_height=ProbedHeightInfo(height=70.5, last_probed=probe_time),
             loaded_volume=None,
         )
     )
@@ -1639,10 +1655,14 @@ def test_get_well_position_with_volume_offset_raises_error(
     decoy.when(mock_labware_view.get_well_definition("labware-id", "B2")).then_return(
         well_def
     )
+    probe_time = datetime.now()
+    decoy.when(mock_well_view.get_last_liquid_update("labware-id", "B2")).then_return(
+        probe_time
+    )
     decoy.when(mock_well_view.get_well_liquid_info("labware-id", "B2")).then_return(
         WellLiquidInfo(
             loaded_volume=None,
-            probed_height=ProbedHeightInfo(height=45.0, last_probed=datetime.now()),
+            probed_height=ProbedHeightInfo(height=45.0, last_probed=probe_time),
             probed_volume=None,
         )
     )
@@ -1698,13 +1718,17 @@ def test_get_well_position_with_meniscus_and_literal_volume_offset(
     decoy.when(
         mock_addressable_area_view.get_addressable_area_position(DeckSlotName.SLOT_4.id)
     ).then_return(slot_pos)
+    probe_time = datetime.now()
+    decoy.when(mock_well_view.get_last_liquid_update("labware-id", "B2")).then_return(
+        probe_time
+    )
     decoy.when(mock_labware_view.get_well_definition("labware-id", "B2")).then_return(
         well_def
     )
     decoy.when(mock_well_view.get_well_liquid_info("labware-id", "B2")).then_return(
         WellLiquidInfo(
             loaded_volume=None,
-            probed_height=ProbedHeightInfo(height=45.0, last_probed=datetime.now()),
+            probed_height=ProbedHeightInfo(height=45.0, last_probed=probe_time),
             probed_volume=None,
         )
     )
@@ -1771,10 +1795,14 @@ def test_get_well_position_with_meniscus_and_float_volume_offset(
     decoy.when(mock_labware_view.get_well_definition("labware-id", "B2")).then_return(
         well_def
     )
+    probe_time = datetime.now()
+    decoy.when(mock_well_view.get_last_liquid_update("labware-id", "B2")).then_return(
+        probe_time
+    )
     decoy.when(mock_well_view.get_well_liquid_info("labware-id", "B2")).then_return(
         WellLiquidInfo(
             loaded_volume=None,
-            probed_height=ProbedHeightInfo(height=45.0, last_probed=datetime.now()),
+            probed_height=ProbedHeightInfo(height=45.0, last_probed=probe_time),
             probed_volume=None,
         )
     )
@@ -1840,10 +1868,14 @@ def test_get_well_position_raises_validation_error(
     decoy.when(mock_labware_view.get_well_definition("labware-id", "B2")).then_return(
         well_def
     )
+    probe_time = datetime.now()
+    decoy.when(mock_well_view.get_last_liquid_update("labware-id", "B2")).then_return(
+        probe_time
+    )
     decoy.when(mock_well_view.get_well_liquid_info("labware-id", "B2")).then_return(
         WellLiquidInfo(
             loaded_volume=None,
-            probed_height=ProbedHeightInfo(height=40.0, last_probed=datetime.now()),
+            probed_height=ProbedHeightInfo(height=40.0, last_probed=probe_time),
             probed_volume=None,
         )
     )
@@ -1905,10 +1937,14 @@ def test_get_meniscus_height(
     decoy.when(mock_labware_view.get_well_definition("labware-id", "B2")).then_return(
         well_def
     )
+    probe_time = datetime.now()
+    decoy.when(mock_well_view.get_last_liquid_update("labware-id", "B2")).then_return(
+        probe_time
+    )
     decoy.when(mock_well_view.get_well_liquid_info("labware-id", "B2")).then_return(
         WellLiquidInfo(
             loaded_volume=LoadedVolumeInfo(
-                volume=2000.0, last_loaded=datetime.now(), operations_since_load=0
+                volume=2000.0, last_loaded=probe_time, operations_since_load=0
             ),
             probed_height=None,
             probed_volume=None,
@@ -2917,7 +2953,7 @@ def test_check_gripper_labware_tip_collision(
             isTiprack=True,
             isMagneticModuleCompatible=False,
         ),
-        cornerOffsetFromSlot=CornerOffsetFromSlot.model_construct(x=1, y=2, z=3),
+        cornerOffsetFromSlot=LabwareDefinitionVector.model_construct(x=1, y=2, z=3),
         ordering=[],
     )
 
@@ -3017,10 +3053,9 @@ def test_get_offset_location_deck_slot(
     )
     labware_store.handle_action(action)
     offset_location = subject.get_offset_location("labware-id-1")
-    assert offset_location is not None
-    assert offset_location.slotName == DeckSlotName.SLOT_C2
-    assert offset_location.definitionUri is None
-    assert offset_location.moduleModel is None
+    assert offset_location == [
+        OnAddressableAreaOffsetLocationSequenceComponent(addressableAreaName="C2")
+    ]
 
 
 @pytest.mark.parametrize("use_mocks", [False])
@@ -3037,7 +3072,7 @@ def test_get_offset_location_module(
         command=LoadModule(
             params=LoadModuleParams(
                 location=DeckSlotLocation(slotName=DeckSlotName.SLOT_A3),
-                model=ModuleModel.TEMPERATURE_MODULE_V1,
+                model=ModuleModel.TEMPERATURE_MODULE_V2,
             ),
             id="load-module-1",
             createdAt=datetime.now(),
@@ -3082,10 +3117,14 @@ def test_get_offset_location_module(
     module_store.handle_action(load_module)
     labware_store.handle_action(load_labware)
     offset_location = subject.get_offset_location("labware-id-1")
-    assert offset_location is not None
-    assert offset_location.slotName == DeckSlotName.SLOT_A3
-    assert offset_location.definitionUri is None
-    assert offset_location.moduleModel == ModuleModel.TEMPERATURE_MODULE_V1
+    assert offset_location == [
+        OnModuleOffsetLocationSequenceComponent(
+            moduleModel=ModuleModel.TEMPERATURE_MODULE_V2
+        ),
+        OnAddressableAreaOffsetLocationSequenceComponent(
+            addressableAreaName="temperatureModuleV2A3"
+        ),
+    ]
 
 
 @pytest.mark.parametrize("use_mocks", [False])
@@ -3103,8 +3142,8 @@ def test_get_offset_location_module_with_adapter(
     load_module = SucceedCommandAction(
         command=LoadModule(
             params=LoadModuleParams(
-                location=DeckSlotLocation(slotName=DeckSlotName.SLOT_A2),
-                model=ModuleModel.TEMPERATURE_MODULE_V1,
+                location=DeckSlotLocation(slotName=DeckSlotName.SLOT_A3),
+                model=ModuleModel.TEMPERATURE_MODULE_V2,
             ),
             id="load-module-1",
             createdAt=datetime.now(),
@@ -3177,12 +3216,17 @@ def test_get_offset_location_module_with_adapter(
     labware_store.handle_action(load_adapter)
     labware_store.handle_action(load_labware)
     offset_location = subject.get_offset_location("labware-id-1")
-    assert offset_location is not None
-    assert offset_location.slotName == DeckSlotName.SLOT_A2
-    assert offset_location.definitionUri == labware_view.get_uri_from_definition(
-        nice_adapter_definition
-    )
-    assert offset_location.moduleModel == ModuleModel.TEMPERATURE_MODULE_V1
+    assert offset_location == [
+        OnLabwareOffsetLocationSequenceComponent(
+            labwareUri=labware_view.get_uri_from_definition(nice_adapter_definition)
+        ),
+        OnModuleOffsetLocationSequenceComponent(
+            moduleModel=ModuleModel.TEMPERATURE_MODULE_V2
+        ),
+        OnAddressableAreaOffsetLocationSequenceComponent(
+            addressableAreaName="temperatureModuleV2A3"
+        ),
+    ]
 
 
 @pytest.mark.parametrize("use_mocks", [False])
@@ -3349,10 +3393,14 @@ def test_validate_dispense_volume_into_well_meniscus(
     decoy.when(mock_labware_view.get_well_geometry("labware-id", "A1")).then_return(
         inner_well_def
     )
+    probe_time = datetime.now()
+    decoy.when(mock_well_view.get_last_liquid_update("labware-id", "A1")).then_return(
+        probe_time
+    )
     decoy.when(mock_well_view.get_well_liquid_info("labware-id", "A1")).then_return(
         WellLiquidInfo(
             loaded_volume=None,
-            probed_height=ProbedHeightInfo(height=40.0, last_probed=datetime.now()),
+            probed_height=ProbedHeightInfo(height=40.0, last_probed=probe_time),
             probed_volume=None,
         )
     )
@@ -3367,6 +3415,129 @@ def test_validate_dispense_volume_into_well_meniscus(
             ),
             volume=1100000.0,
         )
+
+
+def test_get_latest_volume_information(
+    decoy: Decoy,
+    mock_labware_view: LabwareView,
+    mock_well_view: WellView,
+    subject: GeometryView,
+) -> None:
+    """It should raise an InvalidDispenseVolumeError if too much volume is specified."""
+    # Setup
+    labware_def = _load_labware_definition_data()
+    assert labware_def.wells is not None
+    well_def = labware_def.wells["A1"]
+    assert labware_def.innerLabwareGeometry is not None
+    inner_well_def = labware_def.innerLabwareGeometry["welldefinition1111"]
+
+    load_time = datetime.min
+    probe_time = datetime.now()
+
+    decoy.when(mock_labware_view.get_well_definition("labware-id", "A1")).then_return(
+        well_def
+    )
+    decoy.when(mock_labware_view.get_well_geometry("labware-id", "A1")).then_return(
+        inner_well_def
+    )
+    ten_ul_height = subject.get_well_height_at_volume(
+        labware_id="labware-id", well_name="A1", volume=10.0
+    )
+    twenty_ul_height = subject.get_well_height_at_volume(
+        labware_id="labware-id", well_name="A1", volume=20.0
+    )
+
+    # Make sure Get height with no information raises an error
+    decoy.when(mock_well_view.get_last_liquid_update("labware-id", "A1")).then_return(
+        None
+    )
+    decoy.when(mock_well_view.get_well_liquid_info("labware-id", "A1")).then_return(
+        WellLiquidInfo(
+            loaded_volume=None,
+            probed_height=None,
+            probed_volume=None,
+        )
+    )
+    decoy.when(mock_well_view.get_last_liquid_update("labware-id", "A1")).then_return(
+        None
+    )
+
+    with pytest.raises(errors.LiquidHeightUnknownError):
+        subject.get_meniscus_height(labware_id="labware-id", well_name="A1")
+    # Make sure get height with a valid load returns the correct height
+    decoy.when(mock_well_view.get_well_liquid_info("labware-id", "A1")).then_return(
+        WellLiquidInfo(
+            loaded_volume=LoadedVolumeInfo(
+                volume=10.0, last_loaded=load_time, operations_since_load=0
+            ),
+            probed_height=None,
+            probed_volume=None,
+        )
+    )
+
+    decoy.when(mock_well_view.get_last_liquid_update("labware-id", "A1")).then_return(
+        load_time
+    )
+    assert (
+        subject.get_meniscus_height(labware_id="labware-id", well_name="A1")
+        == ten_ul_height
+    )
+
+    # Make sure that if there is a probe after a load that we get the correct height
+    decoy.when(mock_well_view.get_well_liquid_info("labware-id", "A1")).then_return(
+        WellLiquidInfo(
+            loaded_volume=LoadedVolumeInfo(
+                volume=10.0, last_loaded=load_time, operations_since_load=0
+            ),
+            probed_height=ProbedHeightInfo(height=40.0, last_probed=probe_time),
+            probed_volume=None,
+        )
+    )
+    decoy.when(mock_well_view.get_last_liquid_update("labware-id", "A1")).then_return(
+        probe_time
+    )
+
+    assert subject.get_meniscus_height(labware_id="labware-id", well_name="A1") == 40.0
+
+    # Simulate a pipetting action and make sure we get the height based on the most current one
+    decoy.when(mock_well_view.get_well_liquid_info("labware-id", "A1")).then_return(
+        WellLiquidInfo(
+            loaded_volume=LoadedVolumeInfo(
+                volume=10.0, last_loaded=load_time, operations_since_load=1
+            ),
+            probed_height=None,
+            probed_volume=ProbedVolumeInfo(
+                volume=20.0, last_probed=probe_time, operations_since_probe=1
+            ),
+        )
+    )
+    decoy.when(mock_well_view.get_last_liquid_update("labware-id", "A1")).then_return(
+        probe_time
+    )
+    assert (
+        subject.get_meniscus_height(labware_id="labware-id", well_name="A1")
+        == twenty_ul_height
+    )
+
+    # Simulate a calling load_liquid after a probe and make sure we get the height based on the load_liquid
+    decoy.when(mock_well_view.get_well_liquid_info("labware-id", "A1")).then_return(
+        WellLiquidInfo(
+            loaded_volume=LoadedVolumeInfo(
+                volume=10.0, last_loaded=datetime.max, operations_since_load=0
+            ),
+            probed_height=ProbedHeightInfo(height=40.0, last_probed=probe_time),
+            probed_volume=ProbedVolumeInfo(
+                volume=20.0, last_probed=probe_time, operations_since_probe=0
+            ),
+        )
+    )
+    decoy.when(mock_well_view.get_last_liquid_update("labware-id", "A1")).then_return(
+        datetime.max
+    )
+    assert (
+        subject.get_meniscus_height(labware_id="labware-id", well_name="A1")
+        == ten_ul_height
+    )
 
 
 @pytest.mark.parametrize(
@@ -3497,3 +3668,363 @@ def test_get_well_volume_at_height(
     )
     assert isclose(found_volume_bottom, expected_volume_bottom, rel_tol=0.01)
     assert isclose(found_volume_top, expected_volume_top, rel_tol=0.01)
+
+
+@pytest.mark.parametrize("use_mocks", [False])
+def test_get_location_sequence_deck_slot(
+    decoy: Decoy,
+    labware_store: LabwareStore,
+    addressable_area_store: AddressableAreaStore,
+    nice_labware_definition: LabwareDefinition,
+    subject: GeometryView,
+) -> None:
+    """Test if you can get the location sequence of a labware in a deck slot."""
+    action = SucceedCommandAction(
+        command=LoadLabware(
+            id="load-labware-1",
+            createdAt=datetime.now(),
+            key="load-labware-1",
+            status=CommandStatus.SUCCEEDED,
+            result=LoadLabwareResult(
+                labwareId="labware-id-1",
+                definition=nice_labware_definition,
+                offsetId=None,
+            ),
+            params=LoadLabwareParams(
+                location=DeckSlotLocation(slotName=DeckSlotName.SLOT_C2),
+                loadName=nice_labware_definition.parameters.loadName,
+                namespace=nice_labware_definition.namespace,
+                version=nice_labware_definition.version,
+            ),
+        ),
+        state_update=StateUpdate(
+            loaded_labware=LoadedLabwareUpdate(
+                labware_id="labware-id-1",
+                definition=nice_labware_definition,
+                offset_id=None,
+                new_location=DeckSlotLocation(slotName=DeckSlotName.SLOT_C2),
+                display_name=None,
+            ),
+            addressable_area_used=AddressableAreaUsedUpdate(addressable_area_name="C2"),
+        ),
+    )
+    labware_store.handle_action(action)
+    addressable_area_store.handle_action(action)
+    location_sequence = subject.get_location_sequence("labware-id-1")
+    assert location_sequence == [
+        OnAddressableAreaLocationSequenceComponent(addressableAreaName="C2"),
+        OnCutoutFixtureLocationSequenceComponent(
+            cutoutId="cutoutC2", possibleCutoutFixtureIds=["singleCenterSlot"]
+        ),
+    ]
+
+
+@pytest.mark.parametrize("use_mocks", [False])
+def test_get_location_sequence_module(
+    decoy: Decoy,
+    labware_store: LabwareStore,
+    module_store: ModuleStore,
+    addressable_area_store: AddressableAreaStore,
+    nice_labware_definition: LabwareDefinition,
+    tempdeck_v2_def: ModuleDefinition,
+    subject: GeometryView,
+) -> None:
+    """Test if you can get the location sequence of a labware directly on a module."""
+    load_module = SucceedCommandAction(
+        command=LoadModule(
+            params=LoadModuleParams(
+                location=DeckSlotLocation(slotName=DeckSlotName.SLOT_A3),
+                model=ModuleModel.TEMPERATURE_MODULE_V2,
+            ),
+            id="load-module-1",
+            createdAt=datetime.now(),
+            key="load-module-1",
+            status=CommandStatus.SUCCEEDED,
+            result=LoadModuleResult(
+                moduleId="module-id-1",
+                definition=tempdeck_v2_def,
+                model=tempdeck_v2_def.model,
+            ),
+        ),
+        state_update=StateUpdate(
+            addressable_area_used=AddressableAreaUsedUpdate(
+                addressable_area_name="temperatureModuleV2A3"
+            )
+        ),
+    )
+    load_labware = SucceedCommandAction(
+        command=LoadLabware(
+            id="load-labware-1",
+            createdAt=datetime.now(),
+            key="load-labware-1",
+            status=CommandStatus.SUCCEEDED,
+            result=LoadLabwareResult(
+                labwareId="labware-id-1",
+                definition=nice_labware_definition,
+                offsetId=None,
+            ),
+            params=LoadLabwareParams(
+                location=ModuleLocation(moduleId="module-id-1"),
+                loadName=nice_labware_definition.parameters.loadName,
+                namespace=nice_labware_definition.namespace,
+                version=nice_labware_definition.version,
+            ),
+        ),
+        state_update=StateUpdate(
+            loaded_labware=LoadedLabwareUpdate(
+                labware_id="labware-id-1",
+                definition=nice_labware_definition,
+                offset_id=None,
+                new_location=ModuleLocation(moduleId="module-id-1"),
+                display_name=None,
+            )
+        ),
+    )
+
+    module_store.handle_action(load_module)
+    addressable_area_store.handle_action(load_module)
+    labware_store.handle_action(load_labware)
+
+    location_sequence = subject.get_location_sequence("labware-id-1")
+    assert location_sequence == [
+        OnAddressableAreaLocationSequenceComponent(
+            addressableAreaName="temperatureModuleV2A3"
+        ),
+        OnModuleLocationSequenceComponent(moduleId="module-id-1"),
+        OnCutoutFixtureLocationSequenceComponent(
+            cutoutId="cutoutA3", possibleCutoutFixtureIds=["temperatureModuleV2"]
+        ),
+    ]
+
+
+@pytest.mark.parametrize("use_mocks", [False])
+def test_get_location_sequence_module_with_adapter(
+    decoy: Decoy,
+    labware_store: LabwareStore,
+    module_store: ModuleStore,
+    addressable_area_store: AddressableAreaStore,
+    nice_labware_definition: LabwareDefinition,
+    nice_adapter_definition: LabwareDefinition,
+    tempdeck_v2_def: ModuleDefinition,
+    labware_view: LabwareView,
+    subject: GeometryView,
+) -> None:
+    """Test if you can get the location sequence of a labware directly on a module."""
+    load_module = SucceedCommandAction(
+        command=LoadModule(
+            params=LoadModuleParams(
+                location=DeckSlotLocation(slotName=DeckSlotName.SLOT_A3),
+                model=ModuleModel.TEMPERATURE_MODULE_V2,
+            ),
+            id="load-module-1",
+            createdAt=datetime.now(),
+            key="load-module-1",
+            status=CommandStatus.SUCCEEDED,
+            result=LoadModuleResult(
+                moduleId="module-id-1",
+                definition=tempdeck_v2_def,
+                model=tempdeck_v2_def.model,
+            ),
+        ),
+        state_update=StateUpdate(
+            addressable_area_used=AddressableAreaUsedUpdate(
+                addressable_area_name="temperatureModuleV2A3"
+            )
+        ),
+    )
+    load_adapter = SucceedCommandAction(
+        command=LoadLabware(
+            id="load-adapter-1",
+            createdAt=datetime.now(),
+            key="load-adapter-1",
+            status=CommandStatus.SUCCEEDED,
+            result=LoadLabwareResult(
+                labwareId="adapter-id-1",
+                definition=nice_adapter_definition,
+                offsetId=None,
+            ),
+            params=LoadLabwareParams(
+                location=ModuleLocation(moduleId="module-id-1"),
+                loadName=nice_adapter_definition.parameters.loadName,
+                namespace=nice_adapter_definition.namespace,
+                version=nice_adapter_definition.version,
+            ),
+        ),
+        state_update=StateUpdate(
+            loaded_labware=LoadedLabwareUpdate(
+                labware_id="adapter-id-1",
+                definition=nice_adapter_definition,
+                offset_id=None,
+                new_location=ModuleLocation(moduleId="module-id-1"),
+                display_name=None,
+            ),
+        ),
+    )
+    load_labware = SucceedCommandAction(
+        command=LoadLabware(
+            id="load-labware-1",
+            createdAt=datetime.now(),
+            key="load-labware-1",
+            status=CommandStatus.SUCCEEDED,
+            result=LoadLabwareResult(
+                labwareId="labware-id-1",
+                definition=nice_labware_definition,
+                offsetId=None,
+            ),
+            params=LoadLabwareParams(
+                location=OnLabwareLocation(labwareId="adapter-id-1"),
+                loadName=nice_labware_definition.parameters.loadName,
+                namespace=nice_labware_definition.namespace,
+                version=nice_labware_definition.version,
+            ),
+        ),
+        state_update=StateUpdate(
+            loaded_labware=LoadedLabwareUpdate(
+                labware_id="labware-id-1",
+                definition=nice_labware_definition,
+                offset_id=None,
+                new_location=OnLabwareLocation(labwareId="adapter-id-1"),
+                display_name=None,
+            )
+        ),
+    )
+    module_store.handle_action(load_module)
+    addressable_area_store.handle_action(load_module)
+    labware_store.handle_action(load_adapter)
+    labware_store.handle_action(load_labware)
+    location_sequence = subject.get_location_sequence("labware-id-1")
+    assert location_sequence == [
+        OnLabwareLocationSequenceComponent(labwareId="adapter-id-1", lidId=None),
+        OnAddressableAreaLocationSequenceComponent(
+            addressableAreaName="temperatureModuleV2A3"
+        ),
+        OnModuleLocationSequenceComponent(moduleId="module-id-1"),
+        OnCutoutFixtureLocationSequenceComponent(
+            cutoutId="cutoutA3", possibleCutoutFixtureIds=["temperatureModuleV2"]
+        ),
+    ]
+
+
+@pytest.mark.parametrize("use_mocks", [False])
+def test_get_location_sequence_off_deck(
+    decoy: Decoy,
+    labware_store: LabwareStore,
+    nice_labware_definition: LabwareDefinition,
+    subject: GeometryView,
+) -> None:
+    """You cannot get the location sequence for a labware loaded OFF_DECK."""
+    action = SucceedCommandAction(
+        command=LoadLabware(
+            id="load-labware-1",
+            createdAt=datetime.now(),
+            key="load-labware-1",
+            status=CommandStatus.SUCCEEDED,
+            result=LoadLabwareResult(
+                labwareId="labware-id-1",
+                definition=nice_labware_definition,
+                offsetId=None,
+            ),
+            params=LoadLabwareParams(
+                location=OFF_DECK_LOCATION,
+                loadName=nice_labware_definition.parameters.loadName,
+                namespace=nice_labware_definition.namespace,
+                version=nice_labware_definition.version,
+            ),
+        ),
+        state_update=StateUpdate(
+            loaded_labware=LoadedLabwareUpdate(
+                labware_id="labware-id-1",
+                definition=nice_labware_definition,
+                offset_id=None,
+                new_location=OFF_DECK_LOCATION,
+                display_name=None,
+            )
+        ),
+    )
+    labware_store.handle_action(action)
+    location_sequence = subject.get_location_sequence("labware-id-1")
+    assert location_sequence == [
+        NotOnDeckLocationSequenceComponent(logicalLocationName=OFF_DECK_LOCATION)
+    ]
+
+
+@pytest.mark.parametrize("use_mocks", [False])
+def test_get_location_sequence_stacker_hopper(
+    decoy: Decoy,
+    labware_store: LabwareStore,
+    module_store: ModuleStore,
+    addressable_area_store: AddressableAreaStore,
+    nice_labware_definition: LabwareDefinition,
+    flex_stacker_v1_def: ModuleDefinition,
+    subject: GeometryView,
+) -> None:
+    """Test if you can get the location sequence of a labware in the stacker hopper."""
+    load_module = SucceedCommandAction(
+        command=LoadModule(
+            params=LoadModuleParams(
+                location=DeckSlotLocation(slotName=DeckSlotName.SLOT_A3),
+                model=ModuleModel.FLEX_STACKER_MODULE_V1,
+            ),
+            id="load-module-1",
+            createdAt=datetime.now(),
+            key="load-module-1",
+            status=CommandStatus.SUCCEEDED,
+            result=LoadModuleResult(
+                moduleId="module-id-1",
+                definition=flex_stacker_v1_def,
+                model=flex_stacker_v1_def.model,
+            ),
+        ),
+        state_update=StateUpdate(
+            addressable_area_used=AddressableAreaUsedUpdate(
+                addressable_area_name="flexStackerModuleV1A4"
+            )
+        ),
+    )
+    load_labware = SucceedCommandAction(
+        command=LoadLabware(
+            id="load-labware-1",
+            createdAt=datetime.now(),
+            key="load-labware-1",
+            status=CommandStatus.SUCCEEDED,
+            result=LoadLabwareResult(
+                labwareId="labware-id-1",
+                definition=nice_labware_definition,
+                offsetId=None,
+            ),
+            params=LoadLabwareParams(
+                location=ModuleLocation(moduleId="module-id-1"),
+                loadName=nice_labware_definition.parameters.loadName,
+                namespace=nice_labware_definition.namespace,
+                version=nice_labware_definition.version,
+            ),
+        ),
+        state_update=StateUpdate(
+            loaded_labware=LoadedLabwareUpdate(
+                labware_id="labware-id-1",
+                definition=nice_labware_definition,
+                offset_id=None,
+                new_location=ModuleLocation(moduleId="module-id-1"),
+                display_name=None,
+            ),
+            flex_stacker_state_update=FlexStackerStateUpdate(
+                module_id="module-id-1",
+                hopper_labware_update=FlexStackerLoadHopperLabware(
+                    labware_id="labware-id-1"
+                ),
+            ),
+        ),
+    )
+
+    module_store.handle_action(load_module)
+    addressable_area_store.handle_action(load_module)
+    module_store.handle_action(load_labware)
+    labware_store.handle_action(load_labware)
+    location_sequence = subject.get_location_sequence("labware-id-1")
+    assert location_sequence == [
+        OnAddressableAreaLocationSequenceComponent(
+            addressableAreaName="flexStackerModuleV1A4"
+        ),
+        OnModuleLocationSequenceComponent(moduleId="module-id-1"),
+        NotOnDeckLocationSequenceComponent(logicalLocationName=OFF_DECK_LOCATION),
+    ]

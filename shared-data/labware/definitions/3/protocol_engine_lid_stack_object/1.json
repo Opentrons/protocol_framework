@@ -8,7 +8,7 @@
   "metadata": {
     "displayName": "Protocol Engine Lid Stack",
     "displayCategory": "system",
-    "displayVolumeUnits": "\u00b5L",
+    "displayVolumeUnits": "µL",
     "tags": []
   },
   "dimensions": {
@@ -37,5 +37,12 @@
   },
   "namespace": "opentrons",
   "version": 1,
-  "schemaVersion": 3
+  "schemaVersion": 3,
+  "stackingOffsetWithLabware": {
+    "opentrons_flex_deck_riser": {
+      "x": 0,
+      "y": 0,
+      "z": 34
+    }
+  }
 }

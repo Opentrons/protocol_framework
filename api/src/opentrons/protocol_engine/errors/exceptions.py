@@ -459,6 +459,19 @@ class ModuleNotConnectedError(ProtocolEngineError):
         super().__init__(ErrorCodes.GENERAL_ERROR, message, details, wrapping)
 
 
+class OffsetLocationInvalidError(ProtocolEngineError):
+    """Raised when encountering an invalid labware offset location sequence."""
+
+    def __init__(
+        self,
+        message: Optional[str] = None,
+        details: Optional[Dict[str, Any]] = None,
+        wrapping: Optional[Sequence[EnumeratedError]] = None,
+    ) -> None:
+        """Build an OffsetLocationSequenceDoesNotTerminateAtAnAddressableAreaError."""
+        super().__init__(ErrorCodes.GENERAL_ERROR, message, details, wrapping)
+
+
 class SlotDoesNotExistError(ProtocolEngineError):
     """Raised when referencing a deck slot that does not exist."""
 
@@ -1111,6 +1124,19 @@ class LiquidHeightUnknownError(ProtocolEngineError):
         wrapping: Optional[Sequence[EnumeratedError]] = None,
     ) -> None:
         """Build a LiquidHeightUnknownError."""
+        super().__init__(ErrorCodes.GENERAL_ERROR, message, details, wrapping)
+
+
+class LiquidVolumeUnknownError(ProtocolEngineError):
+    """Raised when attempting to report an unknown liquid volume."""
+
+    def __init__(
+        self,
+        message: Optional[str] = None,
+        details: Optional[Dict[str, Any]] = None,
+        wrapping: Optional[Sequence[EnumeratedError]] = None,
+    ) -> None:
+        """Build a LiquidVolumeUnknownError."""
         super().__init__(ErrorCodes.GENERAL_ERROR, message, details, wrapping)
 
 

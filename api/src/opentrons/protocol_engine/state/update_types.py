@@ -135,13 +135,10 @@ class LoadedLidStackUpdate:
     stack_location: LabwareLocation
     "The initial location of the Lid Stack Object."
 
-    labware_ids: typing.List[str]
-    """The unique IDs of the new lids."""
-
     new_locations_by_id: typing.Dict[str, OnLabwareLocation]
     """Each lid's initial location keyed by Labware ID."""
 
-    definition: LabwareDefinition
+    definition: LabwareDefinition | None
     "The Labware Definition of the Lid Labware(s) loaded."
 
 
@@ -149,10 +146,10 @@ class LoadedLidStackUpdate:
 class LabwareLidUpdate:
     """An update that identifies a lid on a given parent labware."""
 
-    parent_labware_id: str
-    """The unique ID of the parent labware."""
+    parent_labware_ids: typing.List[str]
+    """The unique IDs of the parent labwares."""
 
-    lid_id: str
+    lid_ids: typing.List[str | None]
     """The unique IDs of the new lids."""
 
 
@@ -317,6 +314,38 @@ class AbsorbanceReaderStateUpdate:
 
 
 @dataclasses.dataclass
+class FlexStackerLoadHopperLabware:
+    """An update to the Flex Stacker module static state."""
+
+    labware_id: str
+
+
+@dataclasses.dataclass
+class FlexStackerRetrieveLabware:
+    """An update to the Flex Stacker module static state."""
+
+    labware_id: str
+
+
+@dataclasses.dataclass
+class FlexStackerStoreLabware:
+    """An update to the Flex Stacker module static state."""
+
+    labware_id: str
+
+
+@dataclasses.dataclass
+class FlexStackerStateUpdate:
+    """An update to the Flex Stacker module state."""
+
+    module_id: str
+    in_static_mode: bool | NoChangeType = NO_CHANGE
+    hopper_labware_update: FlexStackerLoadHopperLabware | FlexStackerRetrieveLabware | FlexStackerStoreLabware | NoChangeType = (
+        NO_CHANGE
+    )
+
+
+@dataclasses.dataclass
 class LiquidClassLoadedUpdate:
     """The state update from loading a liquid class."""
 
@@ -379,6 +408,8 @@ class StateUpdate:
     absorbance_reader_state_update: AbsorbanceReaderStateUpdate | NoChangeType = (
         NO_CHANGE
     )
+
+    flex_stacker_state_update: FlexStackerStateUpdate | NoChangeType = NO_CHANGE
 
     liquid_class_loaded: LiquidClassLoadedUpdate | NoChangeType = NO_CHANGE
 
@@ -516,9 +547,8 @@ class StateUpdate:
         stack_id: str,
         stack_object_definition: LabwareDefinition,
         stack_location: LabwareLocation,
-        labware_definition: LabwareDefinition,
-        labware_ids: typing.List[str],
         locations: typing.Dict[str, OnLabwareLocation],
+        labware_definition: LabwareDefinition | None,
     ) -> Self:
         """Add a new lid stack to state. See `LoadedLidStackUpdate`."""
         self.loaded_lid_stack = LoadedLidStackUpdate(
@@ -526,20 +556,19 @@ class StateUpdate:
             stack_object_definition=stack_object_definition,
             stack_location=stack_location,
             definition=labware_definition,
-            labware_ids=labware_ids,
             new_locations_by_id=locations,
         )
         return self
 
-    def set_lid(
+    def set_lids(
         self: Self,
-        parent_labware_id: str,
-        lid_id: str,
+        parent_labware_ids: typing.List[str],
+        lid_ids: typing.List[str | None],
     ) -> Self:
         """Update the labware parent of a loaded or moved lid. See `LabwareLidUpdate`."""
         self.labware_lid = LabwareLidUpdate(
-            parent_labware_id=parent_labware_id,
-            lid_id=lid_id,
+            parent_labware_ids=parent_labware_ids,
+            lid_ids=lid_ids,
         )
         return self
 
@@ -715,5 +744,53 @@ class StateUpdate:
         """Mark that an addressable area has been used. See `AddressableAreaUsedUpdate`."""
         self.addressable_area_used = AddressableAreaUsedUpdate(
             addressable_area_name=addressable_area_name
+        )
+        return self
+
+    def load_flex_stacker_hopper_labware(
+        self,
+        module_id: str,
+        labware_id: str,
+    ) -> Self:
+        """Add a labware definition to the engine."""
+        self.flex_stacker_state_update = FlexStackerStateUpdate(
+            module_id=module_id,
+            hopper_labware_update=FlexStackerLoadHopperLabware(labware_id=labware_id),
+        )
+        return self
+
+    def retrieve_flex_stacker_labware(
+        self,
+        module_id: str,
+        labware_id: str,
+    ) -> Self:
+        """Add a labware definition to the engine."""
+        self.flex_stacker_state_update = FlexStackerStateUpdate(
+            module_id=module_id,
+            hopper_labware_update=FlexStackerRetrieveLabware(labware_id=labware_id),
+        )
+        return self
+
+    def store_flex_stacker_labware(
+        self,
+        module_id: str,
+        labware_id: str,
+    ) -> Self:
+        """Add a labware definition to the engine."""
+        self.flex_stacker_state_update = FlexStackerStateUpdate(
+            module_id=module_id,
+            hopper_labware_update=FlexStackerStoreLabware(labware_id=labware_id),
+        )
+        return self
+
+    def update_flex_stacker_mode(
+        self,
+        module_id: str,
+        static_mode: bool,
+    ) -> Self:
+        """Update the mode of the Flex Stacker."""
+        self.flex_stacker_state_update = FlexStackerStateUpdate(
+            module_id=module_id,
+            in_static_mode=static_mode,
         )
         return self

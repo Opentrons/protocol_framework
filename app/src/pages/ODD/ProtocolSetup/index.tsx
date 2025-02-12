@@ -4,6 +4,7 @@ import { useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
 import { useNavigate, useParams } from 'react-router-dom'
 import first from 'lodash/first'
+import { css } from 'styled-components'
 
 import { RUN_STATUS_IDLE, RUN_STATUS_STOPPED } from '@opentrons/api-client'
 import {
@@ -88,8 +89,10 @@ import {
   useRequiredProtocolHardwareFromAnalysis,
   useMissingProtocolHardwareFromAnalysis,
 } from '/app/transformations/commands'
+import { useLPCFlows, LPCFlows } from '/app/organisms/LabwarePositionCheck'
 
 import type { Dispatch, SetStateAction } from 'react'
+import type { FlattenSimpleInterpolation } from 'styled-components'
 import type { Run } from '@opentrons/api-client'
 import type { CutoutFixtureId, CutoutId } from '@opentrons/shared-data'
 import type { OnDeviceRouteParams } from '/app/App/types'
@@ -565,6 +568,16 @@ function PrepareToRun({
           <>
             <ProtocolSetupStep
               onClickSetupStep={() => {
+                setSetupScreen('view only parameters')
+              }}
+              title={t('parameters')}
+              detail={parametersDetail}
+              subDetail={null}
+              status="ready"
+              interactionDisabled={!hasRunTimeParameters}
+            />
+            <ProtocolSetupStep
+              onClickSetupStep={() => {
                 setSetupScreen('instruments')
               }}
               title={t('instruments')}
@@ -596,16 +609,6 @@ function PrepareToRun({
                   : null
               }
               status={offsetsConfirmed ? 'ready' : 'general'}
-            />
-            <ProtocolSetupStep
-              onClickSetupStep={() => {
-                setSetupScreen('view only parameters')
-              }}
-              title={t('parameters')}
-              detail={parametersDetail}
-              subDetail={null}
-              status="ready"
-              interactionDisabled={!hasRunTimeParameters}
             />
             <ProtocolSetupStep
               onClickSetupStep={() => {
@@ -658,7 +661,7 @@ export function ProtocolSetup(): JSX.Element {
   const { runId } = useParams<
     keyof OnDeviceRouteParams
   >() as OnDeviceRouteParams
-  const isNewLpc = useFeatureFlag('lpcRedesign')
+  const isNewLPC = useFeatureFlag('lpcRedesign')
   const { data: runRecord } = useNotifyRunQuery(runId, { staleTime: Infinity })
   const { analysisErrors } = useProtocolAnalysisErrors(runId)
   const { t } = useTranslation(['protocol_setup'])
@@ -741,6 +744,11 @@ export function ProtocolSetup(): JSX.Element {
     robotType,
     protocolName
   )
+  const { launchLPC, showLPC, lpcProps } = useLPCFlows({
+    runId,
+    robotType,
+    protocolName,
+  })
 
   const { trackProtocolRunEvent } = useTrackProtocolRunEvent(runId, robotName)
   const robotAnalyticsData = useRobotAnalyticsData(robotName)
@@ -824,11 +832,18 @@ export function ProtocolSetup(): JSX.Element {
         runId={runId}
         setSetupScreen={setSetupScreen}
         lpcDisabledReason={lpcDisabledReason}
-        launchLPC={launchLegacyLPC}
-        LPCWizard={LegacyLPCWizard}
+        launchLPC={isNewLPC ? launchLPC : launchLegacyLPC}
+        LPCWizard={
+          isNewLPC ? (
+            showLPC ? (
+              <LPCFlows {...lpcProps} />
+            ) : null
+          ) : (
+            LegacyLPCWizard
+          )
+        }
         isConfirmed={offsetsConfirmed}
         setIsConfirmed={setOffsetsConfirmed}
-        isNewLpc={isNewLpc}
       />
     ),
     labware: (
@@ -889,16 +904,29 @@ export function ProtocolSetup(): JSX.Element {
           onConfirmClick={handleProceedToRunClick}
         />
       ) : null}
-      <Flex
-        flexDirection={DIRECTION_COLUMN}
-        padding={
-          setupScreen === 'prepare to run'
-            ? `0 ${SPACING.spacing32} ${SPACING.spacing40}`
-            : `${SPACING.spacing32} ${SPACING.spacing40} ${SPACING.spacing40}`
-        }
-      >
+      <Flex css={buildSetupScreenStyle(setupScreen)}>
         {setupComponentByScreen[setupScreen]}
       </Flex>
     </>
   )
+}
+
+const buildSetupScreenStyle = (
+  setupScreen: SetupScreens
+): FlattenSimpleInterpolation => {
+  const paddingStyle = (): string => {
+    switch (setupScreen) {
+      case 'prepare to run':
+        return `0 ${SPACING.spacing32} ${SPACING.spacing40}`
+      case 'offsets':
+        return ''
+      default:
+        return `${SPACING.spacing32} ${SPACING.spacing40} ${SPACING.spacing40}`
+    }
+  }
+
+  return css`
+    flex-direction: ${DIRECTION_COLUMN};
+    padding: ${paddingStyle()};
+  `
 }

@@ -1,6 +1,6 @@
 from enum import Enum
 from dataclasses import dataclass, fields
-from typing import List
+from typing import List, Dict, Optional
 
 from opentrons.drivers.command_builder import CommandBuilder
 
@@ -11,13 +11,21 @@ class GCODE(str, Enum):
     MOVE_TO_SWITCH = "G5"
     HOME_AXIS = "G28"
     STOP_MOTORS = "M0"
+    ENABLE_MOTORS = "M17"
     GET_RESET_REASON = "M114"
     DEVICE_INFO = "M115"
     GET_LIMIT_SWITCH = "M119"
-    SET_LED = "M200"
+    GET_MOVE_PARAMS = "M120"
     GET_PLATFORM_SENSOR = "M121"
     GET_DOOR_SWITCH = "M122"
+    GET_STALLGUARD_THRESHOLD = "M911"
+    GET_MOTOR_DRIVER_REGISTER = "M920"
+    SET_LED = "M200"
     SET_SERIAL_NUMBER = "M996"
+    SET_RUN_CURRENT = "M906"
+    SET_IHOLD_CURRENT = "M907"
+    SET_STALLGUARD = "M910"
+    SET_MOTOR_DRIVER_REGISTER = "M921"
     ENTER_BOOTLOADER = "dfu"
 
     def build_command(self) -> CommandBuilder:
@@ -44,6 +52,16 @@ class StackerInfo:
     fw: str
     hw: HardwareRevision
     sn: str
+    rr: int = 0
+
+    def to_dict(self) -> Dict[str, str]:
+        """Build command."""
+        return {
+            "serial": self.sn,
+            "version": self.fw,
+            "model": self.hw.value,
+            "reset_reason": str(self.rr),
+        }
 
 
 class StackerAxis(Enum):
@@ -65,13 +83,23 @@ class LEDColor(Enum):
     RED = 1
     GREEN = 2
     BLUE = 3
+    YELLOW = 4
+
+
+class LEDPattern(Enum):
+    """Stacker LED Pattern."""
+
+    STATIC = 0
+    FLASH = 1
+    PULSE = 2
+    CONFIRM = 3
 
 
 class Direction(Enum):
     """Direction."""
 
     RETRACT = 0  # negative
-    EXTENT = 1  # positive
+    EXTEND = 1  # positive
 
     def __str__(self) -> str:
         """Convert to tag for clear logging."""
@@ -79,7 +107,7 @@ class Direction(Enum):
 
     def opposite(self) -> "Direction":
         """Get opposite direction."""
-        return Direction.EXTENT if self == Direction.RETRACT else Direction.RETRACT
+        return Direction.EXTEND if self == Direction.RETRACT else Direction.RETRACT
 
     def distance(self, distance: float) -> float:
         """Get signed distance, where retract direction is negative."""
@@ -104,10 +132,10 @@ class LimitSwitchStatus:
     def get(self, axis: StackerAxis, direction: Direction) -> bool:
         """Get limit switch status."""
         if axis == StackerAxis.X:
-            return self.XE if direction == Direction.EXTENT else self.XR
+            return self.XE if direction == Direction.EXTEND else self.XR
         if axis == StackerAxis.Z:
-            return self.ZE if direction == Direction.EXTENT else self.ZR
-        if direction == Direction.EXTENT:
+            return self.ZE if direction == Direction.EXTEND else self.ZR
+        if direction == Direction.EXTEND:
             raise ValueError("Latch does not have extent limit switch")
         return self.LR
 
@@ -126,13 +154,44 @@ class PlatformStatus:
 
     def get(self, direction: Direction) -> bool:
         """Get platform status."""
-        return self.E if direction == Direction.EXTENT else self.R
+        return self.E if direction == Direction.EXTEND else self.R
+
+    def to_dict(self) -> Dict[str, bool]:
+        """Dict of the data."""
+        return {
+            "extent": self.E,
+            "retract": self.R,
+        }
 
 
 @dataclass
 class MoveParams:
     """Move Parameters."""
 
-    max_speed: float | None = None
-    acceleration: float | None = None
-    max_speed_discont: float | None = None
+    axis: Optional[StackerAxis] = None
+    max_speed: Optional[float] = None
+    acceleration: Optional[float] = None
+    max_speed_discont: Optional[float] = None
+    current: Optional[float] = 0
+
+    @classmethod
+    def get_fields(cls) -> List[str]:
+        """Get parsing fields."""
+        return ["M", "V", "A", "D"]
+
+
+@dataclass
+class StallGuardParams:
+    """StallGuard Parameters."""
+
+    axis: StackerAxis
+    enabled: bool
+    threshold: int
+
+
+class MoveResult(str, Enum):
+    """The result of a move command."""
+
+    NO_ERROR = "ok"
+    STALL_ERROR = "stall"
+    UNKNOWN_ERROR = "unknown"

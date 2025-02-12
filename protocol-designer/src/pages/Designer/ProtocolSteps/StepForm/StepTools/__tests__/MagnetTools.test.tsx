@@ -81,6 +81,7 @@ describe('MagnetTools', () => {
         id: 'magnetId',
         model: 'magneticModuleV2',
         type: 'magneticModuleType',
+        pythonName: 'mockPythonName',
       },
     })
     vi.mocked(getMagnetLabwareEngageHeight).mockReturnValue(null)
@@ -93,6 +94,7 @@ describe('MagnetTools', () => {
           type: 'magneticModuleType',
           moduleState: { engaged: false, type: 'magneticModuleType' },
           model: 'magneticModuleV1',
+          pythonName: 'mockPythonName',
         },
       },
       additionalEquipmentOnDeck: {},
@@ -118,6 +120,7 @@ describe('MagnetTools', () => {
         id: 'magnetId',
         model: 'magneticModuleV1',
         type: 'magneticModuleType',
+        pythonName: 'mockPythonName',
       },
     })
     render(props)

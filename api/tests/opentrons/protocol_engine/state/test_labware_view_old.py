@@ -4,6 +4,7 @@ DEPRECATED: Testing LabwareView independently of LabwareStore is no
 longer helpful. Try to add new tests to test_labware_state.py, where they can be
 tested together, treating LabwareState as a private implementation detail.
 """
+
 import pytest
 from datetime import datetime
 from typing import Dict, Optional, cast, ContextManager, Any, Union, NamedTuple, List
@@ -15,17 +16,16 @@ from opentrons_shared_data.pipette.types import LabwareUri
 from opentrons_shared_data.labware import load_definition
 from opentrons_shared_data.labware.labware_definition import (
     Parameters,
+    LabwareDefinition,
     LabwareRole,
-    OverlapOffset as SharedDataOverlapOffset,
     GripperOffsets,
-    OffsetVector,
+    Vector,
 )
 
 from opentrons.protocols.api_support.deck_type import (
     STANDARD_OT2_DECK,
     STANDARD_OT3_DECK,
 )
-from opentrons.protocols.models import LabwareDefinition
 from opentrons.types import DeckSlotName, MountType
 
 from opentrons.protocol_engine import errors
@@ -34,7 +34,7 @@ from opentrons.protocol_engine.types import (
     Dimensions,
     LabwareOffset,
     LabwareOffsetVector,
-    LabwareOffsetLocation,
+    LegacyLabwareOffsetLocation,
     LoadedLabware,
     ModuleModel,
     ModuleLocation,
@@ -44,6 +44,8 @@ from opentrons.protocol_engine.types import (
     OFF_DECK_LOCATION,
     OverlapOffset,
     LabwareMovementOffsetData,
+    OnAddressableAreaOffsetLocationSequenceComponent,
+    OnModuleOffsetLocationSequenceComponent,
 )
 from opentrons.protocol_engine.state._move_types import EdgePathType
 from opentrons.protocol_engine.state.labware import (
@@ -694,9 +696,7 @@ def test_get_labware_overlap_offsets() -> None:
     subject = get_labware_view()
     result = subject.get_labware_overlap_offsets(
         definition=LabwareDefinition.model_construct(  # type: ignore[call-arg]
-            stackingOffsetWithLabware={
-                "bottom-labware-name": SharedDataOverlapOffset(x=1, y=2, z=3)
-            }
+            stackingOffsetWithLabware={"bottom-labware-name": Vector(x=1, y=2, z=3)}
         ),
         below_labware_name="bottom-labware-name",
     )
@@ -709,7 +709,7 @@ class ModuleOverlapSpec(NamedTuple):
 
     spec_deck_definition: DeckDefinitionV5
     module_model: ModuleModel
-    stacking_offset_with_module: Dict[str, SharedDataOverlapOffset]
+    stacking_offset_with_module: Dict[str, Vector]
     expected_offset: OverlapOffset
 
 
@@ -719,9 +719,7 @@ module_overlap_specs: List[ModuleOverlapSpec] = [
         spec_deck_definition=load_deck(STANDARD_OT2_DECK, 5),
         module_model=ModuleModel.TEMPERATURE_MODULE_V2,
         stacking_offset_with_module={
-            str(ModuleModel.TEMPERATURE_MODULE_V2.value): SharedDataOverlapOffset(
-                x=1, y=2, z=3
-            ),
+            str(ModuleModel.TEMPERATURE_MODULE_V2.value): Vector(x=1, y=2, z=3),
         },
         expected_offset=OverlapOffset(x=1, y=2, z=3),
     ),
@@ -730,9 +728,7 @@ module_overlap_specs: List[ModuleOverlapSpec] = [
         spec_deck_definition=load_deck(STANDARD_OT2_DECK, 5),
         module_model=ModuleModel.THERMOCYCLER_MODULE_V1,
         stacking_offset_with_module={
-            str(ModuleModel.THERMOCYCLER_MODULE_V1.value): SharedDataOverlapOffset(
-                x=11, y=22, z=33
-            ),
+            str(ModuleModel.THERMOCYCLER_MODULE_V1.value): Vector(x=11, y=22, z=33),
         },
         expected_offset=OverlapOffset(x=11, y=22, z=33),
     ),
@@ -755,9 +751,7 @@ module_overlap_specs: List[ModuleOverlapSpec] = [
         spec_deck_definition=load_deck(STANDARD_OT3_DECK, 5),
         module_model=ModuleModel.THERMOCYCLER_MODULE_V2,
         stacking_offset_with_module={
-            str(ModuleModel.THERMOCYCLER_MODULE_V2.value): SharedDataOverlapOffset(
-                x=111, y=222, z=333
-            ),
+            str(ModuleModel.THERMOCYCLER_MODULE_V2.value): Vector(x=111, y=222, z=333),
         },
         expected_offset=OverlapOffset(x=111, y=222, z=333),
     ),
@@ -771,7 +765,7 @@ module_overlap_specs: List[ModuleOverlapSpec] = [
 def test_get_module_overlap_offsets(
     spec_deck_definition: DeckDefinitionV5,
     module_model: ModuleModel,
-    stacking_offset_with_module: Dict[str, SharedDataOverlapOffset],
+    stacking_offset_with_module: Dict[str, Vector],
     expected_offset: OverlapOffset,
 ) -> None:
     """It should get the labware overlap offsets."""
@@ -838,7 +832,10 @@ def test_get_labware_offset_vector() -> None:
         id="offset-id",
         createdAt=datetime(year=2021, month=1, day=2),
         definitionUri="some-labware-uri",
-        location=LabwareOffsetLocation(slotName=DeckSlotName.SLOT_1),
+        location=LegacyLabwareOffsetLocation(slotName=DeckSlotName.SLOT_1),
+        locationSequence=[
+            OnAddressableAreaOffsetLocationSequenceComponent(addressableAreaName="1")
+        ],
         vector=offset_vector,
     )
 
@@ -866,7 +863,10 @@ def test_get_labware_offset() -> None:
         id="id-a",
         createdAt=datetime(year=2021, month=1, day=1),
         definitionUri="uri-a",
-        location=LabwareOffsetLocation(slotName=DeckSlotName.SLOT_1),
+        location=LegacyLabwareOffsetLocation(slotName=DeckSlotName.SLOT_1),
+        locationSequence=[
+            OnAddressableAreaOffsetLocationSequenceComponent(addressableAreaName="1")
+        ],
         vector=LabwareOffsetVector(x=1, y=1, z=1),
     )
 
@@ -874,7 +874,10 @@ def test_get_labware_offset() -> None:
         id="id-b",
         createdAt=datetime(year=2022, month=2, day=2),
         definitionUri="uri-b",
-        location=LabwareOffsetLocation(slotName=DeckSlotName.SLOT_2),
+        location=LegacyLabwareOffsetLocation(slotName=DeckSlotName.SLOT_2),
+        locationSequence=[
+            OnAddressableAreaOffsetLocationSequenceComponent(addressableAreaName="2")
+        ],
         vector=LabwareOffsetVector(x=2, y=2, z=2),
     )
 
@@ -894,7 +897,10 @@ def test_get_labware_offsets() -> None:
         id="id-a",
         createdAt=datetime(year=2021, month=1, day=1),
         definitionUri="uri-a",
-        location=LabwareOffsetLocation(slotName=DeckSlotName.SLOT_1),
+        location=LegacyLabwareOffsetLocation(slotName=DeckSlotName.SLOT_1),
+        locationSequence=[
+            OnAddressableAreaOffsetLocationSequenceComponent(addressableAreaName="1")
+        ],
         vector=LabwareOffsetVector(x=1, y=1, z=1),
     )
 
@@ -902,7 +908,10 @@ def test_get_labware_offsets() -> None:
         id="id-b",
         createdAt=datetime(year=2022, month=2, day=2),
         definitionUri="uri-b",
-        location=LabwareOffsetLocation(slotName=DeckSlotName.SLOT_2),
+        location=LegacyLabwareOffsetLocation(slotName=DeckSlotName.SLOT_2),
+        locationSequence=[
+            OnAddressableAreaOffsetLocationSequenceComponent(addressableAreaName="2")
+        ],
         vector=LabwareOffsetVector(x=2, y=2, z=2),
     )
 
@@ -926,7 +935,10 @@ def test_find_applicable_labware_offset() -> None:
         id="id-1",
         createdAt=datetime(year=2021, month=1, day=1),
         definitionUri="definition-uri",
-        location=LabwareOffsetLocation(slotName=DeckSlotName.SLOT_1),
+        location=LegacyLabwareOffsetLocation(slotName=DeckSlotName.SLOT_1),
+        locationSequence=[
+            OnAddressableAreaOffsetLocationSequenceComponent(addressableAreaName="1")
+        ],
         vector=LabwareOffsetVector(x=1, y=1, z=1),
     )
 
@@ -935,7 +947,10 @@ def test_find_applicable_labware_offset() -> None:
         id="id-2",
         createdAt=datetime(year=2022, month=2, day=2),
         definitionUri="definition-uri",
-        location=LabwareOffsetLocation(slotName=DeckSlotName.SLOT_1),
+        location=LegacyLabwareOffsetLocation(slotName=DeckSlotName.SLOT_1),
+        locationSequence=[
+            OnAddressableAreaOffsetLocationSequenceComponent(addressableAreaName="1")
+        ],
         vector=LabwareOffsetVector(x=2, y=2, z=2),
     )
 
@@ -943,10 +958,16 @@ def test_find_applicable_labware_offset() -> None:
         id="id-3",
         createdAt=datetime(year=2023, month=3, day=3),
         definitionUri="on-module-definition-uri",
-        location=LabwareOffsetLocation(
+        location=LegacyLabwareOffsetLocation(
             slotName=DeckSlotName.SLOT_1,
             moduleModel=ModuleModel.TEMPERATURE_MODULE_V1,
         ),
+        locationSequence=[
+            OnModuleOffsetLocationSequenceComponent(
+                moduleModel=ModuleModel.TEMPERATURE_MODULE_V1
+            ),
+            OnAddressableAreaOffsetLocationSequenceComponent(addressableAreaName="1"),
+        ],
         vector=LabwareOffsetVector(x=3, y=3, z=3),
     )
 
@@ -959,7 +980,11 @@ def test_find_applicable_labware_offset() -> None:
     assert (
         subject.find_applicable_labware_offset(
             definition_uri="definition-uri",
-            location=LabwareOffsetLocation(slotName=DeckSlotName.SLOT_1),
+            location=[
+                OnAddressableAreaOffsetLocationSequenceComponent(
+                    addressableAreaName="1"
+                )
+            ],
         )
         == offset_2
     )
@@ -967,10 +992,14 @@ def test_find_applicable_labware_offset() -> None:
     assert (
         subject.find_applicable_labware_offset(
             definition_uri="on-module-definition-uri",
-            location=LabwareOffsetLocation(
-                slotName=DeckSlotName.SLOT_1,
-                moduleModel=ModuleModel.TEMPERATURE_MODULE_V1,
-            ),
+            location=[
+                OnModuleOffsetLocationSequenceComponent(
+                    moduleModel=ModuleModel.TEMPERATURE_MODULE_V1
+                ),
+                OnAddressableAreaOffsetLocationSequenceComponent(
+                    addressableAreaName="1"
+                ),
+            ],
         )
         == offset_3
     )
@@ -979,7 +1008,11 @@ def test_find_applicable_labware_offset() -> None:
     assert (
         subject.find_applicable_labware_offset(
             definition_uri="different-definition-uri",
-            location=LabwareOffsetLocation(slotName=DeckSlotName.SLOT_1),
+            location=[
+                OnAddressableAreaOffsetLocationSequenceComponent(
+                    addressableAreaName="1"
+                )
+            ],
         )
         is None
     )
@@ -988,7 +1021,11 @@ def test_find_applicable_labware_offset() -> None:
     assert (
         subject.find_applicable_labware_offset(
             definition_uri="different-definition-uri",
-            location=LabwareOffsetLocation(slotName=DeckSlotName.SLOT_2),
+            location=[
+                OnAddressableAreaOffsetLocationSequenceComponent(
+                    addressableAreaName="2"
+                )
+            ],
         )
         is None
     )
@@ -1362,9 +1399,7 @@ def test_raise_if_labware_cannot_be_stacked_on_module_not_adapter() -> None:
         subject.raise_if_labware_cannot_be_stacked(
             top_labware_definition=LabwareDefinition.model_construct(  # type: ignore[call-arg]
                 parameters=Parameters.model_construct(loadName="name"),  # type: ignore[call-arg]
-                stackingOffsetWithLabware={
-                    "test": SharedDataOverlapOffset(x=0, y=0, z=0)
-                },
+                stackingOffsetWithLabware={"test": Vector(x=0, y=0, z=0)},
             ),
             bottom_labware_id="labware-id",
         )
@@ -1389,7 +1424,8 @@ def test_raise_if_labware_cannot_be_stacked_on_labware_on_adapter() -> None:
         },
         definitions_by_uri={
             "def-uri-1": LabwareDefinition.model_construct(  # type: ignore[call-arg]
-                allowedRoles=[LabwareRole.labware]
+                allowedRoles=[LabwareRole.labware],
+                parameters=Parameters.model_construct(loadName="test"),  # type: ignore[call-arg]
             ),
             "def-uri-2": LabwareDefinition.model_construct(  # type: ignore[call-arg]
                 allowedRoles=[LabwareRole.adapter]
@@ -1403,9 +1439,7 @@ def test_raise_if_labware_cannot_be_stacked_on_labware_on_adapter() -> None:
         subject.raise_if_labware_cannot_be_stacked(
             top_labware_definition=LabwareDefinition.model_construct(  # type: ignore[call-arg]
                 parameters=Parameters.model_construct(loadName="name"),  # type: ignore[call-arg]
-                stackingOffsetWithLabware={
-                    "test": SharedDataOverlapOffset(x=0, y=0, z=0)
-                },
+                stackingOffsetWithLabware={"test": Vector(x=0, y=0, z=0)},
             ),
             bottom_labware_id="labware-id",
         )
@@ -1486,9 +1520,7 @@ def test_labware_stacking_height_passes_or_raises(
                     loadName="name",
                     isMagneticModuleCompatible=False,
                 ),
-                stackingOffsetWithLabware={
-                    "test": SharedDataOverlapOffset(x=0, y=0, z=0)
-                },
+                stackingOffsetWithLabware={"test": Vector(x=0, y=0, z=0)},
                 stackLimit=stack_limit,
             ),
             bottom_labware_id="labware-id4",
@@ -1549,8 +1581,8 @@ def test_get_labware_gripper_offsets_default_no_slots(
             "some-labware-uri": LabwareDefinition.model_construct(  # type: ignore[call-arg]
                 gripperOffsets={
                     "default": GripperOffsets(
-                        pickUpOffset=OffsetVector(x=1, y=2, z=3),
-                        dropOffset=OffsetVector(x=4, y=5, z=6),
+                        pickUpOffset=Vector(x=1, y=2, z=3),
+                        dropOffset=Vector(x=4, y=5, z=6),
                     )
                 }
             ),
