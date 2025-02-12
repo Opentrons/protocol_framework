@@ -18,8 +18,6 @@ from opentrons.types import Mount, DeckSlotName
 class LabwareLoadInfo:
     """Information about a successful labware load.
 
-    :meta private:
-
     This is a separate class from the main user-facing `Labware` class
     because this is easier to construct in unit tests.
     """
@@ -47,10 +45,7 @@ class LabwareLoadInfo:
 
 @dataclass(frozen=True)
 class InstrumentLoadInfo:
-    """Like `LabwareLoadInfo`, but for instruments (pipettes).
-
-    :meta private:
-    """
+    """Like `LabwareLoadInfo`, but for instruments (pipettes)."""
 
     instrument_load_name: str
     mount: Mount
@@ -59,10 +54,7 @@ class InstrumentLoadInfo:
 
 @dataclass(frozen=True)
 class ModuleLoadInfo:
-    """Like `LabwareLoadInfo`, but for hardware modules.
-
-    :meta private:
-    """
+    """Like `LabwareLoadInfo`, but for hardware modules."""
 
     requested_model: ModuleModel
     loaded_model: ModuleModel
