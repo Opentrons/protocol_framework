@@ -1,21 +1,20 @@
 import Markdown from 'react-markdown'
-
-import { Box, COLORS, SPACING, LegacyStyledText } from '@opentrons/components'
-
-import { useIsOEMMode } from '/app/resources/robot-settings/hooks'
+import { LegacyStyledText } from '../../atoms'
+import { COLORS } from '../../helix-design-system'
+import { Box } from '../../primitives'
+import { SPACING } from '../../ui-style-constants'
 
 import styles from './styles.module.css'
 
 export interface ReleaseNotesProps {
+  isOEMMode: boolean
   source?: string | null
 }
 
 const DEFAULT_RELEASE_NOTES = 'We recommend upgrading to the latest version.'
 
 export function ReleaseNotes(props: ReleaseNotesProps): JSX.Element {
-  const { source } = props
-
-  const isOEMMode = useIsOEMMode()
+  const { source, isOEMMode } = props
 
   return (
     <div className={styles.release_notes}>
@@ -63,7 +62,7 @@ function UnnumberedListText(props: JSX.IntrinsicAttributes): JSX.Element {
 function HorizontalRule(): JSX.Element {
   return (
     <Box
-      borderBottom={`1px solid ${String(COLORS.grey30)}`}
+      borderBottom={`1px solid ${COLORS.grey30}`}
       marginY={SPACING.spacing16}
       data-testid="divider"
     />
