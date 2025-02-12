@@ -194,6 +194,7 @@ export function PositionField(props: PositionFieldProps): JSX.Element {
             }}
             gridGap={SPACING.spacing8}
             alignItems={ALIGN_CENTER}
+            testId={`PositionField_ListButton_${prefix}`}
           >
             {!(isWhiteButton ?? false) && (
               <Icon name="tip-position" size="1.25rem" />

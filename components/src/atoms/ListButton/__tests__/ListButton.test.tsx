@@ -25,7 +25,7 @@ describe('ListButton', () => {
   it('should render correct style - noActive', () => {
     render(props)
     const listButton = screen.getByTestId('ListButton_noActive')
-    expect(listButton).toHaveStyle(`backgroundColor: ${COLORS.grey30}`)
+    expect(listButton).toHaveStyle(`backgroundColor: ${COLORS.grey20}`)
   })
   it('should render correct style - connected', () => {
     props.type = 'connected'

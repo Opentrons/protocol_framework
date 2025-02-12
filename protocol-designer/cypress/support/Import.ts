@@ -48,7 +48,7 @@ export const verifyOldProtocolModal = (): void => {
         .and('be.visible')
       cy.contains(ContentStrings.confirmButton).should('be.visible')
       cy.contains(ContentStrings.cancelButton).should('be.visible')
-      cy.contains(ContentStrings.confirmButton).click()
+      cy.contains(ContentStrings.confirmButton).click({ force: true })
     })
 }
 
@@ -80,14 +80,14 @@ export const migrateAndMatchSnapshot = ({
     }
     cy.get('button')
       .contains(ContentStrings.confirmButton, { matchCase: false })
-      .click()
+      .click({ force: true })
   }
 
-  cy.get(LocatorStrings.exportProtocol).click()
+  cy.get(LocatorStrings.exportProtocol).click({ force: true })
 
   if (unusedHardware) {
     cy.get('div').contains(ContentStrings.unusedHardwareWarning).should('exist')
-    cy.contains(ContentStrings.continueWithExport).click()
+    cy.contains(ContentStrings.continueWithExport).click({ force: true })
   }
 
   const expectedProtocol: TestFile = getTestFile(expectedTestFile)

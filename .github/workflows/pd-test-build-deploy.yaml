@@ -60,15 +60,15 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
 
   e2e-test:
-      name: 'protocol designer e2e tests'
-      runs-on: 'ubuntu-24.04'
-      timeout-minutes: 20
-      steps:
-        - name: 'Checkout Repository'
-          uses: actions/checkout@v4
-        - uses: ./.github/actions/js/setup
-        - name: 'run test-e2e'
-          run: make -C protocol-designer test-e2e
+    name: 'protocol designer e2e tests'
+    runs-on: 'ubuntu-24.04'
+    timeout-minutes: 20
+    steps:
+      - name: 'Checkout Repository'
+        uses: actions/checkout@v4
+      - uses: ./.github/actions/js/setup
+      - name: 'run test-e2e'
+        run: make -C protocol-designer test-e2e
 
   build-pd:
     timeout-minutes: 20

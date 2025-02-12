@@ -1,16 +1,24 @@
 /** Generate sections of the Python file for fileCreator.ts */
 
-import { FLEX_ROBOT_TYPE, OT2_ROBOT_TYPE } from '@opentrons/shared-data'
+import {
+  FLEX_ROBOT_TYPE,
+  OT2_ROBOT_TYPE,
+  isFlexPipette,
+} from '@opentrons/shared-data'
 import {
   formatPyDict,
   formatPyStr,
   indentPyLines,
   PROTOCOL_CONTEXT_NAME,
 } from '@opentrons/step-generation'
+import { getFlexNameConversion } from './utils'
 import type {
   InvariantContext,
   LabwareEntities,
+  LabwareLiquidState,
+  LiquidEntities,
   ModuleEntities,
+  PipetteEntities,
   Timeline,
   TimelineFrame,
 } from '@opentrons/step-generation'
@@ -41,6 +49,7 @@ export function pythonMetadata(fileMetadata: FileMetadataFields): string {
       category: fileMetadata.category,
       subcategory: fileMetadata.subcategory,
       tags: fileMetadata.tags?.length && fileMetadata.tags.join(', '),
+      protocolDesigner: process.env.OT_PD_VERSION,
     }).filter(([key, value]) => value) // drop blank entries
   )
   return `metadata = ${formatPyDict(stringifiedMetadata)}`
@@ -148,24 +157,106 @@ export function stepCommands(robotStateTimeline: Timeline): string {
   )
 }
 
+export function getLoadPipettes(
+  pipetteEntities: PipetteEntities,
+  labwareEntities: LabwareEntities,
+  pipetteRobotState: TimelineFrame['pipettes']
+): string {
+  const pythonPipette = Object.values(pipetteEntities)
+    .map(pipette => {
+      const { name, id, spec, pythonName, tiprackDefURI } = pipette
+      const mount =
+        spec.channels === 96 ? '' : formatPyStr(pipetteRobotState[id].mount)
+      const pipetteName = isFlexPipette(name)
+        ? getFlexNameConversion(spec)
+        : name
+      const tiprackPythonNames = tiprackDefURI
+        .flatMap(defURI =>
+          Object.values(labwareEntities).filter(
+            lw => lw.labwareDefURI === defURI
+          )
+        )
+        .map(tiprack => tiprack.pythonName)
+        .join(', ')
+      const pythonTipRacks =
+        tiprackDefURI.length === 0 ? '' : `, tip_racks=[${tiprackPythonNames}]`
+
+      return `${pythonName} = ${PROTOCOL_CONTEXT_NAME}.load_instrument(${formatPyStr(
+        pipetteName
+      )}, ${mount}${pythonTipRacks})`
+    })
+    .join('\n')
+
+  return pythonPipette ? `# Load Pipettes:\n${pythonPipette}` : ''
+}
+
+export function getDefineLiquids(liquidEntities: LiquidEntities): string {
+  const pythonDefineLiquids = Object.values(liquidEntities)
+    .map(liquid => {
+      const { pythonName, displayColor, displayName, description } = liquid
+      const liquidArgs = [
+        `${formatPyStr(displayName)}`,
+        ...(description != null
+          ? [`description=${formatPyStr(description)}`]
+          : []),
+        `display_color=${formatPyStr(displayColor)}`,
+      ].join(',\n')
+
+      return (
+        `${pythonName} = ${PROTOCOL_CONTEXT_NAME}.define_liquid(\n` +
+        `${indentPyLines(liquidArgs)},\n` +
+        `)`
+      )
+    })
+    .join('\n')
+  return pythonDefineLiquids ? `# Define Liquids:\n${pythonDefineLiquids}` : ''
+}
+
+export function getLoadLiquids(
+  liquidsByLabwareId: LabwareLiquidState,
+  liquidEntities: LiquidEntities,
+  labwareEntities: LabwareEntities
+): string {
+  const pythonLoadLiquids = Object.entries(liquidsByLabwareId)
+    .flatMap(([labwareId, liquidState]) => {
+      const labwarePythonName = labwareEntities[labwareId].pythonName
+
+      return Object.entries(liquidState).flatMap(([well, locationState]) =>
+        Object.entries(locationState)
+          .map(([liquidGroupId, volume]) => {
+            const liquidPythonName = liquidEntities[liquidGroupId].pythonName
+            return `${labwarePythonName}[${formatPyStr(
+              well
+            )}].load_liquid(${liquidPythonName}, ${volume.volume})`
+          })
+          .join('\n')
+      )
+    })
+    .join('\n')
+  return pythonLoadLiquids ? `# Load Liquids:\n${pythonLoadLiquids}` : ''
+}
+
 export function pythonDefRun(
   invariantContext: InvariantContext,
   robotState: TimelineFrame,
-  robotStateTimeline: Timeline
+  robotStateTimeline: Timeline,
+  liquidsByLabwareId: LabwareLiquidState
 ): string {
-  const { moduleEntities, labwareEntities } = invariantContext
-  const { modules, labware } = robotState
-  const loadModules = getLoadModules(moduleEntities, modules)
-  const loadAdapters = getLoadAdapters(moduleEntities, labwareEntities, labware)
-  const loadLabware = getLoadLabware(moduleEntities, labwareEntities, labware)
+  const {
+    moduleEntities,
+    labwareEntities,
+    pipetteEntities,
+    liquidEntities,
+  } = invariantContext
+  const { modules, labware, pipettes } = robotState
 
   const sections: string[] = [
-    loadModules,
-    loadAdapters,
-    loadLabware,
-    // loadInstruments(),
-    // defineLiquids(),
-    // loadLiquids(),
+    getLoadModules(moduleEntities, modules),
+    getLoadAdapters(moduleEntities, labwareEntities, labware),
+    getLoadLabware(moduleEntities, labwareEntities, labware),
+    getLoadPipettes(pipetteEntities, labwareEntities, pipettes),
+    getDefineLiquids(liquidEntities),
+    getLoadLiquids(liquidsByLabwareId, liquidEntities, labwareEntities),
     stepCommands(robotStateTimeline),
   ]
   const functionBody =
