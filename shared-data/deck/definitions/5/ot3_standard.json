@@ -1053,12 +1053,7 @@
     {
       "id": "flexStackerModuleV1WithMagneticBlockV1",
       "expectOpentronsModuleSerialNumber": true,
-      "mayMountTo": [
-        "cutoutD3",
-        "cutoutC3",
-        "cutoutB3",
-        "cutoutA3"
-      ],
+      "mayMountTo": ["cutoutD3", "cutoutC3", "cutoutB3", "cutoutA3"],
       "displayName": "Flex Stacker With Magnetic Block",
       "providesAddressableAreas": {
         "cutoutD3": ["flexStackerModuleV1D4", "magneticBlockV1D3"],
