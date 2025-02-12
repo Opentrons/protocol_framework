@@ -625,3 +625,36 @@ class AddressableAreaView:
                 raise AreaNotInDeckConfigurationError(
                     f"{addressable_area_name} not provided by deck configuration."
                 )
+
+    def get_current_potential_cutout_fixtures_for_addressable_area(
+        self, addressable_area_name: str
+    ) -> tuple[str, Set[PotentialCutoutFixture]]:
+        """Get the set of cutout fixtures that might provide a given addressable area.
+
+        This takes into account the constraints already established by load commands or by a loaded deck
+        configuration, and may therefore return different results for the same addressable area at
+        different points in the protocol after deck configuration constraints have changed.
+
+        This returns the common cutout id and the potential fixtures.
+        """
+        (
+            cutout_id,
+            base_potential_fixtures,
+        ) = deck_configuration_provider.get_potential_cutout_fixtures(
+            addressable_area_name, self._state.deck_definition
+        )
+        try:
+            loaded_potential_fixtures = (
+                self._state.potential_cutout_fixtures_by_cutout_id[cutout_id]
+            )
+            return cutout_id, loaded_potential_fixtures.intersection(
+                base_potential_fixtures
+            )
+        except KeyError:
+            # If there was a key error here, it's because this function was (eventually) called
+            # from the body of a command implementation whose state update will load the
+            # addressable area it's querying... but that state update has not been submitted
+            # and processed, so nothing has created the entry for this cutout id yet. Do what
+            # we'll do when we actually get to that state update, which is apply the base
+            # potential fixtures from the deck def.
+            return cutout_id, base_potential_fixtures
