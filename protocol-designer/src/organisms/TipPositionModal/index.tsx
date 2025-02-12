@@ -45,7 +45,6 @@ interface TipPositionModalProps {
   wellYWidthMm: number
   isIndeterminate?: boolean
   prefix: MoveLiquidPrefixType
-
 }
 
 export function TipPositionModal(
