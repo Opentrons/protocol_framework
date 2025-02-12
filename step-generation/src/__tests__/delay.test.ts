@@ -1,7 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { delay } from '../commandCreators/atomic/delay'
 import { getSuccessResult } from '../fixtures'
-import type { PauseArgs } from '../types'
 
 const getRobotInitialState = (): any => {
   // This particular state shouldn't matter for delay
@@ -10,16 +9,11 @@ const getRobotInitialState = (): any => {
 
 // neither should InvariantContext
 const invariantContext: any = {}
-let mixInArgs: PauseArgs
 describe('delay', () => {
   it('should delay until the user clicks resume', () => {
     const robotInitialState = getRobotInitialState()
     const message = 'delay indefinitely message'
-    const result = delay(
-      { ...mixInArgs, message },
-      invariantContext,
-      robotInitialState
-    )
+    const result = delay({ message }, invariantContext, robotInitialState)
     const res = getSuccessResult(result)
     expect(res.commands).toEqual([
       {
@@ -36,7 +30,7 @@ describe('delay', () => {
     const robotInitialState = getRobotInitialState()
     const message = 'delay 95.5 secs message'
     const result = delay(
-      { ...mixInArgs, message, seconds: 95.5 },
+      { message, seconds: 95.5 },
       invariantContext,
       robotInitialState
     )
