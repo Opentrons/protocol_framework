@@ -84,12 +84,6 @@ export enum SetupLocators {
  * Clicks "Done" after selecting.
  */
 function selectLabwareByDisplayName(displayName: string): void {
-  if (typeof displayName !== 'string') {
-    throw new Error('displayName must be a string.')
-  }
-  if (displayName === '') {
-    throw new Error('displayName must not be an empty string.')
-  }
   cy.contains(displayName).click({ force: true })
   cy.get(SetupLocators.DoneButtonLabwareSelection).click({ force: true })
 }
