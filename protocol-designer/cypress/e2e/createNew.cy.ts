@@ -1,12 +1,6 @@
-import { SetupActions, SetupVerifications } from '../support/SetupSteps'
-import { UniversalActions } from '../support/universalActions'
-import '../support/commands'
-// Every test is goign to use StepsList
-// Now every test will be a list of some combination of support
-// typescript file list of actions for specific PD stuff and include StepsList for steps
-
-import { runSteps } from '../support/StepExecution'
-import type { StepsList } from '../support/StepExecution'
+import { UniversalSteps } from '../support/UniversalSteps'
+import { SetupSteps, SetupVerifications } from '../support/SetupSteps'
+import { StepBuilder } from '../support/StepBuilder'
 
 describe('The Redesigned Create Protocol Landing Page', () => {
   beforeEach(() => {
@@ -17,29 +11,27 @@ describe('The Redesigned Create Protocol Landing Page', () => {
   it('content and step 1 flow works', () => {
     cy.verifyCreateNewHeader()
     cy.clickCreateNew()
-    const steps: StepsList = [
-      SetupVerifications.OnStep1,
-      SetupVerifications.FlexSelected,
-      UniversalActions.Snapshot,
-      SetupActions.SelectOT2,
-      SetupVerifications.OT2Selected,
-      UniversalActions.Snapshot,
-      SetupActions.SelectFlex,
-      SetupVerifications.FlexSelected,
-      UniversalActions.Snapshot,
-      SetupActions.Confirm,
-      SetupVerifications.OnStep2,
-      SetupVerifications.NinetySixChannel,
-      UniversalActions.Snapshot,
-      SetupActions.GoBack,
-      SetupVerifications.OnStep1,
-      SetupActions.SelectOT2,
-      SetupActions.Confirm,
-      SetupVerifications.OnStep2,
-      SetupVerifications.NotNinetySixChannel,
-      UniversalActions.Snapshot,
-    ]
-
-    runSteps(steps)
+    const steps: StepBuilder = new StepBuilder()
+    steps.add(SetupVerifications.OnStep1())
+    steps.add(SetupVerifications.FlexSelected())
+    steps.add(UniversalSteps.Snapshot())
+    steps.add(SetupSteps.SelectOT2())
+    steps.add(SetupVerifications.OT2Selected())
+    steps.add(UniversalSteps.Snapshot())
+    steps.add(SetupSteps.SelectFlex())
+    steps.add(SetupVerifications.FlexSelected())
+    steps.add(UniversalSteps.Snapshot())
+    steps.add(SetupSteps.Confirm())
+    steps.add(SetupVerifications.OnStep2())
+    steps.add(SetupVerifications.NinetySixChannel())
+    steps.add(UniversalSteps.Snapshot())
+    steps.add(SetupSteps.GoBack())
+    steps.add(SetupVerifications.OnStep1())
+    steps.add(SetupSteps.SelectOT2())
+    steps.add(SetupSteps.Confirm())
+    steps.add(SetupVerifications.OnStep2())
+    steps.add(SetupVerifications.NotNinetySixChannel())
+    steps.add(UniversalSteps.Snapshot())
+    steps.execute()
   })
 })
