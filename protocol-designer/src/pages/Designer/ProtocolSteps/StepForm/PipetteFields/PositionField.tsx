@@ -188,6 +188,7 @@ export function PositionField(props: PositionFieldProps): JSX.Element {
             }}
             gridGap={SPACING.spacing8}
             alignItems={ALIGN_CENTER}
+            testId={`PositionField_ListButton_${prefix}`}
           >
             <Icon name="tip-position" size="1.25rem" />
             <StyledText desktopStyle="bodyDefaultRegular">

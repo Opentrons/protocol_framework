@@ -62,6 +62,7 @@
   "trash_no_labware": "Cannot load labware into Trash Bin",
   "trash_required": "A trash bin or waste chute is required",
   "tubeRack": "Tube racks",
+  "two_item": "No more than 2 {{hardware}} allowed on the deck at one time",
   "untitled_protocol": "Untitled protocol",
   "upload_custom_labware": "Upload custom labware",
   "waste_chute_no_labware": "Cannot load labware into Waste Chute",

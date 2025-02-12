@@ -81,6 +81,7 @@ export function WellsOrderField(props: WellsOrderFieldProps): JSX.Element {
           padding={SPACING.spacing12}
           gridGap={SPACING.spacing8}
           alignItems={ALIGN_CENTER}
+          testId={`WellsOrderField_ListButton_${prefix}`}
         >
           <Icon name="well-order" size="1.25rem" />
           <StyledText desktopStyle="bodyDefaultRegular">
