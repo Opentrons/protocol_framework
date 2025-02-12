@@ -1,5 +1,5 @@
 // eslint-disable-next-line @typescript-eslint/consistent-type-imports
-import { getTestFile, TestFile, TestFilePath } from './testFiles'
+import { getTestFile, TestFile, TestFilePath } from './TestFiles'
 import path from 'path'
 import semver from 'semver'
 import cloneDeep from 'lodash/cloneDeep'
@@ -118,7 +118,10 @@ export const migrateAndMatchSnapshot = ({
         //  a uuid is randomly generated each time you upload a protocol that is less than version 8_5_0
         //  which is the migration version that adds these keys. Due to this, we need to ignore
         //  the uuids
-        if (savedStepForms[initialDeckSetupStep] && isBelowVersion850) {
+        if (
+          Boolean(savedStepForms[initialDeckSetupStep]) &&
+          isBelowVersion850
+        ) {
           savedStepForms[initialDeckSetupStep].trashBinLocationUpdate = {
             trashBin: 'trashLocation',
           }
