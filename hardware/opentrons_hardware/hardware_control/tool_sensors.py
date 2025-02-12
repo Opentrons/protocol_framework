@@ -315,13 +315,6 @@ async def liquid_probe(
     z_discontinuity = 5.0
     prep_mount_mm = (pow(mount_speed, 2) - pow(z_discontinuity, 2)) / (2 * z_acceleration)
 
-    print(f"prep_plunger_mm={p_prep_distance},"
-          f"prep_mount_mm={prep_mount_mm},"
-          f"plunger_speed={plunger_speed},"
-          f"mount_discontinuity={z_discontinuity},"
-          f"mount_acceleration={z_acceleration},"
-          f"mount_seconds_to_acceleration={plunger_impulse_time},"
-          f"mount_speed={mount_speed}")
     lower_plunger = create_step(
         distance={tool: float64(p_prep_distance), head_node: float64(prep_mount_mm)},  # distance
         velocity={tool: float64(plunger_speed), head_node: float64(z_discontinuity)},  # discontinuity

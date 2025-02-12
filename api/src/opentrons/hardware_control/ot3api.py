@@ -2704,6 +2704,10 @@ class OT3API(
             force_both_sensors=force_both_sensors,
             response_queue=response_queue,
         )
+        # NOTE: important that we are getting the estimated position, and
+        #       NOT the encoder position. This is because the estimated position
+        #       will have been set at the point that SYNC line triggered stop,
+        #       while the encoder position has a change of continuing to move from skipping.
         machine_pos = await self._backend.update_position()
         machine_pos[Axis.by_mount(mount)] = end_z
         deck_end_z = self.get_deck_from_machine(machine_pos)[Axis.by_mount(mount)]
@@ -2869,7 +2873,6 @@ class OT3API(
                 break
             except PipetteLiquidNotFoundError as lnfe:
                 error = lnfe
-            current_position = await self.gantry_position(checked_mount, refresh=True)
         await self.move_to(checked_mount, starting_position + top_types.Point(z=2))
         await self.prepare_for_aspirate(checked_mount)
         await self.move_to(checked_mount, starting_position)
