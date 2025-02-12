@@ -1,7 +1,6 @@
-import 'cypress-file-upload'
 // eslint-disable-next-line @typescript-eslint/consistent-type-imports
-import { MigrateTestCase, migrateAndMatchSnapshot } from '../support/import'
-import { TestFilePath } from '../support/testFiles'
+import { MigrateTestCase, migrateAndMatchSnapshot } from '../support/Import'
+import { TestFilePath } from '../support/TestFiles'
 
 describe('Protocol fixtures migrate and match snapshots', () => {
   beforeEach(() => {

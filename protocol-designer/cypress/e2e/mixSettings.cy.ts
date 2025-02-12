@@ -1,10 +1,8 @@
-import '../support/commands'
-import { MixActions, MixVerifications } from '../support/mixSetting'
-import { UniversalActions } from '../support/universalActions'
-import { TestFilePath, getTestFile } from '../support/testFiles'
-import { verifyImportProtocolPage } from '../support/import'
-import { runSteps } from '../support/StepExecution'
-import type { StepsList } from '../support/StepExecution'
+import { MixSteps, MixVerifications } from '../support/MixSteps'
+import { UniversalSteps } from '../support/UniversalSteps'
+import { TestFilePath, getTestFile } from '../support/TestFiles'
+import { verifyImportProtocolPage } from '../support/Import'
+import { StepBuilder } from '../support/StepBuilder'
 
 describe('Redesigned Mixing Steps - Happy Path', () => {
   beforeEach(() => {
@@ -13,65 +11,52 @@ describe('Redesigned Mixing Steps - Happy Path', () => {
     const protocol = getTestFile(TestFilePath.DoItAllV8)
     cy.importProtocol(protocol.path)
     verifyImportProtocolPage(protocol)
-
-    // NOTE: vv make this chunk better//
     cy.contains('Edit protocol').click()
     cy.contains('Protocol steps').click()
     cy.get('[id="AddStepButton"]').contains('Add Step').click()
     cy.verifyOverflowBtn()
   })
 
-  it('It should verify the working function of every permutation of mix checkboxes', () => {
-    const steps: StepsList = [
-      MixActions.SelectMix,
-      UniversalActions.Snapshot,
-      MixVerifications.PartOne,
-      MixActions.SelectLabware,
-      MixActions.SelectWellInputField,
-      MixVerifications.WellSelectPopout,
-      UniversalActions.Snapshot,
-      MixActions.Save,
-      MixActions.EnterVolume,
-      MixActions.EnterMixReps,
-      MixActions.SelectTipHandling,
-      UniversalActions.Snapshot,
-      MixActions.Continue,
-      MixVerifications.PartTwoAsp,
-      MixActions.AspirateFlowRate,
-      MixActions.AspWellOrder,
-      MixVerifications.AspWellOrder,
-      MixActions.AspMixTipPos,
-      MixVerifications.AspMixTipPos,
-      MixActions.Delay,
-      MixActions.Dispense,
-      MixVerifications.PartTwoDisp,
-      MixActions.DispenseFlowRate,
-      MixActions.Delay,
-      MixActions.BlowoutLocation,
-      MixActions.BlowoutFlowRate,
-      MixActions.BlowoutPosFromTop,
-      MixVerifications.BlowoutPopout,
-      MixActions.Save,
-      MixVerifications.Blowout,
-      MixActions.TouchTip,
-      MixVerifications.TouchTipPopout,
-      MixActions.Save,
-      MixVerifications.TouchTip,
-      MixActions.Rename,
-      MixActions.Save,
-      MixVerifications.Rename,
-      MixActions.Save,
-    ]
-    runSteps(steps)
+  it('should verify the working function of every permutation of mix checkboxes', () => {
+    const steps = new StepBuilder()
+    steps.add(MixSteps.SelectMix())
+    steps.add(UniversalSteps.Snapshot())
+    steps.add(MixVerifications.PartOne())
+    steps.add(MixSteps.SelectLabware())
+    steps.add(MixSteps.SelectWellInputField())
+    steps.add(MixVerifications.WellSelectPopout())
+    steps.add(UniversalSteps.Snapshot())
+    steps.add(MixSteps.Save())
+    steps.add(MixSteps.EnterVolume())
+    steps.add(MixSteps.EnterMixReps())
+    steps.add(MixSteps.SelectTipHandling())
+    steps.add(UniversalSteps.Snapshot())
+    steps.add(MixSteps.Continue())
+    steps.add(MixVerifications.PartTwoAsp())
+    steps.add(MixSteps.AspirateFlowRate())
+    steps.add(MixSteps.AspWellOrder())
+    steps.add(MixVerifications.AspWellOrder())
+    steps.add(MixSteps.AspMixTipPos())
+    steps.add(MixVerifications.AspMixTipPos())
+    steps.add(MixSteps.Delay())
+    steps.add(MixSteps.Dispense())
+    steps.add(MixVerifications.PartTwoDisp())
+    steps.add(MixSteps.DispenseFlowRate())
+    steps.add(MixSteps.Delay())
+    steps.add(MixSteps.BlowoutLocation())
+    steps.add(MixSteps.BlowoutFlowRate())
+    steps.add(MixSteps.BlowoutPosFromTop())
+    steps.add(MixVerifications.BlowoutPopout())
+    steps.add(MixSteps.Save())
+    steps.add(MixVerifications.Blowout())
+    steps.add(MixSteps.TouchTip())
+    steps.add(MixVerifications.TouchTipPopout())
+    steps.add(MixSteps.Save())
+    steps.add(MixVerifications.TouchTip())
+    steps.add(MixSteps.Rename())
+    steps.add(MixSteps.Save())
+    steps.add(MixVerifications.Rename())
+    steps.add(MixSteps.Save())
+    steps.execute()
   })
 })
-
-/*
-To Add:
-MixActions.TipPosSideImageMove,
-MixActions.TipPosTopImageMove,
-MixActions.FlowRateWarning, **for asp and disp
-
-To Change:
-Need to refactor labware set up to have different labware on deck for better well selection coverage
-*/
