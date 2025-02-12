@@ -6,7 +6,7 @@ from opentrons.protocols.api_support.tip_tracker import TipTracker
 
 from opentrons.types import DeckSlotName, Location, Point, NozzleMapInterface
 
-from opentrons_shared_data.labware.types import LabwareParameters, LabwareDefinition
+from opentrons_shared_data.labware.types import LabwareParameters2, LabwareDefinition2
 
 from ..._liquid import Liquid
 from ..labware import AbstractLabware, LabwareLoadParams
@@ -36,7 +36,7 @@ class LegacyLabwareCore(AbstractLabware[LegacyWellCore]):
 
     def __init__(
         self,
-        definition: LabwareDefinition,
+        definition: LabwareDefinition2,
         parent: Location,
         label: Optional[str] = None,
     ) -> None:
@@ -106,10 +106,10 @@ class LegacyLabwareCore(AbstractLabware[LegacyWellCore]):
     def set_name(self, new_name: str) -> None:
         self._name = new_name
 
-    def get_definition(self) -> LabwareDefinition:
+    def get_definition(self) -> LabwareDefinition2:
         return self._definition
 
-    def get_parameters(self) -> LabwareParameters:
+    def get_parameters(self) -> LabwareParameters2:
         return self._parameters
 
     def get_quirks(self) -> List[str]:
