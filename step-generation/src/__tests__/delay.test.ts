@@ -24,6 +24,7 @@ describe('delay', () => {
         },
       },
     ])
+    expect(res.python).toEqual(`protocol.pause("delay indefinitely message")`)
   })
 
   it('should delay for a given duration', () => {
@@ -45,5 +46,24 @@ describe('delay', () => {
         },
       },
     ])
+    expect(res.python).toEqual(
+      `protocol.delay(seconds=95.5, msg="delay 95.5 secs message")`
+    )
+  })
+
+  it('should delay with no message', () => {
+    const robotInitialState = getRobotInitialState()
+    const result = delay({ seconds: 12.3 }, invariantContext, robotInitialState)
+    const res = getSuccessResult(result)
+    expect(res.commands).toEqual([
+      {
+        commandType: 'waitForDuration',
+        key: expect.any(String),
+        params: {
+          seconds: 12.3,
+        },
+      },
+    ])
+    expect(res.python).toEqual(`protocol.delay(seconds=12.3)`)
   })
 })
