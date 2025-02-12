@@ -99,6 +99,7 @@ from .types import (
     HardwareFeatureFlags,
     FailedTipStateCheck,
     PipetteSensorResponseQueue,
+    TipScrapeType,
 )
 from .errors import (
     UpdateOngoingError,
@@ -2338,6 +2339,7 @@ class OT3API(
         mount: Union[top_types.Mount, OT3Mount],
         home_after: bool = False,
         ignore_plunger: bool = False,
+        scrape_type: TipScrapeType = TipScrapeType.NONE,
     ) -> None:
         realmount = OT3Mount.from_mount(mount)
         if ignore_plunger is False:
@@ -2349,18 +2351,27 @@ class OT3API(
             spec = self._pipette_handler.plan_ht_drop_tip()
             await self._tip_motor_action(realmount, spec.tip_action_moves)
         else:
-            spec = self._pipette_handler.plan_lt_drop_tip(realmount)
+            spec = self._pipette_handler.plan_lt_drop_tip(realmount, scrape_type)
             for move in spec.tip_action_moves:
                 async with self._backend.motor_current(move.currents):
-                    target_pos = target_position_from_plunger(
-                        realmount, move.distance, self._current_position
-                    )
-                    await self._move(
-                        target_pos,
-                        speed=move.speed,
-                        home_flagged_axes=False,
-                    )
-
+                    if not move.scrape_axis:
+                        target_pos = target_position_from_plunger(
+                            realmount, move.distance, self._current_position
+                        )
+                        await self._move(
+                            target_pos,
+                            speed=move.speed,
+                            home_flagged_axes=False,
+                        )
+                    else:
+                        target_pos = self._current_position
+                        target_pos[move.scrape_axis] += move.distance
+                        self._log.info(f"Moving to target Pos: {target_pos}")
+                        await self._move(
+                            target_pos,
+                            speed=move.speed,
+                            home_flagged_axes=False,
+                        )
         for shake in spec.shake_off_moves:
             await self.move_rel(mount, shake[0], speed=shake[1])
 
