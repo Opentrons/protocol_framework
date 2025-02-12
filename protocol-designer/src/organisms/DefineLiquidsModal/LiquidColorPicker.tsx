@@ -3,10 +3,11 @@ import { Controller } from 'react-hook-form'
 
 import { Flex, POSITION_ABSOLUTE } from '@opentrons/components'
 import { DEFAULT_LIQUID_COLORS } from '@opentrons/shared-data'
+import { rgbaToHex } from './util'
 
 import type { RefObject } from 'react'
 import type { Control, UseFormSetValue } from 'react-hook-form'
-import type { ColorResult, RGBColor } from 'react-color'
+import type { ColorResult } from 'react-color'
 import type { Ingredient } from '@opentrons/step-generation'
 
 interface LiquidColorPickerProps {
@@ -14,13 +15,6 @@ interface LiquidColorPickerProps {
   control: Control<Ingredient, any>
   color: string
   setValue: UseFormSetValue<Ingredient>
-}
-
-const rgbaToHex = (rgba: RGBColor): string => {
-  const { r, g, b, a } = rgba
-  const toHex = (n: number): string => n.toString(16).padStart(2, '0')
-  const alpha = a != null ? Math.round(a * 255) : 255
-  return `#${toHex(r)}${toHex(g)}${toHex(b)}${toHex(alpha)}`
 }
 
 export function LiquidColorPicker({
