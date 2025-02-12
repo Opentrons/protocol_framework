@@ -1,3 +1,5 @@
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
+import { StepThunk } from './StepBuilder'
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace Cypress {
@@ -7,74 +9,6 @@ declare global {
   }
 }
 
-export enum SetupActions {
-  SelectFlex = 'Select Opentrons Flex',
-  SelectOT2 = 'Select Opentrons OT-2',
-  Confirm = 'Confirm',
-  GoBack = 'Go back',
-  SingleChannelPipette50 = 'Select 50uL Single-Channel Pipette',
-  YesGripper = 'Select Yes to gripper',
-  NoGripper = 'Select no to gripper',
-  AddThermocycler = 'Add Thermocycler Module GEN2',
-  AddHeaterShaker = 'Add Heater-Shaker Module GEN1',
-  AddTempdeck2 = 'Add Temperature Module GEN2',
-  AddMagBlock = 'Add Magnetic Block GEN1',
-  EditProtocolA = 'Blue button edit protocol',
-  choseDeckSlot = 'Chose each deck slot',
-  ChoseDeckSlotA1 = 'Choose deck slot A1',
-  ChoseDeckSlotA2 = 'Choose deck slot A2',
-  ChoseDeckSlotA3 = 'Choose deck slot A3',
-  ChoseDeckSlotB1 = 'Choose deck slot B1',
-  ChoseDeckSlotB2 = 'Choose deck slot B2',
-  ChoseDeckSlotB3 = 'Choose deck slot B3',
-  ChoseDeckSlotC1 = 'Choose deck slot C1',
-  ChoseDeckSlotC2 = 'Choose deck slot C2',
-  ChoseDeckSlotC2Labware = 'Chose labware on deck slot C2',
-  ChoseDeckSlotC3 = 'Choose deck slot C3',
-  ChoseDeckSlotD1 = 'Choose deck slot D1',
-  ChoseDeckSlotD2 = 'Choose deck slot D2',
-  ChoseDeckSlotD3 = 'Choose deck slot D3',
-  AddHardwareLabware = 'Adds labware to deck slot by chose deck slot',
-  EditHardwareLabwareOnDeck = 'Edits existing labware/hardware on deck slot',
-  ClickLabwareHeader = 'Click Labware',
-  AddAdapters = 'Add an adapter to a module after selecting labware header',
-  ClickWellPlatesSection = 'Click Well plates',
-  AddLiquid = 'Add liquid',
-  DefineLiquid = 'Define a liquid',
-  ClickLiquidButton = 'Click Liquid button',
-  LiquidSaveWIP = 'Save liquid, is functional but could use a refactor',
-  WellSelector = 'Select wells with strings A1, A2, etc. command separated LIST',
-  LiquidDropdown = 'Dropdown for liquids when adding to well',
-  SelectLiquidWells = 'Select Liquid Wells',
-  SetVolumeAndSaveforWells = 'Set volume and save for wells',
-  ProtocolStepsH = 'Select Protocol Steps Header',
-  AddStep = 'Use after making sure you are on ProtocolStepsH or have already made a step',
-  DeepWellTempModAdapter = 'Select Opentrons 96 Deep Well Temperature Module Adapter',
-  AddNest96DeepWellPlate = 'Adds Nest 96 Deep Well Plate',
-  SelectDone = 'Setup Action to select Done on a step form',
-  SelectLabwareByDisplayName = 'Select labware by display name, pass in the name of the labware',
-}
-
-export enum SetupVerifications {
-  OnStep1 = 'On Step 1 page.',
-  OnStep2 = 'On Step 2 page.',
-  OnStep3 = 'on Step 3 page',
-  FlexSelected = 'Opentrons Flex selected.',
-  OT2Selected = 'Opentrons OT-2 selected.',
-  NinetySixChannel = '96-Channel option is available.',
-  NotNinetySixChannel = '96-Channel option is not available.',
-  StepTwo50uL = 'Step Two part two',
-  StepTwoPart3 = 'Step Two part three',
-  Step4Verification = 'Step 4 part 1',
-  ThermocyclerImg = 'Thermocycler Module GEN2',
-  HeaterShakerImg = 'Heater-Shaker Module GEN1',
-  Tempdeck2Img = 'Temperature Module GEN2',
-  MagBlockImg = 'Magnetic Block GEN1',
-  LiquidPage = 'Liquid page Content is visible',
-  TransferPopOut = 'Verify Step 1 of the transfer function is present',
-  TempeDeckInitialForm = 'Verify that the tempdseteck stepform opens correctly',
-  Temp4CPauseTextVerification = 'Verify that the pause step has the right information in step preview',
-}
 export enum SetupContent {
   Step1Title = 'Step 1',
   Step2Title = 'Step 2',
@@ -138,13 +72,17 @@ export enum SetupLocators {
   LiquidNameInput = 'input[name="displayName"]',
   ModalShellArea = 'div[aria-label="ModalShell_ModalArea"]',
   SaveButton = 'button[type="submit"]',
-  LiquidsDropdown = 'div[tabindex="0"].sc-bqWxrE', // Add new locator for the dropdown
+  LiquidsDropdown = 'div[tabindex="0"].sc-bqWxrE',
   Div = 'div',
   Button = 'button',
   TempdeckTempInput = 'input[name="targetTemperature"]',
   DoneButtonLabwareSelection = '[data-testid="Toolbox_confirmButton"]',
 }
 
+/**
+ * Helper function to select a labware by display name.
+ * Clicks "Done" after selecting.
+ */
 function selectLabwareByDisplayName(displayName: string): void {
   if (typeof displayName !== 'string') {
     throw new Error('displayName must be a string.')
@@ -156,9 +94,11 @@ function selectLabwareByDisplayName(displayName: string): void {
   cy.get(SetupLocators.DoneButtonLabwareSelection).click({ force: true })
 }
 
-const chooseDeckSlot = (
-  slot: string
-): Cypress.Chainable<JQuery<HTMLElement>> => {
+/**
+ * chooseDeckSlot is a helper returning a chainable
+ * that finds the correct deck slot based on x,y coords in your markup.
+ */
+function chooseDeckSlot(slot: string): Cypress.Chainable<JQuery<HTMLElement>> {
   const deckSlots: Record<
     | 'A1'
     | 'A2'
@@ -202,20 +142,22 @@ const chooseDeckSlot = (
   const slotAction = deckSlots[slot as keyof typeof deckSlots]
 
   if (typeof slotAction === 'function') {
-    return slotAction() // Return the chainable object
+    return slotAction()
   } else {
     throw new Error(`Slot ${slot} not found in deck slots.`)
   }
 }
-// Well name selection for liquids and in general
-const selectWells = (wells: string[]): void => {
-  // Define a dictionary of well selectors
+
+/**
+ * Helper function to select multiple wells (like A1, B3, H12).
+ */
+function selectWells(wells: string[]): void {
   const wellSelectors: Record<
     string,
     () => Cypress.Chainable<JQuery<HTMLElement>>
   > = {}
 
-  // Populate the dictionary dynamically
+  // Dynamically populate (A1..H12)
   const rows = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
   const columns = Array.from({ length: 12 }, (_, i) => (i + 1).toString())
 
@@ -227,231 +169,261 @@ const selectWells = (wells: string[]): void => {
     })
   })
 
-  // Iterate over the wells array and click the corresponding wells
   wells.forEach(well => {
     const wellAction = wellSelectors[well]
     if (typeof wellAction === 'function') {
-      wellAction() // Click the well
+      wellAction()
     } else {
       throw new Error(`Well ${well} not found.`)
     }
   })
 }
 
-// Example usage
-// selectWells(['A1', 'B3', 'H12'])
-
-export const setupStepHandlers = {
-  [SetupActions.SelectLabwareByDisplayName]: {
-    handler: (displayName: string): void => {
+/**
+ * Each function returns a StepThunk
+ * Add a comment to all records
+ */
+export const SetupSteps = {
+  /**
+   * Select a labware by display name, then click "Done".
+   */
+  SelectLabwareByDisplayName: (displayName: string): StepThunk => ({
+    call: () => {
       selectLabwareByDisplayName(displayName)
     },
-    paramType: '' as string,
-  },
-  [SetupActions.SelectFlex]: {
-    handler: (): void => {
+  }),
+
+  /**
+   * Select the Opentrons Flex option.
+   */
+  SelectFlex: (): StepThunk => ({
+    call: () => {
       cy.contains(SetupContent.OpentronsFlex).should('be.visible').click()
     },
-    paramType: undefined,
-  },
-  [SetupActions.SelectOT2]: {
-    handler: (): void => {
+  }),
+
+  /**
+   * Select the Opentrons OT-2 option.
+   */
+  SelectOT2: (): StepThunk => ({
+    call: () => {
       cy.contains(SetupContent.OpentronsOT2).should('be.visible').click()
     },
-    paramType: undefined,
-  },
-  [SetupActions.Confirm]: {
-    handler: (): void => {
+  }),
+
+  /**
+   * Click "Confirm".
+   */
+  Confirm: (): StepThunk => ({
+    call: () => {
       cy.contains(SetupContent.Confirm).should('be.visible').click()
     },
-    paramType: undefined,
-  },
-  [SetupActions.GoBack]: {
-    handler: (): void => {
+  }),
+
+  /**
+   * Click "Go back".
+   */
+  GoBack: (): StepThunk => ({
+    call: () => {
       cy.contains(SetupContent.GoBack).should('be.visible').click()
     },
-    paramType: undefined,
-  },
-  [SetupActions.SingleChannelPipette50]: {
-    handler: (): void => {
+  }),
+
+  /**
+   * Select a single-channel pipette with volume 50 µL.
+   */
+  SingleChannelPipette50: (): StepThunk => ({
+    call: () => {
       cy.contains('label', SetupContent.SingleChannel)
         .should('exist')
         .and('be.visible')
         .click()
       cy.contains(SetupContent.Volume50).click()
       cy.contains(SetupContent.Tiprack50).click()
-      // cy.contains(SetupContent.FilterTiprack50).click()
+      // optional: cy.contains(SetupContent.FilterTiprack50).click()
     },
-    paramType: undefined,
-  },
-  [SetupActions.AddThermocycler]: {
-    handler: (): void => {
+  }),
+
+  /**
+   * Add a Thermocycler Module GEN2.
+   */
+  AddThermocycler: (): StepThunk => ({
+    call: () => {
       cy.contains(SetupContent.Thermocycler).click()
     },
-    paramType: undefined,
-  },
-  [SetupActions.AddHeaterShaker]: {
-    handler: (): void => {
+  }),
+
+  /**
+   * Add a Heater-Shaker Module GEN1.
+   */
+  AddHeaterShaker: (): StepThunk => ({
+    call: () => {
       cy.contains(SetupContent.HeaterShaker).click()
     },
-    paramType: undefined,
-  },
-  [SetupActions.AddTempdeck2]: {
-    handler: (): void => {
+  }),
+
+  /**
+   * Add a Temperature Module GEN2.
+   */
+  AddTempdeck2: (): StepThunk => ({
+    call: () => {
       cy.contains(SetupContent.Tempdeck2).click()
     },
-    paramType: undefined,
-  },
-  [SetupActions.AddMagBlock]: {
-    handler: (): void => {
+  }),
+
+  /**
+   * Add a Magnetic Block GEN1.
+   */
+  AddMagBlock: (): StepThunk => ({
+    call: () => {
       cy.contains(SetupContent.MagBlock).click()
     },
-    paramType: undefined,
-  },
-  [SetupActions.YesGripper]: {
-    handler: (): void => {
+  }),
+
+  /**
+   * Click "Yes" for gripper.
+   */
+  YesGripper: (): StepThunk => ({
+    call: () => {
       cy.contains(SetupContent.Yes).click()
     },
-    paramType: undefined,
-  },
-  [SetupActions.NoGripper]: {
-    handler: (): void => {
+  }),
+
+  /**
+   * Click "No" for gripper.
+   */
+  NoGripper: (): StepThunk => ({
+    call: () => {
       cy.contains(SetupContent.No).click()
     },
-    paramType: undefined,
-  },
-  [SetupActions.EditProtocolA]: {
-    handler: (): void => {
+  }),
+
+  /**
+   * Click "Edit protocol".
+   */
+  EditProtocolA: (): StepThunk => ({
+    call: () => {
       cy.contains(SetupContent.EditProtocol).click()
     },
-    paramType: undefined,
-  },
-  [SetupActions.ChoseDeckSlotA1]: {
-    handler: (): void => {
+  }),
+
+  /**
+   * Choose deck slot A1.
+   */
+  ChoseDeckSlotA1: (): StepThunk => ({
+    call: () => {
       chooseDeckSlot('A1').click()
     },
-    paramType: undefined,
-  },
-  [SetupActions.ChoseDeckSlotA2]: {
-    handler: (): void => {
+  }),
+
+  /**
+   * Choose deck slot A2.
+   */
+  ChoseDeckSlotA2: (): StepThunk => ({
+    call: () => {
       chooseDeckSlot('A2').click()
     },
-    paramType: undefined,
-  },
-  [SetupActions.ChoseDeckSlotA3]: {
-    handler: (): void => {
+  }),
+
+  /**
+   * Choose deck slot A3.
+   */
+  ChoseDeckSlotA3: (): StepThunk => ({
+    call: () => {
       chooseDeckSlot('A3').click()
     },
-    paramType: undefined,
-  },
-  [SetupActions.ChoseDeckSlotB1]: {
-    handler: (): void => {
-      chooseDeckSlot('B1').click()
+  }),
+
+  /**
+   * Choose deck slot.
+   */
+  ChoseDeckSlot: (deckSlot: string): StepThunk => ({
+    call: () => {
+      chooseDeckSlot(deckSlot).click()
     },
-    paramType: undefined,
-  },
-  [SetupActions.ChoseDeckSlotB2]: {
-    handler: (): void => {
-      chooseDeckSlot('B2').click()
-    },
-    paramType: undefined,
-  },
-  [SetupActions.ChoseDeckSlotB3]: {
-    handler: (): void => {
-      chooseDeckSlot('B3').click()
-    },
-    paramType: undefined,
-  },
-  [SetupActions.ChoseDeckSlotC1]: {
-    handler: (): void => {
-      chooseDeckSlot('C1').click()
-    },
-    paramType: undefined,
-  },
-  [SetupActions.ChoseDeckSlotC2]: {
-    handler: (): void => {
-      chooseDeckSlot('C2').click()
-    },
-    paramType: undefined,
-  },
-  [SetupActions.ChoseDeckSlotC3]: {
-    handler: (): void => {
-      chooseDeckSlot('C3').click()
-    },
-    paramType: undefined,
-  },
-  [SetupActions.ChoseDeckSlotD1]: {
-    handler: (): void => {
-      chooseDeckSlot('D1').click()
-    },
-    paramType: undefined,
-  },
-  [SetupActions.ChoseDeckSlotD2]: {
-    handler: (): void => {
-      chooseDeckSlot('D2').click()
-    },
-    paramType: undefined,
-  },
-  [SetupActions.ChoseDeckSlotD3]: {
-    handler: (): void => {
-      chooseDeckSlot('D3').click()
-    },
-    paramType: undefined,
-  },
-  [SetupActions.AddHardwareLabware]: {
-    handler: (): void => {
+  }),
+
+  /**
+   * Adds hardware/labware to a deck slot.
+   */
+  AddHardwareLabware: (): StepThunk => ({
+    call: () => {
       cy.contains(SetupContent.AddLabwareToDeck).click()
     },
-    paramType: undefined,
-  },
-  [SetupActions.EditHardwareLabwareOnDeck]: {
-    handler: (): void => {
+  }),
+
+  /**
+   * Edits existing labware/hardware on a deck slot.
+   */
+  EditHardwareLabwareOnDeck: (): StepThunk => ({
+    call: () => {
       cy.contains(SetupContent.EditHardwareLabwareOnDeck).click()
     },
-    paramType: undefined,
-  },
-  [SetupActions.ClickLabwareHeader]: {
-    handler: (): void => {
+  }),
+
+  /**
+   * Clicks the "Labware" header.
+   */
+  ClickLabwareHeader: (): StepThunk => ({
+    call: () => {
       cy.contains(SetupContent.LabwareH).click()
     },
-    paramType: undefined,
-  },
-  [SetupActions.ClickWellPlatesSection]: {
-    handler: (): void => {
+  }),
+
+  /**
+   * Clicks the "Well plates" section.
+   */
+  ClickWellPlatesSection: (): StepThunk => ({
+    call: () => {
       cy.contains(SetupContent.WellPlatesCat).click()
     },
-    paramType: undefined,
-  },
-  [SetupActions.ChoseDeckSlotC2Labware]: {
-    handler: (): void => {
+  }),
+
+  /**
+   * Choose deck slot C2 with a labware-locating approach.
+   */
+  ChoseDeckSlotC2Labware: (): StepThunk => ({
+    call: () => {
       chooseDeckSlot('C2')
         .find('.Box-sc-8ozbhb-0.kIDovv')
         .find('a[role="button"]')
         .contains(SetupContent.EditSlot)
         .click({ force: true })
     },
-    paramType: undefined,
-  },
-  [SetupActions.AddLiquid]: {
-    handler: (): void => {
+  }),
+
+  /**
+   * Clicks the "Add liquid" button.
+   */
+  AddLiquid: (): StepThunk => ({
+    call: () => {
       cy.contains('button', SetupContent.AddLiquid).click()
     },
-    paramType: undefined,
-  },
-  [SetupActions.ClickLiquidButton]: {
-    handler: (): void => {
+  }),
+
+  /**
+   * Clicks the "Liquid" button.
+   */
+  ClickLiquidButton: (): StepThunk => ({
+    call: () => {
       cy.contains('button', SetupContent.LiquidButton).click()
     },
-    paramType: undefined,
-  },
-  [SetupActions.DefineLiquid]: {
-    handler: (): void => {
+  }),
+
+  /**
+   * Clicks the "Define a liquid" button.
+   */
+  DefineLiquid: (): StepThunk => ({
+    call: () => {
       cy.contains('button', SetupContent.DefineALiquid).click()
     },
-    paramType: undefined,
-  },
-  [SetupActions.LiquidSaveWIP]: {
-    handler: (): void => {
+  }),
+
+  /**
+   * Type a sample liquid name, then save.
+   */
+  LiquidSaveWIP: (): StepThunk => ({
+    call: () => {
       cy.get(SetupLocators.LiquidNameInput).type(SetupContent.SampleLiquidName)
 
       cy.get(SetupLocators.ModalShellArea)
@@ -465,138 +437,193 @@ export const setupStepHandlers = {
         .contains(SetupContent.Save)
         .click({ force: true })
     },
-    paramType: undefined,
-  },
-  [SetupActions.WellSelector]: {
-    handler: (wells?: string[]) => {
+  }),
+
+  /**
+   * Select an array of wells (A1, B2, etc.)
+   */
+  WellSelector: (wells: string[]): StepThunk => ({
+    call: () => {
       if (Array.isArray(wells) && wells.length > 0) {
         selectWells(wells)
       } else {
         throw new Error('Wells must be a non-empty array of strings.')
       }
     },
-    paramType: [] as string[],
-  },
-  [SetupActions.LiquidDropdown]: {
-    handler: (): void => {
+  }),
+
+  /**
+   * Opens the liquids dropdown.
+   */
+  LiquidDropdown: (): StepThunk => ({
+    call: () => {
       cy.get(SetupLocators.LiquidsDropdown).should('be.visible').click()
     },
-    paramType: undefined,
-  },
-  [SetupActions.SelectLiquidWells]: {
-    handler: (): void => {
+  }),
+
+  /**
+   * Select "My liquid!" from the dropdown.
+   */
+  SelectLiquidWells: (): StepThunk => ({
+    call: () => {
       cy.contains('My liquid!').click()
     },
-    paramType: undefined,
-  },
-  [SetupActions.SetVolumeAndSaveforWells]: {
-    handler: (): void => {
-      cy.get('input[name="volume"]').type(`150`, { force: true })
+  }),
+
+  /**
+   * Sets volume then saves and clicks "Done".
+   */
+  SetVolumeAndSaveForWells: (volume: string): StepThunk => ({
+    call: () => {
+      cy.get('input[name="volume"]').type(volume, { force: true })
       cy.contains('button', SetupContent.Save).click()
       cy.contains('button', 'Done').click({ force: true })
     },
-    paramType: undefined,
-  },
-  [SetupActions.ProtocolStepsH]: {
-    handler: (): void => {
+  }),
+
+  /**
+   * Clicks "Protocol steps" header.
+   */
+  ProtocolStepsH: (): StepThunk => ({
+    call: () => {
       cy.contains('button', SetupContent.ProtocolSteps).click()
     },
-    paramType: undefined,
-  },
-  [SetupActions.AddStep]: {
-    handler: (): void => {
+  }),
+
+  /**
+   * Click the "Add Step" button.
+   */
+  AddStep: (): StepThunk => ({
+    call: () => {
       cy.contains('button', SetupContent.AddStep).click({ force: true })
     },
-    paramType: undefined,
-  },
-  [SetupActions.AddAdapters]: {
-    handler: (): void => {
+  }),
+
+  /**
+   * Clicks "Adapters" (presumably in a labware context).
+   */
+  AddAdapters: (): StepThunk => ({
+    call: () => {
       cy.contains('Adapters').click()
     },
-    paramType: undefined,
-  },
-  [SetupActions.DeepWellTempModAdapter]: {
-    handler: (): void => {
+  }),
+
+  /**
+   * Selects "Opentrons 96 Deep Well Temperature Module Adapter".
+   */
+  DeepWellTempModAdapter: (): StepThunk => ({
+    call: () => {
       cy.contains('Opentrons 96 Deep Well Temperature Module Adapter').click()
     },
-    paramType: undefined,
-  },
-  [SetupActions.AddNest96DeepWellPlate]: {
-    handler: (): void => {
+  }),
+
+  /**
+   * Adds "NEST 96 Deep Well Plate 2mL".
+   */
+  AddNest96DeepWellPlate: (): StepThunk => ({
+    call: () => {
       cy.contains(SetupContent.NestDeepWell).click()
     },
-    paramType: undefined,
-  },
-  [SetupActions.SelectDone]: {
-    handler: (): void => {
+  }),
+
+  /**
+   * Click "Done" on a step form.
+   */
+  SelectDone: (): StepThunk => ({
+    call: () => {
       cy.get(SetupLocators.DoneButtonLabwareSelection)
         .contains('Done')
         .click({ force: true })
     },
-    paramType: undefined,
-  },
-} as const
+  }),
+}
 
-export const setupVerificationHandlers = {
-  [SetupVerifications.OnStep1]: {
-    handler: (): void => {
+/**
+ * Each function returns a StepThunk
+ * Add a comment to all records
+ */
+export const SetupVerifications = {
+  /**
+   * Verify we are on Step 1.
+   */
+  OnStep1: (): StepThunk => ({
+    call: () => {
       cy.contains(SetupContent.Step1Title).should('be.visible')
     },
-    paramType: undefined,
-  },
-  [SetupVerifications.OnStep2]: {
-    handler: (): void => {
+  }),
+
+  /**
+   * Verify we are on Step 2, and the "Add a pipette" prompt is visible.
+   */
+  OnStep2: (): StepThunk => ({
+    call: () => {
       cy.contains(SetupContent.Step2Title).should('be.visible')
       cy.contains(SetupContent.AddPipette).should('be.visible')
     },
-    paramType: undefined,
-  },
-  [SetupVerifications.FlexSelected]: {
-    handler: (): void => {
+  }),
+
+  /**
+   * Verify the Opentrons Flex button is selected (blue background).
+   */
+  FlexSelected: (): StepThunk => ({
+    call: () => {
       cy.contains(SetupContent.OpentronsFlex).should(
         'have.css',
         'background-color',
         'rgb(0, 108, 250)'
       )
     },
-    paramType: undefined,
-  },
-  [SetupVerifications.OT2Selected]: {
-    handler: (): void => {
+  }),
+
+  /**
+   * Verify the Opentrons OT-2 button is selected (blue background).
+   */
+  OT2Selected: (): StepThunk => ({
+    call: () => {
       cy.contains(SetupContent.OpentronsOT2).should(
         'have.css',
         'background-color',
         'rgb(0, 108, 250)'
       )
     },
-    paramType: undefined,
-  },
-  [SetupVerifications.NinetySixChannel]: {
-    handler: (): void => {
+  }),
+
+  /**
+   * Verify 96-Channel option is visible.
+   */
+  NinetySixChannel: (): StepThunk => ({
+    call: () => {
       cy.contains(SetupContent.NinetySixChannel).should('be.visible')
     },
-    paramType: undefined,
-  },
-  [SetupVerifications.NotNinetySixChannel]: {
-    handler: (): void => {
+  }),
+
+  /**
+   * Verify 96-Channel option is *not* visible.
+   */
+  NotNinetySixChannel: (): StepThunk => ({
+    call: () => {
       cy.contains(SetupContent.NinetySixChannel).should('not.exist')
     },
-    paramType: undefined,
-  },
-  [SetupVerifications.StepTwo50uL]: {
-    handler: (): void => {
-      // This function should get used after you select 50uL fully
+  }),
+
+  /**
+   * After selecting 50 µL, verify the volume/rack info is present.
+   */
+  StepTwo50uL: (): StepThunk => ({
+    call: () => {
       cy.contains(SetupContent.PipetteVolume)
       cy.contains(SetupContent.Volume50).should('be.visible')
       cy.contains(SetupContent.Volume1000).should('be.visible')
       cy.contains(SetupContent.Tiprack50).should('be.visible')
       cy.contains(SetupContent.FilterTiprack50).should('be.visible')
     },
-    paramType: undefined,
-  },
-  [SetupVerifications.StepTwoPart3]: {
-    handler: (): void => {
-      // This function should get used after you select 50uL fully
+  }),
+
+  /**
+   * Verify we see the fully named pipette and tiprack, etc.
+   */
+  StepTwoPart3: (): StepThunk => ({
+    call: () => {
       cy.contains(SetupContent.FullP50SingleName).should('be.visible')
       cy.contains(SetupContent.FullP50TiprackName).should('be.visible')
       cy.contains('Left Mount').should('be.visible')
@@ -604,10 +631,13 @@ export const setupVerificationHandlers = {
       cy.contains('Robot pipettes')
       cy.contains(SetupContent.AddPipette)
     },
-    paramType: undefined,
-  },
-  [SetupVerifications.OnStep3]: {
-    handler: (): void => {
+  }),
+
+  /**
+   * Verify we are on Step 3: "Do you want to move labware automatically with the gripper?"
+   */
+  OnStep3: (): StepThunk => ({
+    call: () => {
       cy.contains('Add a gripper').should('be.visible')
       cy.contains(
         'Do you want to move labware automatically with the gripper?'
@@ -615,10 +645,13 @@ export const setupVerificationHandlers = {
       cy.contains(SetupContent.Yes).should('be.visible')
       cy.contains(SetupContent.No).should('be.visible')
     },
-    paramType: undefined,
-  },
-  [SetupVerifications.Step4Verification]: {
-    handler: (): void => {
+  }),
+
+  /**
+   * Verify Step 4: Module page is visible, with modules listed.
+   */
+  Step4Verification: (): StepThunk => ({
+    call: () => {
       cy.contains(SetupContent.ModulePageH).should('be.visible')
       cy.contains(SetupContent.ModulePageB).should('be.visible')
       cy.contains(SetupContent.Thermocycler).should('be.visible')
@@ -626,58 +659,76 @@ export const setupVerificationHandlers = {
       cy.contains(SetupContent.MagBlock).should('be.visible')
       cy.contains(SetupContent.Tempdeck2).should('be.visible')
     },
-    paramType: undefined,
-  },
-  [SetupVerifications.ThermocyclerImg]: {
-    handler: (): void => {
+  }),
+
+  /**
+   * Verify the Thermocycler image is visible.
+   */
+  ThermocyclerImg: (): StepThunk => ({
+    call: () => {
       cy.get(SetupLocators.ThermocyclerImage).should('be.visible')
     },
-    paramType: undefined,
-  },
-  [SetupVerifications.HeaterShakerImg]: {
-    handler: (): void => {
+  }),
+
+  /**
+   * Verify the Heater-Shaker image is visible.
+   */
+  HeaterShakerImg: (): StepThunk => ({
+    call: () => {
       cy.get(SetupLocators.HeaterShakerImage).should('be.visible')
     },
-    paramType: undefined,
-  },
-  [SetupVerifications.Tempdeck2Img]: {
-    handler: (): void => {
+  }),
+
+  /**
+   * Verify the Temperature Module GEN2 content is visible.
+   */
+  Tempdeck2Img: (): StepThunk => ({
+    call: () => {
       cy.contains(SetupContent.Tempdeck2).should('be.visible')
     },
-    paramType: undefined,
-  },
-  [SetupVerifications.LiquidPage]: {
-    handler: (): void => {
+  }),
+
+  /**
+   * Verify the Liquid page content is visible.
+   */
+  LiquidPage: (): StepThunk => ({
+    call: () => {
       cy.contains('Liquid').should('be.visible')
       cy.contains('Add liquid').should('be.visible')
       cy.contains('Liquid volume by well').should('be.visible')
       cy.contains('Cancel').should('be.visible')
     },
-    paramType: undefined,
-  },
-  [SetupVerifications.TransferPopOut]: {
-    handler: (): void => {
+  }),
+
+  /**
+   * Verify you can open the "Transfer" pop-out panel.
+   */
+  TransferPopOut: (): StepThunk => ({
+    call: () => {
       cy.contains('button', 'Transfer').should('be.visible').click()
       cy.contains('Source labware')
       cy.contains('Select source wells')
       cy.contains('Destination labware')
       cy.contains('Volume per well')
       cy.contains('Tip handling')
-      cy.contains('Tip handling')
       cy.contains('Tip drop location')
     },
-    paramType: undefined,
-  },
-  [SetupVerifications.MagBlockImg]: {
-    handler: (): void => {
+  }),
+
+  /**
+   * Verify the Magnetic Block image is visible.
+   */
+  MagBlockImg: (): StepThunk => ({
+    call: () => {
       cy.get(SetupLocators.MagblockImage).should('be.visible')
     },
-    paramType: undefined,
-  },
-} as const
+  }),
+}
 
+/**
+ * Helper function that verifies the initial "Create Protocol" page content.
+ */
 export const verifyCreateProtocolPage = (): void => {
-  // Verify step 1 and page SetupContent
   cy.contains(SetupContent.Step1Title).should('exist').should('be.visible')
   cy.contains(SetupContent.LetsGetStarted).should('exist').should('be.visible')
   cy.contains(SetupContent.WhatKindOfRobot).should('exist').should('be.visible')

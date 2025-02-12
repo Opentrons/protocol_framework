@@ -1,8 +1,8 @@
 import {
   verifyOldProtocolModal,
   verifyImportProtocolPage,
-} from '../support/import'
-import { getTestFile, TestFilePath } from '../support/testFiles'
+} from '../support/Import'
+import { getTestFile, TestFilePath } from '../support/TestFiles'
 
 describe('The Import Page', () => {
   beforeEach(() => {

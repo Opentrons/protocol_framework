@@ -1,5 +1,5 @@
 // eslint-disable-next-line @typescript-eslint/consistent-type-imports
-import { getTestFile, TestFile, TestFilePath } from './testFiles'
+import { getTestFile, TestFile, TestFilePath } from './TestFiles'
 import path from 'path'
 import semver from 'semver'
 import cloneDeep from 'lodash/cloneDeep'
