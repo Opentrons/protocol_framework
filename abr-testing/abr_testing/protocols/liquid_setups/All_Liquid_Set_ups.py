@@ -304,6 +304,7 @@ def run(protocol: ProtocolContext) -> None:
         )
         # RESERVOIR, INDICES PLATE, DNA PLATE
         pipette.configure_nozzle_layout(style=ALL, tip_racks=[tip_rack])
+        pipette.reset_tipracks()
         pipette.transfer(
             volume=[150, 100, 100],
             source=3 * [src_reservoir["A1"]],
@@ -432,14 +433,14 @@ def run(protocol: ProtocolContext) -> None:
             "nest_12_reservoir_15ml", str(SLOTS["LABWARE"][0])
         )
         pipette.configure_nozzle_layout(
-            style=COLUMN, start="A1", tip_racks=[tip_rack_partial_1, tip_rack_partial_2]
+            style=COLUMN, start="A12", tip_racks=[tip_rack_partial_1, tip_rack_partial_2]
         )
         # fill last column
         print(len(reservoir.wells()[:7]))
         pipette.transfer(
-            volume=7 * [1350],
-            source=7 * [src_reservoir["A1"]],
-            dest=reservoir.wells()[:7],
+            volume=6 * [1350],
+            source=6 * [src_reservoir["A1"]],
+            dest=reservoir.wells()[:6],
             blow_out=True,
             Trash=True,
             blowout_location="destination well",
