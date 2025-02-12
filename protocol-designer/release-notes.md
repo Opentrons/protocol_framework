@@ -10,12 +10,32 @@ By using Opentrons Protocol Designer, you agree to the Opentrons End-User Licens
 
 ## Opentrons Protocol Designer Changes in 8.4.0
 
-Welcome to the v8.4.0 release of Opentrons Protocol Designer! Protocol Designer now supports the Absorbance Plate Reader Module.
+**Welcome to Protocol Designer 8.4.0!**
+
+This release adds support for the Absorbance Plate Reader Module and includes feature improvements and bug fixes.
 
 ### Bug Fixes
 
-- Move steps now use the gripper by default when the gripper is attached.
-- X- and y-offset values for aspirate and dispense during Mix are no longer mismatched.
+- Move steps added to a Flex protocol now use the gripper by default.
+- Use matching X and Y offset values to aspirate and dispense during a Mix step.
+
+All protocols created in Protocol Designer now require version 8.2.0 or higher of the Opentrons App to run.
+
+### New Features
+
+**Absorbance Plate Reader Module GEN1**
+
+You can add an Absorbance Plate Reader Module GEN1 to deck slots A3-D3 on the Flex. You'll also need to use a gripper to safely move the lid on and off the module.
+
+To use the Absorbance Plate Reader Module in your Protocol Designer protocol, add the following steps:
+
+- an Absorbance Plate Reader step to close the lid using the gripper
+- an Absorbance Plate Reader step to initialize the module without labware inside. Choose from a single or multiple wavelengths.
+- an Absorbance Plate Reader step to open the lid using the gripper
+- a Move step to place a plate in the module. Using the gripper is optional.
+- an Absorbance Plate Reader step to read the plate using the same wavelength choices.
+
+Data from the Absorbance Plate Reader Module is exported as a .CSV file and can be found on your Flex's detail page in the Opentrons Desktop App. Repeat the steps shown above to open the lid and remove the plate.
 
 ---
 
