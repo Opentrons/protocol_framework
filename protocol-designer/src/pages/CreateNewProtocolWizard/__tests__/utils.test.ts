@@ -426,7 +426,7 @@ describe('getNumSlotsAvailable', () => {
       mockAdditionalEquipment,
       MAGNETIC_BLOCK_V1
     )
-    expect(result).toBe(7)
+    expect(result).toBe(6)
   })
 })
 
