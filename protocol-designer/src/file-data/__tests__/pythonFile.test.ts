@@ -256,6 +256,36 @@ pipette_left = protocol.load_instrument("p300_multi_gen2", "left", tip_racks=[ti
 pipette_left = protocol.load_instrument("flex_1channel_1000", "right", tip_racks=[tip_rack_1])`.trimStart()
     )
   })
+
+  it('should generate loadPipette for 1 pipette with no tiprack', () => {
+    const pipette1 = 'pipette1'
+    const mockPipetteEntities: PipetteEntities = {
+      [pipette1]: {
+        id: pipette1,
+        pythonName: 'pipette_left',
+        name: 'p300_multi_gen2',
+        tiprackDefURI: [],
+        spec: fixtureP300MultiV2Specs,
+        tiprackLabwareDef: [],
+      },
+    }
+    const mockTiprackEntities: LabwareEntities = {}
+    const pipetteRobotState: TimelineFrame['pipettes'] = {
+      [pipette1]: { mount: 'left' },
+    }
+
+    expect(
+      getLoadPipettes(
+        mockPipetteEntities,
+        mockTiprackEntities,
+        pipetteRobotState
+      )
+    ).toBe(
+      `
+# Load Pipettes:
+pipette_left = protocol.load_instrument("p300_multi_gen2", "left")`.trimStart()
+    )
+  })
 })
 
 const liquid1 = 'liquid1'
@@ -284,8 +314,8 @@ describe('getDefineLiquids', () => {
 # Define Liquids:
 liquid_1 = protocol.define_liquid(
     name="water",
-    description="mock description",
     display_color="mock display color",
+    description="mock description",
 )
 liquid_2 = protocol.define_liquid(
     name="sulfur",

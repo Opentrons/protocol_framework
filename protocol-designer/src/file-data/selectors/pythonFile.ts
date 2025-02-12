@@ -178,10 +178,12 @@ export function getLoadPipettes(
         )
         .map(tiprack => tiprack.pythonName)
         .join(', ')
+      const pythonTipRacks =
+        tiprackDefURI.length === 0 ? '' : `, tip_racks=[${tiprackPythonNames}]`
 
       return `${pythonName} = ${PROTOCOL_CONTEXT_NAME}.load_instrument(${formatPyStr(
         pipetteName
-      )}, ${mount}, tip_racks=[${tiprackPythonNames}])`
+      )}, ${mount}${pythonTipRacks})`
     })
     .join('\n')
 
@@ -192,16 +194,19 @@ export function getDefineLiquids(liquidEntities: LiquidEntities): string {
   const pythonDefineLiquids = Object.values(liquidEntities)
     .map(liquid => {
       const { pythonName, displayColor, displayName, description } = liquid
-      const pythonDescription =
-        description != null
-          ? `\n${indentPyLines(`description=${formatPyStr(description)}`)},`
-          : ''
+      const liquidArgs = [
+        `name=${formatPyStr(displayName)}`,
+        `display_color=${formatPyStr(displayColor)}`,
+        ...(description != null
+          ? [`description=${formatPyStr(description)}`]
+          : []),
+      ].join(',\n')
 
-      return `${pythonName} = ${PROTOCOL_CONTEXT_NAME}.define_liquid(\n${indentPyLines(
-        `name=${formatPyStr(displayName)},`
-      )}${pythonDescription}\n${indentPyLines(
-        `display_color=${formatPyStr(displayColor)},`
-      )}\n)`
+      return (
+        `${pythonName} = ${PROTOCOL_CONTEXT_NAME}.define_liquid(\n` +
+        `${indentPyLines(liquidArgs)},\n` +
+        `)`
+      )
     })
     .join('\n')
   return pythonDefineLiquids ? `# Define Liquids:\n${pythonDefineLiquids}` : ''
