@@ -55,7 +55,7 @@ export const content = {
   transfer: 'Transfer',
   mix: 'Mix',
   pause: 'Pause',
-  heaterShaker: 'Heater-shaker',
+  heaterShaker: 'Heater-Shaker',
   thermocyler: 'Thermocycler',
 }
 

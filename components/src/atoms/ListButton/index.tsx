@@ -16,6 +16,7 @@ interface ListButtonProps extends StyleProps {
   children: ReactNode
   disabled?: boolean
   onClick?: () => void
+  testId?: string
 }
 
 const LISTBUTTON_PROPS_BY_TYPE: Record<
@@ -42,7 +43,14 @@ const LISTBUTTON_PROPS_BY_TYPE: Record<
   odd stylings
 **/
 export function ListButton(props: ListButtonProps): JSX.Element {
-  const { type, children, disabled = false, onClick, ...styleProps } = props
+  const {
+    type,
+    children,
+    disabled = false,
+    onClick,
+    testId, // optional data-testid value for Cypress testing
+    ...styleProps
+  } = props
   const listButtonProps = LISTBUTTON_PROPS_BY_TYPE[type]
 
   const LIST_BUTTON_STYLE = css`
@@ -69,7 +77,7 @@ export function ListButton(props: ListButtonProps): JSX.Element {
 
   return (
     <Flex
-      data-testid={`ListButton_${type}`}
+      data-testid={testId ?? `ListButton_${type}`}
       onClick={onClick}
       css={LIST_BUTTON_STYLE}
       tabIndex={0}
