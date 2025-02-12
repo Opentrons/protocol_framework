@@ -2,9 +2,7 @@ import { SketchPicker } from 'react-color'
 import { Controller } from 'react-hook-form'
 
 import { Flex, POSITION_ABSOLUTE } from '@opentrons/components'
-import {
-  DEFAULT_LIQUID_COLORS,
-} from '@opentrons/shared-data'
+import { DEFAULT_LIQUID_COLORS } from '@opentrons/shared-data'
 
 import type { RefObject } from 'react'
 import type { Control, UseFormSetValue } from 'react-hook-form'
@@ -18,7 +16,6 @@ interface LiquidColorPickerProps {
   setValue: UseFormSetValue<Ingredient>
 }
 
-
 const rgbaToHex = (rgba: RGBColor): string => {
   const { r, g, b, a } = rgba
   const toHex = (n: number): string => n.toString(16).padStart(2, '0')
@@ -26,7 +23,12 @@ const rgbaToHex = (rgba: RGBColor): string => {
   return `#${toHex(r)}${toHex(g)}${toHex(b)}${toHex(alpha)}`
 }
 
-export function LiquidColorPicker({ chooseColorWrapperRef, control, color, setValue }: LiquidColorPickerProps): JSX.Element {
+export function LiquidColorPicker({
+  chooseColorWrapperRef,
+  control,
+  color,
+  setValue,
+}: LiquidColorPickerProps): JSX.Element {
   return (
     <Flex
       position={POSITION_ABSOLUTE}

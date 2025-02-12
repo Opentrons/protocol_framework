@@ -3,7 +3,7 @@ import { AIR } from '@opentrons/step-generation'
 import { DEFAULT_LIQUID_COLORS } from '@opentrons/shared-data'
 import { swatchColors } from '../swatchColors'
 
-vi.spyOn(console, 'warn').mockImplementation(() => { })
+vi.spyOn(console, 'warn').mockImplementation(() => {})
 
 describe('swatchColors', () => {
   it('returns the correct color for an integer ingredient group ID', () => {
@@ -27,7 +27,8 @@ describe('swatchColors', () => {
 
   it('correctly wraps around DEFAULT_LIQUID_COLORS using modulo', () => {
     const indexBeyondRange = DEFAULT_LIQUID_COLORS.length + 5
-    const expectedColor = DEFAULT_LIQUID_COLORS[indexBeyondRange % DEFAULT_LIQUID_COLORS.length]
+    const expectedColor =
+      DEFAULT_LIQUID_COLORS[indexBeyondRange % DEFAULT_LIQUID_COLORS.length]
 
     expect(swatchColors(String(indexBeyondRange))).toBe(expectedColor)
   })
