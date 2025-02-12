@@ -1,6 +1,14 @@
 import { useTranslation } from 'react-i18next'
 import { css } from 'styled-components'
-import { COLORS, RobotCoordsForeignDiv } from '@opentrons/components'
+import {
+  ALIGN_CENTER,
+  COLORS,
+  Flex,
+  Icon,
+  RobotCoordsForeignDiv,
+  SPACING,
+  StyledText,
+} from '@opentrons/components'
 
 type BlockedSlotMessage =
   | 'MODULE_INCOMPATIBLE_SINGLE_LABWARE'
@@ -27,8 +35,8 @@ export const BlockedSlot = (props: BlockedSlotProps): JSX.Element => {
         width={width}
         height={height}
         css={css`
-          fill: rgba(200, 115, 0, 0.75);
-          stroke: var(--c-red);
+          fill: ${COLORS.red20};
+          stroke: ${COLORS.red60};
           rx: 6;
         `}
       />
@@ -40,14 +48,21 @@ export const BlockedSlot = (props: BlockedSlotProps): JSX.Element => {
         innerDivProps={{
           style: {
             height: '100%',
-            fontSize: '12px',
-            color: COLORS.white,
-            margin: '-1.5rem 0.5rem',
+            margin: `${
+              message === 'MODULE_INCOMPATIBLE_LABWARE_SWAP'
+                ? '0'
+                : `-${SPACING.spacing8}rem`
+            } ${SPACING.spacing8}rem`,
             transform: 'rotate(180deg) scaleX(-1)',
           },
         }}
       >
-        {t(`blocked_slot.${message}`)}
+        <Flex gridGap={SPACING.spacing12} alignItems={ALIGN_CENTER}>
+          <Icon name="ot-alert" size="2rem" color={COLORS.red60} />
+          <StyledText desktopStyle="captionRegular" color={COLORS.red60}>
+            {t(`blocked_slot.${message}`)}
+          </StyledText>
+        </Flex>
       </RobotCoordsForeignDiv>
     </g>
   )
