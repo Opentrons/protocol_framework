@@ -106,8 +106,7 @@ export function LabwareListItem(
 
   const isStacked =
     labwareQuantity > 1 ||
-    bottomLabwareId !== topLabwareId ||
-    moduleModel != null
+    bottomLabwareId !== topLabwareId
 
   const { i18n, t } = useTranslation('protocol_setup')
   const [
