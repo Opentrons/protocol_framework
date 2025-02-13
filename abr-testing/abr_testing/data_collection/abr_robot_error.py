@@ -674,7 +674,6 @@ if __name__ == "__main__":
         protocol_file_path,
         version_file_path,
     ] + file_paths
-    input("-------")
     error_folder_path = os.path.join(storage_directory, issue_key)
     os.makedirs(error_folder_path, exist_ok=True)
     for source_file in error_files:
