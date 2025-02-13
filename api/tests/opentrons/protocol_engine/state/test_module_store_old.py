@@ -287,6 +287,13 @@ def test_load_thermocycler_in_thermocycler_slot(
             ),
         ),
     )
+    load_position_for_module: str | AddressableAreaLocation
+    if robot_type == "OT-2 Standard":
+        load_position_for_module = AddressableAreaLocation(
+            addressableAreaName=tc_slot.value
+        )
+    else:
+        load_position_for_module = f"cutout{tc_slot.value}"
 
     subject = ModuleStore(
         Config(
@@ -299,7 +306,7 @@ def test_load_thermocycler_in_thermocycler_slot(
     subject.handle_action(action)
 
     assert subject.state.load_location_by_module_id == {
-        "module-id": AddressableAreaLocation(addressableAreaName=tc_slot.value)
+        "module-id": load_position_for_module
     }
     assert subject.state.additional_slots_occupied_by_module_id == {
         "module-id": expected_additional_slots
