@@ -35,7 +35,7 @@ if TYPE_CHECKING:
     from .pipette_offset.user_flow import PipetteOffsetCalibrationUserFlow
     from .check.user_flow import CheckCalibrationUserFlow
     from opentrons_shared_data.pipette.types import LabwareUri
-    from opentrons_shared_data.labware.types import LabwareDefinition
+    from opentrons_shared_data.labware.types import LabwareDefinition2
 
 ValidState = Union[
     TipCalibrationState,
@@ -56,7 +56,9 @@ class StateTransitionError(RobotServerError):
 
 
 TransitionMap = Dict[Any, Dict[Any, Any]]
-MODULE_LOG = logging.getLogger(__name__)
+
+
+_log = logging.getLogger(__name__)
 
 
 class SimpleStateMachine:
@@ -193,18 +195,32 @@ def get_reference_location(
 def save_tip_length_calibration(
     pipette_id: str, tip_length_offset: float, tip_rack: labware.Labware
 ):
+    # todo(mm, 2025-02-13): Avoid private attribute access.
+    tip_rack_definition = tip_rack._core.get_definition()
+    # We expect this assert to always pass because calling code limits itself to schema
+    # 2 definitions.
+    assert tip_rack_definition["schemaVersion"] == 2
     tip_length_data = ot2_cal_storage.create_tip_length_data(
-        tip_rack._core.get_definition(), tip_length_offset
+        tip_rack_definition, tip_length_offset
     )
     ot2_cal_storage.save_tip_length_calibration(pipette_id, tip_length_data)
 
 
-def get_default_tipracks(default_uris: List["LabwareUri"]) -> List["LabwareDefinition"]:
-    definitions = []
-    for rack in default_uris:
-        details = helpers.details_from_uri(rack)
+def get_default_tipracks(
+    default_uris: List["LabwareUri"],
+) -> List["LabwareDefinition2"]:
+    definitions: list["LabwareDefinition2"] = []
+    for uri in default_uris:
+        details = helpers.details_from_uri(uri)
         rack_def = labware.get_labware_definition(
             details.load_name, details.namespace, details.version
         )
-        definitions.append(rack_def)
+        if rack_def["schemaVersion"] == 2:
+            definitions.append(rack_def)
+        else:
+            _log.error(
+                f"Tip rack URI {uri} points to a definition with schema version"
+                f" {rack_def['schemaVersion']} and will be ignored."
+                f" This is probably a bug in the selection of default tip racks."
+            )
     return definitions
