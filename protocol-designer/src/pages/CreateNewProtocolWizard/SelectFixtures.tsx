@@ -8,6 +8,7 @@ import {
   DIRECTION_COLUMN,
   EmptySelectorButton,
   Flex,
+  FLEX_MAX_CONTENT,
   ListItem,
   SPACING,
   StyledText,
@@ -99,23 +100,24 @@ export function SelectFixtures(props: WizardTileProps): JSX.Element | null {
                 )
 
                 return (
-                  <EmptySelectorButton
-                    disabled={numSlotsAvailable === 0}
-                    key={equipment}
-                    textAlignment={TYPOGRAPHY.textAlignLeft}
-                    iconName="plus"
-                    text={t(`${equipment}`)}
-                    onClick={() => {
-                      if (numSlotsAvailable === 0) {
-                        makeSnackbar(t('slots_limit_reached') as string)
-                      } else {
-                        setValue('additionalEquipment', [
-                          ...additionalEquipment,
-                          equipment,
-                        ])
-                      }
-                    }}
-                  />
+                  <Flex width={FLEX_MAX_CONTENT} key={equipment}>
+                    <EmptySelectorButton
+                      disabled={numSlotsAvailable === 0}
+                      textAlignment={TYPOGRAPHY.textAlignLeft}
+                      iconName="plus"
+                      text={t(`${equipment}`)}
+                      onClick={() => {
+                        if (numSlotsAvailable === 0) {
+                          makeSnackbar(t('slots_limit_reached') as string)
+                        } else {
+                          setValue('additionalEquipment', [
+                            ...additionalEquipment,
+                            equipment,
+                          ])
+                        }
+                      }}
+                    />
+                  </Flex>
                 )
               })}
             </Flex>

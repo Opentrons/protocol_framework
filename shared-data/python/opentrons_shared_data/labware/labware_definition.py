@@ -50,29 +50,7 @@ _NonNegativeNumber = Union[_StrictNonNegativeInt, _StrictNonNegativeFloat]
 """Non-negative JSON number type, written to preserve lack of decimal point."""
 
 
-class CornerOffsetFromSlot(BaseModel):
-    """
-    Distance from left-front-bottom corner of slot to left-front-bottom corner
-     of labware bounding box. Used for labware that spans multiple slots. For
-      labware that does not span multiple slots, x/y/z should all be zero.
-    """
-
-    x: _Number
-    y: _Number
-    z: _Number
-
-
-class OverlapOffset(BaseModel):
-    """
-    Overlap dimensions of labware with another labware/module that it can be stacked on top of.
-    """
-
-    x: _Number
-    y: _Number
-    z: _Number
-
-
-class OffsetVector(BaseModel):
+class Vector(BaseModel):
     """
     A generic 3-D offset vector.
     """
@@ -87,8 +65,8 @@ class GripperOffsets(BaseModel):
     Offsets used when calculating coordinates for gripping labware during labware movement.
     """
 
-    pickUpOffset: OffsetVector
-    dropOffset: OffsetVector
+    pickUpOffset: Vector
+    dropOffset: Vector
 
 
 class BrandData(BaseModel):
@@ -639,7 +617,7 @@ class RoundedCuboidSegment(BaseModel):
     model_config = ConfigDict(ignored_types=(cached_property,))
 
 
-class Metadata1(BaseModel):
+class GroupMetadata(BaseModel):
     """
     Metadata specific to a grid of wells in a labware
     """
@@ -659,7 +637,7 @@ class Group(BaseModel):
     wells: List[str] = Field(
         ..., description="An array of wells that contain the same metadata"
     )
-    metadata: Metadata1 = Field(
+    metadata: GroupMetadata = Field(
         ..., description="Metadata specific to a grid of wells in a labware"
     )
     brand: Optional[BrandData] = Field(
@@ -667,19 +645,20 @@ class Group(BaseModel):
     )
 
 
-WellSegment = Union[
-    ConicalFrustum,
-    CuboidalFrustum,
-    SquaredConeSegment,
-    RoundedCuboidSegment,
-    SphericalSegment,
+WellSegment = Annotated[
+    ConicalFrustum
+    | CuboidalFrustum
+    | SquaredConeSegment
+    | RoundedCuboidSegment
+    | SphericalSegment,
+    Field(discriminator="shape"),
 ]
 
 
 class InnerWellGeometry(BaseModel):
     sections: List[WellSegment] = Field(
         ...,
-        description="A list of all of the sections of the well that have a contiguous shape",
+        description="A list of all of the sections of the well that have a contiguous shape. Must be ordered from top (highest z) to bottom (lowest z).",
     )
 
 
@@ -712,7 +691,7 @@ class LabwareDefinition(BaseModel):
         description="Generated array that keeps track of how wells should be "
         "ordered in a labware",
     )
-    cornerOffsetFromSlot: CornerOffsetFromSlot = Field(
+    cornerOffsetFromSlot: Vector = Field(
         ...,
         description="Distance from left-front-bottom corner of slot to "
         "left-front-bottom corner of labware bounding box. Used for "
@@ -734,12 +713,12 @@ class LabwareDefinition(BaseModel):
         default_factory=list,
         description="Allowed behaviors and usage of a labware in a protocol.",
     )
-    stackingOffsetWithLabware: Dict[str, OverlapOffset] = Field(
+    stackingOffsetWithLabware: Dict[str, Vector] = Field(
         default_factory=dict,
         description="Supported labware that can be stacked upon,"
         " with overlap vector offset between both labware.",
     )
-    stackingOffsetWithModule: Dict[str, OverlapOffset] = Field(
+    stackingOffsetWithModule: Dict[str, Vector] = Field(
         default_factory=dict,
         description="Supported module that can be stacked upon,"
         " with overlap vector offset between labware and module.",

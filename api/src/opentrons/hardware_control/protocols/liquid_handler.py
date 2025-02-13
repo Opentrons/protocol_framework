@@ -187,7 +187,10 @@ class LiquidHandler(
         ...
 
     async def tip_drop_moves(
-        self, mount: MountArgType, home_after: bool = True
+        self,
+        mount: MountArgType,
+        home_after: bool = True,
+        ignore_plunger: bool = False,
     ) -> None:
         ...
 
