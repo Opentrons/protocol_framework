@@ -104,7 +104,7 @@ export const Select: Story = {
   },
 }
 
-export const LabwareWithLidAndQountaty: Story = {
+export const LabwareWithLidAndQuantity: Story = {
   args: {
     type: 'location-colon-location',
     labwareName: 'Labware with lid',
