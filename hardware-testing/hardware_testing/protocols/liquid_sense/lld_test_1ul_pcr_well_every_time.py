@@ -20,7 +20,7 @@ SLOTS = {
     "tips": ["A2", "A3", "B2", "B3", "A4", "B4"],
     "src": "C2",
     "src_holder": "B1",
-    "dst": ["D3", "D2", "D1", "C1"],
+    "dst": ["C1", "D1", "D2", "D3"],
     "tips_200": "A1",
     "diluent_reservoir": "C3",
     "lids": "D4",
@@ -33,7 +33,7 @@ BOTTOM_MM = 3.0
 TIP_VOLUME = 50
 PIP_VOLUME = 50
 DEAD_VOL_DILUENT = 3000
-DEAD_VOL_DYE = 10
+DEAD_VOL_DYE = 15
 
 SRC_LABWARE = "opentrons_96_wellplate_200ul_pcr_full_skirt"
 DST_LABWARE = "corning_96_wellplate_360ul_flat"
@@ -58,7 +58,7 @@ def add_parameters(parameters: ParameterContext) -> None:
         display_name="Number of Plates",
         minimum=1,
         maximum=4,
-        default=4,
+        default=3,
     )
     parameters.add_bool(
         variable_name="skip_diluent", display_name="Skip Diluent", default=False
@@ -268,7 +268,7 @@ def run(ctx: ProtocolContext) -> None:
                 and initial_fill
             ):
                 diluent_ul = (200 / 2) - vol
-            diluent_well = diluent_wells[i_index % len(diluent_wells_used)]
+            diluent_well = diluent_wells_used[i_index % len(diluent_wells_used)]
             diluent_pipette.aspirate(diluent_ul, diluent_well.bottom(0.5))
             diluent_pipette.dispense(
                 diluent_ul, plate[f"A{i_index+1}"].top(), push_out=20
