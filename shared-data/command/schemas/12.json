@@ -1793,6 +1793,11 @@
           "title": "Pipetteid",
           "type": "string"
         },
+        "scrape_tips": {
+          "description": "Whether or not to scrape off the tips with the ejector all the way down. If True, and the target location is a tip rack well, it will move the pipette. Towards the center of the tip rack with the ejector in the 'drop_tip' position. If False, no horizontal movement will occur.",
+          "title": "Scrape Tips",
+          "type": "boolean"
+        },
         "wellLocation": {
           "$ref": "#/$defs/DropTipWellLocation",
           "description": "Relative well location at which to drop the tip."
