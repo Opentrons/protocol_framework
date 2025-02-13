@@ -217,10 +217,7 @@ class TransferComponentsExecutor:
         NOTE: For most of our built-in definitions, we will keep _mix_ off because it is a very application specific thing.
         We should mention in our docs that users should adjust this property according to their application.
         """
-        if (
-            not mix_properties.enabled
-            or self._transfer_type == TransferType.MANY_TO_ONE
-        ):
+        if not mix_properties.enabled:
             return
         # Assertion only for mypy purposes
         assert (
@@ -251,10 +248,7 @@ class TransferComponentsExecutor:
         - No push out
         - No pre-wet for consolidation
         """
-        if (
-            not self._transfer_properties.aspirate.pre_wet
-            or self._transfer_type == TransferType.MANY_TO_ONE
-        ):
+        if not self._transfer_properties.aspirate.pre_wet:
             return
         mix_props = MixProperties(_enabled=True, _repetitions=1, _volume=volume)
         self.mix(mix_properties=mix_props, last_dispense_push_out=False)

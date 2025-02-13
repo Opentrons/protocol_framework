@@ -1454,14 +1454,14 @@ class InstrumentCore(AbstractInstrument[WellCore, LabwareCore]):
             ),
         )
         components_executor.submerge(submerge_properties=aspirate_props.submerge)
-        # TODO: when aspirating for consolidation, do not perform mix
-        components_executor.mix(
-            mix_properties=aspirate_props.mix, last_dispense_push_out=False
-        )
-        # TODO: when aspirating for consolidation, do not preform pre-wet
-        components_executor.pre_wet(
-            volume=volume,
-        )
+        # Do not do a pre-aspirate mix or pre-wet if consolidating
+        if transfer_type != tx_comps_executor.TransferType.MANY_TO_ONE:
+            components_executor.mix(
+                mix_properties=aspirate_props.mix, last_dispense_push_out=False
+            )
+            components_executor.pre_wet(
+                volume=volume,
+            )
         components_executor.aspirate_and_wait(volume=volume)
         components_executor.retract_after_aspiration(volume=volume)
 
