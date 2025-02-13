@@ -39,9 +39,8 @@ export function ProtocolDesignerAppFallback({
     },
   }
 
-  dispatch(analyticsEvent(errorEvent))
-
   const handleReloadClick = (): void => {
+    dispatch(analyticsEvent(errorEvent))
     resetErrorBoundary()
   }
   const handleDownloadProtocol = (): void => {

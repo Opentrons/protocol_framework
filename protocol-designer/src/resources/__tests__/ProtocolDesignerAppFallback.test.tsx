@@ -3,9 +3,12 @@ import { fireEvent, screen } from '@testing-library/react'
 
 import { i18n } from '../../assets/localization'
 import { renderWithProviders } from '../../__testing-utils__'
+import { analyticsEvent } from '../../analytics/actions'
 import { ProtocolDesignerAppFallback } from '../ProtocolDesignerAppFallback'
 
 import type { FallbackProps } from 'react-error-boundary'
+
+vi.mock('../../analytics/actions')
 
 const mockError = {
   message: 'mock error',
@@ -42,5 +45,6 @@ describe('ProtocolDesignerAppFallback', () => {
     render(props)
     fireEvent.click(screen.getByText('Reload app'))
     expect(mockFunc).toHaveBeenCalled()
+    expect(vi.mocked(analyticsEvent)).toHaveBeenCalled()
   })
 })
