@@ -1,6 +1,7 @@
 {
   "allowedRoles": [
-    "labware", "lid"
+    "labware",
+    "lid"
   ],
   "ordering": [],
   "brand": {
@@ -16,7 +17,7 @@
   "dimensions": {
     "xDimension": 127.76,
     "yDimension": 85.48,
-    "zDimension": 8.00
+    "zDimension": 8.9
   },
   "wells": {},
   "groups": [],
@@ -51,7 +52,7 @@
     "plate_lid": {
       "x": 0,
       "y": 0,
-      "z": 2.492
+      "z": 1.1
     },
     "armadillo_96_wellplate_200ul_pcr_full_skirt": {
       "x": 0,
@@ -81,7 +82,7 @@
     "corning_96_wellplate_360ul_flat": {
       "x": 0,
       "y": 0,
-      "z": 4.193
+      "z": 6.6
     }
   },
   "stackLimit": 5,
@@ -107,7 +108,7 @@
       "dropOffset": {
         "x": 0,
         "y": 0.52,
-        "z": -6
+        "z": 0
       }
     }
   }

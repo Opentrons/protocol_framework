@@ -1,22 +1,50 @@
 {
   "ordering": [
-    ["A1"],
-    ["A2"],
-    ["A3"],
-    ["A4"],
-    ["A5"],
-    ["A6"],
-    ["A7"],
-    ["A8"],
-    ["A9"],
-    ["A10"],
-    ["A11"],
-    ["A12"]
+    [
+      "A1"
+    ],
+    [
+      "A2"
+    ],
+    [
+      "A3"
+    ],
+    [
+      "A4"
+    ],
+    [
+      "A5"
+    ],
+    [
+      "A6"
+    ],
+    [
+      "A7"
+    ],
+    [
+      "A8"
+    ],
+    [
+      "A9"
+    ],
+    [
+      "A10"
+    ],
+    [
+      "A11"
+    ],
+    [
+      "A12"
+    ]
   ],
   "brand": {
     "brand": "NEST",
-    "brandId": ["360102"],
-    "links": ["https://www.nest-biotech.com/reagent-reserviors/59178414.html"]
+    "brandId": [
+      "360102"
+    ],
+    "links": [
+      "https://www.nest-biotech.com/reagent-reserviors/59178414.html"
+    ]
   },
   "metadata": {
     "displayName": "NEST 12 Well Reservoir 15 mL",
@@ -188,7 +216,10 @@
     "format": "trough",
     "isTiprack": false,
     "isMagneticModuleCompatible": false,
-    "quirks": ["centerMultichannelOnWells", "touchTipDisabled"],
+    "quirks": [
+      "centerMultichannelOnWells",
+      "touchTipDisabled"
+    ],
     "loadName": "nest_12_reservoir_15ml"
   },
   "namespace": "opentrons",
@@ -199,6 +230,17 @@
     "y": 0,
     "z": 0
   },
+  "stackingOffsetWithLabware": {
+    "nest_12_reservoir_15ml": {
+      "x": 0,
+      "y": 0,
+      "z": 1.7
+    }
+  },
+  "stackLimit": 2,
+  "compatibleParentLabware": [
+    "nest_12_reservoir_15ml"
+  ],
   "innerLabwareGeometry": {
     "cuboidalWell": {
       "sections": [
