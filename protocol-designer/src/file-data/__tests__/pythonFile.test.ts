@@ -31,7 +31,6 @@ import type {
   PipetteEntities,
   TimelineFrame,
 } from '@opentrons/step-generation'
-import { string } from 'yup'
 
 describe('pythonMetadata', () => {
   it('should generate metadata section', () => {
@@ -197,13 +196,13 @@ describe('getLoadAdapters', () => {
 adapter_1 = magnetic_block_1.load_adapter(
     "fixture_flex_96_tiprack_adapter",
     namespace="fixture",
-    version="1",
+    version=1,
 )
 adapter_2 = protocol.load_adapter(
     "fixture_flex_96_tiprack_adapter",
     "B2",
     namespace="fixture",
-    version="1",
+    version=1,
 )`.trimStart()
     )
   })
@@ -225,19 +224,19 @@ well_plate_1 = adapter_2.load_labware(
     "fixture_96_plate",
     label="reagent plate",
     namespace="fixture",
-    version="1",
+    version=1,
 )
 well_plate_2 = magnetic_block_2.load_labware(
     "fixture_96_plate",
     namespace="fixture",
-    version="1",
+    version=1,
 )
 well_plate_3 = protocol.load_labware(
     "fixture_96_plate",
     "C2",
     label="sample plate",
     namespace="fixture",
-    version="1",
+    version=1,
 )`.trimStart()
     )
   })

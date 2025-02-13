@@ -134,30 +134,30 @@ requirements = {
 
 def run(protocol: protocol_api.ProtocolContext):
     # Load Labware:
-    mockPythonName = protocol.load_labware(
+    mock_python_name_1 = protocol.load_labware(
         "fixture_trash",
         "12",
         label="Trash",
         namespace="fixture",
-        version="1",
+        version=1,
     )
-    mockPythonName = protocol.load_labware(
+    mock_python_name_2 = protocol.load_labware(
         "fixture_tiprack_10_ul",
         "1",
         label="Opentrons 96 Tip Rack 10 µL",
         namespace="fixture",
-        version="1",
+        version=1,
     )
-    mockPythonName = protocol.load_labware(
+    mock_python_name_3 = protocol.load_labware(
         "fixture_96_plate",
         "7",
         label="NEST 96 Well Plate 100 µL PCR Full Skirt",
         namespace="fixture",
-        version="1",
+        version=1,
     )
 
     # Load Pipettes:
-    mockPythonName = protocol.load_instrument("p10_single", "left", tip_racks=[mockPythonName])
+    mock_python_name_1 = protocol.load_instrument("p10_single", "left", tip_racks=[mock_python_name_2])
 
     # PROTOCOL STEPS
 

@@ -111,7 +111,7 @@ export function getLoadAdapters(
         `${formatPyStr(parameters.loadName)}`,
         ...(!onModule ? [`${formatPyStr(adapterSlot)}`] : []),
         `namespace=${formatPyStr(namespace)}`,
-        `version=${formatPyStr(version.toString())}`,
+        `version=${version}`,
       ].join(',\n')
 
       return (
@@ -142,7 +142,6 @@ export function getLoadLabware(
       const labwareSlot = labwareRobotState[id].slot
       const onModule = moduleEntities[labwareSlot] != null
       const onAdapter = allLabwareEntities[labwareSlot] != null
-
       let location = PROTOCOL_CONTEXT_NAME
       if (onAdapter) {
         location = allLabwareEntities[labwareSlot].pythonName
@@ -157,7 +156,7 @@ export function getLoadLabware(
           ? [`label=${formatPyStr(labwareNicknamesById[id])}`]
           : []),
         `namespace=${formatPyStr(namespace)}`,
-        `version=${formatPyStr(version.toString())}`,
+        `version=${version}`,
       ].join(',\n')
 
       return (
