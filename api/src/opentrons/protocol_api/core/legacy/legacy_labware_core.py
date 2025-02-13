@@ -36,6 +36,10 @@ class LegacyLabwareCore(AbstractLabware[LegacyWellCore]):
 
     def __init__(
         self,
+        # We need labware schema 2, specifically, because schema 3 changes how positions
+        # are calculated, and we don't attempt to handle that here in
+        # `opentrons.protocol_api.core.legacy`. We do handle it in
+        # `opentrons.protocol_api.core.engine` and `opentrons.protocol_engine`.
         definition: LabwareDefinition2,
         parent: Location,
         label: Optional[str] = None,
