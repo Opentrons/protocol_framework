@@ -193,9 +193,6 @@ def get_reference_location(
 def save_tip_length_calibration(
     pipette_id: str, tip_length_offset: float, tip_rack: labware.Labware
 ):
-    # TODO: 07-22-2020 parent slot is not important when tracking
-    # tip length data, hence the empty string, we should remove it
-    # from create_tip_length_data in a refactor
     tip_length_data = ot2_cal_storage.create_tip_length_data(
         tip_rack._core.get_definition(), tip_length_offset
     )
