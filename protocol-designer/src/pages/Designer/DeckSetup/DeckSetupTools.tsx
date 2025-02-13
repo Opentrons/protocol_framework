@@ -29,6 +29,7 @@ import {
   MAGNETIC_MODULE_V2,
   MODULE_MODELS,
   OT2_ROBOT_TYPE,
+  TEMPERATURE_MODULE_TYPE,
 } from '@opentrons/shared-data'
 
 import { getRobotType } from '../../../file-data/selectors'
@@ -37,7 +38,7 @@ import {
   deleteDeckFixture,
 } from '../../../step-forms/actions/additionalItems'
 import { getSavedStepForms } from '../../../step-forms/selectors'
-import { deleteModule } from '../../../step-forms/actions'
+import { deleteModule } from '../../../modules'
 import { getDeckSetupForActiveItem } from '../../../top-selectors/labware-locations'
 import {
   createContainer,
@@ -49,6 +50,7 @@ import {
   selectNestedLabware,
   selectZoomedIntoSlot,
 } from '../../../labware-ingred/actions'
+import { getEnableMutlipleTempsOT2 } from '../../../feature-flags/selectors'
 import { useBlockingHint } from '../../../organisms/BlockingHintModal/useBlockingHint'
 import { selectors } from '../../../labware-ingred/selectors'
 import { useKitchen } from '../../../organisms/Kitchen/hooks'
@@ -102,6 +104,7 @@ export function DeckSetupTools(props: DeckSetupToolsProps): JSX.Element | null {
   const selectedSlotInfo = useSelector(selectors.getZoomedInSlotInfo)
   const robotType = useSelector(getRobotType)
   const savedSteps = useSelector(getSavedStepForms)
+  const enableMultipleTempsOt2 = useSelector(getEnableMutlipleTempsOT2)
   const [showDeleteLabwareModal, setShowDeleteLabwareModal] = useState<
     ModuleModel | 'clear' | null
   >(null)
@@ -292,7 +295,7 @@ export function DeckSetupTools(props: DeckSetupToolsProps): JSX.Element | null {
     if (slot !== 'offDeck') {
       //  clear module from slot
       if (createdModuleForSlot != null) {
-        dispatch(deleteModule(createdModuleForSlot.id))
+        dispatch(deleteModule({ moduleId: createdModuleForSlot.id }))
       }
       //  clear labware from slot
       if (
@@ -301,6 +304,7 @@ export function DeckSetupTools(props: DeckSetupToolsProps): JSX.Element | null {
           createdLabwareForSlot.labwareDefURI !== selectedLabwareDefUri ||
           //  if nested labware changes but labware doesn't, still delete both
           (createdLabwareForSlot.labwareDefURI === selectedLabwareDefUri &&
+            selectedNestedLabwareDefUri != null &&
             createdNestedLabwareForSlot?.labwareDefURI !==
               selectedNestedLabwareDefUri))
       ) {
@@ -353,6 +357,13 @@ export function DeckSetupTools(props: DeckSetupToolsProps): JSX.Element | null {
       } else {
         dispatch(createDeckFixture(selectedFixture, cutout))
       }
+    }
+    if (
+      matchingLabwareFor4thColumn != null &&
+      selectedFixture !== 'stagingArea' &&
+      selectedFixture !== 'wasteChuteAndStagingArea'
+    ) {
+      dispatch(deleteContainer({ labwareId: matchingLabwareFor4thColumn.id }))
     }
     if (selectedModuleModel != null) {
       //  create module
@@ -411,10 +422,12 @@ export function DeckSetupTools(props: DeckSetupToolsProps): JSX.Element | null {
       selectedModuleModel != null &&
       selectedLabwareDefUri != null &&
       (createdLabwareForSlot?.labwareDefURI !== selectedLabwareDefUri ||
-        //  if nested labware changes but labware doesn't, still create both both
+        //  if nested labware changes but labware doesn't, still create both
         (createdLabwareForSlot.labwareDefURI === selectedLabwareDefUri &&
           createdNestedLabwareForSlot?.labwareDefURI !==
-            selectedNestedLabwareDefUri))
+            selectedNestedLabwareDefUri &&
+          (createdNestedLabwareForSlot?.labwareDefURI != null ||
+            selectedNestedLabwareDefUri != null)))
     ) {
       //   create adapter + labware on module
       dispatch(
@@ -602,11 +615,33 @@ export function DeckSetupTools(props: DeckSetupToolsProps): JSX.Element | null {
                               }) as string
                             )
                           } else if (
-                            typeSomewhereOnDeck.length > 0 &&
-                            robotType === OT2_ROBOT_TYPE
+                            (!enableMultipleTempsOt2 &&
+                              typeSomewhereOnDeck.length > 0 &&
+                              robotType === OT2_ROBOT_TYPE) ||
+                            (enableMultipleTempsOt2 &&
+                              typeSomewhereOnDeck.length > 0 &&
+                              getModuleType(model as ModuleModel) !==
+                                TEMPERATURE_MODULE_TYPE &&
+                              robotType === OT2_ROBOT_TYPE)
                           ) {
                             makeSnackbar(
                               t('one_item', {
+                                hardware: t(
+                                  `shared:${getModuleType(
+                                    selectedModel
+                                  ).toLowerCase()}`
+                                ),
+                              }) as string
+                            )
+                          } else if (
+                            enableMultipleTempsOt2 &&
+                            typeSomewhereOnDeck.length > 1 &&
+                            getModuleType(model as ModuleModel) ===
+                              TEMPERATURE_MODULE_TYPE &&
+                            robotType === OT2_ROBOT_TYPE
+                          ) {
+                            makeSnackbar(
+                              t('two_item', {
                                 hardware: t(
                                   `shared:${getModuleType(
                                     selectedModel

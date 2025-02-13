@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useDispatch } from 'react-redux'
 import {
@@ -7,6 +8,7 @@ import {
   DeckInfoLabel,
   DropdownMenu,
   Flex,
+  LINE_CLAMP_TEXT_STYLE,
   ListItem,
   SPACING,
   StyledText,
@@ -78,6 +80,12 @@ export function DropdownStepFormField(
     }
   }
 
+  useEffect(() => {
+    if (options.length === 1) {
+      updateValue(options[0].value)
+    }
+  }, [options.length])
+
   return (
     <Flex padding={padding ?? SPACING.spacing16}>
       {options.length > 1 || options.length === 0 ? (
@@ -122,7 +130,10 @@ export function DropdownStepFormField(
                 flexDirection={DIRECTION_COLUMN}
                 gridGap={options[0].subtext != null ? SPACING.spacing4 : '0'}
               >
-                <StyledText desktopStyle="captionRegular">
+                <StyledText
+                  desktopStyle="captionRegular"
+                  css={LINE_CLAMP_TEXT_STYLE(3, true)}
+                >
                   {options[0].name}
                 </StyledText>
                 <StyledText
@@ -134,6 +145,11 @@ export function DropdownStepFormField(
               </Flex>
             </Flex>
           </ListItem>
+          {errorToShow != null ? (
+            <StyledText desktopStyle="bodyDefaultRegular" color={COLORS.red50}>
+              {errorToShow}
+            </StyledText>
+          ) : null}
         </Flex>
       )}
     </Flex>
