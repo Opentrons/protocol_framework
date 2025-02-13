@@ -11,6 +11,7 @@ import {
   StyledText,
   ALIGN_CENTER,
   RESPONSIVENESS,
+  Tag,
 } from '@opentrons/components'
 import { Divider } from '/app/atoms/structure/Divider'
 
@@ -59,19 +60,7 @@ export function InterventionInfo(props: InterventionInfoProps): JSX.Element {
           </StyledText>
         ) : null}
         {props.tagtext != null ? (
-          <StyledText
-            oddStyle="hidden"
-            desktopStyle="bodyDefaultRegular"
-            color={COLORS.grey60}
-            css={css`
-              ${LINE_CLAMP_STYLE}
-              @media ${RESPONSIVENESS.touchscreenMediaQuerySpecs} {
-                display: none;
-              }
-            `}
-          >
-            {props.tagtext}{' '}
-          </StyledText>
+            <Tag type="default" text={'Quantity: ' + props.tagtext} shrinkToContent={true}/>
         ) : null}
       </Flex>
       <Divider

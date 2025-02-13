@@ -103,3 +103,18 @@ export const Select: Story = {
     },
   },
 }
+
+export const LabwareWithLidAndQountaty: Story = {
+  args: {
+    type: 'location-colon-location',
+    labwareName: 'Labware with lid',
+    subtext: 'lid id',
+    tagtext: '3',
+    currentLocationProps: {
+      slotName: 'A1',
+    },
+    newLocationProps: {
+      slotName: 'B1',
+    },
+  },
+}
