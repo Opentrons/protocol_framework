@@ -20,6 +20,8 @@ export interface InterventionInfoProps {
   type: 'location-arrow-location' | 'location-colon-location' | 'location'
   labwareName: string
   labwareNickname?: string
+  subtext?: string
+  tagtext?: string
   currentLocationProps: DeckInfoLabelProps
   newLocationProps?: DeckInfoLabelProps
 }
@@ -39,9 +41,9 @@ export function InterventionInfo(props: InterventionInfoProps): JSX.Element {
           desktopStyle="bodyDefaultSemiBold"
           css={LINE_CLAMP_STYLE}
         >
-          {props.labwareName}
+          {props.labwareNickname ?? props.labwareName}
         </StyledText>
-        {props.labwareNickname != null ? (
+        {props.subtext != null ? (
           <StyledText
             oddStyle="hidden"
             desktopStyle="bodyDefaultRegular"
@@ -53,7 +55,22 @@ export function InterventionInfo(props: InterventionInfoProps): JSX.Element {
               }
             `}
           >
-            {props.labwareNickname}{' '}
+            {props.subtext}{' '}
+          </StyledText>
+        ) : null}
+        {props.tagtext != null ? (
+          <StyledText
+            oddStyle="hidden"
+            desktopStyle="bodyDefaultRegular"
+            color={COLORS.grey60}
+            css={css`
+              ${LINE_CLAMP_STYLE}
+              @media ${RESPONSIVENESS.touchscreenMediaQuerySpecs} {
+                display: none;
+              }
+            `}
+          >
+            {props.tagtext}{' '}
           </StyledText>
         ) : null}
       </Flex>
