@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import { useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import mapValues from 'lodash/mapValues'
 
 import {
@@ -9,6 +9,7 @@ import {
   DIRECTION_COLUMN,
   DIRECTION_ROW,
   EmptySelectorButton,
+  FLEX_MAX_CONTENT,
   Flex,
   Icon,
   JUSTIFY_SPACE_BETWEEN,
@@ -36,6 +37,7 @@ import type {
 } from '../../step-forms'
 import type { ThunkDispatch } from '../../types'
 import type { PipetteConfig } from './usePipetteConfig'
+import { getAdditionalEquipmentEntities } from '../../step-forms/selectors'
 
 interface Gripper {
   name: AdditionalEquipmentName
@@ -66,6 +68,12 @@ export function PipetteOverview({
 }: PipetteOverviewProps): JSX.Element {
   const { t } = useTranslation(['create_new_protocol', 'protocol_overview'])
   const dispatch = useDispatch<ThunkDispatch<any>>()
+  const additionalEquipmentEntities = useSelector(
+    getAdditionalEquipmentEntities
+  )
+  const gripperId = Object.values(additionalEquipmentEntities).find(
+    ae => ae.name === 'gripper'
+  )?.id
 
   const swapPipetteUpdate = mapValues(pipettes, pipette => {
     if (!pipette.mount) return pipette.mount
@@ -179,15 +187,17 @@ export function PipetteOverview({
           ) : null}
           {has96Channel ||
           (leftPipette != null && rightPipette != null) ? null : (
-            <EmptySelectorButton
-              onClick={() => {
-                setPage('add')
-                setMount(targetPipetteMount)
-              }}
-              text={t('add_pipette')}
-              textAlignment="left"
-              iconName="plus"
-            />
+            <Flex width={FLEX_MAX_CONTENT}>
+              <EmptySelectorButton
+                onClick={() => {
+                  setPage('add')
+                  setMount(targetPipetteMount)
+                }}
+                text={t('add_pipette')}
+                textAlignment="left"
+                iconName="plus"
+              />
+            </Flex>
           )}
         </Flex>
       </Flex>
@@ -228,7 +238,7 @@ export function PipetteOverview({
                     textDecoration={TYPOGRAPHY.textDecorationUnderline}
                     padding={SPACING.spacing4}
                     onClick={() => {
-                      dispatch(toggleIsGripperRequired())
+                      dispatch(toggleIsGripperRequired(gripperId))
                     }}
                   >
                     <StyledText desktopStyle="bodyDefaultRegular">
@@ -238,14 +248,16 @@ export function PipetteOverview({
                 </Flex>
               </ListItem>
             ) : (
-              <EmptySelectorButton
-                onClick={() => {
-                  dispatch(toggleIsGripperRequired())
-                }}
-                text={t('protocol_overview:add_gripper')}
-                textAlignment="left"
-                iconName="plus"
-              />
+              <Flex width={FLEX_MAX_CONTENT}>
+                <EmptySelectorButton
+                  onClick={() => {
+                    dispatch(toggleIsGripperRequired())
+                  }}
+                  text={t('protocol_overview:add_gripper')}
+                  textAlignment="left"
+                  iconName="plus"
+                />
+              </Flex>
             )}
           </Flex>
         </Flex>

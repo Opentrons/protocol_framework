@@ -78,6 +78,14 @@ from .location import (
     OnDeckLabwareLocation,
     NonStackedLocation,
     DeckPoint,
+    OnLabwareLocationSequenceComponent,
+    OnModuleLocationSequenceComponent,
+    OnAddressableAreaLocationSequenceComponent,
+    NotOnDeckLocationSequenceComponent,
+    OnCutoutFixtureLocationSequenceComponent,
+    LabwareLocationSequence,
+    labware_location_is_system,
+    labware_location_is_off_deck,
 )
 from .labware import (
     OverlapOffset,
@@ -94,6 +102,7 @@ from .labware_offset_location import (
     OnLabwareOffsetLocationSequenceComponent,
     OnModuleOffsetLocationSequenceComponent,
     OnAddressableAreaOffsetLocationSequenceComponent,
+    LabwareOffsetLocationSequenceComponents,
 )
 from .labware_offset_vector import LabwareOffsetVector
 from .well_position import (
@@ -201,9 +210,20 @@ __all__ = [
     "OnDeckLabwareLocation",
     "NonStackedLocation",
     "DeckPoint",
+    "OffDeckLocationType",
+    "SystemLocationType",
+    "OnLabwareLocationSequenceComponent",
+    "OnModuleLocationSequenceComponent",
+    "OnAddressableAreaLocationSequenceComponent",
+    "NotOnDeckLocationSequenceComponent",
+    "OnCutoutFixtureLocationSequenceComponent",
+    "LabwareLocationSequence",
+    "labware_location_is_off_deck",
+    "labware_location_is_system",
     # Labware offset location
     "LegacyLabwareOffsetLocation",
     "LabwareOffsetLocationSequence",
+    "LabwareOffsetLocationSequenceComponents",
     "OnLabwareOffsetLocationSequenceComponent",
     "OnModuleOffsetLocationSequenceComponent",
     "OnAddressableAreaOffsetLocationSequenceComponent",

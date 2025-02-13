@@ -286,7 +286,7 @@ export const transfer: CommandCreator<TransferArgs> = (
                   pipette: args.pipette,
                   labware: args.sourceLabware,
                   well: sourceWell,
-                  volume: Math.max(subTransferVol),
+                  volume: subTransferVol,
                   times: 1,
                   offsetFromBottomMm: aspirateOffsetFromBottomMm,
                   aspirateFlowRateUlSec,
@@ -436,6 +436,7 @@ export const transfer: CommandCreator<TransferArgs> = (
                     },
                     tipRack: args.tipRack,
                     nozzles: args.nozzles,
+                    isAirGap: true,
                   }),
                   ...(dispenseDelay != null
                     ? [

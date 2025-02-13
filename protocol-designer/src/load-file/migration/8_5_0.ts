@@ -1,61 +1,47 @@
 import floor from 'lodash/floor'
+import { swatchColors } from '../../organisms/DefineLiquidsModal/swatchColors'
+import { getMigratedPositionFromTop } from './utils/getMigrationPositionFromTop'
+import { getAdditionalEquipmentLocationUpdate } from './utils/getAdditionalEquipmentLocationUpdate'
+import { getEquipmentLoadInfoFromCommands } from './utils/getEquipmentLoadInfoFromCommands'
 import type {
-  LabwareDefinition2,
   LoadLabwareCreateCommand,
   ProtocolFile,
 } from '@opentrons/shared-data'
+import type { Ingredients } from '@opentrons/step-generation'
 import type { DesignerApplicationData } from './utils/getLoadLiquidCommands'
-
-const getMigratedPositionFromTop = (
-  labwareDefinitions: {
-    [definitionId: string]: LabwareDefinition2
-  },
-  loadLabwareCommands: LoadLabwareCreateCommand[],
-  labware: string,
-  type: 'aspirate' | 'dispense' | 'mix'
-): number => {
-  const matchingLoadLabware = loadLabwareCommands.find(
-    command =>
-      command.commandType === 'loadLabware' &&
-      command.params.labwareId === labware
-  )
-  if (matchingLoadLabware == null) {
-    console.error(
-      `expected to find matching ${type} labware load command but could not with ${type}_labware from form data as ${labware}`
-    )
-  }
-  const labwareUri =
-    matchingLoadLabware != null
-      ? `${matchingLoadLabware.params.namespace}/${matchingLoadLabware.params.loadName}/${matchingLoadLabware.params.version}`
-      : ''
-
-  //    early exit for dispense_labware equaling trashBin or wasteChute
-  if (labwareDefinitions[labwareUri] == null) {
-    return 0
-  }
-
-  const matchingLabwareWellDepth = labwareUri
-    ? labwareDefinitions[labwareUri].wells.A1.depth
-    : 0
-
-  if (matchingLabwareWellDepth === 0) {
-    console.error(
-      `error in finding the ${type} labware well depth with labware uri ${labwareUri}`
-    )
-  }
-  return matchingLabwareWellDepth
-}
+import type { PDMetadata } from '../../file-types'
 
 export const migrateFile = (
   appData: ProtocolFile<DesignerApplicationData>
-): ProtocolFile<DesignerApplicationData> => {
-  const { designerApplication, commands, labwareDefinitions } = appData
+): ProtocolFile<PDMetadata> => {
+  const {
+    designerApplication,
+    commands,
+    labwareDefinitions,
+    liquids,
+    robot,
+  } = appData
 
   if (designerApplication == null || designerApplication?.data == null) {
     throw Error('The designerApplication key in your file is corrupt.')
   }
   const savedStepForms = designerApplication.data
     ?.savedStepForms as DesignerApplicationData['savedStepForms']
+
+  const ingredients = designerApplication.data.ingredients
+
+  const migratedIngredients: Ingredients = Object.entries(
+    ingredients
+  ).reduce<Ingredients>((acc, [id, ingredient]) => {
+    acc[id] = {
+      displayName: ingredient.name ?? '',
+      liquidClass: ingredient.liquidClass,
+      description: ingredient.description ?? null,
+      liquidGroupId: id,
+      displayColor: liquids[id].displayColor ?? swatchColors(id),
+    }
+    return acc
+  }, {})
 
   const loadLabwareCommands = commands.filter(
     (command): command is LoadLabwareCreateCommand =>
@@ -110,6 +96,10 @@ export const migrateFile = (
                     matchingDispenseLabwareWellDepth,
                   1
                 ),
+          aspirate_submerge_delay_seconds: null,
+          dispense_submerge_delay_seconds: null,
+          aspirate_submerge_speed: null,
+          dispense_submerge_speed: null,
         },
       }
     }
@@ -147,14 +137,41 @@ export const migrateFile = (
     {}
   )
 
+  const updatedInitialStep = Object.values(savedStepForms).reduce(
+    (acc, form) => {
+      const { id } = form
+      if (id === '__INITIAL_DECK_SETUP_STEP__') {
+        return {
+          ...acc,
+          [id]: {
+            ...form,
+            ...getAdditionalEquipmentLocationUpdate(
+              commands,
+              robot.model,
+              savedStepForms
+            ),
+          },
+        }
+      }
+      return acc
+    },
+    {}
+  )
+  const equipmentLoadInfoFromCommands = getEquipmentLoadInfoFromCommands(
+    commands,
+    labwareDefinitions
+  )
   return {
     ...appData,
     designerApplication: {
       ...designerApplication,
       data: {
         ...designerApplication.data,
+        ingredients: migratedIngredients,
+        ...equipmentLoadInfoFromCommands,
         savedStepForms: {
           ...designerApplication.data.savedStepForms,
+          ...updatedInitialStep,
           ...savedStepsWithUpdatedMoveLiquidFields,
           ...savedStepsWithUpdatedMixFields,
         },

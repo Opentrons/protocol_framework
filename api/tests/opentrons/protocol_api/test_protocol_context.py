@@ -283,6 +283,7 @@ def test_load_instrument(
     ).then_return(mock_instrument_core)
 
     decoy.when(mock_instrument_core.get_pipette_name()).then_return("Gandalf the Grey")
+    decoy.when(mock_instrument_core.get_model()).then_return("wizard")
     decoy.when(mock_core.get_disposal_locations()).then_raise(
         NoTrashDefinedError("No trash!")
     )
