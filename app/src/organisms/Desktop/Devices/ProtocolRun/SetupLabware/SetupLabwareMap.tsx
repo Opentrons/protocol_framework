@@ -64,7 +64,6 @@ export function SetupLabwareMap({
   const protocolModulesInfo = getProtocolModulesInfo(protocolAnalysis, deckDef)
 
   const modulesOnDeck = protocolModulesInfo.map(module => {
-
     const {
       topLabwareId,
       topLabwareDefinition,
@@ -72,7 +71,7 @@ export function SetupLabwareMap({
     } = getTopLabwareInfo(module.nestedLabwareId ?? '', loadLabwareCommands)
 
     const isLabwareStacked =
-    module.nestedLabwareId != null && module.nestedLabwareId != topLabwareId
+      module.nestedLabwareId != null && module.nestedLabwareId != topLabwareId
 
     return {
       moduleModel: module.moduleDef.model,
