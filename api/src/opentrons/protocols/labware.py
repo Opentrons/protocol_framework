@@ -154,8 +154,7 @@ def verify_definition(  # noqa: C901
     If the definition is invalid, an exception is raised; otherwise parse the
     json and return the valid definition.
 
-    :raises json.JsonDecodeError: If the definition is not valid json
-    :raises jsonschema.ValidationError: If the definition is not valid.
+    :raises NotALabwareError:
     :returns: The parsed definition
     """
     schemata_by_version = {
