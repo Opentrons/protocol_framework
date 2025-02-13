@@ -347,7 +347,7 @@ def run(protocol: protocol_api.ProtocolContext):
 
     # ========== FOURTH ROW ==========
     stacker_50_2 = protocol.load_module("flexStackerModuleV1", "D4")
-    stacker_50_2.load_labware_to_hopper("opentrons_flex_96_tiprack_50ul", quantity = 7, lid="opentrons_flex_tiprack_lid")
+    stacker_50_2.load_labware_to_hopper("opentrons_flex_96_tiprack_50ul", quantity = 6, lid="opentrons_flex_tiprack_lid")
     TRASH = protocol.load_waste_chute()
     LW_reservoir = protocol.load_labware(
         "nest_96_wellplate_2ml_deep", "D1", "Liquid Waste Reservoir"
@@ -1651,27 +1651,6 @@ def run(protocol: protocol_api.ProtocolContext):
         protocol.comment("==============================================")
 
         # ============================================================================================
-        if MODETRASH == "CHUTE":
-            protocol.comment("MOVING: tiprack_50_7 = tiprack_A3_adapter --> TRASH")
-            protocol.move_labware(
-                labware=tiprack_50_7,
-                new_location=TRASH,
-                use_gripper=USE_GRIPPER,
-                pick_up_offset=deck_pick_up_offset,
-            )
-        else:
-            protocol.comment("MOVING: tiprack_50_7 = tiprack_A3_adapter --> B3")
-            protocol.move_labware(
-                labware=tiprack_50_7,
-                new_location="B3",
-                use_gripper=USE_GRIPPER,
-                pick_up_offset=deck_pick_up_offset,
-            )
-            protocol.move_labware(
-                labware=tiprack_50_7,
-                new_location=protocol_api.OFF_DECK,
-                use_gripper=False,
-            )
         protocol.comment("MOVING: CleanupPlate_1 = A4 --> mag_block")
         protocol.move_labware(
             labware=CleanupPlate_1,
@@ -1681,16 +1660,6 @@ def run(protocol: protocol_api.ProtocolContext):
             drop_offset=mb_drop_offset,
         )
         stacker_50_2.exit_static_mode()
-        protocol.comment("DISPENSING: tiprack_50_8 = #1--> B4")
-        tiprack_50_8 = stacker_50_2.retrieve()
-        protocol.move_lid(tiprack_50_8, TRASH, use_gripper=True)
-
-        protocol.comment("MOVING: tiprack_50_8 = B4 --> tiprack_A3_adapter")
-        protocol.move_labware(
-            labware=tiprack_50_8,
-            new_location=tiprack_A3_adapter,
-            use_gripper=USE_GRIPPER,
-        )
         # ============================================================================================
 
         protocol.comment("--> TRANSFERRING AND ADDING AMPure (0.8x)")
@@ -1703,7 +1672,8 @@ def run(protocol: protocol_api.ProtocolContext):
         p1000.flow_rate.aspirate = p1000_flow_rate_aspirate_default
         p1000.flow_rate.dispense = p1000_flow_rate_dispense_default
         p1000.flow_rate.blow_out = p1000_flow_rate_blow_out_default
-        nozzlecheck("96", tiprack_50_8)
+        nozzlecheck("96", tiprack_50_7)
+        p1000.reset_tipracks()
         # ===============================================
         p1000.pick_up_tip()
         protocol.comment("--> ADDING AMPure (0.8x)")
@@ -1719,7 +1689,7 @@ def run(protocol: protocol_api.ProtocolContext):
         if MODETRASH == "CHUTE":
             protocol.comment("MOVING: tiprack_50_8 = tiprack_A3_adapter --> TRASH")
             protocol.move_labware(
-                labware=tiprack_50_8,
+                labware=tiprack_50_7,
                 new_location=TRASH,
                 use_gripper=USE_GRIPPER,
                 pick_up_offset=deck_pick_up_offset,
@@ -1727,13 +1697,13 @@ def run(protocol: protocol_api.ProtocolContext):
         else:
             protocol.comment("MOVING: tiprack_50_8 = tiprack_A3_adapter --> B3")
             protocol.move_labware(
-                labware=tiprack_50_8,
+                labware=tiprack_50_7,
                 new_location="B3",
                 use_gripper=USE_GRIPPER,
                 pick_up_offset=deck_pick_up_offset,
             )
             protocol.move_labware(
-                labware=tiprack_50_8,
+                labware=tiprack_50_7,
                 new_location=protocol_api.OFF_DECK,
                 use_gripper=False,
             )
