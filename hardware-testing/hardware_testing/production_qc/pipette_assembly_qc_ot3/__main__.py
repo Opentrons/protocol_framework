@@ -426,10 +426,10 @@ async def _pick_up_tip_for_fixture(
     assert pip
     pip_channels = pip.channels.value
     tip = _available_tips_fixture[tip_volume][0]
-    print("tip",tip)
+    #print("tip",tip)
     _available_tips_fixture[tip_volume] = _available_tips_fixture[tip_volume][pip_channels:]
-    print("1",IDEAL_LABWARE_LOCATIONS.fixture)
-    print("2",CALIBRATED_LABWARE_LOCATIONS.fixture)
+    #print("1",IDEAL_LABWARE_LOCATIONS.fixture)
+    #print("2",CALIBRATED_LABWARE_LOCATIONS.fixture)
     CALIBRATED_LABWARE_LOCATIONS.fixture = await _pick_up_tip_newfixture(
             api,
             mount,
@@ -799,7 +799,7 @@ async def _fixture_check_pressure(
         pip_channels,
     )
     results.append(r)
-    print(3)
+    #print(3)
     #drop tip fixture
     #input("tuzg1")
     #await api.drop_tip(mount, home_after=False)
