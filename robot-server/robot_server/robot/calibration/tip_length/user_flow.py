@@ -47,7 +47,7 @@ class TipCalibrationUserFlow:
         mount: Mount,
         has_calibration_block: bool,
         tip_rack: Optional[LabwareDefinition] = None,
-    ):
+    ) -> None:
         self._hardware = hardware
         self._mount = mount
         self._has_calibration_block = has_calibration_block
@@ -84,7 +84,7 @@ class TipCalibrationUserFlow:
         self._supported_commands = SupportedCommands(namespace="calibration")
         self._supported_commands.loadLabware = True
 
-    def _set_current_state(self, to_state: State):
+    def _set_current_state(self, to_state: State) -> None:
         self._current_state = to_state
 
     @property
@@ -113,10 +113,10 @@ class TipCalibrationUserFlow:
             )
 
     @tip_origin.setter
-    def tip_origin(self, new_val: Point):
+    def tip_origin(self, new_val: Point) -> None:
         self._tip_origin_pt = new_val
 
-    def reset_tip_origin(self):
+    def reset_tip_origin(self) -> None:
         self._tip_origin_pt = None
 
     @property
@@ -128,14 +128,13 @@ class TipCalibrationUserFlow:
         return self._current_state
 
     def get_pipette(self) -> AttachedPipette:
-        # TODO(mc, 2020-09-17): s/tip_length/tipLength
         return AttachedPipette(
             model=self._hw_pipette.model,
             name=self._hw_pipette.name,
             tipLength=self._hw_pipette.active_tip_settings.default_tip_length,
             mount=str(self._mount),
             serial=self._hw_pipette.pipette_id,
-            defaultTipracks=self._default_tipracks,  # type: ignore[arg-type]
+            defaultTipracks=self._default_tipracks,
         )
 
     def get_required_labware(self) -> List[RequiredLabware]:
@@ -146,7 +145,7 @@ class TipCalibrationUserFlow:
             for s, lw in lw_by_slot.items()
         ]
 
-    async def handle_command(self, name: Any, data: Dict[Any, Any]):
+    async def handle_command(self, name: Any, data: Dict[Any, Any]) -> None:
         """
         Handle a client command
 
@@ -168,7 +167,7 @@ class TipCalibrationUserFlow:
     async def load_labware(
         self,
         tiprackDefinition: Optional[LabwareDefinition] = None,
-    ):
+    ) -> None:
         self._supported_commands.loadLabware = False
         if tiprackDefinition:
             verified_definition = labware.verify_definition(tiprackDefinition)
@@ -177,10 +176,10 @@ class TipCalibrationUserFlow:
                 del self._deck[TIP_RACK_SLOT]
             self._deck[TIP_RACK_SLOT] = self._tip_rack
 
-    async def move_to_tip_rack(self):
+    async def move_to_tip_rack(self) -> None:
         await self._move(Location(self.tip_origin, None))
 
-    async def save_offset(self):
+    async def save_offset(self) -> None:
         if self._current_state == State.measuringNozzleOffset:
             # critical point would default to nozzle for z height
             cur_pt = await self.get_current_point(critical_point=None)
@@ -218,10 +217,10 @@ class TipCalibrationUserFlow:
     ) -> Point:
         return await self._hardware.gantry_position(self._mount, critical_point)
 
-    async def jog(self, vector):
+    async def jog(self, vector: tuple[float, float, float]) -> None:
         await self._hardware.move_rel(mount=self._mount, delta=Point(*vector))
 
-    async def move_to_reference_point(self):
+    async def move_to_reference_point(self) -> None:
         cal_block_target_well: Optional[labware.Well] = None
 
         if self._has_calibration_block:
@@ -234,13 +233,13 @@ class TipCalibrationUserFlow:
         )
         await self._move(ref_loc)
 
-    async def pick_up_tip(self):
+    async def pick_up_tip(self) -> None:
         await util.pick_up_tip(self, tip_length=self._get_default_tip_length())
 
-    async def invalidate_tip(self):
+    async def invalidate_tip(self) -> None:
         await util.invalidate_tip(self)
 
-    async def exit_session(self):
+    async def exit_session(self) -> None:
         if self.hw_pipette.has_tip:
             await self.move_to_tip_rack()
             await self.return_tip()
@@ -263,7 +262,7 @@ class TipCalibrationUserFlow:
         pip_vol = self._hw_pipette.liquid_class.max_volume
         return set(TIP_RACK_LOOKUP_BY_MAX_VOL[str(pip_vol)].alternatives)
 
-    def _initialize_deck(self):
+    def _initialize_deck(self) -> None:
         self._deck[TIP_RACK_SLOT] = self._tip_rack
 
         if self._has_calibration_block:
@@ -272,13 +271,13 @@ class TipCalibrationUserFlow:
                 cb_setup.load_name, self._deck.position_for(cb_setup.slot)
             )
 
-    async def return_tip(self):
+    async def return_tip(self) -> None:
         await util.return_tip(self, tip_length=self._get_default_tip_length())
 
-    async def _move(self, to_loc: Location):
+    async def _move(self, to_loc: Location) -> None:
         await util.move(self, to_loc)
 
-    async def invalidate_last_action(self):
+    async def invalidate_last_action(self) -> None:
         if self._current_state == State.measuringNozzleOffset:
             await self.hardware.home()
             await self._hardware.gantry_position(self.mount, refresh=True)

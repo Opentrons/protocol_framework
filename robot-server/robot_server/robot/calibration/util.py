@@ -1,5 +1,13 @@
 import logging
-from typing import Set, Dict, Any, Union, List, Optional, TYPE_CHECKING
+from typing import (
+    Generic,
+    Mapping,
+    TypeVar,
+    Union,
+    List,
+    Optional,
+    TYPE_CHECKING,
+)
 
 from opentrons.hardware_control.util import plan_arc
 from opentrons.hardware_control.types import CriticalPoint
@@ -47,7 +55,7 @@ ValidState = Union[
 
 
 class StateTransitionError(RobotServerError):
-    def __init__(self, action: CommandDefinition, state: ValidState):
+    def __init__(self, action: CommandDefinition, state: ValidState) -> None:
         super().__init__(
             definition=CalibrationError.BAD_STATE_TRANSITION,
             action=action,
@@ -55,12 +63,25 @@ class StateTransitionError(RobotServerError):
         )
 
 
-TransitionMap = Dict[Any, Dict[Any, Any]]
 MODULE_LOG = logging.getLogger(__name__)
 
 
-class SimpleStateMachine:
-    def __init__(self, states: Set[Any], transitions: TransitionMap):
+_StateT = TypeVar("_StateT")
+_TransitionT = TypeVar("_TransitionT")
+
+
+class SimpleStateMachine(Generic[_StateT, _TransitionT]):
+    def __init__(
+        self,
+        states: set[_StateT],
+        transitions: Mapping[
+            _StateT,
+            Mapping[
+                _TransitionT,
+                _StateT,
+            ],
+        ],
+    ) -> None:
         """
         Construct a simple state machine
 
@@ -71,7 +92,11 @@ class SimpleStateMachine:
         self._states = states
         self._transitions = transitions
 
-    def get_next_state(self, from_state, command):
+    def get_next_state(
+        self,
+        from_state: _StateT,
+        command: _TransitionT,
+    ) -> _StateT | None:
         """
         Trigger a state transition
 
@@ -80,12 +105,17 @@ class SimpleStateMachine:
         :param to_state: The desired state
         :return: desired state if successful, None if fails
         """
+        try:
+            wc_transitions = self._transitions[STATE_WILDCARD]  # type: ignore[index]
+            wc_to_state = wc_transitions[command]
+        except KeyError:
+            wc_to_state = None
 
-        wc_transitions = self._transitions.get(STATE_WILDCARD, {})
-        wc_to_state = wc_transitions.get(command, {})
-
-        fs_transitions = self._transitions.get(from_state, {})
-        fs_to_state = fs_transitions.get(command, {})
+        try:
+            fs_transitions = self._transitions[from_state]
+            fs_to_state = fs_transitions[command]
+        except KeyError:
+            fs_to_state = None
 
         if wc_to_state:
             return wc_to_state
@@ -103,7 +133,7 @@ CalibrationUserFlow = Union[
 ]
 
 
-async def invalidate_tip(user_flow: CalibrationUserFlow):
+async def invalidate_tip(user_flow: CalibrationUserFlow) -> None:
     await user_flow.return_tip()
     user_flow.reset_tip_origin()
     await user_flow.hardware.update_nozzle_configuration_for_mount(
@@ -112,7 +142,7 @@ async def invalidate_tip(user_flow: CalibrationUserFlow):
     await user_flow.move_to_tip_rack()
 
 
-async def pick_up_tip(user_flow: CalibrationUserFlow, tip_length: float):
+async def pick_up_tip(user_flow: CalibrationUserFlow, tip_length: float) -> None:
     # grab position of active nozzle for ref when returning tip later
     cp = user_flow.critical_point_override
     user_flow.tip_origin = await user_flow.hardware.gantry_position(
@@ -128,7 +158,7 @@ async def pick_up_tip(user_flow: CalibrationUserFlow, tip_length: float):
     await user_flow.hardware.pick_up_tip(user_flow.mount, tip_length)
 
 
-async def return_tip(user_flow: CalibrationUserFlow, tip_length: float):
+async def return_tip(user_flow: CalibrationUserFlow, tip_length: float) -> None:
     """
     Move pipette with tip to tip rack well, such that
     the tip is inside the well, but not so deep that
@@ -154,7 +184,7 @@ async def move(
     user_flow: CalibrationUserFlow,
     to_loc: Location,
     this_move_cp: Optional[CriticalPoint] = None,
-):
+) -> None:
     from_pt = await user_flow.get_current_point(None)
     from_loc = Location(from_pt, None)
     cp = this_move_cp or user_flow.critical_point_override
@@ -192,7 +222,7 @@ def get_reference_location(
 
 def save_tip_length_calibration(
     pipette_id: str, tip_length_offset: float, tip_rack: labware.Labware
-):
+) -> None:
     # TODO: 07-22-2020 parent slot is not important when tracking
     # tip length data, hence the empty string, we should remove it
     # from create_tip_length_data in a refactor
