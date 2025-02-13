@@ -52,11 +52,13 @@ export function LabwareMapView(props: LabwareMapViewProps): JSX.Element {
 
   const modulesOnDeck = attachedProtocolModuleMatches.map(module => {
     const { moduleDef, nestedLabwareDef, nestedLabwareId, slotName } = module
-    const isLabwareStacked = nestedLabwareId != null && nestedLabwareDef != null
     const { topLabwareId, topLabwareDefinition } = getTopLabwareInfo(
       module.nestedLabwareId ?? '',
       loadLabwareCommands
     )
+
+    const isLabwareStacked =
+      nestedLabwareId != null && nestedLabwareId !== topLabwareId
 
     return {
       moduleModel: moduleDef.model,
