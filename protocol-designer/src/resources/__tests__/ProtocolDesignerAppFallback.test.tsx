@@ -45,6 +45,10 @@ describe('ProtocolDesignerAppFallback', () => {
     render(props)
     fireEvent.click(screen.getByText('Reload app'))
     expect(mockFunc).toHaveBeenCalled()
+  })
+
+  it('should call analyticsEvent when rendering', () => {
+    render(props)
     expect(vi.mocked(analyticsEvent)).toHaveBeenCalled()
   })
 })
