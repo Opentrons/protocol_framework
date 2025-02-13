@@ -71,7 +71,7 @@ export function SetupLabwareMap({
     } = getTopLabwareInfo(module.nestedLabwareId ?? '', loadLabwareCommands)
 
     const isLabwareStacked =
-      module.nestedLabwareId != null && module.nestedLabwareId != topLabwareId
+      module.nestedLabwareId != null && module.nestedLabwareId !== topLabwareId
 
     return {
       moduleModel: module.moduleDef.model,

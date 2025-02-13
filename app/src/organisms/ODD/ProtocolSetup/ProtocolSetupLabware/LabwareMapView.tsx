@@ -51,7 +51,7 @@ export function LabwareMapView(props: LabwareMapViewProps): JSX.Element {
       : {}
 
   const modulesOnDeck = attachedProtocolModuleMatches.map(module => {
-    const { moduleDef, nestedLabwareDef, nestedLabwareId, slotName } = module
+    const { moduleDef, nestedLabwareId, slotName } = module
     const { topLabwareId, topLabwareDefinition } = getTopLabwareInfo(
       module.nestedLabwareId ?? '',
       loadLabwareCommands
