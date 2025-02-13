@@ -42,7 +42,7 @@ def run(protocol: ProtocolContext) -> None:
     dot_bottom = protocol.params.dot_bottom  # type: ignore[attr-defined]
     deactivate_modules_bool = protocol.params.deactivate_modules  # type: ignore[attr-defined]
     column_tip_pick_up = protocol.params.column_tip_pickup  # type: ignore[attr-defined]
-    
+
     def transfer(
         pipette: InstrumentContext,
         volume: float,
@@ -81,7 +81,7 @@ def run(protocol: ProtocolContext) -> None:
         pipette.flow_rate.dispense = original_disp_rate
 
     # Load modules
-    waste_chute = protocol.load_waste_chute()
+    protocol.load_waste_chute()
     thermocycler: ThermocyclerContext = protocol.load_module(
         "thermocyclerModuleV2"
     )  # type: ignore[assignment]

@@ -7,7 +7,6 @@ from opentrons.protocol_api import (
     OFF_DECK,
     SINGLE,
 )
-from typing import Dict, List
 
 metadata = {
     "protocolName": "Liquid Set up for all robots",
@@ -21,7 +20,7 @@ requirements = {
 }
 
 
-SLOTS: Dict[str, str | List[str]] = {
+SLOTS = {
     "FULL_TIP_RACK": "A1",
     "PARTIAL_TIP_RACK_1000": ["C2", "B3"],
     "SRC_RESERVOIR": "B1",
@@ -99,12 +98,16 @@ def run(protocol: ProtocolContext) -> None:
         pipette.transfer(
             [200, 100, 600],
             src_reservoir["A1"],
-            [sample_plate["A1"].bottom(z=1), elution_plate["A1"].bottom(z=1), res1["A1"].top()],
+            [
+                sample_plate["A1"].bottom(z=1),
+                elution_plate["A1"].bottom(z=1),
+                res1["A1"].top(),
+            ],
             trash=False,
             blow_out=True,
             blowout_location="destination well",
         )
-        
+
         pvt1abr7_labware = [res1, elution_plate, sample_plate]
         for lw in pvt1abr7_labware:
             protocol.move_labware(lw, OFF_DECK, use_gripper=False)
@@ -126,7 +129,11 @@ def run(protocol: ProtocolContext) -> None:
         pipette.transfer(
             [9500 / 8, 55, 100],
             src_reservoir["A1"],
-            [res1["A1"].top(), elution_plate["A1"].bottom(z=1), sample_plate["A1"].bottom(z=1)],
+            [
+                res1["A1"].top(),
+                elution_plate["A1"].bottom(z=1),
+                sample_plate["A1"].bottom(z=1),
+            ],
             trash=False,
             blow_out=True,
             blowout_location="destination well",
@@ -353,8 +360,8 @@ def run(protocol: ProtocolContext) -> None:
             source=3 * [src_reservoir["A1"]],
             dest=[
                 reservoir["A1"],
-                sample_and_control_plate_1["A1"].bottom(z=1),
-                sample_and_control_plate_2["A1"].bottom(z=1),
+                sample_and_control_plate_1["A1"],
+                sample_and_control_plate_2["A1"],
             ],
             trash=False,
             blow_out=True,
@@ -433,7 +440,9 @@ def run(protocol: ProtocolContext) -> None:
             "nest_12_reservoir_15ml", str(SLOTS["LABWARE"][0])
         )
         pipette.configure_nozzle_layout(
-            style=COLUMN, start="A12", tip_racks=[tip_rack_partial_1, tip_rack_partial_2]
+            style=COLUMN,
+            start="A12",
+            tip_racks=[tip_rack_partial_1, tip_rack_partial_2],
         )
         # fill last column
         print(len(reservoir.wells()[:7]))

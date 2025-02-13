@@ -34,13 +34,47 @@ def retrieve_version_file(
         return ""
 
 
-def retrieve_protocol_file(
-    protocol_id: str,
-    robot_ip: str,
-    storage: str,
-) -> Path | str:
-    """Find and copy protocol file on robot with error."""
-    protocol_dir = f"/var/lib/opentrons-robot-server/8/protocols/{protocol_id}"
+def retrieve_protocol_file(protocol_id: str, robot_ip: str, storage: str) -> Path | str:
+    """Find and copy protocol file on robot with error handling."""
+    # List folders in the robot's directory
+    list_folder_command = [
+        "ssh",
+        f"root@{robot_ip}",
+        "ls /var/lib/opentrons-robot-server",
+    ]
+    try:
+        result = subprocess.run(
+            list_folder_command, check=True, capture_output=True, text=True
+        )
+        folders = result.stdout.splitlines()
+
+        def convert_to_floats(data: List) -> List:
+            """Convert list to floats."""
+            float_list = []
+            for item in data:
+                try:
+                    float_value = float(item)
+                    float_list.append(float_value)
+                except ValueError:
+                    pass  # Ignore items that cannot be converted to float
+            return float_list
+
+        folders_float = convert_to_floats(folders)
+        if not folders_float:
+            print("No folders found.")
+            return ""
+        folder_num = max(
+            folders_float
+        )  # Assuming the highest folder number is the latest
+        if folder_num.is_integer():
+            folder_num = int(folder_num)
+    except subprocess.CalledProcessError:
+        print("Could not find folder.")
+        return ""
+    protocol_dir = (
+        f"/var/lib/opentrons-robot-server/{folder_num}/protocols/{protocol_id}"
+    )
+
     # Copy protocol file found in robot onto host computer
     save_dir = Path(f"{storage}")
     command = ["scp", "-r", f"root@{robot_ip}:{protocol_dir}", save_dir]
