@@ -1,6 +1,6 @@
 from opentrons import protocol_api
 from opentrons import types
-from opentrons.protocol_api import COLUMN, ALL
+from opentrons.protocol_api import COLUMN, ALL, Labware
 import math
 
 metadata = {
@@ -263,13 +263,13 @@ def run(protocol: protocol_api.ProtocolContext):
 
     # ================================ LISTS ================================
 
-    def nozzlecheck(nozzletype):
+    def nozzlecheck(nozzletype: str, tip_rack: Labware):
         if nozzletype == "R8":
-            p1000.configure_nozzle_layout(style=COLUMN, start="A12")
+            p1000.configure_nozzle_layout(style=COLUMN, start="A12", tip_racks = [tip_rack])
         if nozzletype == "L8":
-            p1000.configure_nozzle_layout(style=COLUMN, start="A1")
+            p1000.configure_nozzle_layout(style=COLUMN, start="A1", tip_racks = [tip_rack])
         if nozzletype == "96":
-            p1000.configure_nozzle_layout(style=ALL)
+            p1000.configure_nozzle_layout(style=ALL, tip_racks = [tip_rack])
 
     # ========== FIRST ROW ===========
     if ONDECK_THERMO == True:
@@ -536,10 +536,10 @@ def run(protocol: protocol_api.ProtocolContext):
             p1000.flow_rate.aspirate = p50_flow_rate_aspirate_default * 0.5
             p1000.flow_rate.dispense = p50_flow_rate_dispense_default * 0.5
             p1000.flow_rate.blow_out = p50_flow_rate_blow_out_default * 0.5
-            nozzlecheck("L8")
+            nozzlecheck("L8", tiprack_50_SCP_1)
             # ===============================================
             for loop, X in enumerate(column_list_1):
-                p1000.pick_up_tip(tiprack_50_SCP_1[reverse_list[loop]])
+                p1000.pick_up_tip()
                 p1000.aspirate(EPH3Vol, EPH3.bottom(z=Deep384_Z_offset + 1))
                 p1000.dispense(EPH3Vol, sample_plate_1[X].bottom(z=PCRPlate_Z_offset))
                 p1000.move_to(sample_plate_1[X].bottom(z=1))
@@ -608,10 +608,10 @@ def run(protocol: protocol_api.ProtocolContext):
             p1000.flow_rate.aspirate = p50_flow_rate_aspirate_default * 0.5
             p1000.flow_rate.dispense = p50_flow_rate_dispense_default * 0.5
             p1000.flow_rate.blow_out = p50_flow_rate_blow_out_default * 0.5
-            nozzlecheck("L8")
+            nozzlecheck("L8", tiprack_50_SCP_2)
             # ===============================================
             for loop, X in enumerate(column_list_1):
-                p1000.pick_up_tip(tiprack_50_SCP_2[reverse_list[loop]])
+                p1000.pick_up_tip()
                 p1000.aspirate(FSMMVol, FSMM.bottom(z=Deep384_Z_offset))
                 p1000.dispense(
                     FSMMVol, sample_plate_1[X].bottom(z=PCRPlate_Z_offset + 1)
@@ -681,10 +681,10 @@ def run(protocol: protocol_api.ProtocolContext):
             p1000.flow_rate.aspirate = p50_flow_rate_aspirate_default * 0.5
             p1000.flow_rate.dispense = p50_flow_rate_dispense_default * 0.5
             p1000.flow_rate.blow_out = p50_flow_rate_blow_out_default * 0.5
-            nozzlecheck("L8")
+            nozzlecheck("L8", tiprack_50_SCP_3)
             # ===============================================
             for loop, X in enumerate(column_list_1):
-                p1000.pick_up_tip(tiprack_50_SCP_3[reverse_list[loop]])
+                p1000.pick_up_tip()
                 p1000.aspirate(
                     SSMMVol,
                     reagent_plate_1.wells_by_name()[SSMM_list[loop]].bottom(
@@ -760,9 +760,9 @@ def run(protocol: protocol_api.ProtocolContext):
         p1000.flow_rate.aspirate = p1000_flow_rate_aspirate_default * 0.5
         p1000.flow_rate.dispense = p1000_flow_rate_dispense_default * 0.5
         p1000.flow_rate.blow_out = p1000_flow_rate_blow_out_default * 0.5
-        nozzlecheck("96")
+        nozzlecheck("96", tiprack_200_1)
         # ===============================================
-        p1000.pick_up_tip(tiprack_200_1["A1"])
+        p1000.pick_up_tip()
         p1000.move_to(AMPure.bottom(z=Deep384_Z_offset + p200_in_Deep384_Z_offset))
         p1000.mix(3, AMPureVol)
         p1000.aspirate(
@@ -829,9 +829,9 @@ def run(protocol: protocol_api.ProtocolContext):
         p1000.flow_rate.aspirate = p1000_flow_rate_aspirate_default * 0.5
         p1000.flow_rate.dispense = p1000_flow_rate_dispense_default * 0.5
         p1000.flow_rate.blow_out = p1000_flow_rate_blow_out_default * 0.5
-        nozzlecheck("96")
+        nozzlecheck("96", tiprack_200_2)
         # ===============================================
-        p1000.pick_up_tip(tiprack_200_2["A1"])
+        p1000.pick_up_tip()
         p1000.aspirate(
             RemoveSup - 100, sample_plate_1["A1"].bottom(z=PCRPlate_Z_offset + 2)
         )
@@ -889,9 +889,9 @@ def run(protocol: protocol_api.ProtocolContext):
         p1000.flow_rate.aspirate = p1000_flow_rate_aspirate_default
         p1000.flow_rate.dispense = p1000_flow_rate_dispense_default
         p1000.flow_rate.blow_out = p1000_flow_rate_blow_out_default
-        nozzlecheck("R8")
+        nozzlecheck("R8", tiprack_200_X)
         # ===============================================
-        p1000.pick_up_tip(tiprack_200_X["A1"])
+        p1000.pick_up_tip()
         for loop, X in enumerate(column_list_1):
             p1000.aspirate(
                 ETOHMaxVol, ETOH_reservoir["A12"].bottom(z=Deepwell_Z_offset + 1)
@@ -930,9 +930,9 @@ def run(protocol: protocol_api.ProtocolContext):
         p1000.flow_rate.aspirate = p1000_flow_rate_aspirate_default * 0.5
         p1000.flow_rate.dispense = p1000_flow_rate_dispense_default * 0.5
         p1000.flow_rate.blow_out = p1000_flow_rate_blow_out_default * 0.5
-        nozzlecheck("96")
+        nozzlecheck("96", tiprack_200_3)
         # ===============================================
-        p1000.pick_up_tip(tiprack_200_3["A1"])
+        p1000.pick_up_tip()
         p1000.aspirate(
             RemoveSup - 100, sample_plate_1["A1"].bottom(z=PCRPlate_Z_offset + 2)
         )
@@ -955,9 +955,9 @@ def run(protocol: protocol_api.ProtocolContext):
         p1000.flow_rate.aspirate = p1000_flow_rate_aspirate_default * 0.5
         p1000.flow_rate.dispense = p1000_flow_rate_dispense_default * 0.5
         p1000.flow_rate.blow_out = p1000_flow_rate_blow_out_default * 0.5
-        nozzlecheck("R8")
+        nozzlecheck("R8", tiprack_200_X)
         # ===============================================
-        p1000.pick_up_tip(tiprack_200_X["A2"])
+        p1000.pick_up_tip()
         for loop, X in enumerate(column_list_1):
             p1000.aspirate(
                 ETOHMaxVol, ETOH_reservoir["A12"].bottom(z=Deepwell_Z_offset + 1)
@@ -1009,9 +1009,9 @@ def run(protocol: protocol_api.ProtocolContext):
         p1000.flow_rate.aspirate = p1000_flow_rate_aspirate_default
         p1000.flow_rate.dispense = p1000_flow_rate_dispense_default
         p1000.flow_rate.blow_out = p1000_flow_rate_blow_out_default
-        nozzlecheck("96")
+        nozzlecheck("96", tiprack_200_4)
         # ===============================================
-        p1000.pick_up_tip(tiprack_200_4["A1"])
+        p1000.pick_up_tip()
         p1000.aspirate(
             RemoveSup - 100, sample_plate_1["A1"].bottom(z=PCRPlate_Z_offset + 2)
         )
@@ -1077,10 +1077,10 @@ def run(protocol: protocol_api.ProtocolContext):
             p1000.flow_rate.aspirate = p1000_flow_rate_aspirate_default
             p1000.flow_rate.dispense = p1000_flow_rate_dispense_default
             p1000.flow_rate.blow_out = p1000_flow_rate_blow_out_default
-            nozzlecheck("R8")
+            nozzlecheck("R8", tiprack_50_SCP_4)
             # ===============================================
             for loop, X in enumerate(column_list_1):
-                p1000.pick_up_tip(tiprack_50_SCP_4[column_list_1[loop]])
+                p1000.pick_up_tip()
                 p1000.aspirate(
                     RSBVol,
                     reagent_plate_1.wells_by_name()[RSB_list[loop]].bottom(
@@ -1156,9 +1156,9 @@ def run(protocol: protocol_api.ProtocolContext):
         p1000.flow_rate.aspirate = p1000_flow_rate_aspirate_default
         p1000.flow_rate.dispense = p1000_flow_rate_dispense_default
         p1000.flow_rate.blow_out = p1000_flow_rate_blow_out_default
-        nozzlecheck("96")
+        nozzlecheck("96", tiprack_50_5)
         # ===============================================
-        p1000.pick_up_tip(tiprack_50_5["A1"])
+        p1000.pick_up_tip()
         p1000.aspirate(TagVol, TAGMIX.bottom(z=Deep384_Z_offset))
         p1000.dispense(TagVol, sample_plate_2["A1"].bottom(z=PCRPlate_Z_offset))
         p1000.aspirate(TransferSup, sample_plate_1["A1"].bottom(z=PCRPlate_Z_offset))
@@ -1243,10 +1243,10 @@ def run(protocol: protocol_api.ProtocolContext):
             p1000.flow_rate.aspirate = p1000_flow_rate_aspirate_default * 0.5
             p1000.flow_rate.dispense = p1000_flow_rate_dispense_default * 0.5
             p1000.flow_rate.blow_out = p1000_flow_rate_blow_out_default * 0.5
-            nozzlecheck("L8")
+            nozzlecheck("L8", tiprack_50_SCP_6)
             # ===============================================
             for loop, X in enumerate(column_list_1):
-                p1000.pick_up_tip(tiprack_50_SCP_6[reverse_list[loop]])
+                p1000.pick_up_tip()
                 p1000.aspirate(TAGSTOPVol, TAGSTOP.bottom(z=PCRPlate_Z_offset))
                 p1000.dispense(
                     TAGSTOPVol, sample_plate_2[X].bottom(z=PCRPlate_Z_offset)
@@ -1339,9 +1339,9 @@ def run(protocol: protocol_api.ProtocolContext):
         p1000.flow_rate.aspirate = p1000_flow_rate_aspirate_default * 0.5
         p1000.flow_rate.dispense = p1000_flow_rate_dispense_default * 0.5
         p1000.flow_rate.blow_out = p1000_flow_rate_blow_out_default * 0.5
-        nozzlecheck("96")
+        nozzlecheck("96", tiprack_200_5)
         # ===============================================
-        p1000.pick_up_tip(tiprack_200_5["A1"])
+        p1000.pick_up_tip()
         p1000.aspirate(RemoveSup, sample_plate_2["A1"].bottom(z=PCRPlate_Z_offset))
         p1000.dispense(RemoveSup, LW_reservoir["A1"].top(z=Deepwell_Z_offset))
         p1000.return_tip()
@@ -1352,9 +1352,9 @@ def run(protocol: protocol_api.ProtocolContext):
         p1000.flow_rate.aspirate = p1000_flow_rate_aspirate_default
         p1000.flow_rate.dispense = p1000_flow_rate_dispense_default
         p1000.flow_rate.blow_out = p1000_flow_rate_blow_out_default
-        nozzlecheck("R8")
+        nozzlecheck("R8", tiprack_200_X)
         # ===============================================
-        p1000.pick_up_tip(tiprack_200_X["A3"])
+        p1000.pick_up_tip()
         for loop, X in enumerate(column_list_1):
             p1000.aspirate(
                 TWBMaxVol,
@@ -1409,9 +1409,9 @@ def run(protocol: protocol_api.ProtocolContext):
         p1000.flow_rate.aspirate = p1000_flow_rate_aspirate_default * 0.5
         p1000.flow_rate.dispense = p1000_flow_rate_dispense_default * 0.5
         p1000.flow_rate.blow_out = p1000_flow_rate_blow_out_default * 0.5
-        nozzlecheck("96")
+        nozzlecheck("96", tiprack_200_6)
         # ===============================================
-        p1000.pick_up_tip(tiprack_200_6["A1"])
+        p1000.pick_up_tip()
         p1000.aspirate(RemoveSup, sample_plate_2["A1"].bottom(z=PCRPlate_Z_offset))
         p1000.dispense(RemoveSup, LW_reservoir["A1"].top(z=Deepwell_Z_offset))
         p1000.return_tip()
@@ -1422,9 +1422,9 @@ def run(protocol: protocol_api.ProtocolContext):
         p1000.flow_rate.aspirate = p1000_flow_rate_aspirate_default
         p1000.flow_rate.dispense = p1000_flow_rate_dispense_default
         p1000.flow_rate.blow_out = p1000_flow_rate_blow_out_default
-        nozzlecheck("R8")
+        nozzlecheck("R8", tiprack_200_X)
         # ===============================================
-        p1000.pick_up_tip(tiprack_200_X["A4"])
+        p1000.pick_up_tip()
         for loop, X in enumerate(column_list_1):
             p1000.aspirate(
                 TWBMaxVol,
@@ -1475,9 +1475,9 @@ def run(protocol: protocol_api.ProtocolContext):
         p1000.flow_rate.aspirate = p1000_flow_rate_aspirate_default * 0.5
         p1000.flow_rate.dispense = p1000_flow_rate_dispense_default * 0.5
         p1000.flow_rate.blow_out = p1000_flow_rate_blow_out_default * 0.5
-        nozzlecheck("96")
+        nozzlecheck("96", tiprack_200_7)
         # ===============================================
-        p1000.pick_up_tip(tiprack_200_7["A1"])
+        p1000.pick_up_tip()
         p1000.aspirate(RemoveSup, sample_plate_2["A1"].bottom(z=PCRPlate_Z_offset))
         p1000.dispense(RemoveSup, LW_reservoir["A1"].top(z=Deepwell_Z_offset))
         p1000.return_tip()
@@ -1488,9 +1488,9 @@ def run(protocol: protocol_api.ProtocolContext):
         p1000.flow_rate.aspirate = p1000_flow_rate_aspirate_default
         p1000.flow_rate.dispense = p1000_flow_rate_dispense_default
         p1000.flow_rate.blow_out = p1000_flow_rate_blow_out_default
-        nozzlecheck("R8")
+        nozzlecheck("R8", tiprack_200_X)
         # ===============================================
-        p1000.pick_up_tip(tiprack_200_X["A5"])
+        p1000.pick_up_tip()
         for loop, X in enumerate(column_list_1):
             p1000.aspirate(
                 TWBMaxVol,
@@ -1544,9 +1544,9 @@ def run(protocol: protocol_api.ProtocolContext):
         p1000.flow_rate.aspirate = p1000_flow_rate_aspirate_default * 0.5
         p1000.flow_rate.dispense = p1000_flow_rate_dispense_default * 0.5
         p1000.flow_rate.blow_out = p1000_flow_rate_blow_out_default * 0.5
-        nozzlecheck("96")
+        nozzlecheck("96", tiprack_200_8)
         # ===============================================
-        p1000.pick_up_tip(tiprack_200_8["A1"])
+        p1000.pick_up_tip()
         p1000.aspirate(RemoveSup, sample_plate_2["A1"].bottom(z=PCRPlate_Z_offset))
         p1000.dispense(RemoveSup, LW_reservoir["A1"].top(z=Deepwell_Z_offset))
         p1000.return_tip()
@@ -1621,9 +1621,9 @@ def run(protocol: protocol_api.ProtocolContext):
         p1000.flow_rate.aspirate = p1000_flow_rate_aspirate_default
         p1000.flow_rate.dispense = p1000_flow_rate_dispense_default
         p1000.flow_rate.blow_out = p1000_flow_rate_blow_out_default
-        nozzlecheck("96")
+        nozzlecheck("96", tiprack_50_7)
         # ===============================================
-        p1000.pick_up_tip(tiprack_50_7["A1"])
+        p1000.pick_up_tip()
         protocol.comment("--> Adding Barcodes")
         p1000.aspirate(BarcodeVol, Barcodes.bottom(z=Deep384_Z_offset))
         p1000.dispense(BarcodeVol, sample_plate_2["A1"].bottom(z=PCRPlate_Z_offset))
@@ -1703,9 +1703,9 @@ def run(protocol: protocol_api.ProtocolContext):
         p1000.flow_rate.aspirate = p1000_flow_rate_aspirate_default
         p1000.flow_rate.dispense = p1000_flow_rate_dispense_default
         p1000.flow_rate.blow_out = p1000_flow_rate_blow_out_default
-        nozzlecheck("96")
+        nozzlecheck("96", tiprack_50_8)
         # ===============================================
-        p1000.pick_up_tip(tiprack_50_8["A1"])
+        p1000.pick_up_tip()
         protocol.comment("--> ADDING AMPure (0.8x)")
         p1000.aspirate(AMPureVol, AMPure.bottom(z=Deepwell_Z_offset))
         p1000.dispense(AMPureVol, CleanupPlate_1["A1"].bottom(z=Deepwell_Z_offset))
@@ -1757,9 +1757,9 @@ def run(protocol: protocol_api.ProtocolContext):
         p1000.flow_rate.aspirate = p1000_flow_rate_aspirate_default
         p1000.flow_rate.dispense = p1000_flow_rate_dispense_default
         p1000.flow_rate.blow_out = p1000_flow_rate_blow_out_default
-        nozzlecheck("96")
+        nozzlecheck("96", tiprack_200_9)
         # ===============================================
-        p1000.pick_up_tip(tiprack_200_9["A1"])
+        p1000.pick_up_tip()
         p1000.aspirate(RemoveSup, CleanupPlate_1["A1"].bottom(z=Deepwell_Z_offset))
         p1000.dispense(RemoveSup, LW_reservoir["A1"].top(z=Deepwell_Z_offset))
         p1000.return_tip()
@@ -1770,9 +1770,9 @@ def run(protocol: protocol_api.ProtocolContext):
         p1000.flow_rate.aspirate = p1000_flow_rate_aspirate_default
         p1000.flow_rate.dispense = p1000_flow_rate_dispense_default
         p1000.flow_rate.blow_out = p1000_flow_rate_blow_out_default
-        nozzlecheck("R8")
+        nozzlecheck("R8", tiprack_200_X)
         # ===============================================
-        p1000.pick_up_tip(tiprack_200_X["A6"])
+        p1000.pick_up_tip()
         for loop, X in enumerate(column_list_1):
             p1000.aspirate(
                 ETOHMaxVol, ETOH_reservoir["A12"].bottom(z=Deepwell_Z_offset)
@@ -1821,9 +1821,9 @@ def run(protocol: protocol_api.ProtocolContext):
         p1000.flow_rate.aspirate = p1000_flow_rate_aspirate_default
         p1000.flow_rate.dispense = p1000_flow_rate_dispense_default
         p1000.flow_rate.blow_out = p1000_flow_rate_blow_out_default
-        nozzlecheck("96")
+        nozzlecheck("96", tiprack_200_10)
         # ===============================================
-        p1000.pick_up_tip(tiprack_200_10["A1"])
+        p1000.pick_up_tip()
         p1000.aspirate(RemoveSup, CleanupPlate_1["A1"].bottom(z=Deepwell_Z_offset))
         p1000.dispense(RemoveSup, LW_reservoir["A1"].top(z=Deepwell_Z_offset))
         p1000.return_tip()
@@ -1834,9 +1834,9 @@ def run(protocol: protocol_api.ProtocolContext):
         p1000.flow_rate.aspirate = p1000_flow_rate_aspirate_default
         p1000.flow_rate.dispense = p1000_flow_rate_dispense_default
         p1000.flow_rate.blow_out = p1000_flow_rate_blow_out_default
-        nozzlecheck("R8")
+        nozzlecheck("R8", tiprack_200_X)
         # ===============================================
-        p1000.pick_up_tip(tiprack_200_X["A7"])
+        p1000.pick_up_tip()
         for loop, X in enumerate(column_list_1):
             p1000.aspirate(
                 ETOHMaxVol, ETOH_reservoir["A12"].bottom(z=Deepwell_Z_offset)
@@ -1885,9 +1885,9 @@ def run(protocol: protocol_api.ProtocolContext):
         p1000.flow_rate.aspirate = p1000_flow_rate_aspirate_default
         p1000.flow_rate.dispense = p1000_flow_rate_dispense_default
         p1000.flow_rate.blow_out = p1000_flow_rate_blow_out_default
-        nozzlecheck("96")
+        nozzlecheck("96", tiprack_200_11)
         # ===============================================
-        p1000.pick_up_tip(tiprack_200_11["A1"])
+        p1000.pick_up_tip()
         p1000.aspirate(RemoveSup, CleanupPlate_1["A1"].bottom(z=Deepwell_Z_offset))
         p1000.dispense(RemoveSup, LW_reservoir["A1"].top(z=Deepwell_Z_offset))
         p1000.return_tip()
@@ -1950,10 +1950,10 @@ def run(protocol: protocol_api.ProtocolContext):
             p1000.flow_rate.aspirate = p1000_flow_rate_aspirate_default
             p1000.flow_rate.dispense = p1000_flow_rate_dispense_default
             p1000.flow_rate.blow_out = p1000_flow_rate_blow_out_default
-            nozzlecheck("R8")
+            nozzlecheck("R8", tiprack_50_SCP_9)
             # ===============================================
             for loop, X in enumerate(column_list_1):
-                p1000.pick_up_tip(tiprack_50_SCP_9[column_list_1[loop]])
+                p1000.pick_up_tip()
                 p1000.aspirate(
                     RSBVol,
                     reagent_plate_1.wells_by_name()[RSB_list[loop]].bottom(
@@ -2113,10 +2113,10 @@ def run(protocol: protocol_api.ProtocolContext):
         p1000.flow_rate.aspirate = p50_flow_rate_aspirate_default * 0.5
         p1000.flow_rate.dispense = p50_flow_rate_dispense_default * 0.5
         p1000.flow_rate.blow_out = p50_flow_rate_blow_out_default * 0.5
-        nozzlecheck("R8")
+        nozzlecheck("R8", tiprack_50_X)
         # ===============================================
         for loop, X in enumerate(pooled_1_list):
-            p1000.pick_up_tip(tiprack_50_X["A1"])
+            p1000.pick_up_tip()
             p1000.aspirate(NHB2Vol, NHB2.bottom(z=0.3))
             p1000.dispense(NHB2Vol, sample_plate_3[pooled_1_list].bottom(z=1))
             p1000.blow_out(sample_plate_3[pooled_1_list].bottom(z=1))
@@ -2128,10 +2128,10 @@ def run(protocol: protocol_api.ProtocolContext):
         p1000.flow_rate.aspirate = p50_flow_rate_aspirate_default * 0.5
         p1000.flow_rate.dispense = p50_flow_rate_dispense_default * 0.5
         p1000.flow_rate.blow_out = p50_flow_rate_blow_out_default * 0.5
-        nozzlecheck("R8")
+        nozzlecheck("R8", tiprack_50_X)
         # ===============================================
         for loop, X in enumerate(pooled_1_list):
-            p1000.pick_up_tip(tiprack_50_X["A2"])
+            p1000.pick_up_tip()
             p1000.aspirate(PanelVol, Panel.bottom(z=0.3))
             p1000.dispense(PanelVol, sample_plate_3[pooled_1_list].bottom(z=1))
             p1000.blow_out(sample_plate_3[pooled_1_list].bottom(z=1))
@@ -2145,14 +2145,14 @@ def run(protocol: protocol_api.ProtocolContext):
         p1000.flow_rate.aspirate = p50_flow_rate_aspirate_default * 0.5
         p1000.flow_rate.dispense = p50_flow_rate_dispense_default * 0.5
         p1000.flow_rate.blow_out = p50_flow_rate_blow_out_default * 0.5
-        nozzlecheck("R8")
+        nozzlecheck("R8", tiprack_50_X)
+        p1000.pick_up_tip()
         # ===============================================
         for loop, X in enumerate(pooled_1_list):
-            p1000.pick_up_tip(tiprack_50_X["A3"])
             p1000.aspirate(EHB2Vol, EHB2.bottom(z=0.3))
             p1000.dispense(EHB2Vol, sample_plate_3[pooled_1_list].bottom(z=1))
             p1000.blow_out(sample_plate_3[pooled_1_list].bottom(z=1))
-            p1000.drop_tip()
+        p1000.drop_tip()
         # ===============================================
 
         if ONDECK_THERMO == True:
@@ -2260,9 +2260,9 @@ def run(protocol: protocol_api.ProtocolContext):
         p1000.flow_rate.aspirate = p50_flow_rate_aspirate_default * 0.5
         p1000.flow_rate.dispense = p50_flow_rate_dispense_default * 0.5
         p1000.flow_rate.blow_out = p50_flow_rate_blow_out_default * 0.5
-        nozzlecheck("R8")
+        nozzlecheck("R8", tiprack_200_X)
         # ===============================================
-        p1000.pick_up_tip(tiprack_200_X["A8"])
+        p1000.pick_up_tip()
         p1000.move_to(sample_plate_3[pooled_1_list].bottom(z=0.3))
         p1000.aspirate(TransferSup + 1, rate=0.25)
         p1000.dispense(TransferSup + 1, CleanupPlate_2["A1"].bottom(z=1))
@@ -2280,9 +2280,9 @@ def run(protocol: protocol_api.ProtocolContext):
         p1000.flow_rate.aspirate = p50_flow_rate_aspirate_default * 0.5
         p1000.flow_rate.dispense = p50_flow_rate_dispense_default * 0.5
         p1000.flow_rate.blow_out = p50_flow_rate_blow_out_default * 0.5
-        nozzlecheck("R8")
+        nozzlecheck("R8", tiprack_200_X)
         # ===============================================
-        p1000.pick_up_tip(tiprack_200_X["A9"])
+        p1000.pick_up_tip()
         p1000.mix(SMBPremix, 200, SMB_1.bottom(z=1))
         p1000.aspirate(SMBVol / 2, SMB_1.bottom(z=1), rate=0.25)
         p1000.dispense(SMBVol / 2, CleanupPlate_2["A1"].top(z=-7), rate=0.25)
@@ -2320,9 +2320,9 @@ def run(protocol: protocol_api.ProtocolContext):
         p1000.flow_rate.aspirate = p50_flow_rate_aspirate_default * 0.5
         p1000.flow_rate.dispense = p50_flow_rate_dispense_default * 0.5
         p1000.flow_rate.blow_out = p50_flow_rate_blow_out_default * 0.5
-        nozzlecheck("R8")
+        nozzlecheck("R8", tiprack_200_X)
         # ===============================================
-        p1000.pick_up_tip(tiprack_200_X["A10"])
+        p1000.pick_up_tip()
         p1000.move_to(CleanupPlate_2["A1"].bottom(4))
         p1000.aspirate(200, rate=0.25)
         p1000.dispense(200, LW_reservoir["A1"].top(z=-7))
@@ -2341,9 +2341,9 @@ def run(protocol: protocol_api.ProtocolContext):
         p1000.flow_rate.aspirate = p50_flow_rate_aspirate_default * 0.5
         p1000.flow_rate.dispense = p50_flow_rate_dispense_default * 0.5
         p1000.flow_rate.blow_out = p50_flow_rate_blow_out_default * 0.5
-        nozzlecheck("R8")
+        nozzlecheck("R8", tiprack_200_X)
         # ===============================================
-        p1000.pick_up_tip(tiprack_200_X["A11"])
+        p1000.pick_up_tip()
         p1000.aspirate(EEWVol, reagent_plate_1[EEW_list[0]].bottom())
         p1000.dispense(EEWVol, CleanupPlate_2["A1"].bottom())
         p1000.drop_tip()
@@ -2360,9 +2360,9 @@ def run(protocol: protocol_api.ProtocolContext):
         p1000.flow_rate.aspirate = p50_flow_rate_aspirate_default * 0.5
         p1000.flow_rate.dispense = p50_flow_rate_dispense_default * 0.5
         p1000.flow_rate.blow_out = p50_flow_rate_blow_out_default * 0.5
-        nozzlecheck("R8")
+        nozzlecheck("R8", tiprack_200_X)
         # ===============================================
-        p1000.pick_up_tip(tiprack_200_X["A12"])
+        p1000.pick_up_tip()
         p1000.move_to(CleanupPlate_2["A1"].bottom(z=3.5))
         p1000.aspirate(RemoveSup - 100, rate=0.25)
         protocol.delay(minutes=0.1)
@@ -2413,9 +2413,9 @@ def run(protocol: protocol_api.ProtocolContext):
         p1000.flow_rate.aspirate = p50_flow_rate_aspirate_default * 0.5
         p1000.flow_rate.dispense = p50_flow_rate_dispense_default * 0.5
         p1000.flow_rate.blow_out = p50_flow_rate_blow_out_default * 0.5
-        nozzlecheck("R8")
+        nozzlecheck("R8", tiprack_200_XX)
         # ===============================================
-        p1000.pick_up_tip(tiprack_200_XX["A1"])
+        p1000.pick_up_tip()
         p1000.aspirate(EEWVol, reagent_plate_1[EEW_list[1]].bottom())
         p1000.dispense(EEWVol, CleanupPlate_2["A1"].bottom())
         p1000.drop_tip()
@@ -2432,9 +2432,9 @@ def run(protocol: protocol_api.ProtocolContext):
         p1000.flow_rate.aspirate = p50_flow_rate_aspirate_default * 0.5
         p1000.flow_rate.dispense = p50_flow_rate_dispense_default * 0.5
         p1000.flow_rate.blow_out = p50_flow_rate_blow_out_default * 0.5
-        nozzlecheck("R8")
+        nozzlecheck("R8", tiprack_200_XX)
         # ===============================================
-        p1000.pick_up_tip(tiprack_200_XX["A2"])
+        p1000.pick_up_tip()
         p1000.move_to(CleanupPlate_2["A1"].bottom(z=3.5))
         p1000.aspirate(RemoveSup - 100, rate=0.25)
         protocol.delay(minutes=0.1)
@@ -2453,9 +2453,9 @@ def run(protocol: protocol_api.ProtocolContext):
         p1000.flow_rate.aspirate = p50_flow_rate_aspirate_default * 0.5
         p1000.flow_rate.dispense = p50_flow_rate_dispense_default * 0.5
         p1000.flow_rate.blow_out = p50_flow_rate_blow_out_default * 0.5
-        nozzlecheck("R8")
+        nozzlecheck("R8", tiprack_200_XX)
         # ===============================================
-        p1000.pick_up_tip(tiprack_200_XX["A3"])
+        p1000.pick_up_tip()
         p1000.aspirate(EEWVol, reagent_plate_1[EEW_list[2]].bottom())
         p1000.dispense(EEWVol, CleanupPlate_2["A1"].bottom())
         p1000.drop_tip()
@@ -2472,9 +2472,9 @@ def run(protocol: protocol_api.ProtocolContext):
         p1000.flow_rate.aspirate = p50_flow_rate_aspirate_default * 0.5
         p1000.flow_rate.dispense = p50_flow_rate_dispense_default * 0.5
         p1000.flow_rate.blow_out = p50_flow_rate_blow_out_default * 0.5
-        nozzlecheck("R8")
+        nozzlecheck("R8", tiprack_200_XX)
         # ===============================================
-        p1000.pick_up_tip(tiprack_200_XX["A4"])
+        p1000.pick_up_tip()
         p1000.move_to(CleanupPlate_2["A1"].bottom(z=3.5))
         p1000.aspirate(RemoveSup - 100, rate=0.25)
         protocol.delay(minutes=0.1)
@@ -2493,9 +2493,9 @@ def run(protocol: protocol_api.ProtocolContext):
         p1000.flow_rate.aspirate = p50_flow_rate_aspirate_default * 0.5
         p1000.flow_rate.dispense = p50_flow_rate_dispense_default * 0.5
         p1000.flow_rate.blow_out = p50_flow_rate_blow_out_default * 0.5
-        nozzlecheck("R8")
+        nozzlecheck("R8", tiprack_200_XX)
         # ===============================================
-        p1000.pick_up_tip(tiprack_200_XX["A5"])
+        p1000.pick_up_tip()
         p1000.aspirate(EEWVol, reagent_plate_1[EEW_list[3]].bottom())
         p1000.dispense(EEWVol, CleanupPlate_2["A1"].bottom())
         p1000.drop_tip()
@@ -2509,9 +2509,9 @@ def run(protocol: protocol_api.ProtocolContext):
         p1000.flow_rate.aspirate = p50_flow_rate_aspirate_default * 0.5
         p1000.flow_rate.dispense = p50_flow_rate_dispense_default * 0.5
         p1000.flow_rate.blow_out = p50_flow_rate_blow_out_default * 0.5
-        nozzlecheck("R8")
+        nozzlecheck("R8", tiprack_200_XX)
         # ===============================================
-        p1000.pick_up_tip(tiprack_200_XX["A5"])
+        p1000.pick_up_tip()
         p1000.move_to(CleanupPlate_2["A1"].bottom(z=0.25))
         p1000.aspirate(TransferSup, rate=0.25)
         p1000.dispense(TransferSup, CleanupPlate_2["A2"].bottom(z=1))
@@ -2529,9 +2529,9 @@ def run(protocol: protocol_api.ProtocolContext):
         p1000.flow_rate.aspirate = p50_flow_rate_aspirate_default * 0.5
         p1000.flow_rate.dispense = p50_flow_rate_dispense_default * 0.5
         p1000.flow_rate.blow_out = p50_flow_rate_blow_out_default * 0.5
-        nozzlecheck("R8")
+        nozzlecheck("R8", tiprack_200_XX)
         # ===============================================
-        p1000.pick_up_tip(tiprack_200_XX["A6"])
+        p1000.pick_up_tip()
         p1000.move_to(CleanupPlate_2["A2"].bottom(z=3.5))
         p1000.aspirate(RemoveSup - 100, rate=0.25)
         protocol.delay(minutes=0.1)
@@ -2549,9 +2549,9 @@ def run(protocol: protocol_api.ProtocolContext):
         p1000.flow_rate.aspirate = p50_flow_rate_aspirate_default * 0.5
         p1000.flow_rate.dispense = p50_flow_rate_dispense_default * 0.5
         p1000.flow_rate.blow_out = p50_flow_rate_blow_out_default * 0.5
-        nozzlecheck("R8")
+        nozzlecheck("R8", tiprack_200_XX)
         # ===============================================
-        p1000.pick_up_tip(tiprack_200_XX["A7"])
+        p1000.pick_up_tip()
         p1000.move_to(CleanupPlate_2["A2"].bottom(z=0.3))
         p1000.aspirate(50, rate=0.25)
         p1000.default_speed = 200
@@ -2593,12 +2593,11 @@ def run(protocol: protocol_api.ProtocolContext):
         p1000.flow_rate.aspirate = p50_flow_rate_aspirate_default * 0.5
         p1000.flow_rate.dispense = p50_flow_rate_dispense_default * 0.5
         p1000.flow_rate.blow_out = p50_flow_rate_blow_out_default * 0.5
-        nozzlecheck("R8")
+        nozzlecheck("R8", tiprack_50_X)
         # ===============================================
-        p1000.pick_up_tip(tiprack_50_X["A4"])
+        p1000.pick_up_tip()
         p1000.aspirate(EluteVol, Elute.bottom(z=0.3))
         p1000.dispense(EluteVol, CleanupPlate_2[pooled_1_list].bottom(z=0.3))
-        p1000.drop_tip()
         # ===============================================
 
         protocol.comment("--> Transfer Elution")
@@ -2606,13 +2605,10 @@ def run(protocol: protocol_api.ProtocolContext):
         p1000.flow_rate.aspirate = p50_flow_rate_aspirate_default * 0.5
         p1000.flow_rate.dispense = p50_flow_rate_dispense_default * 0.5
         p1000.flow_rate.blow_out = p50_flow_rate_blow_out_default * 0.5
-        nozzlecheck("R8")
         # ===============================================
-        p1000.pick_up_tip(tiprack_50_X["A5"])
         p1000.move_to(CleanupPlate_2[pooled_1_list].bottom(z=0.3))
         p1000.aspirate(TransferSup + 1, rate=0.25)
         p1000.dispense(TransferSup + 1, sample_plate_3[pooled_3_list].bottom(z=1))
-        p1000.drop_tip()
         # ===============================================
 
         protocol.comment("--> Adding ET2")
@@ -2622,9 +2618,7 @@ def run(protocol: protocol_api.ProtocolContext):
         p1000.flow_rate.aspirate = p50_flow_rate_aspirate_default * 0.5
         p1000.flow_rate.dispense = p50_flow_rate_dispense_default * 0.5
         p1000.flow_rate.blow_out = p50_flow_rate_blow_out_default * 0.5
-        nozzlecheck("R8")
         # ===============================================
-        p1000.pick_up_tip(tiprack_50_X["A6"])
         p1000.aspirate(ET2Vol, ET2.bottom())
         p1000.dispense(ET2Vol, sample_plate_3[pooled_3_list].bottom())
         p1000.move_to(sample_plate_3[pooled_3_list].bottom())
@@ -2642,12 +2636,11 @@ def run(protocol: protocol_api.ProtocolContext):
         p1000.flow_rate.aspirate = p50_flow_rate_aspirate_default * 0.5
         p1000.flow_rate.dispense = p50_flow_rate_dispense_default * 0.5
         p1000.flow_rate.blow_out = p50_flow_rate_blow_out_default * 0.5
-        nozzlecheck("R8")
+        nozzlecheck("R8", tiprack_50_X)
         # ===============================================
-        p1000.pick_up_tip(tiprack_50_X["A7"])
+        p1000.pick_up_tip()
         p1000.aspirate(PPCVol, PPC.bottom(z=0.5))
         p1000.dispense(PPCVol, sample_plate_3[pooled_3_list].bottom(z=0.5))
-        p1000.drop_tip()
         # ===============================================
 
         protocol.comment("--> Adding EPM")
@@ -2657,9 +2650,7 @@ def run(protocol: protocol_api.ProtocolContext):
         p1000.flow_rate.aspirate = p50_flow_rate_aspirate_default * 0.5
         p1000.flow_rate.dispense = p50_flow_rate_dispense_default * 0.5
         p1000.flow_rate.blow_out = p50_flow_rate_blow_out_default * 0.5
-        nozzlecheck("R8")
         # ===============================================
-        p1000.pick_up_tip(tiprack_50_X["A8"])
         p1000.aspirate(EPMVol, EPM_2.bottom(z=0.5))
         p1000.dispense(EPMVol, sample_plate_3[pooled_3_list].bottom(z=0.5))
         p1000.move_to(sample_plate_3[pooled_3_list].bottom(z=0.5))
@@ -2712,13 +2703,12 @@ def run(protocol: protocol_api.ProtocolContext):
         p1000.flow_rate.aspirate = p50_flow_rate_aspirate_default * 0.5
         p1000.flow_rate.dispense = p50_flow_rate_dispense_default * 0.5
         p1000.flow_rate.blow_out = p50_flow_rate_blow_out_default * 0.5
-        nozzlecheck("L8")
+        nozzlecheck("L8", tiprack_50_X)
         # ===============================================
-        p1000.pick_up_tip(tiprack_50_X["A9"])
+        p1000.pick_up_tip()
         p1000.move_to(sample_plate_3["A1"].bottom(z=0.5))
         p1000.aspirate(TransferSup + 1, rate=0.25)
         p1000.dispense(TransferSup + 1, CleanupPlate_2["A2"].bottom(z=1))
-        p1000.drop_tip()
         # ===============================================
 
         protocol.comment("--> ADDING AMPure (0.8x)")
@@ -2729,9 +2719,7 @@ def run(protocol: protocol_api.ProtocolContext):
         p1000.flow_rate.aspirate = p50_flow_rate_aspirate_default * 0.5
         p1000.flow_rate.dispense = p50_flow_rate_dispense_default * 0.5
         p1000.flow_rate.blow_out = p50_flow_rate_blow_out_default * 0.5
-        nozzlecheck("R8")
         # ===============================================
-        p1000.pick_up_tip(tiprack_50_X["A10"])
         p1000.mix(AMPurePremix, AMPureVol, AMPure.bottom(z=1))
         p1000.aspirate(AMPureVol, AMPure.bottom(z=1), rate=0.25)
         p1000.dispense(AMPureVol, CleanupPlate_2["A2"].bottom(z=1))
@@ -2781,9 +2769,9 @@ def run(protocol: protocol_api.ProtocolContext):
         p1000.flow_rate.aspirate = p50_flow_rate_aspirate_default * 0.5
         p1000.flow_rate.dispense = p50_flow_rate_dispense_default * 0.5
         p1000.flow_rate.blow_out = p50_flow_rate_blow_out_default * 0.5
-        nozzlecheck("R8")
+        nozzlecheck("R8", tiprack_200_XX)
         # ===============================================
-        p1000.pick_up_tip(tiprack_200_XX["A8"])
+        p1000.pick_up_tip()
         p1000.move_to(CleanupPlate_2["A2"].bottom(z=3.5))
         p1000.aspirate(RemoveSup - 100, rate=0.25)
         protocol.delay(minutes=0.1)
@@ -2806,9 +2794,9 @@ def run(protocol: protocol_api.ProtocolContext):
         p1000.flow_rate.aspirate = p50_flow_rate_aspirate_default * 0.5
         p1000.flow_rate.dispense = p50_flow_rate_dispense_default * 0.5
         p1000.flow_rate.blow_out = p50_flow_rate_blow_out_default * 0.5
-        nozzlecheck("R8")
+        nozzlecheck("R8", tiprack_200_XX)
         # ===============================================
-        p1000.pick_up_tip(tiprack_200_XX["A9"])
+        p1000.pick_up_tip()
         p1000.aspirate(ETOHMaxVol, ETOH_reservoir["A12"].bottom(z=1))
         p1000.move_to(ETOH_reservoir["A12"].top(z=0))
         p1000.move_to(ETOH_reservoir["A12"].top(z=-5))
@@ -2831,9 +2819,9 @@ def run(protocol: protocol_api.ProtocolContext):
         p1000.flow_rate.aspirate = p50_flow_rate_aspirate_default * 0.5
         p1000.flow_rate.dispense = p50_flow_rate_dispense_default * 0.5
         p1000.flow_rate.blow_out = p50_flow_rate_blow_out_default * 0.5
-        nozzlecheck("R8")
+        nozzlecheck("R8", tiprack_200_XX)
         # ===============================================
-        p1000.pick_up_tip(tiprack_200_XX["A10"])
+        p1000.pick_up_tip()
         p1000.move_to(CleanupPlate_2["A2"].bottom(z=3.5))
         p1000.aspirate(RemoveSup - 100, rate=0.25)
         protocol.delay(minutes=0.1)
@@ -2856,9 +2844,9 @@ def run(protocol: protocol_api.ProtocolContext):
         p1000.flow_rate.aspirate = p50_flow_rate_aspirate_default * 0.5
         p1000.flow_rate.dispense = p50_flow_rate_dispense_default * 0.5
         p1000.flow_rate.blow_out = p50_flow_rate_blow_out_default * 0.5
-        nozzlecheck("R8")
+        nozzlecheck("R8", tiprack_200_XX)
         # ===============================================
-        p1000.pick_up_tip(tiprack_200_XX["A11"])
+        p1000.pick_up_tip()
         p1000.aspirate(ETOHMaxVol, ETOH_reservoir["A12"].bottom(z=1))
         p1000.move_to(ETOH_reservoir["A12"].top(z=0))
         p1000.move_to(ETOH_reservoir["A12"].top(z=-5))
@@ -2870,7 +2858,6 @@ def run(protocol: protocol_api.ProtocolContext):
         p1000.move_to(CleanupPlate_2["A2"].top(z=5))
         p1000.move_to(CleanupPlate_2["A2"].top(z=0))
         p1000.move_to(CleanupPlate_2["A2"].top(z=5))
-        p1000.drop_tip()
         # ================================================
 
         if DRYRUN == False:
@@ -2881,9 +2868,7 @@ def run(protocol: protocol_api.ProtocolContext):
         p1000.flow_rate.aspirate = p50_flow_rate_aspirate_default * 0.5
         p1000.flow_rate.dispense = p50_flow_rate_dispense_default * 0.5
         p1000.flow_rate.blow_out = p50_flow_rate_blow_out_default * 0.5
-        nozzlecheck("R8")
         # ===============================================
-        p1000.pick_up_tip(tiprack_200_XX["A12"])
         p1000.move_to(CleanupPlate_2["A2"].bottom(z=3.5))
         p1000.aspirate(RemoveSup - 100, rate=0.25)
         protocol.delay(minutes=0.1)
@@ -2930,9 +2915,9 @@ def run(protocol: protocol_api.ProtocolContext):
         p1000.flow_rate.aspirate = p50_flow_rate_aspirate_default * 0.5
         p1000.flow_rate.dispense = p50_flow_rate_dispense_default * 0.5
         p1000.flow_rate.blow_out = p50_flow_rate_blow_out_default * 0.5
-        nozzlecheck("R8")
+        nozzlecheck("R8", tiprack_50_X)
         # ===============================================
-        p1000.pick_up_tip(tiprack_50_X["A11"])
+        p1000.pick_up_tip()
         p1000.aspirate(RSBVol, RSB_1.bottom(z=1))
         p1000.move_to(
             (
@@ -2990,9 +2975,9 @@ def run(protocol: protocol_api.ProtocolContext):
         p1000.flow_rate.aspirate = p50_flow_rate_aspirate_default * 0.5
         p1000.flow_rate.dispense = p50_flow_rate_dispense_default * 0.5
         p1000.flow_rate.blow_out = p50_flow_rate_blow_out_default * 0.5
-        nozzlecheck("R8")
+        nozzlecheck("R8", tiprack_50_X)
         # ===============================================
-        p1000.pick_up_tip(tiprack_50_X["A12"])
+        p1000.pick_up_tip()
         p1000.move_to(CleanupPlate_2["A2"].bottom(z=0.5))
         p1000.aspirate(TransferSup + 1, rate=0.25)
         p1000.dispense(TransferSup + 1, sample_plate_3["A3"].bottom(z=1))
