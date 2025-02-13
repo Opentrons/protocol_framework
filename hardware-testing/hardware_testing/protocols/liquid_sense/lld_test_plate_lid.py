@@ -13,12 +13,13 @@ SLOTS = {
     "dst": ["D3", "D2", "D1", "C1"],
     "tips_200": "A1",
     "diluent_reservoir": "C3",
-    "lids": "D4"
+    "lids": "D4",
 }
 
 SRC_LABWARE = "opentrons_96_wellplate_200ul_pcr_full_skirt"
 DST_LABWARE = "corning_96_wellplate_360ul_flat"
 DILUENT_LABWARE = "nest_12_reservoir_15ml"
+
 
 def get_latest_version(load_name: str) -> int:
     labware_def_location = (
@@ -26,6 +27,7 @@ def get_latest_version(load_name: str) -> int:
     )
     labware_def_latest = sorted(listdir(labware_def_location))[-1]
     return int(labware_def_latest[0])
+
 
 def add_parameters(parameters: ParameterContext):
     parameters.add_int(
@@ -36,7 +38,8 @@ def add_parameters(parameters: ParameterContext):
         default=4,
     )
 
-def run(ctx: ProtocolContext)-> None:
+
+def run(ctx: ProtocolContext) -> None:
     """Run."""
     num_of_plates = ctx.params.num_of_plates
     lids = [ctx.load_labware("plate_lid", SLOTS["lids"])]
@@ -44,7 +47,7 @@ def run(ctx: ProtocolContext)-> None:
         lids.append(lids[-1].load_labware("plate_lid"))
     lids.reverse()
     dst_labwares = []
-    for i in range(num_of_plates+1):
+    for i in range(num_of_plates + 1):
         if i == 0:
             continue
         dst_labware_XX = ctx.load_labware(
@@ -57,14 +60,14 @@ def run(ctx: ProtocolContext)-> None:
     n = 0
     new_stack = []
     for dst_labware in dst_labwares:
-        ctx.move_labware(lids[n], dst_labware, use_gripper = True)
+        ctx.move_labware(lids[n], dst_labware, use_gripper=True)
         if n == 0:
-            ctx.move_labware(lids[n], "C2", use_gripper = True)
+            ctx.move_labware(lids[n], "C2", use_gripper=True)
             new_stack.append(lids[n])
             print("move lid c2")
         else:
-            ctx.move_labware(lids[n], new_stack[-1], use_gripper = True)
+            ctx.move_labware(lids[n], new_stack[-1], use_gripper=True)
             print("move lid to stack")
             new_stack.append(lids[n])
-        n+=1
+        n += 1
     n = 0
