@@ -14,7 +14,7 @@ Welcome to the v8.3.0 release of the Opentrons App! This release adds support fo
 
 ### New Features
 
-- Change the app or Flex touchscreen language to Mandarin in Settings.
+- Change the app or Flex touchscreen language to Mandarin in Settings. This feature is only supported in app v8.3.0 or higher. If you need to downgrade your software version, first change the app language back to English in Settings.
 
 ### Improved Features
 
