@@ -558,7 +558,7 @@ describe('CommandText', () => {
       { i18nInstance: i18n }
     )
     screen.getByText(
-      'Load NEST 96 Well Plate 100 µL PCR Full Skirt in Magnetic Module GEN2 in Slot 1'
+      'Load NEST 96 Well Plate 100 µL PCR Full Skirt (1) in Magnetic Module GEN2 in Slot 1'
     )
   })
   it('renders correct text for loadLabware in adapter', () => {
@@ -627,7 +627,9 @@ describe('CommandText', () => {
       />,
       { i18nInstance: i18n }
     )
-    screen.getByText('Load NEST 96 Well Plate 100 µL PCR Full Skirt off deck')
+    screen.getByText(
+      'Load NEST 96 Well Plate 100 µL PCR Full Skirt (2) off deck'
+    )
   })
   it('renders correct text for reloadLabware', () => {
     const reloadLabwareCommand = mockCommandTextData.commands.find(
