@@ -1072,6 +1072,7 @@ class InstrumentCore(AbstractInstrument[WellCore, LabwareCore]):
         new_tip: TransferTipPolicyV2,
         tip_racks: List[Tuple[Location, LabwareCore]],
         trash_location: Union[Location, TrashBin, WasteChute],
+        return_tip: bool,
     ) -> None:
         """Execute transfer using liquid class properties.
 
@@ -1225,6 +1226,7 @@ class InstrumentCore(AbstractInstrument[WellCore, LabwareCore]):
         new_tip: TransferTipPolicyV2,
         tip_racks: List[Tuple[Location, LabwareCore]],
         trash_location: Union[Location, TrashBin, WasteChute],
+        return_tip: bool,
     ) -> None:
         pass
 
@@ -1237,6 +1239,7 @@ class InstrumentCore(AbstractInstrument[WellCore, LabwareCore]):
         new_tip: TransferTipPolicyV2,
         tip_racks: List[Tuple[Location, LabwareCore]],
         trash_location: Union[Location, TrashBin, WasteChute],
+        return_tip: bool,
     ) -> None:
         if not tip_racks:
             raise RuntimeError(
