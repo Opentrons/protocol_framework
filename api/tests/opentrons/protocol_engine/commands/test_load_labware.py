@@ -317,6 +317,10 @@ async def test_load_labware_in_flex_stacker(
             module_id=FlexStackerId("some-module-id"),
             in_static_mode=False,
             hopper_labware_ids=[],
+            pool_primary_definition=None,
+            pool_adapter_definition=None,
+            pool_lid_definition=None,
+            pool_count=0,
         )
     )
     decoy.when(

@@ -60,4 +60,8 @@ def test_add_module_action(
         module_id=FlexStackerId("someModuleId"),
         in_static_mode=False,
         hopper_labware_ids=[],
+        pool_primary_definition=None,
+        pool_adapter_definition=None,
+        pool_lid_definition=None,
+        pool_count=0,
     )

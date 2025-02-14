@@ -4814,6 +4814,80 @@
       "title": "SetStatusBarParams",
       "type": "object"
     },
+    "SetStoredLabwareCreate": {
+      "description": "A request to execute a Flex Stacker SetStoredLabware command.",
+      "properties": {
+        "commandType": {
+          "const": "flexStacker/setStoredlabware",
+          "default": "flexStacker/setStoredlabware",
+          "enum": ["flexStacker/setStoredlabware"],
+          "title": "Commandtype",
+          "type": "string"
+        },
+        "intent": {
+          "$ref": "#/$defs/CommandIntent",
+          "description": "The reason the command was added. If not specified or `protocol`, the command will be treated as part of the protocol run itself, and added to the end of the existing command queue.\n\nIf `setup`, the command will be treated as part of run setup. A setup command may only be enqueued if the run has not started.\n\nUse setup commands for activities like pre-run calibration checks and module setup, like pre-heating.",
+          "title": "Intent"
+        },
+        "key": {
+          "description": "A key value, unique in this run, that can be used to track the same logical command across multiple runs of the same protocol. If a value is not provided, one will be generated.",
+          "title": "Key",
+          "type": "string"
+        },
+        "params": {
+          "$ref": "#/$defs/SetStoredLabwareParams"
+        }
+      },
+      "required": ["params"],
+      "title": "SetStoredLabwareCreate",
+      "type": "object"
+    },
+    "SetStoredLabwareParams": {
+      "description": "Input parameters for a setStoredLabware command.",
+      "properties": {
+        "adapterLabware": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/StackerStoredLabwareDetails"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The details of the adapter under the primary labware, if any."
+        },
+        "initialCount": {
+          "description": "The number of labware that should be initially stored in the stacker. This number will be silently clamped to the maximum number of labware that will fit; do not rely on the parameter to know how many labware are in the stacker.",
+          "title": "Initialcount",
+          "type": "integer"
+        },
+        "lidLabware": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/StackerStoredLabwareDetails"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The details of the lid on the primary labware, if any."
+        },
+        "moduleId": {
+          "description": "Unique ID of the Flex Stacker.",
+          "title": "Moduleid",
+          "type": "string"
+        },
+        "primaryLabware": {
+          "$ref": "#/$defs/StackerStoredLabwareDetails",
+          "description": "The details of the primary labware (i.e. not the lid or adapter, if any) stored in the stacker."
+        }
+      },
+      "required": ["moduleId", "initialCount", "primaryLabware"],
+      "title": "SetStoredLabwareParams",
+      "type": "object"
+    },
     "SetTargetBlockTemperatureCreate": {
       "description": "A request to create a Thermocycler's set block temperature command.",
       "properties": {
@@ -5083,6 +5157,29 @@
       },
       "required": ["primaryNozzle"],
       "title": "SingleNozzleLayoutConfiguration",
+      "type": "object"
+    },
+    "StackerStoredLabwareDetails": {
+      "description": "The parameters defining a labware to be stored in the stacker.",
+      "properties": {
+        "loadName": {
+          "description": "Name used to reference the definition of this labware.",
+          "title": "Loadname",
+          "type": "string"
+        },
+        "namespace": {
+          "description": "Namespace of the definition of this labware.",
+          "title": "Namespace",
+          "type": "string"
+        },
+        "version": {
+          "description": "Version of the definition of this labware.",
+          "title": "Version",
+          "type": "integer"
+        }
+      },
+      "required": ["loadName", "namespace", "version"],
+      "title": "StackerStoredLabwareDetails",
       "type": "object"
     },
     "StatusBarAnimation": {
@@ -6355,6 +6452,7 @@
       "evotipUnsealPipette": "#/$defs/EvotipUnsealPipetteCreate",
       "flexStacker/configure": "#/$defs/ConfigureCreate",
       "flexStacker/retrieve": "#/$defs/RetrieveCreate",
+      "flexStacker/setStoredlabware": "#/$defs/SetStoredLabwareCreate",
       "flexStacker/store": "#/$defs/StoreCreate",
       "getNextTip": "#/$defs/GetNextTipCreate",
       "getTipPresence": "#/$defs/GetTipPresenceCreate",
@@ -6650,6 +6748,9 @@
     },
     {
       "$ref": "#/$defs/StoreCreate"
+    },
+    {
+      "$ref": "#/$defs/SetStoredLabwareCreate"
     },
     {
       "$ref": "#/$defs/CalibrateGripperCreate"

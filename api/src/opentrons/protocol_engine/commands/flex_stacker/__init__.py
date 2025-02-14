@@ -24,6 +24,14 @@ from .retrieve import (
     RetrieveCreate,
 )
 
+from .set_stored_labware import (
+    SetStoredLabwareCommandType,
+    SetStoredLabwareParams,
+    SetStoredLabwareResult,
+    SetStoredLabware,
+    SetStoredLabwareCreate,
+)
+
 
 __all__ = [
     # flexStacker/configure
@@ -44,4 +52,10 @@ __all__ = [
     "RetrieveResult",
     "Retrieve",
     "RetrieveCreate",
+    # flexStacker/setStoredLabware
+    "SetStoredLabwareCommandType",
+    "SetStoredLabwareParams",
+    "SetStoredLabwareResult",
+    "SetStoredLabware",
+    "SetStoredLabwareCreate",
 ]
