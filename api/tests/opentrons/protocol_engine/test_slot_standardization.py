@@ -11,7 +11,7 @@ from opentrons.protocol_engine import (
     CommandIntent,
     DeckSlotLocation,
     OnLabwareLocation,
-    LabwareLocation,
+    LoadableLabwareLocation,
     LabwareMovementStrategy,
     LabwareOffsetVector,
     ModuleLocation,
@@ -63,9 +63,9 @@ from opentrons.protocol_engine import (
     ],
 )
 def test_standardize_load_labware_command(
-    original_location: LabwareLocation,
+    original_location: LoadableLabwareLocation,
     robot_type: RobotType,
-    expected_location: LabwareLocation,
+    expected_location: LoadableLabwareLocation,
 ) -> None:
     """It should convert deck slots in `LoadLabwareCreate`s."""
     original = commands.LoadLabwareCreate(
@@ -138,9 +138,9 @@ def test_standardize_load_labware_command(
     ],
 )
 def test_standardize_move_labware_command(
-    original_location: LabwareLocation,
+    original_location: LoadableLabwareLocation,
     robot_type: RobotType,
-    expected_location: LabwareLocation,
+    expected_location: LoadableLabwareLocation,
 ) -> None:
     """It should convert deck slots in `MoveLabwareCreate`s."""
     original = commands.MoveLabwareCreate(

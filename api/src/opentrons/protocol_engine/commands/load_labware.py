@@ -12,7 +12,7 @@ from opentrons_shared_data.labware.labware_definition import LabwareDefinition
 from ..errors import LabwareIsNotAllowedInLocationError
 from ..resources import labware_validation, fixture_validation
 from ..types import (
-    LabwareLocation,
+    LoadableLabwareLocation,
     ModuleLocation,
     ModuleModel,
     OnLabwareLocation,
@@ -42,7 +42,7 @@ def _remove_default(s: dict[str, Any]) -> None:
 class LoadLabwareParams(BaseModel):
     """Payload required to load a labware into a slot."""
 
-    location: LabwareLocation = Field(
+    location: LoadableLabwareLocation = Field(
         ...,
         description="Location the labware should be loaded into.",
     )
@@ -96,7 +96,7 @@ class LoadLabwareImplementation(
         self._state_view = state_view
 
     def _is_loading_to_module(
-        self, location: LabwareLocation, module_model: ModuleModel
+        self, location: LoadableLabwareLocation, module_model: ModuleModel
     ) -> TypeGuard[ModuleLocation]:
         if not isinstance(location, ModuleLocation):
             return False
@@ -141,7 +141,7 @@ class LoadLabwareImplementation(
             )
             state_update.set_addressable_area_used(params.location.slotName.id)
 
-        verified_location: LabwareLocation
+        verified_location: LoadableLabwareLocation
         if (
             self._is_loading_to_module(
                 params.location, ModuleModel.FLEX_STACKER_MODULE_V1

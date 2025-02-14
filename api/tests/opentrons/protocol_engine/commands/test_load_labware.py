@@ -19,7 +19,7 @@ from opentrons.protocol_engine.errors import (
 from opentrons.protocol_engine.types import (
     AddressableAreaLocation,
     DeckSlotLocation,
-    LabwareLocation,
+    LoadableLabwareLocation,
     OnLabwareLocation,
     ModuleLocation,
     ModuleModel,
@@ -76,7 +76,7 @@ async def test_load_labware_on_slot_or_addressable_area(
     equipment: EquipmentHandler,
     state_view: StateView,
     display_name: Optional[str],
-    location: LabwareLocation,
+    location: LoadableLabwareLocation,
     expected_addressable_area_name: str,
 ) -> None:
     """A LoadLabware command should have an execution implementation."""

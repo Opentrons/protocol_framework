@@ -49,6 +49,7 @@ from ..types import (
     CurrentPipetteLocation,
     TipGeometry,
     LabwareMovementOffsetData,
+    InStackerHopperLocation,
     OnDeckLabwareLocation,
     AddressableAreaLocation,
     AddressableOffsetVector,
@@ -404,7 +405,11 @@ class GeometryView:
         elif isinstance(location, OnLabwareLocation):
             labware_data = self._labware.get(location.labwareId)
             return self._get_calibrated_module_offset(labware_data.location)
-        elif location == OFF_DECK_LOCATION or location == SYSTEM_LOCATION:
+        elif (
+            location == OFF_DECK_LOCATION
+            or location == SYSTEM_LOCATION
+            or isinstance(location, InStackerHopperLocation)
+        ):
             raise errors.LabwareNotOnDeckError(
                 "Labware does not have a slot or module associated with it"
                 " since it is no longer on the deck."
