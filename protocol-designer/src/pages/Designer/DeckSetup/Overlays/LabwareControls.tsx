@@ -167,6 +167,8 @@ export const LabwareControls = (
           opacity: hoverOpacity,
           ...DECK_CONTROLS_STYLE,
           zIndex: isOver && canDrop ? 10 : 'auto',
+          // NOTE: cursor is inconsistent when dragging due to an active
+          // react dnd bug: https://github.com/react-dnd/react-dnd/issues/325
           cursor: CURSOR_GRAB,
         },
         onMouseEnter: () => {
