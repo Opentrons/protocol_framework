@@ -108,13 +108,10 @@ export const LabwareWithLidAndQuantity: Story = {
   args: {
     type: 'location-colon-location',
     labwareName: 'Labware with lid',
-    subtext: 'lid id',
+    subtext: 'With Tip Rack Lid',
     tagtext: '3',
     currentLocationProps: {
-      slotName: 'A1',
-    },
-    newLocationProps: {
-      slotName: 'B1',
+      slotName: 'STACKER A',
     },
   },
 }
