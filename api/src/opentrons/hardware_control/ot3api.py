@@ -2364,7 +2364,7 @@ class OT3API(
                             home_flagged_axes=False,
                         )
                     else:
-                        target_pos = self._current_position
+                        target_pos = OrderedDict(self._current_position)
                         target_pos[move.scrape_axis] += move.distance
                         self._log.info(f"Moving to target Pos: {target_pos}")
                         await self._move(
