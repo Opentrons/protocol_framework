@@ -69,6 +69,10 @@ async def test_retrieve(
         module_id=FlexStackerId("flex-stacker-id"),
         in_static_mode=in_static_mode,
         hopper_labware_ids=["labware-id"],
+        pool_primary_definition=None,
+        pool_adapter_definition=None,
+        pool_lid_definition=None,
+        pool_count=0,
     )
     fs_hardware = decoy.mock(cls=FlexStacker)
 

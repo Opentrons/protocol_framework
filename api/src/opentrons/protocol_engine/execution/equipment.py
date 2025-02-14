@@ -127,6 +127,39 @@ class EquipmentHandler:
             or pipette_data_provider.VirtualPipetteDataProvider()
         )
 
+    async def load_definition_for_details(
+        self, load_name: str, namespace: str, version: int
+    ) -> tuple[LabwareDefinition, str]:
+        """Load the definition for a labware from the parameters passed for it to a command.
+
+        Args:
+            load_name: The labware's load name.
+            namespace: The labware's namespace.
+            version: The labware's version.
+
+        Returns:
+            A tuple of the loaded LabwareDefinition object and its definition URI.
+        """
+        definition_uri = uri_from_details(
+            load_name=load_name,
+            namespace=namespace,
+            version=version,
+        )
+
+        try:
+            # Try to use existing definition in state.
+            return (
+                self._state_store.labware.get_definition_by_uri(definition_uri),
+                definition_uri,
+            )
+        except LabwareDefinitionDoesNotExistError:
+            definition = await self._labware_data_provider.get_labware_definition(
+                load_name=load_name,
+                namespace=namespace,
+                version=version,
+            )
+            return definition, definition_uri
+
     async def load_labware(
         self,
         load_name: str,
@@ -152,21 +185,9 @@ class EquipmentHandler:
         Returns:
             A LoadedLabwareData object.
         """
-        definition_uri = uri_from_details(
-            load_name=load_name,
-            namespace=namespace,
-            version=version,
+        definition, definition_uri = await self.load_definition_for_details(
+            load_name, namespace, version
         )
-
-        try:
-            # Try to use existing definition in state.
-            definition = self._state_store.labware.get_definition_by_uri(definition_uri)
-        except LabwareDefinitionDoesNotExistError:
-            definition = await self._labware_data_provider.get_labware_definition(
-                load_name=load_name,
-                namespace=namespace,
-                version=version,
-            )
 
         labware_id = (
             labware_id if labware_id is not None else self._model_utils.generate_id()
