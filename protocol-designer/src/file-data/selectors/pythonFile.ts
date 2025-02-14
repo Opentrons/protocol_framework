@@ -221,9 +221,7 @@ export function getDefineLiquids(liquidEntities: LiquidEntities): string {
       const { pythonName, displayColor, displayName, description } = liquid
       const liquidArgs = [
         `${formatPyStr(displayName)}`,
-        ...(description != null
-          ? [`description=${formatPyStr(description)}`]
-          : []),
+        ...(description ? [`description=${formatPyStr(description)}`] : []),
         `display_color=${formatPyStr(displayColor)}`,
       ].join(',\n')
 
