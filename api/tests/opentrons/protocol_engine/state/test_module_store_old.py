@@ -29,7 +29,6 @@ from opentrons.protocol_engine.types import (
     AddressableArea,
     DeckConfigurationType,
     PotentialCutoutFixture,
-    AddressableAreaLocation,
 )
 
 from opentrons.protocol_engine.state.modules import (
@@ -58,6 +57,7 @@ from opentrons.protocol_engine.state.addressable_areas import (
 )
 from opentrons.protocol_engine.state.config import Config
 from opentrons.hardware_control.modules.types import LiveData
+from opentrons.protocol_engine.resources import deck_configuration_provider
 
 
 _OT2_STANDARD_CONFIG = Config(
@@ -230,8 +230,8 @@ def test_load_module(
     assert subject.state == ModuleState(
         deck_type=DeckType.OT2_STANDARD,
         load_location_by_module_id={
-            "module-id": AddressableAreaLocation(
-                addressableAreaName=DeckSlotName.SLOT_1.value
+            "module-id": deck_configuration_provider.get_cutout_id_by_deck_slot_name(
+                DeckSlotName.SLOT_1
             )
         },
         requested_model_by_id={"module-id": params_model},
@@ -287,13 +287,7 @@ def test_load_thermocycler_in_thermocycler_slot(
             ),
         ),
     )
-    load_position_for_module: str | AddressableAreaLocation
-    if robot_type == "OT-2 Standard":
-        load_position_for_module = AddressableAreaLocation(
-            addressableAreaName=tc_slot.value
-        )
-    else:
-        load_position_for_module = f"cutout{tc_slot.value}"
+    load_position_for_module = f"cutout{tc_slot.value}"
 
     subject = ModuleStore(
         Config(

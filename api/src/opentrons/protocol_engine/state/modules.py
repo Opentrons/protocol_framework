@@ -149,8 +149,8 @@ class HardwareModule:
 class ModuleState:
     """The internal data to keep track of loaded modules."""
 
-    load_location_by_module_id: Dict[str, Optional[AddressableAreaLocation | str]]
-    """The Addressable Area (OT-2) or Cutout ID (Flex) that each module has been loaded into.
+    load_location_by_module_id: Dict[str, Optional[str]]
+    """The Cutout ID of the cutout (Flex) or slot (OT-2) that each module has been loaded.
 
     This will be None when the module was added via
     ProtocolEngine.use_attached_modules() instead of an explicit loadModule command.
@@ -310,7 +310,7 @@ class ModuleStore(HasState[ModuleState], HandlesActions):
         if state_update.flex_stacker_state_update != update_types.NO_CHANGE:
             self._handle_flex_stacker_commands(state_update.flex_stacker_state_update)
 
-    def _add_module_substate(  # noqa: C901
+    def _add_module_substate(
         self,
         module_id: str,
         serial_number: Optional[str],
@@ -319,22 +319,12 @@ class ModuleStore(HasState[ModuleState], HandlesActions):
         requested_model: Optional[ModuleModel],
         module_live_data: Optional[LiveData],
     ) -> None:
-        # Loading slot name to Addressable Area (OT-2) or Cutout ID (Flex) resolution
-        load_location: Optional[AddressableAreaLocation | str]
+        # Loading slot name to Cutout ID (Flex)(OT-2) resolution
+        load_location: Optional[str]
         if slot_name is not None:
-            if (
-                self._state.deck_type == DeckType.OT2_STANDARD
-                or self._state.deck_type == DeckType.OT2_SHORT_TRASH
-            ):
-                load_location = AddressableAreaLocation(
-                    addressableAreaName=slot_name.id
-                )
-            else:
-                load_location = (
-                    deck_configuration_provider.get_cutout_id_by_deck_slot_name(
-                        slot_name
-                    )
-                )
+            load_location = deck_configuration_provider.get_cutout_id_by_deck_slot_name(
+                slot_name
+            )
         else:
             load_location = slot_name
 
@@ -657,12 +647,9 @@ class ModuleView:
 
     _state: ModuleState
 
-    def __init__(
-        self, state: ModuleState, addressable_area_view: AddressableAreaView
-    ) -> None:
+    def __init__(self, state: ModuleState) -> None:
         """Initialize the view with its backing state value."""
         self._state = state
-        self._addressable_areas = addressable_area_view
 
     def get(self, module_id: str) -> LoadedModule:
         """Get module data by the module's unique identifier."""
@@ -674,11 +661,7 @@ class ModuleView:
             raise errors.ModuleNotLoadedError(module_id=module_id) from e
 
         slot_name = None
-        if isinstance(load_location, AddressableAreaLocation):
-            slot_name = self._addressable_areas.get_addressable_area_base_slot(
-                load_location.addressableAreaName
-            )
-        elif isinstance(load_location, str):
+        if isinstance(load_location, str):
             slot_name = deck_configuration_provider.get_deck_slot_for_cutout_id(
                 load_location
             )
@@ -708,11 +691,7 @@ class ModuleView:
 
         for module_id, load_location in locations_by_id:
             module_slot: Optional[DeckSlotName]
-            if isinstance(load_location, AddressableAreaLocation):
-                module_slot = self._addressable_areas.get_addressable_area_base_slot(
-                    load_location.addressableAreaName
-                )
-            elif isinstance(load_location, str):
+            if isinstance(load_location, str):
                 module_slot = deck_configuration_provider.get_deck_slot_for_cutout_id(
                     load_location
                 )
@@ -727,7 +706,7 @@ class ModuleView:
         self, addressable_area_name: str
     ) -> Optional[LoadedModule]:
         """Get the module associated with this addressable area, if any."""
-        for module_id in self._state.slot_by_module_id.keys():
+        for module_id in self._state.load_location_by_module_id.keys():
             if addressable_area_name == self.get_provided_addressable_area(module_id):
                 return self.get(module_id)
         return None
@@ -1208,13 +1187,7 @@ class ModuleView:
         load_locations = self._state.load_location_by_module_id.values()
         module_slots = []
         for location in load_locations:
-            if isinstance(location, AddressableAreaLocation):
-                module_slots.append(
-                    self._addressable_areas.get_addressable_area_base_slot(
-                        location.addressableAreaName
-                    )
-                )
-            elif isinstance(location, str):
+            if isinstance(location, str):
                 module_slots.append(
                     deck_configuration_provider.get_deck_slot_for_cutout_id(location)
                 )
@@ -1224,7 +1197,7 @@ class ModuleView:
     def select_hardware_module_to_load(  # noqa: C901
         self,
         model: ModuleModel,
-        location: AddressableAreaLocation,
+        location: str,
         attached_modules: Sequence[HardwareModule],
         expected_serial_number: Optional[str] = None,
     ) -> HardwareModule:
@@ -1257,29 +1230,8 @@ class ModuleView:
             mod_id,
             load_location,
         ) in self._state.load_location_by_module_id.items():
-            if (
-                isinstance(load_location, AddressableAreaLocation)
-                and load_location == location
-            ):
+            if isinstance(load_location, str) and location == load_location:
                 existing_mod_in_slot = self._state.hardware_by_module_id.get(mod_id)
-                break
-            elif isinstance(load_location, str):
-                hw_mod = self._state.hardware_by_module_id.get(mod_id)
-                serial_at_load_location = (
-                    self._addressable_areas.get_serial_number_by_cutout_id(
-                        load_location
-                    )
-                )
-                serial_at_addressable_area = self._addressable_areas.get_fixture_serial_from_deck_configuration_by_addressable_area(
-                    location.addressableAreaName
-                )
-                if (
-                    serial_at_load_location == serial_at_addressable_area
-                    and hw_mod is not None
-                    and hw_mod.serial_number == serial_at_load_location
-                ):
-                    existing_mod_in_slot = hw_mod
-                    break
 
         if existing_mod_in_slot:
             existing_def = existing_mod_in_slot.definition
@@ -1288,12 +1240,7 @@ class ModuleView:
                 return existing_mod_in_slot
 
             else:
-                _err = f" loaded which provides {location.addressableAreaName}"
-                if (
-                    self._state.deck_type == DeckType.OT2_STANDARD
-                    or self._state.deck_type == DeckType.OT2_SHORT_TRASH
-                ):
-                    _err = f" present in {location.addressableAreaName}"
+                _err = f" present in {location}"
                 raise errors.ModuleAlreadyPresentError(
                     f"A {existing_def.model.value} is already" + _err
                 )

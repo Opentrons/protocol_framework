@@ -87,9 +87,7 @@ def subject(
 @pytest.fixture
 def module_view(subject: ModuleStore) -> ModuleView:
     """Get a ModuleView for the ModuleStore."""
-    return ModuleView(
-        state=subject._state, addressable_area_view=get_addressable_area_view()
-    )
+    return ModuleView(state=subject._state)
 
 
 def test_add_module_action(

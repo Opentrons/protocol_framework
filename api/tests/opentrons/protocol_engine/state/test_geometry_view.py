@@ -218,15 +218,7 @@ def module_store(state_config: Config) -> ModuleStore:
 @pytest.fixture
 def module_view(module_store: ModuleStore, state_config: Config) -> ModuleView:
     """Get a module view of a real labware store."""
-    return ModuleView(
-        state=module_store._state,
-        addressable_area_view=addressable_area_view(
-            addressable_area_store=addressable_area_store(
-                state_config=state_config,
-                deck_definition=deck_definition(state_config=state_config),
-            )
-        ),
-    )
+    return ModuleView(state=module_store._state)
 
 
 @pytest.fixture

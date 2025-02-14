@@ -358,10 +358,15 @@ class EquipmentHandler:
             serial_number_at_locaiton = self._state_store.geometry._addressable_areas.get_fixture_serial_from_deck_configuration_by_addressable_area(
                 addressable_area_name=location.addressableAreaName
             )
+            cutout_id = self._state_store.geometry._addressable_areas.get_cutout_id_by_deck_slot_name(
+                slot_name=self._state_store.geometry._addressable_areas.get_addressable_area_base_slot(
+                    location.addressableAreaName
+                )
+            )
 
             attached_module = self._state_store.modules.select_hardware_module_to_load(
                 model=model,
-                location=location,
+                location=cutout_id,
                 attached_modules=attached_modules,
                 expected_serial_number=serial_number_at_locaiton,
             )

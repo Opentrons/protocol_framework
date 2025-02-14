@@ -41,7 +41,6 @@ from opentrons.protocol_engine.types import (
     AddressableArea,
     DeckConfigurationType,
     PotentialCutoutFixture,
-    AddressableAreaLocation,
 )
 from opentrons.protocol_engine.state.modules import (
     ModuleView,
@@ -130,24 +129,16 @@ def make_module_view(
     ] = None,
 ) -> ModuleView:
     """Get a module view test subject with the specified state."""
-    load_location_by_module_id: Dict[str, Optional[AddressableAreaLocation | str]] = {}
+    load_location_by_module_id: Dict[str, Optional[str]] = {}
     if slot_by_module_id is not None:
         for module_id in slot_by_module_id:
             deck_slot = slot_by_module_id[module_id]
             if deck_slot is not None:
-                if (
-                    deck_type is DeckType.OT2_STANDARD
-                    or deck_type is DeckType.OT2_SHORT_TRASH
-                ):
-                    load_location_by_module_id[module_id] = AddressableAreaLocation(
-                        addressableAreaName=deck_slot.value
-                    )
-                else:
-                    load_location_by_module_id[
-                        module_id
-                    ] = deck_configuration_provider.get_cutout_id_by_deck_slot_name(
-                        deck_slot
-                    )
+                load_location_by_module_id[
+                    module_id
+                ] = deck_configuration_provider.get_cutout_id_by_deck_slot_name(
+                    deck_slot
+                )
             else:
                 load_location_by_module_id[module_id] = None
 
@@ -163,7 +154,7 @@ def make_module_view(
         deck_fixed_labware=[],
     )
 
-    return ModuleView(state=state, addressable_area_view=get_addressable_area_view())
+    return ModuleView(state=state)
 
 
 def get_sample_parent_module_view(
@@ -890,8 +881,8 @@ def test_select_hardware_module_to_load_rejects_missing() -> None:
     with pytest.raises(errors.ModuleNotAttachedError):
         subject.select_hardware_module_to_load(
             model=ModuleModel.TEMPERATURE_MODULE_V1,
-            location=AddressableAreaLocation(
-                addressableAreaName=DeckSlotName.SLOT_1.value
+            location=deck_configuration_provider.get_cutout_id_by_deck_slot_name(
+                DeckSlotName.SLOT_1
             ),
             attached_modules=[],
         )
@@ -924,7 +915,9 @@ def test_select_hardware_module_to_load(
 
     result = subject.select_hardware_module_to_load(
         model=requested_model,
-        location=AddressableAreaLocation(addressableAreaName=DeckSlotName.SLOT_1.value),
+        location=deck_configuration_provider.get_cutout_id_by_deck_slot_name(
+            DeckSlotName.SLOT_1
+        ),
         attached_modules=attached_modules,
     )
 
@@ -945,7 +938,9 @@ def test_select_hardware_module_to_load_skips_non_matching(
 
     result = subject.select_hardware_module_to_load(
         model=ModuleModel.MAGNETIC_MODULE_V2,
-        location=AddressableAreaLocation(addressableAreaName=DeckSlotName.SLOT_1.value),
+        location=deck_configuration_provider.get_cutout_id_by_deck_slot_name(
+            DeckSlotName.SLOT_1
+        ),
         attached_modules=attached_modules,
     )
 
@@ -972,7 +967,9 @@ def test_select_hardware_module_to_load_skips_already_loaded(
 
     result = subject.select_hardware_module_to_load(
         model=ModuleModel.MAGNETIC_MODULE_V1,
-        location=AddressableAreaLocation(addressableAreaName=DeckSlotName.SLOT_3.value),
+        location=deck_configuration_provider.get_cutout_id_by_deck_slot_name(
+            DeckSlotName.SLOT_3
+        ),
         attached_modules=attached_modules,
     )
 
@@ -1002,10 +999,11 @@ def test_select_hardware_module_to_load_reuses_already_loaded(
 
     result = subject.select_hardware_module_to_load(
         model=ModuleModel.MAGNETIC_MODULE_V1,
-        location=AddressableAreaLocation(addressableAreaName=DeckSlotName.SLOT_1.value),
+        location=deck_configuration_provider.get_cutout_id_by_deck_slot_name(
+            DeckSlotName.SLOT_1
+        ),
         attached_modules=attached_modules,
     )
-
     assert result == attached_modules[0]
 
 
@@ -1034,8 +1032,8 @@ def test_select_hardware_module_to_load_rejects_location_reassignment(
     with pytest.raises(errors.ModuleAlreadyPresentError):
         subject.select_hardware_module_to_load(
             model=ModuleModel.TEMPERATURE_MODULE_V1,
-            location=AddressableAreaLocation(
-                addressableAreaName=DeckSlotName.SLOT_1.value
+            location=deck_configuration_provider.get_cutout_id_by_deck_slot_name(
+                DeckSlotName.SLOT_1
             ),
             attached_modules=attached_modules,
         )
