@@ -4,46 +4,39 @@ import {
   BORDERS,
   COLORS,
   DIRECTION_COLUMN,
-  EmptySelectorButton,
-  FLEX_MAX_CONTENT,
   Flex,
   ListItem,
   SPACING,
   StyledText,
-  Tooltip,
-  TYPOGRAPHY,
-  useHoverTooltip,
   WRAP,
 } from '@opentrons/components'
 import {
-  ABSORBANCE_READER_V1,
   FLEX_ROBOT_TYPE,
   getModuleDisplayName,
   getModuleType,
 } from '@opentrons/shared-data'
 
 import { uuid } from '../../utils'
-import { useKitchen } from '../../organisms/Kitchen/hooks'
-import { ModuleDiagram } from './ModuleDiagram'
-import { WizardBody } from './WizardBody'
+import { ModuleDiagram } from '../../pages/CreateNewProtocolWizard/ModuleDiagram'
+import { WizardBody } from '../../pages/CreateNewProtocolWizard/WizardBody'
 import {
   DEFAULT_SLOT_MAP_FLEX,
   DEFAULT_SLOT_MAP_OT2,
   FLEX_SUPPORTED_MODULE_MODELS,
   OT2_SUPPORTED_MODULE_MODELS,
-} from './constants'
-import { getNumSlotsAvailable } from './utils'
+} from '../../pages/CreateNewProtocolWizard/constants'
+import { getNumSlotsAvailable } from '../../pages/CreateNewProtocolWizard/utils'
 import { HandleEnter } from '../../atoms/HandleEnter'
-import { PDListItemCustomize as ListItemCustomize } from '../CreateNewProtocolWizard/PDListItemCustomize'
+import { PDListItemCustomize as ListItemCustomize } from '../../pages/CreateNewProtocolWizard/PDListItemCustomize'
+import { AddModuleEmptySelectorButton } from './AddModuleEmptySelectorButton'
 
 import type { ModuleModel, ModuleType } from '@opentrons/shared-data'
 import type { FormModule } from '../../step-forms'
-import type { WizardTileProps } from './types'
+import type { WizardTileProps } from '../../pages/CreateNewProtocolWizard/types'
 
 export function SelectModules(props: WizardTileProps): JSX.Element | null {
   const { goBack, proceed, watch, setValue } = props
   const { t } = useTranslation(['create_new_protocol', 'shared'])
-  const { makeSnackbar } = useKitchen()
   const fields = watch('fields')
   const modules = watch('modules')
   const additionalEquipment = watch('additionalEquipment')
@@ -69,21 +62,17 @@ export function SelectModules(props: WizardTileProps): JSX.Element | null {
     moduleModel: ModuleModel,
     hasNoAvailableSlots: boolean
   ): void => {
-    if (hasNoAvailableSlots) {
-      makeSnackbar(t('slots_limit_reached') as string)
-    } else {
-      setValue('modules', {
-        ...modules,
-        [uuid()]: {
-          model: moduleModel,
-          type: getModuleType(moduleModel),
-          slot:
-            robotType === FLEX_ROBOT_TYPE
-              ? DEFAULT_SLOT_MAP_FLEX[moduleModel]
-              : DEFAULT_SLOT_MAP_OT2[getModuleType(moduleModel)],
-        },
-      })
-    }
+    setValue('modules', {
+      ...modules,
+      [uuid()]: {
+        model: moduleModel,
+        type: getModuleType(moduleModel),
+        slot:
+          robotType === FLEX_ROBOT_TYPE
+            ? DEFAULT_SLOT_MAP_FLEX[moduleModel]
+            : DEFAULT_SLOT_MAP_OT2[getModuleType(moduleModel)],
+      },
+    })
   }
 
   const handleRemoveModule = (moduleType: ModuleType): void => {
@@ -139,6 +128,7 @@ export function SelectModules(props: WizardTileProps): JSX.Element | null {
                       areSlotsAvailable={numSlotsAvailable > 0}
                       hasGripper={hasGripper}
                       handleAddModule={handleAddModule}
+                      tooltipText={t('add_gripper_for_absorbance_reader')}
                     />
                   )
                 })}
@@ -212,43 +202,5 @@ export function SelectModules(props: WizardTileProps): JSX.Element | null {
         </Flex>
       </WizardBody>
     </HandleEnter>
-  )
-}
-
-interface AddModuleEmptySelectorButtonProps {
-  moduleModel: ModuleModel
-  areSlotsAvailable: boolean
-  hasGripper: boolean
-  handleAddModule: (arg0: ModuleModel, arg1: boolean) => void
-}
-
-function AddModuleEmptySelectorButton(
-  props: AddModuleEmptySelectorButtonProps
-): JSX.Element {
-  const { moduleModel, areSlotsAvailable, hasGripper, handleAddModule } = props
-  const { t } = useTranslation('create_new_protocol')
-  const [targetProps, tooltipProps] = useHoverTooltip()
-  const disableGripperRequired =
-    !hasGripper && moduleModel === ABSORBANCE_READER_V1
-
-  return (
-    <>
-      <Flex {...targetProps} width={FLEX_MAX_CONTENT}>
-        <EmptySelectorButton
-          disabled={!areSlotsAvailable || disableGripperRequired}
-          textAlignment={TYPOGRAPHY.textAlignLeft}
-          iconName="plus"
-          text={getModuleDisplayName(moduleModel)}
-          onClick={() => {
-            handleAddModule(moduleModel, !areSlotsAvailable)
-          }}
-        />
-      </Flex>
-      {disableGripperRequired ? (
-        <Tooltip tooltipProps={tooltipProps}>
-          {t('add_gripper_for_absorbance_reader')}
-        </Tooltip>
-      ) : null}
-    </>
   )
 }
