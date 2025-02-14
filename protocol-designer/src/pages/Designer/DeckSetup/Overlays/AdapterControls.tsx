@@ -4,23 +4,25 @@ import { useRef } from 'react'
 import { useDrop } from 'react-dnd'
 import {
   ALIGN_CENTER,
+  COLORS,
   Flex,
   JUSTIFY_CENTER,
   Link,
   RobotCoordsForeignDiv,
   StyledText,
 } from '@opentrons/components'
-import { getLabwareEntities } from '../../../step-forms/selectors'
-import { DND_TYPES } from '../../../constants'
-import { getLabwareIsCustom } from '../../../utils/labwareModuleCompatibility'
-import { moveDeckItem } from '../../../labware-ingred/actions'
-import { selectors as labwareDefSelectors } from '../../../labware-defs'
+import { getLabwareEntities } from '../../../../step-forms/selectors'
+import { DND_TYPES } from '../../../../constants'
+import { getLabwareIsCustom } from '../../../../utils/labwareModuleCompatibility'
+import { moveDeckItem } from '../../../../labware-ingred/actions'
+import { selectors as labwareDefSelectors } from '../../../../labware-defs'
+import { DECK_CONTROLS_STYLE } from '../constants'
 import { BlockedSlot } from './BlockedSlot'
-import { DECK_CONTROLS_STYLE } from './constants'
+import { SlotOverlay } from './SlotOverlay'
 
 import type { DropTargetMonitor } from 'react-dnd'
 import type { Dimensions } from '@opentrons/shared-data'
-import type { SharedControlsType, DroppedItem } from './types'
+import type { SharedControlsType, DroppedItem } from '../types'
 
 interface AdapterControlsProps extends SharedControlsType {
   slotBoundingBox: Dimensions
@@ -100,7 +102,7 @@ export const AdapterControls = (
       },
       collect: (monitor: DropTargetMonitor) => ({
         itemType: monitor.getItemType(),
-        isOver: !!monitor.isOver(),
+        isOver: !!monitor.isOver({ shallow: true }),
         draggedItem: monitor.getItem() as DroppedItem,
       }),
     }),
@@ -132,57 +134,71 @@ export const AdapterControls = (
 
   const hoverOpacity = (hover != null && hover === itemId) || isOver ? '1' : '0'
 
-  return (
-    <g ref={ref}>
-      {isSlotBlocked ? (
-        <BlockedSlot
-          x={slotPosition[0]}
-          y={slotPosition[1]}
-          width={slotBoundingBox.xDimension}
-          height={slotBoundingBox.yDimension}
-          message="LABWARE_INCOMPATIBLE_WITH_ADAPTER"
-        />
-      ) : (
-        <RobotCoordsForeignDiv
-          dataTestId={itemId}
-          x={onDeck ? slotPosition[0] : 0}
-          y={onDeck ? slotPosition[1] : 0}
-          width={slotBoundingBox.xDimension}
-          height={slotBoundingBox.yDimension}
-          innerDivProps={{
-            style: {
-              opacity: hoverOpacity,
-              ...DECK_CONTROLS_STYLE,
-            },
-            onMouseEnter: () => {
-              setHover(itemId)
-            },
-            onMouseLeave: () => {
-              setHover(null)
-            },
-            onClick: () => {
-              if (!isOver) {
-                setShowMenuListForId(itemId)
-              }
-            },
-          }}
-        >
-          <Flex
-            width={slotBoundingBox.xDimension}
-            height={slotBoundingBox.yDimension}
-            alignItems={ALIGN_CENTER}
-            justifyContent={JUSTIFY_CENTER}
-          >
-            <Link role="button">
-              <StyledText desktopStyle="bodyDefaultSemiBold">
-                {isOver
-                  ? t('overlay.slot.place_here')
-                  : t('starting_deck_state:edit_labware')}
-              </StyledText>
-            </Link>
-          </Flex>
-        </RobotCoordsForeignDiv>
-      )}
-    </g>
+  let body = (
+    <RobotCoordsForeignDiv
+      dataTestId={itemId}
+      x={onDeck ? slotPosition[0] : 0}
+      y={onDeck ? slotPosition[1] : 0}
+      width={slotBoundingBox.xDimension}
+      height={slotBoundingBox.yDimension}
+      innerDivProps={{
+        style: {
+          opacity: hoverOpacity,
+          ...DECK_CONTROLS_STYLE,
+        },
+        onMouseEnter: () => {
+          setHover(itemId)
+        },
+        onMouseLeave: () => {
+          setHover(null)
+        },
+        onClick: () => {
+          if (!isOver) {
+            setShowMenuListForId(itemId)
+          }
+        },
+      }}
+    >
+      <Flex
+        width={slotBoundingBox.xDimension}
+        height={slotBoundingBox.yDimension}
+        alignItems={ALIGN_CENTER}
+        justifyContent={JUSTIFY_CENTER}
+      >
+        <Link role="button">
+          <StyledText desktopStyle="bodyLargeSemiBold">
+            {t('starting_deck_state:edit_labware')}
+          </StyledText>
+        </Link>
+      </Flex>
+    </RobotCoordsForeignDiv>
   )
+
+  if (isSlotBlocked) {
+    body = <BlockedSlot slotPosition={slotPosition} slotId={itemId} />
+  } else if (isOver) {
+    body = (
+      <SlotOverlay
+        slotPosition={slotPosition}
+        slotId={itemId}
+        slotFillColor={`${COLORS.black90}cc`}
+        slotFillOpacity="1"
+      >
+        <Flex
+          width={slotBoundingBox.xDimension}
+          height={slotBoundingBox.yDimension}
+          alignItems={ALIGN_CENTER}
+          justifyContent={JUSTIFY_CENTER}
+          color={COLORS.white}
+        >
+          <Link role="button">
+            <StyledText desktopStyle="bodyLargeSemiBold">
+              {t(`overlay.slot.place_here`)}
+            </StyledText>
+          </Link>
+        </Flex>
+      </SlotOverlay>
+    )
+  }
+  return <g ref={ref}>{body}</g>
 }

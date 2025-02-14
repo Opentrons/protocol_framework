@@ -37,12 +37,18 @@ import {
 } from './utils'
 import { SlotWarning } from './SlotWarning'
 import { HighlightItems } from './HighlightItems'
-import { SlotControls } from './SlotControls'
-import { AdapterControls } from './AdapterControls'
-import { LabwareControls } from './LabwareControls'
+import {
+  SlotControls,
+  AdapterControls,
+  LabwareControls,
+  DragPreview,
+} from './Overlays'
 
 import type { ComponentProps, Dispatch, SetStateAction } from 'react'
-import type { ThermocyclerVizProps } from '@opentrons/components'
+import type {
+  RobotCoordinateSpaceWithRefRenderProps,
+  ThermocyclerVizProps,
+} from '@opentrons/components'
 import type {
   ModuleTemporalProperties,
   ThermocyclerModuleState,
@@ -74,6 +80,7 @@ interface DeckSetupDetailsProps extends DeckSetupTabType {
   setHover: Dispatch<SetStateAction<string | null>>
   showGen1MultichannelCollisionWarnings: boolean
   stagingAreaCutoutIds: CutoutId[]
+  getRobotCoordsFromDOMCoords: RobotCoordinateSpaceWithRefRenderProps['getRobotCoordsFromDOMCoords']
   selectedZoomInSlot?: DeckSlotId
 }
 
@@ -91,6 +98,7 @@ export function DeckSetupDetails(props: DeckSetupDetailsProps): JSX.Element {
     setHover,
     showGen1MultichannelCollisionWarnings,
     stagingAreaCutoutIds,
+    getRobotCoordsFromDOMCoords,
   } = props
   const robotType = useSelector(getRobotType)
   const slotIdsBlockedBySpanning = getSlotIdsBlockedBySpanningForThermocycler(
@@ -568,6 +576,7 @@ export function DeckSetupDetails(props: DeckSetupDetailsProps): JSX.Element {
           }}
         />
       ) : null}
+      <DragPreview getRobotCoordsFromDOMCoords={getRobotCoordsFromDOMCoords} />
     </>
   )
 }

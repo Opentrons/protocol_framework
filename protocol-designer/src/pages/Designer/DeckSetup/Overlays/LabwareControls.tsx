@@ -4,21 +4,24 @@ import { useDrag, useDrop } from 'react-dnd'
 import { useEffect, useRef } from 'react'
 import {
   ALIGN_CENTER,
+  COLORS,
   Flex,
   JUSTIFY_CENTER,
   Link,
   RobotCoordsForeignDiv,
   StyledText,
+  TYPOGRAPHY,
 } from '@opentrons/components'
-import { DND_TYPES } from '../../../constants'
-import { moveDeckItem } from '../../../labware-ingred/actions'
-import { DECK_CONTROLS_STYLE } from './constants'
+import { DND_TYPES } from '../../../../constants'
+import { moveDeckItem } from '../../../../labware-ingred/actions'
+import { DECK_CONTROLS_STYLE } from '../constants'
 import { BlockedSlot } from './BlockedSlot'
+import { SlotOverlay } from './SlotOverlay'
 
 import type { DropTargetMonitor } from 'react-dnd'
-import type { LabwareOnDeck } from '../../../step-forms'
-import type { ThunkDispatch } from '../../../types'
-import type { SharedControlsType, DroppedItem } from './types'
+import type { LabwareOnDeck } from '../../../../step-forms'
+import type { ThunkDispatch } from '../../../../types'
+import type { SharedControlsType, DroppedItem } from '../types'
 
 interface LabwareControlsProps extends SharedControlsType {
   labwareOnDeck: LabwareOnDeck
@@ -45,6 +48,7 @@ export const LabwareControls = (
   } = props
   const dispatch = useDispatch<ThunkDispatch<any>>()
   const ref = useRef(null)
+  const canDropRef = useRef(false)
   const { t } = useTranslation(['starting_deck_state', 'deck'])
 
   const [{ isDragging }, drag] = useDrag(
@@ -77,13 +81,17 @@ export const LabwareControls = (
         setHoveredLabware(labwareOnDeck)
       },
       collect: (monitor: DropTargetMonitor) => ({
-        isOver: monitor.isOver(),
+        isOver: monitor.isOver({ shallow: true }),
         draggedLabware: monitor.getItem() as DroppedItem,
         canDrop: monitor.canDrop(),
       }),
     }),
     [labwareOnDeck]
   )
+
+  useEffect(() => {
+    canDropRef.current = canDrop
+  }, [canDrop])
 
   useEffect(() => {
     if (draggedLabware?.labwareOnDeck != null) {
@@ -102,7 +110,8 @@ export const LabwareControls = (
   if (tab === 'protocolSteps' || isSelected || slotPosition == null) {
     return null
   }
-
+  const isLabwareSwapping =
+    draggedLabware?.labwareOnDeck?.slot !== labwareOnDeck.slot
   const [x, y] = slotPosition
   const width = labwareOnDeck.def.dimensions.xDimension
   const height = labwareOnDeck.def.dimensions.yDimension
@@ -110,68 +119,84 @@ export const LabwareControls = (
   const getDisplayText = (): string => {
     if (isDragging) {
       return t('deck:overlay.slot.drag_to_new_slot')
-    }
-    if (isBeingDragged) {
+    } else if (isOver && canDrop) {
+      if (isLabwareSwapping) {
+        return t('deck:overlay.slot.swap_labware')
+      } else {
+        return t('deck:overlay.slot.place_here')
+      }
+    } else if (!isDragging && !isBeingDragged && !isOver && !canDrop) {
+      return t('edit_labware')
+    } else {
       return ''
     }
-    if (isOver && canDrop) {
-      return t('deck:overlay.slot.place_here')
-    }
-    return t('edit_labware')
   }
 
   let hoverOpacity = '0'
-  if (isOver && canDrop) {
-    hoverOpacity = '0.8'
-  } else if (hover === itemId) {
+  if (!isDragging && isBeingDragged) {
+    hoverOpacity = '0'
+  } else if ((isOver && canDrop) || hover === itemId) {
     hoverOpacity = '1'
   }
 
-  return (
-    <>
-      {swapBlocked ? (
-        <BlockedSlot
-          {...{ x, y, width, height }}
-          message="MODULE_INCOMPATIBLE_LABWARE_SWAP"
-        />
-      ) : (
-        <RobotCoordsForeignDiv
-          {...{ x, y, width, height }}
-          dataTestId={itemId}
-          innerDivProps={{
-            style: {
-              opacity: hoverOpacity,
-              ...DECK_CONTROLS_STYLE,
-              zIndex: isOver && canDrop ? 50 : 'auto',
-            },
-            onMouseEnter: () => {
-              setHover(itemId)
-            },
-            onMouseLeave: () => {
-              setHover(null)
-            },
-            onClick: () => {
-              if (!isBeingDragged) {
-                setShowMenuListForId(itemId)
-              }
-            },
-          }}
-        >
-          <Flex
-            ref={ref}
-            width={width}
-            height={height}
-            alignItems={ALIGN_CENTER}
-            justifyContent={JUSTIFY_CENTER}
-          >
-            <Link role="button">
-              <StyledText desktopStyle="bodyDefaultSemiBold">
-                {getDisplayText()}
-              </StyledText>
-            </Link>
-          </Flex>
-        </RobotCoordsForeignDiv>
-      )}
-    </>
+  const hoverInfo = (
+    <Flex
+      ref={ref}
+      width={width}
+      height={height}
+      alignItems={ALIGN_CENTER}
+      justifyContent={JUSTIFY_CENTER}
+      color={COLORS.white}
+      textAlign={TYPOGRAPHY.textAlignCenter}
+    >
+      <Link role="button">
+        <StyledText desktopStyle="bodyLargeSemiBold">
+          {getDisplayText()}
+        </StyledText>
+      </Link>
+    </Flex>
   )
+
+  let body = (
+    <RobotCoordsForeignDiv
+      {...{ x, y, width, height }}
+      dataTestId={itemId}
+      innerDivProps={{
+        style: {
+          opacity: hoverOpacity,
+          ...DECK_CONTROLS_STYLE,
+          zIndex: isOver && canDrop ? 10 : 'auto',
+        },
+        onMouseEnter: () => {
+          setHover(itemId)
+        },
+        onMouseLeave: () => {
+          setHover(null)
+        },
+        onClick: () => {
+          if (!isBeingDragged) {
+            setShowMenuListForId(itemId)
+          }
+        },
+      }}
+    >
+      {hoverInfo}
+    </RobotCoordsForeignDiv>
+  )
+
+  if (swapBlocked) {
+    body = <BlockedSlot slotId={itemId} slotPosition={slotPosition} />
+  } else if (canDropRef.current && isLabwareSwapping) {
+    body = (
+      <SlotOverlay
+        slotId={itemId}
+        slotPosition={slotPosition}
+        slotFillColor={`${COLORS.black90}cc`}
+        slotFillOpacity={hoverOpacity}
+      >
+        {hoverInfo}
+      </SlotOverlay>
+    )
+  }
+  return <>{body}</>
 }

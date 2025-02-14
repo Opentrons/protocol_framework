@@ -6,6 +6,10 @@ import type { DeckDefinition, DeckSlot } from '@opentrons/shared-data'
 
 export interface RobotCoordinateSpaceWithRefRenderProps {
   deckSlotsById: { [slotId: string]: DeckSlot }
+  getRobotCoordsFromDOMCoords: (
+    domX: number,
+    domY: number
+  ) => { x: number; y: number }
 }
 
 interface RobotCoordinateSpaceWithRefProps extends ComponentProps<typeof Svg> {
@@ -20,6 +24,21 @@ export function RobotCoordinateSpaceWithRef(
 ): JSX.Element | null {
   const { children, deckDef, viewBox, zoomed = false, ...restProps } = props
   const wrapperRef = useRef<SVGSVGElement>(null)
+  const getRobotCoordsFromDOMCoords: RobotCoordinateSpaceWithRefRenderProps['getRobotCoordsFromDOMCoords'] = (
+    x,
+    y
+  ) => {
+    if (wrapperRef.current == null) return { x: 0, y: 0 }
+
+    const cursorPoint = wrapperRef.current.createSVGPoint()
+
+    cursorPoint.x = x
+    cursorPoint.y = y
+
+    return cursorPoint.matrixTransform(
+      wrapperRef.current.getScreenCTM()?.inverse()
+    )
+  }
 
   if (deckDef == null && viewBox == null) return null
 
@@ -45,7 +64,7 @@ export function RobotCoordinateSpaceWithRef(
       height="100%"
       {...restProps}
     >
-      {children?.({ deckSlotsById })}
+      {children?.({ deckSlotsById, getRobotCoordsFromDOMCoords })}
     </Svg>
   )
 }
