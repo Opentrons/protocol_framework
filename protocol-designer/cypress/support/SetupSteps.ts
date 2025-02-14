@@ -109,7 +109,7 @@ export enum SetupContent {
   ModulePageH = 'Add your modules',
   ModulePageB = 'Select modules to use in your protocol.',
   EditProtocol = 'Edit protocol',
-  EditSlot = 'Edit slot',
+  EditLabware = 'Edit labware',
   AddLabwareToDeck = 'Add hardware/labware',
   EditHardwareLabwareOnDeck = 'Edit hardware/labware',
   LabwareH = 'Labware',
@@ -124,6 +124,10 @@ export enum SetupContent {
   AddStep = 'Add Step',
   NestDeepWell = 'NEST 96 Deep Well Plate 2mL',
   Save = 'Save',
+}
+
+export const RegexSetupContent = {
+  slotText: /Edit (slot|labware)/i,
 }
 
 export enum SetupLocators {
@@ -167,29 +171,18 @@ const chooseDeckSlot = (
     | 'D3',
     () => Cypress.Chainable<JQuery<HTMLElement>>
   > = {
-    A1: () =>
-      cy.contains('foreignObject[x="0"][y="321"]', SetupContent.EditSlot),
-    A2: () =>
-      cy.contains('foreignObject[x="164"][y="321"]', SetupContent.EditSlot),
-    A3: () =>
-      cy.contains('foreignObject[x="328"][y="321"]', SetupContent.EditSlot),
-    B1: () =>
-      cy.contains('foreignObject[x="0"][y="214"]', SetupContent.EditSlot),
-    B2: () =>
-      cy.contains('foreignObject[x="164"][y="214"]', SetupContent.EditSlot),
-    B3: () =>
-      cy.contains('foreignObject[x="328"][y="214"]', SetupContent.EditSlot),
-    C1: () =>
-      cy.contains('foreignObject[x="0"][y="107"]', SetupContent.EditSlot),
-    C2: () =>
-      cy.contains('foreignObject[x="164"][y="107"]', SetupContent.EditSlot),
-    C3: () =>
-      cy.contains('foreignObject[x="328"][y="107"]', SetupContent.EditSlot),
-    D1: () => cy.contains('foreignObject[x="0"][y="0"]', SetupContent.EditSlot),
-    D2: () =>
-      cy.contains('foreignObject[x="164"][y="0"]', SetupContent.EditSlot),
-    D3: () =>
-      cy.contains('foreignObject[x="328"][y="0"]', SetupContent.EditSlot),
+    A1: () => cy.contains('[data-testid="A1"]', RegexSetupContent.slotText),
+    A2: () => cy.contains('[data-testid="A2"]', RegexSetupContent.slotText),
+    A3: () => cy.contains('[data-testid="A3"]', RegexSetupContent.slotText),
+    B1: () => cy.contains('[data-testid="B1"]', RegexSetupContent.slotText),
+    B2: () => cy.contains('[data-testid="B2"]', RegexSetupContent.slotText),
+    B3: () => cy.contains('[data-testid="B3"]', RegexSetupContent.slotText),
+    C1: () => cy.contains('[data-testid="C1"]', RegexSetupContent.slotText),
+    C2: () => cy.contains('[data-testid="C2"]', RegexSetupContent.slotText),
+    C3: () => cy.contains('[data-testid="C3"]', RegexSetupContent.slotText),
+    D1: () => cy.contains('[data-testid="D1"]', RegexSetupContent.slotText),
+    D2: () => cy.contains('[data-testid="D2"]', RegexSetupContent.slotText),
+    D3: () => cy.contains('[data-testid="D3"]', RegexSetupContent.slotText),
   }
 
   const slotAction = deckSlots[slot as keyof typeof deckSlots]
@@ -300,7 +293,10 @@ export const executeSetupSteps = (action: SetupActions): void => {
       chooseDeckSlot('B3').click()
       break
     case SetupActions.ChoseDeckSlotC1:
-      chooseDeckSlot('C1').click()
+      chooseDeckSlot('C1')
+        .find('a[role="button"]')
+        .contains(RegexSetupContent.slotText)
+        .click({ force: true })
       break
     case SetupActions.ChoseDeckSlotC2:
       chooseDeckSlot('C2').click()
@@ -309,7 +305,6 @@ export const executeSetupSteps = (action: SetupActions): void => {
       chooseDeckSlot('C3').click()
       break
     case SetupActions.ChoseDeckSlotD1:
-      chooseDeckSlot('D1').click()
       break
     case SetupActions.ChoseDeckSlotD2:
       chooseDeckSlot('D2').click()
@@ -321,7 +316,7 @@ export const executeSetupSteps = (action: SetupActions): void => {
       cy.contains(SetupContent.AddLabwareToDeck).click()
       break
     case SetupActions.EditHardwareLabwareOnDeck:
-      cy.contains(SetupContent.EditHardwareLabwareOnDeck).click()
+      cy.contains(SetupContent.EditHardwareLabwareOnDeck).click({ force: true })
       break
     case SetupActions.ClickLabwareHeader:
       cy.contains(SetupContent.LabwareH).click()
@@ -335,7 +330,7 @@ export const executeSetupSteps = (action: SetupActions): void => {
       chooseDeckSlot('C2')
         .find('.Box-sc-8ozbhb-0.kIDovv')
         .find('a[role="button"]')
-        .contains(SetupContent.EditSlot)
+        .contains(RegexSetupContent.slotText)
         .click({ force: true })
       break
     case SetupActions.SelectArmadillo96WellPlate: // New case for selecting Armadillo plate

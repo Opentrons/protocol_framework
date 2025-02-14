@@ -1,44 +1,49 @@
-import { useMemo } from 'react'
 import { useSelector } from 'react-redux'
-
+import { useMemo } from 'react'
 import {
   ALIGN_CENTER,
   BORDERS,
-  COLORS,
+  CURSOR_GRABBING,
   Flex,
   JUSTIFY_CENTER,
   RobotCoordsForeignObject,
   SPACING,
 } from '@opentrons/components'
 import {
+  FLEX_ROBOT_TYPE,
   getCutoutIdForAddressableArea,
   getDeckDefFromRobotType,
   THERMOCYCLER_MODULE_TYPE,
-  FLEX_ROBOT_TYPE,
 } from '@opentrons/shared-data'
-import { getInitialDeckSetup } from '../../step-forms/selectors'
-import {
-  getFlexHoverDimensions,
-  getOT2HoverDimensions,
-} from '../Designer/DeckSetup/utils'
+import { getInitialDeckSetup } from '../../../../step-forms/selectors'
+import { getRobotType } from '../../../../file-data/selectors'
+import { getFlexHoverDimensions, getOT2HoverDimensions } from '../utils'
+
+import type { MutableRefObject, ReactNode } from 'react'
 import type {
+  AddressableAreaName,
   CoordinateTuple,
   DeckSlotId,
-  AddressableAreaName,
-  RobotType,
 } from '@opentrons/shared-data'
-import type { Dispatch, SetStateAction } from 'react'
 
-interface SlotHoverProps {
-  hover: string | null
-  setHover: Dispatch<SetStateAction<string | null>>
+interface SlotOverlayProps {
   slotId: DeckSlotId
   slotPosition: CoordinateTuple | null
-  robotType: RobotType
+  slotFillColor: string
+  slotFillOpacity: string
+  children: ReactNode
+  ref?: MutableRefObject<null>
 }
 
-export function SlotHover(props: SlotHoverProps): JSX.Element | null {
-  const { hover, setHover, slotId, slotPosition, robotType } = props
+export function SlotOverlay(props: SlotOverlayProps): JSX.Element | null {
+  const {
+    slotId,
+    slotPosition,
+    slotFillColor,
+    slotFillOpacity,
+    children,
+  } = props
+  const robotType = useSelector(getRobotType)
   const deckSetup = useSelector(getInitialDeckSetup)
   const { additionalEquipmentOnDeck, modules } = deckSetup
   const deckDef = useMemo(() => getDeckDefFromRobotType(robotType), [])
@@ -60,17 +65,17 @@ export function SlotHover(props: SlotHoverProps): JSX.Element | null {
   if (slotPosition === null || (hasTCOnSlot && tcSlots.includes(slotId)))
     return null
 
-  const hoverOpacity = hover != null && hover === slotId ? '1' : '0'
   const slotFill = (
     <Flex
       alignItems={ALIGN_CENTER}
-      backgroundColor={`${COLORS.black90}cc`}
+      backgroundColor={slotFillColor}
       borderRadius={BORDERS.borderRadius4}
-      color={COLORS.white}
       gridGap={SPACING.spacing8}
       justifyContent={JUSTIFY_CENTER}
       width="100%"
-    />
+    >
+      {children}
+    </Flex>
   )
 
   if (robotType === FLEX_ROBOT_TYPE) {
@@ -84,21 +89,17 @@ export function SlotHover(props: SlotHoverProps): JSX.Element | null {
 
     return (
       <RobotCoordsForeignObject
-        key="flex_hover"
+        key="flex_slotOverlay"
         width={width}
         height={height}
         x={x}
         y={y}
         flexProps={{ flex: '1' }}
         foreignObjectProps={{
-          opacity: hoverOpacity,
+          opacity: slotFillOpacity,
           flex: '1',
-          onMouseEnter: () => {
-            setHover(slotId)
-          },
-          onMouseLeave: () => {
-            setHover(null)
-          },
+          zIndex: 10,
+          cursor: CURSOR_GRABBING,
         }}
       >
         {slotFill}
@@ -112,21 +113,17 @@ export function SlotHover(props: SlotHoverProps): JSX.Element | null {
 
     return (
       <RobotCoordsForeignObject
-        key="ot2_hover"
+        key="ot2_slotOverlay"
         width={width}
         height={height}
         x={x}
         y={y}
         flexProps={{ flex: '1' }}
         foreignObjectProps={{
-          opacity: hoverOpacity,
+          opacity: slotFillOpacity,
           flex: '1',
-          onMouseEnter: () => {
-            setHover(slotId)
-          },
-          onMouseLeave: () => {
-            setHover(null)
-          },
+          zIndex: 10,
+          cursor: CURSOR_GRABBING,
         }}
       >
         {slotFill}
