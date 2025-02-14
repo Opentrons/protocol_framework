@@ -153,6 +153,7 @@ class LabwareDefinition2(TypedDict):
     gripperOffsets: NotRequired[dict[str, GripperOffsets]]
     gripForce: NotRequired[float]
     gripHeightFromLabwareBottom: NotRequired[float]
+    stackLimit: NotRequired[int]
 
 
 class LabwareDefinition3(TypedDict):
