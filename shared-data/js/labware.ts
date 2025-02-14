@@ -123,6 +123,7 @@ import usascientific12Reservoir22MlV1Uncasted from '../labware/definitions/2/usa
 import usascientific96Wellplate24MlDeepV1Uncasted from '../labware/definitions/2/usascientific_96_wellplate_2.4ml_deep/1.json'
 import evotipsFlex96TiprackAdapterV1Uncasted from '../labware/definitions/2/evotips_flex_96_tiprack_adapter/1.json'
 import evotipsOpentrons96LabwareV1Uncasted from '../labware/definitions/2/evotips_opentrons_96_labware/1.json'
+import opentronsFlexTiprackLidV1Uncasted from '../labware/definitions/3/opentrons_flex_tiprack_lid/1.json'
 
 // v1 legacy labware definitions
 
@@ -301,6 +302,7 @@ const usascientific12Reservoir22MlV1 = usascientific12Reservoir22MlV1Uncasted as
 const usascientific96Wellplate24MlDeepV1 = usascientific96Wellplate24MlDeepV1Uncasted as LabwareDefinition2
 const evotipsFlex96TiprackAdapterV1 = evotipsFlex96TiprackAdapterV1Uncasted as LabwareDefinition2
 const evotipsOpentrons96LabwareV1 = evotipsOpentrons96LabwareV1Uncasted as LabwareDefinition2
+const opentronsFlexTiprackLidV1 = opentronsFlexTiprackLidV1Uncasted as LabwareDefinition2
 
 // cast v1 defs
 
@@ -472,6 +474,7 @@ const latestDefs = {
   usascientific96Wellplate24MlDeepV1,
   evotipsFlex96TiprackAdapterV1,
   evotipsOpentrons96LabwareV1,
+  opentronsFlexTiprackLidV1,
 }
 
 // labware definitions
