@@ -17,7 +17,7 @@ SUBMERGE_MM = -1.5
 
 DST_TUBE = "opentrons_24_tuberack_nest_1.5ml_snapcap"  # measure weight (water + scale)
 
-LABWARES = {
+SRC_LABWARES = {
     1: {  # 1ch pipette
         "TUBES_2ML_SCREWCAP": "opentrons_24_tuberack_nest_2ml_screwcap",
         "TUBES_2ML_SNAPCAP": "opentrons_24_tuberack_nest_2ml_snapcap",
@@ -62,6 +62,7 @@ def add_parameters(parameters: ParameterContext) -> None:
             for label, load_name in info.items()
         ],
     )
+    # TODO: create run time parameter for min lld height
 
 
 def get_latest_labware_version(load_name: str) -> int:
@@ -104,4 +105,19 @@ def run(ctx: ProtocolContext) -> None:
     #         - tube is empty, ADD liquid
     #         - aspirate 1000uL (or less) using DYNAMIC-TRACKING
     #         - dispense into an EMPTY tube (1.5mL snapcap)
-    #         -
+    # FUNCTIONS
+    
+    ## 1 - determine min LLD height 
+    ## 2 - find volume between min lld height + 1.5 mm
+    ## 3 - volume of min lld height + 1.5
+    ## 4 - height of 1000 + 3
+    ## 5 - start aspirating at 4
+    # NOTE 1: Fill src_labware with dye in master reservoir 
+    # NOTE 2: aspirate 1000 ul from src_labware - one tube at a time
+        # put lid onto plate (do one at a time)
+        # half will probe before the start of the aspirate (see if submerge depth can be smaller)
+        # half will not
+    # NOTE 3: dispense 1000 ul to X number of corning plate
+        # put plate on heatershaker 
+    # NOTE 4: read with artel - hv dye (goes above 200, no diluent)
+    # NOTE 5: measure the mass of source plate 
