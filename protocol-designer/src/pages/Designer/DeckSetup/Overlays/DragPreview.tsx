@@ -43,7 +43,6 @@ export function DragPreview(props: DragPreviewProps): JSX.Element | null {
         style: {
           opacity: '0.2',
           ...DECK_CONTROLS_STYLE,
-          zIndex: 10,
           position: POSITION_ABSOLUTE,
           cursor: CURSOR_GRABBING,
         },

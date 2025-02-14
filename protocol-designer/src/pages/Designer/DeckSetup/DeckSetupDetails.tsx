@@ -15,10 +15,7 @@ import {
   isAddressableAreaStandardSlot,
   THERMOCYCLER_MODULE_TYPE,
 } from '@opentrons/shared-data'
-import {
-  getSlotIdsBlockedBySpanningForThermocycler,
-  getSlotIsEmpty,
-} from '../../../step-forms'
+import { getSlotIdsBlockedBySpanningForThermocycler } from '../../../step-forms'
 import { selectors } from '../../../labware-ingred/selectors'
 import { getStagingAreaAddressableAreas } from '../../../utils'
 import { editSlotInfo } from '../../../labware-ingred/actions'
@@ -345,6 +342,8 @@ export function DeckSetupDetails(props: DeckSetupDetailsProps): JSX.Element {
                   setHover={setHover}
                   setShowMenuListForId={setShowMenuListForId}
                   isSelected={selectedZoomInSlot != null}
+                  deckDef={deckDef}
+                  stagingAreaAddressableAreas={[]}
                 />
               ) : null}
             </Module>
@@ -381,11 +380,13 @@ export function DeckSetupDetails(props: DeckSetupDetailsProps): JSX.Element {
             stagingAreaAddressableAreas.includes(addressableArea.id)
           return (
             addressableAreas &&
-            !slotIdsBlockedBySpanning.includes(addressableArea.id) &&
-            getSlotIsEmpty(activeDeckSetup, addressableArea.id)
+            !slotIdsBlockedBySpanning.includes(addressableArea.id)
           )
         })
         .map(addressableArea => {
+          const stagingAreaAddressableAreas = getStagingAreaAddressableAreas(
+            stagingAreaCutoutIds
+          )
           return (
             <SlotControls
               tab={tab}
@@ -403,6 +404,8 @@ export function DeckSetupDetails(props: DeckSetupDetailsProps): JSX.Element {
               setHover={setHover}
               setShowMenuListForId={setShowMenuListForId}
               isSelected={selectedZoomInSlot != null}
+              deckDef={deckDef}
+              stagingAreaAddressableAreas={stagingAreaAddressableAreas}
             />
           )
         })}

@@ -6,6 +6,7 @@ import type { DeckDefinition, DeckSlot } from '@opentrons/shared-data'
 
 export interface RobotCoordinateSpaceWithRefRenderProps {
   deckSlotsById: { [slotId: string]: DeckSlot }
+  //  used for PD's drag/drop DragPreview
   getRobotCoordsFromDOMCoords: (
     domX: number,
     domY: number

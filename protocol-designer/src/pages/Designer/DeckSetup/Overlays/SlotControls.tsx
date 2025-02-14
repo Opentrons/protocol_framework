@@ -12,22 +12,33 @@ import {
   RobotCoordsForeignDiv,
   StyledText,
 } from '@opentrons/components'
-import { DND_TYPES } from '../../../../constants'
+import { getCutoutIdFromAddressableArea } from '@opentrons/shared-data'
+
 import {
   getLabwareIsCompatible,
   getLabwareIsCustom,
 } from '../../../../utils/labwareModuleCompatibility'
+import { getAdditionalEquipmentEntities } from '../../../../step-forms/selectors'
 import { moveDeckItem } from '../../../../labware-ingred/actions'
 import { selectors as labwareDefSelectors } from '../../../../labware-defs'
+import { DND_TYPES } from '../../../../constants'
 import { DECK_CONTROLS_STYLE } from '../constants'
 import { BlockedSlot } from './BlockedSlot'
 import { SlotOverlay } from './SlotOverlay'
 
 import type { DropTargetMonitor } from 'react-dnd'
-import type { Dimensions, ModuleType } from '@opentrons/shared-data'
+import type {
+  Dimensions,
+  ModuleType,
+  DeckDefinition,
+  CutoutId,
+  AddressableAreaName,
+} from '@opentrons/shared-data'
 import type { SharedControlsType, DroppedItem } from '../types'
 
 interface SlotControlsProps extends SharedControlsType {
+  stagingAreaAddressableAreas: AddressableAreaName[]
+  deckDef: DeckDefinition
   slotBoundingBox: Dimensions
   //  NOTE: slotId can be either AddressableAreaName or moduleId
   slotId: string
@@ -48,13 +59,26 @@ export const SlotControls = (props: SlotControlsProps): JSX.Element | null => {
     itemId,
     tab,
     isSelected,
+    deckDef,
+    stagingAreaAddressableAreas,
   } = props
   const customLabwareDefs = useSelector(
     labwareDefSelectors.getCustomLabwareDefsByURI
   )
+  const additionalEquipment = useSelector(getAdditionalEquipmentEntities)
+  const cutoutId = getCutoutIdFromAddressableArea(itemId, deckDef)
+  const trashSlots = Object.values(additionalEquipment)
+    .filter(ae => ae.name === 'trashBin' || ae.name === 'wasteChute')
+    ?.map(ae => ae.location as CutoutId)
+
+  const hasTrash = cutoutId != null ? trashSlots.includes(cutoutId) : false
+  const hasTrashAndNotD4 =
+    hasTrash &&
+    //  to allow for drag/drop into D4 next to a waste chute
+    !stagingAreaAddressableAreas.includes(itemId as AddressableAreaName)
+
   const ref = useRef(null)
   const dispatch = useDispatch()
-
   const { t } = useTranslation(['deck', 'starting_deck_state'])
 
   const [, drag] = useDrag({
@@ -66,13 +90,12 @@ export const SlotControls = (props: SlotControlsProps): JSX.Element | null => {
     () => ({
       accept: DND_TYPES.LABWARE,
       canDrop: (item: DroppedItem) => {
-        const draggedDef = item?.labwareOnDeck?.def
+        const draggedLabware = item?.labwareOnDeck
         console.assert(
-          draggedDef,
+          draggedLabware,
           'no labware def of dragged item, expected it on drop'
         )
-
-        if (moduleType != null && draggedDef != null) {
+        if (moduleType != null && draggedLabware.def != null) {
           // this is a module slot, prevent drop if the dragged labware is not compatible
           const isCustomLabware = getLabwareIsCustom(
             customLabwareDefs,
@@ -80,10 +103,12 @@ export const SlotControls = (props: SlotControlsProps): JSX.Element | null => {
           )
 
           return (
-            getLabwareIsCompatible(draggedDef, moduleType) || isCustomLabware
+            getLabwareIsCompatible(draggedLabware.def, moduleType) ||
+            isCustomLabware
           )
         }
-        return true
+
+        return !hasTrashAndNotD4
       },
       drop: (item: DroppedItem) => {
         const droppedLabware = item
@@ -123,10 +148,11 @@ export const SlotControls = (props: SlotControlsProps): JSX.Element | null => {
 
   const isSlotBlocked =
     isOver &&
-    moduleType != null &&
-    draggedDef != null &&
-    !getLabwareIsCompatible(draggedDef, moduleType) &&
-    !isCustomLabware
+    ((moduleType != null &&
+      draggedDef != null &&
+      !getLabwareIsCompatible(draggedDef, moduleType) &&
+      !isCustomLabware) ||
+      hasTrashAndNotD4)
 
   drag(drop(ref))
 

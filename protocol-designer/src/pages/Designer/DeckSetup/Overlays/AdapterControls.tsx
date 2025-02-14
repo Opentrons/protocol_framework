@@ -12,11 +12,11 @@ import {
   RobotCoordsForeignDiv,
   StyledText,
 } from '@opentrons/components'
-import { getLabwareEntities } from '../../../../step-forms/selectors'
-import { DND_TYPES } from '../../../../constants'
 import { getLabwareIsCustom } from '../../../../utils/labwareModuleCompatibility'
+import { getLabwareEntities } from '../../../../step-forms/selectors'
 import { moveDeckItem } from '../../../../labware-ingred/actions'
 import { selectors as labwareDefSelectors } from '../../../../labware-defs'
+import { DND_TYPES } from '../../../../constants'
 import { DECK_CONTROLS_STYLE } from '../constants'
 import { BlockedSlot } from './BlockedSlot'
 import { SlotOverlay } from './SlotOverlay'
