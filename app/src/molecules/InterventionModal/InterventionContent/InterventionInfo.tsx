@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { css } from 'styled-components'
 
 import {
@@ -29,6 +30,7 @@ export interface InterventionInfoProps {
 
 export function InterventionInfo(props: InterventionInfoProps): JSX.Element {
   const content = buildContent(props)
+  const { t } = useTranslation('protocol_setup')
 
   return (
     <Flex
@@ -61,7 +63,7 @@ export function InterventionInfo(props: InterventionInfoProps): JSX.Element {
           </StyledText>
         ) : null}
         {props.tagtext != null ? (
-            <Tag type="default" text={'Quantity: ' + props.tagtext} shrinkToContent={true}/>
+            <Tag type="default" text={t('labware_quantity', { quantity: props.tagtext })} shrinkToContent={true}/>
         ) : null}
       </Flex>
       <Divider
