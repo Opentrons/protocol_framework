@@ -23,7 +23,7 @@ from .types import (
     OFF_DECK_LOCATION,
     SYSTEM_LOCATION,
     DeckSlotLocation,
-    LabwareLocation,
+    LoadableLabwareLocation,
     AddressableAreaLocation,
     ModuleLocation,
     OnLabwareLocation,
@@ -101,13 +101,18 @@ _standardize_command_functions: Dict[
 
 
 def _standardize_labware_location(
-    original: LabwareLocation, robot_type: RobotType
-) -> LabwareLocation:
+    original: LoadableLabwareLocation, robot_type: RobotType
+) -> LoadableLabwareLocation:
     if isinstance(original, DeckSlotLocation):
         return _standardize_deck_slot_location(original, robot_type)
     elif (
         isinstance(
-            original, (ModuleLocation, OnLabwareLocation, AddressableAreaLocation)
+            original,
+            (
+                ModuleLocation,
+                OnLabwareLocation,
+                AddressableAreaLocation,
+            ),
         )
         or original == OFF_DECK_LOCATION
         or original == SYSTEM_LOCATION
