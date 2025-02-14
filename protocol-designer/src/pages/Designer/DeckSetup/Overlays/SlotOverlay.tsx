@@ -3,6 +3,7 @@ import { useMemo } from 'react'
 import {
   ALIGN_CENTER,
   BORDERS,
+  CURSOR_GRABBING,
   Flex,
   JUSTIFY_CENTER,
   RobotCoordsForeignObject,
@@ -98,7 +99,7 @@ export function SlotOverlay(props: SlotOverlayProps): JSX.Element | null {
           opacity: slotFillOpacity,
           flex: '1',
           zIndex: 10,
-          cursor: 'pointer',
+          cursor: CURSOR_GRABBING,
         }}
       >
         {slotFill}
@@ -122,7 +123,7 @@ export function SlotOverlay(props: SlotOverlayProps): JSX.Element | null {
           opacity: slotFillOpacity,
           flex: '1',
           zIndex: 10,
-          cursor: 'pointer',
+          cursor: CURSOR_GRABBING,
         }}
       >
         {slotFill}

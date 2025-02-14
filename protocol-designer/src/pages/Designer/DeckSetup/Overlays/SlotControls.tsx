@@ -5,6 +5,7 @@ import { useDrop, useDrag } from 'react-dnd'
 import {
   ALIGN_CENTER,
   COLORS,
+  CURSOR_POINTER,
   Flex,
   JUSTIFY_CENTER,
   Link,
@@ -198,7 +199,7 @@ export const SlotControls = (props: SlotControlsProps): JSX.Element | null => {
     )
   }
   return (
-    <g ref={ref} style={{ cursor: 'pointer' }}>
+    <g ref={ref} style={{ cursor: CURSOR_POINTER }}>
       {body}
     </g>
   )

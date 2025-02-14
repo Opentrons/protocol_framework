@@ -16,7 +16,7 @@ export function BlockedSlot(props: BlockedSlotProps): JSX.Element | null {
       slotFillOpacity="0.8"
       slotFillColor={COLORS.white}
     >
-      <Icon size="2.25rem" name="alert-circle" color={COLORS.red50} />
+      <Icon size="2.25rem" name="no-icon" color={COLORS.red50} />
     </SlotOverlay>
   )
 }

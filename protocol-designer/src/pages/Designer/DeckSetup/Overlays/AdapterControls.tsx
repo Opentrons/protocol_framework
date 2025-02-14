@@ -5,6 +5,7 @@ import { useDrop } from 'react-dnd'
 import {
   ALIGN_CENTER,
   COLORS,
+  CURSOR_POINTER,
   Flex,
   JUSTIFY_CENTER,
   Link,
@@ -200,5 +201,9 @@ export const AdapterControls = (
       </SlotOverlay>
     )
   }
-  return <g ref={ref}>{body}</g>
+  return (
+    <g ref={ref} style={{ cursor: CURSOR_POINTER }}>
+      {body}
+    </g>
+  )
 }

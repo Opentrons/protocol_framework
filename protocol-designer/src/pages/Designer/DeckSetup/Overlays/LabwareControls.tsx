@@ -5,6 +5,7 @@ import { useEffect, useRef } from 'react'
 import {
   ALIGN_CENTER,
   COLORS,
+  CURSOR_GRAB,
   Flex,
   JUSTIFY_CENTER,
   Link,
@@ -166,6 +167,7 @@ export const LabwareControls = (
           opacity: hoverOpacity,
           ...DECK_CONTROLS_STYLE,
           zIndex: isOver && canDrop ? 10 : 'auto',
+          cursor: CURSOR_GRAB,
         },
         onMouseEnter: () => {
           setHover(itemId)

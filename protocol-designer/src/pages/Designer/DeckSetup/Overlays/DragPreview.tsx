@@ -1,10 +1,13 @@
 import { useDragLayer } from 'react-dnd'
 import {
   ALIGN_CENTER,
+  CURSOR_GRABBING,
   Flex,
   JUSTIFY_CENTER,
+  POSITION_ABSOLUTE,
   RobotCoordsForeignDiv,
 } from '@opentrons/components'
+import { DND_TYPES } from '../../../../constants'
 import { DECK_CONTROLS_STYLE } from '../constants'
 import type { RobotCoordinateSpaceWithRefRenderProps } from '@opentrons/components'
 import type { DroppedItem } from '../types'
@@ -15,12 +18,13 @@ interface DragPreviewProps {
 
 export function DragPreview(props: DragPreviewProps): JSX.Element | null {
   const { getRobotCoordsFromDOMCoords } = props
-  const { item, currentOffset } = useDragLayer(monitor => ({
+  const { item, currentOffset, itemType } = useDragLayer(monitor => ({
+    itemType: monitor.getItemType(),
     item: monitor.getItem() as DroppedItem,
     currentOffset: monitor.getSourceClientOffset(),
   }))
 
-  if (!currentOffset || !item) {
+  if (!currentOffset || !item || itemType !== DND_TYPES.LABWARE) {
     return null
   }
 
@@ -40,8 +44,8 @@ export function DragPreview(props: DragPreviewProps): JSX.Element | null {
           opacity: '0.2',
           ...DECK_CONTROLS_STYLE,
           zIndex: 10,
-          position: 'absolute',
-          cursor: 'grabbing',
+          position: POSITION_ABSOLUTE,
+          cursor: CURSOR_GRABBING,
         },
       }}
     >
