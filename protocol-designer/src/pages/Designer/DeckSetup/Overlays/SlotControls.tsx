@@ -197,5 +197,9 @@ export const SlotControls = (props: SlotControlsProps): JSX.Element | null => {
       </SlotOverlay>
     )
   }
-  return <g ref={ref}>{body}</g>
+  return (
+    <g ref={ref} style={{ cursor: 'pointer' }}>
+      {body}
+    </g>
+  )
 }

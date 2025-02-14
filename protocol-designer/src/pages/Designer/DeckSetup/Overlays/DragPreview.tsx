@@ -17,9 +17,9 @@ export function DragPreview(props: DragPreviewProps): JSX.Element | null {
   const { getRobotCoordsFromDOMCoords } = props
   const { item, currentOffset } = useDragLayer(monitor => ({
     item: monitor.getItem() as DroppedItem,
-    isDragging: monitor.isDragging(),
     currentOffset: monitor.getSourceClientOffset(),
   }))
+
   if (!currentOffset || !item) {
     return null
   }
@@ -40,6 +40,7 @@ export function DragPreview(props: DragPreviewProps): JSX.Element | null {
           opacity: '0.2',
           ...DECK_CONTROLS_STYLE,
           zIndex: 10,
+          position: 'absolute',
           cursor: 'grabbing',
         },
       }}

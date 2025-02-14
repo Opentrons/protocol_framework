@@ -16,6 +16,7 @@ import {
 } from '@opentrons/shared-data'
 import { getInitialDeckSetup } from '../../../../step-forms/selectors'
 import { getRobotType } from '../../../../file-data/selectors'
+import { getFlexHoverDimensions, getOT2HoverDimensions } from '../utils'
 
 import type { MutableRefObject, ReactNode } from 'react'
 import type {
@@ -32,8 +33,6 @@ interface SlotOverlayProps {
   children: ReactNode
   ref?: MutableRefObject<null>
 }
-
-const FOURTH_COLUMN_SLOTS = ['A4', 'B4', 'C4', 'D4']
 
 export function SlotOverlay(props: SlotOverlayProps): JSX.Element | null {
   const {
@@ -79,45 +78,21 @@ export function SlotOverlay(props: SlotOverlayProps): JSX.Element | null {
   )
 
   if (robotType === FLEX_ROBOT_TYPE) {
-    const hasStagingArea = stagingAreaLocations.includes(cutoutId)
-
-    const X_ADJUSTMENT_LEFT_SIDE = -101.5
-    const X_ADJUSTMENT = -17
-    const X_DIMENSION_MIDDLE_SLOTS = 160.3
-    const X_DIMENSION_OUTER_SLOTS = hasStagingArea ? 160.0 : 246.5
-    const X_DIMENSION_4TH_COLUMN_SLOTS = 175.0
-    const Y_DIMENSION = hasTCOnSlot ? 294.0 : 106.0
-
-    const slotFromCutout = slotId
-    const isLeftSideofDeck =
-      slotFromCutout === 'A1' ||
-      slotFromCutout === 'B1' ||
-      slotFromCutout === 'C1' ||
-      slotFromCutout === 'D1'
-    const xAdjustment = isLeftSideofDeck ? X_ADJUSTMENT_LEFT_SIDE : X_ADJUSTMENT
-    const x = slotPosition[0] + xAdjustment
-
-    const yAdjustment = -10
-    const y = slotPosition[1] + yAdjustment
-
-    const isMiddleOfDeck =
-      slotId === 'A2' || slotId === 'B2' || slotId === 'C2' || slotId === 'D2'
-
-    let xDimension = X_DIMENSION_OUTER_SLOTS
-    if (isMiddleOfDeck) {
-      xDimension = X_DIMENSION_MIDDLE_SLOTS
-    } else if (FOURTH_COLUMN_SLOTS.includes(slotId)) {
-      xDimension = X_DIMENSION_4TH_COLUMN_SLOTS
-    }
-    const yDimension = Y_DIMENSION
+    const { width, height, x, y } = getFlexHoverDimensions(
+      stagingAreaLocations,
+      cutoutId,
+      slotId,
+      hasTCOnSlot != null,
+      slotPosition
+    )
 
     return (
       <RobotCoordsForeignObject
-        key="flex_blockedSlot"
-        width={xDimension}
-        height={yDimension}
-        x={hasTCOnSlot ? x + 20 : x}
-        y={hasTCOnSlot ? y - 70 : y}
+        key="flex_slotOverlay"
+        width={width}
+        height={height}
+        x={x}
+        y={y}
         flexProps={{ flex: '1' }}
         foreignObjectProps={{
           opacity: slotFillOpacity,
@@ -130,16 +105,18 @@ export function SlotOverlay(props: SlotOverlayProps): JSX.Element | null {
       </RobotCoordsForeignObject>
     )
   } else {
-    const y = slotPosition[1]
-    const x = slotPosition[0]
+    const { width, height, x, y } = getOT2HoverDimensions(
+      hasTCOnSlot != null,
+      slotPosition
+    )
 
     return (
       <RobotCoordsForeignObject
-        key="ot2_blockedSlot"
-        width={hasTCOnSlot ? 260 : 128}
-        height={hasTCOnSlot ? 178 : 85}
+        key="ot2_slotOverlay"
+        width={width}
+        height={height}
         x={x}
-        y={hasTCOnSlot ? y - 72 : y}
+        y={y}
         flexProps={{ flex: '1' }}
         foreignObjectProps={{
           opacity: slotFillOpacity,
