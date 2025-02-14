@@ -43,7 +43,6 @@ describe('absorbanceReaderCloseRead compound command creator', () => {
           id: ABSORBANCE_READER_MODULE_ID,
           type: ABSORBANCE_READER_TYPE,
           model: ABSORBANCE_READER_V1,
-          pythonName: 'mockPythonName',
         },
       },
       additionalEquipmentEntities: {

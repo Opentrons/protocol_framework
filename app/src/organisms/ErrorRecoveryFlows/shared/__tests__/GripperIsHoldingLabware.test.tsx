@@ -23,25 +23,19 @@ const render = (props: ComponentProps<typeof GripperIsHoldingLabware>) => {
 
 let mockProceedToRouteAndStep: Mock
 let mockProceedNextStep: Mock
-let mockHandleMotionRouting: Mock
-let mockHomeExceptPlungers: Mock
 
 describe('GripperIsHoldingLabware', () => {
   let props: ComponentProps<typeof GripperIsHoldingLabware>
   beforeEach(() => {
     mockProceedToRouteAndStep = vi.fn(() => Promise.resolve())
     mockProceedNextStep = vi.fn(() => Promise.resolve())
-    mockHandleMotionRouting = vi.fn(() => Promise.resolve())
-    mockHomeExceptPlungers = vi.fn(() => Promise.resolve())
 
     props = {
       ...mockRecoveryContentProps,
       routeUpdateActions: {
         proceedToRouteAndStep: mockProceedToRouteAndStep,
         proceedNextStep: mockProceedNextStep,
-        handleMotionRouting: mockHandleMotionRouting,
       } as any,
-      recoveryCommands: { homeExceptPlungers: mockHomeExceptPlungers } as any,
     }
   })
 
@@ -87,18 +81,6 @@ describe('GripperIsHoldingLabware', () => {
 
     fireEvent.click(screen.getAllByLabelText('No')[0])
     clickButtonLabeled('Continue')
-
-    await waitFor(() => {
-      expect(mockHandleMotionRouting).toHaveBeenCalledWith(true)
-    })
-
-    await waitFor(() => {
-      expect(mockHomeExceptPlungers).toHaveBeenCalled()
-    })
-
-    await waitFor(() => {
-      expect(mockHandleMotionRouting).toHaveBeenCalledWith(false)
-    })
 
     await waitFor(() => {
       expect(mockProceedToRouteAndStep).toHaveBeenCalledWith(

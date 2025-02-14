@@ -161,7 +161,6 @@ const getHighestVersion = (
   path: string,
   pipetteModel: string,
   channels: Channels | null,
-  oemString: string,
   majorVersion: number,
   highestVersion: string
 ): string => {
@@ -175,10 +174,10 @@ const getHighestVersion = (
     //  and make sure the given model, channels, and major/minor versions
     //  are found in the path
     if (
-      minorPathVersion >= minorHighestVersion &&
+      minorPathVersion > minorHighestVersion &&
       path.includes(`${majorPathVersion}_${minorPathVersion}`) &&
       path.includes(pipetteModel) &&
-      path.includes(channels != null ? `${channels}${oemString}` : '')
+      path.includes(channels ?? '')
     ) {
       highestVersion = `${majorPathVersion}_${minorPathVersion}`
     }
@@ -240,7 +239,6 @@ export const getPipetteSpecsV2 = (
         path,
         pipetteModel,
         channels,
-        oemString,
         majorVersion,
         highestVersion
       )

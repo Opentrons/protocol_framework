@@ -197,33 +197,34 @@ test('fail on bad labware', () => {
 describe('test schemas of all opentrons definitions', () => {
   const labwarePaths = glob.sync(globPattern, { cwd: definitionsDir })
 
-  test("definition paths didn't break, which would give false positives", () => {
+  beforeAll(() => {
+    // Make sure definitions path didn't break, which would give you false positives
     expect(labwarePaths.length).toBeGreaterThan(0)
   })
 
-  describe.each(labwarePaths)('%s', labwarePath => {
+  labwarePaths.forEach(labwarePath => {
     const filename = path.parse(labwarePath).base
     const fullLabwarePath = path.join(definitionsDir, labwarePath)
     const labwareDef = require(fullLabwarePath) as LabwareDefinition2
 
-    it('validates against the schema', () => {
+    it(`${filename} validates against schema`, () => {
       const valid = validate(labwareDef)
       const validationErrors = validate.errors
       expect(validationErrors).toBe(null)
       expect(valid).toBe(true)
     })
 
-    test('file name matches version', () => {
+    it(`file name matches version: ${labwarePath}`, () => {
       expect(`${labwareDef.version}`).toEqual(path.basename(filename, '.json'))
     })
 
-    test('parent dir matches loadName', () => {
+    it(`parent dir matches loadName: ${labwarePath}`, () => {
       expect(labwareDef.parameters.loadName).toEqual(
         path.basename(path.dirname(labwarePath))
       )
     })
 
-    test('namespace is "opentrons"', () => {
+    it(`namespace is "opentrons": ${labwarePath}`, () => {
       expect(labwareDef.namespace).toEqual('opentrons')
     })
 
@@ -265,29 +266,30 @@ describe('test that the dimensions in all opentrons definitions make sense', () 
 describe('test schemas of all v2 labware fixtures', () => {
   const labwarePaths = glob.sync(globPattern, { cwd: fixturesDir })
 
-  test("definition paths didn't break, which would give false positives", () => {
+  beforeAll(() => {
+    // Make sure fixtures path didn't break, which would give you false positives
     expect(labwarePaths.length).toBeGreaterThan(0)
   })
 
-  describe.each(labwarePaths)('%s', labwarePath => {
+  labwarePaths.forEach(labwarePath => {
     const filename = path.parse(labwarePath).base
     const fullLabwarePath = path.join(fixturesDir, labwarePath)
     const labwareDef = require(fullLabwarePath) as LabwareDefinition2
 
-    test(`${filename} validates against schema`, () => {
+    it(`${filename} validates against schema`, () => {
       const valid = validate(labwareDef)
       const validationErrors = validate.errors
       expect(validationErrors).toBe(null)
       expect(valid).toBe(true)
     })
 
-    test(`fixture file name matches loadName: ${labwarePath}`, () => {
+    it(`fixture file name matches loadName: ${labwarePath}`, () => {
       expect(labwareDef.parameters.loadName).toEqual(
         path.basename(filename, '.json')
       )
     })
 
-    test(`namespace is "fixture": ${labwarePath}`, () => {
+    it(`namespace is "fixture": ${labwarePath}`, () => {
       expect(labwareDef.namespace).toEqual('fixture')
     })
 

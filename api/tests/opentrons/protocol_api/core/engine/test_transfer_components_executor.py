@@ -36,7 +36,7 @@ def sample_transfer_props(
 ) -> TransferProperties:
     """Return a mocked out liquid class fixture."""
     return LiquidClass.create(maximal_liquid_class_def).get_for(
-        pipette="flex_1channel_50", tip_rack="opentrons_flex_96_tiprack_50ul"
+        pipette="flex_1channel_50", tiprack="opentrons_flex_96_tiprack_50ul"
     )
 
 
@@ -556,72 +556,6 @@ def test_retract_after_aspiration_without_touch_tip_and_delay(
             force_direct=True,
             minimum_z_height=None,
             speed=50,
-        ),
-        mock_instrument_core.air_gap_in_place(
-            volume=air_gap_volume,
-            flow_rate=air_gap_volume,
-            correction_volume=air_gap_correction_vol,
-        ),
-        mock_instrument_core.delay(0.2),
-    )
-
-
-def test_retract_after_aspiration_for_consolidate(
-    decoy: Decoy,
-    mock_instrument_core: InstrumentCore,
-    sample_transfer_props: TransferProperties,
-) -> None:
-    """It should execute steps to retract from well after an aspiration during a MANY_TO_ONE transfer."""
-    source_well = decoy.mock(cls=WellCore)
-    well_top_point = Point(1, 2, 3)
-    well_bottom_point = Point(4, 5, 6)
-
-    decoy.when(mock_instrument_core.get_current_volume()).then_return(12.3)
-    air_gap_volume = (
-        sample_transfer_props.aspirate.retract.air_gap_by_volume.get_for_volume(12.3)
-    )
-    air_gap_correction_vol = (
-        sample_transfer_props.aspirate.correction_by_volume.get_for_volume(
-            air_gap_volume
-        )
-    )
-
-    subject = TransferComponentsExecutor(
-        instrument_core=mock_instrument_core,
-        transfer_properties=sample_transfer_props,
-        target_location=Location(Point(1, 1, 1), labware=None),
-        target_well=source_well,
-        tip_state=TipState(),
-        transfer_type=TransferType.MANY_TO_ONE,
-    )
-    decoy.when(source_well.get_bottom(0)).then_return(well_bottom_point)
-    decoy.when(source_well.get_top(0)).then_return(well_top_point)
-
-    subject.retract_after_aspiration(volume=40)
-
-    decoy.verify(
-        mock_instrument_core.move_to(
-            location=Location(Point(x=4, y=4, z=4), labware=None),
-            well_core=source_well,
-            force_direct=True,
-            minimum_z_height=None,
-            speed=50,
-        ),
-        mock_instrument_core.delay(20),
-        mock_instrument_core.touch_tip(
-            location=Location(Point(x=4, y=4, z=4), labware=None),
-            well_core=source_well,
-            radius=1,
-            mm_from_edge=0.5,
-            z_offset=-1,
-            speed=30,
-        ),
-        mock_instrument_core.move_to(
-            location=Location(Point(x=4, y=4, z=4), labware=None),
-            well_core=source_well,
-            force_direct=True,
-            minimum_z_height=None,
-            speed=None,
         ),
         mock_instrument_core.air_gap_in_place(
             volume=air_gap_volume,

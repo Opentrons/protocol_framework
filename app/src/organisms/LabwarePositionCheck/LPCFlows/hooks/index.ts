@@ -1,1 +1,0 @@
-export { useLPCLabwareInfo } from './useLPCLabwareInfo'

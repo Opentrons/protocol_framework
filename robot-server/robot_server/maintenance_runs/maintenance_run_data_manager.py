@@ -1,11 +1,9 @@
 """Manage current maintenance run data."""
-
 from datetime import datetime
-from typing import Optional, Callable, Sequence
+from typing import List, Optional, Callable
 
 from opentrons.protocol_engine import (
     EngineStatus,
-    LegacyLabwareOffsetCreate,
     LabwareOffsetCreate,
     StateSummary,
     CommandSlice,
@@ -89,7 +87,7 @@ class MaintenanceRunDataManager:
         self,
         run_id: str,
         created_at: datetime,
-        labware_offsets: Sequence[LabwareOffsetCreate | LegacyLabwareOffsetCreate],
+        labware_offsets: List[LabwareOffsetCreate],
         deck_configuration: DeckConfigurationType,
         notify_publishers: Callable[[], None],
     ) -> MaintenanceRun:

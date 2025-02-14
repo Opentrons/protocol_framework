@@ -122,10 +122,7 @@ export function RunningProtocol(): JSX.Element {
   const { trackProtocolRunEvent } = useTrackProtocolRunEvent(runId, robotName)
   const robotAnalyticsData = useRobotAnalyticsData(robotName)
   const robotType = useRobotType(robotName)
-  const { isERActive, failedCommand, runLwDefsByUri } = useErrorRecoveryFlows(
-    runId,
-    runStatus
-  )
+  const { isERActive, failedCommand } = useErrorRecoveryFlows(runId, runStatus)
   const {
     showModal: showIntervention,
     modalProps: interventionProps,
@@ -172,7 +169,6 @@ export function RunningProtocol(): JSX.Element {
           runStatus={runStatus}
           runId={runId}
           unvalidatedFailedCommand={failedCommand}
-          runLwDefsByUri={runLwDefsByUri}
           protocolAnalysis={robotSideAnalysis}
         />
       ) : null}

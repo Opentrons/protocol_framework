@@ -1231,20 +1231,7 @@
             }
           }
         },
-        "labwareId": "UUID",
-        "locationSequence": [
-          {
-            "addressableAreaName": "5",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutout5",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "singleStandardSlot"
-            ]
-          }
-        ]
+        "labwareId": "UUID"
       },
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
@@ -2397,20 +2384,7 @@
             }
           }
         },
-        "labwareId": "UUID",
-        "locationSequence": [
-          {
-            "addressableAreaName": "4",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutout4",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "singleStandardSlot"
-            ]
-          }
-        ]
+        "labwareId": "UUID"
       },
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
@@ -4645,24 +4619,7 @@
             }
           }
         },
-        "labwareId": "UUID",
-        "locationSequence": [
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "addressableAreaName": "9",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutout9",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "singleStandardSlot"
-            ]
-          }
-        ]
+        "labwareId": "UUID"
       },
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
@@ -5837,28 +5794,7 @@
             }
           }
         },
-        "labwareId": "UUID",
-        "locationSequence": [
-          {
-            "kind": "onLabware",
-            "labwareId": "UUID"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "addressableAreaName": "9",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutout9",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "singleStandardSlot"
-            ]
-          }
-        ]
+        "labwareId": "UUID"
       },
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
@@ -7023,24 +6959,7 @@
             }
           }
         },
-        "labwareId": "UUID",
-        "locationSequence": [
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "addressableAreaName": "1",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutout1",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "singleStandardSlot"
-            ]
-          }
-        ]
+        "labwareId": "UUID"
       },
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
@@ -8214,28 +8133,7 @@
             }
           }
         },
-        "labwareId": "UUID",
-        "locationSequence": [
-          {
-            "kind": "onLabware",
-            "labwareId": "UUID"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "addressableAreaName": "1",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutout1",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "singleStandardSlot"
-            ]
-          }
-        ]
+        "labwareId": "UUID"
       },
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
@@ -9409,24 +9307,7 @@
             }
           }
         },
-        "labwareId": "UUID",
-        "locationSequence": [
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "addressableAreaName": "7",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutout7",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "singleStandardSlot"
-            ]
-          }
-        ]
+        "labwareId": "UUID"
       },
       "startedAt": "TIMESTAMP",
       "status": "succeeded"

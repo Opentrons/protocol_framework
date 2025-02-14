@@ -6,11 +6,14 @@ import {
 
 import type { CreateCommand } from '@opentrons/shared-data'
 import type { UseLPCCommandWithChainRunChildProps } from './types'
-import type { OffsetLocationDetails } from '/app/redux/protocol-runs'
+import type {
+  BuildMoveLabwareOffDeckParams,
+  BuildModulePrepCommandsParams,
+} from './commands'
 
 export interface UseHandleResetLwModulesOnDeckResult {
   handleResetLwModulesOnDeck: (
-    offsetLocationDetails: OffsetLocationDetails
+    params: BuildModulePrepCommandsParams & BuildMoveLabwareOffDeckParams
   ) => Promise<void>
 }
 
@@ -18,12 +21,12 @@ export function useHandleResetLwModulesOnDeck({
   chainLPCCommands,
 }: UseLPCCommandWithChainRunChildProps): UseHandleResetLwModulesOnDeckResult {
   const handleResetLwModulesOnDeck = (
-    offsetLocationDetails: OffsetLocationDetails
+    params: BuildModulePrepCommandsParams & BuildMoveLabwareOffDeckParams
   ): Promise<void> => {
     const resetCommands: CreateCommand[] = [
-      ...modulePrepCommands(offsetLocationDetails),
+      ...modulePrepCommands(params),
       ...fullHomeCommands(),
-      ...moveLabwareOffDeckCommands(offsetLocationDetails),
+      ...moveLabwareOffDeckCommands(params as BuildMoveLabwareOffDeckParams),
     ]
 
     return chainLPCCommands(resetCommands, false).then(() => Promise.resolve())

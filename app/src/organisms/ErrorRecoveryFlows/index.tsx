@@ -28,12 +28,11 @@ import {
   useRecoveryTakeover,
   useRetainedFailedCommandBySource,
 } from './hooks'
-import { useRunLoadedLabwareDefinitionsByUri } from '/app/resources/runs'
 
 import type { RunStatus } from '@opentrons/api-client'
 import type { CompletedProtocolAnalysis } from '@opentrons/shared-data'
 import type { FailedCommand } from './types'
-import type { RunLoadedLabwareDefinitionsByUri } from '/app/resources/runs'
+import { useRunLoadedLabwareDefinitionsByUri } from '/app/resources/runs'
 
 const VALID_ER_RUN_STATUSES: RunStatus[] = [
   RUN_STATUS_AWAITING_RECOVERY,
@@ -54,24 +53,10 @@ const INVALID_ER_RUN_STATUSES: RunStatus[] = [
   RUN_STATUS_IDLE,
 ]
 
-interface UseErrorRecoveryResultBase {
+export interface UseErrorRecoveryResult {
   isERActive: boolean
   failedCommand: FailedCommand | null
-  runLwDefsByUri: ReturnType<typeof useRunLoadedLabwareDefinitionsByUri>
 }
-export interface UseErrorRecoveryActiveResult
-  extends UseErrorRecoveryResultBase {
-  isERActive: true
-  failedCommand: FailedCommand
-  runLwDefsByUri: RunLoadedLabwareDefinitionsByUri
-}
-export interface UseErrorRecoveryInactiveResult
-  extends UseErrorRecoveryResultBase {
-  isERActive: false
-}
-export type UseErrorRecoveryResult =
-  | UseErrorRecoveryInactiveResult
-  | UseErrorRecoveryActiveResult
 
 export function useErrorRecoveryFlows(
   runId: string,
@@ -79,7 +64,6 @@ export function useErrorRecoveryFlows(
 ): UseErrorRecoveryResult {
   const [isERActive, setIsERActive] = useState(false)
   const failedCommand = useCurrentlyRecoveringFrom(runId, runStatus)
-  const runLwDefsByUri = useRunLoadedLabwareDefinitionsByUri(runId)
 
   // The complexity of this logic exists to persist Error Recovery screens past the server's definition of Error Recovery.
   // Ex, show a "cancelling run" modal in Error Recovery flows despite the robot no longer being in a recoverable state.
@@ -101,7 +85,8 @@ export function useErrorRecoveryFlows(
     if (runStatus != null) {
       const isAwaitingRecovery =
         VALID_ER_RUN_STATUSES.includes(runStatus) &&
-        runStatus !== RUN_STATUS_STOP_REQUESTED
+        runStatus !== RUN_STATUS_STOP_REQUESTED &&
+        failedCommand != null // Prevents one render cycle of an unknown failed command.
 
       if (isAwaitingRecovery) {
         setIsERActive(isValidERStatus(runStatus, true))
@@ -111,14 +96,10 @@ export function useErrorRecoveryFlows(
     }
   }, [runStatus, failedCommand])
 
-  // Gate ER rendering on data derived from key network requests.
-  return isERActive && failedCommand != null && runLwDefsByUri != null
-    ? {
-        isERActive: true,
-        failedCommand,
-        runLwDefsByUri,
-      }
-    : { isERActive: false, failedCommand, runLwDefsByUri }
+  return {
+    isERActive,
+    failedCommand,
+  }
 }
 
 export interface ErrorRecoveryFlowsProps {
@@ -128,20 +109,14 @@ export interface ErrorRecoveryFlowsProps {
    * information derived from the failed command from the run record even if there is no matching command in protocol analysis.
    * Using a failed command that is not matched to a protocol analysis command is unsafe in most circumstances (ie, in
    * non-generic recovery flows. Prefer using failedCommandBySource in most circumstances. */
-  unvalidatedFailedCommand: UseErrorRecoveryActiveResult['failedCommand']
-  runLwDefsByUri: UseErrorRecoveryActiveResult['runLwDefsByUri']
+  unvalidatedFailedCommand: FailedCommand | null
   protocolAnalysis: CompletedProtocolAnalysis | null
 }
 
 export function ErrorRecoveryFlows(
   props: ErrorRecoveryFlowsProps
 ): JSX.Element | null {
-  const {
-    protocolAnalysis,
-    runStatus,
-    unvalidatedFailedCommand,
-    runLwDefsByUri,
-  } = props
+  const { protocolAnalysis, runStatus, unvalidatedFailedCommand, runId } = props
 
   const failedCommandBySource = useRetainedFailedCommandBySource(
     unvalidatedFailedCommand,
@@ -153,7 +128,11 @@ export function ErrorRecoveryFlows(
   const robotType = protocolAnalysis?.robotType ?? OT2_ROBOT_TYPE
   const robotName = useHost()?.robotName ?? 'robot'
 
-  const allRunDefs = runLwDefsByUri != null ? Object.values(runLwDefsByUri) : []
+  const labwareDefinitionsByUri = useRunLoadedLabwareDefinitionsByUri(runId)
+  const allRunDefs =
+    labwareDefinitionsByUri != null
+      ? Object.values(labwareDefinitionsByUri)
+      : []
 
   const {
     showTakeover,
@@ -171,7 +150,7 @@ export function ErrorRecoveryFlows(
     isActiveUser,
     failedCommand: failedCommandBySource,
     allRunDefs,
-    runLwDefsByUri,
+    labwareDefinitionsByUri,
   })
 
   const renderWizard =

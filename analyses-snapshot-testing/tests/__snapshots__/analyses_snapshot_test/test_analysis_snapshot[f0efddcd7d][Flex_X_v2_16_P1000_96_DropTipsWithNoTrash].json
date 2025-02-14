@@ -101,21 +101,7 @@
             }
           }
         },
-        "labwareId": "UUID",
-        "locationSequence": [
-          {
-            "addressableAreaName": "C4",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutoutC3",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "stagingAreaRightSlot",
-              "stagingAreaSlotWithMagneticBlockV1"
-            ]
-          }
-        ]
+        "labwareId": "UUID"
       },
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
@@ -184,24 +170,7 @@
           "version": 1,
           "wells": {}
         },
-        "labwareId": "UUID",
-        "locationSequence": [
-          {
-            "addressableAreaName": "D3",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutoutD3",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "flexStackerModuleV1",
-              "flexStackerModuleV1WithWasteChuteRightAdapterCovered",
-              "flexStackerModuleV1WithWasteChuteRightAdapterNoCover",
-              "singleRightSlot",
-              "stagingAreaRightSlot"
-            ]
-          }
-        ]
+        "labwareId": "UUID"
       },
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
@@ -1359,28 +1328,7 @@
             }
           }
         },
-        "labwareId": "UUID",
-        "locationSequence": [
-          {
-            "kind": "onLabware",
-            "labwareId": "UUID"
-          },
-          {
-            "addressableAreaName": "D3",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutoutD3",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "flexStackerModuleV1",
-              "flexStackerModuleV1WithWasteChuteRightAdapterCovered",
-              "flexStackerModuleV1WithWasteChuteRightAdapterNoCover",
-              "singleRightSlot",
-              "stagingAreaRightSlot"
-            ]
-          }
-        ]
+        "labwareId": "UUID"
       },
       "startedAt": "TIMESTAMP",
       "status": "succeeded"

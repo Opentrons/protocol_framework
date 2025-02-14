@@ -19,7 +19,6 @@ import {
   Toolbox,
   TYPOGRAPHY,
 } from '@opentrons/components'
-import { getLiquidEntities } from '../../step-forms/selectors'
 import { LINK_BUTTON_STYLE } from '../../atoms'
 import { selectors as labwareIngredSelectors } from '../../labware-ingred/selectors'
 import * as wellContentsSelectors from '../../top-selectors/well-contents'
@@ -65,7 +64,7 @@ export function LiquidToolbox(props: LiquidToolboxProps): JSX.Element {
   const dispatch = useDispatch()
   const [showDefineLiquidModal, setDefineLiquidModal] = useState<boolean>(false)
   const [showBadFormState, setShowBadFormState] = useState<boolean>(false)
-  const liquids = useSelector(getLiquidEntities)
+  const liquids = useSelector(labwareIngredSelectors.allIngredientNamesIds)
   const labwareId = useSelector(labwareIngredSelectors.getSelectedLabwareId)
   const selectedWellGroups = useSelector(getSelectedWells)
   const nickNames = useSelector(getLabwareNicknamesById)
@@ -237,11 +236,11 @@ export function LiquidToolbox(props: LiquidToolboxProps): JSX.Element {
   const liquidInfo: LiquidInfo[] = uniqueLiquids
     .map(liquid => {
       const foundLiquid = Object.values(liquids).find(
-        id => id.liquidGroupId === liquid
+        id => id.ingredientId === liquid
       )
       return {
         liquidIndex: liquid,
-        name: foundLiquid?.displayName ?? '',
+        name: foundLiquid?.name ?? '',
         color: foundLiquid?.displayColor ?? '',
         liquidClassDisplayName: getLiquidClassDisplayName(
           foundLiquid?.liquidClass ?? null
@@ -348,9 +347,8 @@ export function LiquidToolbox(props: LiquidToolboxProps): JSX.Element {
                           render={({ field }) => {
                             const fullOptions: DropdownOption[] = liquidSelectionOptions.map(
                               option => {
-                                const liquid = Object.values(liquids).find(
-                                  liquid =>
-                                    liquid.liquidGroupId === option.value
+                                const liquid = liquids.find(
+                                  liquid => liquid.ingredientId === option.value
                                 )
 
                                 return {

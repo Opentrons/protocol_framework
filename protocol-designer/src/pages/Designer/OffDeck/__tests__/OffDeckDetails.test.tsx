@@ -58,7 +58,6 @@ describe('OffDeckDetails', () => {
           def: fixture12Trough as LabwareDefinition2,
           labwareDefURI: 'mockDefUri',
           slot: 'offDeck',
-          pythonName: 'mockPythonName',
         },
       },
     })

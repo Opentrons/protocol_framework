@@ -1,3 +1,4 @@
+import { getWellsDepth } from '@opentrons/shared-data'
 import {
   DEFAULT_CHANGE_TIP_OPTION,
   DEFAULT_MM_BLOWOUT_OFFSET_FROM_TOP,
@@ -37,9 +38,10 @@ export const mixFormToArgs = (
     orderSecond
   )
   const touchTip = Boolean(hydratedFormData.mix_touchTip_checkbox)
-  const touchTipMmFromTop =
-    hydratedFormData.mix_touchTip_mmFromTop ??
-    DEFAULT_MM_TOUCH_TIP_OFFSET_FROM_TOP
+  const touchTipMmFromBottom =
+    hydratedFormData.mix_touchTip_mmFromBottom ||
+    getWellsDepth(labware.def, orderedWells) +
+      DEFAULT_MM_TOUCH_TIP_OFFSET_FROM_TOP
   const volume = hydratedFormData.volume || 0
   const times = hydratedFormData.times || 0
   const aspirateFlowRateUlSec =
@@ -89,7 +91,7 @@ export const mixFormToArgs = (
     volume,
     times,
     touchTip,
-    touchTipMmFromTop,
+    touchTipMmFromBottom,
     changeTip,
     blowoutLocation,
     pipette: pipette.id,

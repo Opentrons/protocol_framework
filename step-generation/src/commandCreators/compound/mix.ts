@@ -255,9 +255,9 @@ export const mix: CommandCreator<MixArgs> = (
               labwareId: labware,
               wellName: well,
               wellLocation: {
-                origin: 'top',
+                origin: 'bottom',
                 offset: {
-                  z: data.touchTipMmFromTop,
+                  z: data.touchTipMmFromBottom,
                 },
               },
             }),

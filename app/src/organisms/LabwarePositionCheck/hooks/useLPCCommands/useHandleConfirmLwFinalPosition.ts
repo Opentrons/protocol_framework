@@ -11,7 +11,7 @@ import type {
   CreateCommand,
 } from '@opentrons/shared-data'
 import type { UseLPCCommandWithChainRunChildProps } from './types'
-import type { OffsetLocationDetails } from '/app/redux/protocol-runs'
+import type { BuildMoveLabwareOffDeckParams } from './commands'
 
 interface UseHandleConfirmPositionProps
   extends UseLPCCommandWithChainRunChildProps {
@@ -22,8 +22,10 @@ export interface UseHandleConfirmPositionResult {
   /* Initiate commands to return specific modules to a post-run condition before
    * non-plunger homing the utilized pipette and saving the LPC position. */
   handleConfirmLwFinalPosition: (
-    offsetLocationDetails: OffsetLocationDetails,
-    pipette: LoadedPipette
+    params: BuildMoveLabwareOffDeckParams & {
+      onSuccess: () => void
+      pipette: LoadedPipette | null
+    }
   ) => Promise<Coordinates | null>
 }
 
@@ -32,20 +34,26 @@ export function useHandleConfirmLwFinalPosition({
   chainLPCCommands,
 }: UseHandleConfirmPositionProps): UseHandleConfirmPositionResult {
   const handleConfirmLwFinalPosition = (
-    offsetLocationDetails: OffsetLocationDetails,
-    pipette: LoadedPipette
+    params: BuildMoveLabwareOffDeckParams & {
+      onSuccess: () => void
+      pipette: LoadedPipette | null
+    }
   ): Promise<Coordinates | null> => {
+    const { onSuccess, pipette, step } = params
+    const { pipetteId } = step
+
     const confirmCommands: CreateCommand[] = [
-      ...savePositionCommands(pipette.id),
+      ...savePositionCommands(pipetteId),
       ...retractPipetteAxesSequentiallyCommands(pipette),
-      ...moduleCleanupDuringLPCCommands(offsetLocationDetails),
-      ...moveLabwareOffDeckCommands(offsetLocationDetails),
+      ...moduleCleanupDuringLPCCommands(step),
+      ...moveLabwareOffDeckCommands(params),
     ]
 
     return chainLPCCommands(confirmCommands, false).then(responses => {
       const firstResponse = responses[0]
       if (firstResponse.data.commandType === 'savePosition') {
         const { position } = firstResponse.data?.result ?? { position: null }
+        onSuccess()
 
         return Promise.resolve(position)
       } else {

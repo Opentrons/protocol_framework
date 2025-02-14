@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Optional, Dict, Union, TYPE_CHECKING
+from typing import Optional, Dict
 
 from opentrons_shared_data.liquid_classes.liquid_class_definition import (
     LiquidClassSchemaV1,
@@ -11,9 +11,6 @@ from ._liquid_properties import (
     TransferProperties,
     build_transfer_properties,
 )
-
-if TYPE_CHECKING:
-    from . import InstrumentContext, Labware
 
 
 @dataclass(frozen=True)
@@ -67,42 +64,18 @@ class LiquidClass:
     def display_name(self) -> str:
         return self._display_name
 
-    def get_for(
-        self, pipette: Union[str, InstrumentContext], tip_rack: Union[str, Labware]
-    ) -> TransferProperties:
+    def get_for(self, pipette: str, tiprack: str) -> TransferProperties:
         """Get liquid class transfer properties for the specified pipette and tip."""
-        from . import InstrumentContext, Labware
-
-        if isinstance(pipette, InstrumentContext):
-            pipette_name = pipette.name
-        elif isinstance(pipette, str):
-            pipette_name = pipette
-        else:
-            raise ValueError(
-                f"{pipette} should either be an InstrumentContext object"
-                f" or a pipette name string."
-            )
-
-        if isinstance(tip_rack, Labware):
-            tiprack_uri = tip_rack.uri
-        elif isinstance(tip_rack, str):
-            tiprack_uri = tip_rack
-        else:
-            raise ValueError(
-                f"{tip_rack} should either be a tiprack Labware object"
-                f" or a tiprack URI string."
-            )
-
         try:
-            settings_for_pipette = self._by_pipette_setting[pipette_name]
+            settings_for_pipette = self._by_pipette_setting[pipette]
         except KeyError:
             raise ValueError(
-                f"No properties found for {pipette_name} in {self._name} liquid class"
+                f"No properties found for {pipette} in {self._name} liquid class"
             )
         try:
-            transfer_properties = settings_for_pipette[tiprack_uri]
+            transfer_properties = settings_for_pipette[tiprack]
         except KeyError:
             raise ValueError(
-                f"No properties found for {tiprack_uri} in {self._name} liquid class"
+                f"No properties found for {tiprack} in {self._name} liquid class"
             )
         return transfer_properties

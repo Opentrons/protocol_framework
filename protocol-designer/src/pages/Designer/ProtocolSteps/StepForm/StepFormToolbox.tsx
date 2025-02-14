@@ -360,7 +360,6 @@ export function StepFormToolbox(props: StepFormToolboxProps): JSX.Element {
             </StyledText>
           </Flex>
         }
-        width="21.875rem"
       >
         <div
           ref={toolsComponentRef}

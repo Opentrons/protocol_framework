@@ -318,11 +318,11 @@ export function MixTools(props: StepFormProps): JSX.Element {
                 <PositionField
                   prefix={tab}
                   propsForFields={propsForFields}
-                  zField="mix_touchTip_mmFromTop"
+                  zField="mix_touchTip_mmFromBottom"
                   labwareId={
                     formData[
                       getLabwareFieldForPositioningField(
-                        'mix_touchTip_mmFromTop'
+                        'mix_touchTip_mmFromBottom'
                       )
                     ]
                   }

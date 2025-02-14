@@ -22,61 +22,62 @@ import {
 import { i18n } from '/app/i18n'
 
 import type { LPCWizardContentProps } from '/app/organisms/LabwarePositionCheck/types'
-import { LPCContentContainer } from '/app/organisms/LabwarePositionCheck/LPCContentContainer'
 
 const SUPPORT_EMAIL = 'support@opentrons.com'
 
-export function LPCErrorModal(props: LPCWizardContentProps): JSX.Element {
+export function LPCErrorModal({
+  commandUtils,
+  onCloseClick,
+}: LPCWizardContentProps): JSX.Element {
   const { t } = useTranslation(['labware_position_check', 'shared', 'branded'])
-  const { errorMessage, headerCommands } = props.commandUtils
+  const { errorMessage, toggleRobotMoving } = commandUtils
+
+  const handleClose = (): void => {
+    void toggleRobotMoving(true).then(() => {
+      onCloseClick()
+    })
+  }
 
   return (
-    <LPCContentContainer
-      {...props}
-      header={t('labware_position_check_title')}
-      onClickButton={headerCommands.handleClose}
-      buttonText={t('exit')}
+    <ModalContainer
+      padding={SPACING.spacing32}
+      flexDirection={DIRECTION_COLUMN}
+      alignItems={ALIGN_CENTER}
+      justifyContent={JUSTIFY_SPACE_BETWEEN}
+      gridGap={SPACING.spacing16}
     >
-      <ModalContainer
-        padding={SPACING.spacing32}
-        flexDirection={DIRECTION_COLUMN}
-        alignItems={ALIGN_CENTER}
-        justifyContent={JUSTIFY_SPACE_BETWEEN}
-        gridGap={SPACING.spacing16}
-      >
-        <Icon
-          name="ot-alert"
-          size="2.5rem"
-          color={COLORS.red50}
-          aria-label="alert"
-        />
-        <ErrorHeader>
-          {i18n.format(t('shared:something_went_wrong'), 'sentenceCase')}
-        </ErrorHeader>
-        <ContentWrapper>
-          <LegacyStyledText
-            as="p"
-            fontWeight={TYPOGRAPHY.fontWeightSemiBold}
-            textAlign={TEXT_ALIGN_CENTER}
-          >
-            {t('remove_probe_before_exit')}
-          </LegacyStyledText>
-          <LegacyStyledText as="p" textAlign={TEXT_ALIGN_CENTER}>
-            {t('branded:help_us_improve_send_error_report', {
-              support_email: SUPPORT_EMAIL,
-            })}
-          </LegacyStyledText>
-        </ContentWrapper>
-        <ErrorTextArea readOnly value={errorMessage ?? ''} spellCheck={false} />
-        <PrimaryButton
-          textTransform={TEXT_TRANSFORM_CAPITALIZE}
-          alignSelf={ALIGN_FLEX_END}
-          onClick={headerCommands.handleClose}
+      <Icon
+        name="ot-alert"
+        size="2.5rem"
+        color={COLORS.red50}
+        aria-label="alert"
+      />
+      <ErrorHeader>
+        {i18n.format(t('shared:something_went_wrong'), 'sentenceCase')}
+      </ErrorHeader>
+      <ContentWrapper>
+        <LegacyStyledText
+          as="p"
+          fontWeight={TYPOGRAPHY.fontWeightSemiBold}
+          textAlign={TEXT_ALIGN_CENTER}
         >
-          {t('shared:exit')}
-        </PrimaryButton>
-      </ModalContainer>
-    </LPCContentContainer>
+          {t('remove_probe_before_exit')}
+        </LegacyStyledText>
+        <LegacyStyledText as="p" textAlign={TEXT_ALIGN_CENTER}>
+          {t('branded:help_us_improve_send_error_report', {
+            support_email: SUPPORT_EMAIL,
+          })}
+        </LegacyStyledText>
+      </ContentWrapper>
+      <ErrorTextArea readOnly value={errorMessage ?? ''} spellCheck={false} />
+      <PrimaryButton
+        textTransform={TEXT_TRANSFORM_CAPITALIZE}
+        alignSelf={ALIGN_FLEX_END}
+        onClick={handleClose}
+      >
+        {t('shared:exit')}
+      </PrimaryButton>
+    </ModalContainer>
   )
 }
 

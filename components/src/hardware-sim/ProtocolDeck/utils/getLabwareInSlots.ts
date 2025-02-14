@@ -5,7 +5,6 @@ import type {
   MoveLabwareRunTimeCommand,
   ProtocolAnalysisOutput,
   LabwareDefinition2,
-  LoadLidRunTimeCommand,
 } from '@opentrons/shared-data'
 
 interface LabwareInSlot {
@@ -13,12 +12,6 @@ interface LabwareInSlot {
   labwareDef: LabwareDefinition2
   labwareNickName: string | null
   location: { slotName: string }
-}
-
-interface LabwareWithDef {
-  labwareId: string
-  labwareDef: LabwareDefinition2
-  labwareNickName: string | null
 }
 
 export const getInitialAndMovedLabwareInSlots = (
@@ -29,7 +22,6 @@ export const getInitialAndMovedLabwareInSlots = (
     commands
   )
   const topMostLabwareInSlots = getTopMostLabwareInSlots(protocolAnalysis)
-  const allLabwareDefs = getAllLabwareDefinitions(protocolAnalysis)
 
   return commands
     .filter(
@@ -40,7 +32,7 @@ export const getInitialAndMovedLabwareInSlots = (
       const labwareId = command.params.labwareId
       const location = command.params.newLocation
 
-      const originalLabware = allLabwareDefs.find(
+      const originalLabware = topMostLabwareInSlots.find(
         labware => labware.labwareId === labwareId
       )
       const labwareDef = originalLabware?.labwareDef
@@ -53,18 +45,14 @@ export const getInitialAndMovedLabwareInSlots = (
       )
         return acc
       if (labwareId == null) {
-        console.warn(
-          `expected to find labware id from command id ${String(
-            command.id
-          )} but could not`
-        )
+        console.warn('expected to find labware id but could not')
         return acc
       }
       if (labwareDef == null) {
         console.warn(
           `expected to find labware def for labware id ${String(
             labwareId
-          )} in command id ${String(command.id)} but could not`
+          )} but could not`
         )
         return acc
       }
@@ -127,18 +115,14 @@ export const getTopMostLabwareInSlots = (
       )
         return acc
       if (labwareId == null) {
-        console.warn(
-          `expected to find labware id from command id ${String(
-            command.id
-          )} but could not`
-        )
+        console.warn('expected to find labware id but could not')
         return acc
       }
       if (labwareDef == null) {
         console.warn(
           `expected to find labware def for labware id ${String(
             labwareId
-          )} in command id ${String(command.id)}but could not`
+          )} but could not`
         )
         return acc
       }
@@ -167,50 +151,6 @@ export const getTopMostLabwareInSlots = (
           labwareDef: topLabwareDefinition,
           labwareNickName: topLabwareNickName,
           location: { slotName },
-        },
-      ]
-    }, [])
-}
-
-const getAllLabwareDefinitions = (
-  protocolAnalysis: CompletedProtocolAnalysis | ProtocolAnalysisOutput
-): LabwareWithDef[] => {
-  const { commands } = protocolAnalysis
-  return commands
-    .filter((command): command is
-      | LoadLabwareRunTimeCommand
-      | LoadLidRunTimeCommand =>
-      ['loadLabware', 'loadLid'].includes(command.commandType)
-    )
-    .reduce<LabwareWithDef[]>((acc, command) => {
-      const labwareId = command.result?.labwareId
-      const labwareDef = command.result?.definition
-      if (labwareId == null) {
-        console.warn(
-          `expected to find labware id from command id ${String(
-            command.id
-          )} but could not`
-        )
-        return acc
-      }
-      if (labwareDef == null) {
-        console.warn(
-          `expected to find labware def for labware id ${String(
-            labwareId
-          )} fromm command id ${String(command.id)} but could not`
-        )
-        return acc
-      }
-      const displayName =
-        command.commandType === 'loadLabware'
-          ? command.params?.displayName ?? null
-          : null
-      return [
-        ...acc,
-        {
-          labwareId: labwareId,
-          labwareDef: labwareDef,
-          labwareNickName: displayName,
         },
       ]
     }, [])

@@ -108,8 +108,8 @@ describe('RetryStepInfo', () => {
     render(props)
 
     screen.getByText(
-      'Take any necessary additional actions to prepare the robot to retry the failed step.'
+      'First, take any necessary actions to prepare the robot to retry the failed step.'
     )
-    screen.getByText('Close the robot door before proceeding.')
+    screen.getByText('Then, close the robot door before proceeding.')
   })
 })

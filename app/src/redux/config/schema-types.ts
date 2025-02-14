@@ -285,8 +285,4 @@ export type ConfigV25 = Omit<ConfigV24, 'version'> & {
   }
 }
 
-export type ConfigV26 = Omit<ConfigV25, 'version'> & {
-  version: 26
-}
-
-export type Config = ConfigV26
+export type Config = ConfigV25

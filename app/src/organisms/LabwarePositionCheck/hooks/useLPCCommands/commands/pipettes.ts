@@ -5,8 +5,8 @@ import type {
   LoadedPipette,
   MotorAxes,
 } from '@opentrons/shared-data'
+import type { CheckPositionsStep } from '/app/organisms/LabwarePositionCheck/types'
 import type { Axis, Sign, StepSize } from '/app/molecules/JogControls/types'
-import type { OffsetLocationDetails } from '/app/redux/protocol-runs'
 
 const PROBE_LENGTH_MM = 44.5
 
@@ -15,10 +15,9 @@ export const savePositionCommands = (pipetteId: string): CreateCommand[] => [
 ]
 
 export const moveToWellCommands = (
-  offsetLocationDetails: OffsetLocationDetails,
-  pipetteId: string
+  step: CheckPositionsStep
 ): CreateCommand[] => {
-  const { labwareId } = offsetLocationDetails
+  const { pipetteId, labwareId } = step
 
   return [
     {
@@ -116,6 +115,7 @@ export const moveToMaintenancePosition = (
 }
 
 export const verifyProbeAttachmentAndHomeCommands = (
+  pipetteId: string,
   pipette: LoadedPipette | null
 ): CreateCommand[] => {
   const pipetteMount = pipette?.mount
@@ -125,7 +125,7 @@ export const verifyProbeAttachmentAndHomeCommands = (
     {
       commandType: 'verifyTipPresence',
       params: {
-        pipetteId: pipette?.id ?? '',
+        pipetteId,
         expectedState: 'present',
         followSingularSensor: 'primary',
       },

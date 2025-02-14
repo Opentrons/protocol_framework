@@ -1,6 +1,5 @@
 """Geometry state getters."""
 
-from logging import getLogger
 import enum
 from numpy import array, dot, double as npdouble
 from numpy.typing import NDArray
@@ -23,7 +22,6 @@ from ..errors import (
     LabwareNotLoadedOnModuleError,
     LabwareMovementNotAllowedError,
     OperationLocationNotInWellError,
-    WrongModuleTypeError,
 )
 from ..resources import fixture_validation, labware_validation
 from ..types import (
@@ -53,19 +51,8 @@ from ..types import (
     AddressableAreaLocation,
     AddressableOffsetVector,
     StagingSlotLocation,
-    LabwareOffsetLocationSequence,
-    OnModuleOffsetLocationSequenceComponent,
-    OnAddressableAreaOffsetLocationSequenceComponent,
-    OnLabwareOffsetLocationSequenceComponent,
-    OnLabwareLocationSequenceComponent,
+    LabwareOffsetLocation,
     ModuleModel,
-    LabwareLocationSequence,
-    OnModuleLocationSequenceComponent,
-    OnAddressableAreaLocationSequenceComponent,
-    OnCutoutFixtureLocationSequenceComponent,
-    NotOnDeckLocationSequenceComponent,
-    labware_location_is_off_deck,
-    labware_location_is_system,
 )
 from .config import Config
 from .labware import LabwareView
@@ -80,7 +67,6 @@ from .frustum_helpers import (
 from ._well_math import wells_covered_by_pipette_configuration, nozzles_per_well
 
 
-_LOG = getLogger(__name__)
 SLOT_WIDTH = 128
 _PIPETTE_HOMED_POSITION_Z = (
     248.0  # Height of the bottom of the nozzle without the tip attached when homed
@@ -175,7 +161,6 @@ class GeometryView:
                 self._get_highest_z_from_labware_data(lw_data)
                 for lw_data in self._labware.get_all()
                 if lw_data.location != OFF_DECK_LOCATION
-                and not self._labware.get_labware_by_lid_id(lw_data.id)
             ),
             default=0.0,
         )
@@ -1375,246 +1360,50 @@ class GeometryView:
             labware_id=labware_id, slot_name=None
         )
 
-    def get_location_sequence(self, labware_id: str) -> LabwareLocationSequence:
-        """Provide the LocationSequence specifying the current position of the labware.
+    def get_offset_location(self, labware_id: str) -> Optional[LabwareOffsetLocation]:
+        """Provide the LabwareOffsetLocation specifying the current position of the labware.
 
-        Elements in this sequence contain instance IDs of things. The chain is valid only until the
-        labware is moved.
-        """
-        return self.get_predicted_location_sequence(
-            self._labware.get_location(labware_id)
-        )
-
-    def get_predicted_location_sequence(
-        self, labware_location: LabwareLocation
-    ) -> LabwareLocationSequence:
-        """Get the location sequence for this location. Useful for a labware that hasn't been loaded."""
-        return self._recurse_labware_location(labware_location, [])
-
-    def _cutout_fixture_location_sequence_from_addressable_area(
-        self, addressable_area_name: str
-    ) -> OnCutoutFixtureLocationSequenceComponent:
-        (
-            cutout_id,
-            potential_fixtures,
-        ) = self._addressable_areas.get_current_potential_cutout_fixtures_for_addressable_area(
-            addressable_area_name
-        )
-        return OnCutoutFixtureLocationSequenceComponent(
-            possibleCutoutFixtureIds=sorted(
-                [fixture.cutout_fixture_id for fixture in potential_fixtures]
-            ),
-            cutoutId=cutout_id,
-        )
-
-    def _recurse_labware_location_from_aa_component(
-        self,
-        labware_location: AddressableAreaLocation,
-        building: LabwareLocationSequence,
-    ) -> LabwareLocationSequence:
-        cutout_location = self._cutout_fixture_location_sequence_from_addressable_area(
-            labware_location.addressableAreaName
-        )
-        # If the labware is loaded on an AA that is a module, we want to respect the convention
-        # of giving it an OnModuleLocation.
-        possible_module = self._modules.get_by_addressable_area(
-            labware_location.addressableAreaName
-        )
-        if possible_module is not None:
-            return building + [
-                OnAddressableAreaLocationSequenceComponent(
-                    addressableAreaName=labware_location.addressableAreaName
-                ),
-                OnModuleLocationSequenceComponent(moduleId=possible_module.id),
-                cutout_location,
-            ]
-        else:
-            return building + [
-                OnAddressableAreaLocationSequenceComponent(
-                    addressableAreaName=labware_location.addressableAreaName,
-                ),
-                cutout_location,
-            ]
-
-    def _recurse_labware_location_from_module_component(
-        self, labware_location: ModuleLocation, building: LabwareLocationSequence
-    ) -> LabwareLocationSequence:
-        module_id = labware_location.moduleId
-        module_aa = self._modules.get_provided_addressable_area(module_id)
-        base_location: (
-            OnCutoutFixtureLocationSequenceComponent
-            | NotOnDeckLocationSequenceComponent
-        ) = self._cutout_fixture_location_sequence_from_addressable_area(module_aa)
-        try:
-            self._modules.get_flex_stacker_substate(labware_location.moduleId)
-            base_location = NotOnDeckLocationSequenceComponent(
-                logicalLocationName=OFF_DECK_LOCATION
-            )
-        except WrongModuleTypeError:
-            pass
-
-        if self._modules.get_deck_supports_module_fixtures():
-            # On a deck with modules as cutout fixtures, we want, in order,
-            # - the addressable area of the module
-            # - the module with its module id, which is what clients want
-            # - the cutout
-            loc = self._modules.get_location(module_id)
-            model = self._modules.get_connected_model(module_id)
-            module_aa = self._modules.ensure_and_convert_module_fixture_location(
-                loc.slotName, model
-            )
-            return building + [
-                OnAddressableAreaLocationSequenceComponent(
-                    addressableAreaName=module_aa
-                ),
-                OnModuleLocationSequenceComponent(moduleId=module_id),
-                base_location,
-            ]
-        else:
-            # If the module isn't a cutout fixture, then we want
-            # - the module
-            # - the addressable area the module is loaded on
-            # - the cutout
-            location = self._modules.get_location(module_id)
-            return building + [
-                OnModuleLocationSequenceComponent(moduleId=module_id),
-                OnAddressableAreaLocationSequenceComponent(
-                    addressableAreaName=location.slotName.value
-                ),
-                base_location,
-            ]
-
-    def _recurse_labware_location(
-        self,
-        labware_location: LabwareLocation,
-        building: LabwareLocationSequence,
-    ) -> LabwareLocationSequence:
-        if isinstance(labware_location, AddressableAreaLocation):
-            return self._recurse_labware_location_from_aa_component(
-                labware_location, building
-            )
-        elif labware_location_is_off_deck(
-            labware_location
-        ) or labware_location_is_system(labware_location):
-            return building + [
-                NotOnDeckLocationSequenceComponent(logicalLocationName=labware_location)
-            ]
-
-        elif isinstance(labware_location, OnLabwareLocation):
-            return self._recurse_labware_location(
-                self._labware.get_location(labware_location.labwareId),
-                building
-                + [
-                    OnLabwareLocationSequenceComponent(
-                        labwareId=labware_location.labwareId,
-                        lidId=self._labware.get_lid_id_by_labware_id(
-                            labware_location.labwareId
-                        ),
-                    )
-                ],
-            )
-        elif isinstance(labware_location, ModuleLocation):
-            return self._recurse_labware_location_from_module_component(
-                labware_location, building
-            )
-        elif isinstance(labware_location, DeckSlotLocation):
-            return building + [
-                OnAddressableAreaLocationSequenceComponent(
-                    addressableAreaName=labware_location.slotName.value,
-                ),
-                self._cutout_fixture_location_sequence_from_addressable_area(
-                    labware_location.slotName.value
-                ),
-            ]
-        else:
-            _LOG.warn(f"Unhandled labware location kind: {labware_location}")
-            return building
-
-    def get_offset_location(
-        self, labware_id: str
-    ) -> Optional[LabwareOffsetLocationSequence]:
-        """Provide the LegacyLabwareOffsetLocation specifying the current position of the labware.
-
-        If the labware is in a location that cannot be specified by a LabwareOffsetLocationSequence
+        If the labware is in a location that cannot be specified by a LabwareOffsetLocation
         (for instance, OFF_DECK) then return None.
         """
         parent_location = self._labware.get_location(labware_id)
-        return self.get_projected_offset_location(parent_location)
 
-    def get_projected_offset_location(
-        self, labware_location: LabwareLocation
-    ) -> Optional[LabwareOffsetLocationSequence]:
-        """Get the offset location that a labware loaded into this location would match."""
-        return self._recurse_labware_offset_location(labware_location, [])
-
-    def _recurse_labware_offset_location(
-        self, labware_location: LabwareLocation, building: LabwareOffsetLocationSequence
-    ) -> LabwareOffsetLocationSequence | None:
-        if isinstance(labware_location, DeckSlotLocation):
-            return building + [
-                OnAddressableAreaOffsetLocationSequenceComponent(
-                    addressableAreaName=labware_location.slotName.value
-                )
-            ]
-
-        elif isinstance(labware_location, ModuleLocation):
-            module_id = labware_location.moduleId
-            # Allow ModuleNotLoadedError to propagate.
-            # Note also that we match based on the module's requested model, not its
-            # actual model, to implement robot-server's documented HTTP API semantics.
-            module_model = self._modules.get_requested_model(module_id=module_id)
-
-            # If `module_model is None`, it probably means that this module was added by
-            # `ProtocolEngine.use_attached_modules()`, instead of an explicit
-            # `loadModule` command.
-            #
-            # This assert should never raise in practice because:
-            #   1. `ProtocolEngine.use_attached_modules()` is only used by
-            #      robot-server's "stateless command" endpoints, under `/commands`.
-            #   2. Those endpoints don't support loading labware, so this code will
-            #      never run.
-            #
-            # Nevertheless, if it does happen somehow, we do NOT want to pass the
-            # `None` value along to `LabwareView.find_applicable_labware_offset()`.
-            # `None` means something different there, which will cause us to return
-            # wrong results.
-            assert module_model is not None, (
-                "Can't find offsets for labware"
-                " that are loaded on modules"
-                " that were loaded with ProtocolEngine.use_attached_modules()."
+        if isinstance(parent_location, DeckSlotLocation):
+            return LabwareOffsetLocation(
+                slotName=parent_location.slotName, moduleModel=None, definitionUri=None
             )
-
-            module_location = self._modules.get_location(module_id=module_id)
-            if self._modules.get_deck_supports_module_fixtures():
-                module_aa = self._modules.ensure_and_convert_module_fixture_location(
-                    module_location.slotName, module_model
-                )
-            else:
-                module_aa = module_location.slotName.value
-            return building + [
-                OnModuleOffsetLocationSequenceComponent(moduleModel=module_model),
-                OnAddressableAreaOffsetLocationSequenceComponent(
-                    addressableAreaName=module_aa
-                ),
-            ]
-
-        elif isinstance(labware_location, OnLabwareLocation):
-            parent_labware_id = labware_location.labwareId
-            parent_labware_uri = self._labware.get_definition_uri(parent_labware_id)
-
-            base_location = self._labware.get_parent_location(parent_labware_id)
-            return self._recurse_labware_offset_location(
-                base_location,
-                building
-                + [
-                    OnLabwareOffsetLocationSequenceComponent(
-                        labwareUri=parent_labware_uri
-                    )
-                ],
+        elif isinstance(parent_location, ModuleLocation):
+            module_model = self._modules.get_requested_model(parent_location.moduleId)
+            module_location = self._modules.get_location(parent_location.moduleId)
+            return LabwareOffsetLocation(
+                slotName=module_location.slotName,
+                moduleModel=module_model,
+                definitionUri=None,
             )
+        elif isinstance(parent_location, OnLabwareLocation):
+            non_labware_parent_location = self._labware.get_parent_location(labware_id)
 
-        else:  # Off deck
-            return None
+            parent_uri = self._labware.get_definition_uri(parent_location.labwareId)
+            if isinstance(non_labware_parent_location, DeckSlotLocation):
+                return LabwareOffsetLocation(
+                    slotName=non_labware_parent_location.slotName,
+                    moduleModel=None,
+                    definitionUri=parent_uri,
+                )
+            elif isinstance(non_labware_parent_location, ModuleLocation):
+                module_model = self._modules.get_requested_model(
+                    non_labware_parent_location.moduleId
+                )
+                module_location = self._modules.get_location(
+                    non_labware_parent_location.moduleId
+                )
+                return LabwareOffsetLocation(
+                    slotName=module_location.slotName,
+                    moduleModel=module_model,
+                    definitionUri=parent_uri,
+                )
+
+        return None
 
     def get_well_offset_adjustment(
         self,
@@ -1643,7 +1432,7 @@ class GeometryView:
             volume = operation_volume or 0.0
 
         if volume:
-            return self.get_well_height_after_liquid_handling(
+            return self.get_well_height_after_volume(
                 labware_id=labware_id,
                 well_name=well_name,
                 initial_height=initial_handling_height,
@@ -1652,74 +1441,23 @@ class GeometryView:
         else:
             return initial_handling_height
 
-    def get_current_well_volume(
-        self,
-        labware_id: str,
-        well_name: str,
-    ) -> float:
-        """Returns most recently updated volume in specified well."""
-        last_updated = self._wells.get_last_liquid_update(labware_id, well_name)
-        if last_updated is None:
-            raise errors.LiquidHeightUnknownError(
-                "Must LiquidProbe or LoadLiquid before specifying WellOrigin.MENISCUS."
-            )
-
-        well_liquid = self._wells.get_well_liquid_info(
-            labware_id=labware_id, well_name=well_name
-        )
-        if (
-            well_liquid.probed_height is not None
-            and well_liquid.probed_height.height is not None
-            and well_liquid.probed_height.last_probed == last_updated
-        ):
-            return self.get_well_volume_at_height(
-                labware_id=labware_id,
-                well_name=well_name,
-                height=well_liquid.probed_height.height,
-            )
-        elif (
-            well_liquid.loaded_volume is not None
-            and well_liquid.loaded_volume.volume is not None
-            and well_liquid.loaded_volume.last_loaded == last_updated
-        ):
-            return well_liquid.loaded_volume.volume
-        elif (
-            well_liquid.probed_volume is not None
-            and well_liquid.probed_volume.volume is not None
-            and well_liquid.probed_volume.last_probed == last_updated
-        ):
-            return well_liquid.probed_volume.volume
-        else:
-            # This should not happen if there was an update but who knows
-            raise errors.LiquidVolumeUnknownError(
-                f"Unable to find liquid volume despite an update at {last_updated}."
-            )
-
     def get_meniscus_height(
         self,
         labware_id: str,
         well_name: str,
     ) -> float:
         """Returns stored meniscus height in specified well."""
-        last_updated = self._wells.get_last_liquid_update(labware_id, well_name)
-        if last_updated is None:
-            raise errors.LiquidHeightUnknownError(
-                "Must LiquidProbe or LoadLiquid before specifying WellOrigin.MENISCUS."
-            )
-
         well_liquid = self._wells.get_well_liquid_info(
             labware_id=labware_id, well_name=well_name
         )
         if (
             well_liquid.probed_height is not None
             and well_liquid.probed_height.height is not None
-            and well_liquid.probed_height.last_probed == last_updated
         ):
             return well_liquid.probed_height.height
         elif (
             well_liquid.loaded_volume is not None
             and well_liquid.loaded_volume.volume is not None
-            and well_liquid.loaded_volume.last_loaded == last_updated
         ):
             return self.get_well_height_at_volume(
                 labware_id=labware_id,
@@ -1729,7 +1467,6 @@ class GeometryView:
         elif (
             well_liquid.probed_volume is not None
             and well_liquid.probed_volume.volume is not None
-            and well_liquid.probed_volume.last_probed == last_updated
         ):
             return self.get_well_height_at_volume(
                 labware_id=labware_id,
@@ -1737,9 +1474,8 @@ class GeometryView:
                 volume=well_liquid.probed_volume.volume,
             )
         else:
-            # This should not happen if there was an update but who knows
             raise errors.LiquidHeightUnknownError(
-                f"Unable to find liquid height despite an update at {last_updated}."
+                "Must LiquidProbe or LoadLiquid before specifying WellOrigin.MENISCUS."
             )
 
     def get_well_handling_height(
@@ -1761,7 +1497,7 @@ class GeometryView:
             )
         return float(handling_height)
 
-    def get_well_height_after_liquid_handling(
+    def get_well_height_after_volume(
         self, labware_id: str, well_name: str, initial_height: float, volume: float
     ) -> float:
         """Return the height of liquid in a labware well after a given volume has been handled.
@@ -1778,28 +1514,6 @@ class GeometryView:
         return find_height_at_well_volume(
             target_volume=final_volume, well_geometry=well_geometry
         )
-
-    def get_well_height_after_liquid_handling_no_error(
-        self, labware_id: str, well_name: str, initial_height: float, volume: float
-    ) -> float:
-        """Return what the height of liquid in a labware well after liquid handling will be.
-
-        This raises no error if the value returned is an invalid physical location, so it should never be
-        used for navigation, only for a pre-emptive estimate.
-        """
-        well_geometry = self._labware.get_well_geometry(
-            labware_id=labware_id, well_name=well_name
-        )
-        initial_volume = find_volume_at_well_height(
-            target_height=initial_height, well_geometry=well_geometry
-        )
-        final_volume = initial_volume + volume
-        well_volume = find_height_at_well_volume(
-            target_volume=final_volume,
-            well_geometry=well_geometry,
-            raise_error_if_result_invalid=False,
-        )
-        return well_volume
 
     def get_well_height_at_volume(
         self, labware_id: str, well_name: str, volume: float

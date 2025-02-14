@@ -55,11 +55,6 @@ def load(name: str, version: "DeckSchemaVersion3") -> "DeckDefinitionV3":
     ...
 
 
-@overload
-def load(name: str) -> "DeckDefinitionV5":
-    ...
-
-
 def load(name: str, version: int = DEFAULT_DECK_DEFINITION_VERSION) -> "DeckDefinition":
     return json.loads(  # type: ignore[no-any-return]
         load_shared_data(f"deck/definitions/{version}/{name}.json")

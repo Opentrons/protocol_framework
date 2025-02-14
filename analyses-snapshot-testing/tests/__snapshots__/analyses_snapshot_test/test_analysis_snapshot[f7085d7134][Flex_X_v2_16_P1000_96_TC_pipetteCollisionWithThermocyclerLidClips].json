@@ -1282,20 +1282,7 @@
             }
           }
         },
-        "labwareId": "UUID",
-        "locationSequence": [
-          {
-            "addressableAreaName": "A2",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutoutA2",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "singleCenterSlot"
-            ]
-          }
-        ]
+        "labwareId": "UUID"
       },
       "startedAt": "TIMESTAMP",
       "status": "succeeded"

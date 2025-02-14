@@ -568,9 +568,7 @@ async def test_move_axes(
 
     pos = await subject.move_axes(axis_map, critical_point, 100, relative_move)
     decoy.verify(
-        await ot3_hardware_api.move_axes(
-            position=call_to_hw, speed=100, expect_stalls=False
-        ),
+        await ot3_hardware_api.move_axes(position=call_to_hw, speed=100),
         times=1,
     )
     assert pos == {

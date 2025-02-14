@@ -1,6 +1,5 @@
 import {
   ALIGN_CENTER,
-  Check,
   COLORS,
   DIRECTION_COLUMN,
   Flex,
@@ -17,13 +16,12 @@ import { ToggleButton } from '../../atoms/ToggleButton'
 interface ToggleStepFormFieldProps {
   title: string
   isSelected: boolean
+  onLabel: string
+  offLabel: string
   toggleUpdateValue: (value: unknown) => void
   toggleValue: unknown
   tooltipContent: string | null
-  isDisabled?: boolean
-  onLabel?: string
-  offLabel?: string
-  toggleElement?: 'toggle' | 'checkbox'
+  isDisabled: boolean
 }
 export function ToggleStepFormField(
   props: ToggleStepFormFieldProps
@@ -36,8 +34,7 @@ export function ToggleStepFormField(
     toggleUpdateValue,
     toggleValue,
     tooltipContent,
-    isDisabled = false,
-    toggleElement = 'toggle',
+    isDisabled,
   } = props
   const [targetProps, tooltipProps] = useHoverTooltip()
 
@@ -45,7 +42,7 @@ export function ToggleStepFormField(
     <>
       <ListButton
         type="noActive"
-        padding={SPACING.spacing16}
+        padding={SPACING.spacing12}
         onClick={() => {
           if (!isDisabled) {
             toggleUpdateValue(!toggleValue)
@@ -53,7 +50,11 @@ export function ToggleStepFormField(
         }}
         disabled={isDisabled}
       >
-        <Flex width="100%" flexDirection={DIRECTION_COLUMN}>
+        {tooltipContent != null ? (
+          <Tooltip tooltipProps={tooltipProps}>{tooltipContent}</Tooltip>
+        ) : null}
+
+        <Flex width="100%" flexDirection={DIRECTION_COLUMN} {...targetProps}>
           <Flex
             justifyContent={JUSTIFY_SPACE_BETWEEN}
             alignItems={ALIGN_CENTER}
@@ -61,7 +62,6 @@ export function ToggleStepFormField(
             <StyledText
               desktopStyle="bodyDefaultRegular"
               color={isDisabled ? COLORS.grey40 : COLORS.black90}
-              {...targetProps}
             >
               {title}
             </StyledText>
@@ -72,21 +72,15 @@ export function ToggleStepFormField(
               >
                 {isSelected ? onLabel : offLabel}
               </StyledText>
-              {toggleElement === 'toggle' ? (
-                <ToggleButton
-                  label={isSelected ? onLabel : offLabel}
-                  toggledOn={isSelected}
-                />
-              ) : (
-                <Check color={COLORS.blue50} isChecked={isSelected} />
-              )}
+              <ToggleButton
+                disabled={isDisabled}
+                label={isSelected ? onLabel : offLabel}
+                toggledOn={isSelected}
+              />
             </Flex>
           </Flex>
         </Flex>
       </ListButton>
-      {tooltipContent != null ? (
-        <Tooltip tooltipProps={tooltipProps}>{tooltipContent}</Tooltip>
-      ) : null}
     </>
   )
 }

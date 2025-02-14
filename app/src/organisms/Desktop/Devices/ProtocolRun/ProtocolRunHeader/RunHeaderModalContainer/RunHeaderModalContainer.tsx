@@ -52,7 +52,6 @@ export function RunHeaderModalContainer(
           runStatus={runStatus}
           runId={runId}
           unvalidatedFailedCommand={recoveryModalUtils.failedCommand}
-          runLwDefsByUri={recoveryModalUtils.runLwDefsByUri}
           protocolAnalysis={robotProtocolAnalysis}
         />
       ) : null}

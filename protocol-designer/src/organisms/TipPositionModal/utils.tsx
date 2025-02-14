@@ -8,24 +8,35 @@ import {
 import { DECIMALS_ALLOWED, TOO_MANY_DECIMALS } from './constants'
 import type { StepFieldName } from '../../form-types'
 
-export function getDefaultMmFromEdge(args: { name: StepFieldName }): number {
-  const { name } = args
+export function getDefaultMmFromBottom(args: {
+  name: StepFieldName
+  wellDepthMm: number
+}): number {
+  const { name, wellDepthMm } = args
 
   switch (name) {
-    case 'mix_mmFromBottom':
-    case 'dispense_mmFromBottom':
-    case 'dispense_delay_mmFromBottom':
-    case 'aspirate_delay_mmFromBottom':
     case 'aspirate_mmFromBottom':
+      return DEFAULT_MM_OFFSET_FROM_BOTTOM
+
+    case 'aspirate_delay_mmFromBottom':
+      return DEFAULT_MM_OFFSET_FROM_BOTTOM
+
+    case 'dispense_mmFromBottom':
+      return DEFAULT_MM_OFFSET_FROM_BOTTOM
+
+    case 'dispense_delay_mmFromBottom':
+      return DEFAULT_MM_OFFSET_FROM_BOTTOM
+
+    case 'mix_mmFromBottom':
       return DEFAULT_MM_OFFSET_FROM_BOTTOM
 
     default:
       // touch tip fields
       console.assert(
         getIsTouchTipField(name),
-        `getDefaultMmFromEdge fn does not know what to do with field ${name}`
+        `getDefaultMmFromBottom fn does not know what to do with field ${name}`
       )
-      return DEFAULT_MM_TOUCH_TIP_OFFSET_FROM_TOP
+      return DEFAULT_MM_TOUCH_TIP_OFFSET_FROM_TOP + wellDepthMm
   }
 }
 

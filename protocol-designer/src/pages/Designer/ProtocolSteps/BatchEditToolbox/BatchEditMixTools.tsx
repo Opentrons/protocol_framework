@@ -24,7 +24,7 @@ import {
 } from '../StepForm/utils'
 
 import type { WellOrderOption } from '../../../../form-types'
-import type { FieldPropsByName, LiquidHandlingTab } from '../StepForm/types'
+import type { FieldPropsByName } from '../StepForm/types'
 
 interface BatchEditMixToolsProps {
   propsForFields: FieldPropsByName
@@ -33,7 +33,7 @@ interface BatchEditMixToolsProps {
 export function BatchEditMixTools(props: BatchEditMixToolsProps): JSX.Element {
   const { propsForFields } = props
   const { t, i18n } = useTranslation(['form', 'button', 'tooltip'])
-  const [tab, setTab] = useState<LiquidHandlingTab>('aspirate')
+  const [tab, setTab] = useState<'aspirate' | 'dispense'>('aspirate')
   const aspirateTab = {
     text: i18n.format(t('aspirate'), 'capitalize'),
     isActive: tab === 'aspirate',
@@ -179,9 +179,9 @@ export function BatchEditMixTools(props: BatchEditMixToolsProps): JSX.Element {
                 <PositionField
                   prefix="dispense"
                   propsForFields={propsForFields}
-                  zField="mix_touchTip_mmFromTop"
+                  zField="mix_touchTip_mmFromBottom"
                   labwareId={getLabwareIdForPositioningField(
-                    'mix_touchTip_mmFromTop'
+                    'mix_touchTip_mmFromBottom'
                   )}
                 />
               ) : null}

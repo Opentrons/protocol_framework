@@ -118,7 +118,6 @@ describe('createContainer', () => {
           id: 'fakeUuid:someLabwareDefURI',
           labwareDefURI: 'someLabwareDefURI',
           slot: '4',
-          displayCategory: 'wellPlate',
         },
       },
     ]
@@ -164,7 +163,6 @@ describe('createContainer', () => {
           id: 'fakeUuid:someLabwareDefURI',
           labwareDefURI: 'someLabwareDefURI',
           slot: '3',
-          displayCategory: 'wellPlate',
         },
       },
     ]
@@ -256,7 +254,6 @@ describe('createContainer', () => {
           id: 'fakeUuid:someLabwareDefURI',
           labwareDefURI: 'someLabwareDefURI',
           slot: '4',
-          displayCategory: 'tipRack',
         },
       },
       {

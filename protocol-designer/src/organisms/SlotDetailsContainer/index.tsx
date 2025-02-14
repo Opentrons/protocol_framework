@@ -2,7 +2,7 @@ import { useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
 import { getModuleDisplayName } from '@opentrons/shared-data'
 import * as wellContentsSelectors from '../../top-selectors/well-contents'
-import { getLiquidEntities } from '../../step-forms/selectors'
+import { selectors } from '../../labware-ingred/selectors'
 import { selectors as uiLabwareSelectors } from '../../ui/labware'
 import { getDeckSetupForActiveItem } from '../../top-selectors/labware-locations'
 import { SlotInformation } from '../../organisms/SlotInformation'
@@ -26,7 +26,7 @@ export function SlotDetailsContainer(
     wellContentsSelectors.getAllWellContentsForActiveItem
   )
   const nickNames = useSelector(uiLabwareSelectors.getLabwareNicknamesById)
-  const liquidEntities = useSelector(getLiquidEntities)
+  const allIngredNamesIds = useSelector(selectors.allIngredientNamesIds)
 
   if (slot == null || (slot === 'offDeck' && offDeckLabwareId == null)) {
     return null
@@ -78,10 +78,10 @@ export function SlotDetailsContainer(
 
   const liquidNamesOnLabware = uniqueLiquids
     .map(liquid => {
-      const foundLiquid = Object.values(liquidEntities).find(
-        id => id.liquidGroupId === liquid
+      const foundLiquid = Object.values(allIngredNamesIds).find(
+        id => id.ingredientId === liquid
       )
-      return foundLiquid?.displayName ?? ''
+      return foundLiquid?.name ?? ''
     })
     .filter(Boolean)
 

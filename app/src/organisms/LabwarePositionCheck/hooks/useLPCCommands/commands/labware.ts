@@ -1,10 +1,14 @@
 import type { CreateCommand } from '@opentrons/shared-data'
-import type { OffsetLocationDetails } from '/app/redux/protocol-runs'
+import type { CheckPositionsStep } from '/app/organisms/LabwarePositionCheck/types'
 
-export function moveLabwareOffDeckCommands(
-  offsetLocationDetails: OffsetLocationDetails
-): CreateCommand[] {
-  const { adapterId, labwareId } = offsetLocationDetails
+export interface BuildMoveLabwareOffDeckParams {
+  step: CheckPositionsStep
+}
+
+export function moveLabwareOffDeckCommands({
+  step,
+}: BuildMoveLabwareOffDeckParams): CreateCommand[] {
+  const { adapterId, labwareId } = step
 
   return adapterId != null
     ? [

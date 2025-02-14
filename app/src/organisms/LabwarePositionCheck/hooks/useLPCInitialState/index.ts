@@ -1,9 +1,12 @@
 import { useEffect } from 'react'
 import { useDispatch } from 'react-redux'
 
-import { startLPC, LPC_STEPS } from '/app/redux/protocol-runs'
-import { getActivePipetteId } from './utils'
+import { getLabwareDefinitionsFromCommands } from '@opentrons/components'
 
+import { startLPC } from '/app/redux/protocol-runs'
+import { getLPCSteps } from './utils'
+
+import type { RunTimeCommand } from '@opentrons/shared-data'
 import type { LPCWizardState } from '/app/redux/protocol-runs'
 import type { LPCWizardFlexProps } from '/app/organisms/LabwarePositionCheck/LPCWizardFlex'
 
@@ -13,24 +16,29 @@ export interface UseLPCInitialStateProps
 export function useLPCInitialState({
   mostRecentAnalysis,
   runId,
-  labwareDefs,
   ...rest
 }: UseLPCInitialStateProps): void {
   const dispatch = useDispatch()
 
   useEffect(() => {
-    const activePipetteId = getActivePipetteId(mostRecentAnalysis.pipettes)
+    const protocolCommands: RunTimeCommand[] = mostRecentAnalysis.commands
+    const labwareDefs = getLabwareDefinitionsFromCommands(protocolCommands)
+    const LPCSteps = getLPCSteps({
+      protocolData: mostRecentAnalysis,
+      labwareDefs,
+    })
 
     const initialState: LPCWizardState = {
       ...rest,
       protocolData: mostRecentAnalysis,
       labwareDefs,
-      activePipetteId,
+      workingOffsets: [],
       steps: {
         currentStepIndex: 0,
-        totalStepCount: LPC_STEPS.length,
-        all: LPC_STEPS,
-        lastStepIndices: null,
+        totalStepCount: LPCSteps.length,
+        current: LPCSteps[0],
+        all: LPCSteps,
+        next: LPCSteps[1],
       },
     }
 

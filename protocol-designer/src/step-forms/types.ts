@@ -94,8 +94,6 @@ export type NormalizedLabwareById = Record<
   string,
   {
     labwareDefURI: string
-    pythonName: string
-    displayCategory: string
   }
 >
 export type NormalizedLabware = NormalizedLabwareById[keyof NormalizedLabwareById]

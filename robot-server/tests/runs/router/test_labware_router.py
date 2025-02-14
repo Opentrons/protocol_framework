@@ -53,69 +53,37 @@ def labware_definition(minimal_labware_def: LabwareDefDict) -> LabwareDefinition
     return LabwareDefinition.model_validate(minimal_labware_def)
 
 
-async def test_add_labware_offsets(
+async def test_add_labware_offset(
     decoy: Decoy,
     mock_run_orchestrator_store: RunOrchestratorStore,
     run: Run,
 ) -> None:
-    """It should add the labware offsets to the engine, assuming the run is current."""
-    labware_offset_request_1 = pe_types.LegacyLabwareOffsetCreate(
+    """It should add the labware offset to the engine, assuming the run is current."""
+    labware_offset_request = pe_types.LabwareOffsetCreate(
         definitionUri="namespace_1/load_name_1/123",
-        location=pe_types.LegacyLabwareOffsetLocation(slotName=DeckSlotName.SLOT_1),
-        vector=pe_types.LabwareOffsetVector(x=1, y=2, z=3),
-    )
-    labware_offset_request_2 = pe_types.LegacyLabwareOffsetCreate(
-        definitionUri="namespace_1/load_name_2/123",
-        location=pe_types.LegacyLabwareOffsetLocation(slotName=DeckSlotName.SLOT_1),
+        location=pe_types.LabwareOffsetLocation(slotName=DeckSlotName.SLOT_1),
         vector=pe_types.LabwareOffsetVector(x=1, y=2, z=3),
     )
 
-    labware_offset_1 = pe_types.LabwareOffset(
-        id="labware-offset-id-1",
+    labware_offset = pe_types.LabwareOffset(
+        id="labware-offset-id",
         createdAt=datetime(year=2022, month=2, day=2),
         definitionUri="labware-definition-uri",
-        location=pe_types.LegacyLabwareOffsetLocation(slotName=DeckSlotName.SLOT_1),
-        vector=pe_types.LabwareOffsetVector(x=0, y=0, z=0),
-    )
-    labware_offset_2 = pe_types.LabwareOffset(
-        id="labware-offset-id-2",
-        createdAt=datetime(year=2022, month=2, day=2),
-        definitionUri="labware-definition-uri",
-        location=pe_types.LegacyLabwareOffsetLocation(slotName=DeckSlotName.SLOT_1),
+        location=pe_types.LabwareOffsetLocation(slotName=DeckSlotName.SLOT_1),
         vector=pe_types.LabwareOffsetVector(x=0, y=0, z=0),
     )
 
     decoy.when(
-        mock_run_orchestrator_store.add_labware_offset(labware_offset_request_1)
-    ).then_return(labware_offset_1)
-    decoy.when(
-        mock_run_orchestrator_store.add_labware_offset(labware_offset_request_2)
-    ).then_return(labware_offset_2)
+        mock_run_orchestrator_store.add_labware_offset(labware_offset_request)
+    ).then_return(labware_offset)
 
     result = await add_labware_offset(
-        request_body=RequestModel(data=labware_offset_request_1),
+        request_body=RequestModel(data=labware_offset_request),
         run_orchestrator_store=mock_run_orchestrator_store,
         run=run,
     )
-    assert result.content == SimpleBody(data=labware_offset_1)
-    assert result.status_code == 201
 
-    result = await add_labware_offset(
-        request_body=RequestModel(
-            data=[labware_offset_request_1, labware_offset_request_2]
-        ),
-        run_orchestrator_store=mock_run_orchestrator_store,
-        run=run,
-    )
-    assert result.content == SimpleBody(data=[labware_offset_1, labware_offset_2])
-    assert result.status_code == 201
-
-    result = await add_labware_offset(
-        request_body=RequestModel(data=[]),
-        run_orchestrator_store=mock_run_orchestrator_store,
-        run=run,
-    )
-    assert result.content == SimpleBody(data=[])
+    assert result.content == SimpleBody(data=labware_offset)
     assert result.status_code == 201
 
 
@@ -127,9 +95,9 @@ async def test_add_labware_offset_not_current(
     """It should 409 if the run is not current."""
     not_current_run = run.model_copy(update={"current": False})
 
-    labware_offset_request = pe_types.LegacyLabwareOffsetCreate(
+    labware_offset_request = pe_types.LabwareOffsetCreate(
         definitionUri="namespace_1/load_name_1/123",
-        location=pe_types.LegacyLabwareOffsetLocation(slotName=DeckSlotName.SLOT_1),
+        location=pe_types.LabwareOffsetLocation(slotName=DeckSlotName.SLOT_1),
         vector=pe_types.LabwareOffsetVector(x=1, y=2, z=3),
     )
 

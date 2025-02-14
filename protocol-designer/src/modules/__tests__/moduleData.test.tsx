@@ -53,7 +53,6 @@ describe('getNextAvailableModuleSlot', () => {
           type: 'thermocyclerModuleType',
           slot: 'B1',
           moduleState: {} as any,
-          pythonName: 'mockPythonName',
         },
         temperature: {
           model: 'temperatureModuleV2',
@@ -61,7 +60,6 @@ describe('getNextAvailableModuleSlot', () => {
           type: 'temperatureModuleType',
           slot: 'C1',
           moduleState: {} as any,
-          pythonName: 'mockPythonName',
         },
       },
       labware: {},

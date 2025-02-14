@@ -101,7 +101,6 @@ describe('ProtocolSetupLabware', () => {
 
   it('renders the Labware Setup page', () => {
     render()
-    fireEvent.click(screen.getByRole('button', { name: 'List View' }))
     screen.getByText('Labware')
     screen.getByText('Labware name')
     screen.getByText('Location')
@@ -116,10 +115,9 @@ describe('ProtocolSetupLabware', () => {
 
   it('should toggle between map view and list view', () => {
     render()
-    expect(screen.queryByText('Map View')).toBeNull()
-    fireEvent.click(screen.getByRole('button', { name: 'List View' }))
     expect(screen.queryByText('List View')).toBeNull()
     fireEvent.click(screen.getByRole('button', { name: 'Map View' }))
+    expect(screen.queryByText('Map View')).toBeNull()
     fireEvent.click(screen.getByRole('button', { name: 'List View' }))
     screen.getByText('Labware')
     screen.getByText('Labware name')
@@ -128,7 +126,6 @@ describe('ProtocolSetupLabware', () => {
 
   it('sends a latch-close command when the labware latch is open and the button is clicked', () => {
     render()
-    fireEvent.click(screen.getByRole('button', { name: 'List View' }))
     fireEvent.click(screen.getByText('Labware Latch'))
     expect(mockCreateLiveCommand).toHaveBeenCalledWith({
       command: {
@@ -147,7 +144,6 @@ describe('ProtocolSetupLabware', () => {
       refetch: mockRefetch,
     } as any)
     render()
-    fireEvent.click(screen.getByRole('button', { name: 'List View' }))
     fireEvent.click(screen.getByText('Labware Latch'))
     expect(mockCreateLiveCommand).toHaveBeenCalledWith({
       command: {
@@ -166,7 +162,6 @@ describe('ProtocolSetupLabware', () => {
     )
 
     render()
-    fireEvent.click(screen.getByRole('button', { name: 'List View' }))
     screen.getByText('Opening...')
   })
 
@@ -174,8 +169,8 @@ describe('ProtocolSetupLabware', () => {
     vi.mocked(useModulesQuery).mockReturnValue(
       mockUseModulesQueryClosing as any
     )
+
     render()
-    fireEvent.click(screen.getByRole('button', { name: 'List View' }))
     screen.getByText('Closing...')
   })
 
@@ -185,7 +180,6 @@ describe('ProtocolSetupLabware', () => {
     )
 
     render()
-    fireEvent.click(screen.getByRole('button', { name: 'List View' }))
     screen.getByText('Open')
   })
 })

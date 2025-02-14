@@ -8,7 +8,7 @@ from opentrons.config.advanced_settings import _migrate, _ensure
 
 @pytest.fixture
 def migrated_file_version() -> int:
-    return 37
+    return 36
 
 
 # make sure to set a boolean value in default_file_settings only if
@@ -30,6 +30,7 @@ def default_file_settings() -> Dict[str, Any]:
         "enableErrorRecoveryExperiments": None,
         "enableOEMMode": None,
         "enablePerformanceMetrics": None,
+        "allowLiquidClasses": None,
     }
 
 
@@ -431,13 +432,6 @@ def v36_config(v35_config: Dict[str, Any]) -> Dict[str, Any]:
     return r
 
 
-@pytest.fixture
-def v37_config(v36_config: Dict[str, Any]) -> Dict[str, Any]:
-    r = {k: v for k, v in v36_config.items() if k != "allowLiquidClasses"}
-    r["_version"] = 37
-    return r
-
-
 @pytest.fixture(
     scope="session",
     params=[
@@ -479,7 +473,6 @@ def v37_config(v36_config: Dict[str, Any]) -> Dict[str, Any]:
         lazy_fixture("v34_config"),
         lazy_fixture("v35_config"),
         lazy_fixture("v36_config"),
-        lazy_fixture("v37_config"),
     ],
 )
 def old_settings(request: SubRequest) -> Dict[str, Any]:
@@ -570,4 +563,5 @@ def test_ensures_config() -> None:
         "enableErrorRecoveryExperiments": None,
         "enableOEMMode": None,
         "enablePerformanceMetrics": None,
+        "allowLiquidClasses": None,
     }

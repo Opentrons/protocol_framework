@@ -1,11 +1,9 @@
 """Reload labware command request, result, and implementation models."""
-
 from __future__ import annotations
 from pydantic import BaseModel, Field
 from typing import TYPE_CHECKING, Optional, Type
 from typing_extensions import Literal
 
-from .labware_handling_common import LabwarePositionResultMixin
 from .command import AbstractCommandImpl, BaseCommand, BaseCommandCreate, SuccessData
 from ..errors.error_occurrence import ErrorOccurrence
 from ..state.update_types import StateUpdate
@@ -26,8 +24,26 @@ class ReloadLabwareParams(BaseModel):
     )
 
 
-class ReloadLabwareResult(LabwarePositionResultMixin):
+class ReloadLabwareResult(BaseModel):
     """Result data from the execution of a LoadLabware command."""
+
+    labwareId: str = Field(
+        ...,
+        description="An ID to reference this labware in subsequent commands. Same as the one in the parameters.",
+    )
+    offsetId: Optional[str] = Field(
+        # Default `None` instead of `...` so this field shows up as non-required in
+        # OpenAPI. The server is allowed to omit it or make it null.
+        None,
+        description=(
+            "An ID referencing the labware offset that will apply"
+            " to the reloaded labware."
+            " This offset will be in effect until the labware is moved"
+            " with a `moveLabware` command."
+            " Null or undefined means no offset applies,"
+            " so the default of (0, 0, 0) will be used."
+        ),
+    )
 
 
 class ReloadLabwareImplementation(
@@ -61,9 +77,6 @@ class ReloadLabwareImplementation(
             public=ReloadLabwareResult(
                 labwareId=params.labwareId,
                 offsetId=reloaded_labware.offsetId,
-                locationSequence=self._state_view.geometry.get_predicted_location_sequence(
-                    reloaded_labware.location
-                ),
             ),
             state_update=state_update,
         )

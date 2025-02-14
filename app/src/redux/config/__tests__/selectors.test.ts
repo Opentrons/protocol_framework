@@ -246,7 +246,7 @@ describe('shell selectors', () => {
             sleepMs: 25200000,
             brightness: 4,
             textSize: 1,
-            unfinishedUnboxingFlowRoute: '/choose-language',
+            unfinishedUnboxingFlowRoute: '/welcome',
           },
         },
       } as any
@@ -254,7 +254,7 @@ describe('shell selectors', () => {
         sleepMs: 25200000,
         brightness: 4,
         textSize: 1,
-        unfinishedUnboxingFlowRoute: '/choose-language',
+        unfinishedUnboxingFlowRoute: '/welcome',
       })
     })
   })

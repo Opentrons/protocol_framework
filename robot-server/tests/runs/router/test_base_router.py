@@ -9,6 +9,7 @@ from pathlib import Path
 
 from opentrons.types import DeckSlotName, Point, NozzleConfigurationType
 from opentrons.protocol_engine import (
+    LabwareOffsetCreate,
     types as pe_types,
     errors as pe_errors,
     CommandErrorSlice,
@@ -100,11 +101,11 @@ def mock_data_files_directory(decoy: Decoy) -> Path:
 
 
 @pytest.fixture
-def labware_offset_create() -> pe_types.LegacyLabwareOffsetCreate:
+def labware_offset_create() -> LabwareOffsetCreate:
     """Get a labware offset create request value object."""
-    return pe_types.LegacyLabwareOffsetCreate(
+    return pe_types.LabwareOffsetCreate(
         definitionUri="namespace_1/load_name_1/123",
-        location=pe_types.LegacyLabwareOffsetLocation(slotName=DeckSlotName.SLOT_1),
+        location=pe_types.LabwareOffsetLocation(slotName=DeckSlotName.SLOT_1),
         vector=pe_types.LabwareOffsetVector(x=1, y=2, z=3),
     )
 
@@ -113,7 +114,7 @@ async def test_create_run(
     decoy: Decoy,
     mock_run_data_manager: RunDataManager,
     mock_run_auto_deleter: RunAutoDeleter,
-    labware_offset_create: pe_types.LegacyLabwareOffsetCreate,
+    labware_offset_create: pe_types.LabwareOffsetCreate,
     mock_deck_configuration_store: DeckConfigurationStore,
     mock_file_provider_wrapper: FileProviderWrapper,
     mock_protocol_store: ProtocolStore,

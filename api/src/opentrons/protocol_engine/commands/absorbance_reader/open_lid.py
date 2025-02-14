@@ -133,7 +133,7 @@ class OpenLid(BaseCommand[OpenLidParams, OpenLidResult, ErrorOccurrence]):
 
     commandType: OpenLidCommandType = "absorbanceReader/openLid"
     params: OpenLidParams
-    result: Optional[OpenLidResult] = None
+    result: Optional[OpenLidResult]
 
     _ImplementationCls: Type[OpenLidImpl] = OpenLidImpl
 

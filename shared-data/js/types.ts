@@ -259,7 +259,6 @@ export interface LabwareDefinition2 {
   allowedRoles?: LabwareRoles[]
   stackingOffsetWithLabware?: Record<string, LabwareOffset>
   stackingOffsetWithModule?: Record<string, LabwareOffset>
-  stackLimit?: number
 }
 
 export interface LabwareDefinition3 {

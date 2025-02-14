@@ -62,7 +62,7 @@ class Configure(BaseCommand[ConfigureParams, ConfigureResult, ErrorOccurrence]):
 
     commandType: ConfigureCommandType = "flexStacker/configure"
     params: ConfigureParams
-    result: Optional[ConfigureResult] = None
+    result: Optional[ConfigureResult]
 
     _ImplementationCls: Type[ConfigureImpl] = ConfigureImpl
 

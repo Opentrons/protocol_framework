@@ -377,30 +377,6 @@ from .liquid_probe import (
     TryLiquidProbeCommandType,
 )
 
-from .evotip_seal_pipette import (
-    EvotipSealPipette,
-    EvotipSealPipetteParams,
-    EvotipSealPipetteCreate,
-    EvotipSealPipetteResult,
-    EvotipSealPipetteCommandType,
-)
-
-from .evotip_dispense import (
-    EvotipDispense,
-    EvotipDispenseParams,
-    EvotipDispenseCreate,
-    EvotipDispenseResult,
-    EvotipDispenseCommandType,
-)
-
-from .evotip_unseal_pipette import (
-    EvotipUnsealPipette,
-    EvotipUnsealPipetteParams,
-    EvotipUnsealPipetteCreate,
-    EvotipUnsealPipetteResult,
-    EvotipUnsealPipetteCommandType,
-)
-
 Command = Annotated[
     Union[
         AirGapInPlace,
@@ -447,9 +423,6 @@ Command = Annotated[
         GetNextTip,
         LiquidProbe,
         TryLiquidProbe,
-        EvotipSealPipette,
-        EvotipDispense,
-        EvotipUnsealPipette,
         heater_shaker.WaitForTemperature,
         heater_shaker.SetTargetTemperature,
         heater_shaker.DeactivateHeater,
@@ -543,9 +516,6 @@ CommandParams = Union[
     GetNextTipParams,
     LiquidProbeParams,
     TryLiquidProbeParams,
-    EvotipSealPipetteParams,
-    EvotipDispenseParams,
-    EvotipUnsealPipetteParams,
     heater_shaker.WaitForTemperatureParams,
     heater_shaker.SetTargetTemperatureParams,
     heater_shaker.DeactivateHeaterParams,
@@ -637,9 +607,6 @@ CommandType = Union[
     GetNextTipCommandType,
     LiquidProbeCommandType,
     TryLiquidProbeCommandType,
-    EvotipSealPipetteCommandType,
-    EvotipDispenseCommandType,
-    EvotipUnsealPipetteCommandType,
     heater_shaker.WaitForTemperatureCommandType,
     heater_shaker.SetTargetTemperatureCommandType,
     heater_shaker.DeactivateHeaterCommandType,
@@ -732,9 +699,6 @@ CommandCreate = Annotated[
         GetNextTipCreate,
         LiquidProbeCreate,
         TryLiquidProbeCreate,
-        EvotipSealPipetteCreate,
-        EvotipDispenseCreate,
-        EvotipUnsealPipetteCreate,
         heater_shaker.WaitForTemperatureCreate,
         heater_shaker.SetTargetTemperatureCreate,
         heater_shaker.DeactivateHeaterCreate,
@@ -835,9 +799,6 @@ CommandResult = Union[
     GetNextTipResult,
     LiquidProbeResult,
     TryLiquidProbeResult,
-    EvotipSealPipetteResult,
-    EvotipDispenseResult,
-    EvotipUnsealPipetteResult,
     heater_shaker.WaitForTemperatureResult,
     heater_shaker.SetTargetTemperatureResult,
     heater_shaker.DeactivateHeaterResult,

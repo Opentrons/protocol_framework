@@ -123,7 +123,7 @@ export function SelectDestWells(props: SelectDestWellsProps): JSX.Element {
         }) as string,
         'error',
         {
-          buttonText: i18n.format(t('shared:close'), 'capitalize'),
+          closeButton: true,
           disableTimeout: true,
           displayType: 'odd',
           linkText: t('learn_more'),

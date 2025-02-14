@@ -1160,20 +1160,7 @@
             }
           }
         },
-        "labwareId": "UUID",
-        "locationSequence": [
-          {
-            "addressableAreaName": "1",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutout1",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "singleStandardSlot"
-            ]
-          }
-        ]
+        "labwareId": "UUID"
       },
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
@@ -2325,20 +2312,7 @@
             }
           }
         },
-        "labwareId": "UUID",
-        "locationSequence": [
-          {
-            "addressableAreaName": "2",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutout2",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "singleStandardSlot"
-            ]
-          }
-        ]
+        "labwareId": "UUID"
       },
       "startedAt": "TIMESTAMP",
       "status": "succeeded"

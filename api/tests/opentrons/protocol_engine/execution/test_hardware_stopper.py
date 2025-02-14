@@ -1,5 +1,4 @@
 """Test hardware stopping execution and side effects."""
-
 from __future__ import annotations
 
 import pytest
@@ -79,12 +78,12 @@ async def test_hardware_halt(
 
 
 @pytest.mark.parametrize(
-    "post_run_hardware_state",
-    [
-        PostRunHardwareState.STAY_ENGAGED_IN_PLACE,
-        PostRunHardwareState.DISENGAGE_IN_PLACE,
-        PostRunHardwareState.HOME_AND_STAY_ENGAGED,
-        PostRunHardwareState.HOME_THEN_DISENGAGE,
+    argnames=["post_run_hardware_state", "expected_home_after"],
+    argvalues=[
+        (PostRunHardwareState.STAY_ENGAGED_IN_PLACE, False),
+        (PostRunHardwareState.DISENGAGE_IN_PLACE, False),
+        (PostRunHardwareState.HOME_AND_STAY_ENGAGED, True),
+        (PostRunHardwareState.HOME_THEN_DISENGAGE, True),
     ],
 )
 async def test_hardware_stopping_sequence(
@@ -95,6 +94,7 @@ async def test_hardware_stopping_sequence(
     mock_tip_handler: TipHandler,
     subject: HardwareStopper,
     post_run_hardware_state: PostRunHardwareState,
+    expected_home_after: bool,
 ) -> None:
     """It should stop the hardware, and home the robot. Flex no longer performs automatic drop tip.."""
     decoy.when(state_store.pipettes.get_all_attached_tips()).then_return(
@@ -113,7 +113,7 @@ async def test_hardware_stopping_sequence(
         await movement.home(
             axes=[MotorAxis.X, MotorAxis.Y, MotorAxis.LEFT_Z, MotorAxis.RIGHT_Z]
         ),
-        await hardware_api.stop(home_after=False),
+        await hardware_api.stop(home_after=expected_home_after),
     )
 
 
@@ -122,7 +122,6 @@ async def test_hardware_stopping_sequence_without_pipette_tips(
     hardware_api: HardwareAPI,
     state_store: StateStore,
     subject: HardwareStopper,
-    movement: MovementHandler,
 ) -> None:
     """Don't drop tip when there aren't any tips attached to pipettes."""
     decoy.when(state_store.pipettes.get_all_attached_tips()).then_return([])
@@ -133,10 +132,7 @@ async def test_hardware_stopping_sequence_without_pipette_tips(
     )
 
     decoy.verify(
-        await hardware_api.stop(home_after=False),
-        await movement.home(
-            [MotorAxis.X, MotorAxis.Y, MotorAxis.LEFT_Z, MotorAxis.RIGHT_Z]
-        ),
+        await hardware_api.stop(home_after=True),
     )
 
 
@@ -175,7 +171,6 @@ async def test_hardware_stopping_sequence_no_pipette(
     state_store: StateStore,
     hardware_api: HardwareAPI,
     mock_tip_handler: TipHandler,
-    movement: MovementHandler,
     subject: HardwareStopper,
 ) -> None:
     """It should gracefully no-op if the HW API reports no attached pipette."""
@@ -198,14 +193,8 @@ async def test_hardware_stopping_sequence_no_pipette(
     )
 
     decoy.verify(
-        await hardware_api.stop(home_after=False),
-        await movement.home(
-            [MotorAxis.X, MotorAxis.Y, MotorAxis.LEFT_Z, MotorAxis.RIGHT_Z]
-        ),
-        await hardware_api.stop(home_after=False),
-        await movement.home(
-            [MotorAxis.X, MotorAxis.Y, MotorAxis.LEFT_Z, MotorAxis.RIGHT_Z]
-        ),
+        await hardware_api.stop(home_after=True),
+        times=1,
     )
 
 
@@ -243,11 +232,7 @@ async def test_hardware_stopping_sequence_with_gripper(
         await movement.home(
             axes=[MotorAxis.X, MotorAxis.Y, MotorAxis.LEFT_Z, MotorAxis.RIGHT_Z]
         ),
-        await ot3_hardware_api.stop(home_after=False),
-        await ot3_hardware_api.home_z(mount=OT3Mount.GRIPPER),
-        await movement.home(
-            axes=[MotorAxis.X, MotorAxis.Y, MotorAxis.LEFT_Z, MotorAxis.RIGHT_Z]
-        ),
+        await ot3_hardware_api.stop(home_after=True),
     )
 
 
@@ -299,11 +284,7 @@ async def test_hardware_stopping_sequence_with_fixed_trash(
             pipette_id="pipette-id",
             home_after=False,
         ),
-        await ot3_hardware_api.stop(home_after=False),
-        await ot3_hardware_api.home_z(mount=OT3Mount.GRIPPER),
-        await movement.home(
-            axes=[MotorAxis.X, MotorAxis.Y, MotorAxis.LEFT_Z, MotorAxis.RIGHT_Z]
-        ),
+        await ot3_hardware_api.stop(home_after=True),
     )
 
 
@@ -355,8 +336,5 @@ async def test_hardware_stopping_sequence_with_OT2_addressable_area(
             pipette_id="pipette-id",
             home_after=False,
         ),
-        await hardware_api.stop(home_after=False),
-        await movement.home(
-            axes=[MotorAxis.X, MotorAxis.Y, MotorAxis.LEFT_Z, MotorAxis.RIGHT_Z]
-        ),
+        await hardware_api.stop(home_after=True),
     )

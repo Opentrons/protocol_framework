@@ -1,6 +1,5 @@
 import { describe, it, expect, vi } from 'vitest'
 import { ingredients, ingredLocations } from '../reducers'
-import type { LiquidEntities } from '@opentrons/step-generation'
 vi.mock('../../labware-defs/utils')
 
 describe('DUPLICATE_LABWARE action', () => {
@@ -14,20 +13,24 @@ describe('DUPLICATE_LABWARE action', () => {
       },
     }
 
-    const prevIngredState: LiquidEntities = {
+    const prevIngredState = {
       ingred3: {
-        displayName: 'Buffer',
+        name: 'Buffer',
+        wellDetailsByLocation: null,
+        concentration: '50 mol/ng',
         description: '',
+        liquidClass: null,
         displayColor: '#b925ff',
-        liquidGroupId: '0',
-        pythonName: 'liquid_1',
+        serialize: false,
       },
       ingred4: {
-        displayName: 'Other Ingred',
+        name: 'Other Ingred',
+        wellDetailsByLocation: null,
+        concentration: '100%',
         description: '',
+        liquidClass: null,
         displayColor: '#ffd600',
-        liquidGroupId: '1',
-        pythonName: 'liquid_2',
+        serialize: false,
       },
     }
 

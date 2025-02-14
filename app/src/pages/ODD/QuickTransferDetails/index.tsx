@@ -180,10 +180,10 @@ const QuickTransferHeader = ({
 }
 
 const transferSectionTabOptions = [
-  'summary',
-  'hardware',
-  'labware',
-  'deck',
+  'Summary',
+  'Hardware',
+  'Labware',
+  'Deck',
 ] as const
 
 type TabOption = typeof transferSectionTabOptions[number]
@@ -197,14 +197,13 @@ const TransferSectionTabs = ({
   currentOption,
   setCurrentOption,
 }: TransferSectionTabsProps): JSX.Element => {
-  const { t, i18n } = useTranslation('protocol_details')
   const options = transferSectionTabOptions
 
   return (
     <Flex gridGap={SPACING.spacing8}>
       <Tabs
         tabs={options.map(option => ({
-          text: i18n.format(t(option), 'capitalize'),
+          text: option,
           onClick: () => {
             setCurrentOption(option)
           },
@@ -264,7 +263,7 @@ const TransferSectionContent = ({
 
   let protocolSection: JSX.Element | null = null
   switch (currentOption) {
-    case 'summary':
+    case 'Summary':
       protocolSection = (
         <Summary
           date={transferData.data.createdAt ?? null}
@@ -272,20 +271,20 @@ const TransferSectionContent = ({
         />
       )
       break
-    case 'hardware':
+    case 'Hardware':
       protocolSection = <Hardware transferId={transferId} />
       break
-    case 'labware':
+    case 'Labware':
       protocolSection = <Labware transferId={transferId} />
       break
-    case 'deck':
+    case 'Deck':
       protocolSection = <Deck transferId={transferId} />
       break
   }
   return (
     <Flex
       paddingTop={SPACING.spacing32}
-      justifyContent={currentOption === 'deck' ? JUSTIFY_CENTER : undefined}
+      justifyContent={currentOption === 'Deck' ? JUSTIFY_CENTER : undefined}
     >
       {protocolSection}
     </Flex>

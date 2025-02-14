@@ -9,10 +9,10 @@ import type {
   ProtocolAnalysisOutput,
   RunTimeCommand,
 } from '@opentrons/shared-data'
-import type { LegacyLabwareOffsetLocation } from '@opentrons/api-client'
+import type { LabwareOffsetLocation } from '@opentrons/api-client'
 
 export interface LabwareLocationCombo {
-  location: LegacyLabwareOffsetLocation
+  location: LabwareOffsetLocation
   definitionUri: string
   labwareId: string
   moduleId?: string
@@ -167,7 +167,7 @@ function appendLocationComboIfUniq(
 function resolveModuleLocation(
   modules: ProtocolAnalysisOutput['modules'],
   moduleId: string
-): LegacyLabwareOffsetLocation | null {
+): LabwareOffsetLocation | null {
   const moduleEntity = modules.find(m => m.id === moduleId)
   if (moduleEntity == null) {
     console.warn(
@@ -182,7 +182,7 @@ function resolveModuleLocation(
 }
 
 interface ResolveAdapterLocation {
-  adapterOffsetLocation: LegacyLabwareOffsetLocation | null
+  adapterOffsetLocation: LabwareOffsetLocation | null
   moduleIdUnderAdapter?: string
 }
 function resolveAdapterLocation(
@@ -200,7 +200,7 @@ function resolveAdapterLocation(
   const labwareDefUri = labwareEntity.definitionUri
 
   let moduleIdUnderAdapter
-  let adapterOffsetLocation: LegacyLabwareOffsetLocation | null = null
+  let adapterOffsetLocation: LabwareOffsetLocation | null = null
   if (
     labwareEntity.location === 'offDeck' ||
     labwareEntity.location === 'systemLocation'
@@ -211,7 +211,7 @@ function resolveAdapterLocation(
     return { adapterOffsetLocation: null }
   } else if ('moduleId' in labwareEntity.location) {
     const moduleId = labwareEntity.location.moduleId
-    const resolvedModuleLocation: LegacyLabwareOffsetLocation | null = resolveModuleLocation(
+    const resolvedModuleLocation: LabwareOffsetLocation | null = resolveModuleLocation(
       modules,
       moduleId
     )

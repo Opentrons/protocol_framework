@@ -40,15 +40,12 @@ export function useTerminalRunBannerContainer({
   const completedWithErrors =
     (commandErrorList != null && commandErrorList.length > 0) ||
     highestPriorityError != null
-  // TODO(jh, 01-10-25): Adding /commandErrors to notifications accomplishes the below with reduced latency.
-  const completedWithNoErrors =
-    commandErrorList != null && commandErrorList.length === 0
 
   const showSuccessBanner =
     runStatus === RUN_STATUS_SUCCEEDED &&
     isRunCurrent &&
     !isResetRunLoading &&
-    completedWithNoErrors
+    !completedWithErrors
 
   // TODO(jh, 08-14-24): Ideally, the backend never returns the "user cancelled a run" error and
   //  cancelledWithoutRecovery becomes unnecessary.
@@ -121,10 +118,14 @@ function ProtocolRunErrorBanner({
 
   const { closeCurrentRun } = useCloseCurrentRun()
 
-  const { highestPriorityError } = runErrors
+  const { highestPriorityError, commandErrorList } = runErrors
 
   const handleFailedRunClick = (): void => {
-    closeCurrentRun()
+    // TODO(jh, 08-15-24): Revisit the control flow here here after
+    //  commandErrorList may be fetched for a non-current run.
+    if (commandErrorList == null) {
+      closeCurrentRun()
+    }
     runHeaderModalContainerUtils.runFailedModalUtils.toggleModal()
   }
 

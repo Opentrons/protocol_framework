@@ -1,24 +1,17 @@
 import { getIsTiprack } from '@opentrons/shared-data'
-import { getLabwarePythonName, uuid } from '../../utils'
-import { getLabwareEntities } from '../../step-forms/selectors'
+import { uuid } from '../../utils'
 import { selectors as labwareDefSelectors } from '../../labware-defs'
 import { selectors as stepFormSelectors } from '../../step-forms'
 import { selectors as uiLabwareSelectors } from '../../ui/labware'
 import { getNextAvailableDeckSlot, getNextNickname } from '../utils'
 import { getRobotType } from '../../file-data/selectors'
-import type { LabwareEntities } from '@opentrons/step-generation'
 import {
   selectNestedLabware,
   selectLabware,
   selectModule,
   selectFixture,
 } from './actions'
-import type {
-  LabwareOnDeck,
-  ModuleOnDeck,
-  NormalizedLabware,
-  NormalizedLabwareById,
-} from '../../step-forms'
+import type { LabwareOnDeck, ModuleOnDeck } from '../../step-forms'
 import type {
   CreateContainerArgs,
   CreateContainerAction,
@@ -27,7 +20,6 @@ import type {
   SelectLabwareAction,
   SelectModuleAction,
   SelectFixtureAction,
-  DeleteContainerAction,
 } from './actions'
 import type { ThunkAction } from '../../types'
 import type { Fixture } from '../types'
@@ -77,7 +69,6 @@ export const createContainer: (
   const labwareDef = labwareDefSelectors.getLabwareDefsByURI(state)[
     args.labwareDefURI
   ]
-  const labwareDisplayCategory = labwareDef.metadata.displayCategory
   const slot =
     args.slot ||
     getNextAvailableDeckSlot(initialDeckSetup, robotType, labwareDef)
@@ -90,9 +81,6 @@ export const createContainer: (
         : null
 
     if (adapterId != null && args.adapterUnderLabwareDefURI != null) {
-      const adapterDef = labwareDefSelectors.getLabwareDefsByURI(state)[
-        args.adapterUnderLabwareDefURI
-      ]
       dispatch({
         type: 'CREATE_CONTAINER',
         payload: {
@@ -100,7 +88,6 @@ export const createContainer: (
           labwareDefURI: args.adapterUnderLabwareDefURI,
           id: adapterId,
           slot,
-          displayCategory: adapterDef.metadata.displayCategory,
         },
       })
       dispatch({
@@ -109,13 +96,12 @@ export const createContainer: (
           ...args,
           id,
           slot: adapterId,
-          displayCategory: labwareDisplayCategory,
         },
       })
     } else {
       dispatch({
         type: 'CREATE_CONTAINER',
-        payload: { ...args, id, slot, displayCategory: labwareDisplayCategory },
+        payload: { ...args, id, slot },
       })
     }
     if (isTiprack) {
@@ -152,7 +138,6 @@ export const duplicateLabware: (
   const labwareDef = labwareDefSelectors.getLabwareDefsByURI(state)[
     templateLabwareDefURI
   ]
-  const displayCategory = labwareDef.metadata.displayCategory
   const duplicateSlot = getNextAvailableDeckSlot(
     initialDeckSetup,
     robotType,
@@ -178,7 +163,6 @@ export const duplicateLabware: (
           templateLabwareId,
           duplicateLabwareId,
           slot: 'offDeck',
-          displayCategory,
         },
       })
     }
@@ -191,7 +175,6 @@ export const duplicateLabware: (
         templateLabwareId,
         duplicateLabwareId,
         slot: duplicateSlot,
-        displayCategory,
       },
     })
   }
@@ -231,66 +214,4 @@ export const editSlotInfo: (
   )
   dispatch(selectModule({ moduleModel: createdModuleForSlot?.model ?? null }))
   dispatch(selectFixture({ fixture: preSelectedFixture ?? null }))
-}
-
-export interface EditMultipleLabwareAction {
-  type: 'EDIT_MULTIPLE_LABWARE_PYTHON_NAME'
-  payload: NormalizedLabwareById
-}
-
-interface DeleteContainerArgs {
-  labwareId: string
-}
-export const deleteContainer: (
-  args: DeleteContainerArgs
-) => ThunkAction<DeleteContainerAction | EditMultipleLabwareAction> = args => (
-  dispatch,
-  getState
-) => {
-  const { labwareId } = args
-  const state = getState()
-  const labwareEntities = getLabwareEntities(state)
-  const displayCategory =
-    labwareEntities[labwareId].def.metadata.displayCategory
-  const labwareOfSameCategory: LabwareEntities = Object.fromEntries(
-    Object.entries(labwareEntities).filter(
-      ([_, labware]) => labware.def.metadata.displayCategory === displayCategory
-    )
-  )
-  const typeCount = Object.keys(labwareOfSameCategory).length
-
-  dispatch({
-    type: 'DELETE_CONTAINER',
-    payload: {
-      labwareId,
-    },
-  })
-
-  if (typeCount > 1) {
-    const {
-      [labwareId]: _,
-      ...remainingLabwareEntities
-    } = labwareOfSameCategory
-
-    const updatedLabwarePythonName: NormalizedLabwareById = Object.keys(
-      remainingLabwareEntities
-    )
-      .sort()
-      .reduce<Record<string, NormalizedLabware>>(
-        (acc: NormalizedLabwareById, oldId, index) => {
-          acc[oldId] = {
-            ...remainingLabwareEntities[oldId],
-            pythonName: getLabwarePythonName(displayCategory, index + 1),
-            displayCategory,
-          }
-          return acc
-        },
-        {}
-      )
-
-    dispatch({
-      type: 'EDIT_MULTIPLE_LABWARE_PYTHON_NAME',
-      payload: updatedLabwarePythonName,
-    })
-  }
 }

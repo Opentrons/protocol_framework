@@ -21,7 +21,6 @@ beforeEach(() => {
     id: 'magDeckId',
     type: MAGNETIC_MODULE_TYPE,
     model: MAGNETIC_MODULE_V1,
-    pythonName: 'mockPythonName',
   }
   robotState = getInitialRobotStateStandard(invariantContext)
   robotState.labware.destPlateId.slot = '4'

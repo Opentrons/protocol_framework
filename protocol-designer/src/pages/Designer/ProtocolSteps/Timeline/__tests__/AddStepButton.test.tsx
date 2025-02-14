@@ -50,7 +50,6 @@ describe('AddStepButton', () => {
           id: 'mockId',
           moduleState: {} as any,
           slot: 'A1',
-          pythonName: 'mockPythonName',
         },
         tc: {
           model: THERMOCYCLER_MODULE_V1,
@@ -58,7 +57,6 @@ describe('AddStepButton', () => {
           id: 'mockId',
           moduleState: {} as any,
           slot: 'B1',
-          pythonName: 'mockPythonName',
         },
         temp: {
           model: TEMPERATURE_MODULE_V1,
@@ -66,7 +64,6 @@ describe('AddStepButton', () => {
           id: 'mockId',
           moduleState: {} as any,
           slot: 'C1',
-          pythonName: 'mockPythonName',
         },
         mag: {
           model: MAGNETIC_MODULE_V1,
@@ -74,7 +71,6 @@ describe('AddStepButton', () => {
           id: 'mockId',
           moduleState: {} as any,
           slot: 'D1',
-          pythonName: 'mockPythonName',
         },
       },
       labware: {},

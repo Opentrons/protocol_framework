@@ -29,14 +29,6 @@ export default defineConfig(
             configFile: true,
           },
         }),
-        {
-          name: 'markdown-loader',
-          transform(code, id) {
-            if (id.endsWith('.md')) {
-              return `export default ${JSON.stringify(code)}`
-            }
-          },
-        },
       ],
       optimizeDeps: {
         esbuildOptions: {
@@ -72,9 +64,6 @@ export default defineConfig(
       },
       server: {
         port: 5178,
-        watch: {
-          ignored: ['**/cypress/downloads/**'],
-        }
       },
     }
   }

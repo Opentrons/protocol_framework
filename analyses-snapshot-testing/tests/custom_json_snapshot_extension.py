@@ -17,7 +17,15 @@ class CustomJSONSnapshotExtension(JSONSnapshotExtension):
                 (r"line \d+,", "line N,"),
             ],
         }
-        self.id_keys_to_replace = ["id", "pipetteId", "labwareId", "serialNumber", "moduleId", "liquidId", "offsetId", "lidId"]
+        self.id_keys_to_replace = [
+            "id",
+            "pipetteId",
+            "labwareId",
+            "serialNumber",
+            "moduleId",
+            "liquidId",
+            "offsetId",
+        ]
         self.timestamp_keys_to_replace = [
             "createdAt",
             "startedAt",

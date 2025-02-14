@@ -324,25 +324,17 @@
     "conicalWell": {
       "sections": [
         {
-          "shape": "conical",
-          "bottomDiameter": 8.56,
-          "topDiameter": 8.56,
-          "topHeight": 25.2,
-          "bottomHeight": 13.95
+          "shape": "spherical",
+          "radiusOfCurvature": 3.64,
+          "topHeight": 0.14,
+          "bottomHeight": 0.0
         },
         {
           "shape": "conical",
-          "bottomDiameter": 7.9,
-          "topDiameter": 8.56,
-          "topHeight": 13.95,
-          "bottomHeight": 11.9
-        },
-        {
-          "shape": "conical",
-          "bottomDiameter": 5.8,
-          "topDiameter": 7.9,
-          "topHeight": 11.9,
-          "bottomHeight": 10.2
+          "bottomDiameter": 2,
+          "topDiameter": 3,
+          "topHeight": 0.95,
+          "bottomHeight": 0.14
         },
         {
           "shape": "conical",
@@ -353,16 +345,24 @@
         },
         {
           "shape": "conical",
-          "bottomDiameter": 2,
-          "topDiameter": 3,
-          "topHeight": 0.95,
-          "bottomHeight": 0.14
+          "bottomDiameter": 5.8,
+          "topDiameter": 7.9,
+          "topHeight": 11.9,
+          "bottomHeight": 10.2
         },
         {
-          "shape": "spherical",
-          "radiusOfCurvature": 3.64,
-          "topHeight": 0.14,
-          "bottomHeight": 0.0
+          "shape": "conical",
+          "bottomDiameter": 7.9,
+          "topDiameter": 8.56,
+          "topHeight": 13.95,
+          "bottomHeight": 11.9
+        },
+        {
+          "shape": "conical",
+          "bottomDiameter": 8.56,
+          "topDiameter": 8.56,
+          "topHeight": 25.2,
+          "bottomHeight": 13.95
         }
       ]
     }

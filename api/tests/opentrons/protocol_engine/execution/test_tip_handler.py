@@ -257,9 +257,7 @@ async def test_drop_tip(
     await subject.drop_tip(pipette_id="pipette-id", home_after=True)
 
     decoy.verify(
-        await mock_hardware_api.tip_drop_moves(
-            mount=Mount.RIGHT, ignore_plunger=False, home_after=True
-        )
+        await mock_hardware_api.tip_drop_moves(mount=Mount.RIGHT, home_after=True)
     )
     decoy.verify(mock_hardware_api.remove_tip(mount=Mount.RIGHT))
     decoy.verify(

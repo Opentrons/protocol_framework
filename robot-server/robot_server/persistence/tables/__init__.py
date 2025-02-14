@@ -1,7 +1,7 @@
 """SQL database schemas."""
 
 # Re-export the latest schema.
-from .schema_10 import (
+from .schema_9 import (
     metadata,
     protocol_table,
     analysis_table,
@@ -14,7 +14,6 @@ from .schema_10 import (
     data_files_table,
     boolean_setting_table,
     labware_offset_table,
-    labware_offset_location_sequence_components_table,
     PrimitiveParamSQLEnum,
     ProtocolKindSQLEnum,
     BooleanSettingKey,
@@ -36,7 +35,6 @@ __all__ = [
     "data_files_table",
     "boolean_setting_table",
     "labware_offset_table",
-    "labware_offset_location_sequence_components_table",
     "PrimitiveParamSQLEnum",
     "ProtocolKindSQLEnum",
     "BooleanSettingKey",

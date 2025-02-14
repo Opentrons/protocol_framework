@@ -39,7 +39,6 @@ import type {
   LabwareEntities,
   ModuleEntities,
   PipetteEntities,
-  LiquidEntities,
 } from '@opentrons/step-generation'
 import type { PipetteName, LabwareDefinition2 } from '@opentrons/shared-data'
 import type {
@@ -94,15 +93,8 @@ import type {
   SavedStepFormState,
   BatchEditFormChangesState,
 } from '../reducers'
-import type { RootState as LabwareIngredRootState } from '../../labware-ingred/reducers'
 
 const rootSelector = (state: BaseState): RootState => state.stepForms
-const labwareIngredRootSelector = (state: BaseState): LabwareIngredRootState =>
-  state.labwareIngred
-
-const _getInitialDeckSetupStepFormRootState: (
-  arg: RootState
-) => FormData = rs => rs.savedStepForms[INITIAL_DECK_SETUP_STEP_ID]
 
 export const getPresavedStepForm = (state: BaseState): PresavedStepFormState =>
   rootSelector(state).presavedStepForm
@@ -112,19 +104,6 @@ export const getCurrentFormIsPresaved: Selector<
 > = createSelector(
   getPresavedStepForm,
   presavedStepForm => presavedStepForm != null
-)
-
-const _getNormalizedLiquidById: Selector<
-  BaseState,
-  LiquidEntities
-> = createSelector(labwareIngredRootSelector, state => state.ingredients)
-
-export const getLiquidEntities: Selector<
-  BaseState,
-  LiquidEntities
-> = createSelector(
-  _getNormalizedLiquidById,
-  normalizedLiquidById => normalizedLiquidById
 )
 
 // NOTE Ian 2019-04-15: outside of this file, you probably only care about
@@ -185,15 +164,8 @@ export const _getPipetteEntitiesRootState: (
 ) => PipetteEntities = createSelector(
   rs => rs.pipetteInvariantProperties,
   labwareDefSelectors._getLabwareDefsByIdRootState,
-  _getInitialDeckSetupStepFormRootState,
-  (pipetteInvariantProperties, labwareDefs, initialDeckSetupStepForm) =>
-    denormalizePipetteEntities(
-      pipetteInvariantProperties,
-      labwareDefs,
-      initialDeckSetupStepForm.pipetteLocationUpdate as Record<string, string>
-    )
+  denormalizePipetteEntities
 )
-
 // Special version of `getAdditionalEquipmentEntities` selector for use in step-forms reducers
 export const _getAdditionalEquipmentEntitiesRootState: (
   arg: RootState
@@ -218,6 +190,10 @@ export const getAdditionalEquipment: Selector<
   BaseState,
   NormalizedAdditionalEquipmentById
 > = createSelector(rootSelector, _getAdditionalEquipmentRootState)
+
+const _getInitialDeckSetupStepFormRootState: (
+  arg: RootState
+) => FormData = rs => rs.savedStepForms[INITIAL_DECK_SETUP_STEP_ID]
 
 export const getInitialDeckSetupStepForm: Selector<
   BaseState,
@@ -277,7 +253,11 @@ const _getInitialDeckSetup = (
   const additionalEquipmentEntitiesOnDeck = Object.values(
     additionalEquipmentEntities
   ).reduce((aeEntities: AdditionalEquipmentEntities, ae) => {
-    if (ae.name !== 'gripper') {
+    if (
+      ae.name === 'wasteChute' ||
+      ae.name === 'stagingArea' ||
+      ae.name === 'trashBin'
+    ) {
       aeEntities[ae.id] = ae
     }
     return aeEntities
@@ -307,7 +287,6 @@ const _getInitialDeckSetup = (
               type: MAGNETIC_MODULE_TYPE,
               slot,
               moduleState: MAGNETIC_MODULE_INITIAL_STATE,
-              pythonName: moduleEntity.pythonName,
             }
           case TEMPERATURE_MODULE_TYPE:
             return {
@@ -316,7 +295,6 @@ const _getInitialDeckSetup = (
               type: TEMPERATURE_MODULE_TYPE,
               slot,
               moduleState: TEMPERATURE_MODULE_INITIAL_STATE,
-              pythonName: moduleEntity.pythonName,
             }
           case THERMOCYCLER_MODULE_TYPE:
             return {
@@ -325,7 +303,6 @@ const _getInitialDeckSetup = (
               type: THERMOCYCLER_MODULE_TYPE,
               slot,
               moduleState: THERMOCYCLER_MODULE_INITIAL_STATE,
-              pythonName: moduleEntity.pythonName,
             }
           case HEATERSHAKER_MODULE_TYPE:
             return {
@@ -334,7 +311,6 @@ const _getInitialDeckSetup = (
               type: HEATERSHAKER_MODULE_TYPE,
               slot,
               moduleState: HEATERSHAKER_MODULE_INITIAL_STATE,
-              pythonName: moduleEntity.pythonName,
             }
           case MAGNETIC_BLOCK_TYPE:
             return {
@@ -343,7 +319,6 @@ const _getInitialDeckSetup = (
               type: MAGNETIC_BLOCK_TYPE,
               slot,
               moduleState: MAGNETIC_BLOCK_INITIAL_STATE,
-              pythonName: moduleEntity.pythonName,
             }
           case ABSORBANCE_READER_TYPE:
             return {
@@ -352,7 +327,6 @@ const _getInitialDeckSetup = (
               type: ABSORBANCE_READER_TYPE,
               slot,
               moduleState: ABSORBANCE_READER_INITIAL_STATE,
-              pythonName: moduleEntity.pythonName,
             }
         }
       }
@@ -704,7 +678,6 @@ export const getInvariantContext: Selector<
   getLabwareEntities,
   getModuleEntities,
   getPipetteEntities,
-  getLiquidEntities,
   getAdditionalEquipmentEntities,
   featureFlagSelectors.getDisableModuleRestrictions,
   featureFlagSelectors.getAllowAllTipracks,
@@ -712,7 +685,6 @@ export const getInvariantContext: Selector<
     labwareEntities,
     moduleEntities,
     pipetteEntities,
-    liquidEntities,
     additionalEquipmentEntities,
     disableModuleRestrictions,
     allowAllTipracks
@@ -720,7 +692,6 @@ export const getInvariantContext: Selector<
     labwareEntities,
     moduleEntities,
     pipetteEntities,
-    liquidEntities,
     additionalEquipmentEntities,
     config: {
       OT_PD_ALLOW_ALL_TIPRACKS: Boolean(allowAllTipracks),

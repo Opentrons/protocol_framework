@@ -1,79 +1,71 @@
-import { useState, useEffect } from 'react'
-import { useSelector } from 'react-redux'
+import { useState } from 'react'
 
 import {
   retractPipetteAxesSequentiallyCommands,
   verifyProbeAttachmentAndHomeCommands,
 } from './commands'
-import { LPC_STEP, selectCurrentStep } from '/app/redux/protocol-runs'
 
 import type { CreateCommand, LoadedPipette } from '@opentrons/shared-data'
 import type { UseLPCCommandWithChainRunChildProps } from './types'
 
 export interface UseProbeCommandsResult {
-  handleProbeAttachment: (
+  createProbeAttachmentHandler: (
+    pipetteId: string,
     pipette: LoadedPipette | null,
     onSuccess: () => void
-  ) => Promise<void>
-  handleProbeDetachment: (
+  ) => () => Promise<void>
+  createProbeDetachmentHandler: (
     pipette: LoadedPipette | null,
     onSuccess: () => void
-  ) => Promise<void>
+  ) => () => Promise<void>
   unableToDetect: boolean
   setShowUnableToDetect: (canDetect: boolean) => void
 }
 
 export function useHandleProbeCommands({
   chainLPCCommands,
-  runId,
 }: UseLPCCommandWithChainRunChildProps): UseProbeCommandsResult {
   const [showUnableToDetect, setShowUnableToDetect] = useState<boolean>(false)
-  const currentStep = useSelector(selectCurrentStep(runId))
 
-  // We only care about probe detection on the "attach probe" step. When that
-  // step is not active, do not permit redirection to the "probe not attached" view.
-  useEffect(() => {
-    if (currentStep !== LPC_STEP.ATTACH_PROBE && showUnableToDetect) {
-      setShowUnableToDetect(false)
-    }
-  }, [currentStep, showUnableToDetect])
-
-  const handleProbeAttachment = (
+  const createProbeAttachmentHandler = (
+    pipetteId: string,
     pipette: LoadedPipette | null,
     onSuccess: () => void
-  ): Promise<void> => {
+  ): (() => Promise<void>) => {
     const attachmentCommands: CreateCommand[] = [
-      ...verifyProbeAttachmentAndHomeCommands(pipette),
+      ...verifyProbeAttachmentAndHomeCommands(pipetteId, pipette),
     ]
 
-    return chainLPCCommands(attachmentCommands, false, true)
-      .catch(() => {
-        setShowUnableToDetect(true)
-        return Promise.reject(new Error('Unable to detect probe.'))
-      })
-      .then(() => {
-        setShowUnableToDetect(false)
-        onSuccess()
-      })
+    return () =>
+      chainLPCCommands(attachmentCommands, false, true)
+        .catch(() => {
+          setShowUnableToDetect(true)
+          return Promise.reject(new Error('Unable to detect probe.'))
+        })
+        .then(() => {
+          setShowUnableToDetect(false)
+          onSuccess()
+        })
   }
 
-  const handleProbeDetachment = (
+  const createProbeDetachmentHandler = (
     pipette: LoadedPipette | null,
     onSuccess: () => void
-  ): Promise<void> => {
+  ): (() => Promise<void>) => {
     const detatchmentCommands: CreateCommand[] = [
       ...retractPipetteAxesSequentiallyCommands(pipette),
     ]
 
-    return chainLPCCommands(detatchmentCommands, false).then(() => {
-      onSuccess()
-    })
+    return () =>
+      chainLPCCommands(detatchmentCommands, false).then(() => {
+        onSuccess()
+      })
   }
 
   return {
-    handleProbeAttachment,
+    createProbeAttachmentHandler,
     unableToDetect: showUnableToDetect,
     setShowUnableToDetect,
-    handleProbeDetachment,
+    createProbeDetachmentHandler,
   }
 }

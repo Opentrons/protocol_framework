@@ -73,7 +73,7 @@ describe('move liquid step form -> command creator args', () => {
       aspirate_flowRate: null,
       aspirate_mmFromBottom: null,
       aspirate_touchTip_checkbox: false,
-      aspirate_touchTip_mmFromTop: null,
+      aspirate_touchTip_mmFromBottom: null,
       aspirate_mix_checkbox: false,
       aspirate_mix_volume: null,
       aspirate_mix_times: null,
@@ -93,7 +93,7 @@ describe('move liquid step form -> command creator args', () => {
       dispense_flowRate: null,
       dispense_mmFromBottom: null,
       dispense_touchTip_checkbox: false,
-      dispense_touchTip_mmFromTop: null,
+      dispense_touchTip_mmFromBottom: null,
       dispense_mix_checkbox: false,
       dispense_mix_volume: null,
       dispense_mix_times: null,
@@ -177,26 +177,26 @@ describe('move liquid step form -> command creator args', () => {
     // TOUCH TIPS
     {
       checkboxField: 'aspirate_touchTip_checkbox',
-      formFields: { aspirate_touchTip_mmFromTop: -11 },
+      formFields: { aspirate_touchTip_mmFromBottom: 101 },
       expectedArgsUnchecked: {
         touchTipAfterAspirate: false,
-        touchTipAfterAspirateOffsetMmFromTop: -11,
+        touchTipAfterAspirateOffsetMmFromBottom: 101,
       },
       expectedArgsChecked: {
         touchTipAfterAspirate: true,
-        touchTipAfterAspirateOffsetMmFromTop: -11,
+        touchTipAfterAspirateOffsetMmFromBottom: 101,
       },
     },
     {
       checkboxField: 'dispense_touchTip_checkbox',
-      formFields: { dispense_touchTip_mmFromTop: -22 },
+      formFields: { dispense_touchTip_mmFromBottom: 42 },
       expectedArgsUnchecked: {
         touchTipAfterDispense: false,
-        touchTipAfterDispenseOffsetMmFromTop: -22,
+        touchTipAfterDispenseOffsetMmFromBottom: 42,
       },
       expectedArgsChecked: {
         touchTipAfterDispense: true,
-        touchTipAfterDispenseOffsetMmFromTop: -22,
+        touchTipAfterDispenseOffsetMmFromBottom: 42,
       },
     },
     // MIXES

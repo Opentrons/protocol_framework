@@ -185,7 +185,6 @@ describe('moveLabware', () => {
           id: 'labwareid',
           labwareDefURI: 'mockDefUri',
           def: aluminumBlockDef,
-          pythonName: 'mockPythonName',
         },
       },
     }

@@ -17,7 +17,6 @@ describe('engageMagnet', () => {
       id: moduleId,
       type: MAGNETIC_MODULE_TYPE,
       model: MAGNETIC_MODULE_V1,
-      pythonName: 'mockPythonName',
     }
     robotState = getInitialRobotStateStandard(invariantContext)
     robotState.modules[moduleId] = {

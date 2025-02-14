@@ -38,7 +38,7 @@ export function RecoveryInterventionModal({
   }
 
   return createPortal(
-    <InterventionModal {...restProps} iconSize={isOnDevice ? '28px' : '16px'}>
+    <InterventionModal {...restProps}>
       <Flex
         css={
           desktopType === 'desktop-small'

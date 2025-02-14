@@ -50,7 +50,7 @@
       "type": "string",
       "pattern": "^[a-z0-9._]+$"
     },
-    "vector": {
+    "coordinates": {
       "type": "object",
       "additionalProperties": false,
       "required": ["x", "y", "z"],
@@ -71,11 +71,11 @@
       "required": ["pickUpOffset", "dropOffset"],
       "properties": {
         "pickUpOffset": {
-          "$ref": "#/definitions/vector",
+          "$ref": "#/definitions/coordinates",
           "description": "Offset added to calculate pick-up coordinates."
         },
         "dropOffset": {
-          "$ref": "#/definitions/vector",
+          "$ref": "#/definitions/coordinates",
           "description": "Offset added to calculate drop coordinates."
         }
       }
@@ -202,8 +202,15 @@
       }
     },
     "cornerOffsetFromSlot": {
+      "type": "object",
+      "additionalProperties": false,
       "description": "Distance from left-front-bottom corner of slot to left-front-bottom corner of labware bounding box. Used for labware that spans multiple slots. For labware that does not span multiple slots, x/y/z should all be zero.",
-      "$ref": "#/definitions/vector"
+      "required": ["x", "y", "z"],
+      "properties": {
+        "x": { "type": "number" },
+        "y": { "type": "number" },
+        "z": { "type": "number" }
+      }
     },
     "dimensions": {
       "type": "object",
@@ -345,14 +352,14 @@
       "type": "object",
       "description": "Supported labware that can be stacked upon, with overlap height between both labware.",
       "additionalProperties": {
-        "$ref": "#/definitions/vector"
+        "$ref": "#/definitions/coordinates"
       }
     },
     "stackingOffsetWithModule": {
       "type": "object",
       "description": "Supported module that can be stacked upon, with overlap height between labware and module.",
       "additionalProperties": {
-        "$ref": "#/definitions/vector"
+        "$ref": "#/definitions/coordinates"
       }
     },
     "gripperOffsets": {
@@ -384,10 +391,6 @@
     "gripHeightFromLabwareBottom": {
       "type": "number",
       "description": "Recommended Z-height, from labware bottom to the center of gripper pads, when gripping the labware."
-    },
-    "stackLimit": {
-      "type": "number",
-      "description": "The limit representing the maximum stack size for a given labware."
     }
   }
 }

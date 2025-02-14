@@ -1,5 +1,4 @@
 """Load lid command request, result, and implementation models."""
-
 from __future__ import annotations
 from pydantic import BaseModel, Field
 from typing import TYPE_CHECKING, Optional, Type
@@ -12,10 +11,8 @@ from ..resources import labware_validation
 from ..types import (
     LabwareLocation,
     OnLabwareLocation,
-    OnLabwareLocationSequenceComponent,
 )
 
-from .labware_handling_common import LabwareHandlingResultMixin
 from .command import AbstractCommandImpl, BaseCommand, BaseCommandCreate, SuccessData
 from ..errors.error_occurrence import ErrorOccurrence
 from ..state.update_types import StateUpdate
@@ -49,9 +46,13 @@ class LoadLidParams(BaseModel):
     )
 
 
-class LoadLidResult(LabwareHandlingResultMixin):
+class LoadLidResult(BaseModel):
     """Result data from the execution of a LoadLabware command."""
 
+    labwareId: str = Field(
+        ...,
+        description="An ID to reference this lid labware in subsequent commands.",
+    )
     definition: LabwareDefinition = Field(
         ...,
         description="The full definition data for this lid labware.",
@@ -121,18 +122,6 @@ class LoadLidImplementation(
             public=LoadLidResult(
                 labwareId=loaded_labware.labware_id,
                 definition=loaded_labware.definition,
-                # Note: the lid is not yet loaded and therefore won't be found as the lid id for the
-                # labware onto which we're loading it, so build that part of the location sequence
-                # here and then build the rest of the sequence from the parent labware
-                locationSequence=[
-                    OnLabwareLocationSequenceComponent(
-                        labwareId=params.location.labwareId,
-                        lidId=loaded_labware.labware_id,
-                    )
-                ]
-                + self._state_view.geometry.get_location_sequence(
-                    params.location.labwareId
-                ),
             ),
             state_update=state_update,
         )
@@ -143,7 +132,7 @@ class LoadLid(BaseCommand[LoadLidParams, LoadLidResult, ErrorOccurrence]):
 
     commandType: LoadLidCommandType = "loadLid"
     params: LoadLidParams
-    result: Optional[LoadLidResult] = None
+    result: Optional[LoadLidResult]
 
     _ImplementationCls: Type[LoadLidImplementation] = LoadLidImplementation
 

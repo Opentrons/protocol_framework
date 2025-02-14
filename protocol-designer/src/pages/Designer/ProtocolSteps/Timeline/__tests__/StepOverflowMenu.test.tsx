@@ -87,7 +87,6 @@ describe('StepOverflowMenu', () => {
         id: mockId,
         tiprackLabwareDef: [],
         tiprackDefURI: ['mockDefURI1', 'mockDefURI2'],
-        pythonName: 'mockPythonName',
       },
     })
   })
@@ -126,7 +125,6 @@ describe('StepOverflowMenu', () => {
         id: mockId96,
         tiprackLabwareDef: [],
         tiprackDefURI: ['mockDefURI1_96'],
-        pythonName: 'mockPythonName',
       },
     })
     render(props)

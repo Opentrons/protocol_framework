@@ -38,7 +38,7 @@ import {
   deleteDeckFixture,
 } from '../../../step-forms/actions/additionalItems'
 import { getSavedStepForms } from '../../../step-forms/selectors'
-import { deleteModule } from '../../../modules'
+import { deleteModule } from '../../../step-forms/actions'
 import { getDeckSetupForActiveItem } from '../../../top-selectors/labware-locations'
 import {
   createContainer,
@@ -295,7 +295,7 @@ export function DeckSetupTools(props: DeckSetupToolsProps): JSX.Element | null {
     if (slot !== 'offDeck') {
       //  clear module from slot
       if (createdModuleForSlot != null) {
-        dispatch(deleteModule({ moduleId: createdModuleForSlot.id }))
+        dispatch(deleteModule(createdModuleForSlot.id))
       }
       //  clear labware from slot
       if (

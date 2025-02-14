@@ -3,10 +3,7 @@ import map from 'lodash/map'
 import reduce from 'lodash/reduce'
 import ViewportList from 'react-viewport-list'
 
-import {
-  constructInvariantContextFromRunCommands,
-  getResultingTimelineFrameFromRunCommands,
-} from '@opentrons/step-generation'
+import { getResultingTimelineFrameFromRunCommands } from '@opentrons/step-generation'
 import {
   FLEX_ROBOT_TYPE,
   THERMOCYCLER_MODULE_TYPE,
@@ -39,10 +36,11 @@ import type {
   CompletedProtocolAnalysis,
   LabwareLocation,
   ProtocolAnalysisOutput,
+  RobotType,
+  RunTimeCommand,
 } from '@opentrons/shared-data'
 import type { ModuleTemporalProperties } from '@opentrons/step-generation'
 import type { LabwareOnDeck, Module } from '../..'
-
 export * from './types'
 export * from './utils'
 
@@ -50,8 +48,9 @@ const SEC_PER_FRAME = 1000
 export const COMMAND_WIDTH_PX = 240
 
 interface ProtocolTimelineScrubberProps {
+  commands: RunTimeCommand[]
   analysis: CompletedProtocolAnalysis | ProtocolAnalysisOutput
-  height?: string
+  robotType?: RobotType
 }
 
 export const DECK_LAYER_BLOCKLIST = [
@@ -63,24 +62,23 @@ export const DECK_LAYER_BLOCKLIST = [
   'removableDeckOutline',
   'screwHoles',
 ]
+export const VIEWBOX_MIN_X = -84
+export const VIEWBOX_MIN_Y = -10
+export const VIEWBOX_WIDTH = 600
+export const VIEWBOX_HEIGHT = 460
 
 export function ProtocolTimelineScrubber(
   props: ProtocolTimelineScrubberProps
 ): JSX.Element {
-  const { analysis, height } = props
-  const { commands, robotType, liquids } = analysis
+  const { commands, analysis, robotType = FLEX_ROBOT_TYPE } = props
   const wrapperRef = useRef<HTMLDivElement>(null)
   const commandListRef = useRef<ViewportListRef>(null)
   const [currentCommandIndex, setCurrentCommandIndex] = useState<number>(0)
   const [isPlaying, setIsPlaying] = useState<boolean>(true)
 
   const currentCommandsSlice = commands.slice(0, currentCommandIndex + 1)
-  const invariantContextFromRunCommands = constructInvariantContextFromRunCommands(
-    commands
-  )
   const { frame, invariantContext } = getResultingTimelineFrameFromRunCommands(
-    currentCommandsSlice,
-    invariantContextFromRunCommands
+    currentCommandsSlice
   )
   const handlePlayPause = (): void => {
     setIsPlaying(!isPlaying)
@@ -122,28 +120,31 @@ export function ProtocolTimelineScrubber(
 
   const allWellContentsForActiveItem = getAllWellContentsForActiveItem(
     invariantContext.labwareEntities,
-    robotState
+    frame
   )
-  const liquidDisplayColors = liquids.map(
-    ({ displayColor }) => displayColor ?? COLORS.blue50
+  const liquidDisplayColors = analysis.liquids.map(
+    liquid => liquid.displayColor ?? COLORS.blue50
   )
 
   const isValidRobotSideAnalysis = analysis != null
   const allRunDefs = useMemo(
-    () => getLabwareDefinitionsFromCommands(commands),
+    () =>
+      analysis != null
+        ? getLabwareDefinitionsFromCommands(analysis.commands)
+        : [],
     [isValidRobotSideAnalysis]
   )
 
   return (
     <Flex
-      height="auto"
+      height="95vh"
       flexDirection={DIRECTION_COLUMN}
       gridGap={SPACING.spacing8}
     >
       <Flex gridGap={SPACING.spacing8} flex="1 1 0">
-        <Flex height={height ?? '60vh'}>
+        <Flex height="60vh">
           <BaseDeck
-            robotType={robotType ?? FLEX_ROBOT_TYPE}
+            robotType={robotType}
             deckConfig={getSimplestDeckConfigForProtocol(analysis)}
             modulesOnDeck={map(robotState.modules, (module, moduleId) => {
               const labwareInModuleId =
@@ -262,14 +263,14 @@ export function ProtocolTimelineScrubber(
           mount="left"
           pipetteId={leftPipetteId}
           pipetteEntity={leftPipetteEntity}
-          timelineFrame={robotState}
+          timelineFrame={frame.robotState}
           analysis={analysis}
         />
         <PipetteMountViz
           mount="right"
           pipetteId={rightPipetteId}
           pipetteEntity={rightPipetteEntity}
-          timelineFrame={robotState}
+          timelineFrame={frame.robotState}
           analysis={analysis}
         />
       </Flex>
@@ -292,7 +293,7 @@ export function ProtocolTimelineScrubber(
               currentCommandIndex={currentCommandIndex}
               setCurrentCommandIndex={setCurrentCommandIndex}
               analysis={analysis}
-              robotType={robotType ?? FLEX_ROBOT_TYPE}
+              robotType={robotType}
               allRunDefs={allRunDefs}
             />
           )}

@@ -31,8 +31,6 @@ export function constructInvariantContextFromRunCommands(
             id: result.labwareId,
             labwareDefURI: getLabwareDefURI(result.definition),
             def: result.definition,
-            //  ProtocolTimelineScrubber won't need access to pythonNames
-            pythonName: 'n/a',
           },
         }
         return {
@@ -50,7 +48,6 @@ export function constructInvariantContextFromRunCommands(
             id: result.moduleId,
             type: getModuleType(command.params.model),
             model: command.params.model,
-            pythonName: 'n/a',
           },
         }
         return {
@@ -94,7 +91,6 @@ export function constructInvariantContextFromRunCommands(
                 ? [getLabwareDefURI(tiprackLabwareDef)]
                 : [],
             spec: specs,
-            pythonName: 'n/a',
           },
         }
         return {
@@ -138,9 +134,6 @@ export function constructInvariantContextFromRunCommands(
       moduleEntities: {},
       pipetteEntities: {},
       additionalEquipmentEntities: {},
-      //  this util is used for the timeline scrubber. It grabs liquid info from analysis
-      //  so this will not be wired up right now
-      liquidEntities: {},
       config: { OT_PD_DISABLE_MODULE_RESTRICTIONS: true },
     }
   )

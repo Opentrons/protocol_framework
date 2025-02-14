@@ -2296,22 +2296,7 @@
             }
           }
         },
-        "labwareId": "UUID",
-        "locationSequence": [
-          {
-            "addressableAreaName": "temperatureModuleV2D1",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutD1",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ]
+        "labwareId": "UUID"
       },
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
@@ -3476,22 +3461,7 @@
             }
           }
         },
-        "labwareId": "UUID",
-        "locationSequence": [
-          {
-            "addressableAreaName": "heaterShakerV1A3",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutA3",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ]
+        "labwareId": "UUID"
       },
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
@@ -3584,20 +3554,7 @@
             }
           }
         },
-        "labwareId": "UUID",
-        "locationSequence": [
-          {
-            "addressableAreaName": "D2",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutoutD2",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "singleCenterSlot"
-            ]
-          }
-        ]
+        "labwareId": "UUID"
       },
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
@@ -4771,20 +4728,7 @@
             }
           }
         },
-        "labwareId": "UUID",
-        "locationSequence": [
-          {
-            "addressableAreaName": "C2",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutoutC2",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "singleCenterSlot"
-            ]
-          }
-        ]
+        "labwareId": "UUID"
       },
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
@@ -4853,20 +4797,7 @@
           "version": 1,
           "wells": {}
         },
-        "labwareId": "UUID",
-        "locationSequence": [
-          {
-            "addressableAreaName": "A2",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutoutA2",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "singleCenterSlot"
-            ]
-          }
-        ]
+        "labwareId": "UUID"
       },
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
@@ -6024,24 +5955,7 @@
             }
           }
         },
-        "labwareId": "UUID",
-        "locationSequence": [
-          {
-            "kind": "onLabware",
-            "labwareId": "UUID"
-          },
-          {
-            "addressableAreaName": "A2",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutoutA2",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "singleCenterSlot"
-            ]
-          }
-        ]
+        "labwareId": "UUID"
       },
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
@@ -7199,22 +7113,7 @@
             }
           }
         },
-        "labwareId": "UUID",
-        "locationSequence": [
-          {
-            "addressableAreaName": "C3",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutoutC3",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "flexStackerModuleV1",
-              "singleRightSlot",
-              "stagingAreaRightSlot"
-            ]
-          }
-        ]
+        "labwareId": "UUID"
       },
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
@@ -8372,20 +8271,7 @@
             }
           }
         },
-        "labwareId": "UUID",
-        "locationSequence": [
-          {
-            "addressableAreaName": "C4",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutoutC3",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "stagingAreaRightSlot"
-            ]
-          }
-        ]
+        "labwareId": "UUID"
       },
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
@@ -10212,33 +10098,7 @@
         "newLocation": "offDeck",
         "strategy": "manualMoveWithPause"
       },
-      "result": {
-        "eventualDestinationLocationSequence": [
-          {
-            "kind": "notOnDeck",
-            "logicalLocationName": "offDeck"
-          }
-        ],
-        "immediateDestinationLocationSequence": [
-          {
-            "kind": "notOnDeck",
-            "logicalLocationName": "offDeck"
-          }
-        ],
-        "originLocationSequence": [
-          {
-            "addressableAreaName": "C3",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutoutC3",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "stagingAreaRightSlot"
-            ]
-          }
-        ]
-      },
+      "result": {},
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
     },
@@ -10512,37 +10372,7 @@
         "newLocation": "offDeck",
         "strategy": "manualMoveWithPause"
       },
-      "result": {
-        "eventualDestinationLocationSequence": [
-          {
-            "kind": "notOnDeck",
-            "logicalLocationName": "offDeck"
-          }
-        ],
-        "immediateDestinationLocationSequence": [
-          {
-            "kind": "notOnDeck",
-            "logicalLocationName": "offDeck"
-          }
-        ],
-        "originLocationSequence": [
-          {
-            "kind": "onLabware",
-            "labwareId": "UUID"
-          },
-          {
-            "addressableAreaName": "A2",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutoutA2",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "singleCenterSlot"
-            ]
-          }
-        ]
-      },
+      "result": {},
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
     },
@@ -10560,55 +10390,7 @@
         },
         "strategy": "usingGripper"
       },
-      "result": {
-        "eventualDestinationLocationSequence": [
-          {
-            "kind": "onLabware",
-            "labwareId": "UUID"
-          },
-          {
-            "addressableAreaName": "A2",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutoutA2",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "singleCenterSlot"
-            ]
-          }
-        ],
-        "immediateDestinationLocationSequence": [
-          {
-            "kind": "onLabware",
-            "labwareId": "UUID"
-          },
-          {
-            "addressableAreaName": "A2",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutoutA2",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "singleCenterSlot"
-            ]
-          }
-        ],
-        "originLocationSequence": [
-          {
-            "addressableAreaName": "C4",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutoutC3",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "stagingAreaRightSlot"
-            ]
-          }
-        ]
-      },
+      "result": {},
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
     },
@@ -11385,47 +11167,7 @@
         },
         "strategy": "usingGripper"
       },
-      "result": {
-        "eventualDestinationLocationSequence": [
-          {
-            "addressableAreaName": "B2",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutoutB2",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "singleCenterSlot"
-            ]
-          }
-        ],
-        "immediateDestinationLocationSequence": [
-          {
-            "addressableAreaName": "B2",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutoutB2",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "singleCenterSlot"
-            ]
-          }
-        ],
-        "originLocationSequence": [
-          {
-            "addressableAreaName": "C2",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutoutC2",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "singleCenterSlot"
-            ]
-          }
-        ]
-      },
+      "result": {},
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
     },
@@ -11443,47 +11185,7 @@
         },
         "strategy": "usingGripper"
       },
-      "result": {
-        "eventualDestinationLocationSequence": [
-          {
-            "addressableAreaName": "C2",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutoutC2",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "singleCenterSlot"
-            ]
-          }
-        ],
-        "immediateDestinationLocationSequence": [
-          {
-            "addressableAreaName": "C2",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutoutC2",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "singleCenterSlot"
-            ]
-          }
-        ],
-        "originLocationSequence": [
-          {
-            "addressableAreaName": "B2",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutoutB2",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "singleCenterSlot"
-            ]
-          }
-        ]
-      },
+      "result": {},
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
     },
@@ -11501,47 +11203,7 @@
         },
         "strategy": "usingGripper"
       },
-      "result": {
-        "eventualDestinationLocationSequence": [
-          {
-            "addressableAreaName": "C3",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutoutC3",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "stagingAreaRightSlot"
-            ]
-          }
-        ],
-        "immediateDestinationLocationSequence": [
-          {
-            "addressableAreaName": "C3",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutoutC3",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "stagingAreaRightSlot"
-            ]
-          }
-        ],
-        "originLocationSequence": [
-          {
-            "addressableAreaName": "C2",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutoutC2",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "singleCenterSlot"
-            ]
-          }
-        ]
-      },
+      "result": {},
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
     },
@@ -11559,47 +11221,7 @@
         },
         "strategy": "usingGripper"
       },
-      "result": {
-        "eventualDestinationLocationSequence": [
-          {
-            "addressableAreaName": "C2",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutoutC2",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "singleCenterSlot"
-            ]
-          }
-        ],
-        "immediateDestinationLocationSequence": [
-          {
-            "addressableAreaName": "C2",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutoutC2",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "singleCenterSlot"
-            ]
-          }
-        ],
-        "originLocationSequence": [
-          {
-            "addressableAreaName": "C3",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutoutC3",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "stagingAreaRightSlot"
-            ]
-          }
-        ]
-      },
+      "result": {},
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
     },
@@ -11617,47 +11239,7 @@
         },
         "strategy": "usingGripper"
       },
-      "result": {
-        "eventualDestinationLocationSequence": [
-          {
-            "addressableAreaName": "D4",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutoutD3",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "stagingAreaSlotWithWasteChuteRightAdapterNoCover"
-            ]
-          }
-        ],
-        "immediateDestinationLocationSequence": [
-          {
-            "addressableAreaName": "D4",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutoutD3",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "stagingAreaSlotWithWasteChuteRightAdapterNoCover"
-            ]
-          }
-        ],
-        "originLocationSequence": [
-          {
-            "addressableAreaName": "C2",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutoutC2",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "singleCenterSlot"
-            ]
-          }
-        ]
-      },
+      "result": {},
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
     },
@@ -11675,47 +11257,7 @@
         },
         "strategy": "usingGripper"
       },
-      "result": {
-        "eventualDestinationLocationSequence": [
-          {
-            "addressableAreaName": "C2",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutoutC2",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "singleCenterSlot"
-            ]
-          }
-        ],
-        "immediateDestinationLocationSequence": [
-          {
-            "addressableAreaName": "C2",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutoutC2",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "singleCenterSlot"
-            ]
-          }
-        ],
-        "originLocationSequence": [
-          {
-            "addressableAreaName": "D4",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutoutD3",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "stagingAreaSlotWithWasteChuteRightAdapterNoCover"
-            ]
-          }
-        ]
-      },
+      "result": {},
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
     },
@@ -11733,51 +11275,7 @@
         },
         "strategy": "usingGripper"
       },
-      "result": {
-        "eventualDestinationLocationSequence": [
-          {
-            "addressableAreaName": "thermocyclerModuleV2",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutB1",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ],
-        "immediateDestinationLocationSequence": [
-          {
-            "addressableAreaName": "thermocyclerModuleV2",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutB1",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ],
-        "originLocationSequence": [
-          {
-            "addressableAreaName": "C2",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutoutC2",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "singleCenterSlot"
-            ]
-          }
-        ]
-      },
+      "result": {},
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
     },
@@ -11795,49 +11293,7 @@
         },
         "strategy": "usingGripper"
       },
-      "result": {
-        "eventualDestinationLocationSequence": [
-          {
-            "addressableAreaName": "C2",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutoutC2",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "singleCenterSlot"
-            ]
-          }
-        ],
-        "immediateDestinationLocationSequence": [
-          {
-            "addressableAreaName": "C2",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutoutC2",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "singleCenterSlot"
-            ]
-          }
-        ],
-        "originLocationSequence": [
-          {
-            "addressableAreaName": "thermocyclerModuleV2",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutB1",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ]
-      },
+      "result": {},
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
     },
@@ -11855,51 +11311,7 @@
         },
         "strategy": "usingGripper"
       },
-      "result": {
-        "eventualDestinationLocationSequence": [
-          {
-            "addressableAreaName": "magneticBlockV1C1",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutC1",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ],
-        "immediateDestinationLocationSequence": [
-          {
-            "addressableAreaName": "magneticBlockV1C1",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutC1",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ],
-        "originLocationSequence": [
-          {
-            "addressableAreaName": "C2",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutoutC2",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "singleCenterSlot"
-            ]
-          }
-        ]
-      },
+      "result": {},
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
     },
@@ -11917,49 +11329,7 @@
         },
         "strategy": "usingGripper"
       },
-      "result": {
-        "eventualDestinationLocationSequence": [
-          {
-            "addressableAreaName": "C2",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutoutC2",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "singleCenterSlot"
-            ]
-          }
-        ],
-        "immediateDestinationLocationSequence": [
-          {
-            "addressableAreaName": "C2",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutoutC2",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "singleCenterSlot"
-            ]
-          }
-        ],
-        "originLocationSequence": [
-          {
-            "addressableAreaName": "magneticBlockV1C1",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutC1",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ]
-      },
+      "result": {},
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
     },
@@ -11977,59 +11347,7 @@
         },
         "strategy": "usingGripper"
       },
-      "result": {
-        "eventualDestinationLocationSequence": [
-          {
-            "kind": "onLabware",
-            "labwareId": "UUID"
-          },
-          {
-            "addressableAreaName": "temperatureModuleV2D1",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutD1",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ],
-        "immediateDestinationLocationSequence": [
-          {
-            "kind": "onLabware",
-            "labwareId": "UUID"
-          },
-          {
-            "addressableAreaName": "temperatureModuleV2D1",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutD1",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ],
-        "originLocationSequence": [
-          {
-            "addressableAreaName": "C2",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutoutC2",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "singleCenterSlot"
-            ]
-          }
-        ]
-      },
+      "result": {},
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
     },
@@ -12047,53 +11365,7 @@
         },
         "strategy": "usingGripper"
       },
-      "result": {
-        "eventualDestinationLocationSequence": [
-          {
-            "addressableAreaName": "C2",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutoutC2",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "singleCenterSlot"
-            ]
-          }
-        ],
-        "immediateDestinationLocationSequence": [
-          {
-            "addressableAreaName": "C2",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutoutC2",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "singleCenterSlot"
-            ]
-          }
-        ],
-        "originLocationSequence": [
-          {
-            "kind": "onLabware",
-            "labwareId": "UUID"
-          },
-          {
-            "addressableAreaName": "temperatureModuleV2D1",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutD1",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ]
-      },
+      "result": {},
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
     },
@@ -12111,59 +11383,7 @@
         },
         "strategy": "usingGripper"
       },
-      "result": {
-        "eventualDestinationLocationSequence": [
-          {
-            "kind": "onLabware",
-            "labwareId": "UUID"
-          },
-          {
-            "addressableAreaName": "heaterShakerV1A3",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutA3",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ],
-        "immediateDestinationLocationSequence": [
-          {
-            "kind": "onLabware",
-            "labwareId": "UUID"
-          },
-          {
-            "addressableAreaName": "heaterShakerV1A3",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutA3",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ],
-        "originLocationSequence": [
-          {
-            "addressableAreaName": "C2",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutoutC2",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "singleCenterSlot"
-            ]
-          }
-        ]
-      },
+      "result": {},
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
     },
@@ -12181,53 +11401,7 @@
         },
         "strategy": "usingGripper"
       },
-      "result": {
-        "eventualDestinationLocationSequence": [
-          {
-            "addressableAreaName": "C2",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutoutC2",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "singleCenterSlot"
-            ]
-          }
-        ],
-        "immediateDestinationLocationSequence": [
-          {
-            "addressableAreaName": "C2",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutoutC2",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "singleCenterSlot"
-            ]
-          }
-        ],
-        "originLocationSequence": [
-          {
-            "kind": "onLabware",
-            "labwareId": "UUID"
-          },
-          {
-            "addressableAreaName": "heaterShakerV1A3",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutA3",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ]
-      },
+      "result": {},
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
     },
@@ -12245,47 +11419,7 @@
         },
         "strategy": "usingGripper"
       },
-      "result": {
-        "eventualDestinationLocationSequence": [
-          {
-            "addressableAreaName": "C3",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutoutC3",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "stagingAreaRightSlot"
-            ]
-          }
-        ],
-        "immediateDestinationLocationSequence": [
-          {
-            "addressableAreaName": "C3",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutoutC3",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "stagingAreaRightSlot"
-            ]
-          }
-        ],
-        "originLocationSequence": [
-          {
-            "addressableAreaName": "C2",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutoutC2",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "singleCenterSlot"
-            ]
-          }
-        ]
-      },
+      "result": {},
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
     },
@@ -12303,47 +11437,7 @@
         },
         "strategy": "usingGripper"
       },
-      "result": {
-        "eventualDestinationLocationSequence": [
-          {
-            "addressableAreaName": "D4",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutoutD3",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "stagingAreaSlotWithWasteChuteRightAdapterNoCover"
-            ]
-          }
-        ],
-        "immediateDestinationLocationSequence": [
-          {
-            "addressableAreaName": "D4",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutoutD3",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "stagingAreaSlotWithWasteChuteRightAdapterNoCover"
-            ]
-          }
-        ],
-        "originLocationSequence": [
-          {
-            "addressableAreaName": "C3",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutoutC3",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "stagingAreaRightSlot"
-            ]
-          }
-        ]
-      },
+      "result": {},
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
     },
@@ -12361,47 +11455,7 @@
         },
         "strategy": "usingGripper"
       },
-      "result": {
-        "eventualDestinationLocationSequence": [
-          {
-            "addressableAreaName": "C3",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutoutC3",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "stagingAreaRightSlot"
-            ]
-          }
-        ],
-        "immediateDestinationLocationSequence": [
-          {
-            "addressableAreaName": "C3",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutoutC3",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "stagingAreaRightSlot"
-            ]
-          }
-        ],
-        "originLocationSequence": [
-          {
-            "addressableAreaName": "D4",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutoutD3",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "stagingAreaSlotWithWasteChuteRightAdapterNoCover"
-            ]
-          }
-        ]
-      },
+      "result": {},
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
     },
@@ -12419,51 +11473,7 @@
         },
         "strategy": "usingGripper"
       },
-      "result": {
-        "eventualDestinationLocationSequence": [
-          {
-            "addressableAreaName": "thermocyclerModuleV2",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutB1",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ],
-        "immediateDestinationLocationSequence": [
-          {
-            "addressableAreaName": "thermocyclerModuleV2",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutB1",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ],
-        "originLocationSequence": [
-          {
-            "addressableAreaName": "C3",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutoutC3",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "stagingAreaRightSlot"
-            ]
-          }
-        ]
-      },
+      "result": {},
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
     },
@@ -12481,49 +11491,7 @@
         },
         "strategy": "usingGripper"
       },
-      "result": {
-        "eventualDestinationLocationSequence": [
-          {
-            "addressableAreaName": "C3",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutoutC3",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "stagingAreaRightSlot"
-            ]
-          }
-        ],
-        "immediateDestinationLocationSequence": [
-          {
-            "addressableAreaName": "C3",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutoutC3",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "stagingAreaRightSlot"
-            ]
-          }
-        ],
-        "originLocationSequence": [
-          {
-            "addressableAreaName": "thermocyclerModuleV2",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutB1",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ]
-      },
+      "result": {},
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
     },
@@ -12541,51 +11509,7 @@
         },
         "strategy": "usingGripper"
       },
-      "result": {
-        "eventualDestinationLocationSequence": [
-          {
-            "addressableAreaName": "magneticBlockV1C1",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutC1",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ],
-        "immediateDestinationLocationSequence": [
-          {
-            "addressableAreaName": "magneticBlockV1C1",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutC1",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ],
-        "originLocationSequence": [
-          {
-            "addressableAreaName": "C3",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutoutC3",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "stagingAreaRightSlot"
-            ]
-          }
-        ]
-      },
+      "result": {},
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
     },
@@ -12603,49 +11527,7 @@
         },
         "strategy": "usingGripper"
       },
-      "result": {
-        "eventualDestinationLocationSequence": [
-          {
-            "addressableAreaName": "C3",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutoutC3",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "stagingAreaRightSlot"
-            ]
-          }
-        ],
-        "immediateDestinationLocationSequence": [
-          {
-            "addressableAreaName": "C3",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutoutC3",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "stagingAreaRightSlot"
-            ]
-          }
-        ],
-        "originLocationSequence": [
-          {
-            "addressableAreaName": "magneticBlockV1C1",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutC1",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ]
-      },
+      "result": {},
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
     },
@@ -12663,59 +11545,7 @@
         },
         "strategy": "usingGripper"
       },
-      "result": {
-        "eventualDestinationLocationSequence": [
-          {
-            "kind": "onLabware",
-            "labwareId": "UUID"
-          },
-          {
-            "addressableAreaName": "temperatureModuleV2D1",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutD1",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ],
-        "immediateDestinationLocationSequence": [
-          {
-            "kind": "onLabware",
-            "labwareId": "UUID"
-          },
-          {
-            "addressableAreaName": "temperatureModuleV2D1",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutD1",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ],
-        "originLocationSequence": [
-          {
-            "addressableAreaName": "C3",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutoutC3",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "stagingAreaRightSlot"
-            ]
-          }
-        ]
-      },
+      "result": {},
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
     },
@@ -12733,53 +11563,7 @@
         },
         "strategy": "usingGripper"
       },
-      "result": {
-        "eventualDestinationLocationSequence": [
-          {
-            "addressableAreaName": "C3",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutoutC3",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "stagingAreaRightSlot"
-            ]
-          }
-        ],
-        "immediateDestinationLocationSequence": [
-          {
-            "addressableAreaName": "C3",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutoutC3",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "stagingAreaRightSlot"
-            ]
-          }
-        ],
-        "originLocationSequence": [
-          {
-            "kind": "onLabware",
-            "labwareId": "UUID"
-          },
-          {
-            "addressableAreaName": "temperatureModuleV2D1",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutD1",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ]
-      },
+      "result": {},
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
     },
@@ -12797,59 +11581,7 @@
         },
         "strategy": "usingGripper"
       },
-      "result": {
-        "eventualDestinationLocationSequence": [
-          {
-            "kind": "onLabware",
-            "labwareId": "UUID"
-          },
-          {
-            "addressableAreaName": "heaterShakerV1A3",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutA3",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ],
-        "immediateDestinationLocationSequence": [
-          {
-            "kind": "onLabware",
-            "labwareId": "UUID"
-          },
-          {
-            "addressableAreaName": "heaterShakerV1A3",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutA3",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ],
-        "originLocationSequence": [
-          {
-            "addressableAreaName": "C3",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutoutC3",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "stagingAreaRightSlot"
-            ]
-          }
-        ]
-      },
+      "result": {},
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
     },
@@ -12867,53 +11599,7 @@
         },
         "strategy": "usingGripper"
       },
-      "result": {
-        "eventualDestinationLocationSequence": [
-          {
-            "addressableAreaName": "C3",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutoutC3",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "stagingAreaRightSlot"
-            ]
-          }
-        ],
-        "immediateDestinationLocationSequence": [
-          {
-            "addressableAreaName": "C3",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutoutC3",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "stagingAreaRightSlot"
-            ]
-          }
-        ],
-        "originLocationSequence": [
-          {
-            "kind": "onLabware",
-            "labwareId": "UUID"
-          },
-          {
-            "addressableAreaName": "heaterShakerV1A3",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutA3",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ]
-      },
+      "result": {},
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
     },
@@ -12931,47 +11617,7 @@
         },
         "strategy": "usingGripper"
       },
-      "result": {
-        "eventualDestinationLocationSequence": [
-          {
-            "addressableAreaName": "D4",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutoutD3",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "stagingAreaSlotWithWasteChuteRightAdapterNoCover"
-            ]
-          }
-        ],
-        "immediateDestinationLocationSequence": [
-          {
-            "addressableAreaName": "D4",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutoutD3",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "stagingAreaSlotWithWasteChuteRightAdapterNoCover"
-            ]
-          }
-        ],
-        "originLocationSequence": [
-          {
-            "addressableAreaName": "C3",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutoutC3",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "stagingAreaRightSlot"
-            ]
-          }
-        ]
-      },
+      "result": {},
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
     },
@@ -12989,47 +11635,7 @@
         },
         "strategy": "usingGripper"
       },
-      "result": {
-        "eventualDestinationLocationSequence": [
-          {
-            "addressableAreaName": "C4",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutoutC3",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "stagingAreaRightSlot"
-            ]
-          }
-        ],
-        "immediateDestinationLocationSequence": [
-          {
-            "addressableAreaName": "C4",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutoutC3",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "stagingAreaRightSlot"
-            ]
-          }
-        ],
-        "originLocationSequence": [
-          {
-            "addressableAreaName": "D4",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutoutD3",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "stagingAreaSlotWithWasteChuteRightAdapterNoCover"
-            ]
-          }
-        ]
-      },
+      "result": {},
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
     },
@@ -13047,47 +11653,7 @@
         },
         "strategy": "usingGripper"
       },
-      "result": {
-        "eventualDestinationLocationSequence": [
-          {
-            "addressableAreaName": "D4",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutoutD3",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "stagingAreaSlotWithWasteChuteRightAdapterNoCover"
-            ]
-          }
-        ],
-        "immediateDestinationLocationSequence": [
-          {
-            "addressableAreaName": "D4",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutoutD3",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "stagingAreaSlotWithWasteChuteRightAdapterNoCover"
-            ]
-          }
-        ],
-        "originLocationSequence": [
-          {
-            "addressableAreaName": "C4",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutoutC3",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "stagingAreaRightSlot"
-            ]
-          }
-        ]
-      },
+      "result": {},
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
     },
@@ -13105,51 +11671,7 @@
         },
         "strategy": "usingGripper"
       },
-      "result": {
-        "eventualDestinationLocationSequence": [
-          {
-            "addressableAreaName": "thermocyclerModuleV2",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutB1",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ],
-        "immediateDestinationLocationSequence": [
-          {
-            "addressableAreaName": "thermocyclerModuleV2",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutB1",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ],
-        "originLocationSequence": [
-          {
-            "addressableAreaName": "D4",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutoutD3",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "stagingAreaSlotWithWasteChuteRightAdapterNoCover"
-            ]
-          }
-        ]
-      },
+      "result": {},
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
     },
@@ -13167,49 +11689,7 @@
         },
         "strategy": "usingGripper"
       },
-      "result": {
-        "eventualDestinationLocationSequence": [
-          {
-            "addressableAreaName": "D4",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutoutD3",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "stagingAreaSlotWithWasteChuteRightAdapterNoCover"
-            ]
-          }
-        ],
-        "immediateDestinationLocationSequence": [
-          {
-            "addressableAreaName": "D4",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutoutD3",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "stagingAreaSlotWithWasteChuteRightAdapterNoCover"
-            ]
-          }
-        ],
-        "originLocationSequence": [
-          {
-            "addressableAreaName": "thermocyclerModuleV2",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutB1",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ]
-      },
+      "result": {},
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
     },
@@ -13227,51 +11707,7 @@
         },
         "strategy": "usingGripper"
       },
-      "result": {
-        "eventualDestinationLocationSequence": [
-          {
-            "addressableAreaName": "magneticBlockV1C1",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutC1",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ],
-        "immediateDestinationLocationSequence": [
-          {
-            "addressableAreaName": "magneticBlockV1C1",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutC1",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ],
-        "originLocationSequence": [
-          {
-            "addressableAreaName": "D4",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutoutD3",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "stagingAreaSlotWithWasteChuteRightAdapterNoCover"
-            ]
-          }
-        ]
-      },
+      "result": {},
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
     },
@@ -13289,49 +11725,7 @@
         },
         "strategy": "usingGripper"
       },
-      "result": {
-        "eventualDestinationLocationSequence": [
-          {
-            "addressableAreaName": "D4",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutoutD3",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "stagingAreaSlotWithWasteChuteRightAdapterNoCover"
-            ]
-          }
-        ],
-        "immediateDestinationLocationSequence": [
-          {
-            "addressableAreaName": "D4",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutoutD3",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "stagingAreaSlotWithWasteChuteRightAdapterNoCover"
-            ]
-          }
-        ],
-        "originLocationSequence": [
-          {
-            "addressableAreaName": "magneticBlockV1C1",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutC1",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ]
-      },
+      "result": {},
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
     },
@@ -13349,59 +11743,7 @@
         },
         "strategy": "usingGripper"
       },
-      "result": {
-        "eventualDestinationLocationSequence": [
-          {
-            "kind": "onLabware",
-            "labwareId": "UUID"
-          },
-          {
-            "addressableAreaName": "temperatureModuleV2D1",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutD1",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ],
-        "immediateDestinationLocationSequence": [
-          {
-            "kind": "onLabware",
-            "labwareId": "UUID"
-          },
-          {
-            "addressableAreaName": "temperatureModuleV2D1",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutD1",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ],
-        "originLocationSequence": [
-          {
-            "addressableAreaName": "D4",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutoutD3",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "stagingAreaSlotWithWasteChuteRightAdapterNoCover"
-            ]
-          }
-        ]
-      },
+      "result": {},
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
     },
@@ -13419,53 +11761,7 @@
         },
         "strategy": "usingGripper"
       },
-      "result": {
-        "eventualDestinationLocationSequence": [
-          {
-            "addressableAreaName": "D4",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutoutD3",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "stagingAreaSlotWithWasteChuteRightAdapterNoCover"
-            ]
-          }
-        ],
-        "immediateDestinationLocationSequence": [
-          {
-            "addressableAreaName": "D4",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutoutD3",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "stagingAreaSlotWithWasteChuteRightAdapterNoCover"
-            ]
-          }
-        ],
-        "originLocationSequence": [
-          {
-            "kind": "onLabware",
-            "labwareId": "UUID"
-          },
-          {
-            "addressableAreaName": "temperatureModuleV2D1",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutD1",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ]
-      },
+      "result": {},
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
     },
@@ -13483,59 +11779,7 @@
         },
         "strategy": "usingGripper"
       },
-      "result": {
-        "eventualDestinationLocationSequence": [
-          {
-            "kind": "onLabware",
-            "labwareId": "UUID"
-          },
-          {
-            "addressableAreaName": "heaterShakerV1A3",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutA3",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ],
-        "immediateDestinationLocationSequence": [
-          {
-            "kind": "onLabware",
-            "labwareId": "UUID"
-          },
-          {
-            "addressableAreaName": "heaterShakerV1A3",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutA3",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ],
-        "originLocationSequence": [
-          {
-            "addressableAreaName": "D4",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutoutD3",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "stagingAreaSlotWithWasteChuteRightAdapterNoCover"
-            ]
-          }
-        ]
-      },
+      "result": {},
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
     },
@@ -13553,53 +11797,7 @@
         },
         "strategy": "usingGripper"
       },
-      "result": {
-        "eventualDestinationLocationSequence": [
-          {
-            "addressableAreaName": "D4",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutoutD3",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "stagingAreaSlotWithWasteChuteRightAdapterNoCover"
-            ]
-          }
-        ],
-        "immediateDestinationLocationSequence": [
-          {
-            "addressableAreaName": "D4",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutoutD3",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "stagingAreaSlotWithWasteChuteRightAdapterNoCover"
-            ]
-          }
-        ],
-        "originLocationSequence": [
-          {
-            "kind": "onLabware",
-            "labwareId": "UUID"
-          },
-          {
-            "addressableAreaName": "heaterShakerV1A3",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutA3",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ]
-      },
+      "result": {},
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
     },
@@ -13617,51 +11815,7 @@
         },
         "strategy": "usingGripper"
       },
-      "result": {
-        "eventualDestinationLocationSequence": [
-          {
-            "addressableAreaName": "thermocyclerModuleV2",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutB1",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ],
-        "immediateDestinationLocationSequence": [
-          {
-            "addressableAreaName": "thermocyclerModuleV2",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutB1",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ],
-        "originLocationSequence": [
-          {
-            "addressableAreaName": "D4",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutoutD3",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "stagingAreaSlotWithWasteChuteRightAdapterNoCover"
-            ]
-          }
-        ]
-      },
+      "result": {},
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
     },
@@ -13679,53 +11833,7 @@
         },
         "strategy": "usingGripper"
       },
-      "result": {
-        "eventualDestinationLocationSequence": [
-          {
-            "addressableAreaName": "magneticBlockV1C1",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutC1",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ],
-        "immediateDestinationLocationSequence": [
-          {
-            "addressableAreaName": "magneticBlockV1C1",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutC1",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ],
-        "originLocationSequence": [
-          {
-            "addressableAreaName": "thermocyclerModuleV2",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutB1",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ]
-      },
+      "result": {},
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
     },
@@ -13743,53 +11851,7 @@
         },
         "strategy": "usingGripper"
       },
-      "result": {
-        "eventualDestinationLocationSequence": [
-          {
-            "addressableAreaName": "thermocyclerModuleV2",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutB1",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ],
-        "immediateDestinationLocationSequence": [
-          {
-            "addressableAreaName": "thermocyclerModuleV2",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutB1",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ],
-        "originLocationSequence": [
-          {
-            "addressableAreaName": "magneticBlockV1C1",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutC1",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ]
-      },
+      "result": {},
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
     },
@@ -13807,61 +11869,7 @@
         },
         "strategy": "usingGripper"
       },
-      "result": {
-        "eventualDestinationLocationSequence": [
-          {
-            "kind": "onLabware",
-            "labwareId": "UUID"
-          },
-          {
-            "addressableAreaName": "temperatureModuleV2D1",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutD1",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ],
-        "immediateDestinationLocationSequence": [
-          {
-            "kind": "onLabware",
-            "labwareId": "UUID"
-          },
-          {
-            "addressableAreaName": "temperatureModuleV2D1",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutD1",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ],
-        "originLocationSequence": [
-          {
-            "addressableAreaName": "thermocyclerModuleV2",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutB1",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ]
-      },
+      "result": {},
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
     },
@@ -13879,57 +11887,7 @@
         },
         "strategy": "usingGripper"
       },
-      "result": {
-        "eventualDestinationLocationSequence": [
-          {
-            "addressableAreaName": "thermocyclerModuleV2",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutB1",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ],
-        "immediateDestinationLocationSequence": [
-          {
-            "addressableAreaName": "thermocyclerModuleV2",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutB1",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ],
-        "originLocationSequence": [
-          {
-            "kind": "onLabware",
-            "labwareId": "UUID"
-          },
-          {
-            "addressableAreaName": "temperatureModuleV2D1",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutD1",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ]
-      },
+      "result": {},
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
     },
@@ -13947,61 +11905,7 @@
         },
         "strategy": "usingGripper"
       },
-      "result": {
-        "eventualDestinationLocationSequence": [
-          {
-            "kind": "onLabware",
-            "labwareId": "UUID"
-          },
-          {
-            "addressableAreaName": "heaterShakerV1A3",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutA3",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ],
-        "immediateDestinationLocationSequence": [
-          {
-            "kind": "onLabware",
-            "labwareId": "UUID"
-          },
-          {
-            "addressableAreaName": "heaterShakerV1A3",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutA3",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ],
-        "originLocationSequence": [
-          {
-            "addressableAreaName": "thermocyclerModuleV2",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutB1",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ]
-      },
+      "result": {},
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
     },
@@ -14019,57 +11923,7 @@
         },
         "strategy": "usingGripper"
       },
-      "result": {
-        "eventualDestinationLocationSequence": [
-          {
-            "addressableAreaName": "thermocyclerModuleV2",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutB1",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ],
-        "immediateDestinationLocationSequence": [
-          {
-            "addressableAreaName": "thermocyclerModuleV2",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutB1",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ],
-        "originLocationSequence": [
-          {
-            "kind": "onLabware",
-            "labwareId": "UUID"
-          },
-          {
-            "addressableAreaName": "heaterShakerV1A3",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutA3",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ]
-      },
+      "result": {},
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
     },
@@ -14087,53 +11941,7 @@
         },
         "strategy": "usingGripper"
       },
-      "result": {
-        "eventualDestinationLocationSequence": [
-          {
-            "addressableAreaName": "magneticBlockV1C1",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutC1",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ],
-        "immediateDestinationLocationSequence": [
-          {
-            "addressableAreaName": "magneticBlockV1C1",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutC1",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ],
-        "originLocationSequence": [
-          {
-            "addressableAreaName": "thermocyclerModuleV2",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutB1",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ]
-      },
+      "result": {},
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
     },
@@ -14151,53 +11959,7 @@
         },
         "strategy": "usingGripper"
       },
-      "result": {
-        "eventualDestinationLocationSequence": [
-          {
-            "addressableAreaName": "thermocyclerModuleV2",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutB1",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ],
-        "immediateDestinationLocationSequence": [
-          {
-            "addressableAreaName": "thermocyclerModuleV2",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutB1",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ],
-        "originLocationSequence": [
-          {
-            "addressableAreaName": "magneticBlockV1C1",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutC1",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ]
-      },
+      "result": {},
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
     },
@@ -14215,53 +11977,7 @@
         },
         "strategy": "usingGripper"
       },
-      "result": {
-        "eventualDestinationLocationSequence": [
-          {
-            "addressableAreaName": "magneticBlockV1C1",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutC1",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ],
-        "immediateDestinationLocationSequence": [
-          {
-            "addressableAreaName": "magneticBlockV1C1",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutC1",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ],
-        "originLocationSequence": [
-          {
-            "addressableAreaName": "thermocyclerModuleV2",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutB1",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ]
-      },
+      "result": {},
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
     },
@@ -14279,61 +11995,7 @@
         },
         "strategy": "usingGripper"
       },
-      "result": {
-        "eventualDestinationLocationSequence": [
-          {
-            "kind": "onLabware",
-            "labwareId": "UUID"
-          },
-          {
-            "addressableAreaName": "temperatureModuleV2D1",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutD1",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ],
-        "immediateDestinationLocationSequence": [
-          {
-            "kind": "onLabware",
-            "labwareId": "UUID"
-          },
-          {
-            "addressableAreaName": "temperatureModuleV2D1",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutD1",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ],
-        "originLocationSequence": [
-          {
-            "addressableAreaName": "magneticBlockV1C1",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutC1",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ]
-      },
+      "result": {},
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
     },
@@ -14351,57 +12013,7 @@
         },
         "strategy": "usingGripper"
       },
-      "result": {
-        "eventualDestinationLocationSequence": [
-          {
-            "addressableAreaName": "magneticBlockV1C1",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutC1",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ],
-        "immediateDestinationLocationSequence": [
-          {
-            "addressableAreaName": "magneticBlockV1C1",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutC1",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ],
-        "originLocationSequence": [
-          {
-            "kind": "onLabware",
-            "labwareId": "UUID"
-          },
-          {
-            "addressableAreaName": "temperatureModuleV2D1",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutD1",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ]
-      },
+      "result": {},
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
     },
@@ -14419,61 +12031,7 @@
         },
         "strategy": "usingGripper"
       },
-      "result": {
-        "eventualDestinationLocationSequence": [
-          {
-            "kind": "onLabware",
-            "labwareId": "UUID"
-          },
-          {
-            "addressableAreaName": "heaterShakerV1A3",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutA3",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ],
-        "immediateDestinationLocationSequence": [
-          {
-            "kind": "onLabware",
-            "labwareId": "UUID"
-          },
-          {
-            "addressableAreaName": "heaterShakerV1A3",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutA3",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ],
-        "originLocationSequence": [
-          {
-            "addressableAreaName": "magneticBlockV1C1",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutC1",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ]
-      },
+      "result": {},
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
     },
@@ -14491,57 +12049,7 @@
         },
         "strategy": "usingGripper"
       },
-      "result": {
-        "eventualDestinationLocationSequence": [
-          {
-            "addressableAreaName": "magneticBlockV1C1",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutC1",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ],
-        "immediateDestinationLocationSequence": [
-          {
-            "addressableAreaName": "magneticBlockV1C1",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutC1",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ],
-        "originLocationSequence": [
-          {
-            "kind": "onLabware",
-            "labwareId": "UUID"
-          },
-          {
-            "addressableAreaName": "heaterShakerV1A3",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutA3",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ]
-      },
+      "result": {},
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
     },
@@ -14559,61 +12067,7 @@
         },
         "strategy": "usingGripper"
       },
-      "result": {
-        "eventualDestinationLocationSequence": [
-          {
-            "kind": "onLabware",
-            "labwareId": "UUID"
-          },
-          {
-            "addressableAreaName": "temperatureModuleV2D1",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutD1",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ],
-        "immediateDestinationLocationSequence": [
-          {
-            "kind": "onLabware",
-            "labwareId": "UUID"
-          },
-          {
-            "addressableAreaName": "temperatureModuleV2D1",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutD1",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ],
-        "originLocationSequence": [
-          {
-            "addressableAreaName": "magneticBlockV1C1",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutC1",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ]
-      },
+      "result": {},
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
     },
@@ -14631,57 +12085,7 @@
         },
         "strategy": "usingGripper"
       },
-      "result": {
-        "eventualDestinationLocationSequence": [
-          {
-            "addressableAreaName": "thermocyclerModuleV2",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutB1",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ],
-        "immediateDestinationLocationSequence": [
-          {
-            "addressableAreaName": "thermocyclerModuleV2",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutB1",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ],
-        "originLocationSequence": [
-          {
-            "kind": "onLabware",
-            "labwareId": "UUID"
-          },
-          {
-            "addressableAreaName": "temperatureModuleV2D1",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutD1",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ]
-      },
+      "result": {},
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
     },
@@ -14699,61 +12103,7 @@
         },
         "strategy": "usingGripper"
       },
-      "result": {
-        "eventualDestinationLocationSequence": [
-          {
-            "kind": "onLabware",
-            "labwareId": "UUID"
-          },
-          {
-            "addressableAreaName": "temperatureModuleV2D1",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutD1",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ],
-        "immediateDestinationLocationSequence": [
-          {
-            "kind": "onLabware",
-            "labwareId": "UUID"
-          },
-          {
-            "addressableAreaName": "temperatureModuleV2D1",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutD1",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ],
-        "originLocationSequence": [
-          {
-            "addressableAreaName": "thermocyclerModuleV2",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutB1",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ]
-      },
+      "result": {},
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
     },
@@ -14771,57 +12121,7 @@
         },
         "strategy": "usingGripper"
       },
-      "result": {
-        "eventualDestinationLocationSequence": [
-          {
-            "addressableAreaName": "magneticBlockV1C1",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutC1",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ],
-        "immediateDestinationLocationSequence": [
-          {
-            "addressableAreaName": "magneticBlockV1C1",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutC1",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ],
-        "originLocationSequence": [
-          {
-            "kind": "onLabware",
-            "labwareId": "UUID"
-          },
-          {
-            "addressableAreaName": "temperatureModuleV2D1",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutD1",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ]
-      },
+      "result": {},
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
     },
@@ -14839,61 +12139,7 @@
         },
         "strategy": "usingGripper"
       },
-      "result": {
-        "eventualDestinationLocationSequence": [
-          {
-            "kind": "onLabware",
-            "labwareId": "UUID"
-          },
-          {
-            "addressableAreaName": "temperatureModuleV2D1",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutD1",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ],
-        "immediateDestinationLocationSequence": [
-          {
-            "kind": "onLabware",
-            "labwareId": "UUID"
-          },
-          {
-            "addressableAreaName": "temperatureModuleV2D1",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutD1",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ],
-        "originLocationSequence": [
-          {
-            "addressableAreaName": "magneticBlockV1C1",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutC1",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ]
-      },
+      "result": {},
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
     },
@@ -14911,65 +12157,7 @@
         },
         "strategy": "usingGripper"
       },
-      "result": {
-        "eventualDestinationLocationSequence": [
-          {
-            "kind": "onLabware",
-            "labwareId": "UUID"
-          },
-          {
-            "addressableAreaName": "heaterShakerV1A3",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutA3",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ],
-        "immediateDestinationLocationSequence": [
-          {
-            "kind": "onLabware",
-            "labwareId": "UUID"
-          },
-          {
-            "addressableAreaName": "heaterShakerV1A3",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutA3",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ],
-        "originLocationSequence": [
-          {
-            "kind": "onLabware",
-            "labwareId": "UUID"
-          },
-          {
-            "addressableAreaName": "temperatureModuleV2D1",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutD1",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ]
-      },
+      "result": {},
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
     },
@@ -14987,65 +12175,7 @@
         },
         "strategy": "usingGripper"
       },
-      "result": {
-        "eventualDestinationLocationSequence": [
-          {
-            "kind": "onLabware",
-            "labwareId": "UUID"
-          },
-          {
-            "addressableAreaName": "temperatureModuleV2D1",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutD1",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ],
-        "immediateDestinationLocationSequence": [
-          {
-            "kind": "onLabware",
-            "labwareId": "UUID"
-          },
-          {
-            "addressableAreaName": "temperatureModuleV2D1",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutD1",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ],
-        "originLocationSequence": [
-          {
-            "kind": "onLabware",
-            "labwareId": "UUID"
-          },
-          {
-            "addressableAreaName": "heaterShakerV1A3",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutA3",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ]
-      },
+      "result": {},
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
     },
@@ -15063,65 +12193,7 @@
         },
         "strategy": "usingGripper"
       },
-      "result": {
-        "eventualDestinationLocationSequence": [
-          {
-            "kind": "onLabware",
-            "labwareId": "UUID"
-          },
-          {
-            "addressableAreaName": "heaterShakerV1A3",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutA3",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ],
-        "immediateDestinationLocationSequence": [
-          {
-            "kind": "onLabware",
-            "labwareId": "UUID"
-          },
-          {
-            "addressableAreaName": "heaterShakerV1A3",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutA3",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ],
-        "originLocationSequence": [
-          {
-            "kind": "onLabware",
-            "labwareId": "UUID"
-          },
-          {
-            "addressableAreaName": "temperatureModuleV2D1",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutD1",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ]
-      },
+      "result": {},
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
     },
@@ -15139,57 +12211,7 @@
         },
         "strategy": "usingGripper"
       },
-      "result": {
-        "eventualDestinationLocationSequence": [
-          {
-            "addressableAreaName": "thermocyclerModuleV2",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutB1",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ],
-        "immediateDestinationLocationSequence": [
-          {
-            "addressableAreaName": "thermocyclerModuleV2",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutB1",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ],
-        "originLocationSequence": [
-          {
-            "kind": "onLabware",
-            "labwareId": "UUID"
-          },
-          {
-            "addressableAreaName": "heaterShakerV1A3",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutA3",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ]
-      },
+      "result": {},
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
     },
@@ -15207,61 +12229,7 @@
         },
         "strategy": "usingGripper"
       },
-      "result": {
-        "eventualDestinationLocationSequence": [
-          {
-            "kind": "onLabware",
-            "labwareId": "UUID"
-          },
-          {
-            "addressableAreaName": "heaterShakerV1A3",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutA3",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ],
-        "immediateDestinationLocationSequence": [
-          {
-            "kind": "onLabware",
-            "labwareId": "UUID"
-          },
-          {
-            "addressableAreaName": "heaterShakerV1A3",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutA3",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ],
-        "originLocationSequence": [
-          {
-            "addressableAreaName": "thermocyclerModuleV2",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutB1",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ]
-      },
+      "result": {},
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
     },
@@ -15279,57 +12247,7 @@
         },
         "strategy": "usingGripper"
       },
-      "result": {
-        "eventualDestinationLocationSequence": [
-          {
-            "addressableAreaName": "magneticBlockV1C1",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutC1",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ],
-        "immediateDestinationLocationSequence": [
-          {
-            "addressableAreaName": "magneticBlockV1C1",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutC1",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ],
-        "originLocationSequence": [
-          {
-            "kind": "onLabware",
-            "labwareId": "UUID"
-          },
-          {
-            "addressableAreaName": "heaterShakerV1A3",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutA3",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ]
-      },
+      "result": {},
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
     },
@@ -15347,61 +12265,7 @@
         },
         "strategy": "usingGripper"
       },
-      "result": {
-        "eventualDestinationLocationSequence": [
-          {
-            "kind": "onLabware",
-            "labwareId": "UUID"
-          },
-          {
-            "addressableAreaName": "heaterShakerV1A3",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutA3",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ],
-        "immediateDestinationLocationSequence": [
-          {
-            "kind": "onLabware",
-            "labwareId": "UUID"
-          },
-          {
-            "addressableAreaName": "heaterShakerV1A3",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutA3",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ],
-        "originLocationSequence": [
-          {
-            "addressableAreaName": "magneticBlockV1C1",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutC1",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ]
-      },
+      "result": {},
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
     },
@@ -15419,65 +12283,7 @@
         },
         "strategy": "usingGripper"
       },
-      "result": {
-        "eventualDestinationLocationSequence": [
-          {
-            "kind": "onLabware",
-            "labwareId": "UUID"
-          },
-          {
-            "addressableAreaName": "temperatureModuleV2D1",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutD1",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ],
-        "immediateDestinationLocationSequence": [
-          {
-            "kind": "onLabware",
-            "labwareId": "UUID"
-          },
-          {
-            "addressableAreaName": "temperatureModuleV2D1",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutD1",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ],
-        "originLocationSequence": [
-          {
-            "kind": "onLabware",
-            "labwareId": "UUID"
-          },
-          {
-            "addressableAreaName": "heaterShakerV1A3",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutA3",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ]
-      },
+      "result": {},
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
     },
@@ -15495,65 +12301,7 @@
         },
         "strategy": "usingGripper"
       },
-      "result": {
-        "eventualDestinationLocationSequence": [
-          {
-            "kind": "onLabware",
-            "labwareId": "UUID"
-          },
-          {
-            "addressableAreaName": "heaterShakerV1A3",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutA3",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ],
-        "immediateDestinationLocationSequence": [
-          {
-            "kind": "onLabware",
-            "labwareId": "UUID"
-          },
-          {
-            "addressableAreaName": "heaterShakerV1A3",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutA3",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ],
-        "originLocationSequence": [
-          {
-            "kind": "onLabware",
-            "labwareId": "UUID"
-          },
-          {
-            "addressableAreaName": "temperatureModuleV2D1",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutD1",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ]
-      },
+      "result": {},
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
     },
@@ -15571,53 +12319,7 @@
         },
         "strategy": "usingGripper"
       },
-      "result": {
-        "eventualDestinationLocationSequence": [
-          {
-            "addressableAreaName": "C2",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutoutC2",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "singleCenterSlot"
-            ]
-          }
-        ],
-        "immediateDestinationLocationSequence": [
-          {
-            "addressableAreaName": "C2",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutoutC2",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "singleCenterSlot"
-            ]
-          }
-        ],
-        "originLocationSequence": [
-          {
-            "kind": "onLabware",
-            "labwareId": "UUID"
-          },
-          {
-            "addressableAreaName": "heaterShakerV1A3",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutA3",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ]
-      },
+      "result": {},
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
     },
@@ -15889,47 +12591,7 @@
         },
         "strategy": "manualMoveWithPause"
       },
-      "result": {
-        "eventualDestinationLocationSequence": [
-          {
-            "addressableAreaName": "D4",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutoutD3",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "stagingAreaSlotWithWasteChuteRightAdapterNoCover"
-            ]
-          }
-        ],
-        "immediateDestinationLocationSequence": [
-          {
-            "addressableAreaName": "D4",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutoutD3",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "stagingAreaSlotWithWasteChuteRightAdapterNoCover"
-            ]
-          }
-        ],
-        "originLocationSequence": [
-          {
-            "addressableAreaName": "D2",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutoutD2",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "singleCenterSlot"
-            ]
-          }
-        ]
-      },
+      "result": {},
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
     },
@@ -15945,33 +12607,7 @@
         "newLocation": "offDeck",
         "strategy": "manualMoveWithPause"
       },
-      "result": {
-        "eventualDestinationLocationSequence": [
-          {
-            "kind": "notOnDeck",
-            "logicalLocationName": "offDeck"
-          }
-        ],
-        "immediateDestinationLocationSequence": [
-          {
-            "kind": "notOnDeck",
-            "logicalLocationName": "offDeck"
-          }
-        ],
-        "originLocationSequence": [
-          {
-            "addressableAreaName": "D4",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutoutD3",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "stagingAreaSlotWithWasteChuteRightAdapterNoCover"
-            ]
-          }
-        ]
-      },
+      "result": {},
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
     },
@@ -16066,19 +12702,6 @@
       },
       "result": {
         "labwareId": "UUID",
-        "locationSequence": [
-          {
-            "addressableAreaName": "C2",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutoutC2",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "singleCenterSlot"
-            ]
-          }
-        ],
         "offsetId": "UUID"
       },
       "startedAt": "TIMESTAMP",
@@ -16144,47 +12767,7 @@
         },
         "strategy": "manualMoveWithPause"
       },
-      "result": {
-        "eventualDestinationLocationSequence": [
-          {
-            "addressableAreaName": "D2",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutoutD2",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "singleCenterSlot"
-            ]
-          }
-        ],
-        "immediateDestinationLocationSequence": [
-          {
-            "addressableAreaName": "D2",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutoutD2",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "singleCenterSlot"
-            ]
-          }
-        ],
-        "originLocationSequence": [
-          {
-            "addressableAreaName": "C2",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutoutC2",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "singleCenterSlot"
-            ]
-          }
-        ]
-      },
+      "result": {},
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
     },
@@ -16246,19 +12829,6 @@
       },
       "result": {
         "labwareId": "UUID",
-        "locationSequence": [
-          {
-            "addressableAreaName": "D2",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutoutD2",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "singleCenterSlot"
-            ]
-          }
-        ],
         "offsetId": "UUID"
       },
       "startedAt": "TIMESTAMP",
@@ -16325,46 +12895,7 @@
         "strategy": "manualMoveWithPause"
       },
       "result": {
-        "eventualDestinationLocationSequence": [
-          {
-            "addressableAreaName": "C2",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutoutC2",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "singleCenterSlot"
-            ]
-          }
-        ],
-        "immediateDestinationLocationSequence": [
-          {
-            "addressableAreaName": "C2",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutoutC2",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "singleCenterSlot"
-            ]
-          }
-        ],
-        "offsetId": "UUID",
-        "originLocationSequence": [
-          {
-            "addressableAreaName": "D2",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutoutD2",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "singleCenterSlot"
-            ]
-          }
-        ]
+        "offsetId": "UUID"
       },
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
@@ -16429,40 +12960,7 @@
         },
         "strategy": "manualMoveWithPause"
       },
-      "result": {
-        "eventualDestinationLocationSequence": [
-          {
-            "addressableAreaName": "D2",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutoutD2",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "singleCenterSlot"
-            ]
-          }
-        ],
-        "immediateDestinationLocationSequence": [
-          {
-            "addressableAreaName": "D2",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutoutD2",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "singleCenterSlot"
-            ]
-          }
-        ],
-        "originLocationSequence": [
-          {
-            "kind": "notOnDeck",
-            "logicalLocationName": "offDeck"
-          }
-        ]
-      },
+      "result": {},
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
     },
@@ -16571,40 +13069,7 @@
         },
         "strategy": "usingGripper"
       },
-      "result": {
-        "eventualDestinationLocationSequence": [
-          {
-            "kind": "notOnDeck",
-            "logicalLocationName": "offDeck"
-          }
-        ],
-        "immediateDestinationLocationSequence": [
-          {
-            "addressableAreaName": "gripperWasteChute",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutoutD3",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "stagingAreaSlotWithWasteChuteRightAdapterNoCover"
-            ]
-          }
-        ],
-        "originLocationSequence": [
-          {
-            "addressableAreaName": "D2",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutoutD2",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "singleCenterSlot"
-            ]
-          }
-        ]
-      },
+      "result": {},
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
     },
@@ -16622,40 +13087,7 @@
         },
         "strategy": "usingGripper"
       },
-      "result": {
-        "eventualDestinationLocationSequence": [
-          {
-            "kind": "notOnDeck",
-            "logicalLocationName": "offDeck"
-          }
-        ],
-        "immediateDestinationLocationSequence": [
-          {
-            "addressableAreaName": "gripperWasteChute",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutoutD3",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "stagingAreaSlotWithWasteChuteRightAdapterNoCover"
-            ]
-          }
-        ],
-        "originLocationSequence": [
-          {
-            "addressableAreaName": "C2",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutoutC2",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "singleCenterSlot"
-            ]
-          }
-        ]
-      },
+      "result": {},
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
     }

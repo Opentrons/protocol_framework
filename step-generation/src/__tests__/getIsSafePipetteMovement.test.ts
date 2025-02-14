@@ -32,7 +32,6 @@ describe('getIsSafePipetteMovement', () => {
           tiprackDefURI: ['mockDefUri'],
           tiprackLabwareDef: [fixtureTiprack1000ul as LabwareDefinition2],
           spec: fixtureP100096V2Specs,
-          pythonName: 'mockPythonName',
         },
       },
       labwareEntities: {
@@ -40,30 +39,25 @@ describe('getIsSafePipetteMovement', () => {
           id: mockLabwareId,
           labwareDefURI: 'mockDefUri',
           def: fixture96Plate as LabwareDefinition2,
-          pythonName: 'mockPythonName',
         },
         [mockTiprackId]: {
           id: mockTiprackId,
           labwareDefURI: mockTipUri,
           def: fixtureTiprack1000ul as LabwareDefinition2,
-          pythonName: 'mockPythonName',
         },
         [mockAdapter]: {
           id: mockAdapter,
           labwareDefURI: 'mockAdapterUri',
           def: fixtureTiprackAdapter as LabwareDefinition2,
-          pythonName: 'mockPythonName',
         },
         [mockLabware2]: {
           id: mockLabware2,
           labwareDefURI: 'mockDefUri',
           def: fixture96Plate as LabwareDefinition2,
-          pythonName: 'mockPythonName',
         },
       },
       moduleEntities: {},
       additionalEquipmentEntities: {},
-      liquidEntities: {},
       config: {
         OT_PD_DISABLE_MODULE_RESTRICTIONS: false,
       },
@@ -93,7 +87,6 @@ describe('getIsSafePipetteMovement', () => {
         labwareEntities: {},
         pipetteEntities: {},
         moduleEntities: {},
-        liquidEntities: {},
         additionalEquipmentEntities: {
           trashBin: { name: 'trashBin', location: 'A3', id: 'trashBin' },
         },
@@ -127,7 +120,6 @@ describe('getIsSafePipetteMovement', () => {
         id: mockModule,
         type: TEMPERATURE_MODULE_TYPE,
         model: TEMPERATURE_MODULE_V2,
-        pythonName: 'mockPythonName',
       },
     }
     const result = getIsSafePipetteMovement(
@@ -176,7 +168,6 @@ describe('getIsSafePipetteMovement', () => {
         id: mockModule,
         type: TEMPERATURE_MODULE_TYPE,
         model: TEMPERATURE_MODULE_V2,
-        pythonName: 'mockPythonName',
       },
     }
     const result = getIsSafePipetteMovement(

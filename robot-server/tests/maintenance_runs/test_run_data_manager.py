@@ -160,9 +160,9 @@ async def test_create_with_options(
     run_id = "hello world"
     created_at = datetime(year=2021, month=1, day=1)
 
-    labware_offset = pe_types.LegacyLabwareOffsetCreate(
+    labware_offset = pe_types.LabwareOffsetCreate(
         definitionUri="namespace/load_name/version",
-        location=pe_types.LegacyLabwareOffsetLocation(slotName=DeckSlotName.SLOT_5),
+        location=pe_types.LabwareOffsetLocation(slotName=DeckSlotName.SLOT_5),
         vector=pe_types.LabwareOffsetVector(x=1, y=2, z=3),
     )
 

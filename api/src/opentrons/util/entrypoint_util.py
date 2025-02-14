@@ -6,6 +6,7 @@ import contextlib
 from dataclasses import dataclass
 import json
 import logging
+from json import JSONDecodeError
 import pathlib
 import subprocess
 import sys
@@ -20,6 +21,8 @@ from typing import (
     TYPE_CHECKING,
 )
 
+from jsonschema import ValidationError  # type: ignore
+
 from opentrons.calibration_storage.deck_configuration import (
     deserialize_deck_configuration,
 )
@@ -29,7 +32,7 @@ from opentrons.config import (
     JUPYTER_NOTEBOOK_LABWARE_DIR,
     SystemArchitecture,
 )
-from opentrons.protocols import labware
+from opentrons.protocol_api import labware
 from opentrons.calibration_storage import helpers
 from opentrons.protocol_engine.errors.error_occurrence import (
     ErrorOccurrence as ProtocolEngineErrorOccurrence,
@@ -76,7 +79,7 @@ def labware_from_paths(
             if child.is_file() and child.suffix.endswith("json"):
                 try:
                     defn = labware.verify_definition(child.read_bytes())
-                except labware.NotALabwareError:
+                except (ValidationError, JSONDecodeError):
                     log.info(f"{child}: invalid labware, ignoring")
                     log.debug(
                         f"{child}: labware invalid because of this exception.",

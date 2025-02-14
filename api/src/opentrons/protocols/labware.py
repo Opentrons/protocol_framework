@@ -4,7 +4,7 @@ import logging
 import json
 import os
 from pathlib import Path
-from typing import Any, AnyStr, Dict, Optional, Union, List, Sequence, Literal
+from typing import Any, AnyStr, Dict, Optional, Union, List
 
 import jsonschema  # type: ignore
 
@@ -17,29 +17,9 @@ from opentrons.protocols.api_support.constants import (
     USER_DEFS_PATH,
 )
 from opentrons_shared_data.labware.types import LabwareDefinition
-from opentrons_shared_data.errors.exceptions import InvalidProtocolData
 
 
 MODULE_LOG = logging.getLogger(__name__)
-
-LabwareProblem = Literal[
-    "no-schema-id", "bad-schema-id", "schema-mismatch", "invalid-json"
-]
-
-
-class NotALabwareError(InvalidProtocolData):
-    def __init__(
-        self, problem: LabwareProblem, wrapping: Sequence[BaseException]
-    ) -> None:
-        messages: dict[LabwareProblem, str] = {
-            "no-schema-id": "No schema ID present in file",
-            "bad-schema-id": "Bad schema ID in file",
-            "invalid-json": "File does not contain valid JSON",
-            "schema-mismatch": "File does not match labware schema",
-        }
-        super().__init__(
-            message=messages[problem], detail={"kind": problem}, wrapping=wrapping
-        )
 
 
 def get_labware_definition(
@@ -146,7 +126,7 @@ def save_definition(
         json.dump(labware_def, f)
 
 
-def verify_definition(  # noqa: C901
+def verify_definition(
     contents: Union[AnyStr, LabwareDefinition, Dict[str, Any]]
 ) -> LabwareDefinition:
     """Verify that an input string is a labware definition and return it.
@@ -166,24 +146,15 @@ def verify_definition(  # noqa: C901
     if isinstance(contents, dict):
         to_return = contents
     else:
-        try:
-            to_return = json.loads(contents)
-        except json.JSONDecodeError as e:
-            raise NotALabwareError("invalid-json", [e]) from e
+        to_return = json.loads(contents)
     try:
         schema_version = to_return["schemaVersion"]
-    except KeyError as e:
-        raise NotALabwareError("no-schema-id", [e]) from e
-
-    try:
         schema = schemata_by_version[schema_version]
-    except KeyError as e:
-        raise NotALabwareError("bad-schema-id", [e]) from e
-
-    try:
-        jsonschema.validate(to_return, schema)
-    except jsonschema.ValidationError as e:
-        raise NotALabwareError("schema-mismatch", [e]) from e
+    except KeyError:
+        raise RuntimeError(
+            f'Invalid or unknown labware schema version {to_return.get("schemaVersion", None)}'
+        )
+    jsonschema.validate(to_return, schema)
 
     # we can type ignore this because if it passes the jsonschema it has
     # the correct structure

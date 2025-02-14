@@ -41,7 +41,7 @@ interface UseDeckMapUtilsProps {
   runId: ErrorRecoveryFlowsProps['runId']
   protocolAnalysis: ErrorRecoveryFlowsProps['protocolAnalysis']
   failedLabwareUtils: UseFailedLabwareUtilsResult
-  runLwDefsByUri: ERUtilsProps['runLwDefsByUri']
+  labwareDefinitionsByUri: ERUtilsProps['labwareDefinitionsByUri']
   runRecord: Run | undefined
 }
 
@@ -64,7 +64,7 @@ export function useDeckMapUtils({
   runRecord,
   runId,
   failedLabwareUtils,
-  runLwDefsByUri,
+  labwareDefinitionsByUri,
 }: UseDeckMapUtilsProps): UseDeckMapUtilsResult {
   const robotType = protocolAnalysis?.robotType ?? OT2_ROBOT_TYPE
   const deckConfig = getSimplestDeckConfigForProtocol(protocolAnalysis)
@@ -77,9 +77,9 @@ export function useDeckMapUtils({
       getRunCurrentModulesInfo({
         runRecord,
         deckDef,
-        runLwDefsByUri,
+        labwareDefinitionsByUri,
       }),
-    [runRecord, deckDef, runLwDefsByUri]
+    [runRecord, deckDef, labwareDefinitionsByUri]
   )
 
   const runCurrentModules = useMemo(
@@ -93,8 +93,8 @@ export function useDeckMapUtils({
   )
 
   const currentLabwareInfo = useMemo(
-    () => getRunCurrentLabwareInfo({ runRecord, runLwDefsByUri }),
-    [runRecord, runLwDefsByUri]
+    () => getRunCurrentLabwareInfo({ runRecord, labwareDefinitionsByUri }),
+    [runRecord, labwareDefinitionsByUri]
   )
 
   const { updatedModules, remainingLabware } = useMemo(
@@ -113,24 +113,32 @@ export function useDeckMapUtils({
   )
 
   const movedLabwareDef =
-    runLwDefsByUri != null && failedLabwareUtils.failedLabware != null
-      ? runLwDefsByUri[failedLabwareUtils.failedLabware.definitionUri]
+    labwareDefinitionsByUri != null && failedLabwareUtils.failedLabware != null
+      ? labwareDefinitionsByUri[failedLabwareUtils.failedLabware.definitionUri]
       : null
 
   const moduleRenderInfo = useMemo(
     () =>
-      runRecord != null && runLwDefsByUri != null
-        ? getRunModuleRenderInfo(runRecord.data, deckDef, runLwDefsByUri)
+      runRecord != null && labwareDefinitionsByUri != null
+        ? getRunModuleRenderInfo(
+            runRecord.data,
+            deckDef,
+            labwareDefinitionsByUri
+          )
         : [],
-    [deckDef, runLwDefsByUri, runRecord]
+    [deckDef, labwareDefinitionsByUri, runRecord]
   )
 
   const labwareRenderInfo = useMemo(
     () =>
-      runRecord != null && runLwDefsByUri != null
-        ? getRunLabwareRenderInfo(runRecord.data, runLwDefsByUri, deckDef)
+      runRecord != null && labwareDefinitionsByUri != null
+        ? getRunLabwareRenderInfo(
+            runRecord.data,
+            labwareDefinitionsByUri,
+            deckDef
+          )
         : [],
-    [deckDef, runLwDefsByUri, runRecord]
+    [deckDef, labwareDefinitionsByUri, runRecord]
   )
 
   return {
@@ -249,13 +257,13 @@ interface RunCurrentModuleInfo {
 export const getRunCurrentModulesInfo = ({
   runRecord,
   deckDef,
-  runLwDefsByUri,
+  labwareDefinitionsByUri,
 }: {
   runRecord: UseDeckMapUtilsProps['runRecord']
   deckDef: DeckDefinition
-  runLwDefsByUri: UseDeckMapUtilsProps['runLwDefsByUri']
+  labwareDefinitionsByUri?: LabwareDefinitionsByUri | null
 }): RunCurrentModuleInfo[] => {
-  if (runRecord == null) {
+  if (runRecord == null || labwareDefinitionsByUri == null) {
     return []
   } else {
     return runRecord.data.modules.reduce<RunCurrentModuleInfo[]>(
@@ -272,7 +280,7 @@ export const getRunCurrentModulesInfo = ({
 
         const nestedLabwareDef =
           nestedLabware != null
-            ? runLwDefsByUri[nestedLabware.definitionUri]
+            ? labwareDefinitionsByUri[nestedLabware.definitionUri]
             : null
 
         const slotPosition = getPositionFromSlotId(
@@ -316,12 +324,12 @@ interface RunCurrentLabwareInfo {
 // Derive the labware info necessary to render labware on the deck.
 export function getRunCurrentLabwareInfo({
   runRecord,
-  runLwDefsByUri,
+  labwareDefinitionsByUri,
 }: {
   runRecord: UseDeckMapUtilsProps['runRecord']
-  runLwDefsByUri: UseDeckMapUtilsProps['runLwDefsByUri']
+  labwareDefinitionsByUri?: LabwareDefinitionsByUri | null
 }): RunCurrentLabwareInfo[] {
-  if (runRecord == null) {
+  if (runRecord == null || labwareDefinitionsByUri == null) {
     return []
   } else {
     const allLabware = runRecord.data.labware.reduce(
@@ -332,7 +340,7 @@ export function getRunCurrentLabwareInfo({
           runRecord,
           true
         ) // Exclude modules since handled separately.
-        const labwareDef = getLabwareDefinition(lw, runLwDefsByUri)
+        const labwareDef = getLabwareDefinition(lw, labwareDefinitionsByUri)
 
         if (slotName == null || labwareLocation == null) {
           return acc

@@ -61,7 +61,7 @@ class UnsafeUngripLabware(
 
     commandType: UnsafeUngripLabwareCommandType = "unsafe/ungripLabware"
     params: UnsafeUngripLabwareParams
-    result: Optional[UnsafeUngripLabwareResult] = None
+    result: Optional[UnsafeUngripLabwareResult]
 
     _ImplementationCls: Type[
         UnsafeUngripLabwareImplementation

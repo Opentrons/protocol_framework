@@ -29,7 +29,7 @@ import {
   openIngredientSelector,
 } from '../../../labware-ingred/actions'
 import { getNextAvailableDeckSlot } from '../../../labware-ingred/utils'
-import { deleteModule } from '../../../modules'
+import { deleteModule } from '../../../step-forms/actions'
 import {
   ConfirmDeleteStagingAreaModal,
   EditNickNameModal,
@@ -193,7 +193,7 @@ export function SlotOverflowMenu(
   const handleClear = (): void => {
     //  clear module from slot
     if (moduleOnSlot != null) {
-      dispatch(deleteModule({ moduleId: moduleOnSlot.id }))
+      dispatch(deleteModule(moduleOnSlot.id))
     }
     //  clear fixture(s) from slot
     if (fixturesOnSlot.length > 0) {

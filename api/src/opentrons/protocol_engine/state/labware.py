@@ -1,5 +1,4 @@
 """Basic labware data state and store."""
-
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -42,8 +41,7 @@ from ..types import (
     Dimensions,
     LabwareOffset,
     LabwareOffsetVector,
-    LabwareOffsetLocationSequence,
-    LegacyLabwareOffsetLocation,
+    LabwareOffsetLocation,
     LabwareLocation,
     LoadedLabware,
     ModuleLocation,
@@ -169,8 +167,7 @@ class LabwareStore(HasState[LabwareState], HandlesActions):
                 id=action.labware_offset_id,
                 createdAt=action.created_at,
                 definitionUri=action.request.definitionUri,
-                location=action.request.legacyLocation,
-                locationSequence=action.request.locationSequence,
+                location=action.request.location,
                 vector=action.request.vector,
             )
             self._add_labware_offset(labware_offset)
@@ -356,19 +353,6 @@ class LabwareView:
             f"There is not labware loaded onto labware {labware_id}"
         )
 
-    def raise_if_labware_has_non_lid_labware_on_top(self, labware_id: str) -> None:
-        """Raise if labware has another labware that is not its lid on top."""
-        lid_id = self.get_lid_id_by_labware_id(labware_id)
-        for candidate_id, candidate_labware in self._state.labware_by_id.items():
-            if (
-                isinstance(candidate_labware.location, OnLabwareLocation)
-                and candidate_labware.location.labwareId == labware_id
-                and candidate_id != lid_id
-            ):
-                raise errors.LabwareIsInStackError(
-                    f"Cannot access labware {labware_id} because it has a non-lid labware stacked on top."
-                )
-
     def raise_if_labware_has_labware_on_top(self, labware_id: str) -> None:
         """Raise if labware has another labware on top."""
         for labware in self._state.labware_by_id.values():
@@ -377,7 +361,7 @@ class LabwareView:
                 and labware.location.labwareId == labware_id
             ):
                 raise errors.LabwareIsInStackError(
-                    f"Cannot access labware {labware_id} because it has another labware stacked on top."
+                    f"Cannot move to labware {labware_id}, labware has other labware stacked on top."
                 )
 
     def get_by_slot(
@@ -500,13 +484,9 @@ class LabwareView:
             return self.get_labware_stack(labware_stack)
         return labware_stack
 
-    def get_lid_id_by_labware_id(self, labware_id: str) -> str | None:
-        """Get the ID of a lid labware on top of a given labware, if any."""
-        return self._state.labware_by_id[labware_id].lid_id
-
     def get_lid_by_labware_id(self, labware_id: str) -> LoadedLabware | None:
         """Get the Lid Labware that is currently on top of a given labware, if there is one."""
-        lid_id = self.get_lid_id_by_labware_id(labware_id)
+        lid_id = self._state.labware_by_id[labware_id].lid_id
         if lid_id:
             return self._state.labware_by_id[lid_id]
         else:
@@ -845,32 +825,15 @@ class LabwareView:
         """Get all labware offsets, in the order they were added."""
         return list(self._state.labware_offsets_by_id.values())
 
+    # TODO: Make this slightly more ergonomic for the caller by
+    # only returning the optional str ID, at the cost of baking redundant lookups
+    # into the API?
     def find_applicable_labware_offset(
-        self, definition_uri: str, location: LabwareOffsetLocationSequence
-    ) -> Optional[LabwareOffset]:
-        """Find a labware offset that applies to the given definition and location sequence.
-
-        Returns the *most recently* added matching offset, so later ones can override earlier ones.
-        Returns ``None`` if no loaded offset matches the location.
-
-        An offset matches a labware instance if the sequence of locations formed by following the
-        .location elements of the labware instance until you reach an addressable area has the same
-        definition URIs as the sequence of definition URIs stored by the offset.
-        """
-        for candidate in reversed(list(self._state.labware_offsets_by_id.values())):
-            if (
-                candidate.definitionUri == definition_uri
-                and candidate.locationSequence == location
-            ):
-                return candidate
-        return None
-
-    def find_applicable_labware_offset_by_legacy_location(
         self,
         definition_uri: str,
-        location: LegacyLabwareOffsetLocation,
+        location: LabwareOffsetLocation,
     ) -> Optional[LabwareOffset]:
-        """Find a labware offset that applies to the given definition and legacy location.
+        """Find a labware offset that applies to the given definition and location.
 
         Returns the *most recently* added matching offset,
         so later offsets can override earlier ones.
@@ -953,19 +916,6 @@ class LabwareView:
                 raise errors.LocationIsOccupiedError(
                     f"Labware {labware.loadName} is already present at {location}."
                 )
-
-    def raise_if_labware_cannot_be_ondeck(
-        self,
-        location: LabwareLocation,
-        labware_definition: LabwareDefinition,
-    ) -> None:
-        """Raise an error if the labware cannot be in the specified location."""
-        if isinstance(
-            location, (DeckSlotLocation, AddressableAreaLocation)
-        ) and not labware_validation.validate_labware_can_be_ondeck(labware_definition):
-            raise errors.LabwareCannotSitOnDeckError(
-                f"{labware_definition.parameters.loadName} cannot sit in a slot by itself."
-            )
 
     def raise_if_labware_incompatible_with_plate_reader(
         self,

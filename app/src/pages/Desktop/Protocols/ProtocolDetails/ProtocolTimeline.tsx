@@ -27,7 +27,11 @@ export function ProtocolTimeline(): JSX.Element {
 
   return storedProtocol != null && storedProtocol.mostRecentAnalysis != null ? (
     <Box padding={SPACING.spacing16}>
-      <ProtocolTimelineScrubber analysis={storedProtocol.mostRecentAnalysis} />
+      <ProtocolTimelineScrubber
+        commands={storedProtocol.mostRecentAnalysis.commands}
+        analysis={storedProtocol.mostRecentAnalysis}
+        robotType={storedProtocol.mostRecentAnalysis.robotType}
+      />
     </Box>
   ) : (
     <Icon size="8rem" name="ot-spinner" spin />

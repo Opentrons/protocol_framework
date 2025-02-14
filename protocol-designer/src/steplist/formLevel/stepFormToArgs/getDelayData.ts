@@ -1,4 +1,4 @@
-import { getDefaultMmFromEdge } from '../../../organisms/TipPositionModal/utils'
+import { getDefaultMmFromBottom } from '../../../organisms/TipPositionModal/utils'
 import type { InnerDelayArgs } from '@opentrons/step-generation'
 import type {
   DelayCheckboxFields,
@@ -21,8 +21,9 @@ export function getMoveLiquidDelayData(
   if (typeof mmFromBottomFormValue === 'number') {
     mmFromBottom = mmFromBottomFormValue
   } else if (mmFromBottomFormValue === null) {
-    mmFromBottom = getDefaultMmFromEdge({
+    mmFromBottom = getDefaultMmFromBottom({
       name: mmFromBottomField,
+      wellDepthMm: 0 /* NOTE: `wellDepthMm` should not be used for delay offsets */,
     })
   }
   if (

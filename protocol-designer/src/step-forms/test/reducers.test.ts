@@ -274,18 +274,12 @@ describe('labwareInvariantProperties reducer', () => {
     const prevState = {
       labwareIdA1: {
         labwareDefURI: 'foo/a/1',
-        pythonName: 'mockPythonName',
-        displayCategory: 'wellPlate',
       },
       labwareIdA2: {
         labwareDefURI: 'foo/a/1',
-        pythonName: 'mockPythonName',
-        displayCategory: 'wellPlate',
       },
       labwareIdB: {
         labwareDefURI: 'foo/b/1',
-        pythonName: 'mockPythonName',
-        displayCategory: 'wellPlate',
       },
     }
     const result = labwareInvariantProperties(prevState, {
@@ -298,9 +292,6 @@ describe('labwareInvariantProperties reducer', () => {
           },
           version: 2,
           namespace: 'foo',
-          metadata: {
-            displayCategory: 'wellPlate',
-          },
         },
         isOverwriteMismatched: false,
       },
@@ -309,17 +300,13 @@ describe('labwareInvariantProperties reducer', () => {
       // changed
       labwareIdA1: {
         labwareDefURI: 'foo/a/2',
-        displayCategory: 'wellPlate',
       },
       labwareIdA2: {
         labwareDefURI: 'foo/a/2',
-        displayCategory: 'wellPlate',
       },
       // unchanged
       labwareIdB: {
         labwareDefURI: 'foo/b/1',
-        displayCategory: 'wellPlate',
-        pythonName: 'mockPythonName',
       },
     })
   })
@@ -425,7 +412,6 @@ describe('savedStepForms reducer: initial deck setup step', () => {
             duplicateLabwareId: newLabwareId,
             duplicateLabwareNickname: 'new labware nickname',
             slot: newSlot,
-            displayCategory: 'wellPlate',
           },
         },
       },
@@ -437,7 +423,6 @@ describe('savedStepForms reducer: initial deck setup step', () => {
             slot: newSlot,
             labwareDefURI: 'fixtures/foo/1',
             id: newLabwareId,
-            displayCategory: 'adapter',
           },
         },
       },
@@ -1101,6 +1086,22 @@ describe('savedStepForms reducer: initial deck setup step', () => {
         },
         expectedLabwareLocations: {
           [labwareOnModuleId]: '3',
+        },
+        expectedModuleLocations: {},
+      },
+      {
+        testName:
+          'delete occupied module in span7_8_10_11 slot -> labware goes into slot 7',
+        makeStateArgs: {
+          labwareLocationUpdate: {
+            [labwareOnModuleId]: moduleId,
+          },
+          moduleLocationUpdate: {
+            [moduleId]: SPAN7_8_10_11_SLOT,
+          },
+        },
+        expectedLabwareLocations: {
+          [labwareOnModuleId]: '7',
         },
         expectedModuleLocations: {},
       },

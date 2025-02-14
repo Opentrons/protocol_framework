@@ -29,24 +29,6 @@ export interface LoadLabwareRunTimeCommand
     LoadLabwareCreateCommand {
   result?: LoadLabwareResult
 }
-export interface LoadLidCreateCommand extends CommonCommandCreateInfo {
-  commandType: 'loadLid'
-  params: LoadLidParams
-}
-export interface LoadLidRunTimeCommand
-  extends CommonCommandRunTimeInfo,
-    LoadLidCreateCommand {
-  result?: LoadLidResult
-}
-export interface LoadLidStackCreateCommand extends CommonCommandCreateInfo {
-  commandType: 'loadLidStack'
-  params: LoadLidStackParams
-}
-export interface LoadLidStackRunTimeCommand
-  extends CommonCommandRunTimeInfo,
-    LoadLidStackCreateCommand {
-  result?: LoadLidStackResult
-}
 export interface ReloadLabwareCreateCommand extends CommonCommandCreateInfo {
   commandType: 'reloadLabware'
   params: { labwareId: string }
@@ -107,8 +89,6 @@ export type SetupRunTimeCommand =
   | LoadModuleRunTimeCommand
   | LoadLiquidRunTimeCommand
   | MoveLabwareRunTimeCommand
-  | LoadLidRunTimeCommand
-  | LoadLidStackRunTimeCommand
 
 export type SetupCreateCommand =
   | ConfigureNozzleLayoutCreateCommand
@@ -118,8 +98,6 @@ export type SetupCreateCommand =
   | LoadModuleCreateCommand
   | LoadLiquidCreateCommand
   | MoveLabwareCreateCommand
-  | LoadLidCreateCommand
-  | LoadLidStackCreateCommand
 
 export type LabwareLocation =
   | 'offDeck'
@@ -144,43 +122,6 @@ export type NonStackedLocation =
 export interface ModuleLocation {
   slotName: string
 }
-
-export interface OnLabwareLocationSequenceComponent {
-  kind: 'onLabware'
-  labwareId: string
-  lidId: string | null
-}
-
-export interface OnModuleLocationSequenceComponent {
-  kind: 'onModule'
-  moduleId: string
-}
-
-export interface OnAddressableAreaLocationSequenceComponent {
-  kind: 'onAddressableArea'
-  addressableAreaName: string
-}
-
-export interface NotOnDeckLocationSequenceComponent {
-  kind: 'notOnDeck'
-  logicalLocationName: 'offDeck' | 'systemLocation'
-}
-
-export interface OnCutoutFixtureLocationSequenceComponent {
-  kind: 'onCutoutFixture'
-  cutoutId: string
-  possibleCutoutFixtureIds: string[]
-}
-
-export type LocationSequenceComponent =
-  | OnLabwareLocationSequenceComponent
-  | OnModuleLocationSequenceComponent
-  | OnAddressableAreaLocationSequenceComponent
-  | NotOnDeckLocationSequenceComponent
-  | OnCutoutFixtureLocationSequenceComponent
-
-export type LabwareLocationSequence = LocationSequenceComponent[]
-
 export interface LoadPipetteParams {
   pipetteName: string
   pipetteId: string
@@ -203,12 +144,10 @@ interface LoadLabwareResult {
   // todo(mm, 2024-08-19): This does not match the server-returned offsetId field.
   // Confirm nothing client-side is trying to use this, then replace it with offsetId.
   offset: LabwareOffset
-  locationSequence?: LabwareLocationSequence
 }
 interface ReloadLabwareResult {
   labwareId: string
   offsetId?: string | null
-  locationSequence?: LabwareLocationSequence
 }
 
 export type LabwareMovementStrategy =
@@ -223,10 +162,8 @@ export interface MoveLabwareParams {
 }
 interface MoveLabwareResult {
   offsetId: string
-  eventualDestinationLocationSequence?: LabwareLocationSequence
-  immediateDestinationLocationSequence?: LabwareLocationSequence
-  originLocationSequence?: LabwareLocationSequence
 }
+
 interface LoadModuleParams {
   moduleId?: string
   location: ModuleLocation
@@ -265,34 +202,4 @@ interface NozzleConfigurationParams {
 export interface ConfigureNozzleLayoutParams {
   pipetteId: string
   configurationParams: NozzleConfigurationParams
-}
-
-interface LoadLidStackParams {
-  location: LabwareLocation
-  loadName: string
-  namespace: string
-  version: number
-  quantity: number
-}
-
-interface LoadLidStackResult {
-  stackLabwareId: string
-  labwareIds: string[]
-  definition: LabwareDefinition2
-  location: LabwareLocation
-  stackLocationSequence?: LabwareLocationSequence
-  locationSequences?: LabwareLocationSequence[]
-}
-
-interface LoadLidParams {
-  location: LabwareLocation
-  loadName: string
-  namespace: string
-  version: number
-}
-
-interface LoadLidResult {
-  labwareId: string
-  definition: LabwareDefinition2
-  locationSequence?: LabwareLocationSequence
 }

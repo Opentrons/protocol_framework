@@ -20,7 +20,7 @@ import {
   TYPOGRAPHY,
 } from '@opentrons/components'
 
-import { LANGUAGES, US_ENGLISH_DISPLAY_NAME } from '/app/i18n'
+import { LANGUAGES } from '/app/i18n'
 import { getLocalRobot, getRobotApiVersion } from '/app/redux/discovery'
 import { getRobotUpdateAvailable } from '/app/redux/robot-update'
 import { useErrorRecoverySettingsToggle } from '/app/resources/errorRecovery'
@@ -146,9 +146,7 @@ export function RobotSettingsList(props: RobotSettingsListProps): JSX.Element {
         <RobotSettingButton
           settingName={t('app_settings:language')}
           settingInfo={
-            currentLanguageOption != null
-              ? currentLanguageOption.name
-              : US_ENGLISH_DISPLAY_NAME
+            currentLanguageOption != null ? currentLanguageOption.name : ''
           }
           onClick={() => {
             setCurrentOption('LanguageSetting')

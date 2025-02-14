@@ -21,11 +21,11 @@ import {
   DIRECTION_ROW,
 } from '@opentrons/components'
 
-import type { LegacyLabwareOffsetCreateData } from '@opentrons/api-client'
+import type { LabwareOffsetCreateData } from '@opentrons/api-client'
 import type { LabwareDefinition2 } from '@opentrons/shared-data'
 
 export interface TerseOffsetTableProps {
-  offsets: LegacyLabwareOffsetCreateData[]
+  offsets: LabwareOffsetCreateData[]
   labwareDefinitions: LabwareDefinition2[]
 }
 

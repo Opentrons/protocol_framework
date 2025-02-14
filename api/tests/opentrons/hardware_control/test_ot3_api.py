@@ -1895,9 +1895,7 @@ async def test_move_axes(
     await ot3_hardware.move_axes(position=input_position)
     mock_check_motor.return_value = True
 
-    mock_move.assert_called_once_with(
-        target_position=expected_move_pos, speed=None, expect_stalls=False
-    )
+    mock_move.assert_called_once_with(target_position=expected_move_pos, speed=None)
 
 
 async def test_move_gripper_mount_without_gripper_attached(
@@ -1915,14 +1913,14 @@ async def test_move_expect_stall_flag(
 
     expected = HWStopCondition.stall if expect_stalls else HWStopCondition.none
 
-    await ot3_hardware.move_to(Mount.LEFT, Point(0, 0, 0), expect_stalls=expect_stalls)
+    await ot3_hardware.move_to(Mount.LEFT, Point(0, 0, 0), _expect_stalls=expect_stalls)
     mock_backend_move.assert_called_once()
     _, _, _, condition = mock_backend_move.call_args_list[0][0]
     assert condition == expected
 
     mock_backend_move.reset_mock()
     await ot3_hardware.move_rel(
-        Mount.LEFT, Point(10, 0, 0), expect_stalls=expect_stalls
+        Mount.LEFT, Point(10, 0, 0), _expect_stalls=expect_stalls
     )
     mock_backend_move.assert_called_once()
     _, _, _, condition = mock_backend_move.call_args_list[0][0]

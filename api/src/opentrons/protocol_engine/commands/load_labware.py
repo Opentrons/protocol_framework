@@ -1,5 +1,4 @@
 """Load labware command request, result, and implementation models."""
-
 from __future__ import annotations
 from typing import TYPE_CHECKING, Optional, Type, Any
 
@@ -23,7 +22,6 @@ from ..types import (
 )
 
 from .command import AbstractCommandImpl, BaseCommand, BaseCommandCreate, SuccessData
-from .labware_handling_common import LabwarePositionResultMixin
 from ..errors.error_occurrence import ErrorOccurrence
 from ..state.update_types import StateUpdate
 
@@ -75,12 +73,29 @@ class LoadLabwareParams(BaseModel):
     )
 
 
-class LoadLabwareResult(LabwarePositionResultMixin):
+class LoadLabwareResult(BaseModel):
     """Result data from the execution of a LoadLabware command."""
 
+    labwareId: str = Field(
+        ...,
+        description="An ID to reference this labware in subsequent commands.",
+    )
     definition: LabwareDefinition = Field(
         ...,
         description="The full definition data for this labware.",
+    )
+    offsetId: Optional[str] = Field(
+        # Default `None` instead of `...` so this field shows up as non-required in
+        # OpenAPI. The server is allowed to omit it or make it null.
+        None,
+        description=(
+            "An ID referencing the labware offset that will apply"
+            " to the newly-placed labware."
+            " This offset will be in effect until the labware is moved"
+            " with a `moveLabware` command."
+            " Null or undefined means no offset applies,"
+            " so the default of (0, 0, 0) will be used."
+        ),
     )
 
 
@@ -211,19 +226,11 @@ class LoadLabwareImplementation(
                 module_id=params.location.moduleId,
                 labware_id=loaded_labware.labware_id,
             )
-
-        self._state_view.labware.raise_if_labware_cannot_be_ondeck(
-            location=params.location, labware_definition=loaded_labware.definition
-        )
-
         return SuccessData(
             public=LoadLabwareResult(
                 labwareId=loaded_labware.labware_id,
                 definition=loaded_labware.definition,
                 offsetId=loaded_labware.offsetId,
-                locationSequence=self._state_view.geometry.get_predicted_location_sequence(
-                    params.location
-                ),
             ),
             state_update=state_update,
         )

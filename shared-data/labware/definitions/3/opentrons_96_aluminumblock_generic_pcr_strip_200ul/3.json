@@ -17,8 +17,8 @@
   "version": 3,
   "namespace": "opentrons",
   "metadata": {
-    "displayName": "Opentrons 96 Well Aluminum Block with Generic PCR Strip 200 µL",
-    "displayVolumeUnits": "µL",
+    "displayName": "Opentrons 96 Well Aluminum Block with Generic PCR Strip 200 \u00b5L",
+    "displayVolumeUnits": "\u00b5L",
     "displayCategory": "aluminumBlock",
     "tags": []
   },

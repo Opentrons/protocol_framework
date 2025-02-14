@@ -22,7 +22,11 @@ import { useCleanupRecoveryState } from './useCleanupRecoveryState'
 import { useFailedPipetteUtils } from './useFailedPipetteUtils'
 import { getRunningStepCountsFrom } from '/app/resources/protocols'
 
-import type { LabwareDefinition2, RobotType } from '@opentrons/shared-data'
+import type {
+  LabwareDefinition2,
+  LabwareDefinitionsByUri,
+  RobotType,
+} from '@opentrons/shared-data'
 import type { IRecoveryMap, RouteStep, RecoveryRoute } from '../types'
 import type { ErrorRecoveryFlowsProps } from '..'
 import type { UseRouteUpdateActionsResult } from './useRouteUpdateActions'
@@ -50,6 +54,7 @@ export type ERUtilsProps = Omit<ErrorRecoveryFlowsProps, 'failedCommand'> & {
   failedCommand: ReturnType<typeof useRetainedFailedCommandBySource>
   isActiveUser: UseRecoveryTakeoverResult['isActiveUser']
   allRunDefs: LabwareDefinition2[]
+  labwareDefinitionsByUri: LabwareDefinitionsByUri | null
 }
 
 export interface ERUtilsResults {
@@ -85,7 +90,7 @@ export function useERUtils({
   isActiveUser,
   allRunDefs,
   unvalidatedFailedCommand,
-  runLwDefsByUri,
+  labwareDefinitionsByUri,
 }: ERUtilsProps): ERUtilsResults {
   const { data: attachedInstruments } = useInstrumentsQuery()
   const { data: runRecord } = useNotifyRunQuery(runId)
@@ -180,7 +185,7 @@ export function useERUtils({
     runRecord,
     protocolAnalysis,
     failedLabwareUtils,
-    runLwDefsByUri,
+    labwareDefinitionsByUri,
   })
 
   const recoveryActionMutationUtils = useRecoveryActionMutation(

@@ -74,7 +74,7 @@ class UpdatePositionEstimators(
 
     commandType: UpdatePositionEstimatorsCommandType = "unsafe/updatePositionEstimators"
     params: UpdatePositionEstimatorsParams
-    result: Optional[UpdatePositionEstimatorsResult] = None
+    result: Optional[UpdatePositionEstimatorsResult]
 
     _ImplementationCls: Type[
         UpdatePositionEstimatorsImplementation

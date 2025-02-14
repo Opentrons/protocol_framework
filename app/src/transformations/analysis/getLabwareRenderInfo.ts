@@ -23,8 +23,9 @@ export const getLabwareRenderInfo = (
   deckDef: DeckDefinition
 ): LabwareRenderInfoById =>
   protocolData.commands
-    .filter((command): command is LoadLabwareRunTimeCommand =>
-      ['loadLabware', 'loadLid'].includes(command.commandType)
+    .filter(
+      (command): command is LoadLabwareRunTimeCommand =>
+        command.commandType === 'loadLabware'
     )
     .reduce((acc, command) => {
       const labwareId = command.result?.labwareId

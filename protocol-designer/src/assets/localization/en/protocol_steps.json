@@ -107,8 +107,6 @@
   "speed": "Speed",
   "starting_deck": "Starting deck",
   "step_substeps": "{{stepType}} details",
-  "submerge": "Submerge",
-  "submerge_speed": "Submerge speed",
   "temperature": "Temperature",
   "temperature_module": {
     "active": "<semiBoldText>{{module}}</semiBoldText><text>set to</text><tag/>",
@@ -140,7 +138,7 @@
   "tiprack": "Tiprack",
   "tip_handling": "Tip handling",
   "tip_position": "{{prefix}} tip position",
-  "touch_tip_position": "Touch tip position from top",
+  "touch_tip_position": "Touch tip position from bottom",
   "valid_range": "Valid range between {{min}} - {{max}} {{unit}}",
   "view_details": "View details",
   "volume_per_well": "Volume per well",

@@ -164,19 +164,19 @@ const ProtocolHeader = ({
 }
 
 const protocolSectionTabOptions = [
-  'summary',
-  'parameters',
-  'hardware',
-  'labware',
-  'liquids',
-  'deck',
+  'Summary',
+  'Parameters',
+  'Hardware',
+  'Labware',
+  'Liquids',
+  'Deck',
 ] as const
 const protocolSectionTabOptionsWithoutParameters = [
-  'summary',
-  'hardware',
-  'labware',
-  'liquids',
-  'deck',
+  'Summary',
+  'Hardware',
+  'Labware',
+  'Liquids',
+  'Deck',
 ] as const
 
 type TabOption =
@@ -192,12 +192,11 @@ const ProtocolSectionTabs = ({
   currentOption,
   setCurrentOption,
 }: ProtocolSectionTabsProps): JSX.Element => {
-  const { t, i18n } = useTranslation('protocol_details')
   return (
     <Flex gridGap={SPACING.spacing8}>
       <Tabs
         tabs={protocolSectionTabOptions.map(option => ({
-          text: i18n.format(t(option), 'capitalize'),
+          text: option,
           onClick: () => {
             setCurrentOption(option)
           },
@@ -267,7 +266,7 @@ const ProtocolSectionContent = ({
 
   let protocolSection: JSX.Element | null = null
   switch (currentOption) {
-    case 'summary':
+    case 'Summary':
       protocolSection = (
         <Summary
           author={protocolData.data.metadata.author ?? null}
@@ -276,26 +275,26 @@ const ProtocolSectionContent = ({
         />
       )
       break
-    case 'parameters':
+    case 'Parameters':
       protocolSection = <Parameters protocolId={protocolId} />
       break
-    case 'hardware':
+    case 'Hardware':
       protocolSection = <Hardware protocolId={protocolId} />
       break
-    case 'labware':
+    case 'Labware':
       protocolSection = <Labware protocolId={protocolId} />
       break
-    case 'liquids':
+    case 'Liquids':
       protocolSection = <Liquids protocolId={protocolId} />
       break
-    case 'deck':
+    case 'Deck':
       protocolSection = <Deck protocolId={protocolId} />
       break
   }
   return (
     <Flex
       paddingTop={SPACING.spacing32}
-      justifyContent={currentOption === 'deck' ? JUSTIFY_CENTER : undefined}
+      justifyContent={currentOption === 'Deck' ? JUSTIFY_CENTER : undefined}
     >
       {protocolSection}
     </Flex>

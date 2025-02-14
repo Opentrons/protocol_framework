@@ -15,9 +15,9 @@ export default mergeConfig(
       exclude: [...configDefaults.exclude, '**/node_modules/**', '**/dist/**'],
       setupFiles: ['./setup-vitest.mts'],
       coverage: {
-        exclude: ['**/node_modules/**', '**/dist/**', '**/__tests__/**', 'protocol-designer/cypress/**/*', 'labware-library/cypress/**/*', ...configDefaults.exclude],
+        exclude: ['**/node_modules/**', '**/dist/**', '**/__tests__/**'],
         provider: 'v8',
-        reporter: ['text', 'json', 'html', 'lcov'],
+        reporter: ['text', 'json', 'html'],
       },
     },
     resolve: {

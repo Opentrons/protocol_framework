@@ -120,7 +120,7 @@ class GetNextTip(BaseCommand[GetNextTipParams, GetNextTipResult, ErrorOccurrence
 
     commandType: GetNextTipCommandType = "getNextTip"
     params: GetNextTipParams
-    result: Optional[GetNextTipResult] = None
+    result: Optional[GetNextTipResult]
 
     _ImplementationCls: Type[GetNextTipImplementation] = GetNextTipImplementation
 

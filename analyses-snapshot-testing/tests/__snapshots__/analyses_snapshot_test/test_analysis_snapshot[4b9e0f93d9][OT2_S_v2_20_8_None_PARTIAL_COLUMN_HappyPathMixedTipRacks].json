@@ -1160,20 +1160,7 @@
             }
           }
         },
-        "labwareId": "UUID",
-        "locationSequence": [
-          {
-            "addressableAreaName": "7",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutout7",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "singleStandardSlot"
-            ]
-          }
-        ]
+        "labwareId": "UUID"
       },
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
@@ -2325,20 +2312,7 @@
             }
           }
         },
-        "labwareId": "UUID",
-        "locationSequence": [
-          {
-            "addressableAreaName": "8",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutout8",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "singleStandardSlot"
-            ]
-          }
-        ]
+        "labwareId": "UUID"
       },
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
@@ -3516,20 +3490,7 @@
             }
           }
         },
-        "labwareId": "UUID",
-        "locationSequence": [
-          {
-            "addressableAreaName": "2",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutout2",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "singleStandardSlot"
-            ]
-          }
-        ]
+        "labwareId": "UUID"
       },
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
@@ -3775,20 +3736,7 @@
             }
           }
         },
-        "labwareId": "UUID",
-        "locationSequence": [
-          {
-            "addressableAreaName": "1",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutout1",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "singleStandardSlot"
-            ]
-          }
-        ]
+        "labwareId": "UUID"
       },
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
@@ -3881,20 +3829,7 @@
             }
           }
         },
-        "labwareId": "UUID",
-        "locationSequence": [
-          {
-            "addressableAreaName": "3",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutout3",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "singleStandardSlot"
-            ]
-          }
-        ]
+        "labwareId": "UUID"
       },
       "startedAt": "TIMESTAMP",
       "status": "succeeded"

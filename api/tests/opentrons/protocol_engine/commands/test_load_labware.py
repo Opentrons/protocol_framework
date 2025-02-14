@@ -1,5 +1,4 @@
 """Test load labware commands."""
-
 import inspect
 from typing import Optional
 from unittest.mock import sentinel
@@ -24,10 +23,6 @@ from opentrons.protocol_engine.types import (
     ModuleLocation,
     ModuleModel,
     LoadedModule,
-    OnLabwareLocationSequenceComponent,
-    OnModuleLocationSequenceComponent,
-    OnAddressableAreaLocationSequenceComponent,
-    NotOnDeckLocationSequenceComponent,
     OFF_DECK_LOCATION,
 )
 from opentrons.protocol_engine.execution import LoadedLabwareData, EquipmentHandler
@@ -89,15 +84,6 @@ async def test_load_labware_on_slot_or_addressable_area(
         version=1,
         displayName=display_name,
     )
-    decoy.when(
-        state_view.geometry.get_predicted_location_sequence(location)
-    ).then_return(
-        [
-            OnAddressableAreaLocationSequenceComponent(
-                addressableAreaName=expected_addressable_area_name,
-            )
-        ]
-    )
 
     decoy.when(state_view.geometry.ensure_location_not_occupied(location)).then_return(
         sentinel.validated_empty_location
@@ -129,11 +115,6 @@ async def test_load_labware_on_slot_or_addressable_area(
             labwareId="labware-id",
             definition=well_plate_def,
             offsetId="labware-offset-id",
-            locationSequence=[
-                OnAddressableAreaLocationSequenceComponent(
-                    addressableAreaName=expected_addressable_area_name,
-                )
-            ],
         ),
         state_update=StateUpdate(
             loaded_labware=LoadedLabwareUpdate(
@@ -209,18 +190,6 @@ async def test_load_labware_on_labware(
             offsetId="labware-offset-id",
         )
     )
-    decoy.when(
-        state_view.geometry.get_predicted_location_sequence(
-            OnLabwareLocation(labwareId="other-labware-id")
-        )
-    ).then_return(
-        [
-            OnLabwareLocationSequenceComponent(
-                labwareId="other-labware-id", lidId=None
-            ),
-            OnAddressableAreaLocationSequenceComponent(addressableAreaName="A3"),
-        ]
-    )
 
     decoy.when(
         labware_validation.validate_definition_is_labware(well_plate_def)
@@ -232,12 +201,6 @@ async def test_load_labware_on_labware(
             labwareId="labware-id",
             definition=well_plate_def,
             offsetId="labware-offset-id",
-            locationSequence=[
-                OnLabwareLocationSequenceComponent(
-                    labwareId="other-labware-id", lidId=None
-                ),
-                OnAddressableAreaLocationSequenceComponent(addressableAreaName="A3"),
-            ],
         ),
         state_update=StateUpdate(
             loaded_labware=LoadedLabwareUpdate(
@@ -318,16 +281,6 @@ async def test_load_labware_in_flex_stacker(
             hopper_labware_ids=[],
         )
     )
-    decoy.when(
-        state_view.geometry.get_predicted_location_sequence(
-            ModuleLocation(moduleId="some-module-id")
-        )
-    ).then_return(
-        [
-            OnModuleLocationSequenceComponent(moduleId="some-module-id"),
-            NotOnDeckLocationSequenceComponent(logicalLocationName=OFF_DECK_LOCATION),
-        ]
-    )
 
     decoy.when(
         await equipment.load_labware(
@@ -352,12 +305,6 @@ async def test_load_labware_in_flex_stacker(
             labwareId="labware-id",
             definition=well_plate_def,
             offsetId="labware-offset-id",
-            locationSequence=[
-                OnModuleLocationSequenceComponent(moduleId="some-module-id"),
-                NotOnDeckLocationSequenceComponent(
-                    logicalLocationName=OFF_DECK_LOCATION
-                ),
-            ],
         ),
         state_update=StateUpdate(
             loaded_labware=LoadedLabwareUpdate(

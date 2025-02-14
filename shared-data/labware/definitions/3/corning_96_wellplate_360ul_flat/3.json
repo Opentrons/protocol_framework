@@ -51,9 +51,9 @@
     ]
   },
   "metadata": {
-    "displayName": "Corning 96 Well Plate 360 µL Flat",
+    "displayName": "Corning 96 Well Plate 360 \u00b5L Flat",
     "displayCategory": "wellPlate",
-    "displayVolumeUnits": "µL",
+    "displayVolumeUnits": "\u00b5L",
     "tags": []
   },
   "dimensions": {

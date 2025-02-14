@@ -36,11 +36,7 @@ export function ConfirmSetupStepsCompleteModal({
 
   return (
     <OddModal header={modalHeader} onOutsideClick={onCloseClick}>
-      <Flex
-        flexDirection={DIRECTION_COLUMN}
-        gridGap={SPACING.spacing32}
-        width="100%"
-      >
+      <Flex flexDirection={DIRECTION_COLUMN} gridGap={SPACING.spacing32}>
         <LegacyStyledText as="p">
           {t('you_havent_confirmed', {
             missingSteps: new Intl.ListFormat('en', {

@@ -106,12 +106,12 @@ def patch_mock_pipette_movement_safety_check(
 
 
 @pytest.fixture(autouse=True)
-def patch_mock_check_valid_liquid_class_volume_parameters(
+def patch_mock_check_valid_volume_parameters(
     decoy: Decoy, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    """Replace tx_commons.check_valid_liquid_class_volume_parameters() with a mock."""
-    mock = decoy.mock(func=tx_commons.check_valid_liquid_class_volume_parameters)
-    monkeypatch.setattr(tx_commons, "check_valid_liquid_class_volume_parameters", mock)
+    """Replace tx_commons.check_valid_volume_parameters() with a mock."""
+    mock = decoy.mock(func=tx_commons.check_valid_volume_parameters)
+    monkeypatch.setattr(tx_commons, "check_valid_volume_parameters", mock)
 
 
 @pytest.fixture(autouse=True)
@@ -187,60 +187,32 @@ def test_pipette_id(subject: InstrumentCore) -> None:
     assert subject.pipette_id == "abc123"
 
 
-@pytest.mark.parametrize(
-    "version",
-    [
-        APIVersion(2, 15),
-        APIVersion(2, 17),
-        APIVersion(2, 20),
-        APIVersion(2, 22),
-    ],
-)
-def test_get_pipette_name_old(
-    decoy: Decoy,
-    mock_engine_client: EngineClient,
-    mock_protocol_core: ProtocolCore,
-    subject: InstrumentCore,
-    version: APIVersion,
+def test_get_pipette_name(
+    decoy: Decoy, mock_engine_client: EngineClient, subject: InstrumentCore
 ) -> None:
     """It should get the pipette's load name."""
-    decoy.when(mock_protocol_core.api_version).then_return(version)
     decoy.when(mock_engine_client.state.pipettes.get("abc123")).then_return(
         LoadedPipette.model_construct(pipetteName=PipetteNameType.P300_SINGLE)  # type: ignore[call-arg]
     )
-    assert subject.get_pipette_name() == "p300_single"
-    decoy.when(mock_engine_client.state.pipettes.get("abc123")).then_return(
-        LoadedPipette.model_construct(pipetteName=PipetteNameType.P1000_96)  # type: ignore[call-arg]
-    )
-    assert subject.get_pipette_name() == "p1000_96"
-    decoy.when(mock_engine_client.state.pipettes.get("abc123")).then_return(
-        LoadedPipette.model_construct(pipetteName=PipetteNameType.P50_SINGLE_FLEX)  # type: ignore[call-arg]
-    )
-    assert subject.get_pipette_name() == "p50_single_flex"
+
+    result = subject.get_pipette_name()
+
+    assert result == "p300_single"
 
 
-@pytest.mark.parametrize("version", versions_at_or_above(APIVersion(2, 23)))
-def test_get_pipette_name_new(
-    decoy: Decoy,
-    mock_engine_client: EngineClient,
-    mock_protocol_core: ProtocolCore,
-    subject: InstrumentCore,
-    version: APIVersion,
+def test_get_pipette_load_name(
+    decoy: Decoy, mock_engine_client: EngineClient, subject: InstrumentCore
 ) -> None:
     """It should get the pipette's API-specific load name."""
-    decoy.when(mock_protocol_core.api_version).then_return(version)
     decoy.when(mock_engine_client.state.pipettes.get("abc123")).then_return(
         LoadedPipette.model_construct(pipetteName=PipetteNameType.P300_SINGLE)  # type: ignore[call-arg]
     )
-    assert subject.get_pipette_name() == "p300_single"
+    assert subject.get_load_name() == "p300_single"
+
     decoy.when(mock_engine_client.state.pipettes.get("abc123")).then_return(
         LoadedPipette.model_construct(pipetteName=PipetteNameType.P1000_96)  # type: ignore[call-arg]
     )
-    assert subject.get_pipette_name() == "flex_96channel_1000"
-    decoy.when(mock_engine_client.state.pipettes.get("abc123")).then_return(
-        LoadedPipette.model_construct(pipetteName=PipetteNameType.P50_SINGLE_FLEX)  # type: ignore[call-arg]
-    )
-    assert subject.get_pipette_name() == "flex_1channel_50"
+    assert subject.get_load_name() == "flex_96channel_1000"
 
 
 def test_get_mount(
@@ -1155,49 +1127,6 @@ def test_get_display_name(
     assert subject.get_display_name() == "display-name"
 
 
-@pytest.mark.parametrize("tip", [50, 200, 1000])
-def test_get_minimum_liquid_sense_height(
-    decoy: Decoy, subject: InstrumentCore, mock_engine_client: EngineClient, tip: int
-) -> None:
-    """Make sure get minimum liquid sense height returns the appropriate minHeight for its tip."""
-    dummy_lld_settings = {
-        "t50": {"minHeight": 1.0, "minVolume": 11},
-        "t200": {"minHeight": 2.0, "minVolume": 22},
-        "t1000": {"minHeight": 3.0, "minVolume": 33},
-    }
-    decoy.when(
-        mock_engine_client.state.pipettes.get_pipette_lld_settings(subject.pipette_id)
-    ).then_return(dummy_lld_settings)
-    decoy.when(
-        mock_engine_client.state.pipettes.get_attached_tip("abc123")
-    ).then_return(TipGeometry(length=1, diameter=2, volume=tip))
-    assert (
-        subject.get_minimum_liquid_sense_height()
-        == dummy_lld_settings[f"t{tip}"]["minHeight"]
-    )
-
-
-def test_get_minimum_liquid_sense_height_requires_tip_presence(
-    decoy: Decoy,
-    subject: InstrumentCore,
-    mock_engine_client: EngineClient,
-) -> None:
-    """Make sure get_minimum_liquid_sense_height propagates a TipNotAttachedError."""
-    dummy_lld_settings = {
-        "t50": {"minHeight": 1.0, "minVolume": 11},
-        "t200": {"minHeight": 2.0, "minVolume": 22},
-        "t1000": {"minHeight": 3.0, "minVolume": 33},
-    }
-    decoy.when(
-        mock_engine_client.state.pipettes.get_pipette_lld_settings(subject.pipette_id)
-    ).then_return(dummy_lld_settings)
-    decoy.when(
-        mock_engine_client.state.pipettes.get_attached_tip("abc123")
-    ).then_return(None)
-    with pytest.raises(TipNotAttachedError):
-        subject.get_minimum_liquid_sense_height()
-
-
 def test_get_min_volume(
     decoy: Decoy,
     subject: InstrumentCore,
@@ -1742,14 +1671,11 @@ def test_liquid_probe_with_recovery(
     )
 
 
-@pytest.mark.parametrize("version", versions_at_or_above(APIVersion(2, 23)))
 def test_load_liquid_class(
     decoy: Decoy,
     mock_engine_client: EngineClient,
-    mock_protocol_core: ProtocolCore,
     subject: InstrumentCore,
     minimal_liquid_class_def2: LiquidClassSchemaV1,
-    version: APIVersion,
 ) -> None:
     """It should send the load liquid class command to the engine."""
     sample_aspirate_data = minimal_liquid_class_def2.byPipette[0].byTipType[0].aspirate
@@ -1760,7 +1686,6 @@ def test_load_liquid_class(
         minimal_liquid_class_def2.byPipette[0].byTipType[0].multiDispense
     )
 
-    decoy.when(mock_protocol_core.api_version).then_return(version)
     test_liq_class = decoy.mock(cls=LiquidClass)
     test_transfer_props = decoy.mock(cls=TransferProperties)
 
@@ -1805,7 +1730,7 @@ def test_load_liquid_class(
     assert result == "liquid-class-id"
 
 
-def test_aspirate_liquid_class_for_transfer(
+def test_aspirate_liquid_class(
     decoy: Decoy,
     mock_engine_client: EngineClient,
     subject: InstrumentCore,
@@ -1859,102 +1784,6 @@ def test_aspirate_liquid_class_for_transfer(
         mock_transfer_components_executor.retract_after_aspiration(volume=123),
     )
     assert result == [LiquidAndAirGapPair(air_gap=222, liquid=111)]
-
-
-def test_aspirate_liquid_class_for_consolidate(
-    decoy: Decoy,
-    mock_engine_client: EngineClient,
-    subject: InstrumentCore,
-    minimal_liquid_class_def2: LiquidClassSchemaV1,
-    mock_transfer_components_executor: TransferComponentsExecutor,
-) -> None:
-    """It should call aspirate sub-steps execution for a consolidate based on liquid class."""
-    source_well = decoy.mock(cls=WellCore)
-    source_location = Location(Point(1, 2, 3), labware=None)
-    test_liquid_class = LiquidClass.create(minimal_liquid_class_def2)
-    test_transfer_properties = test_liquid_class.get_for(
-        "flex_1channel_50", "opentrons_flex_96_tiprack_50ul"
-    )
-    decoy.when(
-        transfer_components_executor.absolute_point_from_position_reference_and_offset(
-            well=source_well,
-            position_reference=PositionReference.WELL_BOTTOM,
-            offset=Coordinate(x=0, y=0, z=-5),
-        )
-    ).then_return(Point(1, 2, 3))
-    decoy.when(
-        transfer_components_executor.TransferComponentsExecutor(
-            instrument_core=subject,
-            transfer_properties=test_transfer_properties,
-            target_location=Location(Point(1, 2, 3), labware=None),
-            target_well=source_well,
-            transfer_type=TransferType.MANY_TO_ONE,
-            tip_state=TipState(),
-        )
-    ).then_return(mock_transfer_components_executor)
-    decoy.when(
-        mock_transfer_components_executor.tip_state.last_liquid_and_air_gap_in_tip
-    ).then_return(LiquidAndAirGapPair(liquid=111, air_gap=222))
-    result = subject.aspirate_liquid_class(
-        volume=123,
-        source=(source_location, source_well),
-        transfer_properties=test_transfer_properties,
-        transfer_type=TransferType.MANY_TO_ONE,
-        tip_contents=[],
-    )
-    decoy.verify(
-        mock_transfer_components_executor.submerge(
-            submerge_properties=test_transfer_properties.aspirate.submerge,
-        ),
-        mock_transfer_components_executor.aspirate_and_wait(volume=123),
-        mock_transfer_components_executor.retract_after_aspiration(volume=123),
-    )
-    decoy.verify(
-        mock_transfer_components_executor.mix(
-            mix_properties=test_transfer_properties.aspirate.mix,
-            last_dispense_push_out=False,
-        ),
-        times=0,
-    )
-    decoy.verify(mock_transfer_components_executor.pre_wet(volume=123), times=0)
-    assert result == [LiquidAndAirGapPair(air_gap=222, liquid=111)]
-
-
-def test_aspirate_liquid_class_raises_for_more_than_max_volume(
-    decoy: Decoy,
-    mock_engine_client: EngineClient,
-    subject: InstrumentCore,
-    minimal_liquid_class_def2: LiquidClassSchemaV1,
-    mock_transfer_components_executor: TransferComponentsExecutor,
-) -> None:
-    """It should call aspirate sub-steps execution based on liquid class."""
-    source_well = decoy.mock(cls=WellCore)
-    source_location = Location(Point(1, 2, 3), labware=None)
-    test_liquid_class = LiquidClass.create(minimal_liquid_class_def2)
-    test_transfer_properties = test_liquid_class.get_for(
-        "flex_1channel_50", "opentrons_flex_96_tiprack_50ul"
-    )
-    decoy.when(
-        mock_engine_client.state.pipettes.get_working_volume("abc123")
-    ).then_return(100)
-    decoy.when(
-        tx_commons.check_valid_liquid_class_volume_parameters(
-            aspirate_volume=123,
-            disposal_volume=0,
-            air_gap=test_transfer_properties.aspirate.retract.air_gap_by_volume.get_for_volume(
-                123
-            ),
-            max_volume=100,
-        )
-    ).then_raise(ValueError("Oh oh!"))
-    with pytest.raises(ValueError, match="Oh oh!"):
-        subject.aspirate_liquid_class(
-            volume=123,
-            source=(source_location, source_well),
-            transfer_properties=test_transfer_properties,
-            transfer_type=TransferType.ONE_TO_ONE,
-            tip_contents=[],
-        )
 
 
 def test_dispense_liquid_class(

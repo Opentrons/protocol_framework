@@ -1,7 +1,7 @@
 import path from 'path'
 import glob from 'glob'
 import Ajv from 'ajv'
-import { describe, expect, it, test } from 'vitest'
+import { describe, expect, it, beforeAll } from 'vitest'
 
 import { labwareSchemaV1 } from '../schema'
 import type { LabwareDefinition1 } from '../types'
@@ -57,25 +57,26 @@ describe('test the schema against a minimalist fixture', () => {
   })
 })
 
-describe('test all definitions', () => {
+describe('test schemas of all definitions', () => {
   const labwarePaths = glob.sync(DEFINITIONS_GLOB_PATTERN, GLOB_OPTIONS)
 
-  test("definition paths didn't break, which would give false positives", () => {
+  beforeAll(() => {
+    // Make sure definitions path didn't break, which would give you false positives
     expect(labwarePaths.length).toBeGreaterThan(0)
   })
 
-  describe.each(labwarePaths)('%s', labwarePath => {
+  labwarePaths.forEach(labwarePath => {
     const filename = path.parse(labwarePath).name
     const labwareDef = require(labwarePath) as LabwareDefinition1
 
-    it('validates against the schema', () => {
+    it(filename, () => {
       const valid = validate(labwareDef)
       const validationErrors = validate.errors
       expect(validationErrors).toBe(null)
       expect(valid).toBe(true)
     })
 
-    it(`has a file name that matches metadata.name: ${filename}`, () => {
+    it(`file name matches metadata.name: ${filename}`, () => {
       expect(labwareDef.metadata.name).toEqual(filename)
     })
   })

@@ -36,10 +36,7 @@ def get_run_data(one_run: Any, ip: str) -> Dict[str, Any]:
         params={"cursor": 0, "pageLength": 0},
     )
     data = response.json()
-    try:
-        command_count = data["meta"]["totalLength"]
-    except KeyError:
-        command_count = 0
+    command_count = data["meta"]["totalLength"]
     page_length = 100
     commands = list()
     run = dict()

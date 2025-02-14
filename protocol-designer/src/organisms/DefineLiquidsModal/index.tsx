@@ -40,13 +40,23 @@ import { swatchColors } from './swatchColors'
 import type { ColorResult, RGBColor } from 'react-color'
 import type { ThunkDispatch } from 'redux-thunk'
 import type { BaseState } from '../../types'
-import type { Ingredient } from '@opentrons/step-generation'
+import type { LiquidGroup } from '../../labware-ingred/types'
+
+interface LiquidEditFormValues {
+  name: string
+  displayColor: string
+  description: string
+  liquidClass: string
+  serialize: boolean
+  [key: string]: unknown
+}
 
 const liquidEditFormSchema: any = Yup.object().shape({
-  displayName: Yup.string().required('liquid name is required'),
+  name: Yup.string().required('liquid name is required'),
   displayColor: Yup.string(),
   description: Yup.string(),
   liquidClass: Yup.string(),
+  serialize: Yup.boolean(),
 })
 
 interface DefineLiquidsModalProps {
@@ -90,10 +100,11 @@ export function DefineLiquidsModal(
     onClose()
   }
 
-  const saveForm = (formData: Ingredient): void => {
+  const saveForm = (formData: LiquidGroup): void => {
     dispatch(
       labwareIngredActions.editLiquidGroup({
         ...formData,
+        liquidGroupId,
       })
     )
     onClose()
@@ -103,12 +114,12 @@ export function DefineLiquidsModal(
     liquidGroupId != null ? allIngredientGroupFields[liquidGroupId] : null
   const liquidId = selectedLiquid.liquidGroupId ?? nextGroupId
 
-  const initialValues: Ingredient = {
-    displayName: selectedIngredFields?.displayName ?? '',
+  const initialValues: LiquidEditFormValues = {
+    name: selectedIngredFields?.name ?? '',
     displayColor: selectedIngredFields?.displayColor ?? swatchColors(liquidId),
     liquidClass: selectedIngredFields?.liquidClass ?? '',
     description: selectedIngredFields?.description ?? '',
-    liquidGroupId: liquidGroupId ?? nextGroupId,
+    serialize: selectedIngredFields?.serialize ?? false,
   }
 
   const {
@@ -118,24 +129,23 @@ export function DefineLiquidsModal(
     watch,
     setValue,
     register,
-  } = useForm<Ingredient>({
+  } = useForm<LiquidEditFormValues>({
     defaultValues: initialValues,
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     resolver: yupResolver(liquidEditFormSchema),
   })
-  const name = watch('displayName')
+  const name = watch('name')
   const color = watch('displayColor')
   const liquidClass = watch('liquidClass')
   const { errors, touchedFields } = formState
 
-  const handleLiquidEdits = (values: Ingredient): void => {
+  const handleLiquidEdits = (values: LiquidEditFormValues): void => {
     saveForm({
-      displayName: values.displayName,
+      name: values.name,
       displayColor: values.displayColor,
-      liquidClass:
-        values.liquidClass !== '' ? values.liquidClass ?? undefined : undefined,
+      liquidClass: values.liquidClass !== '' ? values.liquidClass : null,
       description: values.description !== '' ? values.description : null,
-      liquidGroupId: values.liquidGroupId,
+      serialize: values.serialize ?? false,
     })
   }
 
@@ -173,7 +183,7 @@ export function DefineLiquidsModal(
                 desktopStyle="bodyLargeSemiBold"
                 css={LINE_CLAMP_TEXT_STYLE(1)}
               >
-                {initialValues.displayName}
+                {initialValues.name}
               </StyledText>
             </Flex>
           ) : (
@@ -230,13 +240,13 @@ export function DefineLiquidsModal(
                   </StyledText>
                   <Controller
                     control={control}
-                    name="displayName"
+                    name="name"
                     render={({ field }) => (
                       <InputField
-                        name="displayName"
+                        name="name"
                         error={
-                          touchedFields.displayName != null
-                            ? errors.displayName?.message
+                          touchedFields.name != null
+                            ? errors.name?.message
                             : null
                         }
                         value={name}
@@ -299,6 +309,21 @@ export function DefineLiquidsModal(
                     size="medium"
                   />
                 </Flex>
+                {/* NOTE: this is for serialization if we decide to add it back */}
+                {/* <Controller
+            control={control}
+            name="serialize"
+            render={({ field }) => (
+              <DeprecatedCheckboxField
+                name="serialize"
+                label={t('liquid_edit.serialize')}
+                value={field.value}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                  field.onChange(e)
+                }}
+              />
+            )}
+          /> */}
               </Flex>
               <Flex
                 justifyContent={
@@ -325,7 +350,7 @@ export function DefineLiquidsModal(
                 <PrimaryButton
                   type="submit"
                   disabled={
-                    errors.displayName != null ||
+                    errors.name != null ||
                     name === '' ||
                     errors.displayColor != null
                   }

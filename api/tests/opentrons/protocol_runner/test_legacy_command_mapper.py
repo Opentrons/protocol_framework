@@ -1,5 +1,4 @@
 """Tests for the PythonAndLegacyRunner's LegacyCommandMapper."""
-
 import inspect
 from datetime import datetime
 from typing import cast

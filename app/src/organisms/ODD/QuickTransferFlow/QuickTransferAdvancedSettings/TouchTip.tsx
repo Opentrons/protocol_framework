@@ -47,12 +47,10 @@ export function TouchTip(props: TouchTipProps): JSX.Element {
       : state.touchTipDispense != null
   )
   const [currentStep, setCurrentStep] = useState<number>(1)
-  const touchTipAspirate =
-    state.touchTipAspirate != null ? state.touchTipAspirate.toString() : null
-  const touchTipDispense =
-    state.touchTipDispense != null ? state.touchTipDispense.toString() : null
-  const [position, setPosition] = useState<string | null>(
-    kind === 'aspirate' ? touchTipAspirate : touchTipDispense
+  const [position, setPosition] = useState<number | null>(
+    kind === 'aspirate'
+      ? state.touchTipAspirate ?? null
+      : state.touchTipDispense ?? null
   )
 
   const touchTipAction =
@@ -96,10 +94,7 @@ export function TouchTip(props: TouchTipProps): JSX.Element {
         setCurrentStep(2)
       }
     } else if (currentStep === 2) {
-      dispatch({
-        type: touchTipAction,
-        position: position != null ? parseInt(position) : undefined,
-      })
+      dispatch({ type: touchTipAction, position: position ?? undefined })
       trackEventWithRobotSerial({
         name: ANALYTICS_QUICK_TRANSFER_SETTING_SAVED,
         properties: {
@@ -135,13 +130,10 @@ export function TouchTip(props: TouchTipProps): JSX.Element {
   }
 
   // the allowed range for touch tip is half the height of the well to 1x the height
-  const positionRange = { min: -Math.round(wellHeight / 2), max: 0 }
+  const positionRange = { min: Math.round(wellHeight / 2), max: wellHeight }
   const positionError =
     position !== null &&
-    (position === '-' ||
-      position.indexOf('-') !== position.lastIndexOf('-') ||
-      Number(position) < positionRange.min ||
-      Number(position) > positionRange.max)
+    (position < positionRange.min || position > positionRange.max)
       ? t(`value_out_of_range`, {
           min: positionRange.min,
           max: Math.floor(positionRange.max),
@@ -205,8 +197,8 @@ export function TouchTip(props: TouchTipProps): JSX.Element {
             marginTop={SPACING.spacing68}
           >
             <InputField
-              type="text"
-              value={String(position ?? '')}
+              type="number"
+              value={position}
               title={t('touch_tip_position_mm')}
               error={positionError}
               readOnly
@@ -219,11 +211,10 @@ export function TouchTip(props: TouchTipProps): JSX.Element {
             borderRadius="0"
           >
             <NumericalKeyboard
-              hasHyphen
               keyboardRef={keyboardRef}
               initialValue={String(position ?? '')}
               onChange={e => {
-                setPosition(e)
+                setPosition(Number(e))
               }}
             />
           </Flex>

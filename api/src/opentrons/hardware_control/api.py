@@ -778,7 +778,6 @@ class API(
         position: Mapping[Axis, float],
         speed: Optional[float] = None,
         max_speeds: Optional[Dict[Axis, float]] = None,
-        expect_stalls: bool = False,
     ) -> None:
         """Moves the effectors of the specified axis to the specified position.
         The effector of the x,y axis is the center of the carriage.
@@ -1251,10 +1250,7 @@ class API(
             await self.prepare_for_aspirate(mount)
 
     async def tip_drop_moves(
-        self,
-        mount: top_types.Mount,
-        home_after: bool = True,
-        ignore_plunger: bool = False,
+        self, mount: top_types.Mount, home_after: bool = True
     ) -> None:
         spec, _ = self.plan_check_drop_tip(mount, home_after)
 

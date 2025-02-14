@@ -49,7 +49,6 @@ from opentrons.protocol_engine.commands.movement_common import StallOrCollisionE
 from opentrons.protocol_engine.execution import (
     MovementHandler,
     PipettingHandler,
-    GantryMover,
 )
 from opentrons.protocol_engine.resources.model_utils import ModelUtils
 
@@ -107,7 +106,6 @@ def subject(
     implementation_type: EitherImplementationType,
     state_view: StateView,
     movement: MovementHandler,
-    gantry_mover: GantryMover,
     pipetting: PipettingHandler,
     model_utils: ModelUtils,
 ) -> Union[LiquidProbeImplementation, TryLiquidProbeImplementation]:
@@ -116,7 +114,6 @@ def subject(
         state_view=state_view,
         pipetting=pipetting,
         movement=movement,
-        gantry_mover=gantry_mover,
         model_utils=model_utils,
     )
 
@@ -320,6 +317,7 @@ async def test_liquid_not_found_error(
             operation_volume=None,
         ),
     ).then_return(position)
+
     decoy.when(
         await pipetting.liquid_probe_in_place(
             pipette_id=pipette_id,

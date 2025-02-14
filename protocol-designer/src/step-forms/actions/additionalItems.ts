@@ -2,14 +2,10 @@ import { uuid } from '../../utils'
 
 export interface ToggleIsGripperRequiredAction {
   type: 'TOGGLE_IS_GRIPPER_REQUIRED'
-  payload: { id: string }
 }
 
-export const toggleIsGripperRequired = (
-  id?: string
-): ToggleIsGripperRequiredAction => ({
+export const toggleIsGripperRequired = (): ToggleIsGripperRequiredAction => ({
   type: 'TOGGLE_IS_GRIPPER_REQUIRED',
-  payload: { id: id != null ? id : `${uuid()}:gripper` },
 })
 
 export type DeckFixture = 'wasteChute' | 'stagingArea' | 'trashBin'

@@ -83,7 +83,7 @@ export function ProtocolSetupLabware({
   setIsConfirmed,
 }: ProtocolSetupLabwareProps): JSX.Element {
   const { t } = useTranslation('protocol_setup')
-  const [showMapView, setShowMapView] = useState<boolean>(true)
+  const [showMapView, setShowMapView] = useState<boolean>(false)
   const [
     showLabwareDetailsModal,
     setShowLabwareDetailsModal,

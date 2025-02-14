@@ -93,14 +93,12 @@ export function DeviceDetailsDeckConfiguration({
       ) {
         return acc
       }
-      const usbPort = modulesData?.data.find(
-        m => m.serialNumber === opentronsModuleSerialNumber
-      )?.usbPort
-      const portDisplay =
-        usbPort?.hubPort != null
-          ? `${usbPort.port}.${usbPort.hubPort}`
-          : usbPort?.port
-      const displayName = getFixtureDisplayName(cutoutFixtureId, portDisplay)
+      const displayName = getFixtureDisplayName(
+        cutoutFixtureId,
+        modulesData?.data.find(
+          m => m.serialNumber === opentronsModuleSerialNumber
+        )?.usbPort.port
+      )
       const fixtureGroup =
         deckDef.cutoutFixtures.find(cf => cf.id === cutoutFixtureId)
           ?.fixtureGroup ?? {}

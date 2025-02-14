@@ -17,21 +17,18 @@ const mockLabOnDeck1 = {
   id: 'labId',
   labwareDefURI: 'mockUri',
   def: fixture96Plate as LabwareDefinition2,
-  pythonName: 'mockPythonName',
 }
 const mockLabOnDeck2 = {
   slot: 'labId',
   id: 'labId2',
   labwareDefURI: 'mockUri2',
   def: fixture96Plate as LabwareDefinition2,
-  pythonName: 'mockPythonName',
 }
 const mockLabOnDeck3 = {
   slot: '2',
   id: 'labId3',
   labwareDefURI: 'mockUri3',
   def: fixture96Plate as LabwareDefinition2,
-  pythonName: 'mockPythonName',
 }
 const mockHS = {
   id: 'mockHsId',
@@ -39,7 +36,6 @@ const mockHS = {
   type: HEATERSHAKER_MODULE_TYPE,
   slot: '1',
   moduleState: {} as any,
-  pythonName: 'mockPythonName',
 }
 
 const mockOt2DeckSetup: AllTemporalPropertiesForTimelineFrame = {
@@ -57,7 +53,6 @@ const mockOt2DeckSetup: AllTemporalPropertiesForTimelineFrame = {
       type: TEMPERATURE_MODULE_TYPE,
       slot: '3',
       moduleState: {} as any,
-      pythonName: 'mockPythonName',
     },
   },
   additionalEquipmentOnDeck: {
@@ -70,7 +65,6 @@ const mockLabOnStagingArea = {
   id: 'labId3',
   labwareDefURI: 'mockUri3',
   def: fixture96Plate as LabwareDefinition2,
-  pythonName: 'mockPythonName',
 }
 const mockHSFlex = {
   id: 'mockHsId',
@@ -78,7 +72,6 @@ const mockHSFlex = {
   type: HEATERSHAKER_MODULE_TYPE,
   slot: 'D1',
   moduleState: {} as any,
-  pythonName: 'mockPythonName',
 }
 const mockTrash = {
   name: 'trashBin' as AdditionalEquipmentName,
@@ -110,7 +103,6 @@ const mockFlex2DeckSetup: AllTemporalPropertiesForTimelineFrame = {
       type: TEMPERATURE_MODULE_TYPE,
       slot: 'C1',
       moduleState: {} as any,
-      pythonName: 'mockPythonName',
     },
   },
   additionalEquipmentOnDeck: {

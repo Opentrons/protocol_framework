@@ -38,7 +38,6 @@ describe('heaterShakerOpenLatch', () => {
           // this tiprack is tall enough to trigger the latch open warning
           labwareDefURI: getLabwareDefURI(fixtureTiprack1000ul),
           def: fixtureTiprack1000ul,
-          pythonName: 'mockPythonName',
         },
       },
     }

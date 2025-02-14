@@ -1,7 +1,7 @@
 """Manage current and historical run data."""
 
 from datetime import datetime
-from typing import Dict, List, Optional, Callable, Union, Mapping, Sequence
+from typing import Dict, List, Optional, Callable, Union, Mapping
 
 from opentrons_shared_data.labware.labware_definition import LabwareDefinition
 from opentrons_shared_data.errors.exceptions import InvalidStoredData, EnumeratedError
@@ -10,7 +10,6 @@ from opentrons.types import NozzleMapInterface
 from opentrons.protocol_engine import (
     EngineStatus,
     LabwareOffsetCreate,
-    LegacyLabwareOffsetCreate,
     StateSummary,
     CommandSlice,
     CommandErrorSlice,
@@ -182,7 +181,7 @@ class RunDataManager:
         self,
         run_id: str,
         created_at: datetime,
-        labware_offsets: Sequence[LabwareOffsetCreate | LegacyLabwareOffsetCreate],
+        labware_offsets: List[LabwareOffsetCreate],
         deck_configuration: DeckConfigurationType,
         file_provider: FileProvider,
         run_time_param_values: Optional[PrimitiveRunTimeParamValuesType],

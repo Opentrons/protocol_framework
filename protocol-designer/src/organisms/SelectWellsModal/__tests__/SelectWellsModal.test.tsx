@@ -55,7 +55,6 @@ describe('SelectWellsModal', () => {
         id: labwareId,
         labwareDefURI: 'mockUri',
         def: fixture96Plate as LabwareDefinition2,
-        pythonName: 'mockPythonName',
       },
     })
     vi.mocked(getPipetteEntities).mockReturnValue({
@@ -65,7 +64,6 @@ describe('SelectWellsModal', () => {
         name: fixtureP1000SingleV2Specs.displayName as PipetteName,
         id: pipId,
         tiprackDefURI: [],
-        pythonName: 'mockPythonName',
       },
     })
   })

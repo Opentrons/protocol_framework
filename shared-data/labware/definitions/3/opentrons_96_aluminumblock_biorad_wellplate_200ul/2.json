@@ -17,8 +17,8 @@
   "version": 2,
   "namespace": "opentrons",
   "metadata": {
-    "displayName": "Opentrons 96 Well Aluminum Block with Bio-Rad Well Plate 200 µL",
-    "displayVolumeUnits": "µL",
+    "displayName": "Opentrons 96 Well Aluminum Block with Bio-Rad Well Plate 200 \u00b5L",
+    "displayVolumeUnits": "\u00b5L",
     "displayCategory": "aluminumBlock",
     "tags": []
   },
@@ -1104,7 +1104,7 @@
         "H12"
       ],
       "metadata": {
-        "displayName": "Bio-Rad 96 Well Plate 200 µL",
+        "displayName": "Bio-Rad 96 Well Plate 200 \u00b5L",
         "displayCategory": "wellPlate",
         "wellBottomShape": "v"
       },
@@ -1126,18 +1126,17 @@
     "conicalWell": {
       "sections": [
         {
-          "shape": "conical",
-          "bottomDiameter": 5.44,
-          "topDiameter": 5.44,
-          "topHeight": 14.57,
-          "bottomHeight": 10.14
+          "shape": "spherical",
+          "radiusOfCurvature": 1.42,
+          "topHeight": 1.21,
+          "bottomHeight": 0.0
         },
         {
           "shape": "conical",
-          "bottomDiameter": 3,
-          "topDiameter": 5.44,
-          "topHeight": 10.14,
-          "bottomHeight": 8.58
+          "bottomDiameter": 2.81,
+          "topDiameter": 3,
+          "topHeight": 1.87,
+          "bottomHeight": 1.21
         },
         {
           "shape": "conical",
@@ -1148,16 +1147,17 @@
         },
         {
           "shape": "conical",
-          "bottomDiameter": 2.81,
-          "topDiameter": 3,
-          "topHeight": 1.87,
-          "bottomHeight": 1.21
+          "bottomDiameter": 3,
+          "topDiameter": 5.44,
+          "topHeight": 10.14,
+          "bottomHeight": 8.58
         },
         {
-          "shape": "spherical",
-          "radiusOfCurvature": 1.42,
-          "topHeight": 1.21,
-          "bottomHeight": 0.0
+          "shape": "conical",
+          "bottomDiameter": 5.44,
+          "topDiameter": 5.44,
+          "topHeight": 14.57,
+          "bottomHeight": 10.14
         }
       ]
     }

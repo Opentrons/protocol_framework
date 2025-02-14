@@ -85,7 +85,7 @@ class MoveAxesRelative(
 
     commandType: MoveAxesRelativeCommandType = "robot/moveAxesRelative"
     params: MoveAxesRelativeParams
-    result: Optional[MoveAxesRelativeResult] = None
+    result: Optional[MoveAxesRelativeResult]
 
     _ImplementationCls: Type[
         MoveAxesRelativeImplementation

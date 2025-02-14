@@ -42,9 +42,7 @@ export function getAddressableAreasInProtocol(
       ) {
         return [...acc, params.newLocation.addressableAreaName]
       } else if (
-        (commandType === 'loadLabware' ||
-          commandType === 'loadLid' ||
-          commandType === 'loadLidStack') &&
+        commandType === 'loadLabware' &&
         params.location !== 'offDeck' &&
         params.location !== 'systemLocation' &&
         'slotName' in params.location &&
@@ -77,9 +75,7 @@ export function getAddressableAreasInProtocol(
 
         return [...acc, ...addressableAreaNames]
       } else if (
-        (commandType === 'loadLabware' ||
-          commandType === 'loadLid' ||
-          commandType === 'loadLidStack') &&
+        commandType === 'loadLabware' &&
         params.location !== 'offDeck' &&
         params.location !== 'systemLocation' &&
         'addressableAreaName' in params.location &&

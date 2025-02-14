@@ -9,11 +9,7 @@ export function getLoadedLabwareDefinitionsByUri(
   commands: RunTimeCommand[]
 ): LabwareDefinitionsByUri {
   return commands.reduce((acc, command) => {
-    if (
-      command.commandType === 'loadLabware' ||
-      command.commandType === 'loadLid' ||
-      command.commandType === 'loadLidStack'
-    ) {
+    if (command.commandType === 'loadLabware') {
       const labwareDef: LabwareDefinition2 | undefined =
         command.result?.definition
       if (labwareDef == null) {

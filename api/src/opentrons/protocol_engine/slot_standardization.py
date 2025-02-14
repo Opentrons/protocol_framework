@@ -14,6 +14,7 @@ This module does that conversion, for any Protocol Engine input that contains a 
 deck slot.
 """
 
+
 from typing import Any, Callable, Dict, Type
 
 from opentrons_shared_data.robot.types import RobotType
@@ -25,9 +26,27 @@ from .types import (
     DeckSlotLocation,
     LabwareLocation,
     AddressableAreaLocation,
+    LabwareOffsetCreate,
     ModuleLocation,
     OnLabwareLocation,
 )
+
+
+def standardize_labware_offset(
+    original: LabwareOffsetCreate, robot_type: RobotType
+) -> LabwareOffsetCreate:
+    """Convert the deck slot in the given `LabwareOffsetCreate` to match the given robot type."""
+    return original.model_copy(
+        update={
+            "location": original.location.model_copy(
+                update={
+                    "slotName": original.location.slotName.to_equivalent_for_robot_type(
+                        robot_type
+                    )
+                }
+            )
+        }
+    )
 
 
 def standardize_command(

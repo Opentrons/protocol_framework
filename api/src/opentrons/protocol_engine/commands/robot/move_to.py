@@ -80,7 +80,7 @@ class MoveTo(BaseCommand[MoveToParams, MoveToResult, ErrorOccurrence]):
 
     commandType: MoveToCommandType = "robot/moveTo"
     params: MoveToParams
-    result: Optional[MoveToResult] = None
+    result: Optional[MoveToResult]
 
     _ImplementationCls: Type[MoveToImplementation] = MoveToImplementation
 

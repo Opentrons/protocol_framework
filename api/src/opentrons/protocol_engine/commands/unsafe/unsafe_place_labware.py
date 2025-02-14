@@ -192,7 +192,7 @@ class UnsafePlaceLabware(
 
     commandType: UnsafePlaceLabwareCommandType = "unsafe/placeLabware"
     params: UnsafePlaceLabwareParams
-    result: Optional[UnsafePlaceLabwareResult] = None
+    result: Optional[UnsafePlaceLabwareResult]
 
     _ImplementationCls: Type[
         UnsafePlaceLabwareImplementation

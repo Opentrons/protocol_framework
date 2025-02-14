@@ -4,7 +4,6 @@ DEPRECATED: Testing LabwareStore independently of LabwareView is no
 longer helpful. Try to add new tests to test_labware_state.py, where they can be
 tested together, treating LabwareState as a private implementation detail.
 """
-
 from typing import Optional
 from opentrons.protocol_engine.state import update_types
 import pytest
@@ -18,10 +17,9 @@ from opentrons.types import DeckSlotName
 
 from opentrons.protocol_engine.types import (
     LabwareOffset,
-    LabwareOffsetCreateInternal,
+    LabwareOffsetCreate,
     LabwareOffsetVector,
-    LegacyLabwareOffsetLocation,
-    OnAddressableAreaOffsetLocationSequenceComponent,
+    LabwareOffsetLocation,
     DeckSlotLocation,
     LoadedLabware,
     OFF_DECK_LOCATION,
@@ -66,12 +64,9 @@ def test_handles_add_labware_offset(
     subject: LabwareStore,
 ) -> None:
     """It should add the labware offset to the state and add the ID."""
-    request = LabwareOffsetCreateInternal(
+    request = LabwareOffsetCreate(
         definitionUri="offset-definition-uri",
-        legacyLocation=LegacyLabwareOffsetLocation(slotName=DeckSlotName.SLOT_1),
-        locationSequence=[
-            OnAddressableAreaOffsetLocationSequenceComponent(addressableAreaName="1")
-        ],
+        location=LabwareOffsetLocation(slotName=DeckSlotName.SLOT_1),
         vector=LabwareOffsetVector(x=1, y=2, z=3),
     )
 
@@ -79,10 +74,7 @@ def test_handles_add_labware_offset(
         id="offset-id",
         createdAt=datetime(year=2021, month=1, day=2),
         definitionUri="offset-definition-uri",
-        location=LegacyLabwareOffsetLocation(slotName=DeckSlotName.SLOT_1),
-        locationSequence=[
-            OnAddressableAreaOffsetLocationSequenceComponent(addressableAreaName="1")
-        ],
+        location=LabwareOffsetLocation(slotName=DeckSlotName.SLOT_1),
         vector=LabwareOffsetVector(x=1, y=2, z=3),
     )
 
@@ -107,12 +99,9 @@ def test_handles_load_labware(
     offset_id: Optional[str],
 ) -> None:
     """It should add the labware data to the state."""
-    offset_request = LabwareOffsetCreateInternal(
+    offset_request = LabwareOffsetCreate(
         definitionUri="offset-definition-uri",
-        legacyLocation=LegacyLabwareOffsetLocation(slotName=DeckSlotName.SLOT_1),
-        locationSequence=[
-            OnAddressableAreaOffsetLocationSequenceComponent(addressableAreaName="1")
-        ],
+        location=LabwareOffsetLocation(slotName=DeckSlotName.SLOT_1),
         vector=LabwareOffsetVector(x=1, y=2, z=3),
     )
 
@@ -191,12 +180,9 @@ def test_handles_reload_labware(
         == expected_definition_uri
     )
 
-    offset_request = LabwareOffsetCreateInternal(
+    offset_request = LabwareOffsetCreate(
         definitionUri="offset-definition-uri",
-        legacyLocation=LegacyLabwareOffsetLocation(slotName=DeckSlotName.SLOT_1),
-        locationSequence=[
-            OnAddressableAreaOffsetLocationSequenceComponent(addressableAreaName="1")
-        ],
+        location=LabwareOffsetLocation(slotName=DeckSlotName.SLOT_1),
         vector=LabwareOffsetVector(x=1, y=2, z=3),
     )
     subject.handle_action(
@@ -256,12 +242,9 @@ def test_handles_move_labware(
 ) -> None:
     """It should update labware state with new location & offset."""
     comment_command = create_comment_command()
-    offset_request = LabwareOffsetCreateInternal(
+    offset_request = LabwareOffsetCreate(
         definitionUri="offset-definition-uri",
-        legacyLocation=LegacyLabwareOffsetLocation(slotName=DeckSlotName.SLOT_1),
-        locationSequence=[
-            OnAddressableAreaOffsetLocationSequenceComponent(addressableAreaName="1")
-        ],
+        location=LabwareOffsetLocation(slotName=DeckSlotName.SLOT_1),
         vector=LabwareOffsetVector(x=1, y=2, z=3),
     )
     subject.handle_action(
@@ -314,12 +297,9 @@ def test_handles_move_labware_off_deck(
 ) -> None:
     """It should update labware state with new location & offset."""
     comment_command = create_comment_command()
-    offset_request = LabwareOffsetCreateInternal(
+    offset_request = LabwareOffsetCreate(
         definitionUri="offset-definition-uri",
-        legacyLocation=LegacyLabwareOffsetLocation(slotName=DeckSlotName.SLOT_1),
-        locationSequence=[
-            OnAddressableAreaOffsetLocationSequenceComponent(addressableAreaName="1")
-        ],
+        location=LabwareOffsetLocation(slotName=DeckSlotName.SLOT_1),
         vector=LabwareOffsetVector(x=1, y=2, z=3),
     )
     subject.handle_action(

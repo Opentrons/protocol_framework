@@ -93,30 +93,6 @@ const divideCreator: any = (
   }
 }
 
-const pythonHelloWorldCreator: any = (
-  params: CountParams,
-  invariantContext: InvariantContext,
-  prevState: CountState
-) => {
-  return {
-    commands: [],
-    warnings: [],
-    python: 'print("Hello world")',
-  }
-}
-
-const pythonGoodbyeWorldCreator: any = (
-  params: CountParams,
-  invariantContext: InvariantContext,
-  prevState: CountState
-) => {
-  return {
-    commands: [],
-    warnings: [],
-    python: 'print("Goodbye world")',
-  }
-}
-
 function mockNextRobotStateAndWarningsSingleCommand(
   command: CountCommand,
   invariantContext: any,
@@ -179,7 +155,6 @@ beforeEach(() => {
     moduleEntities: {},
     pipetteEntities: {},
     additionalEquipmentEntities: {},
-    liquidEntities: {},
     config: DEFAULT_CONFIG,
   }
 })
@@ -202,9 +177,6 @@ describe('reduceCommandCreators', () => {
         { command: 'multiply', params: { value: 2 } },
       ],
       warnings: [],
-      // Note no `python` field here.
-      // Existing CommandCreators that don't emit Python should behave exactly the same as before.
-      // This test makes sure we do NOT produce results like `python:'undefined'` or `python:''` or `python:'\n'`.
     })
   })
 
@@ -254,43 +226,6 @@ describe('reduceCommandCreators', () => {
       ],
     })
   })
-
-  it('Python commands are joined together', () => {
-    const initialState: any = {}
-    const result: any = reduceCommandCreators(
-      [
-        curryCommandCreator(pythonHelloWorldCreator, {}),
-        curryCommandCreator(pythonGoodbyeWorldCreator, {}),
-      ],
-      invariantContext,
-      initialState
-    )
-
-    expect(result).toEqual({
-      commands: [],
-      warnings: [],
-      python: 'print("Hello world")\nprint("Goodbye world")',
-    })
-  })
-
-  it('Python commands mixed with non-Python commands', () => {
-    const initialState: any = {}
-    const result: any = reduceCommandCreators(
-      [
-        curryCommandCreator(addCreator, { value: 1 }),
-        curryCommandCreator(pythonHelloWorldCreator, {}),
-      ],
-      invariantContext,
-      initialState
-    )
-
-    expect(result).toEqual({
-      commands: [{ command: 'add', params: { value: 1 } }],
-      warnings: [],
-      python: 'print("Hello world")',
-      // should only get 1 line of Python with no stray newlines or `undefined`s.
-    })
-  })
 })
 
 describe('commandCreatorsTimeline', () => {
@@ -301,7 +236,6 @@ describe('commandCreatorsTimeline', () => {
         curryCommandCreator(addCreatorWithWarning, { value: 4 }),
         curryCommandCreator(divideCreator, { value: 0 }),
         curryCommandCreator(multiplyCreator, { value: 3 }),
-        curryCommandCreator(pythonHelloWorldCreator, {}),
       ],
       invariantContext,
       initialState
@@ -329,7 +263,6 @@ describe('commandCreatorsTimeline', () => {
           ],
         },
         // no more steps in the timeline, stopped by error
-        // python output is suppressed too
       ],
     })
   })
@@ -342,7 +275,6 @@ describe('commandCreatorsTimeline', () => {
         curryCommandCreator(addCreatorWithWarning, { value: 3 }),
         curryCommandCreator(multiplyCreator, { value: 2 }),
         curryCommandCreator(addCreatorWithWarning, { value: 1 }),
-        curryCommandCreator(pythonHelloWorldCreator, {}),
       ],
       invariantContext,
       initialState
@@ -376,13 +308,6 @@ describe('commandCreatorsTimeline', () => {
             type: 'ADD_WARNING',
           },
         ],
-      },
-      // Python hello world
-      {
-        robotState: { count: 17 },
-        commands: [],
-        warnings: [],
-        python: 'print("Hello world")',
       },
     ])
   })

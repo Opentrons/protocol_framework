@@ -1,5 +1,4 @@
 """Protocol engine commands sub-state."""
-
 from __future__ import annotations
 
 import enum
@@ -305,7 +304,7 @@ class CommandStore(HasState[CommandState], HandlesActions):
         # TODO(mc, 2021-06-22): mypy has trouble with this automatic
         # request > command mapping, figure out how to type precisely
         # (or wait for a future mypy version that can figure it out).
-        queued_command = action.request._CommandCls.model_construct(
+        queued_command = action.request._CommandCls.model_construct(  # type: ignore[call-arg]
             id=action.command_id,
             key=(
                 action.request.key
@@ -507,10 +506,7 @@ class CommandStore(HasState[CommandState], HandlesActions):
                         pass
                     case QueueStatus.RUNNING | QueueStatus.PAUSED:
                         self._state.queue_status = QueueStatus.PAUSED
-                    case (
-                        QueueStatus.AWAITING_RECOVERY
-                        | QueueStatus.AWAITING_RECOVERY_PAUSED
-                    ):
+                    case QueueStatus.AWAITING_RECOVERY | QueueStatus.AWAITING_RECOVERY_PAUSED:
                         self._state.queue_status = QueueStatus.AWAITING_RECOVERY_PAUSED
             elif action.door_state == DoorState.CLOSED:
                 self._state.is_door_blocking = False

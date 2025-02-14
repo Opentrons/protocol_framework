@@ -9,12 +9,11 @@ import type {
   SingleLabwareLiquidState,
   LocationLiquidState,
   LabwareLiquidState,
-  LiquidEntities,
-  LiquidEntity,
 } from '@opentrons/step-generation'
 import type { LoadLabwareCreateCommand } from '@opentrons/shared-data'
 import type { Action, DeckSlot } from '../../types'
 import type {
+  LiquidGroupsById,
   DisplayLabware,
   ZoomedIntoSlotInfoState,
   GenerateNewProtocolState,
@@ -41,7 +40,6 @@ import type {
   SelectFixtureAction,
   ZoomedIntoSlotAction,
   GenerateNewProtocolAction,
-  EditMultipleLiquidGroupsAction,
 } from '../actions'
 // REDUCERS
 // modeLabwareSelection: boolean. If true, we're selecting labware to add to a slot
@@ -273,7 +271,7 @@ export const savedLabware: Reducer<SavedLabwareState, any> = handleActions(
   },
   {}
 )
-export type IngredientsState = LiquidEntities
+export type IngredientsState = LiquidGroupsById
 // @ts-expect-error(sa, 2021-6-20): cannot use string literals as action type
 // TODO IMMEDIATELY: refactor this to the old fashioned way if we cannot have type safety: https://github.com/redux-utilities/redux-actions/issues/282#issuecomment-595163081
 export const ingredients: Reducer<IngredientsState, any> = handleActions(
@@ -295,32 +293,10 @@ export const ingredients: Reducer<IngredientsState, any> = handleActions(
       const liquidGroupId = action.payload
       return omit(state, liquidGroupId)
     },
-    EDIT_MULTIPLE_LIQUID_GROUPS_PYTHON_NAME: (
-      state: IngredientsState,
-      action: EditMultipleLiquidGroupsAction
-    ): IngredientsState => {
-      return {
-        ...state,
-        ...action.payload,
-      }
-    },
     LOAD_FILE: (
       state: IngredientsState,
       action: LoadFileAction
-    ): IngredientsState => {
-      const ingredients = getPDMetadata(action.payload.file).ingredients
-
-      return Object.entries(ingredients).reduce<Record<string, LiquidEntity>>(
-        (acc, [key, ingredient]) => {
-          acc[key] = {
-            ...ingredient,
-            pythonName: `liquid_${parseInt(key) + 1}`,
-          }
-          return acc
-        },
-        {}
-      )
-    },
+    ): IngredientsState => getPDMetadata(action.payload.file).ingredients,
   },
   {}
 )

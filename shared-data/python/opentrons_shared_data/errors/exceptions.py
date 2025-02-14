@@ -1,5 +1,4 @@
 """Exception hierarchy for error codes."""
-
 from typing import Dict, Any, Optional, List, Iterator, Union, Sequence, overload
 from logging import getLogger
 from traceback import format_exception_only, format_tb
@@ -1100,7 +1099,7 @@ class InvalidProtocolData(GeneralError):
         self,
         message: Optional[str] = None,
         detail: Optional[Dict[str, str]] = None,
-        wrapping: Optional[Sequence[Union[EnumeratedError, BaseException]]] = None,
+        wrapping: Optional[Sequence[EnumeratedError]] = None,
     ) -> None:
         """Build an InvalidProtocolData."""
         super().__init__(ErrorCodes.INVALID_PROTOCOL_DATA, message, detail, wrapping)

@@ -280,7 +280,3 @@ test-js-internal:
 .PHONY: test-js-%
 test-js-%: 
 	$(MAKE) test-js-internal tests="$(if $(tests),$(foreach test,$(tests),$*/$(test)),$*)" test_opts="$(test_opts)" cov_opts="$(cov_opts)"
-
-.PHONY: validate-codecov-yml
-validate-codecov-yml:
-	curl --data-binary @.codecov.yml https://codecov.io/validate

@@ -534,22 +534,7 @@
           "version": 1,
           "wells": {}
         },
-        "labwareId": "UUID",
-        "locationSequence": [
-          {
-            "addressableAreaName": "temperatureModuleV2D1",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutD1",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ]
+        "labwareId": "UUID"
       },
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
@@ -845,11 +830,6 @@
           },
           "schemaVersion": 2,
           "stackingOffsetWithLabware": {
-            "evotips_flex_96_tiprack_adapter": {
-              "x": 0,
-              "y": 0,
-              "z": 102
-            },
             "opentrons_96_deep_well_adapter": {
               "x": 0,
               "y": 0,
@@ -1832,20 +1812,7 @@
             }
           }
         },
-        "labwareId": "UUID",
-        "locationSequence": [
-          {
-            "addressableAreaName": "A1",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutoutA1",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "singleLeftSlot"
-            ]
-          }
-        ]
+        "labwareId": "UUID"
       },
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
@@ -1912,20 +1879,7 @@
           "version": 1,
           "wells": {}
         },
-        "labwareId": "UUID",
-        "locationSequence": [
-          {
-            "addressableAreaName": "B2",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutoutB2",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "singleCenterSlot"
-            ]
-          }
-        ]
+        "labwareId": "UUID"
       },
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
@@ -1944,59 +1898,7 @@
         },
         "strategy": "manualMoveWithPause"
       },
-      "result": {
-        "eventualDestinationLocationSequence": [
-          {
-            "kind": "onLabware",
-            "labwareId": "UUID"
-          },
-          {
-            "addressableAreaName": "temperatureModuleV2D1",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutD1",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ],
-        "immediateDestinationLocationSequence": [
-          {
-            "kind": "onLabware",
-            "labwareId": "UUID"
-          },
-          {
-            "addressableAreaName": "temperatureModuleV2D1",
-            "kind": "onAddressableArea"
-          },
-          {
-            "kind": "onModule",
-            "moduleId": "UUID"
-          },
-          {
-            "cutoutId": "cutoutD1",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
-          }
-        ],
-        "originLocationSequence": [
-          {
-            "addressableAreaName": "A1",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutoutA1",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "singleLeftSlot"
-            ]
-          }
-        ]
-      },
+      "result": {},
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
     },
@@ -2026,6 +1928,14 @@
             "brand": "Opentrons",
             "brandId": []
           },
+          "compatibleParentLabware": [
+            "armadillo_96_wellplate_200ul_pcr_full_skirt",
+            "biorad_96_wellplate_200ul_pcr",
+            "opentrons_96_wellplate_200ul_pcr_full_skirt",
+            "opentrons_flex_deck_riser",
+            "opentrons_tough_pcr_auto_sealing_lid",
+            "protocol_engine_lid_stack_object"
+          ],
           "cornerOffsetFromSlot": {
             "x": 0,
             "y": 0,
@@ -2097,7 +2007,7 @@
             "loadName": "opentrons_tough_pcr_auto_sealing_lid",
             "quirks": []
           },
-          "schemaVersion": 2,
+          "schemaVersion": 3,
           "stackLimit": 5,
           "stackingOffsetWithLabware": {
             "armadillo_96_wellplate_200ul_pcr_full_skirt": {
@@ -2129,6 +2039,11 @@
               "x": 0,
               "y": 0,
               "z": 6.492
+            },
+            "protocol_engine_lid_stack_object": {
+              "x": 0,
+              "y": 0,
+              "z": 0
             }
           },
           "stackingOffsetWithModule": {
@@ -2141,24 +2056,7 @@
           "version": 1,
           "wells": {}
         },
-        "labwareId": "UUID",
-        "locationSequence": [
-          {
-            "kind": "onLabware",
-            "labwareId": "UUID"
-          },
-          {
-            "addressableAreaName": "B2",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutoutB2",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "singleCenterSlot"
-            ]
-          }
-        ]
+        "labwareId": "UUID"
       },
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
@@ -2188,6 +2086,14 @@
             "brand": "Opentrons",
             "brandId": []
           },
+          "compatibleParentLabware": [
+            "armadillo_96_wellplate_200ul_pcr_full_skirt",
+            "biorad_96_wellplate_200ul_pcr",
+            "opentrons_96_wellplate_200ul_pcr_full_skirt",
+            "opentrons_flex_deck_riser",
+            "opentrons_tough_pcr_auto_sealing_lid",
+            "protocol_engine_lid_stack_object"
+          ],
           "cornerOffsetFromSlot": {
             "x": 0,
             "y": 0,
@@ -2259,7 +2165,7 @@
             "loadName": "opentrons_tough_pcr_auto_sealing_lid",
             "quirks": []
           },
-          "schemaVersion": 2,
+          "schemaVersion": 3,
           "stackLimit": 5,
           "stackingOffsetWithLabware": {
             "armadillo_96_wellplate_200ul_pcr_full_skirt": {
@@ -2291,6 +2197,11 @@
               "x": 0,
               "y": 0,
               "z": 6.492
+            },
+            "protocol_engine_lid_stack_object": {
+              "x": 0,
+              "y": 0,
+              "z": 0
             }
           },
           "stackingOffsetWithModule": {
@@ -2303,28 +2214,7 @@
           "version": 1,
           "wells": {}
         },
-        "labwareId": "UUID",
-        "locationSequence": [
-          {
-            "kind": "onLabware",
-            "labwareId": "UUID"
-          },
-          {
-            "kind": "onLabware",
-            "labwareId": "UUID"
-          },
-          {
-            "addressableAreaName": "B2",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutoutB2",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "singleCenterSlot"
-            ]
-          }
-        ]
+        "labwareId": "UUID"
       },
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
@@ -2354,6 +2244,14 @@
             "brand": "Opentrons",
             "brandId": []
           },
+          "compatibleParentLabware": [
+            "armadillo_96_wellplate_200ul_pcr_full_skirt",
+            "biorad_96_wellplate_200ul_pcr",
+            "opentrons_96_wellplate_200ul_pcr_full_skirt",
+            "opentrons_flex_deck_riser",
+            "opentrons_tough_pcr_auto_sealing_lid",
+            "protocol_engine_lid_stack_object"
+          ],
           "cornerOffsetFromSlot": {
             "x": 0,
             "y": 0,
@@ -2425,7 +2323,7 @@
             "loadName": "opentrons_tough_pcr_auto_sealing_lid",
             "quirks": []
           },
-          "schemaVersion": 2,
+          "schemaVersion": 3,
           "stackLimit": 5,
           "stackingOffsetWithLabware": {
             "armadillo_96_wellplate_200ul_pcr_full_skirt": {
@@ -2457,6 +2355,11 @@
               "x": 0,
               "y": 0,
               "z": 6.492
+            },
+            "protocol_engine_lid_stack_object": {
+              "x": 0,
+              "y": 0,
+              "z": 0
             }
           },
           "stackingOffsetWithModule": {
@@ -2469,32 +2372,7 @@
           "version": 1,
           "wells": {}
         },
-        "labwareId": "UUID",
-        "locationSequence": [
-          {
-            "kind": "onLabware",
-            "labwareId": "UUID"
-          },
-          {
-            "kind": "onLabware",
-            "labwareId": "UUID"
-          },
-          {
-            "kind": "onLabware",
-            "labwareId": "UUID"
-          },
-          {
-            "addressableAreaName": "B2",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutoutB2",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "singleCenterSlot"
-            ]
-          }
-        ]
+        "labwareId": "UUID"
       },
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
@@ -2524,6 +2402,14 @@
             "brand": "Opentrons",
             "brandId": []
           },
+          "compatibleParentLabware": [
+            "armadillo_96_wellplate_200ul_pcr_full_skirt",
+            "biorad_96_wellplate_200ul_pcr",
+            "opentrons_96_wellplate_200ul_pcr_full_skirt",
+            "opentrons_flex_deck_riser",
+            "opentrons_tough_pcr_auto_sealing_lid",
+            "protocol_engine_lid_stack_object"
+          ],
           "cornerOffsetFromSlot": {
             "x": 0,
             "y": 0,
@@ -2595,7 +2481,7 @@
             "loadName": "opentrons_tough_pcr_auto_sealing_lid",
             "quirks": []
           },
-          "schemaVersion": 2,
+          "schemaVersion": 3,
           "stackLimit": 5,
           "stackingOffsetWithLabware": {
             "armadillo_96_wellplate_200ul_pcr_full_skirt": {
@@ -2627,6 +2513,11 @@
               "x": 0,
               "y": 0,
               "z": 6.492
+            },
+            "protocol_engine_lid_stack_object": {
+              "x": 0,
+              "y": 0,
+              "z": 0
             }
           },
           "stackingOffsetWithModule": {
@@ -2639,36 +2530,7 @@
           "version": 1,
           "wells": {}
         },
-        "labwareId": "UUID",
-        "locationSequence": [
-          {
-            "kind": "onLabware",
-            "labwareId": "UUID"
-          },
-          {
-            "kind": "onLabware",
-            "labwareId": "UUID"
-          },
-          {
-            "kind": "onLabware",
-            "labwareId": "UUID"
-          },
-          {
-            "kind": "onLabware",
-            "labwareId": "UUID"
-          },
-          {
-            "addressableAreaName": "B2",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutoutB2",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "singleCenterSlot"
-            ]
-          }
-        ]
+        "labwareId": "UUID"
       },
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
@@ -2698,6 +2560,14 @@
             "brand": "Opentrons",
             "brandId": []
           },
+          "compatibleParentLabware": [
+            "armadillo_96_wellplate_200ul_pcr_full_skirt",
+            "biorad_96_wellplate_200ul_pcr",
+            "opentrons_96_wellplate_200ul_pcr_full_skirt",
+            "opentrons_flex_deck_riser",
+            "opentrons_tough_pcr_auto_sealing_lid",
+            "protocol_engine_lid_stack_object"
+          ],
           "cornerOffsetFromSlot": {
             "x": 0,
             "y": 0,
@@ -2769,7 +2639,7 @@
             "loadName": "opentrons_tough_pcr_auto_sealing_lid",
             "quirks": []
           },
-          "schemaVersion": 2,
+          "schemaVersion": 3,
           "stackLimit": 5,
           "stackingOffsetWithLabware": {
             "armadillo_96_wellplate_200ul_pcr_full_skirt": {
@@ -2801,6 +2671,11 @@
               "x": 0,
               "y": 0,
               "z": 6.492
+            },
+            "protocol_engine_lid_stack_object": {
+              "x": 0,
+              "y": 0,
+              "z": 0
             }
           },
           "stackingOffsetWithModule": {
@@ -2813,40 +2688,7 @@
           "version": 1,
           "wells": {}
         },
-        "labwareId": "UUID",
-        "locationSequence": [
-          {
-            "kind": "onLabware",
-            "labwareId": "UUID"
-          },
-          {
-            "kind": "onLabware",
-            "labwareId": "UUID"
-          },
-          {
-            "kind": "onLabware",
-            "labwareId": "UUID"
-          },
-          {
-            "kind": "onLabware",
-            "labwareId": "UUID"
-          },
-          {
-            "kind": "onLabware",
-            "labwareId": "UUID"
-          },
-          {
-            "addressableAreaName": "B2",
-            "kind": "onAddressableArea"
-          },
-          {
-            "cutoutId": "cutoutB2",
-            "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": [
-              "singleCenterSlot"
-            ]
-          }
-        ]
+        "labwareId": "UUID"
       },
       "startedAt": "TIMESTAMP",
       "status": "succeeded"

@@ -17,9 +17,7 @@ import {
 import { LINK_BUTTON_STYLE } from '../../atoms'
 import { getMainPagePortalEl } from '../Portal'
 import { WellOrderVisualization } from './WellOrderVisualization'
-
 import type { WellOrderOption } from '../../form-types'
-import type { MoveLiquidPrefixType } from '../../resources/types'
 
 const DEFAULT_FIRST: WellOrderOption = 't2b'
 const DEFAULT_SECOND: WellOrderOption = 'l2r'
@@ -33,7 +31,7 @@ const WELL_ORDER_VALUES: WellOrderOption[] = [
 export interface WellOrderModalProps {
   isOpen: boolean
   closeModal: () => void
-  prefix: MoveLiquidPrefixType
+  prefix: 'aspirate' | 'dispense' | 'mix'
   firstName: string
   secondName: string
   firstValue?: WellOrderOption | null

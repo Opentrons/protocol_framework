@@ -122,7 +122,7 @@ class LabwareCore(AbstractLabware[WellCore]):
 
         request = LabwareOffsetCreate.model_construct(
             definitionUri=self.get_uri(),
-            locationSequence=offset_location,
+            location=offset_location,
             vector=LabwareOffsetVector(x=delta.x, y=delta.y, z=delta.z),
         )
         self._engine_client.add_labware_offset(request)

@@ -1,5 +1,4 @@
 """Command models to retrieve a labware from a Flex Stacker."""
-
 from __future__ import annotations
 from typing import Optional, Literal, TYPE_CHECKING
 from typing_extensions import Type
@@ -13,12 +12,7 @@ from ...errors import (
     LocationIsOccupiedError,
 )
 from ...state import update_types
-from ...types import (
-    ModuleLocation,
-    OnAddressableAreaLocationSequenceComponent,
-    OnModuleLocationSequenceComponent,
-    LabwareLocationSequence,
-)
+from ...types import ModuleLocation
 
 if TYPE_CHECKING:
     from opentrons.protocol_engine.state.state import StateView
@@ -42,12 +36,6 @@ class RetrieveResult(BaseModel):
     labware_id: str = Field(
         ...,
         description="The labware ID of the retrieved labware.",
-    )
-    originLocationSequence: LabwareLocationSequence | None = Field(
-        None, description="The origin location of the labware."
-    )
-    eventualDestinationLocationSequence: LabwareLocationSequence | None = Field(
-        None, description="The eventual destination of the labware."
     )
 
 
@@ -95,24 +83,12 @@ class RetrieveImpl(AbstractCommandImpl[RetrieveParams, SuccessData[RetrieveResul
         # Get the labware dimensions for the labware being retrieved,
         # which is the first one in the hopper labware id list
         lw_id = stacker_state.hopper_labware_ids[0]
-        original_location_sequence = self._state_view.geometry.get_location_sequence(
-            lw_id
-        )
-        labware = self._state_view.labware.get(lw_id)
-        labware_height = self._state_view.labware.get_dimensions(labware_id=lw_id).z
-        if labware.lid_id is not None:
-            lid_def = self._state_view.labware.get_definition(labware.lid_id)
-            offset = self._state_view.labware.get_labware_overlap_offsets(
-                lid_def, labware.loadName
-            ).z
-            labware_height = labware_height + lid_def.dimensions.zDimension - offset
+        lw_dim = self._state_view.labware.get_dimensions(labware_id=lw_id)
 
         if stacker_hw is not None:
-            await stacker_hw.dispense_labware(labware_height=labware_height)
+            # Dispense the labware from the Flex Stacker using the labware height
+            await stacker_hw.dispense_labware(labware_height=lw_dim.z)
 
-        own_addressable_area = self._state_view.modules.get_provided_addressable_area(
-            params.moduleId
-        )
         # update the state to reflect the labware is now in the flex stacker slot
         state_update.set_labware_location(
             labware_id=lw_id,
@@ -123,17 +99,7 @@ class RetrieveImpl(AbstractCommandImpl[RetrieveParams, SuccessData[RetrieveResul
             module_id=params.moduleId, labware_id=lw_id
         )
         return SuccessData(
-            public=RetrieveResult(
-                labware_id=lw_id,
-                originLocationSequence=original_location_sequence,
-                eventualDestinationLocationSequence=[
-                    OnModuleLocationSequenceComponent(moduleId=params.moduleId),
-                    OnAddressableAreaLocationSequenceComponent(
-                        addressableAreaName=own_addressable_area,
-                    ),
-                ],
-            ),
-            state_update=state_update,
+            public=RetrieveResult(labware_id=lw_id), state_update=state_update
         )
 
 
@@ -142,7 +108,7 @@ class Retrieve(BaseCommand[RetrieveParams, RetrieveResult, ErrorOccurrence]):
 
     commandType: RetrieveCommandType = "flexStacker/retrieve"
     params: RetrieveParams
-    result: Optional[RetrieveResult] = None
+    result: Optional[RetrieveResult]
 
     _ImplementationCls: Type[RetrieveImpl] = RetrieveImpl
 

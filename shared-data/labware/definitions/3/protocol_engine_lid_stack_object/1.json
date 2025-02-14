@@ -8,7 +8,7 @@
   "metadata": {
     "displayName": "Protocol Engine Lid Stack",
     "displayCategory": "system",
-    "displayVolumeUnits": "µL",
+    "displayVolumeUnits": "\u00b5L",
     "tags": []
   },
   "dimensions": {

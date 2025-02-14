@@ -31,7 +31,7 @@ export function useSoftwareUpdatePoll(): void {
 
 export function useProtocolReceiptToast(): void {
   const host = useHost()
-  const { t, i18n } = useTranslation(['protocol_info', 'shared'])
+  const { t } = useTranslation('protocol_info')
   const { makeToast } = useToaster()
   const queryClient = useQueryClient()
   const protocolIdsQuery = useAllProtocolIdsQuery(
@@ -83,7 +83,7 @@ export function useProtocolReceiptToast(): void {
               }) as string,
               'success',
               {
-                buttonText: i18n.format(t('shared:close'), 'capitalize'),
+                closeButton: true,
                 disableTimeout: true,
                 displayType: 'odd',
               }

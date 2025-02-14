@@ -48,7 +48,6 @@ describe('DeckThumbnail', () => {
           def: fixture12Trough as LabwareDefinition2,
           labwareDefURI: 'mockDefUri',
           slot: 'A1',
-          pythonName: 'mockPythonName',
         },
       },
     })

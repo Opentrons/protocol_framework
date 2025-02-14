@@ -148,7 +148,7 @@ class AirGapInPlace(
 
     commandType: AirGapInPlaceCommandType = "airGapInPlace"
     params: AirGapInPlaceParams
-    result: Optional[AirGapInPlaceResult] = None
+    result: Optional[AirGapInPlaceResult]
 
     _ImplementationCls: Type[AirGapInPlaceImplementation] = AirGapInPlaceImplementation
 

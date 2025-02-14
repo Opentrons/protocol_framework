@@ -276,9 +276,9 @@ export const consolidate: CommandCreator<ConsolidateArgs> = (
                   labwareId: args.sourceLabware,
                   wellName: sourceWell,
                   wellLocation: {
-                    origin: 'top',
+                    origin: 'bottom',
                     offset: {
-                      z: args.touchTipAfterAspirateOffsetMmFromTop,
+                      z: args.touchTipAfterAspirateOffsetMmFromBottom,
                     },
                   },
                 }),
@@ -324,7 +324,6 @@ export const consolidate: CommandCreator<ConsolidateArgs> = (
           }),
         ]
       }
-
       //  can not touch tip in a waste chute
       const touchTipAfterDispenseCommands: CurriedCommandCreator[] =
         args.touchTipAfterDispense && destinationWell != null
@@ -334,9 +333,9 @@ export const consolidate: CommandCreator<ConsolidateArgs> = (
                 labwareId: args.destLabware,
                 wellName: destinationWell,
                 wellLocation: {
-                  origin: 'top',
+                  origin: 'bottom',
                   offset: {
-                    z: args.touchTipAfterDispenseOffsetMmFromTop,
+                    z: args.touchTipAfterDispenseOffsetMmFromBottom,
                   },
                 },
               }),

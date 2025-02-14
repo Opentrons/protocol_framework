@@ -1,15 +1,9 @@
 import { createAction } from 'redux-actions'
-import { getLiquidEntities } from '../../step-forms/selectors'
 import { selectors } from '../selectors'
 import type { StepFieldName } from '../../form-types'
 import type { DeckSlot, ThunkAction } from '../../types'
 import type { Fixture, IngredInputs } from '../types'
-import type {
-  CutoutId,
-  LabwareDisplayCategory,
-  ModuleModel,
-} from '@opentrons/shared-data'
-import type { LiquidEntities, LiquidEntity } from '@opentrons/step-generation'
+import type { CutoutId, ModuleModel } from '@opentrons/shared-data'
 
 // ===== Labware selector actions =====
 export interface OpenAddLabwareModalAction {
@@ -74,7 +68,6 @@ export interface CreateContainerAction {
   payload: CreateContainerArgs & {
     slot: DeckSlot
     id: string
-    displayCategory: LabwareDisplayCategory
   }
 }
 export interface DeleteContainerAction {
@@ -83,6 +76,10 @@ export interface DeleteContainerAction {
     labwareId: string
   }
 }
+// @ts-expect-error(sa, 2021-6-20): creatActions doesn't return exact actions
+export const deleteContainer: (payload: {
+  labwareId: string
+}) => DeleteContainerAction = createAction('DELETE_CONTAINER')
 // ===========
 export interface SwapSlotContentsAction {
   type: 'MOVE_DECK_ITEM'
@@ -110,7 +107,6 @@ export interface DuplicateLabwareAction {
     duplicateLabwareId: string
     duplicateLabwareNickname: string
     slot: DeckSlot
-    displayCategory: LabwareDisplayCategory
   }
 }
 
@@ -128,60 +124,33 @@ export const removeWellsContents: (
   type: 'REMOVE_WELLS_CONTENTS',
   payload,
 })
-
-export interface EditMultipleLiquidGroupsAction {
-  type: 'EDIT_MULTIPLE_LIQUID_GROUPS_PYTHON_NAME'
-  payload: LiquidEntities // Updated liquid group pythonName
-}
-
 export interface DeleteLiquidGroupAction {
   type: 'DELETE_LIQUID_GROUP'
   payload: string // liquid group id
 }
 export const deleteLiquidGroup: (
   liquidGroupId: string
-) => ThunkAction<
-  DeleteLiquidGroupAction | EditMultipleLiquidGroupsAction
-> = liquidGroupId => (dispatch, getState) => {
-  const allLiquidGroups = selectors.getLiquidGroupsOnDeck(getState())
-  const liquidEntities = getLiquidEntities(getState())
-  const liquidIsOnDeck = allLiquidGroups.includes(liquidGroupId)
-
-  if (!Object.keys(allLiquidGroups).includes(liquidGroupId)) {
-    return
-  }
-
+) => ThunkAction<DeleteLiquidGroupAction> = liquidGroupId => (
+  dispatch,
+  getState
+) => {
+  const allLiquidGroupsOnDeck = selectors.getLiquidGroupsOnDeck(getState())
+  const liquidIsOnDeck = allLiquidGroupsOnDeck.includes(liquidGroupId)
+  // TODO: Ian 2018-10-22 we will eventually want to replace
+  // this window.confirm with a modal
   const okToDelete = liquidIsOnDeck
     ? global.confirm(
         'This liquid has been placed on the deck, are you sure you want to delete it?'
       )
     : true
 
-  if (!okToDelete) {
-    return
+  if (okToDelete) {
+    return dispatch({
+      type: 'DELETE_LIQUID_GROUP',
+      payload: liquidGroupId,
+    })
   }
-
-  // filter out the deleted group and create an updated liquid entities object
-  const { [liquidGroupId]: _, ...remainingLiquidEntities } = liquidEntities
-
-  const updatedLiquidGroupPythonName = Object.keys(remainingLiquidEntities)
-    .sort() //  sort to ensure correct order
-    .reduce<Record<string, LiquidEntity>>((acc, oldId, index) => {
-      acc[oldId] = {
-        ...remainingLiquidEntities[oldId],
-        pythonName: `liquid_${index + 1}`,
-      }
-      return acc
-    }, {})
-
-  //  delete user selected group, then update pythonName for rest of liquids
-  dispatch({ type: 'DELETE_LIQUID_GROUP', payload: liquidGroupId })
-  dispatch({
-    type: 'EDIT_MULTIPLE_LIQUID_GROUPS_PYTHON_NAME',
-    payload: updatedLiquidGroupPythonName,
-  })
 }
-
 // NOTE: assumes you want to set a uniform volume of the same liquid in one labware
 export interface SetWellContentsPayload {
   liquidGroupId: string
@@ -230,22 +199,22 @@ export interface EditLiquidGroupAction {
   type: 'EDIT_LIQUID_GROUP'
   payload: IngredInputs & {
     liquidGroupId: string
-    pythonName: string
   }
 }
 // NOTE: with no ID, a new one is assigned
 export const editLiquidGroup: (
-  args: IngredInputs
+  args: IngredInputs & {
+    liquidGroupId: string | null | undefined
+  }
 ) => ThunkAction<EditLiquidGroupAction> = args => (dispatch, getState) => {
-  const { liquidGroupId: liquidGroupIdFromArg, ...payloadArgs } = args
-  const liquidGroupId =
-    liquidGroupIdFromArg || selectors.getNextLiquidGroupId(getState())
+  const { liquidGroupId, ...payloadArgs } = args // NOTE: separate liquidGroupId for flow to understand unpacking :/
+
   dispatch({
     type: 'EDIT_LIQUID_GROUP',
     payload: {
       ...payloadArgs,
-      liquidGroupId,
-      pythonName: `liquid_${parseInt(liquidGroupId) + 1}`,
+      liquidGroupId:
+        args.liquidGroupId || selectors.getNextLiquidGroupId(getState()),
     },
   })
 }

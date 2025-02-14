@@ -5,12 +5,10 @@ import { SPACING } from '@opentrons/components'
 import { selectors as stepFormSelectors } from '../../../../../step-forms'
 import { getMatchingTipLiquidSpecs } from '../../../../../utils'
 import { InputStepFormField } from '../../../../../molecules'
-
 import type { FieldProps } from '../types'
-import type { FlowRateType } from '../../../../../resources/types'
 
 interface FlowRateFieldProps extends FieldProps {
-  flowRateType: FlowRateType
+  flowRateType: 'aspirate' | 'dispense' | 'blowout'
   volume: unknown
   tiprack: unknown
   pipetteId?: string | null

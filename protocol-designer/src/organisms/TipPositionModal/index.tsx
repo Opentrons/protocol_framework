@@ -27,7 +27,6 @@ import { TipPositionSideView } from './TipPositionSideView'
 
 import type { ChangeEvent } from 'react'
 import type { StepFieldName } from '../../form-types'
-import type { MoveLiquidPrefixType } from '../../resources/types'
 
 type Offset = 'x' | 'y' | 'z'
 interface PositionSpec {
@@ -44,7 +43,7 @@ interface TipPositionModalProps {
   wellXWidthMm: number
   wellYWidthMm: number
   isIndeterminate?: boolean
-  prefix: MoveLiquidPrefixType
+  prefix: 'aspirate' | 'dispense' | 'mix'
 }
 
 export function TipPositionModal(
@@ -77,8 +76,9 @@ export function TipPositionModal(
     )
   }
 
-  const defaultMmFromBottom = utils.getDefaultMmFromEdge({
+  const defaultMmFromBottom = utils.getDefaultMmFromBottom({
     name: zSpec.name,
+    wellDepthMm,
   })
 
   const [zValue, setZValue] = useState<string | null>(
