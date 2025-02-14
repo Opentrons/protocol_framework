@@ -76,7 +76,7 @@ class OnLabwareLocation(BaseModel):
 class InStackerHopperLocation(BaseModel):
     """The location of a labware in a stacker hopper."""
 
-    kind: Literal["inStackerHopper"]
+    kind: Literal["inStackerHopper"] = "inStackerHopper"
     moduleId: str = Field(
         ..., description="The ID of the stacker in which this labware is."
     )
