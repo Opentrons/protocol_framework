@@ -1632,7 +1632,22 @@
             }
           }
         },
-        "labwareId": "UUID"
+        "labwareId": "UUID",
+        "locationSequence": [
+          {
+            "addressableAreaName": "temperatureModuleV2D1",
+            "kind": "onAddressableArea"
+          },
+          {
+            "kind": "onModule",
+            "moduleId": "UUID"
+          },
+          {
+            "cutoutId": "cutoutD1",
+            "kind": "onCutoutFixture",
+            "possibleCutoutFixtureIds": []
+          }
+        ]
       },
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
@@ -2810,7 +2825,26 @@
             }
           }
         },
-        "labwareId": "UUID"
+        "labwareId": "UUID",
+        "locationSequence": [
+          {
+            "kind": "onLabware",
+            "labwareId": "UUID"
+          },
+          {
+            "addressableAreaName": "temperatureModuleV2D1",
+            "kind": "onAddressableArea"
+          },
+          {
+            "kind": "onModule",
+            "moduleId": "UUID"
+          },
+          {
+            "cutoutId": "cutoutD1",
+            "kind": "onCutoutFixture",
+            "possibleCutoutFixtureIds": []
+          }
+        ]
       },
       "startedAt": "TIMESTAMP",
       "status": "succeeded"
@@ -3283,6 +3317,11 @@
           },
           "schemaVersion": 2,
           "stackingOffsetWithLabware": {
+            "evotips_flex_96_tiprack_adapter": {
+              "x": 0,
+              "y": 0,
+              "z": 102
+            },
             "opentrons_96_deep_well_adapter": {
               "x": 0,
               "y": 0,
@@ -4265,7 +4304,20 @@
             }
           }
         },
-        "labwareId": "UUID"
+        "labwareId": "UUID",
+        "locationSequence": [
+          {
+            "addressableAreaName": "A2",
+            "kind": "onAddressableArea"
+          },
+          {
+            "cutoutId": "cutoutA2",
+            "kind": "onCutoutFixture",
+            "possibleCutoutFixtureIds": [
+              "singleCenterSlot"
+            ]
+          }
+        ]
       },
       "startedAt": "TIMESTAMP",
       "status": "succeeded"

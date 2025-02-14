@@ -1,4 +1,5 @@
 """ProtocolEngine shared test fixtures."""
+
 from __future__ import annotations
 
 import pytest
@@ -156,6 +157,14 @@ def adapter_def() -> LabwareDefinition:
 
 
 @pytest.fixture(scope="session")
+def lid_stack_def() -> LabwareDefinition:
+    """Get the definition of the opentrons tiprack lid."""
+    return LabwareDefinition.model_validate(
+        load_definition("protocol_engine_lid_stack_object", 1, schema=3)
+    )
+
+
+@pytest.fixture(scope="session")
 def falcon_tuberack_def() -> LabwareDefinition:
     """Get the definition of the 6-well Falcon tuberack."""
     return LabwareDefinition.model_validate(
@@ -168,6 +177,14 @@ def magdeck_well_plate_def() -> LabwareDefinition:
     """Get the definition of a well place compatible with magdeck."""
     return LabwareDefinition.model_validate(
         load_definition("nest_96_wellplate_100ul_pcr_full_skirt", 1)
+    )
+
+
+@pytest.fixture(scope="session")
+def tiprack_lid_def() -> LabwareDefinition:
+    """Get the definition of the opentrons tiprack lid."""
+    return LabwareDefinition.model_validate(
+        load_definition("opentrons_flex_tiprack_lid", 1, schema=3)
     )
 
 

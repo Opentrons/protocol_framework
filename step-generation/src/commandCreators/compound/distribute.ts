@@ -299,9 +299,9 @@ export const distribute: CommandCreator<DistributeArgs> = (
                   labwareId: args.destLabware,
                   wellName: destWell,
                   wellLocation: {
-                    origin: 'bottom',
+                    origin: 'top',
                     offset: {
-                      z: args.touchTipAfterDispenseOffsetMmFromBottom,
+                      z: args.touchTipAfterDispenseOffsetMmFromTop,
                     },
                   },
                 }),
@@ -458,9 +458,9 @@ export const distribute: CommandCreator<DistributeArgs> = (
               labwareId: args.sourceLabware,
               wellName: args.sourceWell,
               wellLocation: {
-                origin: 'bottom',
+                origin: 'top',
                 offset: {
-                  z: args.touchTipAfterAspirateOffsetMmFromBottom,
+                  z: args.touchTipAfterAspirateOffsetMmFromTop,
                 },
               },
             }),
@@ -497,8 +497,35 @@ export const distribute: CommandCreator<DistributeArgs> = (
           ]
         : []
       const aspirateDisposalVolumeOnce = chunkIndex === 0 ? disposalVolume : 0
+      // if changeTip is 'once' or 'never', only prewet for first aspiration
+      // if changeTip is 'always', pre-wet for each chunk
+      const preWetTipCommands =
+        args.preWetTip &&
+        (args.changeTip === 'always' ? true : chunkIndex === 0)
+          ? mixUtil({
+              pipette: args.pipette,
+              labware: args.sourceLabware,
+              well: args.sourceWell,
+              volume:
+                args.volume * destWellChunk.length +
+                (args.changeTip === 'always'
+                  ? disposalVolume
+                  : aspirateDisposalVolumeOnce),
+              times: 1,
+              offsetFromBottomMm: aspirateOffsetFromBottomMm,
+              aspirateFlowRateUlSec,
+              dispenseFlowRateUlSec,
+              aspirateDelaySeconds: aspirateDelay?.seconds,
+              dispenseDelaySeconds: dispenseDelay?.seconds,
+              tipRack: args.tipRack,
+              xOffset: aspirateXOffset,
+              yOffset: aspirateYOffset,
+              nozzles,
+            })
+          : []
       return [
         ...tipCommands,
+        ...preWetTipCommands,
         ...configureForVolumeCommand,
         ...mixBeforeAspirateCommands,
         curryCommandCreator(aspirate, {

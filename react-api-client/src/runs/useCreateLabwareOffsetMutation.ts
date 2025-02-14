@@ -3,23 +3,23 @@ import { createLabwareOffset } from '@opentrons/api-client'
 import { useHost } from '../api'
 import type {
   HostConfig,
-  Run,
-  LabwareOffsetCreateData,
+  LegacyLabwareOffsetCreateData,
+  LabwareOffset,
 } from '@opentrons/api-client'
 import type { UseMutationResult, UseMutateAsyncFunction } from 'react-query'
 
 interface CreateLabwareOffsetParams {
   runId: string
-  data: LabwareOffsetCreateData
+  data: LegacyLabwareOffsetCreateData
 }
 
 export type UseCreateLabwareOffsetMutationResult = UseMutationResult<
-  Run,
+  LabwareOffset,
   unknown,
   CreateLabwareOffsetParams
 > & {
   createLabwareOffset: UseMutateAsyncFunction<
-    Run,
+    LabwareOffset,
     unknown,
     CreateLabwareOffsetParams
   >
@@ -29,19 +29,22 @@ export function useCreateLabwareOffsetMutation(): UseCreateLabwareOffsetMutation
   const host = useHost()
   const queryClient = useQueryClient()
 
-  const mutation = useMutation<Run, unknown, CreateLabwareOffsetParams>(
-    ({ runId, data }) =>
-      createLabwareOffset(host as HostConfig, runId, data)
-        .then(response => {
-          queryClient.invalidateQueries([host, 'runs']).catch((e: Error) => {
-            console.error(`error invalidating runs query: ${e.message}`)
-          })
-          return response.data
+  const mutation = useMutation<
+    LabwareOffset,
+    unknown,
+    CreateLabwareOffsetParams
+  >(({ runId, data }) =>
+    createLabwareOffset(host as HostConfig, runId, data)
+      .then(response => {
+        queryClient.invalidateQueries([host, 'runs']).catch((e: Error) => {
+          console.error(`error invalidating runs query: ${e.message}`)
         })
-        .catch((e: Error) => {
-          console.error(`error creating labware offsets: ${e.message}`)
-          throw e
-        })
+        return response.data
+      })
+      .catch((e: Error) => {
+        console.error(`error creating labware offsets: ${e.message}`)
+        throw e
+      })
   )
 
   return {

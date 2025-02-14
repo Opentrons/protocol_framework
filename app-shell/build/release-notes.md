@@ -8,6 +8,20 @@ By installing and using Opentrons software, you agree to the Opentrons End-User 
 
 ---
 
+## Opentrons App Changes in 8.3.0
+
+Welcome to the v8.3.0 release of the Opentrons App! This release adds support for Mandarin in the app or Flex touchscreen and includes other beta features for our commercial partners.
+
+### New Features
+
+- Change the app or Flex touchscreen language to Mandarin in Settings.
+
+### Improved Features
+
+- Improvements to the Flex error recovery feature help protocols recover from detected stalls and collisions, saving you valuable time and resources.
+
+---
+
 ## Opentrons App Changes in 8.2.0
 
 Welcome to the v8.2.0 release of the Opentrons App! This release adds support for the Opentrons Absorbance Plate Reader Module, as well as other features.

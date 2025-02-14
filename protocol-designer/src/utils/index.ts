@@ -1,4 +1,5 @@
 import uuidv1 from 'uuid/v4'
+import snakeCase from 'lodash/snakeCase'
 import {
   makeWellSetHelpers,
   getDeckDefFromRobotType,
@@ -21,6 +22,8 @@ import type {
   CutoutFixtureId,
   RobotType,
   SupportedTip,
+  ModuleType,
+  LabwareDisplayCategory,
 } from '@opentrons/shared-data'
 import type { WellGroup } from '@opentrons/components'
 import type { BoundingRect, GenericRect } from '../collision-types'
@@ -283,4 +286,23 @@ export const removeOpentronsPhrases = (input: string): string => {
     .replace(/\s+/g, ' ')
 
   return updatedText.trim()
+}
+
+const getModuleShortnameForPython = (type: ModuleType): string => {
+  const shortName = type.split('Type')[0]
+  return snakeCase(shortName)
+}
+
+export const getModulePythonName = (
+  type: ModuleType,
+  typeCount: number
+): string => {
+  return `${getModuleShortnameForPython(type)}_${typeCount}`
+}
+
+export const getLabwarePythonName = (
+  labwareDisplayCategory: LabwareDisplayCategory,
+  typeCount: number
+): string => {
+  return `${snakeCase(labwareDisplayCategory)}_${typeCount}`
 }
