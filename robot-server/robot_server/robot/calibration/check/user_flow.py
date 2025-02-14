@@ -19,7 +19,7 @@ from opentrons.calibration_storage.ot2 import (
     save_tip_length_calibration,
 )
 
-from opentrons.calibration_storage.ot2 import models
+from opentrons.calibration_storage.ot2.models import v1 as cal_models
 from opentrons.types import Mount, Point, Location
 from opentrons.hardware_control import (
     HardwareControlAPI,
@@ -347,9 +347,9 @@ class CheckCalibrationUserFlow:
     def _get_current_calibrations(
         self,
     ) -> tuple[
-        models.v1.DeckCalibrationModel | None,
-        dict[Mount, models.v1.InstrumentOffsetModel | None],
-        dict[Mount, models.v1.TipLengthModel | None],
+        cal_models.DeckCalibrationModel | None,
+        dict[Mount, cal_models.InstrumentOffsetModel | None],
+        dict[Mount, cal_models.TipLengthModel | None],
     ]:
         deck = get_robot_deck_attitude()
         pipette_offsets = {
@@ -365,7 +365,7 @@ class CheckCalibrationUserFlow:
 
     def _get_tip_length_from_pipette(
         self, mount: Mount, pipette: Pipette
-    ) -> Optional[models.v1.TipLengthModel]:
+    ) -> Optional[cal_models.TipLengthModel]:
         if not pipette.pipette_id:
             return None
         pip_offset = get_pipette_offset(pipette.pipette_id, mount)
@@ -431,7 +431,7 @@ class CheckCalibrationUserFlow:
         self,
         pipette: Optional[Pipette] = None,
         mount: Optional[Mount] = None,
-    ) -> models.v1.InstrumentOffsetModel:
+    ) -> cal_models.InstrumentOffsetModel:
         if not pipette or not mount:
             pip_offset = get_pipette_offset(
                 self.hw_pipette.pipette_id or "", self.mount
@@ -444,7 +444,7 @@ class CheckCalibrationUserFlow:
     @staticmethod
     def _get_tr_lw(
         tip_rack_def: Optional[LabwareDefinition],
-        existing_calibration: models.v1.InstrumentOffsetModel,
+        existing_calibration: cal_models.InstrumentOffsetModel,
         volume: float,
         position: Location,
     ) -> labware.Labware:
@@ -497,7 +497,7 @@ class CheckCalibrationUserFlow:
         return tr_lw
 
     def _get_tiprack_by_pipette_volume(
-        self, volume: float, existing_calibration: models.v1.InstrumentOffsetModel
+        self, volume: float, existing_calibration: cal_models.InstrumentOffsetModel
     ) -> labware.Labware:
         tip_rack_def = None
         if self._tip_racks:
