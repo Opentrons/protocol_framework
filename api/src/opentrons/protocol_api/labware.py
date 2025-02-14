@@ -26,7 +26,12 @@ from typing import (
     Mapping,
 )
 
-from opentrons_shared_data.labware.types import LabwareDefinition, LabwareParameters
+from opentrons_shared_data.labware.types import (
+    LabwareDefinition,
+    LabwareDefinition2,
+    LabwareParameters2,
+    LabwareParameters3,
+)
 
 from opentrons.types import Location, Point, NozzleMapInterface
 from opentrons.protocols.api_support.types import APIVersion
@@ -537,7 +542,7 @@ class Labware:
 
     @property
     @requires_version(2, 0)
-    def parameters(self) -> "LabwareParameters":
+    def parameters(self) -> "LabwareParameters2 | LabwareParameters3":
         """Internal properties of a labware including type and quirks."""
         return self._core.get_parameters()
 
@@ -1445,7 +1450,7 @@ def next_available_tip(
 # TODO(mc, 2022-11-09): implementation detail, move somewhere else
 # only used in old calibration flows by robot-server
 def load_from_definition(
-    definition: "LabwareDefinition",
+    definition: "LabwareDefinition2",
     parent: Location,
     label: Optional[str] = None,
     api_level: Optional[APIVersion] = None,
@@ -1489,8 +1494,8 @@ def load(
     label: Optional[str] = None,
     namespace: Optional[str] = None,
     version: int = 1,
-    bundled_defs: Optional[Dict[str, LabwareDefinition]] = None,
-    extra_defs: Optional[Dict[str, LabwareDefinition]] = None,
+    bundled_defs: Optional[Mapping[str, LabwareDefinition2]] = None,
+    extra_defs: Optional[Mapping[str, LabwareDefinition2]] = None,
     api_level: Optional[APIVersion] = None,
 ) -> Labware:
     """
@@ -1527,5 +1532,15 @@ def load(
         bundled_defs=bundled_defs,
         extra_defs=extra_defs,
     )
+
+    # The legacy `load_from_definition()` function that we're calling only supports
+    # schemaVersion==2 labware. Fortunately, when robot-server calls this function,
+    # we only expect it to try to load schemaVersion==2 labware, so we never expect
+    # this ValueError to be raised in practice.
+    if definition["schemaVersion"] != 2:
+        raise ValueError(
+            f"{namespace}/{load_name}/{version} has schema {definition['schemaVersion']}."
+            " Only schema 2 is supported."
+        )
 
     return load_from_definition(definition, parent, label, api_level)

@@ -57,7 +57,7 @@ from .state_machine import (
     PipetteOffsetWithTipLengthStateMachine,
 )
 
-from opentrons_shared_data.labware.types import LabwareDefinition
+from opentrons_shared_data.labware.types import LabwareDefinition2
 
 
 MODULE_LOG = logging.getLogger(__name__)
@@ -85,7 +85,7 @@ class PipetteOffsetCalibrationUserFlow:
         mount: Mount = Mount.RIGHT,
         recalibrate_tip_length: bool = False,
         has_calibration_block: bool = False,
-        tip_rack_def: Optional[LabwareDefinition] = None,
+        tip_rack_def: Optional[LabwareDefinition2] = None,
     ) -> None:
         self._hardware = hardware
         self._mount = mount
@@ -263,11 +263,17 @@ class PipetteOffsetCalibrationUserFlow:
 
     async def load_labware(
         self,
-        tiprackDefinition: Optional[LabwareDefinition] = None,
+        # tiprackDefinition comes from the HTTP client and is not validated by the time
+        # it reaches here, hence us calling labware.verify_definition() below.
+        tiprackDefinition: Optional[LabwareDefinition2] = None,
     ) -> None:
         self._supported_commands.loadLabware = False
         if tiprackDefinition:
             verified_definition = labware.verify_definition(tiprackDefinition)
+            # todo(mm, 2025-02-13): Move schema validation to the FastAPI layer and turn
+            # this schemaVersion assertion into a proper HTTP API 422 error.
+            # https://opentrons.atlassian.net/browse/EXEC-1230
+            assert verified_definition["schemaVersion"] == 2
             existing_offset_calibration = self._get_stored_pipette_offset_cal()
             self._load_tip_rack(verified_definition, existing_offset_calibration)
 
@@ -315,9 +321,12 @@ class PipetteOffsetCalibrationUserFlow:
 
     def _get_stored_tip_length_cal(self) -> Optional[float]:
         try:
+            definition = self._tip_rack._core.get_definition()
+            # Assert for type checking. This should always pass because
+            # self._get_tr_lw() limits itself to schema 2.
+            assert definition["schemaVersion"] == 2
             return load_tip_length_calibration(
-                self._hw_pipette.pipette_id or "",
-                self._tip_rack._core.get_definition(),
+                self._hw_pipette.pipette_id or "", definition
             ).tipLength
         except TipLengthCalNotFound:
             return None
@@ -350,7 +359,7 @@ class PipetteOffsetCalibrationUserFlow:
 
     @staticmethod
     def _get_tr_lw(
-        tip_rack_def: Optional[LabwareDefinition],
+        tip_rack_def: Optional[LabwareDefinition2],
         existing_calibration: Optional[models.v1.InstrumentOffsetModel],
         volume: float,
         position: Location,
@@ -379,7 +388,7 @@ class PipetteOffsetCalibrationUserFlow:
 
     def _load_tip_rack(
         self,
-        tip_rack_def: Optional[LabwareDefinition],
+        tip_rack_def: Optional[LabwareDefinition2],
         existing_calibration: Optional[models.v1.InstrumentOffsetModel],
     ) -> None:
         """

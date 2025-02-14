@@ -35,7 +35,7 @@ from opentrons.protocols.api_support.deck_type import (
     guess_from_global_config as guess_deck_type_from_global_config,
 )
 
-from opentrons_shared_data.labware.types import LabwareDefinition
+from opentrons_shared_data.labware.types import LabwareDefinition2
 
 from robot_server.robot.calibration.constants import (
     MOVE_TO_DECK_SAFETY_BUFFER,
@@ -100,7 +100,7 @@ class CheckCalibrationUserFlow:
         self,
         hardware: HardwareControlAPI,
         has_calibration_block: bool = False,
-        tip_rack_defs: Optional[List[LabwareDefinition]] = None,
+        tip_rack_defs: Optional[List[LabwareDefinition2]] = None,
     ) -> None:
         self._hardware = hardware
         self._state_machine = CalibrationCheckStateMachine()
@@ -125,7 +125,7 @@ class CheckCalibrationUserFlow:
         ) = self._get_current_calibrations()
         self._check_valid_calibrations()
 
-        self._tip_racks: Optional[List[LabwareDefinition]] = tip_rack_defs
+        self._tip_racks: Optional[List[LabwareDefinition2]] = tip_rack_defs
         self._active_pipette, self._pip_info = self._select_starting_pipette()
 
         self._has_calibration_block = has_calibration_block
@@ -210,7 +210,7 @@ class CheckCalibrationUserFlow:
         return self._supported_commands.supported()
 
     async def transition(
-        self, tiprackDefinition: Optional[LabwareDefinition] = None
+        self, tiprackDefinition: Optional[LabwareDefinition2] = None
     ) -> None:
         pass
 
@@ -379,6 +379,8 @@ class CheckCalibrationUserFlow:
         details = helpers.details_from_uri(pip_offset.uri)
         position = self._deck.position_for(TIPRACK_SLOT)
         if details.namespace == OPENTRONS_NAMESPACE:
+            # todo(mm, 2025-02-13): This can probably replaced with a load from
+            # shared-data. We don't need a whole Labware object.
             tiprack = labware.load(
                 load_name=details.load_name,
                 namespace=details.namespace,
@@ -388,6 +390,9 @@ class CheckCalibrationUserFlow:
             tiprack_def = tiprack._core.get_definition()
         else:
             tiprack_def = get_custom_tiprack_definition_for_tlc(pip_offset.uri)
+        # todo(mm, 2025-02-13): Unclear if this assert is actually always safe.
+        # https://opentrons.atlassian.net/browse/EXEC-1230
+        assert tiprack_def["schemaVersion"] == 2
         return load_tip_length_calibration(pipette.pipette_id, tiprack_def)
 
     def _check_valid_calibrations(self) -> None:
@@ -426,7 +431,7 @@ class CheckCalibrationUserFlow:
     def _is_checking_both_mounts(self) -> bool:
         return len(self._pip_info) == 2
 
-    def _get_volume_from_tiprack_def(self, tip_rack_def: LabwareDefinition) -> float:
+    def _get_volume_from_tiprack_def(self, tip_rack_def: LabwareDefinition2) -> float:
         first_well = tip_rack_def["wells"]["A1"]
         return float(first_well["totalLiquidVolume"])
 
@@ -453,7 +458,7 @@ class CheckCalibrationUserFlow:
 
     @staticmethod
     def _get_tr_lw(
-        tip_rack_def: Optional[LabwareDefinition],
+        tip_rack_def: Optional[LabwareDefinition2],
         existing_calibration: cal_models.InstrumentOffsetModel,
         volume: float,
         position: Location,
@@ -720,6 +725,9 @@ class CheckCalibrationUserFlow:
                 tl_at_active_mount, cal_types.SourceType.calibration_check
             )
             tip_definition = self.active_tiprack._core.get_definition()
+            # Assert for type checking. This should always pass because
+            # self._get_tr_lw() should only deal with labware schema 2.
+            assert tip_definition["schemaVersion"] == 2
             tip_length_dict = create_tip_length_data(
                 definition=tip_definition,
                 # fixme(mm, 2025-02-14): .tip_length does not exist on this type but
@@ -906,11 +914,12 @@ class CheckCalibrationUserFlow:
         pip_id = self.hw_pipette.pipette_id
         assert pip_id
         assert self.active_tiprack
+        definition = self.active_tiprack._core.get_definition()
+        # Assert for type checking. This should always pass because
+        # self._get_tr_lw() should only deal with labware schema 2.
+        assert definition["schemaVersion"] == 2
         try:
-            return load_tip_length_calibration(
-                pip_id,
-                self.active_tiprack._core.get_definition(),
-            ).tipLength
+            return load_tip_length_calibration(pip_id, definition).tipLength
         except cal_types.TipLengthCalNotFound:
             tip_overlap = self.hw_pipette.tip_overlap["v0"].get(
                 self.active_tiprack.uri, self.hw_pipette.tip_overlap["v0"]["default"]
