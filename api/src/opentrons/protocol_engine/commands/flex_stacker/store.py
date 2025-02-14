@@ -14,10 +14,8 @@ from ...errors import (
 )
 from ...state import update_types
 from ...types import (
-    OFF_DECK_LOCATION,
-    NotOnDeckLocationSequenceComponent,
-    OnModuleLocationSequenceComponent,
     LabwareLocationSequence,
+    InStackerHopperLocation,
 )
 
 
@@ -85,6 +83,11 @@ class StoreImpl(AbstractCommandImpl[StoreParams, SuccessData[StoreResult]]):
         original_location_sequence = self._state_view.geometry.get_location_sequence(
             lw_id
         )
+        eventual_target_location_sequence = (
+            self._state_view.geometry.get_predicted_location_sequence(
+                InStackerHopperLocation(moduleId=params.moduleId)
+            )
+        )
         labware = self._state_view.labware.get(lw_id)
         labware_height = self._state_view.labware.get_dimensions(labware_id=lw_id).z
         if labware.lid_id is not None:
@@ -102,7 +105,7 @@ class StoreImpl(AbstractCommandImpl[StoreParams, SuccessData[StoreResult]]):
         # update the state to reflect the labware is store in the stack
         state_update.set_labware_location(
             labware_id=lw_id,
-            new_location=OFF_DECK_LOCATION,
+            new_location=InStackerHopperLocation(moduleId=params.moduleId),
             new_offset_id=None,
         )
         state_update.store_flex_stacker_labware(
@@ -112,12 +115,7 @@ class StoreImpl(AbstractCommandImpl[StoreParams, SuccessData[StoreResult]]):
         return SuccessData(
             public=StoreResult(
                 originLocationSequence=original_location_sequence,
-                eventualDestinationLocationSequence=[
-                    OnModuleLocationSequenceComponent(moduleId=params.moduleId),
-                    NotOnDeckLocationSequenceComponent(
-                        logicalLocationName=OFF_DECK_LOCATION
-                    ),
-                ],
+                eventualDestinationLocationSequence=eventual_target_location_sequence,
             ),
             state_update=state_update,
         )

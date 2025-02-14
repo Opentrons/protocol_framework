@@ -19,7 +19,8 @@ from ..types import (
     DeckSlotLocation,
     AddressableAreaLocation,
     LoadedModule,
-    OFF_DECK_LOCATION,
+    InStackerHopperLocation,
+    LabwareLocation,
 )
 
 from .command import AbstractCommandImpl, BaseCommand, BaseCommandCreate, SuccessData
@@ -141,7 +142,10 @@ class LoadLabwareImplementation(
             )
             state_update.set_addressable_area_used(params.location.slotName.id)
 
-        verified_location: LoadableLabwareLocation
+        # TODO: make this LoadableLabwareLocation again once we add the rest of the commands
+        # for stacker labware pool configuration. Until then, this is the only way to put a
+        # labware in the stacker hopper at the time the protocol starts.
+        verified_location: LabwareLocation
         if (
             self._is_loading_to_module(
                 params.location, ModuleModel.FLEX_STACKER_MODULE_V1
@@ -150,10 +154,9 @@ class LoadLabwareImplementation(
                 params.location.moduleId
             ).in_static_mode
         ):
-            # labware loaded to the flex stacker hopper is considered offdeck. This is
-            # a temporary solution until the hopper can be represented as non-addressable
-            # addressable area in the deck configuration.
-            verified_location = OFF_DECK_LOCATION
+            verified_location = InStackerHopperLocation(
+                moduleId=params.location.moduleId
+            )
         else:
             verified_location = self._state_view.geometry.ensure_location_not_occupied(
                 params.location
@@ -204,11 +207,9 @@ class LoadLabwareImplementation(
                 loaded_labware.definition
             )
 
-        if self._is_loading_to_module(
-            params.location, ModuleModel.FLEX_STACKER_MODULE_V1
-        ):
+        if isinstance(verified_location, InStackerHopperLocation):
             state_update.load_flex_stacker_hopper_labware(
-                module_id=params.location.moduleId,
+                module_id=verified_location.moduleId,
                 labware_id=loaded_labware.labware_id,
             )
 
@@ -222,7 +223,7 @@ class LoadLabwareImplementation(
                 definition=loaded_labware.definition,
                 offsetId=loaded_labware.offsetId,
                 locationSequence=self._state_view.geometry.get_predicted_location_sequence(
-                    params.location
+                    verified_location,
                 ),
             ),
             state_update=state_update,
