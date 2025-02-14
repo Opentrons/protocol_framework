@@ -289,6 +289,9 @@ class CheckCalibrationUserFlow:
         if len(pips) == 1:
             for mount, pip in pips.items():
                 pip_calibration = self._pipette_calibrations[mount]
+                # This assert reflects an assumption from before this code was type-checked.
+                # Ideally, this would be ensured statically.
+                assert pip_calibration is not None
                 info = PipetteInfo(
                     channels=pip.config.channels,
                     rank=PipetteRank.first,
@@ -344,6 +347,8 @@ class CheckCalibrationUserFlow:
             l_info.rank = PipetteRank.second
             return r_info, [r_info, l_info]
 
+    # todo(mm, 2025-02-14): These return types are the source of a lot of ignored and
+    # asserted-away type errors in this file. Double-check that they're actually correct.
     def _get_current_calibrations(
         self,
     ) -> tuple[
@@ -394,7 +399,12 @@ class CheckCalibrationUserFlow:
                 definition=CalibrationError.UNCALIBRATED_ROBOT,
                 flow="Calibration Health Check",
             )
-        deck_state = robot_calibration.validate_attitude_deck_calibration(deck)
+        deck_state = robot_calibration.validate_attitude_deck_calibration(
+            # fixme(mm, 2025-02-14): This is passing the wrong type and it happens
+            # to work because the two types share the same attribute names.
+            # This is from before this file was type-checked.
+            deck  # type: ignore[arg-type]
+        )
         if deck_state != util.DeckTransformState.OK:
             raise RobotServerError(
                 definition=CalibrationError.UNCALIBRATED_ROBOT,
@@ -702,35 +712,55 @@ class CheckCalibrationUserFlow:
         only_one_pipette = not self._is_checking_both_mounts()
         pipette_state = is_second_pipette or only_one_pipette
         if self.current_state == State.comparingTip:
-            calibration = mark_bad_calibration.mark_bad(
-                self._tip_lengths[active_mount], cal_types.SourceType.calibration_check
+            tl_at_active_mount = self._tip_lengths[active_mount]
+            # This assert reflects an assumption from before this code was type-checked.
+            # Ideally, this would be ensured statically.
+            assert tl_at_active_mount is not None
+            marked_tl_calibration = mark_bad_calibration.mark_bad(
+                tl_at_active_mount, cal_types.SourceType.calibration_check
             )
             tip_definition = self.active_tiprack._core.get_definition()
             tip_length_dict = create_tip_length_data(
                 definition=tip_definition,
-                length=calibration.tip_length,
-                cal_status=calibration.status,
+                # fixme(mm, 2025-02-14): .tip_length does not exist on this type but
+                # tipLength does. Investigate how (or if?) this has ever worked.
+                # This is from before this file was type-checked.
+                length=marked_tl_calibration.tip_length,  # type: ignore[attr-defined]
+                cal_status=marked_tl_calibration.status,
             )
-            save_tip_length_calibration(calibration.pipette, tip_length_dict)
+            save_tip_length_calibration(
+                # fixme(mm, 2025-02-14): .pipette does not exist on TipLengthModel,
+                # though it does exist on TipLengthCalibration. Investigate how (or if?)
+                # this has ever worked. This is from before this file was type-checked.
+                marked_tl_calibration.pipette,  # type: ignore[attr-defined]
+                tip_length_dict,
+            )
         elif self.current_state == State.comparingPointOne and pipette_state:
             # Here if we're on the second pipette, but the first slot we
             # should make sure we mark both pipette cal and deck cal as bad.
-            pip_calibration = mark_bad_calibration.mark_bad(
-                self._pipette_calibrations[active_mount],
+            pc_at_active_mount = self._pipette_calibrations[active_mount]
+            # This assert reflects an assumption from before this code was type-checked.
+            # Ideally, this would be ensured statically.
+            assert pc_at_active_mount is not None
+            marked_pipette_calibration = mark_bad_calibration.mark_bad(
+                pc_at_active_mount,
                 cal_types.SourceType.calibration_check,
             )
+            # This assert reflects an assumption from before this code was type-checked.
+            # Ideally, this would be ensured statically.
+            assert self._deck_calibration is not None
             deck_calibration = mark_bad_calibration.mark_bad(
                 self._deck_calibration, cal_types.SourceType.calibration_check
             )
             pipette_id = self.hw_pipette.pipette_id
             assert pipette_id, "Cannot update pipette offset calibraion"
             save_pipette_calibration(
-                offset=Point(*pip_calibration.offset),
+                offset=Point(*marked_pipette_calibration.offset),
                 pip_id=pipette_id,
                 mount=active_mount,
-                tiprack_hash=pip_calibration.tiprack,
-                tiprack_uri=pip_calibration.uri,
-                cal_status=pip_calibration.status,
+                tiprack_hash=marked_pipette_calibration.tiprack,
+                tiprack_uri=marked_pipette_calibration.uri,
+                cal_status=marked_pipette_calibration.status,
             )
             save_robot_deck_attitude(
                 transform=deck_calibration.attitude,
@@ -740,30 +770,37 @@ class CheckCalibrationUserFlow:
                 cal_status=deck_calibration.status,
             )
         elif self.current_state in pipette_offset_states:
-            calibration = mark_bad_calibration.mark_bad(
-                self._pipette_calibrations[active_mount],
+            pc_at_active_mount = self._pipette_calibrations[active_mount]
+            # This assert reflects an assumption from before this code was type-checked.
+            # Ideally, this would be ensured statically.
+            assert pc_at_active_mount is not None
+            marked_pipette_calibration = mark_bad_calibration.mark_bad(
+                pc_at_active_mount,
                 cal_types.SourceType.calibration_check,
             )
             pipette_id = self.hw_pipette.pipette_id
             assert pipette_id, "Cannot update pipette offset calibraion"
             save_pipette_calibration(
-                offset=Point(*calibration.offset),
+                offset=Point(*marked_pipette_calibration.offset),
                 pip_id=pipette_id,
                 mount=active_mount,
-                tiprack_hash=calibration.tiprack,
-                tiprack_uri=calibration.uri,
-                cal_status=calibration.status,
+                tiprack_hash=marked_pipette_calibration.tiprack,
+                tiprack_uri=marked_pipette_calibration.uri,
+                cal_status=marked_pipette_calibration.status,
             )
         elif self.current_state in deck_calibration_states and pipette_state:
-            calibration = mark_bad_calibration.mark_bad(
+            # This assert reflects an assumption from before this code was type-checked.
+            # Ideally, this would be ensured statically.
+            assert self._deck_calibration is not None
+            marked_deck_calibration = mark_bad_calibration.mark_bad(
                 self._deck_calibration, cal_types.SourceType.calibration_check
             )
             save_robot_deck_attitude(
-                transform=calibration.attitude,
-                pip_id=calibration.pipette_calibrated_with,
-                lw_hash=calibration.tiprack,
-                source=calibration.source,
-                cal_status=calibration.status,
+                transform=marked_deck_calibration.attitude,
+                pip_id=marked_deck_calibration.pipette_calibrated_with,
+                lw_hash=marked_deck_calibration.tiprack,
+                source=marked_deck_calibration.source,
+                cal_status=marked_deck_calibration.status,
             )
 
     async def update_comparison_map(self) -> None:
