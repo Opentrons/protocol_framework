@@ -95,7 +95,7 @@ class Metadata(BaseModel):
     tags: list[str] | None = None
 
 
-class Parameters(BaseModel):
+class Parameters2(BaseModel):
     format: Literal["96Standard", "384Standard", "trough", "irregular", "trash"]
     quirks: list[str] | None = None
     isTiprack: bool
@@ -104,6 +104,9 @@ class Parameters(BaseModel):
     loadName: Annotated[str, Field(pattern=SAFE_STRING_REGEX)]
     isMagneticModuleCompatible: bool
     magneticModuleEngageHeight: _NonNegativeNumber | None = None
+
+
+class Parameters3(Parameters2, BaseModel):
     isDeckSlotCompatible: bool | None = None
 
 
@@ -444,7 +447,7 @@ class LabwareDefinition(BaseModel):
     namespace: Annotated[str, Field(pattern=SAFE_STRING_REGEX)]
     metadata: Metadata
     brand: BrandData
-    parameters: Parameters
+    parameters: Parameters2 | Parameters3
     ordering: list[list[str]]
     cornerOffsetFromSlot: Vector
     dimensions: Dimensions
