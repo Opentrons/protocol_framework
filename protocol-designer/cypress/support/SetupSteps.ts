@@ -293,7 +293,10 @@ export const executeSetupSteps = (action: SetupActions): void => {
       chooseDeckSlot('B3').click()
       break
     case SetupActions.ChoseDeckSlotC1:
-      chooseDeckSlot('C1').click()
+      chooseDeckSlot('C1')
+        .find('a[role="button"]')
+        .contains(RegexSetupContent.slotText)
+        .click({ force: true })
       break
     case SetupActions.ChoseDeckSlotC2:
       chooseDeckSlot('C2').click()
@@ -302,7 +305,6 @@ export const executeSetupSteps = (action: SetupActions): void => {
       chooseDeckSlot('C3').click()
       break
     case SetupActions.ChoseDeckSlotD1:
-      chooseDeckSlot('D1').click()
       break
     case SetupActions.ChoseDeckSlotD2:
       chooseDeckSlot('D2').click()
@@ -314,7 +316,7 @@ export const executeSetupSteps = (action: SetupActions): void => {
       cy.contains(SetupContent.AddLabwareToDeck).click()
       break
     case SetupActions.EditHardwareLabwareOnDeck:
-      cy.contains(SetupContent.EditHardwareLabwareOnDeck).click()
+      cy.contains(SetupContent.EditHardwareLabwareOnDeck).click({ force: true })
       break
     case SetupActions.ClickLabwareHeader:
       cy.contains(SetupContent.LabwareH).click()
@@ -328,7 +330,7 @@ export const executeSetupSteps = (action: SetupActions): void => {
       chooseDeckSlot('C2')
         .find('.Box-sc-8ozbhb-0.kIDovv')
         .find('a[role="button"]')
-        .contains(SetupContent.EditLabware)
+        .contains(RegexSetupContent.slotText)
         .click({ force: true })
       break
     case SetupActions.SelectArmadillo96WellPlate: // New case for selecting Armadillo plate
