@@ -9,7 +9,7 @@ from opentrons.protocols.api_support.deck_type import (
 from opentrons.protocol_api import labware
 from opentrons.protocol_api.core.legacy.deck import Deck
 
-from opentrons_shared_data.labware.types import LabwareDefinition
+from opentrons_shared_data.labware.types import LabwareDefinition2
 from opentrons_shared_data.pipette.types import LabwareUri
 
 from robot_server.robot.calibration import util
@@ -46,7 +46,7 @@ class TipCalibrationUserFlow:
         hardware: HardwareControlAPI,
         mount: Mount,
         has_calibration_block: bool,
-        tip_rack: Optional[LabwareDefinition] = None,
+        tip_rack: Optional[LabwareDefinition2] = None,
     ):
         self._hardware = hardware
         self._mount = mount
@@ -167,11 +167,17 @@ class TipCalibrationUserFlow:
 
     async def load_labware(
         self,
-        tiprackDefinition: Optional[LabwareDefinition] = None,
+        # tiprackDefinition comes from the HTTP client and is not validated by the time
+        # it reaches here, hence us calling labware.verify_definition() below.
+        tiprackDefinition: Optional[LabwareDefinition2] = None,
     ):
         self._supported_commands.loadLabware = False
         if tiprackDefinition:
             verified_definition = labware.verify_definition(tiprackDefinition)
+            # todo(mm, 2025-02-13): Move schema validation to the FastAPI layer and turn
+            # this schemaVersion assertion into a proper HTTP API 422 error.
+            # https://opentrons.atlassian.net/browse/EXEC-1230
+            assert verified_definition["schemaVersion"] == 2
             self._tip_rack = self._get_tip_rack_lw(verified_definition)
             if self._deck[TIP_RACK_SLOT]:
                 del self._deck[TIP_RACK_SLOT]
@@ -247,7 +253,7 @@ class TipCalibrationUserFlow:
         await self._hardware.home()
 
     def _get_tip_rack_lw(
-        self, tip_rack_def: Optional[LabwareDefinition]
+        self, tip_rack_def: Optional[LabwareDefinition2]
     ) -> labware.Labware:
         position = self._deck.position_for(TIP_RACK_SLOT)
         if tip_rack_def is None:
