@@ -3,8 +3,8 @@ import { screen } from '@testing-library/react'
 
 import { renderWithProviders } from '../../../../../../../__testing-utils__'
 
-import { SingleStepMoveLiquidTools } from '../SingleStepMoveLiquidTools'
-import { MultipleStepsMoveLiquidTools } from '../MultipleStepsMoveLiquidTools'
+import { FirstStepMoveLiquidTools } from '../FirstStepMoveLiquidTools'
+import { SecondStepsMoveLiquidTools } from '../SecondStepsMoveLiquidTools'
 
 import { MoveLiquidTools } from '../'
 
@@ -13,8 +13,8 @@ import type { FieldPropsByName } from '../../../types'
 import type { FormData } from '../../../../../../../form-types'
 import type { StepFormErrors } from '../../../../../../../steplist'
 
-vi.mock('../SingleStepMoveLiquidTools')
-vi.mock('../MultipleStepsMoveLiquidTools')
+vi.mock('../FirstStepMoveLiquidTools')
+vi.mock('../SecondStepsMoveLiquidTools')
 
 const render = (props: ComponentProps<typeof MoveLiquidTools>) => {
   return renderWithProviders(<MoveLiquidTools {...props} />)
@@ -35,22 +35,22 @@ describe('MoveLiquidTools', () => {
       showFormErrors: false,
     }
 
-    vi.mocked(SingleStepMoveLiquidTools).mockReturnValue(
-      <div>mock SingleStepMoveLiquidTools</div>
+    vi.mocked(FirstStepMoveLiquidTools).mockReturnValue(
+      <div>mock FirstStepMoveLiquidTools</div>
     )
-    vi.mocked(MultipleStepsMoveLiquidTools).mockReturnValue(
-      <div>mock MultipleStepsMoveLiquidTools</div>
+    vi.mocked(SecondStepsMoveLiquidTools).mockReturnValue(
+      <div>mock SecondStepsMoveLiquidTools</div>
     )
   })
 
   it('renders SingleStepMoveLiquidTools when there is only one step', () => {
     render(props)
-    screen.getByText('mock SingleStepMoveLiquidTools')
+    screen.getByText('mock FirstStepMoveLiquidTools')
   })
 
   it('renders MultipleStepsMoveLiquidTools when there are multiple steps', () => {
-    props.toolboxStep = 3
+    props.toolboxStep = 1
     render(props)
-    screen.getByText('mock MultipleStepsMoveLiquidTools')
+    screen.getByText('mock SecondStepsMoveLiquidTools')
   })
 })
