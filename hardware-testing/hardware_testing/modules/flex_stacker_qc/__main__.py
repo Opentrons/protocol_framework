@@ -8,82 +8,113 @@ if "OT_SYSTEM_VERSION" not in environ:
 import argparse
 import asyncio
 from pathlib import Path
-from typing import Tuple, cast
+from typing import cast
+from dataclasses import asdict
 
 from hardware_testing.data import ui
-from hardware_testing.data.csv_report import CSVReport
 
-from opentrons.hardware_control.modules import ModuleType, FlexStacker
+from opentrons.hardware_control.types import EstopState
+from opentrons.drivers.flex_stacker.types import HardwareRevision
+from opentrons.hardware_control.modules import (
+    ModuleType,
+    FlexStacker,
+    PlatformState,
+    SimulatingModuleAtPort,
+)
 
 from .config import TestSection, TestConfig, build_report, TESTS
 
 from hardware_testing.opentrons_api import helpers_ot3
 
 
-def build_stacker_report(is_simulating: bool) -> CSVReport:
-    """Report setup for FLEX Stacker qc script."""
+SIM_SERIAL = "dummy_stacker_serial"
+
+
+def verify_estop_disengaged(api: helpers_ot3.OT3API) -> bool:
+    """Verify ESTOP is connected and disengaged."""
+    estop_state = api.get_estop_state()
+    match estop_state:
+        case EstopState.DISENGAGED:
+            return True
+        case EstopState.NOT_PRESENT:
+            ui.print_error("ESTOP is not present, cannot start tests")
+            return False
+        case _:
+            ui.print_error("ESTOP is pressed, please release it before starting")
+            ui.get_user_ready("Release ESTOP")
+            if api.get_estop_state() is EstopState.DISENGAGED:
+                return True
+            ui.print_error("ESTOP is still pressed, cannot start tests")
+            return False
+
+
+async def verify_platform_removed(stacker: FlexStacker) -> bool:
+    """Verify platform is removed from the carrier."""
+    await stacker._reader.read()
+    if stacker.platform_state is not PlatformState.UNKNOWN:
+        ui.print_error("Platform must be removed from the carrier before starting")
+        ui.get_user_ready("Remove platform from {platform_state.value}")
+        await stacker._reader.read()
+        if stacker.platform_state is not PlatformState.UNKNOWN:
+            ui.print_error("Platform is still detected, cannot start tests")
+            return False
+    return True
+
+
+async def _build_api(cfg: TestConfig) -> helpers_ot3.OT3API:
+    """Build the hardware controller API."""
+    api = await helpers_ot3.build_async_ot3_hardware_api(
+        is_simulating=cfg.simulate, gripper="GRPV1120230323A01"
+    )
+    if cfg.simulate:
+        # build a simulator for the FLEX Stacker
+        sim_mod = SimulatingModuleAtPort(
+            serial_number=SIM_SERIAL,
+            model="flexStackerModuleV1",
+            port="sim-port",
+            name="flexstacker",
+        )
+        await api._backend.module_controls.register_modules([sim_mod])
+    return api
+
+
+def _get_test_device(api: helpers_ot3.OT3API, barcode: str) -> FlexStacker:
+    """Find the FLEX Stacker controller by barcode."""
+    found = api._backend.module_controls.get_module_by_module_id(barcode)
+    if found and found.MODULE_TYPE == ModuleType.FLEX_STACKER:
+        return cast(FlexStacker, found)
+    ui.print_error(f"cannot find FLEX Stacker with barcode: {barcode}, aborting")
+    raise SystemExit()
+
+
+async def _main(cfg: TestConfig) -> None:
+    # BUILD REPORT
     test_name = Path(__file__).parent.name.replace("_", "-")
     ui.print_title(test_name.upper())
 
     report = build_report(test_name)
     report.set_operator(
-        "simulating" if is_simulating else input("enter OPERATOR name: ")
+        "simulating" if cfg.simulate else input("enter OPERATOR name: ")
     )
-    return report
-    
+    barcode = SIM_SERIAL if cfg.simulate else input("SCAN device barcode: ").strip()
+    report.set_tag(barcode)
 
-
-async def _main(cfg: TestConfig) -> None:
-    # BUILD REPORT
-    report = build_stacker_report(cfg.simulate)
-
-    api = await helpers_ot3.build_async_ot3_hardware_api(
-        is_simulating=cfg.simulate,
-        gripper="GRPV1120230323A01"
-    )
-
-    barcode = "STACKER-SIMULATOR-SN"
-    if not cfg.simulate:
-        barcode = input("SCAN device barcode: ").strip()
-
-    module_by_barcode = api._backend.module_controls.get_module_by_module_id(barcode)
-    if not module_by_barcode or module_by_barcode.MODULE_TYPE != ModuleType.FLEX_STACKER:
-        ui.print_error(f"FLEX Stacker with serial number {barcode} not found")
-        return
-    
-    stacker = cast(FlexStacker, module_by_barcode)
-
-    # make sure the stacker serial number matches the barcode
-    sn = stacker.device_info["serial"]
-    report.set_tag(sn)
-    report.set_device_id(sn, barcode)
+    # BUILD API
+    api = await _build_api(cfg)
+    stacker = _get_test_device(api, barcode)
+    report.set_device_id(stacker.device_info["serial"], barcode)
 
     if not cfg.simulate:
         # Perform initial checks before starting tests
         # 1. estop should not be pressed
         # 2. platform should be removed
-        if stacker.get_estop():
-            ui.print_error("ESTOP is pressed, please release it before starting")
-            ui.get_user_ready("Release ESTOP")
-            if stacker.get_estop():
-                ui.print_error("ESTOP is still pressed, cannot start tests")
-                return
-
-        platform_state = stacker.get_platform_status()
-        if platform_state is PlatformStatus.ERROR:
-            ui.print_error("Platform sensors are not working properly, aborting")
-            return
-        if platform_state is not PlatformStatus.REMOVED:
-            ui.print_error("Platform must be removed from the carrier before starting")
-            ui.get_user_ready("Remove platform from {platform_state.value}")
-            if stacker.get_platform_status() is not PlatformStatus.REMOVED:
-                ui.print_error("Platform is still detected, cannot start tests")
-                return
+        assert verify_estop_disengaged(api)
+        assert await verify_platform_removed(stacker)
 
     # RUN TESTS
     for section, test_run in cfg.tests.items():
         ui.print_title(section.value)
-        test_run(stacker, report, section.value)
+        await test_run(stacker, report, section.value, **asdict(cfg))
 
     # SAVE REPORT
     ui.print_title("DONE")
@@ -93,6 +124,12 @@ async def _main(cfg: TestConfig) -> None:
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
+    parser.add_argument("--revision", choices=["dvt", "evt", "nff"], default="dvt")
+    rev_map = {
+        "dvt": HardwareRevision.DVT,
+        "evt": HardwareRevision.EVT,
+        "nff": HardwareRevision.NFF,
+    }
     parser.add_argument("--simulate", action="store_true")
     # add each test-section as a skippable argument (eg: --skip-connectivity)
     for s in TestSection:
@@ -108,5 +145,7 @@ if __name__ == "__main__":
         _t_sections = {
             s: f for s, f in TESTS if not getattr(args, f"skip_{s.value.lower()}")
         }
-    _config = TestConfig(simulate=args.simulate, tests=_t_sections)
+    _config = TestConfig(
+        revision=rev_map[args.revision], simulate=args.simulate, tests=_t_sections
+    )
     asyncio.run(_main(_config))

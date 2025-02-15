@@ -9,7 +9,8 @@ from hardware_testing.data.csv_report import (
     CSVResult,
 )
 
-from .driver import FlexStacker, HardwareRevision
+from opentrons.drivers.flex_stacker.types import HardwareRevision
+from opentrons.hardware_control.modules import FlexStacker
 
 
 def build_csv_lines() -> List[Union[CSVLine, CSVLineRepeating]]:
@@ -21,13 +22,17 @@ def build_csv_lines() -> List[Union[CSVLine, CSVLineRepeating]]:
     ]
 
 
-def test_gcode(driver: FlexStacker, report: CSVReport) -> None:
+async def test_gcode(
+    module: FlexStacker, report: CSVReport, revision: HardwareRevision, **kwargs
+) -> None:
     """Send and receive response for GCODE M115."""
     success = True
-    info = driver.get_device_info()
-    print("Hardware Revision: ", info.hw, "\n")
-    if info is None or info.hw != HardwareRevision.EVT:
-        print("Hardware Revision must be EVT")
+    info = await module._driver.get_device_info()
+    if not info:
+        ui.print_error("Failed to get device info")
+        raise SystemExit()
+    elif info.hw != revision:
+        ui.print_info(f"Hardware Revision expected {revision}, got {info.hw or None}")
         success = False
     report(
         "CONNECTIVITY",
@@ -36,17 +41,19 @@ def test_gcode(driver: FlexStacker, report: CSVReport) -> None:
     )
 
 
-def test_eeprom(driver: FlexStacker, report: CSVReport) -> None:
+async def test_eeprom(
+    module: FlexStacker, report: CSVReport, simulate: bool, **kwargs
+) -> None:
     """Set serial number and make sure device info is updated accordingly."""
     success = True
-    if not driver._simulating:
+    if not simulate:
         serial = input("enter Serial Number: ")
     else:
         serial = "STACKER-SIMULATOR-SN"
-    driver.set_serial_number(serial)
-    info = driver.get_device_info()
+    await module._driver.set_serial_number(serial)
+    info = await module._driver.get_device_info()
     if info.sn != serial:
-        print("Serial number is not set properly")
+        ui.print_info("Serial number is not set properly")
         success = False
     report(
         "CONNECTIVITY",
@@ -55,9 +62,11 @@ def test_eeprom(driver: FlexStacker, report: CSVReport) -> None:
     )
 
 
-def test_leds(driver: FlexStacker, report: CSVReport) -> None:
+async def test_leds(
+    module: FlexStacker, report: CSVReport, simulate: bool, **kwargs
+) -> None:
     """Prompt tester to verify the status led is blinking."""
-    if not driver._simulating:
+    if not simulate:
         is_blinking = ui.get_user_answer("Is the status LED blinking?")
     else:
         is_blinking = True
@@ -66,13 +75,13 @@ def test_leds(driver: FlexStacker, report: CSVReport) -> None:
     )
 
 
-def run(driver: FlexStacker, report: CSVReport, section: str) -> None:
+async def run(driver: FlexStacker, report: CSVReport, section: str, **kwargs) -> None:
     """Run."""
     ui.print_header("USB Communication")
-    test_gcode(driver, report)
+    await test_gcode(driver, report, **kwargs)
 
     ui.print_header("EEPROM Communication")
-    test_eeprom(driver, report)
+    await test_eeprom(driver, report, **kwargs)
 
     ui.print_header("LED Blinking")
-    test_leds(driver, report)
+    await test_leds(driver, report, **kwargs)

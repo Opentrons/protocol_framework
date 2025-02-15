@@ -3,6 +3,7 @@ from dataclasses import dataclass
 import enum
 from typing import Dict, Callable
 
+from opentrons.drivers.flex_stacker.types import HardwareRevision
 from hardware_testing.data.csv_report import CSVReport, CSVSection
 
 from . import (
@@ -30,6 +31,7 @@ class TestSection(enum.Enum):
 class TestConfig:
     """Test Config."""
 
+    revision: HardwareRevision
     simulate: bool
     tests: Dict[TestSection, Callable]
 
