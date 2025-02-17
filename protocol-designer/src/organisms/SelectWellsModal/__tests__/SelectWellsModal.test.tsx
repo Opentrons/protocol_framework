@@ -21,7 +21,7 @@ import type { LabwareDefinition2, PipetteName } from '@opentrons/shared-data'
 vi.mock('/protocol-designer/step-forms/selectors')
 vi.mock('/protocol-designer/labware-ingred/selectors')
 vi.mock('/protocol-designer/top-selectors/well-contents')
-vi.mock('/protocol-designer/Labware/SelectableLabware')
+vi.mock('/protocol-designer/organisms/Labware/SelectableLabware')
 
 const render = (props: ComponentProps<typeof SelectWellsModal>) => {
   return renderWithProviders(<SelectWellsModal {...props} />, {

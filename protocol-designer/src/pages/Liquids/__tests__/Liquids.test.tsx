@@ -15,7 +15,7 @@ import type { NavigateFunction } from 'react-router-dom'
 
 const mockNavigate = vi.fn()
 
-vi.mock('/protocol-designer/Designer/LiquidsOverflowMenu')
+vi.mock('/protocol-designer/pages/Designer/LiquidsOverflowMenu')
 vi.mock('/protocol-designer/organisms')
 vi.mock('/protocol-designer/labware-ingred/selectors')
 vi.mock('react-router-dom', async importOriginal => {

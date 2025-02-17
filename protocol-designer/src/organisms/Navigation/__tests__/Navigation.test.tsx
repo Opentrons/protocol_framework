@@ -9,7 +9,7 @@ import { toggleNewProtocolModal } from '/protocol-designer/navigation/actions'
 import { SettingsIcon } from '/protocol-designer/organisms/SettingsIcon'
 import { Navigation } from '..'
 
-vi.mock('/protocol-designer/SettingsIcon')
+vi.mock('/protocol-designer/organisms/SettingsIcon')
 vi.mock('/protocol-designer/navigation/actions')
 vi.mock('/protocol-designer/file-data/selectors')
 vi.mock('/protocol-designer/load-file/selectors')
