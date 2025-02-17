@@ -25,7 +25,7 @@ import {
 import {
   actions as tutorialActions,
   selectors as tutorialSelectors,
-} from '../../tutorial'
+} from '/protocol-designer/tutorial'
 import { ToggleButton } from '/protocol-designer/atoms/ToggleButton'
 import { LINK_BUTTON_STYLE } from '/protocol-designer/atoms'
 import { actions as featureFlagActions } from '/protocol-designer/feature-flags'
