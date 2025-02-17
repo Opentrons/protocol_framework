@@ -29,8 +29,8 @@ vi.mock('/protocol-designer/step-forms/selectors')
 vi.mock('/protocol-designer/feature-flags/selectors')
 vi.mock('/protocol-designer/file-data/selectors')
 vi.mock('/protocol-designer/labware-defs/selectors')
-vi.mock('/protocol-designer/labware-defs/actions')
 vi.mock('/protocol-designer/labware-ingred/selectors')
+vi.mock('/protocol-designer/labware-defs/actions')
 vi.mock('/protocol-designer/labware-ingred/actions')
 
 const render = (props: ComponentProps<typeof LabwareTools>) => {

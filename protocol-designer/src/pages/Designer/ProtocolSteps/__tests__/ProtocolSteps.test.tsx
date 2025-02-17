@@ -25,12 +25,12 @@ import { ProtocolSteps } from '..'
 
 import type { SavedStepFormState } from '/protocol-designer/step-forms'
 
-vi.mock('/protocol-designer/OffDeck')
+vi.mock('/protocol-designer/pages/Designer/OffDeck')
 vi.mock('/protocol-designer/step-forms/selectors')
 vi.mock('/protocol-designer/ui/steps/selectors')
 vi.mock('/protocol-designer/ui/labware/selectors')
 vi.mock('../StepForm')
-vi.mock('/protocol-designer/DeckSetup')
+vi.mock('/protocol-designer/pages/Designer/DeckSetup')
 vi.mock('../StepSummary.tsx')
 vi.mock('../Timeline')
 vi.mock('../DraggableSidebar')

@@ -10,7 +10,7 @@ import { getOrderedWells } from '/protocol-designer/steplist/utils'
 import type { HydratedMixFormData } from '/protocol-designer/form-types'
 import type { LabwareDefinition2 } from '@opentrons/shared-data'
 
-vi.mock('/protocol-designer/utils')
+vi.mock('/protocol-designer/steplist/utils')
 
 let hydratedForm: HydratedMixFormData
 const labwareDef = fixture_96_plate as LabwareDefinition2

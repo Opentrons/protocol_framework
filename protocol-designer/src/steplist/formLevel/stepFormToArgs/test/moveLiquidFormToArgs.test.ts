@@ -21,7 +21,7 @@ import type {
   PathOption,
 } from '/protocol-designer/form-types'
 
-vi.mock('/protocol-designer/utils')
+vi.mock('/protocol-designer/steplist/utils')
 vi.mock('assert')
 
 const ASPIRATE_WELL = 'A2' // default source is trough for these tests

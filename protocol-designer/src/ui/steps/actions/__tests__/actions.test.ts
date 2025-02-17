@@ -19,6 +19,7 @@ import type { Timeline, RobotState } from '@opentrons/step-generation/src/types'
 vi.mock('/protocol-designer/step-forms/selectors')
 vi.mock('/protocol-designer/selectors')
 vi.mock('/protocol-designer/file-data/selectors')
+vi.mock('/protocol-designer/ui/steps/selectors')
 
 const mockStore = configureMockStore([thunk])
 
