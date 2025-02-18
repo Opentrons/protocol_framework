@@ -7,7 +7,6 @@ from decoy import Decoy
 
 from opentrons_shared_data.labware.types import (
     LabwareDefinition as LabwareDefDict,
-    LabwareParameters as LabwareParamsDict,
     LabwareUri,
 )
 from opentrons_shared_data.labware.labware_definition import (
@@ -192,7 +191,9 @@ def test_get_definition(subject: LabwareCore) -> None:
             "gripperOffsets": {},
         },
     )
-    assert subject.get_parameters() == cast(LabwareParamsDict, {"loadName": "world"})
+    assert subject.get_parameters() == {  # type: ignore[comparison-overlap]
+        "loadName": "world"
+    }
 
 
 def test_get_user_display_name(decoy: Decoy, mock_engine_client: EngineClient) -> None:

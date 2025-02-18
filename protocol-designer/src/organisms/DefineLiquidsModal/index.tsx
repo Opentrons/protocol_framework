@@ -1,28 +1,21 @@
 import { useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
-import { SketchPicker } from 'react-color'
 import { yupResolver } from '@hookform/resolvers/yup'
 import * as Yup from 'yup'
 import { Controller, useForm } from 'react-hook-form'
-import styled from 'styled-components'
+
+import { getAllLiquidClassDefs } from '@opentrons/shared-data'
 import {
-  DEFAULT_LIQUID_COLORS,
-  getAllLiquidClassDefs,
-} from '@opentrons/shared-data'
-import {
-  BORDERS,
   Btn,
   COLORS,
   DIRECTION_COLUMN,
-  DropdownMenu,
   Flex,
   InputField,
   JUSTIFY_END,
   JUSTIFY_SPACE_BETWEEN,
   LiquidIcon,
   Modal,
-  POSITION_ABSOLUTE,
   PrimaryButton,
   SecondaryButton,
   SPACING,
@@ -34,13 +27,15 @@ import * as labwareIngredActions from '../../labware-ingred/actions'
 import { selectors as labwareIngredSelectors } from '../../labware-ingred/selectors'
 import { HandleEnter } from '../../atoms/HandleEnter'
 import { LINE_CLAMP_TEXT_STYLE } from '../../atoms'
+import { TextAreaField } from '../../molecules'
 import { getEnableLiquidClasses } from '../../feature-flags/selectors'
 import { swatchColors } from './swatchColors'
+import { LiquidColorPicker } from './LiquidColorPicker'
+import { LiquidClassDropdown } from './LiquidClassDropdown'
 
-import type { ColorResult, RGBColor } from 'react-color'
+import type { Ingredient } from '@opentrons/step-generation'
 import type { ThunkDispatch } from 'redux-thunk'
 import type { BaseState } from '../../types'
-import type { Ingredient } from '@opentrons/step-generation'
 
 const liquidEditFormSchema: any = Yup.object().shape({
   displayName: Yup.string().required('liquid name is required'),
@@ -139,13 +134,6 @@ export function DefineLiquidsModal(
     })
   }
 
-  const rgbaToHex = (rgba: RGBColor): string => {
-    const { r, g, b, a } = rgba
-    const toHex = (n: number): string => n.toString(16).padStart(2, '0')
-    const alpha = a != null ? Math.round(a * 255) : 255
-    return `#${toHex(r)}${toHex(g)}${toHex(b)}${toHex(alpha)}`
-  }
-
   const liquidClassOptions = [
     { name: 'Choose an option', value: '' },
     ...Object.entries(liquidClassDefs).map(
@@ -190,29 +178,12 @@ export function DefineLiquidsModal(
         >
           <>
             {showColorPicker ? (
-              <Flex
-                position={POSITION_ABSOLUTE}
-                left="4.375rem"
-                top="4.6875rem"
-                ref={chooseColorWrapperRef}
-                zIndex={2}
-              >
-                <Controller
-                  name="displayColor"
-                  control={control}
-                  render={({ field }) => (
-                    <SketchPicker
-                      presetColors={DEFAULT_LIQUID_COLORS}
-                      color={color}
-                      onChange={(color: ColorResult) => {
-                        const hex = rgbaToHex(color.rgb)
-                        setValue('displayColor', hex)
-                        field.onChange(hex)
-                      }}
-                    />
-                  )}
-                />
-              </Flex>
+              <LiquidColorPicker
+                chooseColorWrapperRef={chooseColorWrapperRef}
+                control={control}
+                color={color}
+                setValue={setValue}
+              />
             ) : null}
 
             <Flex flexDirection={DIRECTION_COLUMN} gridGap={SPACING.spacing32}>
@@ -251,36 +222,20 @@ export function DefineLiquidsModal(
                   color={COLORS.grey60}
                   gridGap={SPACING.spacing4}
                 >
-                  <StyledText desktopStyle="bodyDefaultRegular">
-                    {t('description')}
-                  </StyledText>
-                  <DescriptionField {...register('description')} />
+                  <TextAreaField
+                    title={t('description')}
+                    {...register('description')}
+                    value={watch('description')}
+                    height="4.75rem"
+                  />
                 </Flex>
                 {enableLiquidClasses ? (
-                  <Flex flexDirection={DIRECTION_COLUMN} color={COLORS.grey60}>
-                    <Controller
-                      control={control}
-                      name="liquidClass"
-                      render={({ field }) => (
-                        <DropdownMenu
-                          title={t('liquid_class.title')}
-                          tooltipText={t('liquid_class.tooltip')}
-                          dropdownType="neutral"
-                          width="100%"
-                          filterOptions={liquidClassOptions}
-                          currentOption={
-                            liquidClassOptions.find(
-                              ({ value }) => value === liquidClass
-                            ) ?? liquidClassOptions[0]
-                          }
-                          onClick={value => {
-                            field.onChange(value)
-                            setValue('liquidClass', value)
-                          }}
-                        />
-                      )}
-                    />
-                  </Flex>
+                  <LiquidClassDropdown
+                    control={control}
+                    setValue={setValue}
+                    liquidClassOptions={liquidClassOptions}
+                    liquidClass={liquidClass}
+                  />
                 ) : null}
                 <Flex
                   flexDirection={DIRECTION_COLUMN}
@@ -340,13 +295,3 @@ export function DefineLiquidsModal(
     </HandleEnter>
   )
 }
-
-export const DescriptionField = styled.textarea`
-  min-height: 5rem;
-  width: 100%;
-  border: 1px ${BORDERS.styleSolid} ${COLORS.grey50};
-  border-radius: ${BORDERS.borderRadius4};
-  padding: ${SPACING.spacing8};
-  font-size: ${TYPOGRAPHY.fontSizeP};
-  resize: none;
-`

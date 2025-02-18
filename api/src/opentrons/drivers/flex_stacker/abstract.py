@@ -11,6 +11,8 @@ from .types import (
     StackerInfo,
     LEDColor,
     StallGuardParams,
+    TOFSensor,
+    TOFSensorStatus,
 )
 
 
@@ -59,6 +61,10 @@ class AbstractFlexStackerDriver(Protocol):
         """Enables and sets the stallguard threshold for the given axis motor."""
         ...
 
+    async def enable_tof_sensor(self, sensor: TOFSensor, enable: bool) -> bool:
+        """Enable or disable the TOF sensor."""
+        ...
+
     async def set_motor_driver_register(
         self, axis: StackerAxis, reg: int, value: int
     ) -> bool:
@@ -67,6 +73,20 @@ class AbstractFlexStackerDriver(Protocol):
 
     async def get_motor_driver_register(self, axis: StackerAxis, reg: int) -> int:
         """Gets the register value of the given motor axis driver."""
+        ...
+
+    async def set_tof_driver_register(
+        self, sensor: TOFSensor, reg: int, value: int
+    ) -> bool:
+        """Set the register of the given tof sensor driver to the given value."""
+        ...
+
+    async def get_tof_driver_register(self, sensor: TOFSensor, reg: int) -> int:
+        """Gets the register value of the given tof sensor driver."""
+        ...
+
+    async def get_tof_sensor_status(self, sensor: TOFSensor) -> TOFSensorStatus:
+        """Get the status of the tof sensor."""
         ...
 
     async def get_motion_params(self, axis: StackerAxis) -> MoveParams:

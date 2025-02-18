@@ -20,12 +20,17 @@ from .types import (
     LimitSwitchStatus,
     LEDColor,
     StallGuardParams,
+    TOFSensor,
+    TOFSensorMode,
+    TOFSensorState,
+    TOFSensorStatus,
 )
 
 
 FS_BAUDRATE = 115200
 DEFAULT_FS_TIMEOUT = 1
 FS_MOVE_TIMEOUT = 20
+FS_TOF_TIMEOUT = 20
 FS_ACK = "OK\n"
 FS_ERROR_KEYWORD = "err"
 FS_ASYNC_ERROR_ACK = "async"
@@ -190,7 +195,7 @@ class FlexStackerDriver(AbstractFlexStackerDriver):
 
     @classmethod
     def parse_get_motor_register(cls, response: str) -> int:
-        """Parse get register value."""
+        """Parse get motor register value."""
         pattern = r"(?P<M>[XZL]):(?P<R>\d+) V:(?P<V>\d+)"
         _RE = re.compile(f"^{GCODE.GET_MOTOR_DRIVER_REGISTER} {pattern}$")
         m = _RE.match(response)
@@ -199,6 +204,35 @@ class FlexStackerDriver(AbstractFlexStackerDriver):
                 f"Incorrect Response for get motor driver register: {response}"
             )
         return int(m.group("V"))
+
+    @classmethod
+    def parse_get_tof_sensor_register(cls, response: str) -> int:
+        """Parse get tof sensor register value."""
+        pattern = r"(?P<S>[XZ]):(?P<R>\d+) V:(?P<V>\d+)"
+        _RE = re.compile(f"^{GCODE.GET_TOF_DRIVER_REGISTER} {pattern}$")
+        m = _RE.match(response)
+        if not m:
+            raise ValueError(
+                f"Incorrect Response for get tof sensor driver register: {response}"
+            )
+        return int(m.group("V"))
+
+    @classmethod
+    def parse_tof_sensor_status(cls, response: str) -> TOFSensorStatus:
+        """Parse get tof sensor status response."""
+        pattern = r"(?P<S>[XZ]):(?P<O>\d) T:(?P<T>\d) M:(?P<M>\d)"
+        _RE = re.compile(f"^{GCODE.GET_TOF_SENSOR_STATUS} {pattern}$")
+        m = _RE.match(response)
+        if not m:
+            raise ValueError(
+                f"Incorrect Response for get tof sensor status: {response}"
+            )
+        return TOFSensorStatus(
+            sensor=TOFSensor(m.group("S")),
+            state=TOFSensorState(int(m.group("T"))),
+            mode=TOFSensorMode(int(m.group("M"))),
+            ok=bool(int(m.group("O"))),
+        )
 
     @classmethod
     def append_move_params(
@@ -334,6 +368,18 @@ class FlexStackerDriver(AbstractFlexStackerDriver):
             raise ValueError(f"Incorrect Response for set stallguard threshold: {resp}")
         return True
 
+    async def enable_tof_sensor(self, sensor: TOFSensor, enable: bool) -> bool:
+        """Enable or disable the TOF sensor."""
+        # Enabling the TOF sensor takes a while, so give extra timeout.
+        timeout = FS_TOF_TIMEOUT if enable else DEFAULT_FS_TIMEOUT
+        resp = await self._connection.send_command(
+            GCODE.ENABLE_TOF_SENSOR.build_command().add_int(sensor.name, int(enable)),
+            timeout=timeout,
+        )
+        if not re.match(rf"^{GCODE.ENABLE_TOF_SENSOR}$", resp):
+            raise ValueError(f"Incorrect Response for enable TOF sensor: {resp}")
+        return True
+
     async def set_motor_driver_register(
         self, axis: StackerAxis, reg: int, value: int
     ) -> bool:
@@ -355,6 +401,35 @@ class FlexStackerDriver(AbstractFlexStackerDriver):
             GCODE.GET_MOTOR_DRIVER_REGISTER.build_command().add_int(axis.name, reg)
         )
         return self.parse_get_motor_register(response)
+
+    async def set_tof_driver_register(
+        self, sensor: TOFSensor, reg: int, value: int
+    ) -> bool:
+        """Set the register of the given tof sensor driver to the given value."""
+        resp = await self._connection.send_command(
+            GCODE.SET_TOF_DRIVER_REGISTER.build_command()
+            .add_int(sensor.name, reg)
+            .add_element(str(value))
+        )
+        if not re.match(rf"^{GCODE.SET_TOF_DRIVER_REGISTER}$", resp):
+            raise ValueError(
+                f"Incorrect Response for set tof sensor driver register: {resp}"
+            )
+        return True
+
+    async def get_tof_driver_register(self, sensor: TOFSensor, reg: int) -> int:
+        """Gets the register value of the given tof sensor driver."""
+        response = await self._connection.send_command(
+            GCODE.GET_TOF_DRIVER_REGISTER.build_command().add_int(sensor.name, reg)
+        )
+        return self.parse_get_tof_sensor_register(response)
+
+    async def get_tof_sensor_status(self, sensor: TOFSensor) -> TOFSensorStatus:
+        """Get the status of the tof sensor."""
+        response = await self._connection.send_command(
+            GCODE.GET_TOF_SENSOR_STATUS.build_command().add_element(sensor.name)
+        )
+        return self.parse_tof_sensor_status(response)
 
     async def get_motion_params(self, axis: StackerAxis) -> MoveParams:
         """Get the motion parameters used by the given axis motor."""

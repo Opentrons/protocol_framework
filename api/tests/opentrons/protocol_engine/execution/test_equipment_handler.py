@@ -1,15 +1,16 @@
 """Test equipment command execution side effects."""
 
-import pytest
-from _pytest.fixtures import SubRequest
+from unittest.mock import sentinel
 import inspect
 from datetime import datetime
 from decoy import Decoy, matchers
 from typing import Any, Optional, cast, Dict
 
+import pytest
+from _pytest.fixtures import SubRequest
+
 from opentrons_shared_data.pipette.types import PipetteNameType
 from opentrons_shared_data.pipette import pipette_definition
-from opentrons_shared_data.labware.labware_definition import LabwareDefinition
 from opentrons_shared_data.labware.types import LabwareUri
 
 from opentrons.calibration_storage.helpers import uri_from_details
@@ -219,7 +220,6 @@ async def test_load_labware(
     model_utils: ModelUtils,
     state_store: StateStore,
     labware_data_provider: LabwareDataProvider,
-    minimal_labware_def: LabwareDefinition,
     subject: EquipmentHandler,
 ) -> None:
     """It should load labware definition and offset data and generate an ID."""
@@ -235,7 +235,7 @@ async def test_load_labware(
             namespace="opentrons-test",
             version=1,
         )
-    ).then_return(minimal_labware_def)
+    ).then_return(sentinel.labware_def)
     decoy.when(
         state_store.geometry.get_projected_offset_location(
             DeckSlotLocation(slotName=DeckSlotName.SLOT_3)
@@ -278,7 +278,7 @@ async def test_load_labware(
 
     assert result == LoadedLabwareData(
         labware_id="unique-id",
-        definition=minimal_labware_def,
+        definition=sentinel.labware_def,
         offsetId="labware-offset-id",
     )
 
@@ -287,7 +287,6 @@ async def test_load_labware_off_deck(
     decoy: Decoy,
     model_utils: ModelUtils,
     state_store: StateStore,
-    minimal_labware_def: LabwareDefinition,
     subject: EquipmentHandler,
 ) -> None:
     """It should load labware definition and offset data and generate an ID."""
@@ -297,7 +296,7 @@ async def test_load_labware_off_deck(
         state_store.labware.get_definition_by_uri(
             cast("LabwareUri", "opentrons-test/load-name/1")
         )
-    ).then_return(minimal_labware_def)
+    ).then_return(sentinel.labware_def)
 
     result = await subject.load_labware(
         location=OFF_DECK_LOCATION,
@@ -309,7 +308,7 @@ async def test_load_labware_off_deck(
 
     assert result == LoadedLabwareData(
         labware_id="unique-id",
-        definition=minimal_labware_def,
+        definition=sentinel.labware_def,
         offsetId=None,
     )
 
@@ -318,7 +317,6 @@ async def test_load_labware_uses_provided_id(
     decoy: Decoy,
     state_store: StateStore,
     labware_data_provider: LabwareDataProvider,
-    minimal_labware_def: LabwareDefinition,
     subject: EquipmentHandler,
 ) -> None:
     """It should use the provided ID rather than generating an ID for the labware."""
@@ -332,7 +330,7 @@ async def test_load_labware_uses_provided_id(
             namespace="opentrons-test",
             version=1,
         )
-    ).then_return(minimal_labware_def)
+    ).then_return(sentinel.labware_def)
     decoy.when(
         state_store.geometry.get_projected_offset_location(
             DeckSlotLocation(slotName=DeckSlotName.SLOT_3)
@@ -360,7 +358,7 @@ async def test_load_labware_uses_provided_id(
     )
 
     assert result == LoadedLabwareData(
-        labware_id="my-labware-id", definition=minimal_labware_def, offsetId=None
+        labware_id="my-labware-id", definition=sentinel.labware_def, offsetId=None
     )
 
 
@@ -369,7 +367,6 @@ async def test_load_labware_uses_loaded_labware_def(
     model_utils: ModelUtils,
     state_store: StateStore,
     labware_data_provider: LabwareDataProvider,
-    minimal_labware_def: LabwareDefinition,
     subject: EquipmentHandler,
 ) -> None:
     """Loading labware should use the labware definition already in state."""
@@ -382,7 +379,7 @@ async def test_load_labware_uses_loaded_labware_def(
     decoy.when(model_utils.generate_id()).then_return("unique-id")
 
     decoy.when(state_store.labware.get_definition_by_uri(expected_uri)).then_return(
-        minimal_labware_def
+        sentinel.labware_def
     )
 
     decoy.when(
@@ -414,7 +411,7 @@ async def test_load_labware_uses_loaded_labware_def(
 
     assert result == LoadedLabwareData(
         labware_id="unique-id",
-        definition=minimal_labware_def,
+        definition=sentinel.labware_def,
         offsetId=None,
     )
 
@@ -432,7 +429,6 @@ async def test_load_labware_on_module(
     decoy: Decoy,
     model_utils: ModelUtils,
     state_store: StateStore,
-    minimal_labware_def: LabwareDefinition,
     subject: EquipmentHandler,
 ) -> None:
     """It should load labware definition and offset data and generate an ID."""
@@ -440,7 +436,7 @@ async def test_load_labware_on_module(
 
     decoy.when(
         state_store.labware.get_definition_by_uri(matchers.IsA(str))
-    ).then_return(minimal_labware_def)
+    ).then_return(sentinel.labware_def)
 
     decoy.when(state_store.modules.get_requested_model("module-id")).then_return(
         ModuleModel.THERMOCYCLER_MODULE_V1
@@ -505,7 +501,7 @@ async def test_load_labware_on_module(
 
     assert result == LoadedLabwareData(
         labware_id="unique-id",
-        definition=minimal_labware_def,
+        definition=sentinel.labware_def,
         offsetId="labware-offset-id",
     )
 

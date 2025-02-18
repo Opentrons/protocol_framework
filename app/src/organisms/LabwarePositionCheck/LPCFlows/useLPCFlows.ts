@@ -59,10 +59,12 @@ export function useLPCFlows({
   const currentOffsets = runRecord?.data?.labwareOffsets ?? []
   const mostRecentAnalysis = useMostRecentCompletedAnalysis(runId)
 
-  const labwareDefs = useMemo(
-    () => getLabwareDefinitionsFromCommands(mostRecentAnalysis?.commands ?? []),
-    [mostRecentAnalysis != null]
-  )
+  const labwareDefs = useMemo(() => {
+    const labwareDefsFromCommands = getLabwareDefinitionsFromCommands(
+      mostRecentAnalysis?.commands ?? []
+    )
+    return labwareDefsFromCommands
+  }, [mostRecentAnalysis != null])
   const labwareInfo = useLPCLabwareInfo({
     currentOffsets,
     labwareDefs,
