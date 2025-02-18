@@ -73,10 +73,10 @@ export const MoveBetweenSlots: Story = {
     type: 'location-arrow-location',
     labwareName: 'Plate',
     currentLocationProps: {
-      slotName: 'A1',
+      deckLabel: 'A1',
     },
     newLocationProps: {
-      slotName: 'B2',
+      deckLabel: 'B2',
     },
   },
 }
@@ -86,7 +86,7 @@ export const Refill: Story = {
     type: 'location',
     labwareName: 'Tip Rack',
     currentLocationProps: {
-      slotName: 'A1',
+      deckLabel: 'A1',
     },
   },
 }
@@ -96,10 +96,10 @@ export const Select: Story = {
     type: 'location-colon-location',
     labwareName: 'Well',
     currentLocationProps: {
-      slotName: 'A1',
+      deckLabel: 'A1',
     },
     newLocationProps: {
-      slotName: 'B1',
+      deckLabel: 'B1',
     },
   },
 }
@@ -111,7 +111,7 @@ export const LabwareWithLidAndQuantity: Story = {
     subtext: 'With Tip Rack Lid',
     tagtext: '3',
     currentLocationProps: {
-      slotName: 'STACKER A',
+      deckLabel: 'STACKER A',
     },
   },
 }
