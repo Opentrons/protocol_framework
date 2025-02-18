@@ -216,9 +216,9 @@ def module_store(state_config: Config) -> ModuleStore:
 
 
 @pytest.fixture
-def module_view(module_store: ModuleStore) -> ModuleView:
+def module_view(module_store: ModuleStore, state_config: Config) -> ModuleView:
     """Get a module view of a real labware store."""
-    return ModuleView(module_store._state)
+    return ModuleView(state=module_store._state)
 
 
 @pytest.fixture

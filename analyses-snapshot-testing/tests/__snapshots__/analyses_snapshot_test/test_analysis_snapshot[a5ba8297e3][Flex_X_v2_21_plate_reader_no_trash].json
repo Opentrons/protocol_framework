@@ -2492,7 +2492,9 @@
           {
             "cutoutId": "cutoutB3",
             "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
+            "possibleCutoutFixtureIds": [
+              "absorbanceReaderV1"
+            ]
           }
         ],
         "immediateDestinationLocationSequence": [
@@ -2507,7 +2509,9 @@
           {
             "cutoutId": "cutoutB3",
             "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
+            "possibleCutoutFixtureIds": [
+              "absorbanceReaderV1"
+            ]
           }
         ],
         "originLocationSequence": [

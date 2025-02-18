@@ -1,7 +1,7 @@
 """Equipment command side-effect logic."""
 
 from dataclasses import dataclass
-from typing import Optional, overload, Union, List
+from typing import Optional, overload, List
 
 from opentrons_shared_data.labware.labware_definition import LabwareDefinition
 from opentrons_shared_data.pipette.types import PipetteNameType
@@ -290,7 +290,7 @@ class EquipmentHandler:
     async def load_magnetic_block(
         self,
         model: ModuleModel,
-        location: Union[DeckSlotLocation, AddressableAreaLocation],
+        location: AddressableAreaLocation,
         module_id: Optional[str],
     ) -> LoadedModuleData:
         """Ensure the required magnetic block is attached.
@@ -321,7 +321,7 @@ class EquipmentHandler:
     async def load_module(
         self,
         model: ModuleModel,
-        location: DeckSlotLocation,
+        location: AddressableAreaLocation,
         module_id: Optional[str],
     ) -> LoadedModuleData:
         """Ensure the required module is attached.
@@ -355,12 +355,18 @@ class EquipmentHandler:
                 for hw_mod in self._hardware_api.attached_modules
             ]
 
-            serial_number_at_locaiton = self._state_store.geometry._addressable_areas.get_fixture_serial_from_deck_configuration_by_deck_slot(
-                location.slotName
+            serial_number_at_locaiton = self._state_store.geometry._addressable_areas.get_fixture_serial_from_deck_configuration_by_addressable_area(
+                addressable_area_name=location.addressableAreaName
             )
+            cutout_id = self._state_store.geometry._addressable_areas.get_cutout_id_by_deck_slot_name(
+                slot_name=self._state_store.geometry._addressable_areas.get_addressable_area_base_slot(
+                    location.addressableAreaName
+                )
+            )
+
             attached_module = self._state_store.modules.select_hardware_module_to_load(
                 model=model,
-                location=location,
+                location=cutout_id,
                 attached_modules=attached_modules,
                 expected_serial_number=serial_number_at_locaiton,
             )

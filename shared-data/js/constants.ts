@@ -569,6 +569,8 @@ export const FLEX_STACKER_WITH_WASTE_CHUTE_ADAPTER_COVERED_FIXTURE: 'flexStacker
   'flexStackerModuleV1WithWasteChuteRightAdapterCovered'
 export const FLEX_STACKER_WTIH_WASTE_CHUTE_ADAPTER_NO_COVER_FIXTURE: 'flexStackerModuleV1WithWasteChuteRightAdapterNoCover' =
   'flexStackerModuleV1WithWasteChuteRightAdapterNoCover'
+export const FLEX_STACKER_WITH_MAG_BLOCK_FIXTURE: 'flexStackerModuleV1WithMagneticBlockV1' =
+  'flexStackerModuleV1WithMagneticBlockV1'
 
 export const MODULE_FIXTURES_BY_MODEL: {
   [moduleModel in ModuleModel]?: CutoutFixtureId[]
@@ -623,6 +625,7 @@ export const WASTE_CHUTE_STAGING_AREA_FIXTURES: CutoutFixtureId[] = [
 
 export const FLEX_STACKER_FIXTURES: CutoutFixtureId[] = [
   FLEX_STACKER_V1_FIXTURE,
+  FLEX_STACKER_WITH_MAG_BLOCK_FIXTURE,
   FLEX_STACKER_WITH_WASTE_CHUTE_ADAPTER_COVERED_FIXTURE,
   FLEX_STACKER_WTIH_WASTE_CHUTE_ADAPTER_NO_COVER_FIXTURE,
 ]
