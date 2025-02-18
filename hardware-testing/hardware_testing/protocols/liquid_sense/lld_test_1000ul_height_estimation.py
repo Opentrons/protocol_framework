@@ -152,12 +152,10 @@ def _get_multi_dispense_volumes(current_volume: float) -> List[float]:
         disp_vols = [current_volume - 200, 200]
     elif current_volume <= 250 + 250:
         disp_vols = [250, current_volume - 250]
-    elif current_volume <= 250 + 250:
-        disp_vols = [250, current_volume - 250]
 
     # 3x dispenses
     elif current_volume <= 200 + 200 + 200:
-        disp_vols = [200, 200, current_volume - (200 * 2)]
+        disp_vols = [200, 200, current_volume - (200 + 200)]
     elif current_volume <= 250 + 200 + 200:
         disp_vols = [current_volume - (200 + 200), 200, 200]
     elif current_volume <= 250 + 250 + 200:
@@ -167,15 +165,15 @@ def _get_multi_dispense_volumes(current_volume: float) -> List[float]:
 
     # 4x dispenses
     elif current_volume <= 200 + 200 + 200 + 200:
-        disp_vols = [200, 200, 200, current_volume - (200 * 2)]
+        disp_vols = [200, 200, 200, current_volume - (200 + 200 + 200)]
     elif current_volume <= 250 + 200 + 200 + 200:
-        disp_vols = [current_volume - (200 + 200), 200, 200, 200]
+        disp_vols = [current_volume - (200 + 200 + 200), 200, 200, 200]
     elif current_volume <= 250 + 250 + 200 + 200:
-        disp_vols = [250, current_volume - (200 + 250), 200, 200]
+        disp_vols = [250, current_volume - (200 + 200 + 250), 200, 200]
     elif current_volume <= 250 + 250 + 250 + 200:
-        disp_vols = [250, 250, current_volume - (250 + 250), 200]
+        disp_vols = [250, 250, current_volume - (250 + 250 + 200), 200]
     elif current_volume <= 250 + 250 + 250 + 250:
-        disp_vols = [250, 250, 250, current_volume - (250 + 250)]
+        disp_vols = [250, 250, 250, current_volume - (250 + 250 + 250)]
 
     else:
         raise ValueError("this shouldn't happen")
@@ -395,13 +393,14 @@ def run(ctx: ProtocolContext) -> None:
             multi_dispense_vols = _get_multi_dispense_volumes(
                 current_volume=ul_to_remove
             )
-            num_multi_dispenses = 1 if ul_to_remove < 250 else 4
             multi_dispense_wells = [
-                remaining_dst_wells.pop(0) for _ in range(num_multi_dispenses)
+                remaining_dst_wells.pop(0)
+                for _ in range(len(multi_dispense_vols))
             ]
 
             # ADD DYE TO TEST-LABWARE
             # FIXME: use dynamic tracking for ALL aspirates/dispenses (entire test, why not)
+            # FIXME: probe the reservoir if this is the first trial
             pipette.aspirate(ul_to_add, dye_src_well.bottom(2))
             pipette.dispense(ul_to_add, test_well.top(), push_out=P1000_MAX_PUSH_OUT_UL)
             pipette.drop_tip()
