@@ -3,6 +3,7 @@ import {
   tiprackWellNamesFlat,
   DEFAULT_PIPETTE,
   SOURCE_LABWARE,
+  AIR_GAP_META,
   DEFAULT_BLOWOUT_WELL,
   DEST_LABWARE,
 } from './data'
@@ -138,30 +139,21 @@ export const makeAspirateHelper: MakeAspDispHelper<AspDispAirgapParams> = bakedP
     ...params,
   },
 })
-export const makeMoveToWellHelper = (wellName: string, labwareId?: string) => ({
-  commandType: 'moveToWell',
+export const makeAirGapHelper: MakeAirGapHelper<AspDispAirgapParams> = bakedParams => (
+  wellName,
+  volume,
+  params
+) => ({
+  commandType: 'aspirate',
+  meta: AIR_GAP_META,
   key: expect.any(String),
   params: {
-    pipetteId: DEFAULT_PIPETTE,
-    labwareId: labwareId ?? SOURCE_LABWARE,
+    ..._defaultAspirateParams,
+    ...bakedParams,
     wellName,
-    wellLocation: {
-      origin: 'bottom',
-      offset: {
-        x: 0,
-        y: 0,
-        z: 11.54,
-      },
-    },
-  },
-})
-export const makeAirGapHelper = (volume: number) => ({
-  commandType: 'airGapInPlace',
-  key: expect.any(String),
-  params: {
-    pipetteId: DEFAULT_PIPETTE,
     volume,
     flowRate: ASPIRATE_FLOW_RATE,
+    ...params,
   },
 })
 export const blowoutHelper = (
@@ -246,6 +238,7 @@ export const makeDispenseAirGapHelper: MakeDispenseAirGapHelper<AspDispAirgapPar
     volume,
     ...params,
   },
+  meta: AIR_GAP_META,
 })
 const _defaultTouchTipParams = {
   pipetteId: DEFAULT_PIPETTE,
