@@ -852,21 +852,35 @@ class GeometryView:
     def _get_potential_fixtures_for_location_occupation(
         self, location: _LabwareLocation
     ) -> Tuple[str, Set[PotentialCutoutFixture]] | None:
-        if isinstance(location, DeckSlotLocation):
-            module = self._modules.get_by_slot(location.slotName)
+        loc: DeckSlotLocation | AddressableAreaLocation | None = None
+        if isinstance(location, AddressableAreaLocation):
+            # Convert the addressable area into a staging slot if applicable
+            slots = StagingSlotName._value2member_map_
+            for slot in slots:
+                if location.addressableAreaName == slot:
+                    loc = DeckSlotLocation(
+                        slotName=DeckSlotName(location.addressableAreaName[0] + "3")
+                    )
+            if loc is None:
+                loc = location
+        elif isinstance(location, DeckSlotLocation):
+            loc = location
+
+        if isinstance(loc, DeckSlotLocation):
+            module = self._modules.get_by_slot(loc.slotName)
             if module is not None and self._config.robot_type != "OT-2 Standard":
                 fixtures = deck_configuration_provider.get_potential_cutout_fixtures(
                     addressable_area_name=self._modules.ensure_and_convert_module_fixture_location(
-                        deck_slot=location.slotName,
+                        deck_slot=loc.slotName,
                         model=module.model,
                     ),
                     deck_definition=self._addressable_areas.deck_definition,
                 )
             else:
                 fixtures = None
-        elif isinstance(location, AddressableAreaLocation):
+        elif isinstance(loc, AddressableAreaLocation):
             fixtures = deck_configuration_provider.get_potential_cutout_fixtures(
-                addressable_area_name=location.addressableAreaName,
+                addressable_area_name=loc.addressableAreaName,
                 deck_definition=self._addressable_areas.deck_definition,
             )
         else:
