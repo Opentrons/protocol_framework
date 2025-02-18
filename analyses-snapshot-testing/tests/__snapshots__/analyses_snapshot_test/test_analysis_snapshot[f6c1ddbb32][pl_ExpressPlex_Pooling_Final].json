@@ -1643,7 +1643,9 @@
           {
             "cutoutId": "cutoutA1",
             "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
+            "possibleCutoutFixtureIds": [
+              "heaterShakerModuleV1"
+            ]
           }
         ]
       },
@@ -4392,7 +4394,9 @@
           {
             "cutoutId": "cutoutA1",
             "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
+            "possibleCutoutFixtureIds": [
+              "heaterShakerModuleV1"
+            ]
           }
         ]
       },
@@ -10313,8 +10317,6 @@
             "kind": "onCutoutFixture",
             "possibleCutoutFixtureIds": [
               "flexStackerModuleV1",
-              "flexStackerModuleV1WithWasteChuteRightAdapterCovered",
-              "flexStackerModuleV1WithWasteChuteRightAdapterNoCover",
               "singleRightSlot",
               "stagingAreaRightSlot"
             ]
