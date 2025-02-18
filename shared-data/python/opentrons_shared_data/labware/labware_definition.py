@@ -101,7 +101,7 @@ class Parameters(BaseModel):
     isTiprack: bool
     tipLength: _NonNegativeNumber | None = None
     tipOverlap: _NonNegativeNumber | None = None
-    loadName: str = Field(pattern=SAFE_STRING_REGEX)
+    loadName: Annotated[str, Field(pattern=SAFE_STRING_REGEX)]
     isMagneticModuleCompatible: bool
     magneticModuleEngageHeight: _NonNegativeNumber | None = None
     isDeckSlotCompatible: bool | None = None
@@ -440,8 +440,8 @@ class InnerWellGeometry(BaseModel):
 
 class LabwareDefinition(BaseModel):
     schemaVersion: Literal[1, 2, 3]
-    version: int = Field(ge=1)
-    namespace: str = Field(pattern=SAFE_STRING_REGEX)
+    version: Annotated[int, Field(ge=1)]
+    namespace: Annotated[str, Field(pattern=SAFE_STRING_REGEX)]
     metadata: Metadata
     brand: BrandData
     parameters: Parameters
