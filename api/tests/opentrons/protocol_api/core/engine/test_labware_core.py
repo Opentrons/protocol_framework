@@ -7,7 +7,6 @@ from decoy import Decoy
 
 from opentrons_shared_data.labware.types import (
     LabwareDefinition as LabwareDefDict,
-    LabwareParameters as LabwareParamsDict,
     LabwareUri,
 )
 from opentrons_shared_data.labware.labware_definition import (
@@ -23,8 +22,9 @@ from opentrons.protocol_engine.clients import SyncClient as EngineClient
 from opentrons.protocol_engine.errors import LabwareNotOnDeckError
 from opentrons.protocol_engine.types import (
     LabwareOffsetCreate,
-    LabwareOffsetLocation,
+    LabwareOffsetLocationSequence,
     LabwareOffsetVector,
+    OnAddressableAreaOffsetLocationSequenceComponent,
 )
 from opentrons.protocol_api._liquid import Liquid
 from opentrons.protocol_api.core.labware import LabwareLoadParams
@@ -106,16 +106,18 @@ def test_set_calibration_succeeds_in_ok_location(
     decoy.when(
         mock_engine_client.state.labware.get_display_name("cool-labware")
     ).then_return("what a cool labware")
-    location = LabwareOffsetLocation(slotName=DeckSlotName.SLOT_C2)
+    location = [
+        OnAddressableAreaOffsetLocationSequenceComponent(addressableAreaName="C2")
+    ]
     decoy.when(
         mock_engine_client.state.geometry.get_offset_location("cool-labware")
-    ).then_return(location)
+    ).then_return(cast(LabwareOffsetLocationSequence, location))
     subject.set_calibration(Point(1, 2, 3))
     decoy.verify(
         mock_engine_client.add_labware_offset(
             LabwareOffsetCreate(
                 definitionUri="hello/world/42",
-                location=location,
+                locationSequence=cast(LabwareOffsetLocationSequence, location),
                 vector=LabwareOffsetVector(x=1, y=2, z=3),
             )
         ),
@@ -189,7 +191,9 @@ def test_get_definition(subject: LabwareCore) -> None:
             "gripperOffsets": {},
         },
     )
-    assert subject.get_parameters() == cast(LabwareParamsDict, {"loadName": "world"})
+    assert subject.get_parameters() == {  # type: ignore[comparison-overlap]
+        "loadName": "world"
+    }
 
 
 def test_get_user_display_name(decoy: Decoy, mock_engine_client: EngineClient) -> None:

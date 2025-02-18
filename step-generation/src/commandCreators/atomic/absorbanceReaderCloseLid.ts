@@ -1,21 +1,29 @@
 import { uuid } from '../../utils'
-import { missingModuleError } from '../../errorCreators'
+import * as errorCreators from '../../errorCreators'
 import { absorbanceReaderStateGetter } from '../../robotStateSelectors'
-import type { AbsorbanceReaderLidArgs, CommandCreator } from '../../types'
+import type { AbsorbanceReaderCloseLidCreateCommand } from '@opentrons/shared-data'
+import type { CommandCreator, CommandCreatorError } from '../../types'
 
-export const absorbanceReaderCloseLid: CommandCreator<AbsorbanceReaderLidArgs> = (
-  args,
-  invariantContext,
-  prevRobotState
-) => {
+export const absorbanceReaderCloseLid: CommandCreator<
+  AbsorbanceReaderCloseLidCreateCommand['params']
+> = (args, invariantContext, prevRobotState) => {
   const absorbanceReaderState = absorbanceReaderStateGetter(
     prevRobotState,
-    args.module
+    args.moduleId
   )
-  if (args.module == null || absorbanceReaderState == null) {
-    return {
-      errors: [missingModuleError()],
-    }
+  const errors: CommandCreatorError[] = []
+  if (args.moduleId == null || absorbanceReaderState == null) {
+    errors.push(errorCreators.missingModuleError())
+  }
+  if (
+    !Object.values(invariantContext.additionalEquipmentEntities).some(
+      ({ name }) => name === 'gripper'
+    )
+  ) {
+    errors.push(errorCreators.absorbanceReaderNoGripper())
+  }
+  if (errors.length > 0) {
+    return { errors }
   }
 
   return {
@@ -24,7 +32,7 @@ export const absorbanceReaderCloseLid: CommandCreator<AbsorbanceReaderLidArgs> =
         commandType: 'absorbanceReader/closeLid',
         key: uuid(),
         params: {
-          moduleId: args.module,
+          moduleId: args.moduleId,
         },
       },
     ],

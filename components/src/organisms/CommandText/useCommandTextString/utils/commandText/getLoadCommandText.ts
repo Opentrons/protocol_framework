@@ -56,7 +56,9 @@ export const getLoadCommandText = ({
         loadedModules: commandTextData?.modules ?? [],
         t,
       })
-      const labwareName = command.result?.definition.metadata.displayName
+      const labwareName =
+        command.params.displayName ??
+        command.result?.definition.metadata.displayName
       // use in preposition for modules and slots, on for labware and adapters
       let displayLocation = t('in_location', { location })
       if (
@@ -72,6 +74,13 @@ export const getLoadCommandText = ({
         labware: labwareName,
         display_location: displayLocation,
       })
+    }
+    // TODO(sb, 01/29): Add full support for these commands in run log once location refactor is complete
+    case 'loadLid': {
+      return t('load_lid')
+    }
+    case 'loadLidStack': {
+      return t('load_lid_stack')
     }
     case 'reloadLabware': {
       const { labwareId } = command.params

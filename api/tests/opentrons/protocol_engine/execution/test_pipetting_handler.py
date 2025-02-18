@@ -171,7 +171,9 @@ async def test_hw_dispense_in_place(
         mock_hardware_api.set_flow_rate(
             mount=Mount.RIGHT, aspirate=None, dispense=2.5, blow_out=None
         ),
-        await mock_hardware_api.dispense(mount=Mount.RIGHT, volume=25, push_out=None),
+        await mock_hardware_api.dispense(
+            mount=Mount.RIGHT, volume=25, push_out=None, correction_volume=0
+        ),
         mock_hardware_api.set_flow_rate(
             mount=Mount.RIGHT, aspirate=1.23, dispense=4.56, blow_out=7.89
         ),
@@ -263,7 +265,9 @@ async def test_hw_aspirate_in_place(
         mock_hardware_api.set_flow_rate(
             mount=Mount.LEFT, aspirate=2.5, dispense=None, blow_out=None
         ),
-        await mock_hardware_api.aspirate(mount=Mount.LEFT, volume=25),
+        await mock_hardware_api.aspirate(
+            mount=Mount.LEFT, volume=25, correction_volume=0
+        ),
         mock_hardware_api.set_flow_rate(
             mount=Mount.LEFT, aspirate=1.23, dispense=4.56, blow_out=7.89
         ),

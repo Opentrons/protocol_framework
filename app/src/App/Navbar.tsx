@@ -1,4 +1,5 @@
 import { useCallback } from 'react'
+import { useTranslation } from 'react-i18next'
 import { NavLink, useNavigate } from 'react-router-dom'
 import styled from 'styled-components'
 import debounce from 'lodash/debounce'
@@ -111,11 +112,11 @@ const LogoImg = styled('img')`
 `
 
 export function Navbar({ routes }: { routes: RouteProps[] }): JSX.Element {
+  const { t } = useTranslation('top_navigation')
   const navigate = useNavigate()
   const navRoutes = routes.filter(
     ({ navLinkTo }: RouteProps) => navLinkTo != null
   )
-
   const debouncedNavigate = useCallback(
     debounce((path: string) => {
       navigate(path)
@@ -149,7 +150,7 @@ export function Navbar({ routes }: { routes: RouteProps[] }): JSX.Element {
               as="h3"
               margin={`${SPACING.spacing8} 0 ${SPACING.spacing8} ${SPACING.spacing12}`}
             >
-              {name}
+              {t(name)}
             </LegacyStyledText>
           </NavbarLink>
         ))}

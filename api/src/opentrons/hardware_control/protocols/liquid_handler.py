@@ -98,6 +98,7 @@ class LiquidHandler(
         mount: MountArgType,
         volume: Optional[float] = None,
         rate: float = 1.0,
+        correction_volume: float = 0.0,
     ) -> None:
         """
         Aspirate a volume of liquid (in microliters/uL) using this pipette
@@ -117,6 +118,7 @@ class LiquidHandler(
         volume : [float] The number of microliters to aspirate
         rate : [float] Set plunger speed for this aspirate, where
             speed = rate * aspirate_speed
+        correction_volume : Correction volume in uL for the specified aspirate volume
         """
         ...
 
@@ -126,6 +128,7 @@ class LiquidHandler(
         volume: Optional[float] = None,
         rate: float = 1.0,
         push_out: Optional[float] = None,
+        correction_volume: float = 0.0,
     ) -> None:
         """
         Dispense a volume of liquid in microliters(uL) using this pipette
@@ -136,6 +139,7 @@ class LiquidHandler(
         volume : [float] The number of microliters to dispense
         rate : [float] Set plunger speed for this dispense, where
             speed = rate * dispense_speed
+        correction_volume : Correction volume in uL for the specified dispense volume
         """
         ...
 
@@ -183,7 +187,10 @@ class LiquidHandler(
         ...
 
     async def tip_drop_moves(
-        self, mount: MountArgType, home_after: bool = True
+        self,
+        mount: MountArgType,
+        home_after: bool = True,
+        ignore_plunger: bool = False,
     ) -> None:
         ...
 

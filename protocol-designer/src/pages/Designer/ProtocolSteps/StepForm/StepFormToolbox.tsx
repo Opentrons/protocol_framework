@@ -49,6 +49,7 @@ import {
   TemperatureTools,
   ThermocyclerTools,
 } from './StepTools'
+import { useAbsorbanceReaderCommandType } from './hooks'
 import {
   getSaveStepSnackbarText,
   getVisibleFormErrors,
@@ -138,6 +139,10 @@ export function StepFormToolbox(props: StepFormToolboxProps): JSX.Element {
     dependentFields: error.dependentProfileFields,
   }))
   const timeline = useSelector(getRobotStateTimeline)
+  const moduleId = formData.moduleId
+  const enableReadOrInitialization = useAbsorbanceReaderCommandType(
+    moduleId as string | null
+  )
   const [toolboxStep, setToolboxStep] = useState<number>(0)
   const [showFormErrors, setShowFormErrors] = useState<boolean>(false)
   const [tab, setTab] = useState<LiquidHandlingTab>('aspirate')
@@ -205,7 +210,8 @@ export function StepFormToolbox(props: StepFormToolboxProps): JSX.Element {
   }
 
   const isMultiStepToolbox =
-    formData.stepType === 'absorbanceReader' ||
+    (formData.stepType === 'absorbanceReader' &&
+      enableReadOrInitialization != null) ||
     formData.stepType === 'moveLiquid' ||
     formData.stepType === 'mix' ||
     formData.stepType === 'thermocycler'
@@ -242,7 +248,7 @@ export function StepFormToolbox(props: StepFormToolboxProps): JSX.Element {
           numErrors,
           stepTypeDisplayName: i18n.format(
             t(`stepType.${formData.stepType}`),
-            'capitalize'
+            'titleCase'
           ),
           t,
         })
@@ -348,12 +354,13 @@ export function StepFormToolbox(props: StepFormToolboxProps): JSX.Element {
             <Icon size="1rem" name={icon} minWidth="1rem" />
             <StyledText
               desktopStyle="bodyLargeSemiBold"
-              css={LINE_CLAMP_TEXT_STYLE(2)}
+              css={LINE_CLAMP_TEXT_STYLE(2, true)}
             >
               {capitalizeFirstLetter(String(formData.stepName))}
             </StyledText>
           </Flex>
         }
+        width="21.875rem"
       >
         <div
           ref={toolsComponentRef}

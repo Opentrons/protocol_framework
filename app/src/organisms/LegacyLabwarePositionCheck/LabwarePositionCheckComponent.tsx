@@ -39,7 +39,7 @@ import type {
   RobotType,
 } from '@opentrons/shared-data'
 import type {
-  LabwareOffsetCreateData,
+  LegacyLabwareOffsetCreateData,
   LabwareOffset,
   CommandData,
 } from '@opentrons/api-client'
@@ -56,8 +56,8 @@ interface LabwarePositionCheckModalProps {
   existingOffsets: LabwareOffset[]
   onCloseClick: () => unknown
   protocolName: string
-  setMaintenanceRunId: (id: string | null) => void
-  isDeletingMaintenanceRun: boolean
+  setMaintenanceRunId?: (id: string | null) => void
+  isDeletingMaintenanceRun?: boolean
   caughtError?: Error
 }
 
@@ -105,7 +105,7 @@ export const LabwarePositionCheckComponent = (
       maintenanceRunData?.data.id !== maintenanceRunId &&
       monitorMaintenanceRunForDeletion
     ) {
-      setMaintenanceRunId(null)
+      setMaintenanceRunId?.(null)
     }
   }, [
     maintenanceRunData?.data.id,
@@ -310,7 +310,9 @@ export const LabwarePositionCheckComponent = (
     robotType,
   }
 
-  const handleApplyOffsets = (offsets: LabwareOffsetCreateData[]): void => {
+  const handleApplyOffsets = (
+    offsets: LegacyLabwareOffsetCreateData[]
+  ): void => {
     setIsApplyingOffsets(true)
     Promise.all(offsets.map(data => createLabwareOffset({ runId, data })))
       .then(() => {

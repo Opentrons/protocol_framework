@@ -62,7 +62,7 @@ export function ConnectedStepInfo(props: ConnectedStepInfoProps): JSX.Element {
     setOpenedOverflowMenuId,
     sidebarWidth,
   } = props
-  const { t } = useTranslation('application')
+  const { i18n, t } = useTranslation('application')
   const dispatch = useDispatch<ThunkDispatch<BaseState, any, any>>()
   const stepIds = useSelector(getOrderedStepIds)
   const step = useSelector(stepFormSelectors.getSavedStepForms)[stepId]
@@ -227,7 +227,8 @@ export function ConnectedStepInfo(props: ConnectedStepInfoProps): JSX.Element {
         onMouseEnter={highlightStep}
         iconName={hasError || hasWarnings ? 'alert-circle' : iconName}
         title={`${stepNumber}. ${
-          step.stepName || t(`stepType.${step.stepType}`)
+          i18n.format(step.stepName, 'titleCase') ||
+          t(`stepType.${step.stepType}`)
         }`}
         dragHovered={dragHovered}
         sidebarWidth={sidebarWidth}

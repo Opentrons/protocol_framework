@@ -13,8 +13,8 @@ import type {
 import type {
   LabwareEntities,
   LocationLiquidState,
-  RunCommandTimelineFrame,
   SingleLabwareLiquidState,
+  TimelineFrame,
 } from '@opentrons/step-generation'
 import type { CommandTextData } from './types'
 
@@ -127,11 +127,11 @@ export const wellFillFromWellContents = (
 
 export function getAllWellContentsForActiveItem(
   labwareEntities: LabwareEntities,
-  timelineFrame: RunCommandTimelineFrame
+  robotState: TimelineFrame
 ): WellContentsByLabware | null {
-  if (timelineFrame == null) return null
+  if (robotState == null) return null
 
-  const liquidState = timelineFrame.robotState.liquidState.labware
+  const liquidState = robotState.liquidState.labware
   const wellContentsByLabwareId = mapValues(
     liquidState,
     (labwareLiquids: SingleLabwareLiquidState, labwareId: string) => {
@@ -152,7 +152,8 @@ export function getLabwareDefinitionsFromCommands(
 ): LabwareDefinition2[] {
   return commands.reduce<LabwareDefinition2[]>((acc, command) => {
     const isLoadingNewDef =
-      command.commandType === 'loadLabware' &&
+      (command.commandType === 'loadLabware' ||
+        command.commandType === 'loadLid') &&
       !acc.some(
         def =>
           command.result?.definition != null &&

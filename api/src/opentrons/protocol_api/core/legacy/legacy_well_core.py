@@ -106,6 +106,10 @@ class LegacyWellCore(AbstractWellCore):
         """Get the coordinate of the well's center."""
         return self._geometry.center()
 
+    def get_meniscus(self) -> Point:
+        """Get the coordinate of the well's center."""
+        raise APIVersionError(api_element="Getting a meniscus")
+
     def load_liquid(
         self,
         liquid: Liquid,
@@ -117,6 +121,21 @@ class LegacyWellCore(AbstractWellCore):
     def from_center_cartesian(self, x: float, y: float, z: float) -> Point:
         """Gets point in deck coordinates based on percentage of the radius of each axis."""
         return self._geometry.from_center_cartesian(x, y, z)
+
+    def estimate_liquid_height_after_pipetting(
+        self,
+        operation_volume: float,
+    ) -> float:
+        """Estimate what the liquid height will be after pipetting, without raising an error."""
+        return 0.0
+
+    def current_liquid_height(self) -> float:
+        """Get the current liquid height."""
+        return 0.0
+
+    def get_liquid_volume(self) -> float:
+        """Get the current well volume."""
+        return 0.0
 
     # TODO(mc, 2022-10-28): is this used and/or necessary?
     def __repr__(self) -> str:

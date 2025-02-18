@@ -27,6 +27,7 @@ export function useRecoveryToasts({
   ...rest
 }: BuildToast): RecoveryToasts {
   const { currentStepNumber, hasRunDiverged } = stepCounts
+  const { i18n, t } = useTranslation('shared')
   const { makeToast } = useToaster()
   const displayType = isOnDevice ? 'odd' : 'desktop'
 
@@ -53,6 +54,10 @@ export function useRecoveryToasts({
   const makeSuccessToast = (): void => {
     if (selectedRecoveryOption !== RECOVERY_MAP.CANCEL_RUN.ROUTE) {
       makeToast(bodyText, 'success', {
+        buttonText:
+          displayType === 'odd'
+            ? i18n.format(t('shared:close'), 'capitalize')
+            : undefined,
         closeButton: true,
         disableTimeout: true,
         displayType,
@@ -110,7 +115,6 @@ export function useRecoveryFullCommandText(
 ): string | null {
   const { commandTextData, stepNumber } = props
 
-  // TODO TOME: I think you are looking one command to far, for some reason.
   const relevantCmdIdx = stepNumber ?? -1
   const relevantCmd = commandTextData?.commands[relevantCmdIdx - 1] ?? null
 
