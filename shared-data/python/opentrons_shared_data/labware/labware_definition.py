@@ -116,19 +116,57 @@ class Dimensions(BaseModel):
     xDimension: _NonNegativeNumber
 
 
-class WellDefinition(BaseModel):
+class _WellCommon2(BaseModel):
     model_config = ConfigDict(extra="allow")
 
     depth: _NonNegativeNumber
+    totalLiquidVolume: _NonNegativeNumber
     x: _NonNegativeNumber
     y: _NonNegativeNumber
     z: _NonNegativeNumber
+
+
+class CircularWellDefinition2(_WellCommon2, BaseModel):
+    shape: Literal["circular"]
+    diameter: _NonNegativeNumber
+
+
+class RectangularWellDefinition2(_WellCommon2, BaseModel):
+    shape: Literal["rectangular"]
+    xDimension: _NonNegativeNumber
+    yDimension: _NonNegativeNumber
+
+
+WellDefinition2 = Annotated[
+    CircularWellDefinition2 | RectangularWellDefinition2, Field(discriminator="shape")
+]
+
+
+class _WellCommon3(BaseModel):
+    model_config = ConfigDict(extra="allow")
+
+    depth: _NonNegativeNumber
     totalLiquidVolume: _NonNegativeNumber
-    xDimension: _NonNegativeNumber | None = None
-    yDimension: _NonNegativeNumber | None = None
-    diameter: _NonNegativeNumber | None = None
-    shape: Literal["rectangular", "circular"]
+    x: _NonNegativeNumber
+    y: _NonNegativeNumber
+    z: _NonNegativeNumber
     geometryDefinitionId: str | None = None
+
+
+class CircularWellDefinition3(_WellCommon3, BaseModel):
+    shape: Literal["circular"]
+    diameter: _NonNegativeNumber
+
+
+class RectangularWellDefinition3(_WellCommon3, BaseModel):
+    shape: Literal["rectangular"]
+    xDimension: _NonNegativeNumber
+    yDimension: _NonNegativeNumber
+
+
+WellDefinition3 = Annotated[
+    CircularWellDefinition3 | RectangularWellDefinition3, Field(discriminator="shape")
+]
 
 
 class SphericalSegment(BaseModel):
@@ -451,7 +489,7 @@ class LabwareDefinition(BaseModel):
     ordering: list[list[str]]
     cornerOffsetFromSlot: Vector
     dimensions: Dimensions
-    wells: dict[str, WellDefinition]
+    wells: dict[str, WellDefinition2 | WellDefinition3]
     groups: list[Group]
     allowedRoles: list[LabwareRole] = Field(default_factory=list)
     stackingOffsetWithLabware: dict[str, Vector] = Field(default_factory=dict)
