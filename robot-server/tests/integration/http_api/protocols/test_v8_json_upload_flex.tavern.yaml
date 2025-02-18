@@ -252,7 +252,7 @@ stages:
                       moduleId: magneticBlockId
                     - kind: onCutoutFixture
                       cutoutId: cutoutD3
-                      possibleCutoutFixtureIds: ["flexStackerModuleV1WithMagneticBlockV1", "magneticBlockV1"]
+                      possibleCutoutFixtureIds: ["flexStackerModuleV1WithMagneticBlockV1", "magneticBlockV1", "stagingAreaSlotWithMagneticBlockV1"]
                 notes: []
                 startedAt: !re_fullmatch "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d+(Z|([+-]\\d{2}:\\d{2}))"
                 completedAt: !re_fullmatch "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d+(Z|([+-]\\d{2}:\\d{2}))"
