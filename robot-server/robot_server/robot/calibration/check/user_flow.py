@@ -19,7 +19,7 @@ from opentrons.calibration_storage.ot2 import (
     save_tip_length_calibration,
 )
 
-from opentrons.calibration_storage.ot2 import models
+from opentrons.calibration_storage.ot2.models import v1 as cal_models
 from opentrons.types import Mount, Point, Location
 from opentrons.hardware_control import (
     HardwareControlAPI,
@@ -101,7 +101,7 @@ class CheckCalibrationUserFlow:
         hardware: HardwareControlAPI,
         has_calibration_block: bool = False,
         tip_rack_defs: Optional[List[LabwareDefinition2]] = None,
-    ):
+    ) -> None:
         self._hardware = hardware
         self._state_machine = CalibrationCheckStateMachine()
         self._current_state = State.sessionStarted
@@ -175,10 +175,10 @@ class CheckCalibrationUserFlow:
             )
 
     @tip_origin.setter
-    def tip_origin(self, new_val: Optional[Point]):
+    def tip_origin(self, new_val: Optional[Point]) -> None:
         self._tip_origin_pt = new_val
 
-    def reset_tip_origin(self):
+    def reset_tip_origin(self) -> None:
         self._tip_origin_pt = None
 
     @property
@@ -209,10 +209,12 @@ class CheckCalibrationUserFlow:
     def supported_commands(self) -> List[str]:
         return self._supported_commands.supported()
 
-    async def transition(self, tiprackDefinition: Optional[LabwareDefinition2] = None):
+    async def transition(
+        self, tiprackDefinition: Optional[LabwareDefinition2] = None
+    ) -> None:
         pass
 
-    async def change_active_pipette(self):
+    async def change_active_pipette(self) -> None:
         second_pip = self._get_pipette_by_rank(PipetteRank.second)
         if not second_pip:
             raise RobotServerError(
@@ -226,7 +228,7 @@ class CheckCalibrationUserFlow:
         self._active_tiprack = self._load_active_tiprack()
         self.reset_tip_origin()
 
-    def _set_current_state(self, to_state: State):
+    def _set_current_state(self, to_state: State) -> None:
         self._current_state = to_state
 
     @property
@@ -235,7 +237,7 @@ class CheckCalibrationUserFlow:
             CriticalPoint.FRONT_NOZZLE if self.hw_pipette.config.channels == 8 else None
         )
 
-    async def handle_command(self, name: Any, data: Dict[Any, Any]):
+    async def handle_command(self, name: Any, data: Dict[Any, Any]) -> None:
         """
         Handle a client command
 
@@ -265,7 +267,7 @@ class CheckCalibrationUserFlow:
     def get_active_tiprack(self) -> RequiredLabware:
         return RequiredLabware.from_lw(self.active_tiprack)
 
-    def _filter_hw_pips(self):
+    def _filter_hw_pips(self) -> Dict[Mount, Pipette]:
         hw_instr = self._hardware.hardware_instruments
         return {m: p for m, p in hw_instr.items() if p}
 
@@ -287,6 +289,9 @@ class CheckCalibrationUserFlow:
         if len(pips) == 1:
             for mount, pip in pips.items():
                 pip_calibration = self._pipette_calibrations[mount]
+                # This assert reflects an assumption from before this code was type-checked.
+                # Ideally, this would be ensured statically.
+                assert pip_calibration is not None
                 info = PipetteInfo(
                     channels=pip.config.channels,
                     rank=PipetteRank.first,
@@ -296,7 +301,8 @@ class CheckCalibrationUserFlow:
                         pip.liquid_class.max_volume, pip_calibration
                     ),
                     default_tipracks=uf.get_default_tipracks(
-                        pip.liquid_class.default_tipracks
+                        # `type: ignore` to narrow list[str] to list[LabwareURI].
+                        pip.liquid_class.default_tipracks  # type: ignore[arg-type]
                     ),
                 )
                 return info, [info]
@@ -314,7 +320,8 @@ class CheckCalibrationUserFlow:
                 right_pip.liquid_class.max_volume, r_calibration
             ),
             default_tipracks=uf.get_default_tipracks(
-                right_pip.liquid_class.default_tipracks
+                # `type: ignore` to narrow list[str] to list[LabwareURI].
+                right_pip.liquid_class.default_tipracks  # type: ignore[arg-type]
             ),
         )
         l_info = PipetteInfo(
@@ -326,7 +333,8 @@ class CheckCalibrationUserFlow:
                 left_pip.liquid_class.max_volume, l_calibration
             ),
             default_tipracks=uf.get_default_tipracks(
-                left_pip.liquid_class.default_tipracks
+                # `type: ignore` to narrow list[str] to list[LabwareURI].
+                left_pip.liquid_class.default_tipracks  # type: ignore[arg-type]
             ),
         )
         if (
@@ -339,7 +347,15 @@ class CheckCalibrationUserFlow:
             l_info.rank = PipetteRank.second
             return r_info, [r_info, l_info]
 
-    def _get_current_calibrations(self):
+    # todo(mm, 2025-02-14): These return types are the source of a lot of ignored and
+    # asserted-away type errors in this file. Double-check that they're actually correct.
+    def _get_current_calibrations(
+        self,
+    ) -> tuple[
+        cal_models.DeckCalibrationModel | None,
+        dict[Mount, cal_models.InstrumentOffsetModel | None],
+        dict[Mount, cal_models.TipLengthModel | None],
+    ]:
         deck = get_robot_deck_attitude()
         pipette_offsets = {
             m: get_pipette_offset(p.pipette_id, m)
@@ -354,7 +370,7 @@ class CheckCalibrationUserFlow:
 
     def _get_tip_length_from_pipette(
         self, mount: Mount, pipette: Pipette
-    ) -> Optional[models.v1.TipLengthModel]:
+    ) -> Optional[cal_models.TipLengthModel]:
         if not pipette.pipette_id:
             return None
         pip_offset = get_pipette_offset(pipette.pipette_id, mount)
@@ -379,7 +395,7 @@ class CheckCalibrationUserFlow:
         assert tiprack_def["schemaVersion"] == 2
         return load_tip_length_calibration(pipette.pipette_id, tiprack_def)
 
-    def _check_valid_calibrations(self):
+    def _check_valid_calibrations(self) -> None:
         deck = self._deck_calibration
         tip_length = all(tl for tl in self._tip_lengths.values())
         pipette = all(po for po in self._pipette_calibrations.values())
@@ -388,7 +404,12 @@ class CheckCalibrationUserFlow:
                 definition=CalibrationError.UNCALIBRATED_ROBOT,
                 flow="Calibration Health Check",
             )
-        deck_state = robot_calibration.validate_attitude_deck_calibration(deck)
+        deck_state = robot_calibration.validate_attitude_deck_calibration(
+            # fixme(mm, 2025-02-14): This is passing the wrong type and it happens
+            # to work because the two types share the same attribute names.
+            # This is from before this file was type-checked.
+            deck  # type: ignore[arg-type]
+        )
         if deck_state != util.DeckTransformState.OK:
             raise RobotServerError(
                 definition=CalibrationError.UNCALIBRATED_ROBOT,
@@ -407,14 +428,14 @@ class CheckCalibrationUserFlow:
         except StopIteration:
             return None
 
-    def _is_checking_both_mounts(self):
+    def _is_checking_both_mounts(self) -> bool:
         return len(self._pip_info) == 2
 
     def _get_volume_from_tiprack_def(self, tip_rack_def: LabwareDefinition2) -> float:
         first_well = tip_rack_def["wells"]["A1"]
         return float(first_well["totalLiquidVolume"])
 
-    def _load_cal_block(self):
+    def _load_cal_block(self) -> None:
         if self._has_calibration_block:
             cb_setup = CAL_BLOCK_SETUP_CAL_CHECK
             self._deck[cb_setup.slot] = labware.load(
@@ -425,7 +446,7 @@ class CheckCalibrationUserFlow:
         self,
         pipette: Optional[Pipette] = None,
         mount: Optional[Mount] = None,
-    ) -> models.v1.InstrumentOffsetModel:
+    ) -> cal_models.InstrumentOffsetModel:
         if not pipette or not mount:
             pip_offset = get_pipette_offset(
                 self.hw_pipette.pipette_id or "", self.mount
@@ -438,7 +459,7 @@ class CheckCalibrationUserFlow:
     @staticmethod
     def _get_tr_lw(
         tip_rack_def: Optional[LabwareDefinition2],
-        existing_calibration: models.v1.InstrumentOffsetModel,
+        existing_calibration: cal_models.InstrumentOffsetModel,
         volume: float,
         position: Location,
     ) -> labware.Labware:
@@ -491,7 +512,7 @@ class CheckCalibrationUserFlow:
         return tr_lw
 
     def _get_tiprack_by_pipette_volume(
-        self, volume: float, existing_calibration: models.v1.InstrumentOffsetModel
+        self, volume: float, existing_calibration: cal_models.InstrumentOffsetModel
     ) -> labware.Labware:
         tip_rack_def = None
         if self._tip_racks:
@@ -558,7 +579,7 @@ class CheckCalibrationUserFlow:
                 rank=info_pip.rank.value,
                 mount=str(info_pip.mount),
                 serial=hw_pip.pipette_id,
-                defaultTipracks=info_pip.default_tipracks,  # type: ignore[arg-type]
+                defaultTipracks=info_pip.default_tipracks,
             )
             for hw_pip, info_pip in zip(hw_pips, info_pips)
         ]
@@ -581,9 +602,7 @@ class CheckCalibrationUserFlow:
             rank=self.active_pipette.rank.value,
             mount=str(self.mount),
             serial=self.hw_pipette.pipette_id,
-            defaultTipracks=(
-                self.active_pipette.default_tipracks  # type: ignore[arg-type]
-            ),
+            defaultTipracks=self.active_pipette.default_tipracks,
         )
 
     def _determine_threshold(self) -> Point:
@@ -630,15 +649,18 @@ class CheckCalibrationUserFlow:
     def _check_and_update_status(
         new_status: RobotHealthCheck, old_status: RobotHealthCheck
     ) -> Literal["IN_THRESHOLD", "OUTSIDE_THRESHOLD"]:
-        if old_status == RobotHealthCheck.OUTSIDE_THRESHOLD:
-            return old_status.value
+        if old_status is RobotHealthCheck.OUTSIDE_THRESHOLD:
+            # Not sure why mypy thinks this .value is Any.
+            return old_status.value  # type: ignore[no-any-return]
         else:
             return new_status.value
 
     def _update_compare_status_by_state(
         self, rank: PipetteRank, info: ComparisonStatus, status: RobotHealthCheck
     ) -> ComparisonStatePerCalibration:
-        intermediate_map = getattr(self._comparison_map, rank.name)
+        intermediate_map: ComparisonStatePerCalibration = getattr(
+            self._comparison_map, rank.name
+        )
         is_second_pipette = self.active_pipette.rank == PipetteRank.second
         only_one_pipette = not self._is_checking_both_mounts()
         deck_comparison_state = is_second_pipette or only_one_pipette
@@ -649,6 +671,9 @@ class CheckCalibrationUserFlow:
             pip = PipetteOffsetComparisonMap(status=status.value, comparingHeight=info)
             intermediate_map.set_value("pipetteOffset", pip)
         elif self.current_state == State.comparingPointOne:
+            # This assert reflects an assumption from before this code was type-checked.
+            # Ideally, this would be ensured statically.
+            assert intermediate_map.pipetteOffset is not None
             old_status = RobotHealthCheck.status_from_string(
                 intermediate_map.pipetteOffset.status
             )
@@ -659,6 +684,9 @@ class CheckCalibrationUserFlow:
                 deck = DeckComparisonMap(status=status.value, comparingPointOne=info)
                 intermediate_map.set_value("deck", deck)
         elif self.current_state == State.comparingPointTwo and deck_comparison_state:
+            # This assert reflects an assumption from before this code was type-checked.
+            # Ideally, this would be ensured statically.
+            assert intermediate_map.deck is not None
             old_status = RobotHealthCheck.status_from_string(
                 intermediate_map.deck.status
             )
@@ -666,6 +694,9 @@ class CheckCalibrationUserFlow:
             intermediate_map.deck.status = updated_status
             intermediate_map.deck.comparingPointTwo = info
         elif self.current_state == State.comparingPointThree and deck_comparison_state:
+            # This assert reflects an assumption from before this code was type-checked.
+            # Ideally, this would be ensured statically.
+            assert intermediate_map.deck is not None
             old_status = RobotHealthCheck.status_from_string(
                 intermediate_map.deck.status
             )
@@ -674,7 +705,7 @@ class CheckCalibrationUserFlow:
             intermediate_map.deck.comparingPointThree = info
         return intermediate_map
 
-    def _mark_bad(self):
+    def _mark_bad(self) -> None:
         pipette_offset_states = [State.comparingHeight, State.comparingPointOne]
         deck_calibration_states = [
             State.comparingPointOne,
@@ -686,8 +717,12 @@ class CheckCalibrationUserFlow:
         only_one_pipette = not self._is_checking_both_mounts()
         pipette_state = is_second_pipette or only_one_pipette
         if self.current_state == State.comparingTip:
-            calibration = mark_bad_calibration.mark_bad(
-                self._tip_lengths[active_mount], cal_types.SourceType.calibration_check
+            tl_at_active_mount = self._tip_lengths[active_mount]
+            # This assert reflects an assumption from before this code was type-checked.
+            # Ideally, this would be ensured statically.
+            assert tl_at_active_mount is not None
+            marked_tl_calibration = mark_bad_calibration.mark_bad(
+                tl_at_active_mount, cal_types.SourceType.calibration_check
             )
             tip_definition = self.active_tiprack._core.get_definition()
             # Assert for type checking. This should always pass because
@@ -695,29 +730,45 @@ class CheckCalibrationUserFlow:
             assert tip_definition["schemaVersion"] == 2
             tip_length_dict = create_tip_length_data(
                 definition=tip_definition,
-                length=calibration.tip_length,
-                cal_status=calibration.status,
+                # fixme(mm, 2025-02-14): .tip_length does not exist on this type but
+                # tipLength does. Investigate how (or if?) this has ever worked.
+                # This is from before this file was type-checked.
+                length=marked_tl_calibration.tip_length,  # type: ignore[attr-defined]
+                cal_status=marked_tl_calibration.status,
             )
-            save_tip_length_calibration(calibration.pipette, tip_length_dict)
+            save_tip_length_calibration(
+                # fixme(mm, 2025-02-14): .pipette does not exist on TipLengthModel,
+                # though it does exist on TipLengthCalibration. Investigate how (or if?)
+                # this has ever worked. This is from before this file was type-checked.
+                marked_tl_calibration.pipette,  # type: ignore[attr-defined]
+                tip_length_dict,
+            )
         elif self.current_state == State.comparingPointOne and pipette_state:
             # Here if we're on the second pipette, but the first slot we
             # should make sure we mark both pipette cal and deck cal as bad.
-            pip_calibration = mark_bad_calibration.mark_bad(
-                self._pipette_calibrations[active_mount],
+            pc_at_active_mount = self._pipette_calibrations[active_mount]
+            # This assert reflects an assumption from before this code was type-checked.
+            # Ideally, this would be ensured statically.
+            assert pc_at_active_mount is not None
+            marked_pipette_calibration = mark_bad_calibration.mark_bad(
+                pc_at_active_mount,
                 cal_types.SourceType.calibration_check,
             )
+            # This assert reflects an assumption from before this code was type-checked.
+            # Ideally, this would be ensured statically.
+            assert self._deck_calibration is not None
             deck_calibration = mark_bad_calibration.mark_bad(
                 self._deck_calibration, cal_types.SourceType.calibration_check
             )
             pipette_id = self.hw_pipette.pipette_id
             assert pipette_id, "Cannot update pipette offset calibraion"
             save_pipette_calibration(
-                offset=Point(*pip_calibration.offset),
+                offset=Point(*marked_pipette_calibration.offset),
                 pip_id=pipette_id,
                 mount=active_mount,
-                tiprack_hash=pip_calibration.tiprack,
-                tiprack_uri=pip_calibration.uri,
-                cal_status=pip_calibration.status,
+                tiprack_hash=marked_pipette_calibration.tiprack,
+                tiprack_uri=marked_pipette_calibration.uri,
+                cal_status=marked_pipette_calibration.status,
             )
             save_robot_deck_attitude(
                 transform=deck_calibration.attitude,
@@ -727,33 +778,40 @@ class CheckCalibrationUserFlow:
                 cal_status=deck_calibration.status,
             )
         elif self.current_state in pipette_offset_states:
-            calibration = mark_bad_calibration.mark_bad(
-                self._pipette_calibrations[active_mount],
+            pc_at_active_mount = self._pipette_calibrations[active_mount]
+            # This assert reflects an assumption from before this code was type-checked.
+            # Ideally, this would be ensured statically.
+            assert pc_at_active_mount is not None
+            marked_pipette_calibration = mark_bad_calibration.mark_bad(
+                pc_at_active_mount,
                 cal_types.SourceType.calibration_check,
             )
             pipette_id = self.hw_pipette.pipette_id
             assert pipette_id, "Cannot update pipette offset calibraion"
             save_pipette_calibration(
-                offset=Point(*calibration.offset),
+                offset=Point(*marked_pipette_calibration.offset),
                 pip_id=pipette_id,
                 mount=active_mount,
-                tiprack_hash=calibration.tiprack,
-                tiprack_uri=calibration.uri,
-                cal_status=calibration.status,
+                tiprack_hash=marked_pipette_calibration.tiprack,
+                tiprack_uri=marked_pipette_calibration.uri,
+                cal_status=marked_pipette_calibration.status,
             )
         elif self.current_state in deck_calibration_states and pipette_state:
-            calibration = mark_bad_calibration.mark_bad(
+            # This assert reflects an assumption from before this code was type-checked.
+            # Ideally, this would be ensured statically.
+            assert self._deck_calibration is not None
+            marked_deck_calibration = mark_bad_calibration.mark_bad(
                 self._deck_calibration, cal_types.SourceType.calibration_check
             )
             save_robot_deck_attitude(
-                transform=calibration.attitude,
-                pip_id=calibration.pipette_calibrated_with,
-                lw_hash=calibration.tiprack,
-                source=calibration.source,
-                cal_status=calibration.status,
+                transform=marked_deck_calibration.attitude,
+                pip_id=marked_deck_calibration.pipette_calibrated_with,
+                lw_hash=marked_deck_calibration.tiprack,
+                source=marked_deck_calibration.source,
+                cal_status=marked_deck_calibration.status,
             )
 
-    async def update_comparison_map(self):
+    async def update_comparison_map(self) -> None:
         ref_pt, jogged_pt = self._get_reference_points_by_state()
         rank = self.active_pipette.rank
         threshold_vector = self._determine_threshold()
@@ -781,14 +839,17 @@ class CheckCalibrationUserFlow:
                 status = RobotHealthCheck.OUTSIDE_THRESHOLD
 
             info = ComparisonStatus(
-                differenceVector=(jogged_pt - ref_pt),
+                differenceVector=list(jogged_pt - ref_pt),
                 thresholdVector=list(threshold_vector),
                 exceedsThreshold=exceeds,
             )
             intermediate_map = self._update_compare_status_by_state(rank, info, status)
             self._comparison_map.set_value(rank.name, intermediate_map)
 
-    def _get_reference_points_by_state(self):
+    # todo(mm, 2025-02-14): This `type: ignore[return]` is because mypy thinks we're
+    # missing some cases. Investigate this to see if any of those missed cases matter
+    # in practice.
+    def _get_reference_points_by_state(self) -> tuple[Point, Point]:  # type: ignore[return]
         saved_points = self._reference_points
         if self.current_state == State.comparingTip:
             return saved_points.tip.initial_point, saved_points.tip.final_point
@@ -801,7 +862,7 @@ class CheckCalibrationUserFlow:
         elif self.current_state == State.comparingPointThree:
             return saved_points.three.initial_point, saved_points.three.final_point
 
-    async def register_initial_point(self):
+    async def register_initial_point(self) -> None:
         """
         Here we will register the initial and final
         points to the current point before jogging
@@ -826,7 +887,7 @@ class CheckCalibrationUserFlow:
             self._reference_points.three.initial_point = current_point
             self._reference_points.three.final_point = current_point
 
-    async def register_final_point(self):
+    async def register_final_point(self) -> None:
         critical_point = self.critical_point_override
         current_point = await self.get_current_point(critical_point)
         if self.current_state == State.comparingNozzle:
@@ -866,7 +927,7 @@ class CheckCalibrationUserFlow:
             tip_length = self.active_tiprack.tip_length
             return tip_length - tip_overlap
 
-    async def move_to_tip_rack(self):
+    async def move_to_tip_rack(self) -> None:
         if not self.active_tiprack:
             raise RobotServerError(
                 definition=CalibrationError.UNMET_STATE_TRANSITION_REQ,
@@ -877,7 +938,7 @@ class CheckCalibrationUserFlow:
         await self.register_initial_point()
         await self._move(Location(self.tip_origin, None))
 
-    async def move_to_deck(self):
+    async def move_to_deck(self) -> None:
         deck_pt = self._deck.get_slot_center(JOG_TO_DECK_SLOT)
         ydim = self._deck.get_slot_definition(JOG_TO_DECK_SLOT)["boundingBox"][
             "yDimension"
@@ -896,7 +957,7 @@ class CheckCalibrationUserFlow:
         loc = Location(Point(*coords), None)
         return loc.move(point=Point(0, 0, self._z_height_reference))
 
-    async def move_to_reference_point(self):
+    async def move_to_reference_point(self) -> None:
         cal_block_target_well: Optional[labware.Well] = None
         if self._has_calibration_block:
             cb_setup = CAL_BLOCK_SETUP_CAL_CHECK
@@ -909,36 +970,36 @@ class CheckCalibrationUserFlow:
         await self._move(ref_loc)
         await self.register_final_point()
 
-    async def move_to_point_one(self):
+    async def move_to_point_one(self) -> None:
         await self._move(self._get_move_to_point_loc_by_state())
         await self.register_initial_point()
 
-    async def move_to_point_two(self):
+    async def move_to_point_two(self) -> None:
         await self._move(self._get_move_to_point_loc_by_state())
         await self.register_initial_point()
 
-    async def move_to_point_three(self):
+    async def move_to_point_three(self) -> None:
         await self._move(self._get_move_to_point_loc_by_state())
         await self.register_initial_point()
 
-    async def jog(self, vector):
+    async def jog(self, vector: tuple[float, float, float]) -> None:
         await self._hardware.move_rel(mount=self.mount, delta=Point(*vector))
         await self.register_final_point()
 
-    async def pick_up_tip(self):
+    async def pick_up_tip(self) -> None:
         await uf.pick_up_tip(self, tip_length=self._get_tip_length())
 
-    async def invalidate_tip(self):
+    async def invalidate_tip(self) -> None:
         await uf.invalidate_tip(self)
 
-    async def return_tip(self):
+    async def return_tip(self) -> None:
         await uf.return_tip(self, tip_length=self._get_tip_length())
         await self.hardware.retract(self.mount)
 
-    async def _move(self, to_loc: Location):
+    async def _move(self, to_loc: Location) -> None:
         await uf.move(self, to_loc)
 
-    async def invalidate_last_action(self):
+    async def invalidate_last_action(self) -> None:
         if self._current_state not in (State.comparingNozzle, State.preparingPipette):
             await self.hardware.home()
             await self.hardware.gantry_position(self.mount, refresh=True)
@@ -955,7 +1016,7 @@ class CheckCalibrationUserFlow:
             await self.hardware.gantry_position(self.mount, refresh=True)
             await self.move_to_tip_rack()
 
-    async def exit_session(self):
+    async def exit_session(self) -> None:
         if self.hw_pipette.has_tip:
             await self.move_to_tip_rack()
             await self.return_tip()
