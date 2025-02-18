@@ -2193,7 +2193,7 @@
   "liquids": {
     "0": { "displayName": "123", "description": "", "displayColor": "#b925ff" }
   },
-  "commandSchemaId": "opentronsCommandSchemaV8",
+  "commandSchemaId": "opentronsCommandSchemaV10",
   "commands": [
     {
       "key": "b0cb75c2-d745-44fc-9132-d0614153db4f",
