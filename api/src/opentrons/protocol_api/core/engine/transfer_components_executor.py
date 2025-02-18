@@ -581,10 +581,6 @@ def absolute_point_from_position_reference_and_offset(
         case PositionReference.WELL_CENTER:
             reference_point = well.get_center()
         case PositionReference.LIQUID_MENISCUS:
-            # raise NotImplementedError(
-            #     "Liquid transfer using liquid-meniscus relative positioning"
-            #     " is not yet implemented."
-            # )
             reference_point = well.get_meniscus()
         case _:
             raise ValueError(f"Unknown position reference {position_reference}")
