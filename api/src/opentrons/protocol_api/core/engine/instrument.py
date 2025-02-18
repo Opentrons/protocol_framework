@@ -1260,27 +1260,38 @@ class InstrumentCore(AbstractInstrument[WellCore, LabwareCore]):
             pipette=self.get_pipette_name(),
             tip_rack=tiprack_uri_for_transfer_props,
         )
+
+        min_asp_vol_for_multi_dispense = 2 * volume
+        if transfer_props.multi_dispense is None or (
+            transfer_props.multi_dispense is not None
+            and (
+                min_asp_vol_for_multi_dispense
+                + transfer_props.multi_dispense.conditioning_by_volume.get_for_volume(
+                    min_asp_vol_for_multi_dispense
+                )
+                + transfer_props.multi_dispense.disposal_by_volume.get_for_volume(
+                    min_asp_vol_for_multi_dispense
+                )
+                > working_volume
+            )
+        ):
+            self.transfer_liquid(
+                liquid_class=liquid_class,
+                volume=volume,
+                source=[source for _ in range(len(dest))],
+                dest=dest,
+                new_tip=new_tip,
+                tip_racks=tip_racks,
+                trash_location=trash_location,
+            )
+            return
+
         # TODO: use the ID returned by load_liquid_class in command annotations
         self.load_liquid_class(
             name=liquid_class.name,
             transfer_properties=transfer_props,
             tiprack_uri=tiprack_uri_for_transfer_props,
         )
-
-        min_asp_vol_for_multi_dispense = 2 * volume
-        if transfer_props.multi_dispense is not None and (
-            min_asp_vol_for_multi_dispense
-            + transfer_props.multi_dispense.conditioning_by_volume.get_for_volume(
-                min_asp_vol_for_multi_dispense
-            )
-            + transfer_props.multi_dispense.disposal_by_volume.get_for_volume(
-                min_asp_vol_for_multi_dispense
-            )
-            > working_volume
-        ):
-            use_multi_dispense = False
-        else:
-            use_multi_dispense = True
 
         dest_per_volume_step = tx_commons.expand_for_volume_constraints(
             volumes=[volume for _ in range(len(dest))],
@@ -1343,34 +1354,30 @@ class InstrumentCore(AbstractInstrument[WellCore, LabwareCore]):
         while not is_last_step:
             total_aspirate_volume = 0.0
             vol_dest_combo = []
-            if use_multi_dispense and transfer_props.multi_dispense is not None:
-                while (
-                    total_aspirate_volume
-                    + next_step_volume
-                    + transfer_props.multi_dispense.disposal_by_volume.get_for_volume(
-                        total_aspirate_volume + next_step_volume
-                    )
-                    + transfer_props.multi_dispense.conditioning_by_volume.get_for_volume(
-                        total_aspirate_volume + next_step_volume
-                    )
-                    <= working_volume
-                ):
-                    total_aspirate_volume += next_step_volume
-                    vol_dest_combo.append((next_step_volume, next_dest))
-                conditioning_vol = (
-                    transfer_props.multi_dispense.conditioning_by_volume.get_for_volume(
-                        total_aspirate_volume
-                    )
+            while (
+                total_aspirate_volume
+                + next_step_volume
+                + transfer_props.multi_dispense.disposal_by_volume.get_for_volume(
+                    total_aspirate_volume + next_step_volume
                 )
-                disposal_vol = (
-                    transfer_props.multi_dispense.disposal_by_volume.get_for_volume(
-                        total_aspirate_volume
-                    )
+                + transfer_props.multi_dispense.conditioning_by_volume.get_for_volume(
+                    total_aspirate_volume + next_step_volume
                 )
-            else:
-                total_aspirate_volume = next_step_volume
+                <= working_volume
+            ):
+                total_aspirate_volume += next_step_volume
                 vol_dest_combo.append((next_step_volume, next_dest))
-                conditioning_vol = disposal_vol = 0
+
+            conditioning_vol = (
+                transfer_props.multi_dispense.conditioning_by_volume.get_for_volume(
+                    total_aspirate_volume
+                )
+            )
+            disposal_vol = (
+                transfer_props.multi_dispense.disposal_by_volume.get_for_volume(
+                    total_aspirate_volume
+                )
+            )
 
             try:
                 next_step_volume, next_dest = next(dest_per_volume_step)
@@ -1396,31 +1403,13 @@ class InstrumentCore(AbstractInstrument[WellCore, LabwareCore]):
                 conditioning_volume=conditioning_vol,
             )
             for dispense_num, (next_vol, next_dest) in enumerate(vol_dest_combo):
-                if use_multi_dispense:
-                    post_disp_tip_contents = (
-                        self.dispense_liquid_class_during_multi_dispense(
-                            volume=next_vol,
-                            dest=next_dest,
-                            source=source,
-                            transfer_properties=transfer_props,
-                            transfer_type=tx_comps_executor.TransferType.ONE_TO_MANY,
-                            tip_contents=post_asp_tip_contents
-                            if dispense_num == 1
-                            else post_disp_tip_contents,
-                            add_final_air_gap=False
-                            if is_last_step and new_tip == TransferTipPolicyV2.NEVER
-                            else True,
-                            trash_location=trash_location,
-                            disposal_volume=disposal_vol,
-                        )
-                    )
-                else:
-                    post_disp_tip_contents = self.dispense_liquid_class(
+                post_disp_tip_contents = (
+                    self.dispense_liquid_class_during_multi_dispense(
                         volume=next_vol,
                         dest=next_dest,
                         source=source,
                         transfer_properties=transfer_props,
-                        transfer_type=tx_comps_executor.TransferType.ONE_TO_ONE,
+                        transfer_type=tx_comps_executor.TransferType.ONE_TO_MANY,
                         tip_contents=post_asp_tip_contents
                         if dispense_num == 1
                         else post_disp_tip_contents,
@@ -1428,7 +1417,9 @@ class InstrumentCore(AbstractInstrument[WellCore, LabwareCore]):
                         if is_last_step and new_tip == TransferTipPolicyV2.NEVER
                         else True,
                         trash_location=trash_location,
+                        disposal_volume=disposal_vol,
                     )
+                )
 
         if new_tip != TransferTipPolicyV2.NEVER:
             _drop_tip()
@@ -1798,7 +1789,7 @@ class InstrumentCore(AbstractInstrument[WellCore, LabwareCore]):
         tip_contents: List[tx_comps_executor.LiquidAndAirGapPair],
         add_final_air_gap: bool,
         trash_location: Union[Location, TrashBin, WasteChute],
-        disposal_volume: Optional[float] = None,
+        disposal_volume: float,
     ) -> List[tx_comps_executor.LiquidAndAirGapPair]:
         """Execute a dispense step that's part of a multi-dispense.
         1. Move pipette to the ‘submerge’ position with normal speed.
@@ -1881,8 +1872,7 @@ class InstrumentCore(AbstractInstrument[WellCore, LabwareCore]):
             source_location=source[0] if source else None,
             source_well=source[1] if source else None,
             add_final_air_gap=add_final_air_gap,
-            is_last_retract=disposal_volume is not None
-            and self.get_current_volume() == disposal_volume,
+            is_last_retract=self.get_current_volume() == disposal_volume,
         )
         last_contents = components_executor.tip_state.last_liquid_and_air_gap_in_tip
         new_tip_contents = tip_contents[0:-1] + [last_contents]
