@@ -13,7 +13,7 @@ from hardware_testing.protocols import (
 )
 import math
 
-metadata = {"protocolName": "LLD 1uL PCR-to-MVS-1PAT"}
+metadata = {"protocolName": "LLD 1uL PCR-to-MVS-gripper-test"}
 requirements = {"robotType": "Flex", "apiLevel": "2.22"}
 
 SLOTS = {
@@ -54,13 +54,16 @@ def add_parameters(parameters: ParameterContext) -> None:
     parameters.add_bool(
         variable_name="baseline", display_name="Baseline", default=False
     )
+    parameters.add_bool(
+        variable_name = "test_gripper_only", display_name="Gripper Only", default = True
+    )
     create_dye_source_well_parameter(parameters)
     parameters.add_int(
         variable_name="num_of_plates",
         display_name="Number of Plates",
         minimum=1,
         maximum=5,
-        default=2,
+        default=5,
     )
     parameters.add_bool(
         variable_name="skip_diluent", display_name="Skip Diluent", default=False
@@ -97,6 +100,7 @@ def run(ctx: ProtocolContext) -> None:
     skip_diluent = ctx.params.skip_diluent  # type: ignore[attr-defined]
     push_out = ctx.params.push_out  # type: ignore[attr-defined]
     use_test_matrix = ctx.params.use_test_matrix  # type: ignore[attr-defined]
+    test_gripper_only = ctx.params.test_gripper_only # type: ignore[attr-defined]
     TRIALS = columns * 8 * num_of_plates
     ctx.load_trash_bin("A1")
     # Test Matrix
@@ -225,24 +229,25 @@ def run(ctx: ProtocolContext) -> None:
         ctx.move_labware(
             src_lid, diluent_lid, use_gripper=True
         )  # move lid off of source plate
-        dye_needed_in_well = (vol * columns) + DEAD_VOL_DYE
-        well_letter = plate_num_matrix[plate_num]
-        src_wells = [src_labware[f"{well_letter}{src_well+1}"] for src_well in range(len(test_matrix))]
-        pipette.configure_for_volume(dye_needed_in_well)
-        pipette.pick_up_tip()
-        num_of_transfers = 1
-        for src_well in src_wells:
-            if dye_needed_in_well > pipette.max_volume:
-                dye_needed_in_well = dye_needed_in_well / 2
-                num_of_transfers = 2
-            for i in range(num_of_transfers):
-                if vol < 2.0:
-                    pipette.aspirate(dye_needed_in_well, src_holder["A1"])
-                else:
-                    pipette.aspirate(dye_needed_in_well, src_holder["A2"])
-                pipette.dispense(dye_needed_in_well, src_well)
-        pipette.drop_tip()
-        tip_counter += 1
+        if not test_gripper_only:
+            dye_needed_in_well = (vol * columns) + DEAD_VOL_DYE
+            well_letter = plate_num_matrix[plate_num]
+            src_wells = [src_labware[f"{well_letter}{src_well+1}"] for src_well in range(len(test_matrix))]
+            pipette.configure_for_volume(dye_needed_in_well)
+            pipette.pick_up_tip()
+            num_of_transfers = 1
+            for src_well in src_wells:
+                if dye_needed_in_well > pipette.max_volume:
+                    dye_needed_in_well = dye_needed_in_well / 2
+                    num_of_transfers = 2
+                for i in range(num_of_transfers):
+                    if vol < 2.0:
+                        pipette.aspirate(dye_needed_in_well, src_holder["A1"])
+                    else:
+                        pipette.aspirate(dye_needed_in_well, src_holder["A2"])
+                    pipette.dispense(dye_needed_in_well, src_well)
+            pipette.drop_tip()
+            tip_counter += 1
         ctx.move_labware(
             src_lid, src_holder, use_gripper=True
         )  # put lid back on source plate
@@ -258,35 +263,36 @@ def run(ctx: ProtocolContext) -> None:
         ctx.move_labware(
             diluent_lid, src_lid, use_gripper=True
         )  # move lid off diluent reservoir
-        ctx.comment("FILLING DESTINATION PLATE WITH DILUENT")
-        columns_list = plate.columns()[:columns]
-        if baseline:
-            diluent_ul = 200
-            halfway = 0  # start at beginning
-        elif initial_fill:
-            diluent_ul = 200 - vol
-            print(f"initial {diluent_ul}")
-            halfway = 0  # start at beginning
-        else:
-            diluent_ul = 100
-            print("remaining diluent {diluent_ul}")
-            halfway = int(len(columns_list) / 2)  # start halfway through the plate
-        diluent_pipette.pick_up_tip()
-        for i in columns_list[halfway:]:
-            i_index = columns_list.index(i)
-            if (
-                columns_list.index(i) >= int(len(columns_list) / 2)
-                and use_test_matrix
-                and initial_fill
-            ):
-                diluent_ul = 100 - vol
-            diluent_well = diluent_wells_used[i_index % len(diluent_wells_used)]
-            diluent_pipette.aspirate(diluent_ul, diluent_well.bottom(0.5))
-            diluent_pipette.dispense(
-                diluent_ul, plate[f"A{i_index+1}"].top(), push_out=20
-            )
-            dst_well = plate[f"A{i_index + 1}"]
-        diluent_pipette.drop_tip()
+        if not test_gripper_only:
+            ctx.comment("FILLING DESTINATION PLATE WITH DILUENT")
+            columns_list = plate.columns()[:columns]
+            if baseline:
+                diluent_ul = 200
+                halfway = 0  # start at beginning
+            elif initial_fill:
+                diluent_ul = 200 - vol
+                print(f"initial {diluent_ul}")
+                halfway = 0  # start at beginning
+            else:
+                diluent_ul = 100
+                print("remaining diluent {diluent_ul}")
+                halfway = int(len(columns_list) / 2)  # start halfway through the plate
+            diluent_pipette.pick_up_tip()
+            for i in columns_list[halfway:]:
+                i_index = columns_list.index(i)
+                if (
+                    columns_list.index(i) >= int(len(columns_list) / 2)
+                    and use_test_matrix
+                    and initial_fill
+                ):
+                    diluent_ul = 100 - vol
+                diluent_well = diluent_wells_used[i_index % len(diluent_wells_used)]
+                diluent_pipette.aspirate(diluent_ul, diluent_well.bottom(0.5))
+                diluent_pipette.dispense(
+                    diluent_ul, plate[f"A{i_index+1}"].top(), push_out=20
+                )
+                dst_well = plate[f"A{i_index + 1}"]
+            diluent_pipette.return_tip()
         ctx.move_labware(
             diluent_lid, diluent_reservoir, use_gripper=True
         )  # put lid back on diluent reservoir
@@ -400,14 +406,15 @@ def run(ctx: ProtocolContext) -> None:
                 tip_counter = fill_well_with_dye(
                     plate=plate, vol=vol, plate_num=n, tip_counter=tip_counter
                 )
-                for i, w in enumerate(plate.wells()[: columns * 8]):
-                    # FILL DESTINATION PLATE WITH DYE
-                    tip_counter = _run_trial(
-                        w,
-                        tip_counter=tip_counter,
-                        target_ul=vol,
-                        plate_num=n,
-                    )
+                if not test_gripper_only:
+                    for i, w in enumerate(plate.wells()[: columns * 8]):
+                        # FILL DESTINATION PLATE WITH DYE
+                        tip_counter = _run_trial(
+                            w,
+                            tip_counter=tip_counter,
+                            target_ul=vol,
+                            plate_num=n,
+                        )
             # FILL REMAINING COLUMNS WITH DILUENT
             fill_plate_with_diluent(
                 plate=plate, baseline=baseline, initial_fill=False, vol=vol
