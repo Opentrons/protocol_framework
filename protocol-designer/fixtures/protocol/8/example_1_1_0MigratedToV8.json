@@ -3341,7 +3341,7 @@
     },
     "1": { "displayName": "dna", "description": "", "displayColor": "#ffd600" }
   },
-  "commandSchemaId": "opentronsCommandSchemaV8",
+  "commandSchemaId": "opentronsCommandSchemaV10",
   "commands": [
     {
       "key": "f9ad5d77-d29a-420b-bd45-fe1d86b6cceb",

@@ -41,7 +41,7 @@ import type {
   LabwareLocation,
   AddressableAreaName,
   CommandAnnotationV1Mixin,
-  CommandV8Mixin,
+  CommandV10Mixin,
   CreateCommand,
   LabwareV2Mixin,
   LiquidV1Mixin,
@@ -380,8 +380,8 @@ export const createFile: Selector<ProtocolFile> = createSelector(
       liquids,
     }
 
-    const commandv8Mixin: CommandV8Mixin = {
-      commandSchemaId: 'opentronsCommandSchemaV8',
+    const commandv10Mixin: CommandV10Mixin = {
+      commandSchemaId: 'opentronsCommandSchemaV10',
       commands,
     }
 
@@ -436,7 +436,7 @@ export const createFile: Selector<ProtocolFile> = createSelector(
       ...deckStructure,
       ...labwareV2Mixin,
       ...liquidV1Mixin,
-      ...commandv8Mixin,
+      ...commandv10Mixin,
       ...commandAnnotionaV1Mixin,
     }
   }
