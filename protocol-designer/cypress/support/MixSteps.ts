@@ -106,7 +106,8 @@ enum MixLocators {
   PosFromBottom = '[id="TipPositionField_mix_touchTip_mmFromBottom"]',
   RenameBtn = 'button:contains("Rename")',
   StepNameInput = '[class="InputField__StyledInput-sc-1gyyvht-0 cLVzBl"]',
-  StepNotesInput = '[class="RenameStepModal__DescriptionField-sc-1k5vjxe-0 lkzOSf"]',
+  StepNotesInput = '[class="TextAreaField__StyledTextArea-sc-ug50vm-0 fSXuLe"]',
+  // StepNotesInput = '[data-testid="TextAreaField_step_notes"]',
   PosFromTop = '[data-testid="TipPositionField_mix_touchTip_mmFromTop"]',
 }
 

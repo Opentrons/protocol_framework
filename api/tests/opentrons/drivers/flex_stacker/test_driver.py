@@ -3,7 +3,12 @@ from mock import AsyncMock
 from opentrons.drivers.asyncio.communication.serial_connection import (
     AsyncResponseSerialConnection,
 )
-from opentrons.drivers.flex_stacker.driver import FS_MOVE_TIMEOUT, FlexStackerDriver
+from opentrons.drivers.flex_stacker.driver import (
+    DEFAULT_FS_TIMEOUT,
+    FS_MOVE_TIMEOUT,
+    FS_TOF_TIMEOUT,
+    FlexStackerDriver,
+)
 from opentrons.drivers.flex_stacker import types
 
 
@@ -401,3 +406,90 @@ async def test_set_motor_driver_register(
     )
     connection.send_command.assert_any_call(set_register)
     connection.reset_mock()
+
+
+async def test_enable_tof_sensor(
+    subject: FlexStackerDriver, connection: AsyncMock
+) -> None:
+    """It should send a enable tof sensor command."""
+    connection.send_command.return_value = "M224"
+    response = await subject.enable_tof_sensor(types.TOFSensor.X, False)
+    assert response
+
+    enable_tof = types.GCODE.ENABLE_TOF_SENSOR.build_command().add_int(
+        types.TOFSensor.X.name, 0
+    )
+    connection.send_command.assert_any_call(enable_tof, timeout=DEFAULT_FS_TIMEOUT)
+    connection.reset_mock()
+
+    # Test enable, with longer timeout
+    response = await subject.enable_tof_sensor(types.TOFSensor.X, True)
+    assert response
+
+    enable_tof = types.GCODE.ENABLE_TOF_SENSOR.build_command().add_int(
+        types.TOFSensor.X.name, 1
+    )
+    connection.send_command.assert_any_call(enable_tof, timeout=FS_TOF_TIMEOUT)
+    connection.reset_mock()
+
+
+async def test_get_tof_driver_register(
+    subject: FlexStackerDriver, connection: AsyncMock
+) -> None:
+    """It should get the tof driver register."""
+    connection.send_command.return_value = "M222 X:0 V:3"
+    response = await subject.get_tof_driver_register(types.TOFSensor.X, 0)
+    assert response == 3
+
+    get_register = types.GCODE.GET_TOF_DRIVER_REGISTER.build_command().add_int(
+        types.TOFSensor.X.name, 0
+    )
+    connection.send_command.assert_any_call(get_register)
+    connection.reset_mock()
+
+
+async def test_set_tof_driver_register(
+    subject: FlexStackerDriver, connection: AsyncMock
+) -> None:
+    """It should set the tof driver register."""
+    connection.send_command.return_value = "M223"
+    response = await subject.set_tof_driver_register(types.TOFSensor.X, 1, 1)
+    assert response
+
+    set_register = (
+        types.GCODE.SET_TOF_DRIVER_REGISTER.build_command()
+        .add_int(types.TOFSensor.X.name, 1)
+        .add_element(str(1))
+    )
+    connection.send_command.assert_any_call(set_register)
+    connection.reset_mock()
+
+
+async def test_get_tof_sensor_status(
+    subject: FlexStackerDriver, connection: AsyncMock
+) -> None:
+    """it should send a get tof sensors status."""
+    connection.send_command.return_value = "M215 Z:1 T:2 M:3"
+    response = await subject.get_tof_sensor_status(types.TOFSensor.Z)
+    assert response == types.TOFSensorStatus(
+        sensor=types.TOFSensor.Z,
+        state=types.TOFSensorState.IDLE,
+        mode=types.TOFSensorMode.MEASURE,
+        ok=True,
+    )
+
+    tof_status = types.GCODE.GET_TOF_SENSOR_STATUS.build_command().add_element(
+        types.TOFSensor.Z.name
+    )
+    connection.send_command.assert_any_call(tof_status)
+    connection.reset_mock()
+
+    # Test invalid response
+    connection.send_command.return_value = "M215 Z:1 T:2 :99"
+    with pytest.raises(ValueError):
+        response = await subject.get_tof_sensor_status(types.TOFSensor.Z)
+
+    tof_status = types.GCODE.GET_TOF_SENSOR_STATUS.build_command().add_element(
+        types.TOFSensor.Z.name
+    )
+    connection.send_command.assert_any_call(tof_status)

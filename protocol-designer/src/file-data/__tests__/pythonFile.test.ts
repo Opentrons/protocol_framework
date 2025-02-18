@@ -157,6 +157,13 @@ const labwareRobotState: TimelineFrame['labware'] = {
   [labwareId5]: { slot: 'C2' },
 }
 
+const mockLabwareNicknames: Record<string, string> = {
+  [labwareId1]: fixtureTiprackAdapter.metadata.displayName,
+  [labwareId2]: fixtureTiprackAdapter.metadata.displayName,
+  [labwareId3]: 'reagent plate',
+  [labwareId4]: fixture96Plate.metadata.displayName,
+  [labwareId5]: 'sample plate',
+}
 describe('getLoadModules', () => {
   it('should generate loadModules', () => {
     const modules: TimelineFrame['modules'] = {
@@ -186,8 +193,17 @@ describe('getLoadAdapters', () => {
     ).toBe(
       `
 # Load Adapters:
-adapter_1 = magnetic_block_1.load_adapter("fixture_flex_96_tiprack_adapter")
-adapter_2 = protocol.load_adapter("fixture_flex_96_tiprack_adapter", "B2")`.trimStart()
+adapter_1 = magnetic_block_1.load_adapter(
+    "fixture_flex_96_tiprack_adapter",
+    namespace="fixture",
+    version=1,
+)
+adapter_2 = protocol.load_adapter(
+    "fixture_flex_96_tiprack_adapter",
+    "B2",
+    namespace="fixture",
+    version=1,
+)`.trimStart()
     )
   })
 })
@@ -195,13 +211,33 @@ adapter_2 = protocol.load_adapter("fixture_flex_96_tiprack_adapter", "B2")`.trim
 describe('getLoadLabware', () => {
   it('should generate loadLabware for 3 labware', () => {
     expect(
-      getLoadLabware(mockModuleEntities, mockLabwareEntities, labwareRobotState)
+      getLoadLabware(
+        mockModuleEntities,
+        mockLabwareEntities,
+        labwareRobotState,
+        mockLabwareNicknames
+      )
     ).toBe(
       `
 # Load Labware:
-well_plate_1 = adapter_2.load_labware("fixture_96_plate")
-well_plate_2 = magnetic_block_2.load_labware("fixture_96_plate")
-well_plate_3 = protocol.load_labware("fixture_96_plate", "C2")`.trimStart()
+well_plate_1 = adapter_2.load_labware(
+    "fixture_96_plate",
+    label="reagent plate",
+    namespace="fixture",
+    version=1,
+)
+well_plate_2 = magnetic_block_2.load_labware(
+    "fixture_96_plate",
+    namespace="fixture",
+    version=1,
+)
+well_plate_3 = protocol.load_labware(
+    "fixture_96_plate",
+    "C2",
+    label="sample plate",
+    namespace="fixture",
+    version=1,
+)`.trimStart()
     )
   })
 })
@@ -301,7 +337,7 @@ const mockLiquidEntities: LiquidEntities = {
   [liquid2]: {
     liquidGroupId: liquid2,
     pythonName: 'liquid_2',
-    description: null,
+    description: '',
     displayName: 'sulfur',
     displayColor: 'mock display color 2',
   },

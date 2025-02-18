@@ -207,34 +207,95 @@ def test_get_id_by_labware_raises_error() -> None:
         subject.get_id_by_labware(labware_id="no-labware-id")
 
 
-def test_raise_if_labware_has_labware_on_top() -> None:
-    """It should raise if labware has another labware on top."""
+def test_raise_if_labware_has_non_lid_labware_on_top() -> None:
+    """It should raise if labware has a non-lid labware on top."""
     subject = get_labware_view(
         labware_by_id={
-            "labware-id-1": LoadedLabware(
-                id="labware-id-1",
+            "bottom-labware-1": LoadedLabware(
+                id="bottom-labware-1",
                 loadName="test",
                 definitionUri="test-uri",
                 location=DeckSlotLocation(slotName=DeckSlotName.SLOT_1),
             ),
-            "labware-id-2": LoadedLabware(
-                id="labware-id-2",
+            "bottom-labware-2": LoadedLabware(
+                id="bottom-labware-2",
                 loadName="test",
                 definitionUri="test-uri",
-                location=ModuleLocation(moduleId="module-id"),
+                location=DeckSlotLocation(slotName=DeckSlotName.SLOT_2),
+                lid_id="lid-labware-a",
             ),
-            "labware-id-3": LoadedLabware(
-                id="labware-id-3",
+            "bottom-labware-3": LoadedLabware(
+                id="bottom-labware-3",
                 loadName="test",
                 definitionUri="test-uri",
-                location=OnLabwareLocation(labwareId="labware-id-1"),
+                location=DeckSlotLocation(slotName=DeckSlotName.SLOT_3),
+            ),
+            "lid-labware-a": LoadedLabware(
+                id="lid-labware-a",
+                loadName="lid",
+                definitionUri="lid-uri",
+                location=OnLabwareLocation(labwareId="bottom-labware-2"),
+            ),
+            "top-labware-b": LoadedLabware(
+                id="top-labware-b",
+                loadName="test",
+                definitionUri="test-uri",
+                location=OnLabwareLocation(labwareId="bottom-labware-3"),
             ),
         }
     )
-    subject.raise_if_labware_has_labware_on_top("labware-id-2")
-    subject.raise_if_labware_has_labware_on_top("labware-id-3")
+    subject.raise_if_labware_has_non_lid_labware_on_top("bottom-labware-1")
+    subject.raise_if_labware_has_non_lid_labware_on_top("bottom-labware-2")
+    subject.raise_if_labware_has_non_lid_labware_on_top("lid-labware-a")
+    subject.raise_if_labware_has_non_lid_labware_on_top("top-labware-b")
     with pytest.raises(errors.exceptions.LabwareIsInStackError):
-        subject.raise_if_labware_has_labware_on_top("labware-id-1")
+        subject.raise_if_labware_has_non_lid_labware_on_top("bottom-labware-3")
+
+
+def test_raise_if_labware_has_labware_on_top() -> None:
+    """It should raise if labware has another labware on top, even if it's a lid."""
+    subject = get_labware_view(
+        labware_by_id={
+            "bottom-labware-1": LoadedLabware(
+                id="bottom-labware-1",
+                loadName="test",
+                definitionUri="test-uri",
+                location=DeckSlotLocation(slotName=DeckSlotName.SLOT_1),
+            ),
+            "bottom-labware-2": LoadedLabware(
+                id="bottom-labware-2",
+                loadName="test",
+                definitionUri="test-uri",
+                location=ModuleLocation(moduleId="module-id"),
+                lid_id="lid-labware-a",
+            ),
+            "bottom-labware-3": LoadedLabware(
+                id="bottom-labware-3",
+                loadName="test",
+                definitionUri="test-uri",
+                location=DeckSlotLocation(slotName=DeckSlotName.SLOT_3),
+            ),
+            "lid-labware-a": LoadedLabware(
+                id="lid-labware-a",
+                loadName="test-lid",
+                definitionUri="lid-uri",
+                location=OnLabwareLocation(labwareId="bottom-labware-2"),
+            ),
+            "top-labware-b": LoadedLabware(
+                id="top-labware-b",
+                loadName="test",
+                definitionUri="test-uri",
+                location=OnLabwareLocation(labwareId="bottom-labware-3"),
+            ),
+        }
+    )
+    subject.raise_if_labware_has_labware_on_top("bottom-labware-1")
+    subject.raise_if_labware_has_labware_on_top("top-labware-b")
+    subject.raise_if_labware_has_labware_on_top("lid-labware-a")
+    with pytest.raises(errors.exceptions.LabwareIsInStackError):
+        subject.raise_if_labware_has_labware_on_top("bottom-labware-2")
+    with pytest.raises(errors.exceptions.LabwareIsInStackError):
+        subject.raise_if_labware_has_labware_on_top("bottom-labware-3")
 
 
 def test_get_labware_definition(well_plate_def: LabwareDefinition) -> None:

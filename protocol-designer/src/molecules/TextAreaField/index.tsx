@@ -33,8 +33,10 @@ const useFocusVisible = (): boolean => {
   const [isKeyboardFocus, setIsKeyboardFocus] = useState(false)
 
   useEffect(() => {
-    const handleKeyDown = (): void => {
-      setIsKeyboardFocus(true)
+    const handleKeyDown = (event: KeyboardEvent): void => {
+      if (event.key === 'Tab') {
+        setIsKeyboardFocus(true)
+      }
     }
     const handleMouseDown = (): void => {
       setIsKeyboardFocus(false)

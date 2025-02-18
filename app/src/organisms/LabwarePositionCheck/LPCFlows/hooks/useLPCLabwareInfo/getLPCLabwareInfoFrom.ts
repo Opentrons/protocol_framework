@@ -58,6 +58,13 @@ function getDisplayNameFromUri({
   const matchedDef = labwareDefs?.find(
     def => getLabwareDefURI(def) === uri
   ) as LabwareDefinition2
+  if (!!!matchedDef) {
+    console.warn(
+      `Could not get labware def for uri ${uri} from list of defs with uri ${
+        labwareDefs?.map(getLabwareDefURI) ?? '<no list provided>'
+      }`
+    )
+  }
 
   return getLabwareDisplayName(matchedDef)
 }
