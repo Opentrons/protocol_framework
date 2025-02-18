@@ -85,7 +85,7 @@
       "z": 6.6
     }
   },
-  "stackLimit": 5,
+  "stackLimit": 11,
   "compatibleParentLabware": [
     "armadillo_96_wellplate_200ul_pcr_full_skirt",
     "opentrons_96_wellplate_200ul_pcr_full_skirt",

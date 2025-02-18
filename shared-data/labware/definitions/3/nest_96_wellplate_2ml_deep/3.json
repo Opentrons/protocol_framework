@@ -1344,6 +1344,11 @@
       "x": 0,
       "y": 0,
       "z": 2
+    },
+    "nest_12_reservoir_15ml": {
+      "x": 0, 
+      "y": 0, 
+      "z": 2
     }
   },
   "stackingOffsetWithModule": {
@@ -1353,9 +1358,10 @@
       "z": 2.66
     }
   },
-  "stackLimit": 2,
+  "stackLimit": 3,
   "compatibleParentLabware": [
-    "nest_96_wellplate_2ml_deep"
+    "nest_96_wellplate_2ml_deep",
+    "nest_12_reservoir_15ml"
   ],
   "innerLabwareGeometry": {
     "cuboidalWell": {
