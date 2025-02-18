@@ -436,7 +436,6 @@ export const transfer: CommandCreator<TransferArgs> = (
                     },
                     tipRack: args.tipRack,
                     nozzles: args.nozzles,
-                    isAirGap: true,
                   }),
                   ...(dispenseDelay != null
                     ? [

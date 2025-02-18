@@ -257,7 +257,6 @@ export const distribute: CommandCreator<DistributeArgs> = (
               },
               nozzles,
               tipRack: args.tipRack,
-              isAirGap: true,
             }),
             ...(dispenseDelay != null
               ? [
