@@ -1329,7 +1329,9 @@
           {
             "cutoutId": "cutoutB1",
             "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
+            "possibleCutoutFixtureIds": [
+              "thermocyclerModuleV2Front"
+            ]
           }
         ]
       },
@@ -5481,7 +5483,9 @@
           {
             "cutoutId": "cutoutD3",
             "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
+            "possibleCutoutFixtureIds": [
+              "temperatureModuleV2"
+            ]
           }
         ]
       },

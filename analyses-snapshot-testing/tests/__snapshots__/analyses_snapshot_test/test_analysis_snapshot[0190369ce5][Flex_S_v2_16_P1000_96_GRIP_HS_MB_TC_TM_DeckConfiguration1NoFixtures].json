@@ -1822,7 +1822,9 @@
           {
             "cutoutId": "cutoutB3",
             "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
+            "possibleCutoutFixtureIds": [
+              "temperatureModuleV2"
+            ]
           }
         ]
       },
@@ -11577,7 +11579,9 @@
           {
             "cutoutId": "cutoutB1",
             "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
+            "possibleCutoutFixtureIds": [
+              "thermocyclerModuleV2Front"
+            ]
           }
         ],
         "immediateDestinationLocationSequence": [
@@ -11592,7 +11596,9 @@
           {
             "cutoutId": "cutoutB1",
             "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
+            "possibleCutoutFixtureIds": [
+              "thermocyclerModuleV2Front"
+            ]
           }
         ],
         "originLocationSequence": [
@@ -11639,7 +11645,9 @@
           {
             "cutoutId": "cutoutA2",
             "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
+            "possibleCutoutFixtureIds": [
+              "magneticBlockV1"
+            ]
           }
         ],
         "immediateDestinationLocationSequence": [
@@ -11654,7 +11662,9 @@
           {
             "cutoutId": "cutoutA2",
             "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
+            "possibleCutoutFixtureIds": [
+              "magneticBlockV1"
+            ]
           }
         ],
         "originLocationSequence": [
@@ -11669,7 +11679,9 @@
           {
             "cutoutId": "cutoutB1",
             "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
+            "possibleCutoutFixtureIds": [
+              "thermocyclerModuleV2Front"
+            ]
           }
         ]
       },
@@ -11707,7 +11719,9 @@
           {
             "cutoutId": "cutoutB3",
             "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
+            "possibleCutoutFixtureIds": [
+              "temperatureModuleV2"
+            ]
           }
         ],
         "immediateDestinationLocationSequence": [
@@ -11726,7 +11740,9 @@
           {
             "cutoutId": "cutoutB3",
             "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
+            "possibleCutoutFixtureIds": [
+              "temperatureModuleV2"
+            ]
           }
         ],
         "originLocationSequence": [
@@ -11741,7 +11757,9 @@
           {
             "cutoutId": "cutoutA2",
             "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
+            "possibleCutoutFixtureIds": [
+              "magneticBlockV1"
+            ]
           }
         ]
       },
@@ -11831,7 +11849,9 @@
           {
             "cutoutId": "cutoutB3",
             "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
+            "possibleCutoutFixtureIds": [
+              "temperatureModuleV2"
+            ]
           }
         ]
       },

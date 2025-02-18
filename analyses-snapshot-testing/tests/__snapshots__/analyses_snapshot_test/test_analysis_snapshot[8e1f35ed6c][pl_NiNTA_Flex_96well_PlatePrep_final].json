@@ -5021,7 +5021,9 @@
           {
             "cutoutId": "cutoutD1",
             "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
+            "possibleCutoutFixtureIds": [
+              "heaterShakerModuleV1"
+            ]
           }
         ]
       },
@@ -6324,7 +6326,9 @@
           {
             "cutoutId": "cutoutD1",
             "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
+            "possibleCutoutFixtureIds": [
+              "heaterShakerModuleV1"
+            ]
           }
         ]
       },

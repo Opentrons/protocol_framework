@@ -1645,7 +1645,9 @@
           {
             "cutoutId": "cutoutD1",
             "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
+            "possibleCutoutFixtureIds": [
+              "temperatureModuleV2"
+            ]
           }
         ]
       },
@@ -2842,7 +2844,9 @@
           {
             "cutoutId": "cutoutD1",
             "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
+            "possibleCutoutFixtureIds": [
+              "temperatureModuleV2"
+            ]
           }
         ]
       },

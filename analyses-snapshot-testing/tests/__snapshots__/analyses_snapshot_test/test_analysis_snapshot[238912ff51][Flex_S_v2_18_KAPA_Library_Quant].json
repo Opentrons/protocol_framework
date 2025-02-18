@@ -1353,7 +1353,9 @@
           {
             "cutoutId": "cutoutB1",
             "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
+            "possibleCutoutFixtureIds": [
+              "thermocyclerModuleV2Front"
+            ]
           }
         ]
       },
@@ -7354,7 +7356,9 @@
           {
             "cutoutId": "cutoutC1",
             "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
+            "possibleCutoutFixtureIds": [
+              "temperatureModuleV2"
+            ]
           }
         ]
       },
@@ -8551,7 +8555,9 @@
           {
             "cutoutId": "cutoutC1",
             "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
+            "possibleCutoutFixtureIds": [
+              "temperatureModuleV2"
+            ]
           }
         ]
       },
@@ -12477,8 +12483,6 @@
             "kind": "onCutoutFixture",
             "possibleCutoutFixtureIds": [
               "flexStackerModuleV1",
-              "flexStackerModuleV1WithWasteChuteRightAdapterCovered",
-              "flexStackerModuleV1WithWasteChuteRightAdapterNoCover",
               "singleRightSlot",
               "stagingAreaRightSlot"
             ]
