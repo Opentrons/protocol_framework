@@ -110,7 +110,7 @@ def test_submerge(
             rate=1,
             flow_rate=air_gap_removal_flow_rate,
             in_place=True,
-            is_meniscus=None,
+            is_meniscus=False,
             push_out=0,
             correction_volume=air_gap_correction_vol,
         ),
@@ -126,13 +126,23 @@ def test_submerge(
     )
 
 
+@pytest.mark.parametrize(
+    argnames=["position_reference", "expected_is_meniscus"],
+    argvalues=[
+        [PositionReference.WELL_BOTTOM, False],
+        [PositionReference.LIQUID_MENISCUS, True],
+    ],
+)
 def test_aspirate_and_wait(
     decoy: Decoy,
     mock_instrument_core: InstrumentCore,
     sample_transfer_props: TransferProperties,
+    position_reference: PositionReference,
+    expected_is_meniscus: bool,
 ) -> None:
     """It should execute an aspirate and a delay according to properties."""
     source_well = decoy.mock(cls=WellCore)
+    sample_transfer_props.aspirate.position_reference = position_reference
     aspirate_flow_rate = (
         sample_transfer_props.aspirate.flow_rate_by_volume.get_for_volume(10)
     )
@@ -156,7 +166,7 @@ def test_aspirate_and_wait(
             rate=1,
             flow_rate=aspirate_flow_rate,
             in_place=True,
-            is_meniscus=None,
+            is_meniscus=expected_is_meniscus,
             correction_volume=correction_volume,
         ),
         mock_instrument_core.delay(0.2),
@@ -187,13 +197,23 @@ def test_aspirate_and_wait_skips_delay(
     )
 
 
+@pytest.mark.parametrize(
+    argnames=["position_reference", "expected_is_meniscus"],
+    argvalues=[
+        [PositionReference.WELL_BOTTOM, False],
+        [PositionReference.LIQUID_MENISCUS, True],
+    ],
+)
 def test_dispense_and_wait(
     decoy: Decoy,
     mock_instrument_core: InstrumentCore,
     sample_transfer_props: TransferProperties,
+    position_reference: PositionReference,
+    expected_is_meniscus: bool,
 ) -> None:
     """It should execute a dispense and a delay according to properties."""
     source_well = decoy.mock(cls=WellCore)
+    sample_transfer_props.dispense.position_reference = position_reference
     dispense_flow_rate = (
         sample_transfer_props.dispense.flow_rate_by_volume.get_for_volume(10)
     )
@@ -218,7 +238,7 @@ def test_dispense_and_wait(
             flow_rate=dispense_flow_rate,
             in_place=True,
             push_out=123,
-            is_meniscus=None,
+            is_meniscus=expected_is_meniscus,
             correction_volume=correction_volume,
         ),
         mock_instrument_core.delay(0.5),
@@ -289,7 +309,7 @@ def test_mix(
             rate=1,
             flow_rate=aspirate_flow_rate,
             in_place=True,
-            is_meniscus=None,
+            is_meniscus=False,
             correction_volume=aspirate_correction_volume,
         ),
         mock_instrument_core.delay(0.2),
@@ -301,7 +321,7 @@ def test_mix(
             flow_rate=dispense_flow_rate,
             in_place=True,
             push_out=2.0,
-            is_meniscus=None,
+            is_meniscus=False,
             correction_volume=dispense_correction_volume,
         ),
         mock_instrument_core.delay(0.5),
@@ -342,7 +362,7 @@ def test_mix_disabled(
             rate=1,
             flow_rate=aspirate_flow_rate,
             in_place=True,
-            is_meniscus=None,
+            is_meniscus=False,
             correction_volume=correction_volume,
         ),
         times=0,
@@ -386,7 +406,7 @@ def test_pre_wet(
             rate=1,
             flow_rate=aspirate_flow_rate,
             in_place=True,
-            is_meniscus=None,
+            is_meniscus=False,
             correction_volume=aspirate_correction_volume,
         ),
         mock_instrument_core.delay(0.2),
@@ -398,7 +418,7 @@ def test_pre_wet(
             flow_rate=dispense_flow_rate,
             in_place=True,
             push_out=0,
-            is_meniscus=None,
+            is_meniscus=False,
             correction_volume=dispense_correction_volume,
         ),
         mock_instrument_core.delay(0.5),
@@ -437,7 +457,7 @@ def test_pre_wet_disabled(
             rate=1,
             flow_rate=aspirate_flow_rate,
             in_place=True,
-            is_meniscus=None,
+            is_meniscus=False,
             correction_volume=aspirate_correction_volume,
         ),
         times=0,
@@ -1085,6 +1105,11 @@ def test_retract_after_dispense_with_blowout_in_disposal_location(
             Coordinate(x=31, y=32, z=33),
             Point(38, 40, 42),
         ),
+        (
+            PositionReference.LIQUID_MENISCUS,
+            Coordinate(x=41, y=42, z=43),
+            Point(51, 53, 55),
+        ),
     ],
 )
 def test_absolute_point_from_position_reference_and_offset(
@@ -1099,9 +1124,11 @@ def test_absolute_point_from_position_reference_and_offset(
     well_top_point = Point(1, 2, 3)
     well_bottom_point = Point(4, 5, 6)
     well_center_point = Point(7, 8, 9)
+    liquid_meniscus_point = Point(10, 11, 12)
     decoy.when(well.get_bottom(0)).then_return(well_bottom_point)
     decoy.when(well.get_top(0)).then_return(well_top_point)
     decoy.when(well.get_center()).then_return(well_center_point)
+    decoy.when(well.get_meniscus()).then_return(liquid_meniscus_point)
 
     assert (
         absolute_point_from_position_reference_and_offset(
@@ -1116,13 +1143,6 @@ def test_absolute_point_from_position_reference_and_offset_raises_errors(
 ) -> None:
     """It should raise errors for invalid input."""
     well = decoy.mock(cls=WellCore)
-    with pytest.raises(NotImplementedError):
-        absolute_point_from_position_reference_and_offset(
-            well=well,
-            position_reference=PositionReference.LIQUID_MENISCUS,
-            offset=Coordinate(x=0, y=0, z=0),
-        )
-
     with pytest.raises(ValueError, match="Unknown position reference"):
         absolute_point_from_position_reference_and_offset(
             well=well,
