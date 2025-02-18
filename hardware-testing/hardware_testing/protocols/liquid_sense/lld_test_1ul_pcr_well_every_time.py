@@ -28,8 +28,9 @@ SLOTS = {
 # OPEN AREAS C3 AND C4
 
 TARGET_UL = 1
-SUBMERGE_MM = -1.5
-BOTTOM_MM = 3.0
+SUBMERGE_MM_LLD = -1.5
+SUBMERGE_MM = -3.0
+BOTTOM_MM = 0.5
 
 TIP_VOLUME = 50
 PIP_VOLUME = 50
@@ -187,18 +188,27 @@ def run(ctx: ProtocolContext) -> None:
     diluent = ctx.define_liquid("diluent", "#0000FF")
     diluent_wells_used = diluent_reservoir.wells()[:number_of_wells_needed]
     diluent_reservoir.load_liquid(diluent_wells_used, total_vol_per_well, diluent)
-    # DYE
+    # DYE - two different types for appropriate volumes
     volume_list = [1.0, 1.2, 1.5, 2.0, 5.0]
-    total_dye_needed = (
-        sum([(vol * 24) + 10 for vol in volume_list[:num_of_plates]]) * num_of_plates
+    volume_list_d = [1.0, 1.2, 1.5]
+    volume_list_c = [2.0,5.0]
+    total_dye_needed_d = (
+        sum([(vol * 24) + 10 for vol in volume_list_d[:num_of_plates]]) * num_of_plates
     )
-    dye = ctx.define_liquid("dye", "#FF0000")
+    total_dye_needed_c = (
+        sum([(vol * 24) + 10 for vol in volume_list_c[:num_of_plates]]) * num_of_plates
+    )
+    dye_d = ctx.define_liquid("dye_d", "#FF0000")
+    dye_c = ctx.define_liquid("dye_c", "F1C232")
+    
     # SOURCE WELL
     if baseline:
         # if baseline, do not load dye
         src_holder.load_empty([src_holder["A1"]])
+        src_holder.load_empty([src_holder["A2"]])
     else:
-        src_holder.load_liquid([src_holder["A1"]], total_dye_needed + 100, dye)
+        src_holder.load_liquid([src_holder["A1"]], total_dye_needed_d + 100, dye_d)
+        src_holder.load_liquid([src_holder["A2"]], total_dye_needed_c + 100, dye_c)
     for dst_labware in dst_labwares:
         if not diluent:
             # if skipping diluent step, preload with diluent
@@ -226,7 +236,10 @@ def run(ctx: ProtocolContext) -> None:
                 dye_needed_in_well = dye_needed_in_well / 2
                 num_of_transfers = 2
             for i in range(num_of_transfers):
-                pipette.aspirate(dye_needed_in_well, src_holder["A1"])
+                if vol < 2.0:
+                    pipette.aspirate(dye_needed_in_well, src_holder["A1"])
+                else:
+                    pipette.aspirate(dye_needed_in_well, src_holder["A2"])
                 pipette.dispense(dye_needed_in_well, src_well)
         pipette.drop_tip()
         tip_counter += 1
@@ -255,7 +268,7 @@ def run(ctx: ProtocolContext) -> None:
             print(f"initial {diluent_ul}")
             halfway = 0  # start at beginning
         else:
-            diluent_ul = 200 - ((200 / 2) - vol)
+            diluent_ul = 100
             print("remaining diluent {diluent_ul}")
             halfway = int(len(columns_list) / 2)  # start halfway through the plate
         diluent_pipette.pick_up_tip()
@@ -266,7 +279,7 @@ def run(ctx: ProtocolContext) -> None:
                 and use_test_matrix
                 and initial_fill
             ):
-                diluent_ul = (200 / 2) - vol
+                diluent_ul = 100 - vol
             diluent_well = diluent_wells_used[i_index % len(diluent_wells_used)]
             diluent_pipette.aspirate(diluent_ul, diluent_well.bottom(0.5))
             diluent_pipette.dispense(
@@ -322,6 +335,7 @@ def run(ctx: ProtocolContext) -> None:
                 pipette.drop_tip()
                 pipette.pick_up_tip()
                 tip_counter += 1
+            SUBMERGE_MM = SUBMERGE_MM_LLD
         pipette.configure_for_volume(target_ul)
         # ASPIRATE
         if "M" in asp_behavior:
@@ -333,11 +347,13 @@ def run(ctx: ProtocolContext) -> None:
                 pipette.drop_tip()
                 pipette.pick_up_tip()
                 tip_counter += 2
+            SUBMERGE_MM = -2
             pipette.aspirate(target_ul, src_well.meniscus(SUBMERGE_MM))
         else:
             pipette.aspirate(target_ul, src_well.bottom(BOTTOM_MM))
         # DISPENSE
         if "M" in dsp_behavior:
+            SUBMERGE_MM = -2
             pipette.dispense(
                 target_ul, dst_well.meniscus(SUBMERGE_MM), push_out=push_out
             )  # contact
