@@ -420,18 +420,31 @@ export const MultipleStepsMoveLiquidTools = ({
           }
         >
           {formData[`${tab}_touchTip_checkbox`] === true ? (
-            <PositionField
-              prefix={tab}
-              propsForFields={propsForFields}
-              zField={`${tab}_touchTip_mmFromTop`}
-              labwareId={
-                formData[
-                  getLabwareFieldForPositioningField(
-                    addFieldNamePrefix('touchTip_mmFromTop')
-                  )
-                ]
-              }
-            />
+            <Flex flexDirection={DIRECTION_COLUMN} gridGap={SPACING.spacing10}>
+              <InputStepFormField
+                showTooltip={false}
+                padding="0"
+                title={t('protocol_steps:touchTip_speed')}
+                {...propsForFields[`${tab}_touchTip_speed`]}
+                units={t('application:units.millimeterPerSec')}
+              />
+
+              <PositionField
+                prefix={tab}
+                propsForFields={propsForFields}
+                zField={`${tab}_touchTip_mmFromTop`}
+                labwareId={
+                  formData[
+                    getLabwareFieldForPositioningField(
+                      addFieldNamePrefix('touchTip_mmFromTop')
+                    )
+                  ]
+                }
+                showButton
+                padding="0"
+                listButtonType="white"
+              />
+            </Flex>
           ) : null}
         </CheckboxExpandStepFormField>
         <CheckboxExpandStepFormField
