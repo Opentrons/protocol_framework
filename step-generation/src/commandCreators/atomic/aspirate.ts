@@ -14,6 +14,8 @@ import {
   getIsHeaterShakerNorthSouthOfNonTiprackWithMultiChannelPipette,
   uuid,
   getIsSafePipetteMovement,
+  formatPyStr,
+  formatPyWellLocation,
 } from '../../utils'
 import { COLUMN_4_SLOTS } from '../../constants'
 import type {
@@ -257,7 +259,22 @@ export const aspirate: CommandCreator<ExtendedAspirateParams> = (
       },
     },
   ]
+
+  const pipettePythonName =
+    invariantContext.pipetteEntities[pipetteId].pythonName
+  const labwarePythonName =
+    invariantContext.labwareEntities[labwareId].pythonName
+  const pythonArgs = [
+    `${volume}`,
+    `location=${labwarePythonName}[${formatPyStr(
+      wellName
+    )}]${formatPyWellLocation(wellLocation)}`,
+    `rate=`,
+  ]
+  const python = `${pipettePythonName}.aspirate(${pythonArgs.join(', ')})`
+
   return {
     commands,
+    python,
   }
 }
