@@ -63,7 +63,11 @@ export function InterventionInfo(props: InterventionInfoProps): JSX.Element {
           </StyledText>
         ) : null}
         {props.tagtext != null ? (
-            <Tag type="default" text={t('labware_quantity', { quantity: props.tagtext })} shrinkToContent={true}/>
+          <Tag
+            type="default"
+            text={t('labware_quantity', { quantity: props.tagtext })}
+            shrinkToContent={true}
+          />
         ) : null}
       </Flex>
       <Divider
