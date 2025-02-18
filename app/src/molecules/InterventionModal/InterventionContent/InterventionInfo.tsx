@@ -1,4 +1,3 @@
-import { useTranslation } from 'react-i18next'
 import { css } from 'styled-components'
 
 import {
@@ -13,6 +12,7 @@ import {
   ALIGN_CENTER,
   RESPONSIVENESS,
   Tag,
+  SPACING_1,
 } from '@opentrons/components'
 import { Divider } from '/app/atoms/structure/Divider'
 
@@ -30,7 +30,6 @@ export interface InterventionInfoProps {
 
 export function InterventionInfo(props: InterventionInfoProps): JSX.Element {
   const content = buildContent(props)
-  const { t } = useTranslation('protocol_setup')
 
   return (
     <Flex
@@ -53,7 +52,7 @@ export function InterventionInfo(props: InterventionInfoProps): JSX.Element {
             color={COLORS.grey60}
             css={css`
               ${LINE_CLAMP_STYLE}
-              margin-bottom: 0.25rem
+              maring-bottom: ${SPACING_1}
               @media ${RESPONSIVENESS.touchscreenMediaQuerySpecs} {
                 display: none;
               }
@@ -63,21 +62,19 @@ export function InterventionInfo(props: InterventionInfoProps): JSX.Element {
           </StyledText>
         ) : null}
         {props.tagtext != null ? (
-          <Tag
-            type="default"
-            text={t('labware_quantity', { quantity: props.tagtext })}
-            shrinkToContent={true}
-          />
+          <Tag type="default" text={props.tagtext} shrinkToContent={true} />
         ) : null}
       </Flex>
-      <Divider
-        borderColor={COLORS.grey35}
-        css={`
-          @media ${RESPONSIVENESS.touchscreenMediaQuerySpecs} {
-            display: none;
-          }
-        `}
-      />
+      {props.tagtext != null && (
+        <Divider
+          borderColor={COLORS.grey35}
+          css={`
+            @media ${RESPONSIVENESS.touchscreenMediaQuerySpecs} {
+              display: none;
+            }
+          `}
+        />
+      )}
       {content}
     </Flex>
   )

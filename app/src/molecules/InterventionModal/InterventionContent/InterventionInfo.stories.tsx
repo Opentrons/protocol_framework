@@ -109,7 +109,7 @@ export const LabwareWithLidAndQuantity: Story = {
     type: 'location-colon-location',
     labwareName: 'Labware with lid',
     subtext: 'With Tip Rack Lid',
-    tagtext: '3',
+    tagtext: 'Quantity: 3',
     currentLocationProps: {
       deckLabel: 'STACKER A',
     },
