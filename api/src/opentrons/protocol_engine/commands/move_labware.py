@@ -266,7 +266,7 @@ class MoveLabwareImplementation(AbstractCommandImpl[MoveLabwareParams, _ExecuteR
         )
 
         # Check that labware and destination do not have labware on top
-        self._state_view.labware.raise_if_labware_has_labware_on_top(
+        self._state_view.labware.raise_if_labware_has_non_lid_labware_on_top(
             labware_id=params.labwareId
         )
 

@@ -356,6 +356,19 @@ class LabwareView:
             f"There is not labware loaded onto labware {labware_id}"
         )
 
+    def raise_if_labware_has_non_lid_labware_on_top(self, labware_id: str) -> None:
+        """Raise if labware has another labware that is not its lid on top."""
+        lid_id = self.get_lid_id_by_labware_id(labware_id)
+        for candidate_id, candidate_labware in self._state.labware_by_id.items():
+            if (
+                isinstance(candidate_labware.location, OnLabwareLocation)
+                and candidate_labware.location.labwareId == labware_id
+                and candidate_id != lid_id
+            ):
+                raise errors.LabwareIsInStackError(
+                    f"Cannot access labware {labware_id} because it has a non-lid labware stacked on top."
+                )
+
     def raise_if_labware_has_labware_on_top(self, labware_id: str) -> None:
         """Raise if labware has another labware on top."""
         for labware in self._state.labware_by_id.values():
@@ -364,7 +377,7 @@ class LabwareView:
                 and labware.location.labwareId == labware_id
             ):
                 raise errors.LabwareIsInStackError(
-                    f"Cannot move to labware {labware_id}, labware has other labware stacked on top."
+                    f"Cannot access labware {labware_id} because it has another labware stacked on top."
                 )
 
     def get_by_slot(

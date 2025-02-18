@@ -59,6 +59,15 @@ describe('MagnetTools', () => {
           updateValue: vi.fn(),
           value: 'engage',
         },
+        moduleId: {
+          onFieldFocus: vi.fn(),
+          onFieldBlur: vi.fn(),
+          errorToShow: null,
+          disabled: false,
+          name: 'magnetAction',
+          updateValue: vi.fn(),
+          value: 'engage',
+        },
         engageHeight: {
           onFieldFocus: vi.fn(),
           onFieldBlur: vi.fn(),

@@ -5,7 +5,7 @@ from enum import Enum
 from dataclasses import dataclass, fields
 from pydantic import BaseModel, Field
 
-from opentrons_shared_data.labware.types import LabwareDefinition
+from opentrons_shared_data.labware.types import LabwareDefinition2
 from opentrons.protocol_api import labware
 from opentrons.types import DeckLocation
 
@@ -62,7 +62,7 @@ class PipetteInfo:
     max_volume: int
     channels: int
     tip_rack: labware.Labware
-    default_tipracks: typing.List[LabwareDefinition]
+    default_tipracks: typing.List[LabwareDefinition2]
 
 
 @dataclass
@@ -128,6 +128,9 @@ class RequiredLabware(BaseModel):
     namespace: str
     version: str
     isTiprack: bool
+    # todo(mm, 2025-02-13): This should restrict input to labware schema 2 to protect
+    # robot_server.robot.calibration legacy internals.
+    # https://opentrons.atlassian.net/browse/EXEC-1230
     definition: typing.Dict[str, typing.Any]
 
     @classmethod

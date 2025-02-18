@@ -178,6 +178,31 @@ def test_set_has_tip(subject: WellCore) -> None:
         subject.set_has_tip(True)
 
 
+def test_get_meniscus(
+    decoy: Decoy, mock_engine_client: EngineClient, subject: WellCore
+) -> None:
+    """Get meniscus coordinates."""
+    decoy.when(
+        mock_engine_client.state.geometry.get_meniscus_height(
+            labware_id="labware-id",
+            well_name="well-name",
+        )
+    ).then_return(1.23)
+    decoy.when(
+        mock_engine_client.state.geometry.get_well_position(
+            labware_id="labware-id",
+            well_name="well-name",
+            well_location=WellLocation(
+                origin=WellOrigin.BOTTOM,
+                offset=WellOffset(x=0, y=0, z=1.23),
+                volumeOffset=0.0,
+            ),
+        )
+    ).then_return(Point(1, 2, 4.23))
+
+    assert subject.get_meniscus() == Point(1, 2, 4.23)
+
+
 def test_load_liquid(
     decoy: Decoy, mock_engine_client: EngineClient, subject: WellCore
 ) -> None:

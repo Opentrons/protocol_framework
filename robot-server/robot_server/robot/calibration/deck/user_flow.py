@@ -41,7 +41,7 @@ from opentrons.protocols.api_support.deck_type import (
 from opentrons.types import Mount, Point, Location
 from opentrons.util import linal
 
-from opentrons_shared_data.labware.types import LabwareDefinition
+from opentrons_shared_data.labware.types import LabwareDefinition2
 from opentrons_shared_data.pipette.types import LabwareUri
 
 from robot_server.robot.calibration.constants import TIP_RACK_LOOKUP_BY_MAX_VOL
@@ -230,7 +230,7 @@ class DeckCalibrationUserFlow:
             )[0]
 
     def _get_tip_rack_lw(
-        self, tiprack_definition: Optional[LabwareDefinition] = None
+        self, tiprack_definition: Optional[LabwareDefinition2] = None
     ) -> labware.Labware:
         if tiprack_definition:
             return labware.load_from_definition(
@@ -289,10 +289,19 @@ class DeckCalibrationUserFlow:
     ) -> Point:
         return await self._hardware.gantry_position(self._mount, critical_point)
 
-    async def load_labware(self, tiprackDefinition: LabwareDefinition):
+    async def load_labware(
+        self,
+        # tiprackDefinition comes from the HTTP client and is not validated by the time
+        # it reaches here, hence us calling labware.verify_definition() below.
+        tiprackDefinition: LabwareDefinition2,
+    ):
         self._supported_commands.loadLabware = False
         if tiprackDefinition:
             verified_definition = labware.verify_definition(tiprackDefinition)
+            # todo(mm, 2025-02-13): Move schema validation to the FastAPI layer and turn
+            # this schemaVersion assertion into a proper HTTP API 422 error.
+            # https://opentrons.atlassian.net/browse/EXEC-1230
+            assert verified_definition["schemaVersion"] == 2
             self._tip_rack = self._get_tip_rack_lw(verified_definition)
             if self._deck[TIP_RACK_SLOT]:
                 del self._deck[TIP_RACK_SLOT]
@@ -359,11 +368,12 @@ class DeckCalibrationUserFlow:
     def _get_tip_length(self) -> float:
         pip_id = self._hw_pipette.pipette_id
         assert pip_id
+        definition = self._tip_rack._core.get_definition()
+        # Assert for type checking. We expect this to always pass because
+        # self._get_tip_rack_lw() limits itself to schema 2.
+        assert definition["schemaVersion"] == 2
         try:
-            return load_tip_length_calibration(
-                pip_id,
-                self._tip_rack._core.get_definition(),
-            ).tipLength
+            return load_tip_length_calibration(pip_id, definition).tipLength
         except cal_types.TipLengthCalNotFound:
             tip_overlap = self._hw_pipette.tip_overlap["v0"].get(self._tip_rack.uri, 0)
             tip_length = self._tip_rack.tip_length
