@@ -52,7 +52,7 @@ export function InterventionInfo(props: InterventionInfoProps): JSX.Element {
             color={COLORS.grey60}
             css={css`
               ${LINE_CLAMP_STYLE}
-              maring-bottom: ${SPACING_1}
+              margin-bottom: ${SPACING_1}
               @media ${RESPONSIVENESS.touchscreenMediaQuerySpecs} {
                 display: none;
               }
