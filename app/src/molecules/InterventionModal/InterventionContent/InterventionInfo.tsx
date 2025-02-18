@@ -58,7 +58,7 @@ export function InterventionInfo(props: InterventionInfoProps): JSX.Element {
               }
             `}
           >
-            {props.subtext}{' '}
+            {props.subtext}
           </StyledText>
         ) : null}
         {props.tagtext != null ? (
