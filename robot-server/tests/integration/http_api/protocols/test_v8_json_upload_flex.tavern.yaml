@@ -225,13 +225,7 @@ stages:
                       moduleId: temperatureModuleId
                     - kind: onCutoutFixture
                       cutoutId: cutoutD1
-                      # note: this is not how it should work and happens because the loadModule
-                      # command always loads onto an addressable area, presenting a conflict between
-                      # the cutout fixture required by the module being present and the cutout fixture
-                      # required by the deck slot addressable area that was used to load the module
-                      # being present. other work will fix this, and once that other work is merged
-                      # this value should be ["temperatureModuleV2"]
-                      possibleCutoutFixtureIds: []
+                      possibleCutoutFixtureIds: ["temperatureModuleV2"]
                 notes: []
                 startedAt: !re_fullmatch "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d+(Z|([+-]\\d{2}:\\d{2}))"
                 completedAt: !re_fullmatch "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d+(Z|([+-]\\d{2}:\\d{2}))"
@@ -258,8 +252,7 @@ stages:
                       moduleId: magneticBlockId
                     - kind: onCutoutFixture
                       cutoutId: cutoutD3
-                      # note: this should be ["magneticBlockV1"], see above
-                      possibleCutoutFixtureIds: []
+                      possibleCutoutFixtureIds: ["flexStackerModuleV1WithMagneticBlockV1", "magneticBlockV1"]
                 notes: []
                 startedAt: !re_fullmatch "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d+(Z|([+-]\\d{2}:\\d{2}))"
                 completedAt: !re_fullmatch "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d+(Z|([+-]\\d{2}:\\d{2}))"
