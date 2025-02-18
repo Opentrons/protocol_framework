@@ -1304,7 +1304,7 @@ class InstrumentCore(AbstractInstrument[WellCore, LabwareCore]):
                     home_after=False,
                     alternate_drop_location=False,
                 )
-            if isinstance(trash_location, (TrashBin, WasteChute)):
+            elif isinstance(trash_location, (TrashBin, WasteChute)):
                 self.drop_tip_in_disposal_location(
                     disposal_location=trash_location,
                     home_after=False,
