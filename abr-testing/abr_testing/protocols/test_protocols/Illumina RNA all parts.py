@@ -2487,8 +2487,8 @@ def run(protocol: ProtocolContext) -> None:
         p1000.move_to(sample_plate_3["A1"].bottom(z=0.5))
         p1000.aspirate(TransferSup + 1, rate=0.25)
         p1000.dispense(TransferSup + 1, CleanupPlate_2["A2"].bottom(z=1))
+        p1000.drop_tip()
         # ===============================================
-
         protocol.comment("--> ADDING AMPure (0.8x)")
         AMPureVol = 40.5
         SampleVol = 45.0
@@ -2497,6 +2497,8 @@ def run(protocol: ProtocolContext) -> None:
         p1000.flow_rate.dispense = p50_flow_rate_dispense_default * 0.5
         p1000.flow_rate.blow_out = p50_flow_rate_blow_out_default * 0.5
         # ===============================================
+        nozzlecheck("R8", tiprack_50_X)
+        p1000.pick_up_tip()
         p1000.mix(AMPurePremix, AMPureVol, AMPure.bottom(z=1))
         p1000.aspirate(AMPureVol, AMPure.bottom(z=1), rate=0.25)
         p1000.dispense(AMPureVol, CleanupPlate_2["A2"].bottom(z=1))
@@ -2740,7 +2742,6 @@ def run(protocol: ProtocolContext) -> None:
         p1000.move_to(CleanupPlate_2.wells_by_name()["A2"].top(z=5))
         p1000.move_to(CleanupPlate_2.wells_by_name()["A2"].top(z=0))
         p1000.move_to(CleanupPlate_2.wells_by_name()["A2"].top(z=5))
-        p1000.drop_tip()
         # ===============================================
 
         if DRYRUN is False:
@@ -2751,9 +2752,7 @@ def run(protocol: ProtocolContext) -> None:
         p1000.flow_rate.aspirate = p50_flow_rate_aspirate_default * 0.5
         p1000.flow_rate.dispense = p50_flow_rate_dispense_default * 0.5
         p1000.flow_rate.blow_out = p50_flow_rate_blow_out_default * 0.5
-        nozzlecheck("R8", tiprack_50_X)
         # ===============================================
-        p1000.pick_up_tip()
         p1000.move_to(CleanupPlate_2["A2"].bottom(z=0.5))
         p1000.aspirate(TransferSup + 1, rate=0.25)
         p1000.dispense(TransferSup + 1, sample_plate_3["A3"].bottom(z=1))
