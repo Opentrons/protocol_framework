@@ -15,9 +15,11 @@ import {
 } from '../fixtures'
 import { moveLabware } from '..'
 
-import type { LabwareDefinition2 } from '@opentrons/shared-data'
+import type {
+  LabwareDefinition2,
+  MoveLabwareParams,
+} from '@opentrons/shared-data'
 import type { InvariantContext, RobotState } from '../types'
-import type { MoveLabwareArgs } from '..'
 
 const mockWasteChuteId = 'mockWasteChuteId'
 const mockGripperId = 'mockGripperId'
@@ -44,11 +46,10 @@ describe('moveLabware', () => {
   })
   it('should return a moveLabware command for manualMoveWithPause given only the required params', () => {
     const params = {
-      commandCreatorFnName: 'moveLabware',
-      labware: SOURCE_LABWARE,
-      useGripper: false,
+      labwareId: SOURCE_LABWARE,
+      strategy: 'manualMoveWithPause',
       newLocation: { slotName: 'A1' },
-    } as MoveLabwareArgs
+    } as MoveLabwareParams
 
     const result = moveLabware(params, invariantContext, robotState)
     expect(getSuccessResult(result).commands).toEqual([
@@ -65,11 +66,10 @@ describe('moveLabware', () => {
   })
   it('should return a moveLabware command for moving with a gripper given only the required params', () => {
     const params = {
-      commandCreatorFnName: 'moveLabware',
-      labware: SOURCE_LABWARE,
-      useGripper: true,
+      labwareId: SOURCE_LABWARE,
+      strategy: 'usingGripper',
       newLocation: { slotName: 'A1' },
-    } as MoveLabwareArgs
+    } as MoveLabwareParams
 
     const result = moveLabware(params, invariantContext, robotState)
     expect(getSuccessResult(result).commands).toEqual([
@@ -86,11 +86,10 @@ describe('moveLabware', () => {
   })
   it('should return an error for labware does not exist with bad labwareid', () => {
     const params = {
-      commandCreatorFnName: 'moveLabware',
-      labware: 'badLabware',
-      useGripper: true,
+      labwareId: 'badLabware',
+      strategy: 'usingGripper',
       newLocation: { slotName: 'A1' },
-    } as MoveLabwareArgs
+    } as MoveLabwareParams
 
     const result = moveLabware(params, invariantContext, robotState)
     expect(getErrorResult(result).errors).toHaveLength(1)
@@ -103,11 +102,10 @@ describe('moveLabware', () => {
       invariantContext
     )
     const params = {
-      commandCreatorFnName: 'moveLabware',
-      labware: SOURCE_LABWARE,
-      useGripper: true,
+      labwareId: SOURCE_LABWARE,
+      strategy: 'usingGripper',
       newLocation: { slotName: 'A1' },
-    } as MoveLabwareArgs
+    } as MoveLabwareParams
 
     const result = moveLabware(params, invariantContext, robotState)
     expect(getErrorResult(result).errors).toHaveLength(1)
@@ -117,11 +115,10 @@ describe('moveLabware', () => {
   })
   it('should return an error for trying to move the labware to an occupied slot', () => {
     const params = {
-      commandCreatorFnName: 'moveLabware',
-      labware: SOURCE_LABWARE,
-      useGripper: true,
+      labwareId: SOURCE_LABWARE,
+      strategy: 'usingGripper',
       newLocation: { slotName: '1' },
-    } as MoveLabwareArgs
+    } as MoveLabwareParams
 
     const result = moveLabware(params, invariantContext, robotState)
     expect(getErrorResult(result).errors).toHaveLength(1)
@@ -146,11 +143,10 @@ describe('moveLabware', () => {
       [SOURCE_LABWARE]: { slot: 'gripperWasteChute' },
     }
     const params = {
-      commandCreatorFnName: 'moveLabware',
-      labware: SOURCE_LABWARE,
-      useGripper: true,
+      labwareId: SOURCE_LABWARE,
+      strategy: 'usingGripper',
       newLocation: { slotName: 'A1' },
-    } as MoveLabwareArgs
+    } as MoveLabwareParams
 
     const result = moveLabware(params, wasteChuteInvariantContext, robotState)
     expect(getErrorResult(result).errors).toHaveLength(1)
@@ -160,11 +156,10 @@ describe('moveLabware', () => {
   })
   it('should return an error for trying to move the labware off deck with a gripper', () => {
     const params = {
-      commandCreatorFnName: 'moveLabware',
-      labware: SOURCE_LABWARE,
-      useGripper: true,
+      labwareId: SOURCE_LABWARE,
+      strategy: 'usingGripper',
       newLocation: 'offDeck',
-    } as MoveLabwareArgs
+    } as MoveLabwareParams
 
     const result = moveLabware(params, invariantContext, robotState)
     expect(getErrorResult(result).errors).toHaveLength(1)
@@ -190,16 +185,16 @@ describe('moveLabware', () => {
           id: 'labwareid',
           labwareDefURI: 'mockDefUri',
           def: aluminumBlockDef,
+          pythonName: 'mockPythonName',
         },
       },
     }
 
     const params = {
-      commandCreatorFnName: 'moveLabware',
-      labware: SOURCE_LABWARE,
-      useGripper: true,
+      labwareId: SOURCE_LABWARE,
+      strategy: 'usingGripper',
       newLocation: { slotName: 'A1' },
-    } as MoveLabwareArgs
+    } as MoveLabwareParams
 
     const result = moveLabware(params, invariantContext, robotState)
     expect(getErrorResult(result).errors).toHaveLength(1)
@@ -219,11 +214,10 @@ describe('moveLabware', () => {
     const tcRobotState = stateAndContext.robotState
 
     const params = {
-      commandCreatorFnName: 'moveLabware',
-      labware: SOURCE_LABWARE,
-      useGripper: false,
+      labwareId: SOURCE_LABWARE,
+      strategy: 'manualMoveWithPause',
       newLocation: { moduleId: thermocyclerId },
-    } as MoveLabwareArgs
+    } as MoveLabwareParams
 
     const result = moveLabware(params, tcInvariantContext, tcRobotState)
     expect(getErrorResult(result).errors).toHaveLength(1)
@@ -251,11 +245,10 @@ describe('moveLabware', () => {
       },
     }
     const params = {
-      commandCreatorFnName: 'moveLabware',
-      labware: SOURCE_LABWARE,
-      useGripper: true,
+      labwareId: SOURCE_LABWARE,
+      strategy: 'usingGripper',
       newLocation: { moduleId: HEATER_SHAKER_ID },
-    } as MoveLabwareArgs
+    } as MoveLabwareParams
 
     const result = moveLabware(params, invariantContext, robotState)
     expect(getErrorResult(result).errors).toHaveLength(1)
@@ -290,11 +283,10 @@ describe('moveLabware', () => {
       },
     }
     const params = {
-      commandCreatorFnName: 'moveLabware',
-      labware: SOURCE_LABWARE,
-      useGripper: true,
+      labwareId: SOURCE_LABWARE,
+      strategy: 'usingGripper',
       newLocation: { labwareId: ADAPTER_ID },
-    } as MoveLabwareArgs
+    } as MoveLabwareParams
 
     const result = moveLabware(params, invariantContext, robotState)
     expect(getErrorResult(result).errors).toHaveLength(1)
@@ -322,11 +314,10 @@ describe('moveLabware', () => {
       },
     }
     const params = {
-      commandCreatorFnName: 'moveLabware',
-      labware: SOURCE_LABWARE,
-      useGripper: true,
+      labwareId: SOURCE_LABWARE,
+      strategy: 'usingGripper',
       newLocation: { moduleId: HEATER_SHAKER_ID },
-    } as MoveLabwareArgs
+    } as MoveLabwareParams
 
     const result = moveLabware(params, invariantContext, robotState)
     expect(getErrorResult(result).errors).toHaveLength(1)
@@ -359,11 +350,10 @@ describe('moveLabware', () => {
       },
     } as any) as RobotState
     const params = {
-      commandCreatorFnName: 'moveLabware',
-      labware: TIPRACK_1,
-      useGripper: true,
+      labwareId: TIPRACK_1,
+      strategy: 'usingGripper',
       newLocation: { addressableAreaName: 'gripperWasteChute' },
-    } as MoveLabwareArgs
+    } as MoveLabwareParams
 
     const result = moveLabware(
       params,
@@ -398,11 +388,10 @@ describe('moveLabware', () => {
       },
     } as any) as RobotState
     const params = {
-      commandCreatorFnName: 'moveLabware',
-      labware: SOURCE_LABWARE,
-      useGripper: true,
+      labwareId: SOURCE_LABWARE,
+      strategy: 'usingGripper',
       newLocation: { addressableAreaName: 'gripperWasteChute' },
-    } as MoveLabwareArgs
+    } as MoveLabwareParams
 
     const result = moveLabware(
       params,
@@ -423,11 +412,10 @@ describe('moveLabware', () => {
     } as InvariantContext
 
     const params = {
-      commandCreatorFnName: 'moveLabware',
-      labware: SOURCE_LABWARE,
-      useGripper: true,
+      labwareId: SOURCE_LABWARE,
+      strategy: 'usingGripper',
       newLocation: { slotName: 'A1' },
-    } as MoveLabwareArgs
+    } as MoveLabwareParams
 
     const result = moveLabware(params, invariantContext, robotState)
     expect(getErrorResult(result).errors).toHaveLength(1)
@@ -449,11 +437,10 @@ describe('moveLabware', () => {
     } as InvariantContext
 
     const params = {
-      commandCreatorFnName: 'moveLabware',
-      labware: SOURCE_LABWARE,
-      useGripper: false,
+      labwareId: SOURCE_LABWARE,
+      strategy: 'manualMoveWithPause',
       newLocation: { addressableAreaName: 'gripperWasteChute' },
-    } as MoveLabwareArgs
+    } as MoveLabwareParams
 
     const result = moveLabware(params, invariantContext, robotState)
     expect(getErrorResult(result).errors).toHaveLength(1)
@@ -475,11 +462,10 @@ describe('moveLabware', () => {
     } as any) as RobotState
 
     const params = {
-      commandCreatorFnName: 'moveLabware',
-      labware: SOURCE_LABWARE,
-      useGripper: true,
+      labwareId: SOURCE_LABWARE,
+      strategy: 'usingGripper',
       newLocation: { addressableAreaName: 'gripperWasteChute' },
-    } as MoveLabwareArgs
+    } as MoveLabwareParams
 
     const result = moveLabware(params, invariantContext, robotStateWithTipOnPip)
     expect(getErrorResult(result).errors).toHaveLength(1)

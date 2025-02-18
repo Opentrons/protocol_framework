@@ -2,7 +2,7 @@ import { css } from 'styled-components'
 import { Flex } from '../../primitives'
 import { SPACING } from '../../ui-style-constants'
 import { BORDERS, COLORS } from '../../helix-design-system'
-import { CURSOR_POINTER } from '../../styles'
+import { CURSOR_DEFAULT, CURSOR_POINTER } from '../../styles'
 
 import type { ReactNode } from 'react'
 import type { StyleProps } from '../../primitives'
@@ -16,6 +16,7 @@ interface ListButtonProps extends StyleProps {
   children: ReactNode
   disabled?: boolean
   onClick?: () => void
+  testId?: string
 }
 
 const LISTBUTTON_PROPS_BY_TYPE: Record<
@@ -23,8 +24,8 @@ const LISTBUTTON_PROPS_BY_TYPE: Record<
   { backgroundColor: string; hoverBackgroundColor: string }
 > = {
   noActive: {
-    backgroundColor: COLORS.grey30,
-    hoverBackgroundColor: COLORS.grey35,
+    backgroundColor: COLORS.grey20,
+    hoverBackgroundColor: COLORS.grey30,
   },
   connected: {
     backgroundColor: COLORS.green30,
@@ -42,13 +43,20 @@ const LISTBUTTON_PROPS_BY_TYPE: Record<
   odd stylings
 **/
 export function ListButton(props: ListButtonProps): JSX.Element {
-  const { type, children, disabled, onClick, ...styleProps } = props
+  const {
+    type,
+    children,
+    disabled = false,
+    onClick,
+    testId, // optional data-testid value for Cypress testing
+    ...styleProps
+  } = props
   const listButtonProps = LISTBUTTON_PROPS_BY_TYPE[type]
 
   const LIST_BUTTON_STYLE = css`
-    cursor: ${CURSOR_POINTER};
+    cursor: ${disabled ? CURSOR_DEFAULT : CURSOR_POINTER};
     background-color: ${disabled
-      ? COLORS.grey35
+      ? COLORS.grey20
       : listButtonProps.backgroundColor};
     max-width: 26.875rem;
     padding: ${styleProps.padding ??
@@ -56,15 +64,23 @@ export function ListButton(props: ListButtonProps): JSX.Element {
     border-radius: ${BORDERS.borderRadius8};
 
     &:hover {
-      background-color: ${listButtonProps.hoverBackgroundColor};
+      background-color: ${disabled
+        ? COLORS.grey20
+        : listButtonProps.hoverBackgroundColor};
+    }
+
+    &:focus-visible {
+      outline: 2px solid ${COLORS.blue50};
+      outline-offset: 0.25rem;
     }
   `
 
   return (
     <Flex
-      data-testid={`ListButton_${type}`}
+      data-testid={testId ?? `ListButton_${type}`}
       onClick={onClick}
       css={LIST_BUTTON_STYLE}
+      tabIndex={0}
       {...styleProps}
     >
       {children}

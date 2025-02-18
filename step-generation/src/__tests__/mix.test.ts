@@ -22,7 +22,10 @@ import {
   makeTouchTipHelper,
   delayCommand,
 } from '../fixtures'
-import type { LabwareDefinition2 } from '@opentrons/shared-data'
+import type {
+  AspDispAirgapParams,
+  LabwareDefinition2,
+} from '@opentrons/shared-data'
 import type {
   ChangeTipOptions,
   InvariantContext,
@@ -40,6 +43,13 @@ let invariantContext: InvariantContext
 let robotStateWithTip: RobotState
 let mixinArgs: Partial<MixArgs>
 
+const mockWellLocation: Partial<AspDispAirgapParams> = {
+  wellLocation: {
+    origin: 'bottom',
+    offset: { x: 0, y: 0, z: 3.2 },
+  },
+}
+
 beforeEach(() => {
   mixinArgs = {
     ...getFlowRateAndOffsetParamsMix(),
@@ -52,14 +62,12 @@ beforeEach(() => {
 
     blowoutLocation: null,
     touchTip: false,
-
+    offsetFromBottomMm: 3.2,
     aspirateDelaySeconds: null,
     dispenseDelaySeconds: null,
     dropTipLocation: FIXED_TRASH_ID,
-    aspirateXOffset: 0,
-    dispenseXOffset: 0,
-    aspirateYOffset: 0,
-    dispenseYOffset: 0,
+    xOffset: 0,
+    yOffset: 0,
   }
 
   invariantContext = makeContext()
@@ -85,11 +93,11 @@ describe('mix: change tip', () => {
     expect(res.commands).toEqual(
       flatMap(args.wells, (well: string, idx: number) => [
         ...replaceTipCommands(idx),
-        aspirateHelper(well, volume),
-        dispenseHelper(well, volume),
+        aspirateHelper(well, volume, mockWellLocation),
+        dispenseHelper(well, volume, mockWellLocation),
 
-        aspirateHelper(well, volume),
-        dispenseHelper(well, volume),
+        aspirateHelper(well, volume, mockWellLocation),
+        dispenseHelper(well, volume, mockWellLocation),
       ])
     )
   })
@@ -102,10 +110,10 @@ describe('mix: change tip', () => {
     expect(res.commands).toEqual([
       ...replaceTipCommands(0),
       ...flatMap(args.wells, well => [
-        aspirateHelper(well, volume),
-        dispenseHelper(well, volume),
-        aspirateHelper(well, volume),
-        dispenseHelper(well, volume),
+        aspirateHelper(well, volume, mockWellLocation),
+        dispenseHelper(well, volume, mockWellLocation),
+        aspirateHelper(well, volume, mockWellLocation),
+        dispenseHelper(well, volume, mockWellLocation),
       ]),
     ])
   })
@@ -117,10 +125,10 @@ describe('mix: change tip', () => {
 
     expect(res.commands).toEqual(
       flatMap(args.wells, well => [
-        aspirateHelper(well, volume),
-        dispenseHelper(well, volume),
-        aspirateHelper(well, volume),
-        dispenseHelper(well, volume),
+        aspirateHelper(well, volume, mockWellLocation),
+        dispenseHelper(well, volume, mockWellLocation),
+        aspirateHelper(well, volume, mockWellLocation),
+        dispenseHelper(well, volume, mockWellLocation),
       ])
     )
   })
@@ -144,10 +152,10 @@ describe('mix: advanced options', () => {
     const res = getSuccessResult(result)
     expect(res.commands).toEqual([
       ...replaceTipCommands(0),
-      aspirateHelper('A1', volume),
-      dispenseHelper('A1', volume),
-      aspirateHelper('A1', volume),
-      dispenseHelper('A1', volume),
+      aspirateHelper('A1', volume, mockWellLocation),
+      dispenseHelper('A1', volume, mockWellLocation),
+      aspirateHelper('A1', volume, mockWellLocation),
+      dispenseHelper('A1', volume, mockWellLocation),
     ])
   })
 
@@ -167,11 +175,11 @@ describe('mix: advanced options', () => {
     expect(res.commands).toEqual(
       flatMap(args.wells, (well: string, idx: number) => [
         ...replaceTipCommands(idx),
-        aspirateHelper(well, volume),
-        dispenseHelper(well, volume),
+        aspirateHelper(well, volume, mockWellLocation),
+        dispenseHelper(well, volume, mockWellLocation),
 
-        aspirateHelper(well, volume),
-        dispenseHelper(well, volume),
+        aspirateHelper(well, volume, mockWellLocation),
+        dispenseHelper(well, volume, mockWellLocation),
         touchTipHelper(well),
       ])
     )
@@ -193,11 +201,11 @@ describe('mix: advanced options', () => {
     expect(res.commands).toEqual(
       flatMap(args.wells, (well, idx) => [
         ...replaceTipCommands(idx),
-        aspirateHelper(well, volume),
-        dispenseHelper(well, volume),
+        aspirateHelper(well, volume, mockWellLocation),
+        dispenseHelper(well, volume, mockWellLocation),
 
-        aspirateHelper(well, volume),
-        dispenseHelper(well, volume),
+        aspirateHelper(well, volume, mockWellLocation),
+        dispenseHelper(well, volume, mockWellLocation),
         blowoutHelper(blowoutLabwareId, {
           wellLocation: {
             origin: 'top',
@@ -227,11 +235,11 @@ describe('mix: advanced options', () => {
     expect(res.commands).toEqual(
       flatMap(args.wells, (well, idx) => [
         ...replaceTipCommands(idx),
-        aspirateHelper(well, volume),
-        dispenseHelper(well, volume),
+        aspirateHelper(well, volume, mockWellLocation),
+        dispenseHelper(well, volume, mockWellLocation),
 
-        aspirateHelper(well, volume),
-        dispenseHelper(well, volume),
+        aspirateHelper(well, volume, mockWellLocation),
+        dispenseHelper(well, volume, mockWellLocation),
         blowoutHelper(blowoutLabwareId, {
           wellLocation: {
             origin: 'top',
@@ -260,12 +268,12 @@ describe('mix: advanced options', () => {
     expect(res.commands).toEqual(
       flatMap(args.wells, (well, idx) => [
         ...replaceTipCommands(idx),
-        aspirateHelper(well, volume),
+        aspirateHelper(well, volume, mockWellLocation),
         delayCommand(12),
-        dispenseHelper(well, volume),
-        aspirateHelper(well, volume),
+        dispenseHelper(well, volume, mockWellLocation),
+        aspirateHelper(well, volume, mockWellLocation),
         delayCommand(12),
-        dispenseHelper(well, volume),
+        dispenseHelper(well, volume, mockWellLocation),
       ])
     )
   })
@@ -285,11 +293,11 @@ describe('mix: advanced options', () => {
     expect(res.commands).toEqual(
       flatMap(args.wells, (well, idx) => [
         ...replaceTipCommands(idx),
-        aspirateHelper(well, volume),
-        dispenseHelper(well, volume),
+        aspirateHelper(well, volume, mockWellLocation),
+        dispenseHelper(well, volume, mockWellLocation),
         delayCommand(12),
-        aspirateHelper(well, volume),
-        dispenseHelper(well, volume),
+        aspirateHelper(well, volume, mockWellLocation),
+        dispenseHelper(well, volume, mockWellLocation),
         delayCommand(12),
       ])
     )
@@ -314,13 +322,13 @@ describe('mix: advanced options', () => {
       expect(res.commands).toEqual(
         flatMap(args.wells, (well, idx) => [
           ...replaceTipCommands(idx),
-          aspirateHelper(well, volume),
+          aspirateHelper(well, volume, mockWellLocation),
           delayCommand(10),
-          dispenseHelper(well, volume),
+          dispenseHelper(well, volume, mockWellLocation),
           delayCommand(12),
-          aspirateHelper(well, volume),
+          aspirateHelper(well, volume, mockWellLocation),
           delayCommand(10),
-          dispenseHelper(well, volume),
+          dispenseHelper(well, volume, mockWellLocation),
           delayCommand(12),
           blowoutHelper(blowoutLabwareId, {
             wellLocation: {

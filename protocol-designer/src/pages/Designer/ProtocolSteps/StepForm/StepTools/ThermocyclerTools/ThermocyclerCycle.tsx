@@ -423,7 +423,7 @@ export function ThermocyclerCycle(props: ThermocyclerCycleProps): JSX.Element {
                       cycleStepId,
                       'temp',
                       maskToFloat(e.target.value),
-                      temperatureRangeFieldValue(4, 96)
+                      temperatureRangeFieldValue(4, 99)
                     )
                   }}
                   onBlur={() => {

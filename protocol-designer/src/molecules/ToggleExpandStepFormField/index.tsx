@@ -1,12 +1,11 @@
 import {
   ALIGN_CENTER,
-  Btn,
   COLORS,
   Check,
   DIRECTION_COLUMN,
   Flex,
   JUSTIFY_SPACE_BETWEEN,
-  ListItem,
+  ListButton,
   SPACING,
   StyledText,
 } from '@opentrons/components'
@@ -73,12 +72,13 @@ export function ToggleExpandStepFormField(
 
   const label = isSelected ? onLabel : offLabel ?? null
   return (
-    <ListItem type="noActive">
-      <Flex
-        padding={SPACING.spacing12}
-        width="100%"
-        flexDirection={DIRECTION_COLUMN}
-      >
+    <ListButton
+      type="noActive"
+      padding={SPACING.spacing12}
+      onClick={onToggleUpdateValue}
+      width="100%"
+    >
+      <Flex flexDirection={DIRECTION_COLUMN} width="100%">
         <Flex justifyContent={JUSTIFY_SPACE_BETWEEN} alignItems={ALIGN_CENTER}>
           <StyledText desktopStyle="bodyDefaultRegular">{title}</StyledText>
           <Flex alignItems={ALIGN_CENTER} gridGap={SPACING.spacing8}>
@@ -92,14 +92,11 @@ export function ToggleExpandStepFormField(
             ) : null}
             {toggleElement === 'toggle' ? (
               <ToggleButton
-                onClick={onToggleUpdateValue}
                 label={isSelected ? onLabel : offLabel}
                 toggledOn={isSelected}
               />
             ) : (
-              <Btn onClick={onToggleUpdateValue}>
-                <Check color={COLORS.blue50} isChecked={isSelected} />
-              </Btn>
+              <Check color={COLORS.blue50} isChecked={isSelected} />
             )}
           </Flex>
         </Flex>
@@ -121,6 +118,6 @@ export function ToggleExpandStepFormField(
           ) : null}
         </Flex>
       </Flex>
-    </ListItem>
+    </ListButton>
   )
 }

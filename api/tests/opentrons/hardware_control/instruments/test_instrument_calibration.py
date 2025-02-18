@@ -8,7 +8,7 @@ from decoy import Decoy
 
 from opentrons_shared_data.labware.types import (
     LabwareUri,
-    LabwareDefinition as LabwareDefDict,
+    LabwareDefinition2 as LabwareDef2Dict,
 )
 from opentrons_shared_data.labware.labware_definition import (
     LabwareDefinition,
@@ -44,10 +44,10 @@ def _use_mock_calibration_storage(
 
 
 @pytest.fixture
-def tip_rack_dict() -> LabwareDefDict:
+def tip_rack_dict() -> LabwareDef2Dict:
     """Get a tip rack dictionary definition value object."""
     return cast(
-        LabwareDefDict,
+        LabwareDef2Dict,
         {"namespace": "test", "version": 1, "parameters": {"loadName": "cool-labware"}},
     )
 
@@ -74,8 +74,8 @@ def tip_rack_model() -> LabwareDefinition:
 )
 def test_load_tip_length(
     decoy: Decoy,
-    tip_rack_dict: LabwareDefDict,
-    tip_rack_definition: Union[LabwareDefDict, LabwareDefinition],
+    tip_rack_dict: LabwareDef2Dict,
+    tip_rack_definition: Union[LabwareDef2Dict, LabwareDefinition],
 ) -> None:
     """Test that a tip length can be laoded for a pipette / tiprack combination."""
     tip_length_data = v1_models.TipLengthModel(

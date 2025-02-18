@@ -1,4 +1,4 @@
-import { beforeEach, describe, it, expect } from 'vitest'
+import { beforeEach, describe, it, expect, vi } from 'vitest'
 import { expectTimelineError } from '../__utils__/testMatchers'
 import { blowout } from '../commandCreators/atomic/blowout'
 import {
@@ -13,6 +13,8 @@ import {
 } from '../fixtures'
 import type { BlowoutParams } from '@opentrons/shared-data'
 import type { RobotState, InvariantContext } from '../types'
+
+vi.mock('../utils/heaterShakerCollision')
 
 describe('blowout', () => {
   let invariantContext: InvariantContext
@@ -29,6 +31,7 @@ describe('blowout', () => {
       wellName: 'A1',
       flowRate: 21.1,
       wellLocation: {
+        origin: 'top',
         offset: {
           z: -1.3,
         },

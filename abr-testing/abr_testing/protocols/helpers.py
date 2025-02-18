@@ -225,7 +225,7 @@ def create_disposable_lid_parameter(parameters: ParameterContext) -> None:
         variable_name="disposable_lid",
         display_name="Disposable Lid",
         description="True means use lid.",
-        default=True,
+        default=False,
     )
 
 

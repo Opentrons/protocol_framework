@@ -11,6 +11,7 @@ import {
   moveToAddressableArea,
   moveToAddressableAreaForDropTip,
 } from '../commandCreators/atomic'
+import { ZERO_OFFSET } from '../constants'
 import { curryCommandCreator } from './curryCommandCreator'
 import type { AddressableAreaName, CutoutId } from '@opentrons/shared-data'
 import type {
@@ -46,6 +47,7 @@ export const movableTrashCommandsUtil = (
     volume,
     flowRate,
   } = args
+  const offset = ZERO_OFFSET
   const trash = Object.values(
     invariantContext.additionalEquipmentEntities
   ).find(aE => aE.name === 'trashBin')
@@ -89,6 +91,7 @@ export const movableTrashCommandsUtil = (
                 curryCommandCreator(moveToAddressableArea, {
                   pipetteId,
                   addressableAreaName,
+                  offset,
                 }),
                 curryCommandCreator(aspirateInPlace, {
                   pipetteId,
@@ -123,6 +126,7 @@ export const movableTrashCommandsUtil = (
                 curryCommandCreator(moveToAddressableArea, {
                   pipetteId,
                   addressableAreaName,
+                  offset,
                 }),
                 curryCommandCreator(dispenseInPlace, {
                   pipetteId,
@@ -140,6 +144,7 @@ export const movableTrashCommandsUtil = (
                 curryCommandCreator(moveToAddressableArea, {
                   pipetteId,
                   addressableAreaName,
+                  offset,
                 }),
                 curryCommandCreator(blowOutInPlace, {
                   pipetteId,
@@ -154,6 +159,7 @@ export const movableTrashCommandsUtil = (
           curryCommandCreator(moveToAddressableArea, {
             pipetteId,
             addressableAreaName,
+            offset,
           }),
         ]
       }

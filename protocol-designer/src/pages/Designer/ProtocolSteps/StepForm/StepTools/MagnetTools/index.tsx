@@ -54,14 +54,18 @@ export function MagnetTools(props: StepFormProps): JSX.Element {
   const mappedErrorsToField = getFormErrorsMappedToField(visibleFormErrors)
 
   return (
-    <Flex flexDirection={DIRECTION_COLUMN}>
+    <Flex
+      flexDirection={DIRECTION_COLUMN}
+      paddingY={SPACING.spacing16}
+      gridGap={SPACING.spacing12}
+    >
       <DropdownStepFormField
         {...propsForFields.moduleId}
         options={moduleLabwareOptions}
         title={t('protocol_steps:module')}
       />
       <Divider marginY="0" />
-      <Flex flexDirection={DIRECTION_COLUMN} padding={SPACING.spacing16}>
+      <Flex flexDirection={DIRECTION_COLUMN} paddingX={SPACING.spacing16}>
         <ToggleExpandStepFormField
           {...propsForFields.engageHeight}
           toggleValue={propsForFields.magnetAction.value}

@@ -63,11 +63,7 @@ function _getNextRobotStateAndWarningsSingleCommand(
   assert(command, 'undefined command passed to getNextRobotStateAndWarning')
   switch (command.commandType) {
     case 'aspirate':
-      if (command.meta?.isAirGap === true) {
-        break
-      } else {
-        forAspirate(command.params, invariantContext, robotStateAndWarnings)
-      }
+      forAspirate(command.params, invariantContext, robotStateAndWarnings)
       break
 
     case 'dispense':
@@ -126,6 +122,7 @@ function _getNextRobotStateAndWarningsSingleCommand(
     case 'delay': // deprecated, use waitForDuration instead
     case 'custom': // fall-back
     case 'comment':
+    case 'airGapInPlace':
       break
 
     case 'loadLiquid':

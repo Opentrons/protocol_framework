@@ -7,7 +7,7 @@ import { makeContext, getInitialRobotStateStandard } from '../fixtures'
 import { disengageMagnet } from '../commandCreators/atomic/disengageMagnet'
 import type { InvariantContext, RobotState } from '../types'
 const moduleId = 'magneticModuleId'
-const commandCreatorFnName = 'disengageMagnet'
+
 describe('disengageMagnet', () => {
   let invariantContext: InvariantContext
   let robotState: RobotState
@@ -17,6 +17,7 @@ describe('disengageMagnet', () => {
       id: moduleId,
       type: MAGNETIC_MODULE_TYPE,
       model: MAGNETIC_MODULE_V1,
+      pythonName: 'mockPythonName',
     }
     robotState = getInitialRobotStateStandard(invariantContext)
     robotState.modules[moduleId] = {
@@ -28,11 +29,9 @@ describe('disengageMagnet', () => {
     }
   })
   it('creates disengage magnet command', () => {
-    const module = moduleId
     const result = disengageMagnet(
       {
-        commandCreatorFnName,
-        module,
+        moduleId,
       },
       invariantContext,
       robotState
@@ -43,7 +42,7 @@ describe('disengageMagnet', () => {
           commandType: 'magneticModule/disengage',
           key: expect.any(String),
           params: {
-            moduleId: module,
+            moduleId,
           },
         },
       ],

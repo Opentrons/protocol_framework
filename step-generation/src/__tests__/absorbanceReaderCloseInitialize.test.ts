@@ -24,14 +24,17 @@ describe('absorbanceReaderCloseInitialize compound command creator', () => {
   let absorbanceReaderCloseInitializeArgs: AbsorbanceReaderInitializeArgs
   const ABSORBANCE_READER_MODULE_ID = 'absorbanceReaderModuleId'
   const ABSORBANCE_READER_MODULE_SLOT = 'D3'
+  const GRIPPER_ID = 'gripperId'
   let robotState: RobotState
   let invariantContext: InvariantContext
   beforeEach(() => {
     absorbanceReaderCloseInitializeArgs = {
       commandCreatorFnName: 'absorbanceReaderInitialize',
-      module: ABSORBANCE_READER_MODULE_ID,
-      mode: 'single',
-      wavelengths: [450],
+      moduleId: ABSORBANCE_READER_MODULE_ID,
+      measureMode: 'single',
+      sampleWavelengths: [450],
+      name: 'some name',
+      description: 'some descirption',
     }
     invariantContext = {
       ...makeContext(),
@@ -40,6 +43,13 @@ describe('absorbanceReaderCloseInitialize compound command creator', () => {
           id: ABSORBANCE_READER_MODULE_ID,
           type: ABSORBANCE_READER_TYPE,
           model: ABSORBANCE_READER_V1,
+          pythonName: 'mockPythonName',
+        },
+      },
+      additionalEquipmentEntities: {
+        [GRIPPER_ID]: {
+          id: GRIPPER_ID,
+          name: 'gripper',
         },
       },
     }
@@ -107,8 +117,8 @@ describe('absorbanceReaderCloseInitialize compound command creator', () => {
   it('should emit close and intalize commands if multi mode', () => {
     absorbanceReaderCloseInitializeArgs = {
       ...absorbanceReaderCloseInitializeArgs,
-      mode: 'multi',
-      wavelengths: [450, 600],
+      measureMode: 'multi',
+      sampleWavelengths: [450, 600],
     }
     vi.mocked(absorbanceReaderStateGetter).mockReturnValue(
       {} as AbsorbanceReaderState

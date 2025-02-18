@@ -28,7 +28,15 @@ describe('absorbanceReaderOpenLid', () => {
       id: moduleId,
       type: ABSORBANCE_READER_TYPE,
       model: ABSORBANCE_READER_V1,
+      pythonName: 'mockPythonName',
     }
+    invariantContext.additionalEquipmentEntities = {
+      gripperId: {
+        name: 'gripper',
+        id: 'gripperId',
+      },
+    }
+
     robotState = getInitialRobotStateStandard(invariantContext)
     robotState.modules[moduleId] = {
       slot: 'D3',
@@ -43,11 +51,9 @@ describe('absorbanceReaderOpenLid', () => {
     )
   })
   it('creates absorbance reader open lid command', () => {
-    const module = moduleId
     const result = absorbanceReaderOpenLid(
       {
-        module,
-        commandCreatorFnName: 'absorbanceReaderOpenLid',
+        moduleId,
       },
       invariantContext,
       robotState
@@ -58,19 +64,17 @@ describe('absorbanceReaderOpenLid', () => {
           commandType: 'absorbanceReader/openLid',
           key: expect.any(String),
           params: {
-            moduleId: module,
+            moduleId,
           },
         },
       ],
     })
   })
   it('creates returns error if bad module state', () => {
-    const module = moduleId
     vi.mocked(absorbanceReaderStateGetter).mockReturnValue(null)
     const result = absorbanceReaderOpenLid(
       {
-        module,
-        commandCreatorFnName: 'absorbanceReaderOpenLid',
+        moduleId,
       },
       invariantContext,
       robotState
@@ -78,6 +82,20 @@ describe('absorbanceReaderOpenLid', () => {
     expect(getErrorResult(result).errors).toHaveLength(1)
     expect(getErrorResult(result).errors[0]).toMatchObject({
       type: 'MISSING_MODULE',
+    })
+  })
+  it('creates returns error if no gripper', () => {
+    invariantContext.additionalEquipmentEntities = {}
+    const result = absorbanceReaderOpenLid(
+      {
+        moduleId,
+      },
+      invariantContext,
+      robotState
+    )
+    expect(getErrorResult(result).errors).toHaveLength(1)
+    expect(getErrorResult(result).errors[0]).toMatchObject({
+      type: 'ABSORBANCE_READER_NO_GRIPPER',
     })
   })
 })

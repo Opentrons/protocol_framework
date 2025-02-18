@@ -1,5 +1,5 @@
 import { uuid } from '../../utils'
-import type { ModuleOnlyParams } from '@opentrons/shared-data/protocol/types/schemaV4'
+import type { ModuleOnlyParams } from '@opentrons/shared-data'
 import type { CommandCreator } from '../../types'
 export const thermocyclerCloseLid: CommandCreator<ModuleOnlyParams> = (
   args,
@@ -12,7 +12,7 @@ export const thermocyclerCloseLid: CommandCreator<ModuleOnlyParams> = (
         commandType: 'thermocycler/closeLid',
         key: uuid(),
         params: {
-          moduleId: args.module,
+          moduleId: args.moduleId,
         },
       },
     ],

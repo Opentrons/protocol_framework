@@ -5,6 +5,7 @@ import {
   dropTipInPlace,
   moveToAddressableArea,
 } from '../commandCreators/atomic'
+import { ZERO_OFFSET } from '../constants'
 import { curryCommandCreator } from './curryCommandCreator'
 import type { AddressableAreaName } from '@opentrons/shared-data'
 import type { RobotState, CurriedCommandCreator } from '../types'
@@ -35,7 +36,7 @@ export const wasteChuteCommandsUtil = (
     volume,
     flowRate,
   } = args
-
+  const offset = ZERO_OFFSET
   let commands: CurriedCommandCreator[] = []
   switch (type) {
     case 'dropTip': {
@@ -45,6 +46,7 @@ export const wasteChuteCommandsUtil = (
             curryCommandCreator(moveToAddressableArea, {
               pipetteId,
               addressableAreaName,
+              offset,
             }),
             curryCommandCreator(dropTipInPlace, {
               pipetteId,
@@ -60,6 +62,7 @@ export const wasteChuteCommandsUtil = (
               curryCommandCreator(moveToAddressableArea, {
                 pipetteId,
                 addressableAreaName,
+                offset,
               }),
               curryCommandCreator(dispenseInPlace, {
                 pipetteId,
@@ -77,6 +80,7 @@ export const wasteChuteCommandsUtil = (
               curryCommandCreator(moveToAddressableArea, {
                 pipetteId,
                 addressableAreaName,
+                offset,
               }),
               curryCommandCreator(blowOutInPlace, {
                 pipetteId,
@@ -93,6 +97,7 @@ export const wasteChuteCommandsUtil = (
               curryCommandCreator(moveToAddressableArea, {
                 pipetteId,
                 addressableAreaName,
+                offset,
               }),
               curryCommandCreator(aspirateInPlace, {
                 pipetteId,

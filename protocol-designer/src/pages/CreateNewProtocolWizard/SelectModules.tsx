@@ -1,20 +1,21 @@
 import { useTranslation } from 'react-i18next'
-import { useSelector } from 'react-redux'
 import {
   ALIGN_CENTER,
   BORDERS,
   COLORS,
   DIRECTION_COLUMN,
   EmptySelectorButton,
+  FLEX_MAX_CONTENT,
   Flex,
   ListItem,
   SPACING,
   StyledText,
+  Tooltip,
   TYPOGRAPHY,
+  useHoverTooltip,
   WRAP,
 } from '@opentrons/components'
 import {
-  ABSORBANCE_READER_TYPE,
   ABSORBANCE_READER_V1,
   FLEX_ROBOT_TYPE,
   getModuleDisplayName,
@@ -24,7 +25,6 @@ import {
   TEMPERATURE_MODULE_TYPE,
 } from '@opentrons/shared-data'
 import { uuid } from '../../utils'
-import { getEnableAbsorbanceReader } from '../../feature-flags/selectors'
 import { useKitchen } from '../../organisms/Kitchen/hooks'
 import { ModuleDiagram } from './ModuleDiagram'
 import { WizardBody } from './WizardBody'
@@ -50,7 +50,6 @@ export function SelectModules(props: WizardTileProps): JSX.Element | null {
   const fields = watch('fields')
   const modules = watch('modules')
   const additionalEquipment = watch('additionalEquipment')
-  const enableAbsorbanceReader = useSelector(getEnableAbsorbanceReader)
   const robotType = fields.robotType
   const supportedModules =
     robotType === FLEX_ROBOT_TYPE
@@ -71,8 +70,8 @@ export function SelectModules(props: WizardTileProps): JSX.Element | null {
     TEMPERATURE_MODULE_TYPE,
     HEATERSHAKER_MODULE_TYPE,
     MAGNETIC_BLOCK_TYPE,
-    ABSORBANCE_READER_TYPE,
   ]
+  const hasGripper = additionalEquipment.some(aE => aE === 'gripper')
 
   const handleAddModule = (
     moduleModel: ModuleModel,
@@ -165,8 +164,7 @@ export function SelectModules(props: WizardTileProps): JSX.Element | null {
       >
         <Flex flexDirection={DIRECTION_COLUMN}>
           <Flex flexDirection={DIRECTION_COLUMN} gridGap={SPACING.spacing12}>
-            {(filteredSupportedModules.length > 0 && enableAbsorbanceReader) ||
-            // note (kk:09/26/2024) the condition for absorbanceReaderV1 will be removed when ff is removed
+            {filteredSupportedModules.length > 0 ||
             !(
               filteredSupportedModules.length === 1 &&
               filteredSupportedModules[0] === 'absorbanceReaderV1'
@@ -177,11 +175,7 @@ export function SelectModules(props: WizardTileProps): JSX.Element | null {
             ) : null}
             <Flex gridGap={SPACING.spacing4} flexWrap={WRAP}>
               {filteredSupportedModules
-                .filter(module =>
-                  enableAbsorbanceReader
-                    ? module
-                    : module !== ABSORBANCE_READER_V1
-                )
+                .sort((moduleA, moduleB) => moduleA.localeCompare(moduleB))
                 .map(moduleModel => {
                   const numSlotsAvailable = getNumSlotsAvailable(
                     modules,
@@ -189,15 +183,12 @@ export function SelectModules(props: WizardTileProps): JSX.Element | null {
                     moduleModel
                   )
                   return (
-                    <EmptySelectorButton
+                    <AddModuleEmptySelectorButton
                       key={moduleModel}
-                      disabled={numSlotsAvailable === 0}
-                      textAlignment={TYPOGRAPHY.textAlignLeft}
-                      iconName="plus"
-                      text={getModuleDisplayName(moduleModel)}
-                      onClick={() => {
-                        handleAddModule(moduleModel, numSlotsAvailable === 0)
-                      }}
+                      moduleModel={moduleModel}
+                      areSlotsAvailable={numSlotsAvailable > 0}
+                      hasGripper={hasGripper}
+                      handleAddModule={handleAddModule}
                     />
                   )
                 })}
@@ -221,6 +212,9 @@ export function SelectModules(props: WizardTileProps): JSX.Element | null {
                   gridGap={SPACING.spacing4}
                 >
                   {Object.entries(modules)
+                    .sort(([, moduleA], [, moduleB]) =>
+                      moduleA.model.localeCompare(moduleB.model)
+                    )
                     .reduce<Array<FormModule & { count: number; key: string }>>(
                       (acc, [key, module]) => {
                         const existingModule = acc.find(
@@ -255,7 +249,9 @@ export function SelectModules(props: WizardTileProps): JSX.Element | null {
                         },
                         dropdownType: 'neutral' as DropdownBorder,
                         filterOptions: getNumOptions(
-                          numSlotsAvailable + module.count
+                          module.model !== ABSORBANCE_READER_V1
+                            ? numSlotsAvailable + module.count
+                            : numSlotsAvailable
                         ),
                       }
                       return (
@@ -304,5 +300,43 @@ export function SelectModules(props: WizardTileProps): JSX.Element | null {
         </Flex>
       </WizardBody>
     </HandleEnter>
+  )
+}
+
+interface AddModuleEmptySelectorButtonProps {
+  moduleModel: ModuleModel
+  areSlotsAvailable: boolean
+  hasGripper: boolean
+  handleAddModule: (arg0: ModuleModel, arg1: boolean) => void
+}
+
+function AddModuleEmptySelectorButton(
+  props: AddModuleEmptySelectorButtonProps
+): JSX.Element {
+  const { moduleModel, areSlotsAvailable, hasGripper, handleAddModule } = props
+  const [targetProps, tooltipProps] = useHoverTooltip()
+  const { t } = useTranslation('create_new_protocol')
+  const disableGripperRequired =
+    !hasGripper && moduleModel === ABSORBANCE_READER_V1
+
+  return (
+    <>
+      <Flex {...targetProps} width={FLEX_MAX_CONTENT}>
+        <EmptySelectorButton
+          disabled={!areSlotsAvailable || disableGripperRequired}
+          textAlignment={TYPOGRAPHY.textAlignLeft}
+          iconName="plus"
+          text={getModuleDisplayName(moduleModel)}
+          onClick={() => {
+            handleAddModule(moduleModel, !areSlotsAvailable)
+          }}
+        />
+      </Flex>
+      {disableGripperRequired ? (
+        <Tooltip tooltipProps={tooltipProps}>
+          {t('add_gripper_for_absorbance_reader')}
+        </Tooltip>
+      ) : null}
+    </>
   )
 }
