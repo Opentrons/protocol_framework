@@ -548,6 +548,7 @@ stages:
                       y: 0
                       z: 0
                   alternateDropLocation: false
+                  scrape_tips: false
                 result:
                   position: { 'x': 410.84000000000003, 'y': 374.56, 'z': 82.0 }
                 notes: []
