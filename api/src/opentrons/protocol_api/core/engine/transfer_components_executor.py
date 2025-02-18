@@ -236,7 +236,7 @@ class TransferComponentsExecutor:
         for n in range(mix_properties.repetitions, 0, -1):
             self.aspirate_and_wait(volume=mix_properties.volume)
             self.dispense_and_wait(
-                dispense_properties=self._transfer_properties.dispense,     # TODO: check that using single-dispense props during mix is correct
+                dispense_properties=self._transfer_properties.dispense,  # TODO: check that using single-dispense props during mix is correct
                 volume=mix_properties.volume,
                 push_out_override=push_out_vol
                 if last_dispense_push_out is True and n == 1
@@ -276,6 +276,12 @@ class TransferComponentsExecutor:
             So if total aspirated volume is 20, use the value for airGapByVolume[20]
             Flow rate = min(aspirateFlowRate, (airGapByVolume)/sec)
             - Use post-aspirate delay
+
+        Args:
+            volume: dispense volume
+            add_air_gap: whether to add an air gap before moving away from the current well.
+                         This value is True for all retractions, except when retracting
+                         during a multi-dispense.
         """
         # TODO: Raise error if retract is below the meniscus
         retract_props = self._transfer_properties.aspirate.retract
@@ -327,10 +333,12 @@ class TransferComponentsExecutor:
             volume_for_air_gap = self._instrument.get_current_volume()
         else:
             volume_for_air_gap = volume
-        add_air_gap and self._add_air_gap(
-            air_gap_volume=self._transfer_properties.aspirate.retract.air_gap_by_volume.get_for_volume(
-                volume_for_air_gap
-        ))
+        if add_air_gap:
+            self._add_air_gap(
+                air_gap_volume=self._transfer_properties.aspirate.retract.air_gap_by_volume.get_for_volume(
+                    volume_for_air_gap
+                )
+            )
 
     def retract_after_dispensing(
         self,

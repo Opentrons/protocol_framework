@@ -1856,7 +1856,9 @@ def test_aspirate_liquid_class_for_transfer(
         ),
         mock_transfer_components_executor.pre_wet(volume=123),
         mock_transfer_components_executor.aspirate_and_wait(volume=123),
-        mock_transfer_components_executor.retract_after_aspiration(volume=123),
+        mock_transfer_components_executor.retract_after_aspiration(
+            volume=123, add_air_gap=True
+        ),
     )
     assert result == [LiquidAndAirGapPair(air_gap=222, liquid=111)]
 
@@ -1907,7 +1909,9 @@ def test_aspirate_liquid_class_for_consolidate(
             submerge_properties=test_transfer_properties.aspirate.submerge,
         ),
         mock_transfer_components_executor.aspirate_and_wait(volume=123),
-        mock_transfer_components_executor.retract_after_aspiration(volume=123),
+        mock_transfer_components_executor.retract_after_aspiration(
+            volume=123, add_air_gap=True
+        ),
     )
     decoy.verify(
         mock_transfer_components_executor.mix(
@@ -2011,7 +2015,9 @@ def test_dispense_liquid_class(
             submerge_properties=test_transfer_properties.dispense.submerge,
         ),
         mock_transfer_components_executor.dispense_and_wait(
-            "Update me", volume=123, push_out_override=push_out_vol
+            dispense_properties=test_transfer_properties.dispense,
+            volume=123,
+            push_out_override=push_out_vol,
         ),
         mock_transfer_components_executor.mix(
             mix_properties=test_transfer_properties.dispense.mix,
