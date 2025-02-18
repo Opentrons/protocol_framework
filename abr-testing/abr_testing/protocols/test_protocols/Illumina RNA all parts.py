@@ -1,7 +1,16 @@
-from opentrons import protocol_api
+"""Illumina RNA Enrichment 96x Flex Stacker."""
+from opentrons.protocol_api import ProtocolContext, ParameterContext, OFF_DECK
 from opentrons import types
 from opentrons.protocol_api import COLUMN, ALL, Labware
-import math
+from opentrons.protocol_api.module_contexts import (
+    MagneticBlockContext,
+    TemperatureModuleContext,
+    ThermocyclerContext,
+    FlexStackerContext,
+)
+from opentrons.hardware_control.modules.types import ThermocyclerStep
+from typing import List
+
 
 metadata = {
     "protocolName": "Illumina RNA Enrichment 96x Part 1-3",
@@ -14,8 +23,8 @@ requirements = {
 }
 
 
-def add_parameters(parameters):
-    # ======================== RUNTIME PARAMETERS ========================
+def add_parameters(parameters: ParameterContext) -> None:
+    """Parameters."""
     parameters.add_bool(
         display_name="Dry Run",
         variable_name="DRYRUN",
@@ -51,14 +60,11 @@ def add_parameters(parameters):
     )
 
 
-def run(protocol: protocol_api.ProtocolContext):
+def run(protocol: ProtocolContext) -> None:
+    """Protocol."""
     # ======================== DOWNLOADED PARAMETERS ========================
-    global USE_GRIPPER  # T/F Whether or not Using the Gripper
-    global STP_50_TIPS  # T/F Whether or not there are p50 Single Tip Pickups
-    global STP_200_TIPS  # T/F Whether or not there are p200 Single Tip Pickups
     global REUSE_ANY_50_TIPS  # T/F Whether or not Reusing any p50
     global REUSE_ANY_200_TIPS  # T/F Whether or not Reusing any p200
-    global TIP_TRASH  # T/F whether or not the Tips are Returned
     global COLUMNS  # Number of Columns of Samples
     global PLATE_STACKED  # Number of Plates Stacked in Stacked Position
     global p50_TIPS  # Number of p50 tips currently available
@@ -74,40 +80,27 @@ def run(protocol: protocol_api.ProtocolContext):
     global tiprack_200_R2  # Tiprack for p200 Reuse #2
     global WASTEVOL  # Number - Total volume of Discarded Liquid Waste
     global ETOHVOL  # Number - Total volume of Available EtOH
-    # =================== LOADING THE RUNTIME PARAMETERS ====================
 
-    """
-    DRYRUN              = protocol.params.DRYRUN
-    COLUMNS             = protocol.params.COLUMNS
-    PCRCYCLES           = protocol.params.PCRCYCLES
-    """
-
-    # =================================================================================================
-    # ====================================== INSTRUCTION FOR USE ======================================
-    # =================================================================================================
-    # Change the PROTOCOL_STEPS to the appropriate sections to be tested, or 'All Steps'
+    # ===========================================================
+    # ====================================== INSTRUCTION FOR USE
+    # ===========================================================
+    # Change PROTOCOL_STEPS to appropriate sections to be tested, or 'All Steps'
     # Practically speaking it can be broken down to:
     # 'cDNA and Library Prep'
     # 'Pooling and Hybridization'
     # "Just Capture"
-    # The Runtime parameters are inactivated and Parameters are instead set by these testing parameters:
-    # Set thye MODESPEED to "QUICK" if you want to skip the single column pipetting across the 96well plate, it will assume it did the step and throw out the tiprack, do this for troubleshooting
+    # Set MODESPEED to "QUICK" if you want to skip single column for 96well plate, will assume
+    # it did step and throw out the tiprack, do this for troubleshooting
     # Otherwise it'll do it and take a long time, but that's for ABR
-    # Set the MODETRASH to "MANUAL" if you want to instead have the gripper place the labware to be thrown out instead into a deck slot on D3 and pause to manually remove it.
-    # Otherwise there's about 20 tipracks dropping into the chute, they can get banged up and not reusable
-    # SCP_Position means Single Column Pickup Position, this is the quick reference to a deck slot where the 96 channel can access single columns
-    # =================================================================================================
-    # =================================================================================================
-    # =================================================================================================
-
+    # into a deck slot on D3 and pause to manually remove it.
+    # SCP_Position means Single Column Pickup Position, where 96ch can access single columns
     DRYRUN = True
-    PCRCYCLES = 4
     PROTOCOL_STEPS = "All Steps"
     MODESPEED = "NORMAL"  # QUICK or NORMAL
     MODETRASH = "CHUTE"  # MANUAL or CHUTE
     SCP_Position = "C2"
-    if DRYRUN == True:
-        HYBRIDTIME = 18
+    if DRYRUN:
+        HYBRIDTIME = 18.0
     else:
         HYBRIDTIME = 0.1
     HYBRID_PAUSE = False
@@ -121,10 +114,9 @@ def run(protocol: protocol_api.ProtocolContext):
     #   'Just Hybridization'
     #   'Just Capture'
 
-    # =================================================================================================
-    # ====================================== ADVANCED PARAMETERS ======================================
-    # =================================================================================================
-
+    # ===========================================================
+    # ====================================== ADVANCED PARAMETERS
+    # ===========================================================
     # -------PROTOCOL STEP-------
     if (
         PROTOCOL_STEPS == "All Steps"
@@ -184,73 +176,11 @@ def run(protocol: protocol_api.ProtocolContext):
         STEP_CLEANUP_2 = False
     # ---------------------------
 
-    # This notifies the user that for 5-6 columns (from more than 32 samples up to 48 samples) it requires Tip reusing in order to remain walkaway.
-    # This setting will override any Runtime parameter, and also pauses to notify the user.  So if the user enters 6 columns with Single Tip Use, it will pause and warn that it has to change to Reusing tips in order to remain walkaway.
-    # Note that if omitting steps (i.e. skipping the last cleanup step) it is possible to do single use tips, but may vary on case by case basis.
-    # Note that it is also possible to use advanced settings to include pauses that requires user intervention to replenish tipracks, making allowing a run of single Use Tips.
-    TIP_SETTING = "Single Tip Use"
-    TIP_TRASH = True  # Default True    | True = Used tips go in Trash, False = Used tips go back into rack
-    DEACTIVATE_TEMP = True  # Default True    | True = Temp and / or Thermocycler deactivate at end of run, False = remain on, such as leaving at 4 degrees
-    TRASH_POSITION = "CHUTE"  # Default 'CHUTE' | 'BIN' or 'CHUTE'
-    TIP_MIX = False
     ONDECK_THERMO = True
-    ONDECK_HEATERSHAKER = False  # Default True    | True = On Deck Heater Shaker, False = No heatershaker and increased tip mixing reps.
-    ONDECK_TEMP = True  # Default True    | True = On Deck Temperature module, False = No Temperature Module
-    USE_GRIPPER = True  # Default True    | True = Uses the FLEX Gripper, False = No Gripper Movement, protocol pauses and requires manual intervention.
-    HOTSWAP = False  # Default False   | True = Allows replenishing tipracks on the off deck positions so the protocol can continue, False = Won't, protocol will most likely have out of tip error message.
-    HOTSWAP_PAUSE = False  # Default False   | True = Protocol pauses for replenishing the offdeck tip racks or to continue, False = Protocol won't cause, user must add tipracks at their discretion.
-    SWAPOFFDECK = False  # Default False   | True = Protocol will use an empty deck position as a temprorary place to swap new and used tip racks between on and off deck, instead of discarding in the chute, False = won't, and used tipracks will go into the chute.  Use True if there is deck space to spare and when doing troubleshooting so tips aren't being discarded with the tip racks.
-    CUSTOM_OFFSETS = False  # Default False   | True = use per instrument specific offsets, False = Don't use any offsets.  This is for per instrument, per module gripper alignment adjustments that need fine tuning without gripper recalibration.
-    RES_TYPE_96x = False  # Default False   | True = use a 96x2ml deepwell for the Reagent Reservoir to keep tips compartmentalized, False = 12x15ml Reservoir.
-    WASH_AirMultiDis = False  # Default False   | When adding WASH to multiple columns, dispense above the wells and reuse tips (Tip Saving)
-    ETOH_1_AirMultiDis = False  # Default False   | When adding EtOH to multiple columns, dispense above the wells and reuse tips (Tip Saving)
-    NWASH_AirMultiDis = False  # Default False   | When adding EtOH to multiple columns, dispense above the wells and reuse tips (Tip Saving)
-    REUSE_50_TIPS_RSB_1 = False  # Default False   | Reusing p50 tips
-    REUSE_50_TIPS_RSB_2 = False  # Default False   | Reusing p50 tips
-    REUSE_200_TIPS_ETOH_1 = False  # Default False   | Reusing p200 tips
-    STP_200_TIPS = False  # Default False   | Single Tip Pickup p200 tips
-    STP_50_TIPS = False  # Default False   | Single tip Pickup p50 tips
-    NOLABEL = False  # Default False   | True = Do no include Liquid Labeling, False = Liquid Labeling is included, adds additional lines to Protocol Step Preview at end of protocol.
-    REPORT = False  # Default False   | True = Include Extra Comments in the Protocol Step Preview for troubleshooting, False = Do Not Include
-
-    # ============================== SETTINGS ===============================
-    if TRASH_POSITION == "BIN":
-        SWAPOFFDECK = True  # Setting to Swap empty Tipracks to empty positions instead of dumping them
-    if TRASH_POSITION == "CHUTE":
-        SWAPOFFDECK = False  # Setting to Swap empty Tipracks to empty positions instead of dumping them
-    if TIP_MIX == True:
-        ONDECK_HEATERSHAKER = False  # On Deck Heater Shaker
-    if TIP_MIX == False:
-        ONDECK_HEATERSHAKER = True  # On Deck Heater Shaker
-    if DRYRUN == True:
-        TIP_TRASH = (
-            False  # True = Used tips go in Trash, False = Used tips go back into rack
-        )
-        DEACTIVATE_TEMP = True  # Whether or not to deactivate the heating and cooling modules after a run
-        REPORT = True  # Whether or not to include Extra Comments for Debugging
-    if TIP_SETTING == "Reusing Tips":
-        RES_TYPE_96x = True  # Type of Reservoir, if reusing tips or omitting rows, set True to use a 96x2ml deepwell
-        WASH_AirMultiDis = True  # When adding WASH to multiple columns, dispense above the wells and reuse tips (Tip Saving)
-        ETOH_1_AirMultiDis = True  # When adding EtOH to multiple columns, dispense above the wells and reuse tips (Tip Saving)
-        RSB_1_AirMultiDis = True  # When adding RSB to multiple columns, dispense above the wells and reuse tips (Tip Saving)
-        REUSE_50_TIPS_RSB = True  # Reusing p50 tips
-        REUSE_200_TIPS_WASH = True  # Reusing p200 tips
-        REUSE_200_TIPS_ETOH = True  # Reusing p200 tips
-        STP_200_TIPS = True  # Default False   | Single Tip Pickup p200 tips
-        STP_50_TIPS = True  # Default False   | Single tip Pickup p50 tips
-
-    if TIP_SETTING == "Single Tip Use":
-        RES_TYPE_96x = False  # Type of Reservoir, if reusing tips or omitting rows, set True to use a 96x2ml deepwell
-        WASH_AirMultiDis = False  # When adding WASH to multiple columns, dispense above the wells and reuse tips (Tip Saving)
-        ETOH_1_AirMultiDis = False  # When adding EtOH to multiple columns, dispense above the wells and reuse tips (Tip Saving)
-        RSB_1_AirMultiDis = False  # When adding RSB to multiple columns, dispense above the wells and reuse tips (Tip Saving)
-        REUSE_50_TIPS_RSB = False  # Reusing p50 tips
-        REUSE_200_TIPS_WASH = False  # Reusing p200 tips
-        REUSE_200_TIPS_ETOH = False  # Reusing p200 tips
-        STP_200_TIPS = True  # Default False   | Single Tip Pickup p200 tips
-        STP_50_TIPS = True  # Default False   | Single tip Pickup p50 tips
-
-    # ======================== BACKGROUND PARAMETERS ========================
+    ONDECK_TEMP = True  # True:On Deck Temperature module, False:No Temperature Module
+    CUSTOM_OFFSETS = (
+        False  # True:use per instrument specific offsets, False:Don't use offsets
+    )
 
     # =============================== PIPETTE ===============================
     p1000 = protocol.load_instrument("flex_96channel_1000", "left")
@@ -263,17 +193,24 @@ def run(protocol: protocol_api.ProtocolContext):
 
     # ================================ LISTS ================================
 
-    def nozzlecheck(nozzletype: str, tip_rack: Labware):
+    def nozzlecheck(nozzletype: str, tip_rack: Labware) -> None:
+        """Configures Pipette."""
         if nozzletype == "R8":
-            p1000.configure_nozzle_layout(style=COLUMN, start="A12", tip_racks = [tip_rack])
+            p1000.configure_nozzle_layout(
+                style=COLUMN, start="A12", tip_racks=[tip_rack]
+            )
         if nozzletype == "L8":
-            p1000.configure_nozzle_layout(style=COLUMN, start="A1", tip_racks = [tip_rack])
+            p1000.configure_nozzle_layout(
+                style=COLUMN, start="A1", tip_racks=[tip_rack]
+            )
         if nozzletype == "96":
-            p1000.configure_nozzle_layout(style=ALL, tip_racks = [tip_rack])
+            p1000.configure_nozzle_layout(style=ALL, tip_racks=[tip_rack])
 
     # ========== FIRST ROW ===========
-    if ONDECK_THERMO == True:
-        thermocycler = protocol.load_module("thermocycler module gen2")
+    if ONDECK_THERMO:
+        thermocycler: ThermocyclerContext = protocol.load_module(
+            "thermocycler module gen2"
+        )  # type: ignore[assignment]
         sample_plate_1 = thermocycler.load_labware(
             "opentrons_96_wellplate_200ul_pcr_full_skirt", "Sample Plate 1"
         )
@@ -281,15 +218,14 @@ def run(protocol: protocol_api.ProtocolContext):
         sample_plate_1 = protocol.load_labware(
             "opentrons_96_wellplate_200ul_pcr_full_skirt", "A1", "Sample Plate 1"
         )
-    # SAMPLE PLATE STACK
     # ================ Add the first labware in the position ================
     sample_plate_2 = protocol.load_labware(
         "opentrons_96_wellplate_200ul_pcr_full_skirt", "A2", "Sample Plate 2"
     )
-    # sample_plate_3 = protocol.load_labware('opentrons_96_wellplate_200ul_pcr_full_skirt','A2','Sample Plate 3')
-    # sample_plate_4 = protocol.load_labware('opentrons_96_wellplate_200ul_pcr_full_skirt','A2','Sample Plate 4')
     # =======================================================================
-    stacker_200_1 = protocol.load_module("flexStackerModuleV1", "A4")
+    stacker_200_1: FlexStackerContext = protocol.load_module(
+        "flexStackerModuleV1", "A4"
+    )  # type: ignore[assignment]
     stacker_200_1.load_labware_to_hopper(
         "opentrons_flex_96_tiprack_200ul", quantity=6, lid="opentrons_flex_tiprack_lid"
     )
@@ -297,36 +233,30 @@ def run(protocol: protocol_api.ProtocolContext):
         "opentrons_flex_96_tiprack_adapter", "A3"
     )
     tiprack_200_1 = tiprack_A3_adapter.load_labware("opentrons_flex_96_tiprack_200ul")
-    # A2: tiprack_200_3      = protocol.load_labware('opentrons_flex_96_tiprack_200ul','A4')
-    # A3: tiprack_200_4      = protocol.load_labware('opentrons_flex_96_tiprack_200ul','A4')
-    # A4: tiprack_200_5     = protocol.load_labware('opentrons_flex_96_tiprack_200ul','A4')
-    # A5: tiprack_200_6     = protocol.load_labware('opentrons_flex_96_tiprack_200ul','A4')
-    # A6: tiprack_200_7     = protocol.load_labware('opentrons_flex_96_tiprack_200ul','A4')
     # ========== SECOND ROW ==========
-    # REAGENT PLATE STACK
     reagent_plate_2 = protocol.load_labware(
         "greiner_384_wellplate_240ul", "B2", "Reagent Plate 2"
     )
     # ================ Add the first labware in the position ================
-    stacker_200_2 = protocol.load_module("flexStackerModuleV1", "B4")
+    stacker_200_2: FlexStackerContext = protocol.load_module(
+        "flexStackerModuleV1", "B4"
+    )  # type: ignore[assignment]
     stacker_200_2.load_labware_to_hopper(
         "opentrons_flex_96_tiprack_200ul", quantity=6, lid="opentrons_flex_tiprack_lid"
     )
     lids = protocol.load_lid_stack("opentrons_tough_pcr_auto_sealing_lid", "B3", 5)
-    # B2 tiprack_200_8       = protocol.load_labware('opentrons_flex_96_tiprack_200ul','B4')
-    # B3 tiprack_200_9       = protocol.load_labware('opentrons_flex_96_tiprack_200ul','B4')
-    # B4 tiprack_200_10       = protocol.load_labware('opentrons_flex_96_tiprack_200ul','B4')
-    # B5 tiprack_200_11       = protocol.load_labware('opentrons_flex_96_tiprack_200ul','B4')
-    # B6 tiprack_200_XX       = protocol.load_labware('opentrons_flex_96_tiprack_200ul','B4')
-    # =======================================================================
 
     # ========== THIRD ROW ===========
-    stacker_50_1 = protocol.load_module("flexStackerModuleV1", "C4")
+    stacker_50_1: FlexStackerContext = protocol.load_module(
+        "flexStackerModuleV1", "C4"
+    )  # type: ignore[assignment]
     stacker_50_1.load_labware_to_hopper(
         "opentrons_flex_96_tiprack_50ul", quantity=6, lid="opentrons_flex_tiprack_lid"
     )
-    if ONDECK_TEMP == True:
-        temp_block = protocol.load_module("temperature module gen2", "C1")
+    if ONDECK_TEMP:
+        temp_block: TemperatureModuleContext = protocol.load_module(
+            "temperature module gen2", "C1"
+        )  # type: ignore[assignment]
         reagent_plate_1 = temp_block.load_labware(
             "greiner_384_wellplate_240ul", "Reagent Plate 1"
         )
@@ -340,32 +270,28 @@ def run(protocol: protocol_api.ProtocolContext):
     ETOH_reservoir = protocol.load_labware(
         "nest_96_wellplate_2ml_deep", "C3", "ETOH Reservoir"
     )
-    # C2 tiprack_50_8        = protocol.load_labware('opentrons_flex_96_tiprack_50ul','C4')
-    # C3 tiprack_50_SCP_9    = protocol.load_labware('opentrons_flex_96_tiprack_50ul','C4')
-    # C4 tiprack_50_SCP_10   = protocol.load_labware('opentrons_flex_96_tiprack_50ul','C4')
-    # C5 tiprack_50_X        = protocol.load_labware('opentrons_flex_96_tiprack_50ul','C4')
 
     # ========== FOURTH ROW ==========
-    stacker_50_2 = protocol.load_module("flexStackerModuleV1", "D4")
-    stacker_50_2.load_labware_to_hopper("opentrons_flex_96_tiprack_50ul", quantity = 6, lid="opentrons_flex_tiprack_lid")
+    stacker_50_2: FlexStackerContext = protocol.load_module(
+        "flexStackerModuleV1", "D4"
+    )  # type: ignore[assignment]
+    stacker_50_2.load_labware_to_hopper(
+        "opentrons_flex_96_tiprack_50ul", quantity=6, lid="opentrons_flex_tiprack_lid"
+    )
     TRASH = protocol.load_waste_chute()
     LW_reservoir = protocol.load_labware(
         "nest_96_wellplate_2ml_deep", "D1", "Liquid Waste Reservoir"
     )
-    mag_block = protocol.load_module("magneticBlockV1", "D2")
+    mag_block: MagneticBlockContext = protocol.load_module(
+        "magneticBlockV1", "D2"
+    )  # type: ignore[assignment]
     CleanupPlate_1 = mag_block.load_labware(
         "nest_96_wellplate_2ml_deep", "Cleanup Plate 1"
     )
     stacker_50_2.enter_static_mode()
-    CleanupPlate_2 = stacker_50_2.load_labware('nest_96_wellplate_2ml_deep', 'Cleanup Plate 2')
-
-    # ============ TRASH =============
-
-    # D2: tiprack_50_SCP_3   = protocol.load_labware('opentrons_flex_96_tiprack_50ul','D4')
-    # D3: tiprack_50_SCP_4   = protocol.load_labware('opentrons_flex_96_tiprack_50ul','D4')
-    # D4: tiprack_50_5       = protocol.load_labware('opentrons_flex_96_tiprack_50ul','D4')
-    # D5: tiprack_50_SCP_6   = protocol.load_labware('opentrons_flex_96_tiprack_50ul','D4')
-    # D6: tiprack_50_7       = protocol.load_labware('opentrons_flex_96_tiprack_50ul','D4')
+    CleanupPlate_2 = stacker_50_2.load_labware(
+        "nest_96_wellplate_2ml_deep", "Cleanup Plate 2"
+    )
 
     # ========================== REAGENT PLATE_1 ============================
     TAGMIX = reagent_plate_1["B1"]  # 96 Wells
@@ -384,9 +310,9 @@ def run(protocol: protocol_api.ProtocolContext):
     #                   = reagent_plate_1['A12'] # 8 Wells
     #                   = reagent_plate_1['A13'] # 8 Wells
     SMB_1 = reagent_plate_1["A14"]  # 8 Wells
-    SMB_2 = reagent_plate_1["A15"]  # 8 Wells
-    EEW_1 = reagent_plate_1["A16"]  # 8 Wells
-    EEW_2 = reagent_plate_1["A17"]  # 8 Wells
+    # SMB_2 = reagent_plate_1["A15"]  # 8 Wells
+    # EEW_1 = reagent_plate_1["A16"]  # 8 Wells
+    # EEW_2 = reagent_plate_1["A17"]  # 8 Wells
     NHB2 = reagent_plate_1["A18"]  # 8 Wells
     Panel = reagent_plate_1["A19"]  # 8 Wells
     ET2 = reagent_plate_1["A20"]  # 8 Wells
@@ -416,40 +342,12 @@ def run(protocol: protocol_api.ProtocolContext):
         "A11",
         "A12",
     ]
-    column_list_2 = [
-        "A2",
-        "A3",
-        "A4",
-        "A5",
-        "A6",
-        "A7",
-        "A8",
-        "A9",
-        "A10",
-        "A11",
-        "A12",
-    ]
-
-    reverse_list = [
-        "A12",
-        "A11",
-        "A10",
-        "A9",
-        "A8",
-        "A7",
-        "A6",
-        "A5",
-        "A4",
-        "A3",
-        "A2",
-        "A1",
-    ]
     pooled_1_list = "A12"
-    pooled_2_list = "A1"
+    # pooled_2_list = "A1"
     pooled_3_list = "A3"
-    pooled_4_list = "A4"
-    pooled_5_list = "A5"
-    pooled_6_list = "A6"
+    # pooled_4_list = "A4"
+    # pooled_5_list = "A5"
+    # pooled_6_list = "A6"
 
     SSMM_list = ["A3", "A4", "A3", "A4", "A3", "A4", "A3", "A4", "A3", "A4", "A3", "A4"]
     RSB_list = ["A6", "A7", "A8", "A6", "A7", "A8", "A6", "A7", "A8", "A6", "A7", "A8"]
@@ -457,73 +355,47 @@ def run(protocol: protocol_api.ProtocolContext):
     EEW_list = ["A2", "B2", "A2", "B2", "A2", "B2", "A2", "B2", "A2", "B2", "A2", "B2"]
 
     # ============================ CUSTOM OFFSETS ===========================
-    # These are Custom Offsets which are a PER INSTRUMENT Setting, to account for slight adjustments of the gripper calibration or labware.
     p200_in_Deep384_Z_offset = 9
 
-    deck_2_drop_offset = {"x": 0, "y": 0, "z": 13}
-    deck_2_pick_up_offset = {"x": 0, "y": 0, "z": 13}
-    deck_3_drop_offset = {"x": 0, "y": 0, "z": 26}
-    deck_3_pick_up_offset = {"x": 0, "y": 0, "z": 26}
-    deck_4_drop_offset = {"x": 0, "y": 0, "z": 39}
-    deck_4_pick_up_offset = {"x": 0, "y": 0, "z": 39}
-
-    if CUSTOM_OFFSETS == True:
+    if CUSTOM_OFFSETS:
         PCRPlate_Z_offset = 0
         Deepwell_Z_offset = 0
         Deep384_Z_offset = 0
         # HEATERSHAKER OFFSETS
-        hs_drop_offset = {"x": 0, "y": 0, "z": 0}
-        hs_pick_up_offset = {"x": 0, "y": 0, "z": 0}
         # MAG BLOCK OFFSETS
         mb_drop_offset = {"x": 0, "y": 0.0, "z": 0}
         mb_pick_up_offset = {"x": 0, "y": 0, "z": 0}
         # THERMOCYCLER OFFSETS
-        tc_drop_offset = {"x": 0, "y": 0, "z": 0}
         tc_pick_up_offset = {"x": 0, "y": 0, "z": 0}
         # DECK OFFSETS
         deck_drop_offset = {"x": 0, "y": 0, "z": 0}
         deck_pick_up_offset = {"x": 0, "y": 0, "z": 0}
-        deck_2_drop_offset = {"x": 0, "y": 0, "z": 13}
-        deck_2_pick_up_offset = {"x": 0, "y": 0, "z": 13}
-        deck_3_drop_offset = {"x": 0, "y": 0, "z": 26}
-        deck_3_pick_up_offset = {"x": 0, "y": 0, "z": 26}
-        deck_4_drop_offset = {"x": 0, "y": 0, "z": 39}
-        deck_4_pick_up_offset = {"x": 0, "y": 0, "z": 39}
     else:
         PCRPlate_Z_offset = 0
         Deepwell_Z_offset = 0
         Deep384_Z_offset = 0
         # HEATERSHAKER OFFSETS
-        hs_drop_offset = {"x": 0, "y": 0, "z": 0}
-        hs_pick_up_offset = {"x": 0, "y": 0, "z": 0}
         # MAG BLOCK OFFSETS
         mb_drop_offset = {"x": 0, "y": 0.0, "z": 0}
         mb_pick_up_offset = {"x": 0, "y": 0, "z": 0}
         # THERMOCYCLER OFFSETS
-        tc_drop_offset = {"x": 0, "y": 0, "z": 0}
         tc_pick_up_offset = {"x": 0, "y": 0, "z": 0}
         # DECK OFFSETS
         deck_drop_offset = {"x": 0, "y": 0, "z": 0}
         deck_pick_up_offset = {"x": 0, "y": 0, "z": 0}
-        deck_2_drop_offset = {"x": 0, "y": 0, "z": 13}
-        deck_2_pick_up_offset = {"x": 0, "y": 0, "z": 13}
-        deck_3_drop_offset = {"x": 0, "y": 0, "z": 26}
-        deck_3_pick_up_offset = {"x": 0, "y": 0, "z": 26}
-        deck_4_drop_offset = {"x": 0, "y": 0, "z": 39}
-        deck_4_pick_up_offset = {"x": 0, "y": 0, "z": 39}
 
-    # =================================================================================================
-    # ========================================= PROTOCOL START ========================================
-    # =================================================================================================
-    if ONDECK_THERMO == True:
+    # ========================================================
+    # ========================================= PROTOCOL START
+    # ========================================================
+    if ONDECK_THERMO:
         thermocycler.open_lid()
-    if ONDECK_TEMP == True:
+    if ONDECK_TEMP:
         temp_block.set_temperature(4)
-    # =================================================================================================
-    # ========================================= PROTOCOL START ========================================
-    # =================================================================================================
+    # =========================================================
+    # ========================================= PROTOCOL START
+    # =========================================================
 
-    if STEP_RNA == True:
+    if STEP_RNA:
         protocol.comment("==============================================")
         protocol.comment("--> Aliquoting EPH3")
         protocol.comment("==============================================")
@@ -548,17 +420,15 @@ def run(protocol: protocol_api.ProtocolContext):
                 p1000.drop_tip()
             # ===============================================
 
-        ############################################################################################################################################
         protocol.comment("MOVING: Plate Lid #1 = Plate Lid Stack --> sample_plate_1")
         protocol.move_lid(lids, sample_plate_1, use_gripper=True)
 
-        if ONDECK_THERMO == True:
+        if ONDECK_THERMO:
             thermocycler.close_lid()
-        if ONDECK_THERMO == True:
+        if ONDECK_THERMO:
             thermocycler.open_lid()
         protocol.comment("MOVING: Plate Lid #1 = sample_plate_1 --> lids[1]")
         protocol.move_lid(sample_plate_1, lids, use_gripper=True)
-        ############################################################################################################################################
 
         protocol.comment("==============================================")
         protocol.comment("--> Aliquoting FSMM")
@@ -570,7 +440,7 @@ def run(protocol: protocol_api.ProtocolContext):
             protocol.move_labware(
                 labware=tiprack_50_SCP_1,
                 new_location=TRASH,
-                use_gripper=USE_GRIPPER,
+                use_gripper=True,
                 pick_up_offset=deck_pick_up_offset,
             )
         else:
@@ -578,12 +448,12 @@ def run(protocol: protocol_api.ProtocolContext):
             protocol.move_labware(
                 labware=tiprack_50_SCP_1,
                 new_location="B3",
-                use_gripper=USE_GRIPPER,
+                use_gripper=True,
                 pick_up_offset=deck_pick_up_offset,
             )
             protocol.move_labware(
                 labware=tiprack_50_SCP_1,
-                new_location=protocol_api.OFF_DECK,
+                new_location=OFF_DECK,
                 use_gripper=False,
             )
         protocol.comment("MOVING: tiprack_50_SCP_2 = D4 --> SCP_Position")
@@ -594,7 +464,7 @@ def run(protocol: protocol_api.ProtocolContext):
         protocol.move_labware(
             labware=tiprack_50_SCP_2,
             new_location=SCP_Position,
-            use_gripper=USE_GRIPPER,
+            use_gripper=True,
             pick_up_offset=deck_pick_up_offset,
             drop_offset=deck_drop_offset,
         )
@@ -622,17 +492,15 @@ def run(protocol: protocol_api.ProtocolContext):
                 p1000.drop_tip()
             # ===============================================
 
-        ############################################################################################################################################
         protocol.comment("MOVING: Plate Lid #1 = lids[1] --> sample_plate_1")
         protocol.move_lid(lids, sample_plate_1, use_gripper=True)
-        if ONDECK_THERMO == True:
+        if ONDECK_THERMO:
             thermocycler.close_lid()
         #
-        if ONDECK_THERMO == True:
+        if ONDECK_THERMO:
             thermocycler.open_lid()
         protocol.comment("MOVING: Plate Lid #1 = sample_plate_1 --> lids[1]")
         protocol.move_lid(sample_plate_1, lids, use_gripper=True)
-        ############################################################################################################################################
 
         protocol.comment("==============================================")
         protocol.comment("--> Aliquoting SSMM")
@@ -644,7 +512,7 @@ def run(protocol: protocol_api.ProtocolContext):
             protocol.move_labware(
                 labware=tiprack_50_SCP_2,
                 new_location=TRASH,
-                use_gripper=USE_GRIPPER,
+                use_gripper=True,
                 pick_up_offset=deck_pick_up_offset,
             )
         else:
@@ -652,12 +520,12 @@ def run(protocol: protocol_api.ProtocolContext):
             protocol.move_labware(
                 labware=tiprack_50_SCP_2,
                 new_location="B3",
-                use_gripper=USE_GRIPPER,
+                use_gripper=True,
                 pick_up_offset=deck_pick_up_offset,
             )
             protocol.move_labware(
                 labware=tiprack_50_SCP_2,
-                new_location=protocol_api.OFF_DECK,
+                new_location=OFF_DECK,
                 use_gripper=False,
             )
         protocol.comment("DISPENSING: tiprack_50_SCP_3 = #1--> D4")
@@ -667,7 +535,7 @@ def run(protocol: protocol_api.ProtocolContext):
         protocol.move_labware(
             labware=tiprack_50_SCP_3,
             new_location=SCP_Position,
-            use_gripper=USE_GRIPPER,
+            use_gripper=True,
             pick_up_offset=deck_pick_up_offset,
             drop_offset=deck_drop_offset,
         )
@@ -700,30 +568,28 @@ def run(protocol: protocol_api.ProtocolContext):
                 p1000.drop_tip()
             # ===============================================
 
-        ############################################################################################################################################
         protocol.comment("MOVING: Plate Lid #1 = lids[1] --> sample_plate_1")
         protocol.move_lid(lids, sample_plate_1, use_gripper=True)
-        if ONDECK_THERMO == True:
+        if ONDECK_THERMO:
             thermocycler.close_lid()
         #
-        if ONDECK_THERMO == True:
+        if ONDECK_THERMO:
             thermocycler.open_lid()
         protocol.comment("MOVING: Plate Lid #1 = sample_plate_1 --> TRASH")
         protocol.move_lid(sample_plate_1, TRASH, use_gripper=True)
-        ############################################################################################################################################
 
-    if STEP_POSTRNA == True:
+    if STEP_POSTRNA:
         protocol.comment("==============================================")
         protocol.comment("--> Post RNA Cleanup")
         protocol.comment("==============================================")
 
-        # =========================================CleanupPlate_1===================================================
+        # =========================================CleanupPlate_1=================
         if MODETRASH == "CHUTE":
             protocol.comment("MOVING: tiprack_50_SCP_3 = SCP_Position --> TRASH")
             protocol.move_labware(
                 labware=tiprack_50_SCP_3,
                 new_location=TRASH,
-                use_gripper=USE_GRIPPER,
+                use_gripper=True,
                 pick_up_offset=deck_pick_up_offset,
             )
         else:
@@ -731,12 +597,12 @@ def run(protocol: protocol_api.ProtocolContext):
             protocol.move_labware(
                 labware=tiprack_50_SCP_3,
                 new_location="B3",
-                use_gripper=USE_GRIPPER,
+                use_gripper=True,
                 pick_up_offset=deck_pick_up_offset,
             )
             protocol.move_labware(
                 labware=tiprack_50_SCP_3,
-                new_location=protocol_api.OFF_DECK,
+                new_location=OFF_DECK,
                 use_gripper=False,
             )
         protocol.comment("MOVING: CleanupPlate_1 = mag_block --> D4")
@@ -744,7 +610,7 @@ def run(protocol: protocol_api.ProtocolContext):
         protocol.move_labware(
             labware=CleanupPlate_1,
             new_location=stacker_50_2,
-            use_gripper=USE_GRIPPER,
+            use_gripper=True,
             pick_up_offset=deck_pick_up_offset,
             drop_offset=deck_drop_offset,
         )
@@ -752,11 +618,9 @@ def run(protocol: protocol_api.ProtocolContext):
 
         # ============================================================================================
         protocol.comment("--> ADDING AMPure (0.8x)")
-        AMPureVol = 45
-        SampleVol = 45
-        AMPureMixRPM = 1800
-        AMPureMixTime = 5 * 60 if DRYRUN == False else 0.1 * 60
-        AMPurePremix = 3 if DRYRUN == False else 1
+        AMPureVol = 45.0
+        SampleVol = 45.0
+        AMPurePremix = 3 if DRYRUN is False else 1
         p1000.flow_rate.aspirate = p1000_flow_rate_aspirate_default * 0.5
         p1000.flow_rate.dispense = p1000_flow_rate_dispense_default * 0.5
         p1000.flow_rate.blow_out = p1000_flow_rate_blow_out_default * 0.5
@@ -785,7 +649,7 @@ def run(protocol: protocol_api.ProtocolContext):
         protocol.move_labware(
             labware=sample_plate_1,
             new_location=mag_block,
-            use_gripper=USE_GRIPPER,
+            use_gripper=True,
             pick_up_offset=deck_pick_up_offset,
             drop_offset=deck_drop_offset,
         )
@@ -794,7 +658,7 @@ def run(protocol: protocol_api.ProtocolContext):
             protocol.move_labware(
                 labware=tiprack_200_1,
                 new_location=TRASH,
-                use_gripper=USE_GRIPPER,
+                use_gripper=True,
                 pick_up_offset=deck_pick_up_offset,
             )
         else:
@@ -802,12 +666,12 @@ def run(protocol: protocol_api.ProtocolContext):
             protocol.move_labware(
                 labware=tiprack_200_1,
                 new_location="B3",
-                use_gripper=USE_GRIPPER,
+                use_gripper=True,
                 pick_up_offset=deck_pick_up_offset,
             )
             protocol.move_labware(
                 labware=tiprack_200_1,
-                new_location=protocol_api.OFF_DECK,
+                new_location=OFF_DECK,
                 use_gripper=False,
             )
         protocol.comment("MOVING: tiprack_200_2 = A4 --> tiprack_A3_adapter")
@@ -817,7 +681,7 @@ def run(protocol: protocol_api.ProtocolContext):
         protocol.move_labware(
             labware=tiprack_200_2,
             new_location=tiprack_A3_adapter,
-            use_gripper=USE_GRIPPER,
+            use_gripper=True,
             pick_up_offset=deck_pick_up_offset,
             drop_offset=deck_drop_offset,
         )
@@ -825,7 +689,6 @@ def run(protocol: protocol_api.ProtocolContext):
 
         protocol.comment("--> Removing Supernatant 1A")
         RemoveSup = 200
-        ActualRemoveSup = 200
         p1000.flow_rate.aspirate = p1000_flow_rate_aspirate_default * 0.5
         p1000.flow_rate.dispense = p1000_flow_rate_dispense_default * 0.5
         p1000.flow_rate.blow_out = p1000_flow_rate_blow_out_default * 0.5
@@ -855,7 +718,7 @@ def run(protocol: protocol_api.ProtocolContext):
             protocol.move_labware(
                 labware=tiprack_200_2,
                 new_location=TRASH,
-                use_gripper=USE_GRIPPER,
+                use_gripper=True,
                 pick_up_offset=deck_pick_up_offset,
             )
         else:
@@ -863,12 +726,12 @@ def run(protocol: protocol_api.ProtocolContext):
             protocol.move_labware(
                 labware=tiprack_200_2,
                 new_location="B3",
-                use_gripper=USE_GRIPPER,
+                use_gripper=True,
                 pick_up_offset=deck_pick_up_offset,
             )
             protocol.move_labware(
                 labware=tiprack_200_2,
-                new_location=protocol_api.OFF_DECK,
+                new_location=OFF_DECK,
                 use_gripper=False,
             )
         protocol.comment("MOVING: tiprack_200_X = B4 --> SCP_Position")
@@ -878,7 +741,7 @@ def run(protocol: protocol_api.ProtocolContext):
         protocol.move_labware(
             labware=tiprack_200_X,
             new_location=SCP_Position,
-            use_gripper=USE_GRIPPER,
+            use_gripper=True,
             pick_up_offset=deck_pick_up_offset,
             drop_offset=deck_drop_offset,
         )
@@ -918,7 +781,7 @@ def run(protocol: protocol_api.ProtocolContext):
         protocol.move_labware(
             labware=tiprack_200_3,
             new_location=tiprack_A3_adapter,
-            use_gripper=USE_GRIPPER,
+            use_gripper=True,
             pick_up_offset=deck_pick_up_offset,
             drop_offset=deck_drop_offset,
         )
@@ -926,7 +789,6 @@ def run(protocol: protocol_api.ProtocolContext):
 
         protocol.comment("--> Removing Supernatant 1B")
         RemoveSup = 200
-        ActualRemoveSup = 200
         p1000.flow_rate.aspirate = p1000_flow_rate_aspirate_default * 0.5
         p1000.flow_rate.dispense = p1000_flow_rate_dispense_default * 0.5
         p1000.flow_rate.blow_out = p1000_flow_rate_blow_out_default * 0.5
@@ -981,7 +843,7 @@ def run(protocol: protocol_api.ProtocolContext):
             protocol.move_labware(
                 labware=tiprack_200_3,
                 new_location=TRASH,
-                use_gripper=USE_GRIPPER,
+                use_gripper=True,
                 pick_up_offset=deck_pick_up_offset,
             )
         else:
@@ -989,7 +851,7 @@ def run(protocol: protocol_api.ProtocolContext):
             protocol.move_labware(
                 labware=tiprack_200_3,
                 new_location="B3",
-                use_gripper=USE_GRIPPER,
+                use_gripper=True,
                 pick_up_offset=deck_pick_up_offset,
             )
         protocol.comment("DISPENSING: tiprack_200_4 = #3--> A4")
@@ -999,13 +861,12 @@ def run(protocol: protocol_api.ProtocolContext):
         protocol.move_labware(
             labware=tiprack_200_4,
             new_location=tiprack_A3_adapter,
-            use_gripper=USE_GRIPPER,
+            use_gripper=True,
         )
         # ============================================================================================
 
         protocol.comment("--> Removing Supernatant 1C")
         RemoveSup = 200
-        ActualRemoveSup = 200
         p1000.flow_rate.aspirate = p1000_flow_rate_aspirate_default
         p1000.flow_rate.dispense = p1000_flow_rate_dispense_default
         p1000.flow_rate.blow_out = p1000_flow_rate_blow_out_default
@@ -1035,45 +896,46 @@ def run(protocol: protocol_api.ProtocolContext):
             protocol.move_labware(
                 labware=tiprack_200_4,
                 new_location=TRASH,
-                use_gripper=USE_GRIPPER,
+                use_gripper=True,
             )
         else:
             protocol.comment("MOVING: tiprack_200_4 = tiprack_A3_adapter --> B3")
             protocol.move_labware(
                 labware=tiprack_200_4,
                 new_location="B3",
-                use_gripper=USE_GRIPPER,
+                use_gripper=True,
             )
             protocol.move_labware(
                 labware=tiprack_200_4,
-                new_location=protocol_api.OFF_DECK,
+                new_location=OFF_DECK,
                 use_gripper=False,
             )
         protocol.comment("MOVING: CleanupPlate_1 = D4 --> A4")
         stacker_200_1.enter_static_mode()
         protocol.move_labware(
-            labware=CleanupPlate_1, new_location=stacker_200_1, use_gripper=USE_GRIPPER
+            labware=CleanupPlate_1, new_location=stacker_200_1, use_gripper=True
         )
         protocol.comment("MOVING: tiprack_200_X = SCP_Position --> B4")
         stacker_200_2.enter_static_mode()
         protocol.move_labware(
-            labware=tiprack_200_X, new_location=tiprack_A3_adapter, use_gripper=USE_GRIPPER
+            labware=tiprack_200_X,
+            new_location=tiprack_A3_adapter,
+            use_gripper=True,
         )
 
         protocol.comment("DISPENSING: tiprack_50_SCP_4 = #3--> D4")
         stacker_50_2.exit_static_mode()
-        tiprack_50_SCP_4   = stacker_50_2.retrieve()
+        tiprack_50_SCP_4 = stacker_50_2.retrieve()
         protocol.move_lid(tiprack_50_SCP_4, TRASH, use_gripper=True)
         protocol.comment("MOVING: tiprack_50_SCP_4 = D4 --> tiprack_A3_adapter")
         protocol.move_labware(
-            labware=tiprack_50_SCP_4, new_location=SCP_Position, use_gripper=USE_GRIPPER
+            labware=tiprack_50_SCP_4, new_location=SCP_Position, use_gripper=True
         )
         # ============================================================================================
 
         if MODESPEED != "QUICK":
             protocol.comment("--> Adding RSB")
             RSBVol = 32
-            RSBMix = 10 if DRYRUN == False else 1
             p1000.flow_rate.aspirate = p1000_flow_rate_aspirate_default
             p1000.flow_rate.dispense = p1000_flow_rate_dispense_default
             p1000.flow_rate.blow_out = p1000_flow_rate_blow_out_default
@@ -1101,7 +963,7 @@ def run(protocol: protocol_api.ProtocolContext):
             protocol.move_labware(
                 labware=tiprack_50_SCP_4,
                 new_location=TRASH,
-                use_gripper=USE_GRIPPER,
+                use_gripper=True,
                 pick_up_offset=deck_pick_up_offset,
             )
         else:
@@ -1109,43 +971,43 @@ def run(protocol: protocol_api.ProtocolContext):
             protocol.move_labware(
                 labware=tiprack_50_SCP_4,
                 new_location="B3",
-                use_gripper=USE_GRIPPER,
+                use_gripper=True,
                 pick_up_offset=deck_pick_up_offset,
             )
         protocol.comment("MOVING: tiprack_200_X = B4 --> SCP_Position")
         protocol.move_labware(
             labware=tiprack_200_X,
             new_location=SCP_Position,
-            use_gripper=USE_GRIPPER,
+            use_gripper=True,
             pick_up_offset=deck_pick_up_offset,
             drop_offset=deck_drop_offset,
         )
         protocol.comment("DISPENSING: tiprack_50_5 = #4--> D4")
-        tiprack_50_5   = stacker_50_2.retrieve()
+        tiprack_50_5 = stacker_50_2.retrieve()
         protocol.move_lid(tiprack_50_5, TRASH, use_gripper=True)
         protocol.comment("MOVING: tiprack_50_5 = D4 --> tiprack_A3_adapter")
         protocol.move_labware(
             labware=tiprack_50_5,
             new_location=tiprack_A3_adapter,
-            use_gripper=USE_GRIPPER,
+            use_gripper=True,
         )
         protocol.comment("UNSTACKING: sample_plate_2 = --> A2")
         protocol.comment("MOVING: sample_plate_2 = A2 --> thermocycler")
-        if ONDECK_THERMO == True:
+        if ONDECK_THERMO:
             protocol.move_labware(
                 labware=sample_plate_2,
                 new_location=thermocycler,
-                use_gripper=USE_GRIPPER,
+                use_gripper=True,
             )
         else:
             protocol.move_labware(
                 labware=sample_plate_2,
                 new_location="B1",
-                use_gripper=USE_GRIPPER,
+                use_gripper=True,
             )
         # ============================================================================================
 
-    if STEP_TAG == True:
+    if STEP_TAG:
         protocol.comment("==============================================")
         protocol.comment("--> Tagment")
         protocol.comment("==============================================")
@@ -1166,18 +1028,15 @@ def run(protocol: protocol_api.ProtocolContext):
         p1000.return_tip()
         # ===============================================
 
-        ############################################################################################################################################
         protocol.comment("MOVING: Plate Lid #1 = Plate Lid Stack --> sample_plate_1")
         protocol.move_lid(lids, sample_plate_2, use_gripper=True)
-        if ONDECK_THERMO == True:
+        if ONDECK_THERMO:
             thermocycler.close_lid()
         #
-        if ONDECK_THERMO == True:
+        if ONDECK_THERMO:
             thermocycler.open_lid()
         protocol.comment("MOVING: Plate Lid #1 = sample_plate_1 --> lids[2]")
         protocol.move_lid(sample_plate_2, lids, use_gripper=True)
-
-        ############################################################################################################################################
 
         # ============================================================================================
         if MODETRASH == "CHUTE":
@@ -1185,7 +1044,7 @@ def run(protocol: protocol_api.ProtocolContext):
             protocol.move_labware(
                 labware=sample_plate_1,
                 new_location=TRASH,
-                use_gripper=USE_GRIPPER,
+                use_gripper=True,
                 pick_up_offset=deck_pick_up_offset,
             )
         else:
@@ -1193,12 +1052,12 @@ def run(protocol: protocol_api.ProtocolContext):
             protocol.move_labware(
                 labware=sample_plate_1,
                 new_location="B3",
-                use_gripper=USE_GRIPPER,
+                use_gripper=True,
                 pick_up_offset=deck_pick_up_offset,
             )
             protocol.move_labware(
                 labware=sample_plate_1,
-                new_location=protocol_api.OFF_DECK,
+                new_location=OFF_DECK,
                 use_gripper=False,
             )
         if MODETRASH == "CHUTE":
@@ -1206,7 +1065,7 @@ def run(protocol: protocol_api.ProtocolContext):
             protocol.move_labware(
                 labware=tiprack_50_5,
                 new_location=TRASH,
-                use_gripper=USE_GRIPPER,
+                use_gripper=True,
                 pick_up_offset=deck_pick_up_offset,
             )
         else:
@@ -1214,7 +1073,7 @@ def run(protocol: protocol_api.ProtocolContext):
             protocol.move_labware(
                 labware=tiprack_50_5,
                 new_location="B3",
-                use_gripper=USE_GRIPPER,
+                use_gripper=True,
                 pick_up_offset=deck_pick_up_offset,
             )
         protocol.comment("MOVING: tiprack_200_X = SCP_Position --> tiprack_A3_adapter")
@@ -1222,24 +1081,22 @@ def run(protocol: protocol_api.ProtocolContext):
         protocol.move_labware(
             labware=tiprack_200_X,
             new_location=tiprack_A3_adapter,
-            use_gripper=USE_GRIPPER,
+            use_gripper=True,
         )
         protocol.comment("DISPENSING: tiprack_50_SCP_6 = #4--> D4")
-        tiprack_50_SCP_6   = stacker_50_2.retrieve()
+        tiprack_50_SCP_6 = stacker_50_2.retrieve()
         protocol.move_lid(tiprack_50_SCP_6, TRASH, use_gripper=True)
         protocol.comment("MOVING: tiprack_50_SCP_6 = D4 --> SCP_Position")
         protocol.move_labware(
             labware=tiprack_50_SCP_6,
             new_location=SCP_Position,
-            use_gripper=USE_GRIPPER,
+            use_gripper=True,
         )
         # ============================================================================================
 
         if MODESPEED != "QUICK":
             protocol.comment("--> Adding TAGSTOP")
             TAGSTOPVol = 10
-            TAGSTOPMixRep = 10 if DRYRUN == False else 1
-            TAGSTOPMixVol = 20
             p1000.flow_rate.aspirate = p1000_flow_rate_aspirate_default * 0.5
             p1000.flow_rate.dispense = p1000_flow_rate_dispense_default * 0.5
             p1000.flow_rate.blow_out = p1000_flow_rate_blow_out_default * 0.5
@@ -1254,29 +1111,27 @@ def run(protocol: protocol_api.ProtocolContext):
                 p1000.drop_tip()
             # ===============================================
 
-        ############################################################################################################################################
         protocol.comment("MOVING: Plate Lid #1 = Plate Lid Stack --> sample_plate_2")
         protocol.move_lid(lids, sample_plate_2, use_gripper=True)
-        if ONDECK_THERMO == True:
+        if ONDECK_THERMO:
             thermocycler.close_lid()
         #
-        if ONDECK_THERMO == True:
+        if ONDECK_THERMO:
             thermocycler.open_lid()
         protocol.comment("MOVING: Plate Lid #1 = sample_plate_2 --> lids[2]")
         protocol.move_lid(sample_plate_2, lids, use_gripper=True)
-        ############################################################################################################################################
 
-    if STEP_WASH == True:
+    if STEP_WASH:
         protocol.comment("==============================================")
         protocol.comment("--> Wash")
         protocol.comment("==============================================")
 
-        # ============================================================================================
+        # =======================================================================
         protocol.comment("MOVING: sample_plate_2 = thermocycler --> mag_block")
         protocol.move_labware(
             labware=sample_plate_2,
             new_location=mag_block,
-            use_gripper=USE_GRIPPER,
+            use_gripper=True,
             pick_up_offset=tc_pick_up_offset,
             drop_offset=mb_drop_offset,
         )
@@ -1285,7 +1140,7 @@ def run(protocol: protocol_api.ProtocolContext):
             protocol.move_labware(
                 labware=tiprack_50_SCP_6,
                 new_location=TRASH,
-                use_gripper=USE_GRIPPER,
+                use_gripper=True,
                 pick_up_offset=deck_pick_up_offset,
             )
         else:
@@ -1293,19 +1148,19 @@ def run(protocol: protocol_api.ProtocolContext):
             protocol.move_labware(
                 labware=tiprack_50_SCP_6,
                 new_location="B3",
-                use_gripper=USE_GRIPPER,
+                use_gripper=True,
                 pick_up_offset=deck_pick_up_offset,
             )
             protocol.move_labware(
                 labware=tiprack_50_SCP_6,
-                new_location=protocol_api.OFF_DECK,
+                new_location=OFF_DECK,
                 use_gripper=False,
             )
         protocol.comment("MOVING: tiprack_200_X = tiprack_A3_adapter --> SCP_Position")
         protocol.move_labware(
             labware=tiprack_200_X,
             new_location=SCP_Position,
-            use_gripper=USE_GRIPPER,
+            use_gripper=True,
             pick_up_offset=deck_pick_up_offset,
             drop_offset=deck_drop_offset,
         )
@@ -1314,7 +1169,7 @@ def run(protocol: protocol_api.ProtocolContext):
         protocol.move_labware(
             labware=CleanupPlate_1,
             new_location=stacker_50_2,
-            use_gripper=USE_GRIPPER,
+            use_gripper=True,
             pick_up_offset=deck_pick_up_offset,
             drop_offset=deck_drop_offset,
         )
@@ -1327,7 +1182,7 @@ def run(protocol: protocol_api.ProtocolContext):
         protocol.move_labware(
             labware=tiprack_200_5,
             new_location=tiprack_A3_adapter,
-            use_gripper=USE_GRIPPER,
+            use_gripper=True,
             pick_up_offset=deck_pick_up_offset,
             drop_offset=deck_drop_offset,
         )
@@ -1335,7 +1190,6 @@ def run(protocol: protocol_api.ProtocolContext):
 
         protocol.comment("--> Removing Supernatant")
         RemoveSup = 200
-        ActualRemoveSup = 200
         p1000.flow_rate.aspirate = p1000_flow_rate_aspirate_default * 0.5
         p1000.flow_rate.dispense = p1000_flow_rate_dispense_default * 0.5
         p1000.flow_rate.blow_out = p1000_flow_rate_blow_out_default * 0.5
@@ -1372,7 +1226,7 @@ def run(protocol: protocol_api.ProtocolContext):
             protocol.move_labware(
                 labware=tiprack_200_5,
                 new_location=TRASH,
-                use_gripper=USE_GRIPPER,
+                use_gripper=True,
                 pick_up_offset=deck_pick_up_offset,
             )
         else:
@@ -1380,12 +1234,12 @@ def run(protocol: protocol_api.ProtocolContext):
             protocol.move_labware(
                 labware=tiprack_200_5,
                 new_location="B3",
-                use_gripper=USE_GRIPPER,
+                use_gripper=True,
                 pick_up_offset=deck_pick_up_offset,
             )
             protocol.move_labware(
                 labware=tiprack_200_5,
-                new_location=protocol_api.OFF_DECK,
+                new_location=OFF_DECK,
                 use_gripper=False,
             )
         protocol.comment("DISPENSING: tiprack_200_6 = #4--> A4")
@@ -1397,7 +1251,7 @@ def run(protocol: protocol_api.ProtocolContext):
         protocol.move_labware(
             labware=tiprack_200_6,
             new_location=tiprack_A3_adapter,
-            use_gripper=USE_GRIPPER,
+            use_gripper=True,
             pick_up_offset=deck_pick_up_offset,
             drop_offset=deck_drop_offset,
         )
@@ -1405,7 +1259,6 @@ def run(protocol: protocol_api.ProtocolContext):
 
         protocol.comment("--> Removing Supernatant")
         RemoveSup = 200
-        ActualRemoveSup = 200
         p1000.flow_rate.aspirate = p1000_flow_rate_aspirate_default * 0.5
         p1000.flow_rate.dispense = p1000_flow_rate_dispense_default * 0.5
         p1000.flow_rate.blow_out = p1000_flow_rate_blow_out_default * 0.5
@@ -1442,7 +1295,7 @@ def run(protocol: protocol_api.ProtocolContext):
             protocol.move_labware(
                 labware=tiprack_200_6,
                 new_location=TRASH,
-                use_gripper=USE_GRIPPER,
+                use_gripper=True,
                 pick_up_offset=deck_pick_up_offset,
             )
         else:
@@ -1450,12 +1303,12 @@ def run(protocol: protocol_api.ProtocolContext):
             protocol.move_labware(
                 labware=tiprack_200_6,
                 new_location="B3",
-                use_gripper=USE_GRIPPER,
+                use_gripper=True,
                 pick_up_offset=deck_pick_up_offset,
             )
             protocol.move_labware(
                 labware=tiprack_200_6,
-                new_location=protocol_api.OFF_DECK,
+                new_location=OFF_DECK,
                 use_gripper=False,
             )
         protocol.comment("DISPENSING: tiprack_200_7 = #5--> A4")
@@ -1465,13 +1318,12 @@ def run(protocol: protocol_api.ProtocolContext):
         protocol.move_labware(
             labware=tiprack_200_7,
             new_location=tiprack_A3_adapter,
-            use_gripper=USE_GRIPPER,
+            use_gripper=True,
         )
         # ============================================================================================
 
         protocol.comment("--> Removing Supernatant")
         RemoveSup = 200
-        ActualRemoveSup = 200
         p1000.flow_rate.aspirate = p1000_flow_rate_aspirate_default * 0.5
         p1000.flow_rate.dispense = p1000_flow_rate_dispense_default * 0.5
         p1000.flow_rate.blow_out = p1000_flow_rate_blow_out_default * 0.5
@@ -1508,7 +1360,7 @@ def run(protocol: protocol_api.ProtocolContext):
             protocol.move_labware(
                 labware=tiprack_200_7,
                 new_location=TRASH,
-                use_gripper=USE_GRIPPER,
+                use_gripper=True,
                 pick_up_offset=deck_pick_up_offset,
             )
         else:
@@ -1516,12 +1368,12 @@ def run(protocol: protocol_api.ProtocolContext):
             protocol.move_labware(
                 labware=tiprack_200_7,
                 new_location="B3",
-                use_gripper=USE_GRIPPER,
+                use_gripper=True,
                 pick_up_offset=deck_pick_up_offset,
             )
             protocol.move_labware(
                 labware=tiprack_200_7,
-                new_location=protocol_api.OFF_DECK,
+                new_location=OFF_DECK,
                 use_gripper=False,
             )
         protocol.comment("DISPENSING: tiprack_200_8 = #6--> A4")
@@ -1531,7 +1383,7 @@ def run(protocol: protocol_api.ProtocolContext):
         protocol.move_labware(
             labware=tiprack_200_8,
             new_location=tiprack_A3_adapter,
-            use_gripper=USE_GRIPPER,
+            use_gripper=True,
             pick_up_offset=deck_pick_up_offset,
             drop_offset=deck_drop_offset,
         )
@@ -1540,7 +1392,6 @@ def run(protocol: protocol_api.ProtocolContext):
 
         protocol.comment("--> Removing Supernatant")
         RemoveSup = 200
-        ActualRemoveSup = 200
         p1000.flow_rate.aspirate = p1000_flow_rate_aspirate_default * 0.5
         p1000.flow_rate.dispense = p1000_flow_rate_dispense_default * 0.5
         p1000.flow_rate.blow_out = p1000_flow_rate_blow_out_default * 0.5
@@ -1558,7 +1409,7 @@ def run(protocol: protocol_api.ProtocolContext):
             protocol.move_labware(
                 labware=tiprack_200_8,
                 new_location=TRASH,
-                use_gripper=USE_GRIPPER,
+                use_gripper=True,
                 pick_up_offset=deck_pick_up_offset,
             )
         else:
@@ -1566,12 +1417,12 @@ def run(protocol: protocol_api.ProtocolContext):
             protocol.move_labware(
                 labware=tiprack_200_8,
                 new_location="B3",
-                use_gripper=USE_GRIPPER,
+                use_gripper=True,
                 pick_up_offset=deck_pick_up_offset,
             )
             protocol.move_labware(
                 labware=tiprack_200_8,
-                new_location=protocol_api.OFF_DECK,
+                new_location=OFF_DECK,
                 use_gripper=False,
             )
         protocol.comment("MOVING: CleanupPlate_1 = D4 --> A4")
@@ -1579,44 +1430,39 @@ def run(protocol: protocol_api.ProtocolContext):
         protocol.move_labware(
             labware=CleanupPlate_1,
             new_location=stacker_200_1,
-            use_gripper=USE_GRIPPER,
+            use_gripper=True,
             pick_up_offset=deck_pick_up_offset,
             drop_offset=deck_drop_offset,
         )
         protocol.comment("DISPENSING: tiprack_50_7 = #6--> D4")
         stacker_50_2.exit_static_mode()
-        tiprack_50_7   = stacker_50_2.retrieve()
+        tiprack_50_7 = stacker_50_2.retrieve()
         protocol.move_lid(tiprack_50_7, TRASH, use_gripper=True)
         protocol.comment("MOVING: tiprack_50_7 = D4 --> tiprack_A3_adapter")
         protocol.move_labware(
             labware=tiprack_50_7,
             new_location=tiprack_A3_adapter,
-            use_gripper=USE_GRIPPER,
+            use_gripper=True,
         )
         protocol.comment("MOVING: sample_plate_2 = mag_block --> thermocycler")
-        if ONDECK_THERMO == True:
+        if ONDECK_THERMO:
             protocol.move_labware(
                 labware=sample_plate_2,
                 new_location=thermocycler,
-                use_gripper=USE_GRIPPER,
+                use_gripper=True,
             )
         else:
             protocol.move_labware(
                 labware=sample_plate_2,
                 new_location="B1",
-                use_gripper=USE_GRIPPER,
+                use_gripper=True,
             )
         # ============================================================================================
 
         protocol.comment("--> Adding EPM and Barcode")
         EPMVol = 40
-        EPMMixTime = 3 * 60 if DRYRUN == False else 0.1 * 60
-        EPMMixRPM = 2000
         EPMMixVol = 35
-        EPMVolCount = 0
         BarcodeVol = 10
-        BarcodeMixRep = 3 if DRYRUN == False else 1
-        BarcodeMixVol = 10
         TransferSup = 50
         p1000.flow_rate.aspirate = p1000_flow_rate_aspirate_default
         p1000.flow_rate.dispense = p1000_flow_rate_dispense_default
@@ -1633,19 +1479,17 @@ def run(protocol: protocol_api.ProtocolContext):
         p1000.return_tip()
         # ===============================================
 
-        ############################################################################################################################################
         protocol.comment("MOVING: Plate Lid #1 = Plate Lid Stack --> sample_plate_2")
         protocol.move_lid(lids, sample_plate_2, use_gripper=True)
-        if ONDECK_THERMO == True:
+        if ONDECK_THERMO:
             thermocycler.close_lid()
         #
-        if ONDECK_THERMO == True:
+        if ONDECK_THERMO:
             thermocycler.open_lid()
         protocol.comment("MOVING: Plate Lid #1 = sample_plate_2 --> TRASH")
         protocol.move_lid(sample_plate_2, TRASH, use_gripper=True)
-        ############################################################################################################################################
 
-    if STEP_CLEANUP_1 == True:
+    if STEP_CLEANUP_1:
         protocol.comment("==============================================")
         protocol.comment("--> Cleanup 1")
         protocol.comment("==============================================")
@@ -1655,7 +1499,7 @@ def run(protocol: protocol_api.ProtocolContext):
         protocol.move_labware(
             labware=CleanupPlate_1,
             new_location=mag_block,
-            use_gripper=USE_GRIPPER,
+            use_gripper=True,
             pick_up_offset=deck_pick_up_offset,
             drop_offset=mb_drop_offset,
         )
@@ -1663,12 +1507,9 @@ def run(protocol: protocol_api.ProtocolContext):
         # ============================================================================================
 
         protocol.comment("--> TRANSFERRING AND ADDING AMPure (0.8x)")
-        H20Vol = 40
-        AMPureVol = 45
-        SampleVol = 45
-        AMPureMixRPM = 1800
-        AMPureMixTime = 5 * 60 if DRYRUN == False else 0.1 * 60
-        AMPurePremix = 3 if DRYRUN == False else 1
+        AMPureVol = 45.0
+        SampleVol = 45.0
+        AMPurePremix = 3 if DRYRUN is False else 1
         p1000.flow_rate.aspirate = p1000_flow_rate_aspirate_default
         p1000.flow_rate.dispense = p1000_flow_rate_dispense_default
         p1000.flow_rate.blow_out = p1000_flow_rate_blow_out_default
@@ -1691,7 +1532,7 @@ def run(protocol: protocol_api.ProtocolContext):
             protocol.move_labware(
                 labware=tiprack_50_7,
                 new_location=TRASH,
-                use_gripper=USE_GRIPPER,
+                use_gripper=True,
                 pick_up_offset=deck_pick_up_offset,
             )
         else:
@@ -1699,12 +1540,12 @@ def run(protocol: protocol_api.ProtocolContext):
             protocol.move_labware(
                 labware=tiprack_50_7,
                 new_location="B3",
-                use_gripper=USE_GRIPPER,
+                use_gripper=True,
                 pick_up_offset=deck_pick_up_offset,
             )
             protocol.move_labware(
                 labware=tiprack_50_7,
-                new_location=protocol_api.OFF_DECK,
+                new_location=OFF_DECK,
                 use_gripper=False,
             )
         protocol.comment("DISPENSING: tiprack_200_9 = #2--> B4")
@@ -1717,13 +1558,12 @@ def run(protocol: protocol_api.ProtocolContext):
         protocol.move_labware(
             labware=tiprack_200_9,
             new_location=tiprack_A3_adapter,
-            use_gripper=USE_GRIPPER,
+            use_gripper=True,
         )
         # ============================================================================================
 
         protocol.comment("--> Removing Supernatant 2A")
         RemoveSup = 200
-        ActualRemoveSup = 200
         p1000.flow_rate.aspirate = p1000_flow_rate_aspirate_default
         p1000.flow_rate.dispense = p1000_flow_rate_dispense_default
         p1000.flow_rate.blow_out = p1000_flow_rate_blow_out_default
@@ -1757,7 +1597,7 @@ def run(protocol: protocol_api.ProtocolContext):
             protocol.move_labware(
                 labware=tiprack_200_9,
                 new_location=TRASH,
-                use_gripper=USE_GRIPPER,
+                use_gripper=True,
                 pick_up_offset=deck_pick_up_offset,
             )
         else:
@@ -1765,12 +1605,12 @@ def run(protocol: protocol_api.ProtocolContext):
             protocol.move_labware(
                 labware=tiprack_200_9,
                 new_location="B3",
-                use_gripper=USE_GRIPPER,
+                use_gripper=True,
                 pick_up_offset=deck_pick_up_offset,
             )
             protocol.move_labware(
                 labware=tiprack_200_9,
-                new_location=protocol_api.OFF_DECK,
+                new_location=OFF_DECK,
                 use_gripper=False,
             )
         protocol.comment("DISPENSING: tiprack_200_10 = #3--> B4")
@@ -1781,13 +1621,12 @@ def run(protocol: protocol_api.ProtocolContext):
         protocol.move_labware(
             labware=tiprack_200_10,
             new_location=tiprack_A3_adapter,
-            use_gripper=USE_GRIPPER,
+            use_gripper=True,
         )
         # ============================================================================================
 
         protocol.comment("--> Removing Supernatant 2B")
         RemoveSup = 200
-        ActualRemoveSup = 200
         p1000.flow_rate.aspirate = p1000_flow_rate_aspirate_default
         p1000.flow_rate.dispense = p1000_flow_rate_dispense_default
         p1000.flow_rate.blow_out = p1000_flow_rate_blow_out_default
@@ -1821,7 +1660,7 @@ def run(protocol: protocol_api.ProtocolContext):
             protocol.move_labware(
                 labware=tiprack_200_10,
                 new_location=TRASH,
-                use_gripper=USE_GRIPPER,
+                use_gripper=True,
                 pick_up_offset=deck_pick_up_offset,
             )
         else:
@@ -1829,12 +1668,12 @@ def run(protocol: protocol_api.ProtocolContext):
             protocol.move_labware(
                 labware=tiprack_200_10,
                 new_location="B3",
-                use_gripper=USE_GRIPPER,
+                use_gripper=True,
                 pick_up_offset=deck_pick_up_offset,
             )
             protocol.move_labware(
                 labware=tiprack_200_10,
-                new_location=protocol_api.OFF_DECK,
+                new_location=OFF_DECK,
                 use_gripper=False,
             )
         protocol.comment("DISPENSING: tiprack_200_11 = #4--> B4")
@@ -1845,13 +1684,12 @@ def run(protocol: protocol_api.ProtocolContext):
         protocol.move_labware(
             labware=tiprack_200_11,
             new_location=tiprack_A3_adapter,
-            use_gripper=USE_GRIPPER,
+            use_gripper=True,
         )
         # ============================================================================================
 
         protocol.comment("--> Removing Supernatant 1C")
         RemoveSup = 200
-        ActualRemoveSup = 200
         p1000.flow_rate.aspirate = p1000_flow_rate_aspirate_default
         p1000.flow_rate.dispense = p1000_flow_rate_dispense_default
         p1000.flow_rate.blow_out = p1000_flow_rate_blow_out_default
@@ -1869,7 +1707,7 @@ def run(protocol: protocol_api.ProtocolContext):
             protocol.move_labware(
                 labware=tiprack_200_11,
                 new_location=TRASH,
-                use_gripper=USE_GRIPPER,
+                use_gripper=True,
                 pick_up_offset=deck_pick_up_offset,
             )
         else:
@@ -1877,19 +1715,19 @@ def run(protocol: protocol_api.ProtocolContext):
             protocol.move_labware(
                 labware=tiprack_200_11,
                 new_location="B3",
-                use_gripper=USE_GRIPPER,
+                use_gripper=True,
                 pick_up_offset=deck_pick_up_offset,
             )
             protocol.move_labware(
                 labware=tiprack_200_11,
-                new_location=protocol_api.OFF_DECK,
+                new_location=OFF_DECK,
                 use_gripper=False,
             )
         protocol.comment("MOVING: tiprack_200_X = SCP_Position --> B4")
         protocol.move_labware(
             labware=tiprack_200_X,
             new_location=stacker_200_2,
-            use_gripper=USE_GRIPPER,
+            use_gripper=True,
             pick_up_offset=deck_pick_up_offset,
             drop_offset=deck_drop_offset,
         )
@@ -1899,7 +1737,7 @@ def run(protocol: protocol_api.ProtocolContext):
         protocol.move_labware(
             labware=CleanupPlate_2,
             new_location=stacker_50_2,
-            use_gripper=USE_GRIPPER,
+            use_gripper=True,
             pick_up_offset=deck_pick_up_offset,
             drop_offset=deck_drop_offset,
         )
@@ -1909,14 +1747,13 @@ def run(protocol: protocol_api.ProtocolContext):
         protocol.move_lid(tiprack_50_SCP_9, TRASH, use_gripper=True)
         protocol.comment("MOVING: tiprack_50_SCP_9 = C4 --> SCP_Position")
         protocol.move_labware(
-            labware=tiprack_50_SCP_9, new_location=SCP_Position, use_gripper=USE_GRIPPER
+            labware=tiprack_50_SCP_9, new_location=SCP_Position, use_gripper=True
         )
         # ============================================================================================
 
         if MODESPEED != "QUICK":
             protocol.comment("--> Adding RSB")
             RSBVol = 32
-            RSBMix = 10 if DRYRUN == False else 1
             p1000.flow_rate.aspirate = p1000_flow_rate_aspirate_default
             p1000.flow_rate.dispense = p1000_flow_rate_dispense_default
             p1000.flow_rate.blow_out = p1000_flow_rate_blow_out_default
@@ -1940,7 +1777,7 @@ def run(protocol: protocol_api.ProtocolContext):
             protocol.move_labware(
                 labware=tiprack_50_SCP_9,
                 new_location=TRASH,
-                use_gripper=USE_GRIPPER,
+                use_gripper=True,
                 pick_up_offset=deck_pick_up_offset,
             )
         else:
@@ -1948,17 +1785,17 @@ def run(protocol: protocol_api.ProtocolContext):
             protocol.move_labware(
                 labware=tiprack_50_SCP_9,
                 new_location="B3",
-                use_gripper=USE_GRIPPER,
+                use_gripper=True,
                 pick_up_offset=deck_pick_up_offset,
             )
             protocol.move_labware(
                 labware=tiprack_50_SCP_9,
-                new_location=protocol_api.OFF_DECK,
+                new_location=OFF_DECK,
                 use_gripper=False,
             )
         protocol.comment("DISPENSING: tiprack_50_SCP_10 = #4--> C4")
         stacker_200_1.enter_static_mode()
-        protocol.move_labware(CleanupPlate_2, stacker_200_1, use_gripper = True)
+        protocol.move_labware(CleanupPlate_2, stacker_200_1, use_gripper=True)
         stacker_50_1.exit_static_mode()
         tiprack_50_SCP_10 = stacker_50_1.retrieve()
         protocol.move_lid(tiprack_50_SCP_10, TRASH, use_gripper=True)
@@ -1966,14 +1803,14 @@ def run(protocol: protocol_api.ProtocolContext):
         protocol.move_labware(
             labware=tiprack_50_SCP_10,
             new_location=SCP_Position,
-            use_gripper=USE_GRIPPER,
+            use_gripper=True,
         )
         if MODETRASH == "CHUTE":
             protocol.comment("MOVING: sample_plate_2 = thermocycler --> TRASH")
             protocol.move_labware(
                 labware=sample_plate_2,
                 new_location=TRASH,
-                use_gripper=USE_GRIPPER,
+                use_gripper=True,
                 pick_up_offset=deck_pick_up_offset,
             )
         else:
@@ -1981,12 +1818,12 @@ def run(protocol: protocol_api.ProtocolContext):
             protocol.move_labware(
                 labware=sample_plate_2,
                 new_location="B3",
-                use_gripper=USE_GRIPPER,
+                use_gripper=True,
                 pick_up_offset=deck_pick_up_offset,
             )
             protocol.move_labware(
                 labware=sample_plate_2,
-                new_location=protocol_api.OFF_DECK,
+                new_location=OFF_DECK,
                 use_gripper=False,
             )
         # =======================
@@ -1997,49 +1834,24 @@ def run(protocol: protocol_api.ProtocolContext):
             "opentrons_96_wellplate_200ul_pcr_full_skirt", "A2", "Sample Plate 3"
         )
         protocol.comment("MOVING: sample_plate_3 = A2 --> thermocycler")
-        if ONDECK_THERMO == True:
+        if ONDECK_THERMO:
             protocol.move_labware(
                 labware=sample_plate_3,
                 new_location=thermocycler,
-                use_gripper=USE_GRIPPER,
-                pick_up_offset=deck_2_pick_up_offset,
-                drop_offset=tc_drop_offset,
+                use_gripper=True,
             )
         else:
             protocol.move_labware(
                 labware=sample_plate_3,
                 new_location="B1",
-                use_gripper=USE_GRIPPER,
-                pick_up_offset=deck_2_pick_up_offset,
-                drop_offset=deck_drop_offset,
+                use_gripper=True,
             )
         # =======================
         # =======================
-        # protocol.pause('Add sample_plate_4 to A2')
-        protocol.comment("UNSTACKING: sample_plate_4 = --> A2")
-        sample_plate_4 = protocol.load_labware(
-            "opentrons_96_wellplate_200ul_pcr_full_skirt", "A2", "Sample Plate 4"
-        )
-        # ============================================================================================
 
-    if STEP_POOL == True:
+    if STEP_POOL:
 
         protocol.comment("--> Pooling")
-        """
-        PoolVol = 20
-        p1000.flow_rate.aspirate = p50_flow_rate_aspirate_default*0.5
-        p1000.flow_rate.dispense = p50_flow_rate_dispense_default*0.5
-        p1000.flow_rate.blow_out = p50_flow_rate_blow_out_default*0.5
-        nozzlecheck('L8')
-        #===============================================
-        for loop, X in enumerate(column_list_1):
-            p1000.pick_up_tip(tiprack_50_SCP_10[reverse_list[loop]])
-            p1000.aspirate(PoolVol, sample_plate_3[X].bottom(z=1))
-            p1000.dispense(PoolVol, sample_plate_4[pooled_1_list].bottom(z=1))
-            p1000.blow_out(sample_plate_4[pooled_1_list].top(z=-5))
-            p1000.drop_tip()
-        #===============================================
-        """
 
         # ============================================================================================
         if MODETRASH == "CHUTE":
@@ -2047,7 +1859,7 @@ def run(protocol: protocol_api.ProtocolContext):
             protocol.move_labware(
                 labware=tiprack_50_SCP_10,
                 new_location=TRASH,
-                use_gripper=USE_GRIPPER,
+                use_gripper=True,
                 pick_up_offset=deck_pick_up_offset,
             )
         else:
@@ -2055,12 +1867,12 @@ def run(protocol: protocol_api.ProtocolContext):
             protocol.move_labware(
                 labware=tiprack_50_SCP_10,
                 new_location="B3",
-                use_gripper=USE_GRIPPER,
+                use_gripper=True,
                 pick_up_offset=deck_pick_up_offset,
             )
             protocol.move_labware(
                 labware=tiprack_50_SCP_10,
-                new_location=protocol_api.OFF_DECK,
+                new_location=OFF_DECK,
                 use_gripper=False,
             )
         protocol.comment("DISPENSING: tiprack_50_SCP_10 = #5--> C4")
@@ -2069,11 +1881,11 @@ def run(protocol: protocol_api.ProtocolContext):
         protocol.move_lid(tiprack_50_X, TRASH, use_gripper=True)
         protocol.comment("MOVING: tiprack_50_X = C4 --> SCP_Position")
         protocol.move_labware(
-            labware=tiprack_50_X, new_location=SCP_Position, use_gripper=USE_GRIPPER
+            labware=tiprack_50_X, new_location=SCP_Position, use_gripper=True
         )
         # ============================================================================================
 
-    if STEP_HYB == True:
+    if STEP_HYB:
         protocol.comment("==============================================")
         protocol.comment("--> HYB")
         protocol.comment("==============================================")
@@ -2110,8 +1922,6 @@ def run(protocol: protocol_api.ProtocolContext):
 
         protocol.comment("--> Adding EHB2")
         EHB2Vol = 10
-        EHB2MixRep = 10 if DRYRUN == False else 1
-        EHB2MixVol = 90
         p1000.flow_rate.aspirate = p50_flow_rate_aspirate_default * 0.5
         p1000.flow_rate.dispense = p50_flow_rate_dispense_default * 0.5
         p1000.flow_rate.blow_out = p50_flow_rate_blow_out_default * 0.5
@@ -2125,12 +1935,11 @@ def run(protocol: protocol_api.ProtocolContext):
         p1000.drop_tip()
         # ===============================================
 
-        if ONDECK_THERMO == True:
+        if ONDECK_THERMO:
             protocol.comment("Hybridize on Deck")
-            ############################################################################################################################################
             thermocycler.close_lid()
-            if DRYRUN == False:
-                profile_TAGSTOP = [
+            if DRYRUN is False:
+                profile_TAGSTOP: List[ThermocyclerStep] = [
                     {"temperature": 98, "hold_time_minutes": 5},
                     {"temperature": 97, "hold_time_minutes": 1},
                     {"temperature": 95, "hold_time_minutes": 1},
@@ -2156,7 +1965,7 @@ def run(protocol: protocol_api.ProtocolContext):
                     steps=profile_TAGSTOP, repetitions=1, block_max_volume=100
                 )
                 thermocycler.set_block_temperature(62)
-                if HYBRID_PAUSE == True:
+                if HYBRID_PAUSE:
                     protocol.comment("HYBRIDIZATION PAUSED")
                 thermocycler.set_block_temperature(10)
             thermocycler.open_lid()
@@ -2164,16 +1973,15 @@ def run(protocol: protocol_api.ProtocolContext):
             protocol.comment(
                 "Pausing to run Tagmentation on an off deck Thermocycler ~15min"
             )
-        ############################################################################################################################################
 
-    if STEP_CAPTURE == True:
+    if STEP_CAPTURE:
         protocol.comment("==============================================")
         protocol.comment("--> Capture")
         protocol.comment("==============================================")
 
-        if DRYRUN == False:
+        if DRYRUN is False:
             protocol.comment("SETTING THERMO and TEMP BLOCK Temperature")
-            if ONDECK_THERMO == True:
+            if ONDECK_THERMO:
                 thermocycler.set_block_temperature(58)
                 thermocycler.set_lid_temperature(58)
         # ============================================================================================
@@ -2182,7 +1990,7 @@ def run(protocol: protocol_api.ProtocolContext):
         protocol.move_labware(
             labware=tiprack_50_X,
             new_location=stacker_50_1,
-            use_gripper=USE_GRIPPER,
+            use_gripper=True,
             pick_up_offset=deck_pick_up_offset,
             drop_offset=deck_drop_offset,
         )
@@ -2190,7 +1998,7 @@ def run(protocol: protocol_api.ProtocolContext):
         protocol.move_labware(
             labware=tiprack_200_X,
             new_location=SCP_Position,
-            use_gripper=USE_GRIPPER,
+            use_gripper=True,
             pick_up_offset=deck_pick_up_offset,
             drop_offset=deck_drop_offset,
         )
@@ -2199,7 +2007,7 @@ def run(protocol: protocol_api.ProtocolContext):
             protocol.move_labware(
                 labware=CleanupPlate_1,
                 new_location=TRASH,
-                use_gripper=USE_GRIPPER,
+                use_gripper=True,
                 pick_up_offset=mb_pick_up_offset,
             )
         else:
@@ -2207,19 +2015,19 @@ def run(protocol: protocol_api.ProtocolContext):
             protocol.move_labware(
                 labware=CleanupPlate_1,
                 new_location="B3",
-                use_gripper=USE_GRIPPER,
+                use_gripper=True,
                 pick_up_offset=mb_pick_up_offset,
             )
             protocol.move_labware(
                 labware=CleanupPlate_1,
-                new_location=protocol_api.OFF_DECK,
+                new_location=OFF_DECK,
                 use_gripper=False,
             )
         protocol.comment("MOVING: CleanupPlate_2 = A4 --> mag_block")
         protocol.move_labware(
             labware=CleanupPlate_2,
             new_location=mag_block,
-            use_gripper=USE_GRIPPER,
+            use_gripper=True,
             pick_up_offset=deck_pick_up_offset,
             drop_offset=mb_drop_offset,
         )
@@ -2238,15 +2046,13 @@ def run(protocol: protocol_api.ProtocolContext):
         p1000.dispense(TransferSup + 1, CleanupPlate_2["A1"].bottom(z=1))
         p1000.drop_tip()
         # ===============================================
-        if ONDECK_THERMO == True:
+        if ONDECK_THERMO:
             thermocycler.close_lid()
 
         protocol.comment("--> ADDING SMB")
         SMBVol = 250
         SampleVol = 100
-        SMBMixRPM = 2000
-        SMBMixRep = 5 * 60 if DRYRUN == False else 0.1 * 60
-        SMBPremix = 3 if DRYRUN == False else 1
+        SMBPremix = 3 if DRYRUN is False else 1
         p1000.flow_rate.aspirate = p50_flow_rate_aspirate_default * 0.5
         p1000.flow_rate.dispense = p50_flow_rate_dispense_default * 0.5
         p1000.flow_rate.blow_out = p50_flow_rate_blow_out_default * 0.5
@@ -2276,10 +2082,10 @@ def run(protocol: protocol_api.ProtocolContext):
         p1000.drop_tip()
         # ===============================================
 
-        if ONDECK_THERMO == True:
+        if ONDECK_THERMO:
             thermocycler.open_lid()
 
-        if DRYRUN == False:
+        if DRYRUN is False:
             protocol.delay(minutes=2)
 
         protocol.comment("==============================================")
@@ -2319,10 +2125,10 @@ def run(protocol: protocol_api.ProtocolContext):
         p1000.drop_tip()
         # ===============================================
 
-        if DRYRUN == False:
+        if DRYRUN is False:
             protocol.delay(seconds=5 * 60)
 
-        if DRYRUN == False:
+        if DRYRUN is False:
             protocol.delay(seconds=1 * 60)
 
         protocol.comment("--> Removing Supernatant")
@@ -2352,7 +2158,7 @@ def run(protocol: protocol_api.ProtocolContext):
             protocol.move_labware(
                 labware=tiprack_200_X,
                 new_location=TRASH,
-                use_gripper=USE_GRIPPER,
+                use_gripper=True,
                 pick_up_offset=deck_pick_up_offset,
             )
         else:
@@ -2360,12 +2166,12 @@ def run(protocol: protocol_api.ProtocolContext):
             protocol.move_labware(
                 labware=tiprack_200_X,
                 new_location="B3",
-                use_gripper=USE_GRIPPER,
+                use_gripper=True,
                 pick_up_offset=deck_pick_up_offset,
             )
             protocol.move_labware(
                 labware=tiprack_200_X,
-                new_location=protocol_api.OFF_DECK,
+                new_location=OFF_DECK,
                 use_gripper=False,
             )
         protocol.comment("DISPENSING: tiprack_200_XX = #5--> B4")
@@ -2374,7 +2180,7 @@ def run(protocol: protocol_api.ProtocolContext):
         protocol.move_lid(tiprack_200_XX, TRASH, use_gripper=True)
         protocol.comment("MOVING: tiprack_200_XX = B4 --> SCP_Position")
         protocol.move_labware(
-            labware=tiprack_200_XX, new_location=SCP_Position, use_gripper=USE_GRIPPER
+            labware=tiprack_200_XX, new_location=SCP_Position, use_gripper=True
         )
         # ============================================================================================
 
@@ -2391,10 +2197,10 @@ def run(protocol: protocol_api.ProtocolContext):
         p1000.drop_tip()
         # ===============================================
 
-        if DRYRUN == False:
+        if DRYRUN is False:
             protocol.delay(seconds=5 * 60)
 
-        if DRYRUN == False:
+        if DRYRUN is False:
             protocol.delay(seconds=1 * 60)
 
         protocol.comment("--> Removing Supernatant")
@@ -2431,10 +2237,10 @@ def run(protocol: protocol_api.ProtocolContext):
         p1000.drop_tip()
         # ===============================================
 
-        if DRYRUN == False:
+        if DRYRUN is False:
             protocol.delay(seconds=5 * 60)
 
-        if DRYRUN == False:
+        if DRYRUN is False:
             protocol.delay(seconds=1 * 60)
 
         protocol.comment("--> Removing Supernatant")
@@ -2471,7 +2277,7 @@ def run(protocol: protocol_api.ProtocolContext):
         p1000.drop_tip()
         # ===============================================
 
-        if DRYRUN == False:
+        if DRYRUN is False:
             protocol.delay(seconds=1 * 60)
 
         protocol.comment("--> Transfer Hybridization")
@@ -2488,10 +2294,10 @@ def run(protocol: protocol_api.ProtocolContext):
         p1000.drop_tip()
         # ===============================================
 
-        if DRYRUN == False:
+        if DRYRUN is False:
             protocol.delay(seconds=5 * 60)
 
-        if DRYRUN == False:
+        if DRYRUN is False:
             protocol.delay(seconds=1 * 60)
 
         protocol.comment("--> Removing Supernatant")
@@ -2544,7 +2350,7 @@ def run(protocol: protocol_api.ProtocolContext):
         protocol.move_labware(
             labware=tiprack_200_XX,
             new_location=stacker_200_1,
-            use_gripper=USE_GRIPPER,
+            use_gripper=True,
             pick_up_offset=deck_pick_up_offset,
             drop_offset=deck_drop_offset,
         )
@@ -2552,7 +2358,7 @@ def run(protocol: protocol_api.ProtocolContext):
         protocol.move_labware(
             labware=tiprack_50_X,
             new_location=SCP_Position,
-            use_gripper=USE_GRIPPER,
+            use_gripper=True,
             pick_up_offset=deck_pick_up_offset,
             drop_offset=deck_drop_offset,
         )
@@ -2583,7 +2389,7 @@ def run(protocol: protocol_api.ProtocolContext):
 
         protocol.comment("--> Adding ET2")
         ET2Vol = 4
-        ET2MixRep = 10 if DRYRUN == False else 1
+        ET2MixRep = 10 if DRYRUN is False else 1
         ET2MixVol = 20
         p1000.flow_rate.aspirate = p50_flow_rate_aspirate_default * 0.5
         p1000.flow_rate.dispense = p50_flow_rate_dispense_default * 0.5
@@ -2596,7 +2402,7 @@ def run(protocol: protocol_api.ProtocolContext):
         p1000.drop_tip()
         # ===============================================
 
-    if STEP_PCR == True:
+    if STEP_PCR:
         protocol.comment("==============================================")
         protocol.comment("--> AMPLIFICATION")
         protocol.comment("==============================================")
@@ -2615,7 +2421,7 @@ def run(protocol: protocol_api.ProtocolContext):
 
         protocol.comment("--> Adding EPM")
         EPMVol = 20
-        EPMMixRep = 10 if DRYRUN == False else 1
+        EPMMixRep = 10 if DRYRUN is False else 1
         EPMMixVol = 45
         p1000.flow_rate.aspirate = p50_flow_rate_aspirate_default * 0.5
         p1000.flow_rate.dispense = p50_flow_rate_dispense_default * 0.5
@@ -2628,19 +2434,20 @@ def run(protocol: protocol_api.ProtocolContext):
         p1000.drop_tip()
         # ===============================================
 
-        ############################################################################################################################################
-        if ONDECK_THERMO == True:
-            if DRYRUN == False:
+        if ONDECK_THERMO:
+            if DRYRUN is False:
                 protocol.comment("SETTING THERMO to Room Temp")
                 thermocycler.set_block_temperature(4)
                 thermocycler.set_lid_temperature(100)
             thermocycler.close_lid()
-            if DRYRUN == False:
-                profile_PCR_1 = [{"temperature": 98, "hold_time_seconds": 45}]
+            if DRYRUN is False:
+                profile_PCR_1: List[ThermocyclerStep] = [
+                    {"temperature": 98, "hold_time_seconds": 45}
+                ]
                 thermocycler.execute_profile(
                     steps=profile_PCR_1, repetitions=1, block_max_volume=50
                 )
-                profile_PCR_2 = [
+                profile_PCR_2: List[ThermocyclerStep] = [
                     {"temperature": 98, "hold_time_seconds": 30},
                     {"temperature": 60, "hold_time_seconds": 30},
                     {"temperature": 72, "hold_time_seconds": 30},
@@ -2648,22 +2455,23 @@ def run(protocol: protocol_api.ProtocolContext):
                 thermocycler.execute_profile(
                     steps=profile_PCR_2, repetitions=12, block_max_volume=50
                 )
-                profile_PCR_3 = [{"temperature": 72, "hold_time_minutes": 1}]
+                profile_PCR_3: List[ThermocyclerStep] = [
+                    {"temperature": 72, "hold_time_minutes": 1}
+                ]
                 thermocycler.execute_profile(
                     steps=profile_PCR_3, repetitions=1, block_max_volume=50
                 )
                 thermocycler.set_block_temperature(10)
             thermocycler.open_lid()
         else:
-            if DRYRUN == False:
+            if DRYRUN is False:
                 protocol.pause("Pausing to run PCR on an off deck Thermocycler ~25min")
             else:
                 protocol.comment(
                     "Pausing to run PCR on an off deck Thermocycler ~25min"
                 )
-        ############################################################################################################################################
 
-    if STEP_CLEANUP_2 == True:
+    if STEP_CLEANUP_2:
         protocol.comment("==============================================")
         protocol.comment("--> Cleanup 2")
         protocol.comment("==============================================")
@@ -2683,9 +2491,8 @@ def run(protocol: protocol_api.ProtocolContext):
 
         protocol.comment("--> ADDING AMPure (0.8x)")
         AMPureVol = 40.5
-        SampleVol = 45
-        AMPureMixRep = 5 * 60 if DRYRUN == False else 0.1 * 60
-        AMPurePremix = 3 if DRYRUN == False else 1
+        SampleVol = 45.0
+        AMPurePremix = 3 if DRYRUN is False else 1
         p1000.flow_rate.aspirate = p50_flow_rate_aspirate_default * 0.5
         p1000.flow_rate.dispense = p50_flow_rate_dispense_default * 0.5
         p1000.flow_rate.blow_out = p50_flow_rate_blow_out_default * 0.5
@@ -2717,7 +2524,7 @@ def run(protocol: protocol_api.ProtocolContext):
         protocol.move_labware(
             labware=tiprack_50_X,
             new_location=stacker_200_2,
-            use_gripper=USE_GRIPPER,
+            use_gripper=True,
             pick_up_offset=deck_pick_up_offset,
             drop_offset=deck_drop_offset,
         )
@@ -2725,13 +2532,13 @@ def run(protocol: protocol_api.ProtocolContext):
         protocol.move_labware(
             labware=tiprack_200_XX,
             new_location=SCP_Position,
-            use_gripper=USE_GRIPPER,
+            use_gripper=True,
             pick_up_offset=deck_pick_up_offset,
             drop_offset=deck_drop_offset,
         )
         # ============================================================================================
 
-        if DRYRUN == False:
+        if DRYRUN is False:
             protocol.delay(minutes=4)
 
         protocol.comment("--> Removing Supernatant")
@@ -2781,7 +2588,7 @@ def run(protocol: protocol_api.ProtocolContext):
         p1000.drop_tip()
         # ================================================
 
-        if DRYRUN == False:
+        if DRYRUN is False:
             protocol.delay(minutes=0.5)
 
         protocol.comment("--> Remove ETOH Wash")
@@ -2830,7 +2637,7 @@ def run(protocol: protocol_api.ProtocolContext):
         p1000.move_to(CleanupPlate_2["A2"].top(z=5))
         # ================================================
 
-        if DRYRUN == False:
+        if DRYRUN is False:
             protocol.delay(minutes=0.5)
 
         protocol.comment("--> Remove ETOH Wash")
@@ -2856,7 +2663,7 @@ def run(protocol: protocol_api.ProtocolContext):
         p1000.drop_tip()
         # ===============================================
 
-        if DRYRUN == False:
+        if DRYRUN is False:
             protocol.delay(minutes=1)
 
         # ============================================================================================
@@ -2865,7 +2672,7 @@ def run(protocol: protocol_api.ProtocolContext):
         protocol.move_labware(
             labware=tiprack_200_XX,
             new_location=stacker_200_1,
-            use_gripper=USE_GRIPPER,
+            use_gripper=True,
             pick_up_offset=deck_pick_up_offset,
             drop_offset=deck_drop_offset,
         )
@@ -2873,7 +2680,7 @@ def run(protocol: protocol_api.ProtocolContext):
         protocol.move_labware(
             labware=tiprack_50_X,
             new_location=SCP_Position,
-            use_gripper=USE_GRIPPER,
+            use_gripper=True,
             pick_up_offset=deck_pick_up_offset,
             drop_offset=deck_drop_offset,
         )
@@ -2881,7 +2688,6 @@ def run(protocol: protocol_api.ProtocolContext):
 
         protocol.comment("--> Adding RSB")
         RSBVol = 32
-        RSBMixRep = 1 * 60 if DRYRUN == False else 0.1 * 60
         p1000.flow_rate.aspirate = p50_flow_rate_aspirate_default * 0.5
         p1000.flow_rate.dispense = p50_flow_rate_dispense_default * 0.5
         p1000.flow_rate.blow_out = p50_flow_rate_blow_out_default * 0.5
@@ -2937,7 +2743,7 @@ def run(protocol: protocol_api.ProtocolContext):
         p1000.drop_tip()
         # ===============================================
 
-        if DRYRUN == False:
+        if DRYRUN is False:
             protocol.delay(minutes=3)
 
         protocol.comment("--> Transferring Supernatant")
