@@ -7,15 +7,18 @@ from __future__ import annotations
 
 from enum import Enum
 from math import sqrt, asin
+from typing import Final
 from numpy import pi, trapz
 from functools import cached_property
 
 from pydantic import (
     ConfigDict,
     BaseModel,
+    Discriminator,
     Field,
     StrictInt,
     StrictFloat,
+    TypeAdapter,
 )
 from typing_extensions import Annotated, Literal
 
@@ -165,7 +168,8 @@ class RectangularWellDefinition3(_WellCommon3, BaseModel):
 
 
 WellDefinition3 = Annotated[
-    CircularWellDefinition3 | RectangularWellDefinition3, Field(discriminator="shape")
+    CircularWellDefinition3 | RectangularWellDefinition3,
+    Discriminator("shape"),
 ]
 
 
@@ -471,7 +475,7 @@ WellSegment = Annotated[
     | SquaredConeSegment
     | RoundedCuboidSegment
     | SphericalSegment,
-    Field(discriminator="shape"),
+    Discriminator("shape"),
 ]
 
 
@@ -479,24 +483,57 @@ class InnerWellGeometry(BaseModel):
     sections: list[WellSegment]
 
 
-class LabwareDefinition(BaseModel):
-    schemaVersion: Literal[1, 2, 3]
+class LabwareDefinition2(BaseModel):
+    # todo(mm, 2025-02-18): Is it correct to accept schemaVersion==1 here?
+    schemaVersion: Literal[1, 2]
     version: Annotated[int, Field(ge=1)]
     namespace: Annotated[str, Field(pattern=SAFE_STRING_REGEX)]
     metadata: Metadata
     brand: BrandData
-    parameters: Parameters2 | Parameters3
-    ordering: list[list[str]]
+    parameters: Parameters2
     cornerOffsetFromSlot: Vector
+    ordering: list[list[str]]
     dimensions: Dimensions
-    wells: dict[str, WellDefinition2 | WellDefinition3]
+    wells: dict[str, WellDefinition2]
     groups: list[Group]
-    allowedRoles: list[LabwareRole] = Field(default_factory=list)
     stackingOffsetWithLabware: dict[str, Vector] = Field(default_factory=dict)
     stackingOffsetWithModule: dict[str, Vector] = Field(default_factory=dict)
+    allowedRoles: list[LabwareRole] = Field(default_factory=list)
     gripperOffsets: dict[str, GripperOffsets] = Field(default_factory=dict)
-    gripHeightFromLabwareBottom: float | None = None
     gripForce: float | None = None
-    innerLabwareGeometry: dict[str, InnerWellGeometry] | None = None
+    gripHeightFromLabwareBottom: float | None = None
     stackLimit: int | None = None
+
+
+class LabwareDefinition3(BaseModel):
+    schemaVersion: Literal[3]
+    version: Annotated[int, Field(ge=1)]
+    namespace: Annotated[str, Field(pattern=SAFE_STRING_REGEX)]
+    metadata: Metadata
+    brand: BrandData
+    parameters: Parameters3
+    cornerOffsetFromSlot: Vector
+    ordering: list[list[str]]
+    dimensions: Dimensions
+    wells: dict[str, WellDefinition3]
+    groups: list[Group]
+    stackingOffsetWithLabware: dict[str, Vector] = Field(default_factory=dict)
+    stackingOffsetWithModule: dict[str, Vector] = Field(default_factory=dict)
+    allowedRoles: list[LabwareRole] = Field(default_factory=list)
+    gripperOffsets: dict[str, GripperOffsets] = Field(default_factory=dict)
+    gripForce: float | None = None
+    gripHeightFromLabwareBottom: float | None = None
+    stackLimit: int | None = None
+    innerLabwareGeometry: dict[str, InnerWellGeometry] | None = None
     compatibleParentLabware: list[str] | None = None
+
+
+LabwareDefinition = Annotated[
+    LabwareDefinition2 | LabwareDefinition3,
+    Discriminator("schemaVersion"),
+]
+
+
+labware_definition_type_adapter: Final = TypeAdapter[LabwareDefinition](
+    LabwareDefinition
+)
