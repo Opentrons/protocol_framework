@@ -55,7 +55,33 @@ export function InterventionInfo(props: InterventionInfoProps): JSX.Element {
         >
           {props.labwareNickname ?? props.labwareName}
         </StyledText>
-        {props.layout === 'stacked' ? (
+        {props.layout === 'default' ? (
+          <>
+            {props.labwareNickname != null ? (
+              <StyledText
+                oddStyle="hidden"
+                desktopStyle="bodyDefaultRegular"
+                color={COLORS.grey60}
+                css={css`
+                  ${LINE_CLAMP_STYLE}
+                  @media ${RESPONSIVENESS.touchscreenMediaQuerySpecs} {
+                    display: none;
+                  }
+                `}
+              >
+                {props.labwareNickname}{' '}
+              </StyledText>
+            ) : null}
+            <Divider
+              borderColor={COLORS.grey35}
+              css={`
+                @media ${RESPONSIVENESS.touchscreenMediaQuerySpecs} {
+                  display: none;
+                }
+              `}
+            />
+          </>
+        ) : (
           <>
             <StyledText
               oddStyle="hidden"
@@ -64,7 +90,7 @@ export function InterventionInfo(props: InterventionInfoProps): JSX.Element {
               css={css`
                 ${LINE_CLAMP_STYLE}
                 margin-bottom: ${SPACING_1}
-              @media ${RESPONSIVENESS.touchscreenMediaQuerySpecs} {
+            @media ${RESPONSIVENESS.touchscreenMediaQuerySpecs} {
                   display: none;
                 }
               `}
@@ -81,7 +107,7 @@ export function InterventionInfo(props: InterventionInfoProps): JSX.Element {
               `}
             />
           </>
-        ) : null}
+        )}
       </Flex>
       {content}
     </Flex>

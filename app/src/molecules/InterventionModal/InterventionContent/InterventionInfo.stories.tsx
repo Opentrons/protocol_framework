@@ -70,6 +70,7 @@ type Story = StoryObj<typeof InterventionInfo>
 
 export const MoveBetweenSlots: Story = {
   args: {
+    layout: 'default',
     type: 'location-arrow-location',
     labwareName: 'Plate',
     currentLocationProps: {
@@ -83,6 +84,7 @@ export const MoveBetweenSlots: Story = {
 
 export const Refill: Story = {
   args: {
+    layout: 'default',
     type: 'location',
     labwareName: 'Tip Rack',
     currentLocationProps: {
@@ -93,6 +95,7 @@ export const Refill: Story = {
 
 export const Select: Story = {
   args: {
+    layout: 'default',
     type: 'location-colon-location',
     labwareName: 'Well',
     currentLocationProps: {
