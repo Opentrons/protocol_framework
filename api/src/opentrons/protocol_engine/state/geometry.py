@@ -2009,3 +2009,21 @@ class GeometryView:
             target_well_name,
             self._labware.get_definition(labware_id).ordering,
         )
+
+    def get_height_of_labware_stack(
+        self, definitions: list[LabwareDefinition]
+    ) -> float:
+        """Get the overall height of a stack of labware listed by definition in top-first order."""
+        if len(definitions) == 0:
+            return 0
+        if len(definitions) == 1:
+            return definitions[0].dimensions.zDimension
+        total_height = 0.0
+        upper_def: LabwareDefinition = definitions[0]
+        for lower_def in definitions[1:]:
+            overlap = self._labware.get_labware_overlap_offsets(
+                upper_def, lower_def.parameters.loadName
+            ).z
+            total_height += upper_def.dimensions.zDimension - overlap
+            upper_def = lower_def
+        return total_height + upper_def.dimensions.zDimension

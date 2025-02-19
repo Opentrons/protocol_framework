@@ -1257,3 +1257,15 @@ class LiquidClassRedefinitionError(ProtocolEngineError):
         wrapping: Optional[Sequence[EnumeratedError]] = None,
     ) -> None:
         super().__init__(ErrorCodes.GENERAL_ERROR, message, details, wrapping)
+
+
+class FlexStackerNotLogicallyEmptyError(ProtocolEngineError):
+    """Raised when attempting a stacker operation that requires it to be empty when it is known from the protocol that it is not."""
+
+    def __init__(
+        self,
+        message: Optional[str] = None,
+        details: Optional[dict[str, Any]] = None,
+        wrapping: Optional[Sequence[EnumeratedError]] = None,
+    ) -> None:
+        super().__init__(ErrorCodes.GENERAL_ERROR, message, details, wrapping)

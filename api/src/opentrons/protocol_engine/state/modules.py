@@ -385,6 +385,10 @@ class ModuleStore(HasState[ModuleState], HandlesActions):
                 module_id=FlexStackerId(module_id),
                 in_static_mode=False,
                 hopper_labware_ids=[],
+                pool_primary_definition=None,
+                pool_adapter_definition=None,
+                pool_lid_definition=None,
+                pool_count=0,
             )
 
     def _update_additional_slots_occupied_by_thermocycler(

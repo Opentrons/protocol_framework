@@ -34,6 +34,7 @@ from opentrons_shared_data.labware.labware_definition import (
     Vector as LabwareDefinitionVector,
     ConicalFrustum,
 )
+from opentrons_shared_data.labware import load_definition as load_labware_definition
 
 from opentrons.protocol_engine import errors
 from opentrons.protocol_engine.types import (
@@ -4032,3 +4033,46 @@ def test_get_location_sequence_stacker_hopper(
             cutoutId="cutoutA3",
         ),
     ]
+
+
+@pytest.mark.parametrize("use_mocks", [False])
+@pytest.mark.parametrize(
+    "definition_list,height",
+    [
+        pytest.param([], 0, id="empty-list"),
+        pytest.param(
+            [
+                LabwareDefinition.model_validate(
+                    load_labware_definition(
+                        "corning_96_wellplate_360ul_flat", version=2
+                    )
+                )
+            ],
+            14.22,
+            id="single-labware",
+        ),
+        pytest.param(
+            [
+                LabwareDefinition.model_validate(
+                    load_labware_definition(
+                        "opentrons_flex_tiprack_lid", version=1, schema=3
+                    )
+                ),
+                LabwareDefinition.model_validate(
+                    load_labware_definition(
+                        "opentrons_flex_96_tiprack_1000ul", version=1
+                    )
+                ),
+            ],
+            99 + 17 - 14,
+            id="tiprack-plus-lid",
+        ),
+    ],
+)
+def test_get_height_of_labware_stack(
+    subject: GeometryView,
+    definition_list: list[LabwareDefinition],
+    height: float,
+) -> None:
+    """It should correctly calculate the height of labware stacks."""
+    assert subject.get_height_of_labware_stack(definition_list) == height
