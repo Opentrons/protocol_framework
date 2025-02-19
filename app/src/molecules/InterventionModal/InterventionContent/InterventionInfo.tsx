@@ -13,6 +13,7 @@ import {
   RESPONSIVENESS,
   Tag,
   SPACING_1,
+  TYPOGRAPHY,
 } from '@opentrons/components'
 import { Divider } from '/app/atoms/structure/Divider'
 
@@ -58,28 +59,30 @@ export function InterventionInfo(props: InterventionInfoProps): JSX.Element {
         {props.layout === 'default' ? (
           <>
             {props.labwareNickname != null ? (
-              <StyledText
-                oddStyle="hidden"
-                desktopStyle="bodyDefaultRegular"
-                color={COLORS.grey60}
-                css={css`
-                  ${LINE_CLAMP_STYLE}
-                  @media ${RESPONSIVENESS.touchscreenMediaQuerySpecs} {
-                    display: none;
-                  }
-                `}
-              >
-                {props.labwareNickname}{' '}
-              </StyledText>
+              <>
+                <StyledText
+                  oddStyle="hidden"
+                  desktopStyle="bodyDefaultRegular"
+                  color={COLORS.grey60}
+                  css={css`
+                    ${LINE_CLAMP_STYLE}
+                    @media ${RESPONSIVENESS.touchscreenMediaQuerySpecs} {
+                      display: none;
+                    }
+                  `}
+                >
+                  {props.labwareNickname}{' '}
+                </StyledText>
+                <Divider
+                  borderColor={COLORS.grey35}
+                  css={`
+                    @media ${RESPONSIVENESS.touchscreenMediaQuerySpecs} {
+                      display: none;
+                    }
+                  `}
+                />
+              </>
             ) : null}
-            <Divider
-              borderColor={COLORS.grey35}
-              css={`
-                @media ${RESPONSIVENESS.touchscreenMediaQuerySpecs} {
-                  display: none;
-                }
-              `}
-            />
           </>
         ) : (
           <>
@@ -89,9 +92,9 @@ export function InterventionInfo(props: InterventionInfoProps): JSX.Element {
               color={COLORS.grey60}
               css={css`
                 ${LINE_CLAMP_STYLE}
-                margin-bottom: ${SPACING_1}
-            @media ${RESPONSIVENESS.touchscreenMediaQuerySpecs} {
-                  display: none;
+                margin: ${SPACING_1} 0;
+                @media ${RESPONSIVENESS.touchscreenMediaQuerySpecs} {
+                  font-size: ${TYPOGRAPHY.fontSize22};
                 }
               `}
             >
@@ -102,7 +105,7 @@ export function InterventionInfo(props: InterventionInfoProps): JSX.Element {
               borderColor={COLORS.grey35}
               css={`
                 @media ${RESPONSIVENESS.touchscreenMediaQuerySpecs} {
-                  display: none;
+                  border-bottom-color: ${COLORS.grey60};
                 }
               `}
             />
