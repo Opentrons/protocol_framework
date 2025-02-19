@@ -336,6 +336,9 @@ def test_drop_tip_no_location(
         labware_id="labware-id",
         engine_client=mock_engine_client,
     )
+    decoy.when(
+        mock_engine_client.state.tips.get_pipette_channels("abc123")
+    ).then_return(8)
 
     subject.drop_tip(location=None, well_core=well_core, home_after=True)
 
@@ -384,6 +387,9 @@ def test_drop_tip_with_location(
             absolute_point=Point(1, 2, 3),
         )
     ).then_return(WellLocation(origin=WellOrigin.TOP, offset=WellOffset(x=3, y=2, z=1)))
+    decoy.when(
+        mock_engine_client.state.tips.get_pipette_channels("abc123")
+    ).then_return(8)
     decoy.when(mock_engine_client.state.labware.is_tiprack("labware-id")).then_return(
         True
     )
@@ -415,6 +421,7 @@ def test_drop_tip_with_location(
                 ),
                 homeAfter=True,
                 alternateDropLocation=False,
+                scrape_tips=True,
             )
         ),
     )

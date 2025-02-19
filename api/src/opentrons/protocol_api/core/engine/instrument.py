@@ -51,6 +51,8 @@ _DISPENSE_VOLUME_VALIDATION_ADDED_IN = APIVersion(2, 17)
 _RESIN_TIP_DEFAULT_VOLUME = 400
 _RESIN_TIP_DEFAULT_FLOW_RATE = 10.0
 
+_RETURN_TIP_SCRAPE_ADDED_IN = APIVersion(2, 22)
+"""The version after which return-tip for 1/8 channels will scrape off."""
 
 class InstrumentCore(AbstractInstrument[WellCore]):
     """Instrument API core using a ProtocolEngine.
@@ -496,6 +498,7 @@ class InstrumentCore(AbstractInstrument[WellCore]):
         """
         well_name = well_core.get_name()
         labware_id = well_core.labware_id
+        scrape_tips = False
 
         if location is not None:
             relative_well_location = (
@@ -519,6 +522,7 @@ class InstrumentCore(AbstractInstrument[WellCore]):
                 pipette_id=self._pipette_id,
                 labware_id=labware_id,
             )
+            scrape_tips = self.get_channels() <= 8
         pipette_movement_conflict.check_safe_for_pipette_movement(
             engine_state=self._engine_client.state,
             pipette_id=self._pipette_id,
@@ -534,6 +538,7 @@ class InstrumentCore(AbstractInstrument[WellCore]):
                 wellLocation=well_location,
                 homeAfter=home_after,
                 alternateDropLocation=alternate_drop_location,
+                scrape_tips=scrape_tips,
             )
         )
 

@@ -32,6 +32,7 @@ from opentrons.hardware_control.types import (
     HardwareAction,
     Axis,
     OT3Mount,
+    TipScrapeType,
 )
 from opentrons.hardware_control.constants import (
     SHAKE_OFF_TIPS_SPEED,
@@ -78,6 +79,8 @@ class TipActionMoveSpec:
     speed: Optional[
         float
     ]  # allow speed for a movement to default to its axes' speed settings
+    scrape_axis: Optional[Axis] = None
+    # add a scrape motion in the middle of a tip drop
 
 
 @dataclass(frozen=True)
@@ -889,6 +892,7 @@ class OT3PipetteHandler:
     def plan_lt_drop_tip(
         self,
         mount: OT3Mount,
+        scrape_tips: TipScrapeType = TipScrapeType.NONE,
     ) -> TipActionSpec:
         instrument = self.get_pipette(mount)
         config = instrument.drop_configurations.plunger_eject
@@ -896,6 +900,20 @@ class OT3PipetteHandler:
             raise CommandPreconditionViolated(
                 f"No plunger-eject drop tip configurations for {instrument.name} on {mount.name}"
             )
+        scrape_move: Optional[TipActionMoveSpec] = None
+        match scrape_tips:
+            case TipScrapeType.LEFT_ONE_COL:
+                scrape_move = TipActionMoveSpec(
+                    distance=-11, currents=None, speed=None, scrape_axis=Axis.X
+                )
+            case TipScrapeType.RIGHT_ONE_COL:
+                scrape_move = TipActionMoveSpec(
+                    distance=11, currents=None, speed=None, scrape_axis=Axis.X
+                )
+            case TipScrapeType.NONE:
+                scrape_move = None
+            case _:
+                scrape_move = None
         drop_seq = [
             TipActionMoveSpec(
                 distance=instrument.plunger_positions.drop_tip,
@@ -914,6 +932,9 @@ class OT3PipetteHandler:
                 },
             ),
         ]
+        if scrape_move:
+            # Add the scrape move before the plunger moves back up
+            drop_seq.insert(1, scrape_move)
 
         return TipActionSpec(
             tip_action_moves=drop_seq,
