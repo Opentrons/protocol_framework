@@ -115,23 +115,16 @@ export function SelectModules(props: WizardTileProps): JSX.Element | null {
             <Flex gridGap={SPACING.spacing4} flexWrap={WRAP}>
               {filteredSupportedModules
                 .sort((moduleA, moduleB) => moduleA.localeCompare(moduleB))
-                .map(moduleModel => {
-                  const numSlotsAvailable = getNumSlotsAvailable(
-                    modules,
-                    additionalEquipment,
-                    moduleModel
-                  )
-                  return (
-                    <AddModuleEmptySelectorButton
-                      key={moduleModel}
-                      moduleModel={moduleModel}
-                      areSlotsAvailable={numSlotsAvailable > 0}
-                      hasGripper={hasGripper}
-                      handleAddModule={handleAddModule}
-                      tooltipText={t('add_gripper_for_absorbance_reader')}
-                    />
-                  )
-                })}
+                .map(moduleModel => (
+                  <AddModuleEmptySelectorButton
+                    key={moduleModel}
+                    moduleModel={moduleModel}
+                    areSlotsAvailable={true}
+                    hasGripper={hasGripper}
+                    handleAddModule={handleAddModule}
+                    tooltipText={t('add_gripper_for_absorbance_reader')}
+                  />
+                ))}
             </Flex>
             {modules != null && Object.keys(modules).length > 0 ? (
               <Flex
