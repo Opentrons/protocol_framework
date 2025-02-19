@@ -47,4 +47,4 @@ export const COLUMN_STYLE = css`
   flex: 1;
 `
 
-export const NAV_BAR_HEIGHT_REM = 4
+export const NAV_BAR_HEIGHT_REM = 3.75

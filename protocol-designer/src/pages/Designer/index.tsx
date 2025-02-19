@@ -133,6 +133,7 @@ export function Designer(): JSX.Element {
         width="100%"
         justifyContent={JUSTIFY_CENTER}
         alignItems={ALIGN_CENTER}
+        maxHeight="100%"
       >
         <DeckSetupContainer tab={tab} />
       </Flex>
@@ -197,8 +198,10 @@ export function Designer(): JSX.Element {
               {zoomIn.slot == null ? (
                 <Flex
                   justifyContent={JUSTIFY_FLEX_END}
+                  alignItems={ALIGN_CENTER}
                   alignSelf={ALIGN_STRETCH}
                   width="100%"
+                  height="2.422rem" // (kk:02/19/25) Note this is to adjust for the height of the ToggleGroup this will be removed when updating ToggleGroup
                 >
                   <ToggleGroup
                     selectedValue={deckView}

@@ -36,7 +36,7 @@ import type { CoordinateTuple, DeckSlotId } from '@opentrons/shared-data'
 import type { DeckSetupTabType } from '../types'
 
 const OFF_DECK_MAP_WIDTH = '41.625rem'
-const OFF_DECK_MAP_HEIGHT = '45.5rem'
+const OFF_DECK_MAP_HEIGHT = '44rem'
 const OFF_DECK_MAP_HEIGHT_FOR_STEP = '30.315rem'
 const ZERO_SLOT_POSITION: CoordinateTuple = [0, 0, 0]
 interface OffDeckDetailsProps extends DeckSetupTabType {
