@@ -49,7 +49,7 @@ import type { StepFormErrors } from '../../../../../../steplist'
 const addPrefix = (prefix: string) => (fieldName: string): StepFieldName =>
   `${prefix}_${fieldName}`
 
-interface MultipleStepsMoveLiquidToolsProps {
+interface SecondStepsMoveLiquidToolsProps {
   propsForFields: FieldPropsByName
   formData: FormData
   tab: LiquidHandlingTab
@@ -58,14 +58,14 @@ interface MultipleStepsMoveLiquidToolsProps {
   visibleFormErrors: StepFormErrors
 }
 
-export const MultipleStepsMoveLiquidTools = ({
+export const SecondStepsMoveLiquidTools = ({
   propsForFields,
   formData,
   tab,
   setTab,
   setShowFormErrors,
   visibleFormErrors,
-}: MultipleStepsMoveLiquidToolsProps): JSX.Element => {
+}: SecondStepsMoveLiquidToolsProps): JSX.Element => {
   const { t, i18n } = useTranslation(['protocol_steps', 'form', 'tooltip'])
   const [targetProps, tooltipProps] = useHoverTooltip()
   const labwares = useSelector(getLabwareEntities)
