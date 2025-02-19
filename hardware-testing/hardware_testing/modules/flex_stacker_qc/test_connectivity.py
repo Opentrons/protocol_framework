@@ -9,6 +9,7 @@ from hardware_testing.data.csv_report import (
     CSVResult,
 )
 
+from hardware_testing.opentrons_api import helpers_ot3
 from opentrons.drivers.flex_stacker.types import HardwareRevision
 from opentrons.hardware_control.modules import FlexStacker
 
@@ -23,7 +24,7 @@ def build_csv_lines() -> List[Union[CSVLine, CSVLineRepeating]]:
 
 
 async def test_gcode(
-    module: FlexStacker, report: CSVReport, revision: HardwareRevision, **kwargs
+    module: FlexStacker, report: CSVReport, revision: HardwareRevision
 ) -> None:
     """Send and receive response for GCODE M115."""
     success = True
@@ -41,9 +42,7 @@ async def test_gcode(
     )
 
 
-async def test_eeprom(
-    module: FlexStacker, report: CSVReport, simulate: bool, **kwargs
-) -> None:
+async def test_eeprom(module: FlexStacker, report: CSVReport, simulate: bool) -> None:
     """Set serial number and make sure device info is updated accordingly."""
     success = True
     if not simulate:
@@ -62,9 +61,7 @@ async def test_eeprom(
     )
 
 
-async def test_leds(
-    module: FlexStacker, report: CSVReport, simulate: bool, **kwargs
-) -> None:
+async def test_leds(module: FlexStacker, report: CSVReport, simulate: bool) -> None:
     """Prompt tester to verify the status led is blinking."""
     if not simulate:
         is_blinking = ui.get_user_answer("Is the status LED blinking?")
@@ -75,13 +72,20 @@ async def test_leds(
     )
 
 
-async def run(driver: FlexStacker, report: CSVReport, section: str, **kwargs) -> None:
+async def run(
+    module: FlexStacker,
+    report: CSVReport,
+    section: str,
+    simulate: bool,
+    api: helpers_ot3.OT3API,
+    hardware_revision: HardwareRevision,
+) -> None:
     """Run."""
     ui.print_header("USB Communication")
-    await test_gcode(driver, report, **kwargs)
+    await test_gcode(module, report, hardware_revision)
 
     ui.print_header("EEPROM Communication")
-    await test_eeprom(driver, report, **kwargs)
+    await test_eeprom(module, report, simulate)
 
     ui.print_header("LED Blinking")
-    await test_leds(driver, report, **kwargs)
+    await test_leds(module, report, simulate)

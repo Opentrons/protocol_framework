@@ -9,7 +9,6 @@ import argparse
 import asyncio
 from pathlib import Path
 from typing import cast
-from dataclasses import asdict
 
 from hardware_testing.data import ui
 
@@ -114,7 +113,7 @@ async def _main(cfg: TestConfig) -> None:
     # RUN TESTS
     for section, test_run in cfg.tests.items():
         ui.print_title(section.value)
-        await test_run(stacker, report, section.value, **asdict(cfg))
+        await test_run(stacker, report, section.value, cfg.simulate, api, cfg.revision)
 
     # SAVE REPORT
     ui.print_title("DONE")

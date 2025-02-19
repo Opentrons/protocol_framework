@@ -8,7 +8,13 @@ from hardware_testing.data.csv_report import (
     CSVResult,
 )
 
-from .driver import FlexStacker, StackerAxis, Direction
+from opentrons.drivers.flex_stacker.types import (
+    StackerAxis,
+    Direction,
+    HardwareRevision,
+)
+from opentrons.hardware_control.modules import FlexStacker
+from hardware_testing.opentrons_api import helpers_ot3
 
 
 def build_csv_lines() -> List[Union[CSVLine, CSVLineRepeating]]:
@@ -20,29 +26,28 @@ def build_csv_lines() -> List[Union[CSVLine, CSVLineRepeating]]:
     ]
 
 
-def get_latch_held_switch(driver: FlexStacker) -> bool:
+async def get_latch_held_switch(module: FlexStacker) -> bool:
     """Get limit switch."""
-    held_switch = driver.get_limit_switch(StackerAxis.L, Direction.RETRACT)
+    held_switch = await module._driver.get_limit_switch(
+        StackerAxis.L, Direction.RETRACT
+    )
     print("(Held Switch triggered) : ", held_switch)
     return held_switch
 
 
-def close_latch(driver: FlexStacker) -> None:
-    """Close latch."""
-    driver.move_to_limit_switch(StackerAxis.L, Direction.RETRACT)
-
-
-def open_latch(driver: FlexStacker) -> None:
-    """Open latch."""
-    driver.move_in_mm(StackerAxis.L, 22)
-
-
-def run(driver: FlexStacker, report: CSVReport, section: str) -> None:
+async def run(
+    module: FlexStacker,
+    report: CSVReport,
+    section: str,
+    simulate: bool,
+    api: helpers_ot3.OT3API,
+    hardware_revision: HardwareRevision,
+) -> None:
     """Run."""
-    if not get_latch_held_switch(driver):
+    if not await get_latch_held_switch(module):
         print("Switch is not triggered, try to trigger it by closing latch...")
-        close_latch(driver)
-        if not get_latch_held_switch(driver):
+        await module.close_latch()
+        if not await get_latch_held_switch(module):
             print("!!! Held switch is still not triggered !!!")
             report(section, "trigger-latch-switch", [CSVResult.FAIL])
             return
@@ -50,8 +55,8 @@ def run(driver: FlexStacker, report: CSVReport, section: str) -> None:
     report(section, "trigger-latch-switch", [CSVResult.PASS])
 
     ui.print_header("Latch Release/Open")
-    open_latch(driver)
-    success = not get_latch_held_switch(driver)
+    await module.open_latch()
+    success = not await get_latch_held_switch(module)
     report(section, "release/open-latch", [CSVResult.from_bool(success)])
 
     ui.print_header("Latch Hold/Close")
@@ -59,6 +64,6 @@ def run(driver: FlexStacker, report: CSVReport, section: str) -> None:
         print("Latch must be open to close it")
         report(section, "hold/close-latch", [CSVResult.FAIL])
     else:
-        close_latch(driver)
-        success = get_latch_held_switch(driver)
+        await module.close_latch()
+        success = await get_latch_held_switch(module)
         report(section, "hold/close-latch", [CSVResult.from_bool(success)])

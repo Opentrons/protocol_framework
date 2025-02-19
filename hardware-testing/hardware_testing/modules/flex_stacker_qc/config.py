@@ -1,7 +1,7 @@
 """Config."""
 from dataclasses import dataclass
 import enum
-from typing import Dict, Callable
+from typing import Dict, Any, TypeVar, Callable, Coroutine
 
 from opentrons.drivers.flex_stacker.types import HardwareRevision
 from hardware_testing.data.csv_report import CSVReport, CSVSection
@@ -14,6 +14,9 @@ from . import (
     test_door_switch,
     test_estop,
 )
+
+
+T = TypeVar("T")
 
 
 class TestSection(enum.Enum):
@@ -33,7 +36,7 @@ class TestConfig:
 
     revision: HardwareRevision
     simulate: bool
-    tests: Dict[TestSection, Callable]
+    tests: Dict[TestSection, Callable[..., Coroutine[Any, Any, None]]]
 
 
 TESTS = [

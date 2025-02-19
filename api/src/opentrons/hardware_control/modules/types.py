@@ -22,6 +22,7 @@ from opentrons.drivers.flex_stacker.types import (
     LimitSwitchStatus,
     PlatformStatus,
     StackerAxis,
+    Direction,
 )
 from opentrons.drivers.rpi_drivers.types import USBPort
 
@@ -395,6 +396,11 @@ class StackerAxisState(str, Enum):
             case StackerAxis.L:
                 return cls.EXTENDED if status.LR else cls.RETRACTED
         return cls.UNKNOWN
+    
+    @classmethod
+    def from_direction(cls, direction: Direction) -> "StackerAxisState":
+        """Get the axis state from the direction."""
+        return cls.RETRACTED if direction == Direction.RETRACT else cls.EXTENDED
 
 
 class LatchState(str, Enum):

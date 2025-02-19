@@ -8,7 +8,13 @@ from hardware_testing.data.csv_report import (
 )
 
 from .utils import test_limit_switches_per_direction
-from .driver import FlexStacker, StackerAxis, Direction
+from opentrons.drivers.flex_stacker.types import (
+    StackerAxis,
+    Direction,
+    HardwareRevision,
+)
+from opentrons.hardware_control.modules import FlexStacker
+from hardware_testing.opentrons_api import helpers_ot3
 
 
 def build_csv_lines() -> List[Union[CSVLine, CSVLineRepeating]]:
@@ -23,12 +29,19 @@ def build_csv_lines() -> List[Union[CSVLine, CSVLineRepeating]]:
     ]
 
 
-def run(driver: FlexStacker, report: CSVReport, section: str) -> None:
+async def run(
+    module: FlexStacker,
+    report: CSVReport,
+    section: str,
+    simulate: bool,
+    api: helpers_ot3.OT3API,
+    hardware_revision: HardwareRevision,
+) -> None:
     """Run."""
-    test_limit_switches_per_direction(
-        driver, StackerAxis.Z, Direction.EXTENT, report, section
+    await test_limit_switches_per_direction(
+        module, StackerAxis.Z, Direction.EXTEND, report, section
     )
 
-    test_limit_switches_per_direction(
-        driver, StackerAxis.Z, Direction.RETRACT, report, section
+    await test_limit_switches_per_direction(
+        module, StackerAxis.Z, Direction.RETRACT, report, section
     )

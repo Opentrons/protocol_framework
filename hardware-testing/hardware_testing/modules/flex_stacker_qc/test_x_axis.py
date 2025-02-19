@@ -9,7 +9,13 @@ from hardware_testing.data.csv_report import (
 )
 
 from .utils import test_limit_switches_per_direction
-from .driver import FlexStacker, StackerAxis, Direction
+from opentrons.drivers.flex_stacker.types import (
+    StackerAxis,
+    Direction,
+    HardwareRevision,
+)
+from opentrons.hardware_control.modules import FlexStacker
+from hardware_testing.opentrons_api import helpers_ot3
 
 
 def build_csv_lines() -> List[Union[CSVLine, CSVLineRepeating]]:
@@ -32,13 +38,13 @@ def build_csv_lines() -> List[Union[CSVLine, CSVLineRepeating]]:
     ]
 
 
-def test_platform_sensors_for_direction(
-    driver: FlexStacker, direction: Direction, report: CSVReport, section: str
+async def test_platform_sensors_for_direction(
+    module: FlexStacker, direction: Direction, report: CSVReport, section: str
 ) -> None:
     """Test platform sensors for a given direction."""
     ui.print_header(f"Platform Sensor - {direction} direction")
-    sensor_result = driver.get_platform_sensor(direction)
-    opposite_result = not driver.get_platform_sensor(direction.opposite())
+    sensor_result = await module._driver.get_platform_sensor(direction)
+    opposite_result = not await module._driver.get_platform_sensor(direction.opposite())
     print(f"{direction} sensor triggered: {sensor_result}")
     print(f"{direction.opposite()} sensor untriggered: {opposite_result}")
     report(
@@ -52,30 +58,39 @@ def test_platform_sensors_for_direction(
     )
 
 
-def platform_is_removed(driver: FlexStacker) -> bool:
+async def platform_is_removed(module: FlexStacker) -> bool:
     """Check if the platform is removed from the carrier."""
-    plus_side = driver.get_platform_sensor(Direction.EXTENT)
-    minus_side = driver.get_platform_sensor(Direction.RETRACT)
+    plus_side = await module._driver.get_platform_sensor(Direction.EXTEND)
+    minus_side = await module._driver.get_platform_sensor(Direction.RETRACT)
     return not plus_side and not minus_side
 
 
-def run(driver: FlexStacker, report: CSVReport, section: str) -> None:
+async def run(
+    module: FlexStacker,
+    report: CSVReport,
+    section: str,
+    simulate: bool,
+    api: helpers_ot3.OT3API,
+    hardware_revision: HardwareRevision,
+) -> None:
     """Run."""
-    if not driver._simulating and not platform_is_removed(driver):
+    if not simulate and not platform_is_removed(module):
         print("FAILURE - Cannot start tests with platform on the carrier")
         return
 
-    test_limit_switches_per_direction(
-        driver, StackerAxis.X, Direction.EXTENT, report, section
+    await test_limit_switches_per_direction(
+        module, StackerAxis.X, Direction.EXTEND, report, section
     )
 
-    if not driver._simulating:
+    if not simulate:
         ui.get_user_ready("Place the platform on the X carrier")
 
-    test_platform_sensors_for_direction(driver, Direction.EXTENT, report, section)
+    await test_platform_sensors_for_direction(module, Direction.EXTEND, report, section)
 
-    test_limit_switches_per_direction(
-        driver, StackerAxis.X, Direction.RETRACT, report, section
+    await test_limit_switches_per_direction(
+        module, StackerAxis.X, Direction.RETRACT, report, section
     )
 
-    test_platform_sensors_for_direction(driver, Direction.RETRACT, report, section)
+    await test_platform_sensors_for_direction(
+        module, Direction.RETRACT, report, section
+    )

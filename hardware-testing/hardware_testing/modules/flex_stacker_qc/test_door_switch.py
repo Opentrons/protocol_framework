@@ -10,7 +10,9 @@ from hardware_testing.data.csv_report import (
     CSVResult,
 )
 
-from .driver import FlexStacker
+from hardware_testing.opentrons_api import helpers_ot3
+from opentrons.hardware_control.modules import FlexStacker
+from opentrons.drivers.flex_stacker.types import HardwareRevision
 
 
 def build_csv_lines() -> List[Union[CSVLine, CSVLineRepeating]]:
@@ -21,16 +23,25 @@ def build_csv_lines() -> List[Union[CSVLine, CSVLineRepeating]]:
     ]
 
 
-def run(driver: FlexStacker, report: CSVReport, section: str) -> None:
+async def run(
+    module: FlexStacker,
+    report: CSVReport,
+    section: str,
+    simulate: bool,
+    api: helpers_ot3.OT3API,
+    hardware_revision: HardwareRevision,
+) -> None:
     """Run."""
     ui.print_header("Close Door")
-    if not driver._simulating:
+    if not simulate:
         ui.get_user_ready("Close the hopper door")
-    closed = driver.get_hopper_door_closed()
+    await module._reader.get_door_closed()
+    closed = module._reader.hopper_door_closed
     report(section, "close-door", [CSVResult.from_bool(closed)])
 
     ui.print_header("Open Door")
-    if not driver._simulating:
+    if not simulate:
         ui.get_user_ready("Open the hopper door")
-    closed = driver.get_hopper_door_closed()
+    await module._reader.get_door_closed()
+    closed = module._reader.hopper_door_closed
     report(section, "open-door", [CSVResult.from_bool(not closed)])
