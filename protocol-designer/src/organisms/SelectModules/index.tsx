@@ -25,7 +25,6 @@ import {
   FLEX_SUPPORTED_MODULE_MODELS,
   OT2_SUPPORTED_MODULE_MODELS,
 } from '../../pages/CreateNewProtocolWizard/constants'
-import { getNumSlotsAvailable } from '../../pages/CreateNewProtocolWizard/utils'
 import { HandleEnter } from '../../atoms/HandleEnter'
 import { PDListItemCustomize as ListItemCustomize } from '../../pages/CreateNewProtocolWizard/PDListItemCustomize'
 import { AddModuleEmptySelectorButton } from './AddModuleEmptySelectorButton'
