@@ -370,7 +370,7 @@ jobs:
 
       - name: 'upload github artifact'
         if: matrix.target == 'desktop'
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: 'opentrons-${{matrix.variant}}-${{ matrix.os }}'
           path: app-shell/dist/publish

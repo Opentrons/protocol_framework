@@ -105,7 +105,7 @@ jobs:
       - name: 'build components'
         run: make -C components
       - name: 'upload github artifact'
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: 'components-artifact'
           path: storybook-static
