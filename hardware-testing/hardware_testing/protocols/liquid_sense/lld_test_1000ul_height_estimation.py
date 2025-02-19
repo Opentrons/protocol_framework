@@ -1,8 +1,9 @@
 """Testing LLD Height Estimation during 1000uL Dynamic Aspirations."""
+from dataclasses import dataclass
 from enum import Enum
 from os import listdir
 from os.path import isdir
-from typing import Optional, Tuple, List, Any
+from typing import Optional, Tuple, List, Any, Dict
 
 from opentrons.protocol_api import (
     ProtocolContext,
@@ -10,6 +11,7 @@ from opentrons.protocol_api import (
     Labware,
     InstrumentContext,
     Well,
+    Liquid,
 )
 from opentrons_shared_data.load import get_shared_data_root
 
@@ -17,6 +19,7 @@ metadata = {"protocolName": "LLD 1000uL Tube-to-Tube"}
 requirements = {"robotType": "Flex", "apiLevel": "2.22"}
 
 SLOTS = {
+    "trash": "A3",
     "tips_1": "B1",
     "tips_2": "B2",
     "tips_3": "B3",
@@ -29,12 +32,12 @@ P1000_MAX_PUSH_OUT_UL = 79.0
 
 # operator fills this labware with RED-DYE at protocol start
 # ~20-25 mL per destination plate (eg: 5x plates requires 100-125 mL)
-LOAD_NAME_SRC_RESERVOIRS = [
-    "nest_1_reservoir_290ml",
-    "nest_1_reservoir_195ml",
-    "nest_12_reservoir_15ml",
-    "nest_96_wellplate_2ml_deep",
-]
+LOAD_NAME_SRC_RESERVOIRS: Dict[str, float] = {
+    "nest_1_reservoir_290ml": 30000,
+    "nest_1_reservoir_195ml": 30000,
+    "nest_12_reservoir_15ml": 3000,
+    "nest_96_wellplate_2ml_deep": 300,
+}
 
 # optical flat-bottom, for use in plate-reader (never changes)
 LOAD_NAME_DST_PLATE = "corning_96_wellplate_360ul_flat"
@@ -65,6 +68,17 @@ LOAD_NAME_SRC_LABWARE_BY_CHANNELS = {
 class AspirateMode(Enum):
     MENISCUS = "meniscus"
     MENISCUS_LLD = "meniscus-lld"
+
+
+@dataclass
+class TestTrial:
+    mode: AspirateMode
+    test_well: Well
+    ul_to_add: float
+    ul_to_remove: float
+    submerge_mm: float
+    destination_wells: List[Well]
+    destination_volumes: List[float]
 
 
 def _binary_search_liquid_volume_at_height(
@@ -101,7 +115,7 @@ def _get_nominal_volume_range_for_dynamic_tracking(
     # that a given pipette at a given submerge depth can DYNAMICALLY pipette
     min_vol = _binary_search_liquid_volume_at_height(
         well,
-        pipette.get_minimum_liquid_sense_height() + abs(mm_offset_pipette_tip),
+        pipette.get_minimum_liquid_sense_height() + mm_offset_pipette_tip,
     )
     max_vol = _binary_search_liquid_volume_at_height(
         well,
@@ -124,12 +138,12 @@ def _get_add_then_remove_volumes_for_test_well(
     min_vol, max_vol = _get_nominal_volume_range_for_dynamic_tracking(
         well,
         pipette,
-        mm_offset_pipette_tip=submerge_mm + mm_offset_min_vol,
+        mm_offset_pipette_tip=(submerge_mm * -1) + mm_offset_min_vol,
         mm_offset_well_top=mm_offset_well_top,
     )
     # always try to aspirate 1000ul (b/c it creates largest Z travel)
     remove_vol = min(max_vol - min_vol, pipette.max_volume)
-    return max_vol, remove_vol
+    return min_vol + remove_vol, remove_vol
 
 
 def _get_multi_dispense_volumes(volume_in_tip: float) -> List[float]:
@@ -215,7 +229,11 @@ def _get_aspirate_mode_for_well(well: Well) -> AspirateMode:
 
 
 def _load_labware(
-    ctx: ProtocolContext, load_name: str, location: str, **kwargs: Any
+    ctx: ProtocolContext,
+    load_name: str,
+    location: str,
+    liquid: Optional[Tuple[Liquid, float]] = None,
+    **kwargs: Any,
 ) -> Labware:
     version: Optional[int] = None
     # will attempt to load the newest version of a Schema 3 labware (if found)
@@ -232,8 +250,51 @@ def _load_labware(
         pass
     ret_labware = ctx.load_labware(load_name, location, version=version, **kwargs)
     if not ret_labware.is_tiprack:
-        ret_labware.load_empty(ret_labware.wells())
+        if liquid is not None:
+            ret_labware.load_liquid(ret_labware.wells(), liquid[-1], liquid[0])
+        else:
+            ret_labware.load_empty(ret_labware.wells())
     return ret_labware
+
+
+def _helper_load_all_labware(
+    ctx: ProtocolContext,
+    reservoir_load_name: str,
+    test_labware_load_name: str,
+    num_plates: int,
+    pipette_channels: int,
+) -> Tuple[Labware, List[Labware], List[Labware]]:
+    assert test_labware_load_name in list(
+        LOAD_NAME_SRC_LABWARE_BY_CHANNELS[pipette_channels].values()
+    ), f"{test_labware_load_name} cannot be tested with {pipette_channels}ch pipette"
+    # FIXME: get rid of this "air" liquid once the bug is fixed
+    #        where we're not able to estimate-height if well is empty
+    air = ctx.define_liquid(name="air", display_color="#FFFFFF")
+    src_reservoir = _load_labware(
+        ctx,
+        reservoir_load_name,
+        SLOTS["src_reservoir"],
+        liquid=(air, 0.01),
+    )
+    test_labwares = [
+        _load_labware(
+            ctx,
+            test_labware_load_name,
+            SLOTS[f"test_labware_{i + 1}"],
+            liquid=(air, 0.01),
+        )
+        for i in range(num_plates)
+    ]
+    dst_plates = [
+        _load_labware(
+            ctx,
+            LOAD_NAME_DST_PLATE,
+            SLOTS[f"dst_plate_{i + 1}"],
+            liquid=(air, 0.01),
+        )
+        for i in range(num_plates)
+    ]
+    return src_reservoir, test_labwares, dst_plates
 
 
 def add_parameters(parameters: ParameterContext) -> None:
@@ -257,10 +318,10 @@ def add_parameters(parameters: ParameterContext) -> None:
     parameters.add_str(
         display_name="reservoir",
         variable_name="reservoir",
-        default=LOAD_NAME_SRC_RESERVOIRS[0],
+        default=list(LOAD_NAME_SRC_RESERVOIRS.keys())[0],
         choices=[
             {"display_name": load_name, "value": load_name}
-            for load_name in LOAD_NAME_SRC_RESERVOIRS
+            for load_name in LOAD_NAME_SRC_RESERVOIRS.keys()
         ],
     )
     parameters.add_str(
@@ -299,7 +360,7 @@ def add_parameters(parameters: ParameterContext) -> None:
     parameters.add_float(
         display_name="mm_offset_min_vol",
         variable_name="mm_offset_min_vol",
-        default=3.0,
+        default=3.0,  # NOTE: minimum seems to be >=0.05 to pass simulation
         minimum=0.0,
         maximum=100.0,
     )
@@ -323,7 +384,7 @@ def run(ctx: ProtocolContext) -> None:
     test_labware_load_name = ctx.params.test_labware  # type: ignore[attr-defined]
     reservoir_load_name = ctx.params.reservoir  # type: ignore[attr-defined]
     mount = ctx.params.mount  # type: ignore[attr-defined]
-    submerge_mm = {
+    submerge_mm_by_mode = {
         AspirateMode.MENISCUS: ctx.params.submerge_no_lld,  # type: ignore[attr-defined]
         AspirateMode.MENISCUS_LLD: ctx.params.submerge_yes_lld,  # type: ignore[attr-defined]
     }
@@ -342,41 +403,41 @@ def run(ctx: ProtocolContext) -> None:
             for i in range(num_tip_slots)
         ],
     )
+    # NOTE: Keep it simple. Just pick up a tip right-away.
+    #       `InstrumentContext.get_minimum_liquid_sense_height()` requires a tip
+    #       to be currently attached, else it raises an error.
+    #       We call that function when pre-calculating stuff.
+    pipette.pick_up_tip()
 
     # LOAD LABWARE
+    ctx.load_trash_bin(SLOTS["trash"])
     assert test_labware_load_name in list(
         LOAD_NAME_SRC_LABWARE_BY_CHANNELS[channels].values()
     ), f"{test_labware_load_name} cannot be tested with {channels}ch pipette"
-    src_reservoir = _load_labware(ctx, reservoir_load_name, SLOTS["src_reservoir"])
-    test_labwares = [
-        _load_labware(ctx, test_labware_load_name, SLOTS[f"test_labware_{i + 1}"])
-        for i in range(num_plates)
-    ]
-    dst_plates = [
-        _load_labware(ctx, LOAD_NAME_DST_PLATE, SLOTS[f"dst_plate_{i + 1}"])
-        for i in range(num_plates)
-    ]
+    src_reservoir, test_labwares, dst_plates = _helper_load_all_labware(
+        ctx,
+        reservoir_load_name=reservoir_load_name,
+        test_labware_load_name=test_labware_load_name,
+        num_plates=num_plates,
+        pipette_channels=channels,
+    )
 
-    # LOAD LIQUID
-    dye_src_well = src_reservoir["A1"]
-    range_hv = ctx.define_liquid(name="range-hv", display_color="#FF0000")
-    src_reservoir.load_liquid([dye_src_well], dye_src_well.max_volume, range_hv)
-
-    # RUN
+    # PRE-DETERMINE VOLUME/LOCATIONS
+    # NOTE: storing trials by test-labware instance, so that during
+    #       the test-run loop we can easily know when to use the
+    #       gripper to re-arrange things
+    test_trials_by_labware: Dict[Labware, List[TestTrial]] = {
+        test_labware: [] for test_labware in test_labwares
+    }
     for test_labware, dst_plate in zip(test_labwares, dst_plates):
         remaining_dst_wells = dst_plate.wells()
         for test_well in test_labware.wells():
             # stop testing once the destination plate is full
             if not remaining_dst_wells:
                 break
-
-            # NOTE: pipette needs tip attached so it can calculate
-            #       its minimum LLD height
-            pipette.pick_up_tip()
-
             # gather all variables needed for testing this well
             mode = _get_aspirate_mode_for_well(test_well)
-            submerge_mm = submerge_mm[mode]
+            submerge_mm = submerge_mm_by_mode[mode]
             ul_to_add, ul_to_remove = _get_add_then_remove_volumes_for_test_well(
                 test_well,
                 pipette,
@@ -384,30 +445,81 @@ def run(ctx: ProtocolContext) -> None:
                 mm_offset_min_vol,
                 mm_offset_well_top,
             )
-            multi_dispense_vols = _get_multi_dispense_volumes(
+            destination_volumes = _get_multi_dispense_volumes(
                 volume_in_tip=ul_to_remove
             )
-            multi_dispense_wells = [
-                remaining_dst_wells.pop(0) for _ in range(len(multi_dispense_vols))
+            destination_wells = [
+                remaining_dst_wells.pop(0) for _ in range(len(destination_volumes))
             ]
+            test_trials_by_labware[test_labware].append(
+                TestTrial(
+                    mode=mode,
+                    test_well=test_well,
+                    ul_to_add=ul_to_add,
+                    ul_to_remove=ul_to_remove,
+                    submerge_mm=submerge_mm,
+                    destination_wells=destination_wells,
+                    destination_volumes=destination_volumes,
+                )
+            )
+
+    # LOAD LIQUID
+    dye_src_well = src_reservoir["A1"]
+    range_hv = ctx.define_liquid(name="range-hv", display_color="#FF0000")
+    src_reservoir.load_liquid([dye_src_well], dye_src_well.max_volume, range_hv)
+
+    # DETECT LIQUID
+    # NOTE: pipette should already have tip attached
+    pipette.require_liquid_presence(dye_src_well)
+    dead_vol_for_reservoir = LOAD_NAME_SRC_RESERVOIRS[reservoir_load_name]
+    total_dye_transferred = sum(
+        [t.ul_to_add for tl in test_trials_by_labware.values() for t in tl]
+    )
+    min_dye_required_in_reservoir = dead_vol_for_reservoir + total_dye_transferred
+    assert dye_src_well.current_liquid_volume() >= min_dye_required_in_reservoir, (
+        f"must have >= {int(min_dye_required_in_reservoir)} uL "
+        f"(detected {int(dye_src_well.current_liquid_volume())} uL)"
+    )
+
+    # RUN
+    _detected_src = False
+    for test_labware, test_trials in test_trials_by_labware.items():
+        # TODO: use gripper to arrange things between test-labwares
+        for trial in test_trials:
+
+            # FIXME: use dynamic tracking for ALL aspirates/dispenses (entire test, why not)
 
             # ADD DYE TO TEST-LABWARE
-            # FIXME: use dynamic tracking for ALL aspirates/dispenses (entire test, why not)
-            # FIXME: probe the reservoir if this is the first trial
-            pipette.aspirate(ul_to_add, dye_src_well.bottom(2))
-            pipette.dispense(ul_to_add, test_well.top(), push_out=P1000_MAX_PUSH_OUT_UL)
+            # NOTE: 1st trial has tip already attached
+            if not pipette.has_tip:
+                pipette.pick_up_tip()
+            print(f"adding {trial.ul_to_add} uL")
+
+            while trial.test_well.current_liquid_volume() < trial.ul_to_add:
+                remaining_ul = trial.ul_to_add - trial.test_well.current_liquid_volume()
+                pipette.aspirate(
+                    min(remaining_ul, pipette.max_volume), dye_src_well.bottom(2)
+                )
+                pipette.dispense(
+                    pipette.current_volume,
+                    trial.test_well.top(),
+                    push_out=P1000_MAX_PUSH_OUT_UL,
+                )
             pipette.drop_tip()
 
             # REMOVE DYE FROM TEST-LABWARE
+            print(f"removing {trial.ul_to_remove} uL")
             pipette.pick_up_tip()
-            if mode == AspirateMode.MENISCUS_LLD and not ctx.is_simulating():
-                pipette.require_liquid_presence(test_well)
-            pipette.aspirate(ul_to_remove, test_well.meniscus(submerge_mm))
+            if trial.mode == AspirateMode.MENISCUS_LLD and not ctx.is_simulating():
+                pipette.require_liquid_presence(trial.test_well)
+            pipette.aspirate(
+                trial.ul_to_remove, trial.test_well.meniscus(trial.submerge_mm)
+            )
 
             # MULTI-DISPENSE TO PLATE
-            for w, v in zip(multi_dispense_wells, multi_dispense_vols):
+            for w, v in zip(trial.destination_wells, trial.destination_volumes):
                 push_out = 0 if v < pipette.current_volume else P1000_MAX_PUSH_OUT_UL
                 pipette.dispense(v, w.top(), push_out=push_out)
             pipette.drop_tip()
 
-            # TODO: move dst_plate to plate-reader and take reading
+        # TODO: move dst_plate to plate-reader and take reading
