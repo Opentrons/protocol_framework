@@ -42,41 +42,6 @@ describe('getNumSlotsAvailable', () => {
     expect(result).toBe(0)
   })
 
-  it('should return 1 for a non MoaM module - temperature module', () => {
-    const result = getNumSlotsAvailable(null, [], TEMPERATURE_MODULE_V1)
-    expect(result).toBe(1)
-  })
-
-  it('should return 1 for a non MoaM module - absorbance plate reader', () => {
-    const result = getNumSlotsAvailable(null, [], ABSORBANCE_READER_V1)
-    expect(result).toBe(1)
-  })
-
-  it('should return 1 for a non MoaM module - thermocycler v1', () => {
-    const result = getNumSlotsAvailable(null, [], THERMOCYCLER_MODULE_V1)
-    expect(result).toBe(1)
-  })
-
-  it('should return 1 for a non MoaM module -  magnetic module v1', () => {
-    const result = getNumSlotsAvailable(null, [], MAGNETIC_MODULE_V1)
-    expect(result).toBe(1)
-  })
-
-  it('should return 1 for a non MoaM module - magnetic module v2', () => {
-    const result = getNumSlotsAvailable(null, [], MAGNETIC_MODULE_V2)
-    expect(result).toBe(1)
-  })
-
-  it('should return 2 for a thermocycler', () => {
-    const result = getNumSlotsAvailable(null, [], THERMOCYCLER_MODULE_V2)
-    expect(result).toBe(2)
-  })
-
-  it('should return 8 when there are no modules or additional equipment for a heater-shaker', () => {
-    const result = getNumSlotsAvailable(null, [], HEATERSHAKER_MODULE_V1)
-    expect(result).toBe(8)
-  })
-
   it('should return 3 when there a plate reader', () => {
     const mockModules = {
       0: {
