@@ -184,12 +184,12 @@ class LabwareDefinition3(TypedDict):
     gripperOffsets: NotRequired[dict[str, GripperOffsets]]
     gripForce: NotRequired[float]
     gripHeightFromLabwareBottom: NotRequired[float]
+    stackLimit: NotRequired[int]
     # The innerLabwareGeometry dict values are not currently modeled in these
     # TypedDict-based bindings. The only code that cares about them
     # currentlyuses our Pydantic-based bindings instead.
     innerLabwareGeometry: NotRequired[dict[str, object] | None]
     compatibleParentLabware: NotRequired[list[str]]
-    stackLimit: NotRequired[int]
 
 
 LabwareDefinition = LabwareDefinition2 | LabwareDefinition3
