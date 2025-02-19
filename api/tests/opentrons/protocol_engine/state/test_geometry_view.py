@@ -4025,6 +4025,10 @@ def test_get_location_sequence_stacker_hopper(
     assert location_sequence == [
         InStackerHopperLocation(moduleId="module-id-1"),
         OnCutoutFixtureLocationSequenceComponent(
-            possibleCutoutFixtureIds=["flexStackerModuleV1"], cutoutId="cutoutA3"
+            possibleCutoutFixtureIds=[
+                "flexStackerModuleV1",
+                "flexStackerModuleV1WithMagneticBlockV1",
+            ],
+            cutoutId="cutoutA3",
         ),
     ]
