@@ -18,15 +18,25 @@ import { Divider } from '/app/atoms/structure/Divider'
 
 import type { DeckInfoLabelProps } from '@opentrons/components'
 
-export interface InterventionInfoProps {
+export interface InterventionInfoDefaultProps {
+  layout: 'default'
   type: 'location-arrow-location' | 'location-colon-location' | 'location'
   labwareName: string
   labwareNickname?: string
-  subtext?: string
-  tagtext?: string
   currentLocationProps: DeckInfoLabelProps
   newLocationProps?: DeckInfoLabelProps
 }
+
+export interface InterventionInfoStackedProps
+  extends Omit<InterventionInfoDefaultProps, 'layout'> {
+  layout: 'stacked'
+  subText: string
+  tagText: string
+}
+
+export type InterventionInfoProps =
+  | InterventionInfoDefaultProps
+  | InterventionInfoStackedProps
 
 export function InterventionInfo(props: InterventionInfoProps): JSX.Element {
   const content = buildContent(props)
@@ -45,36 +55,34 @@ export function InterventionInfo(props: InterventionInfoProps): JSX.Element {
         >
           {props.labwareNickname ?? props.labwareName}
         </StyledText>
-        {props.subtext != null ? (
-          <StyledText
-            oddStyle="hidden"
-            desktopStyle="bodyDefaultRegular"
-            color={COLORS.grey60}
-            css={css`
-              ${LINE_CLAMP_STYLE}
-              margin-bottom: ${SPACING_1}
+        {props.layout === 'stacked' ? (
+          <>
+            <StyledText
+              oddStyle="hidden"
+              desktopStyle="bodyDefaultRegular"
+              color={COLORS.grey60}
+              css={css`
+                ${LINE_CLAMP_STYLE}
+                margin-bottom: ${SPACING_1}
               @media ${RESPONSIVENESS.touchscreenMediaQuerySpecs} {
-                display: none;
-              }
-            `}
-          >
-            {props.subtext}
-          </StyledText>
-        ) : null}
-        {props.tagtext != null ? (
-          <Tag type="default" text={props.tagtext} shrinkToContent={true} />
+                  display: none;
+                }
+              `}
+            >
+              {props.subText}
+            </StyledText>
+            <Tag type="default" text={props.tagText} shrinkToContent={true} />
+            <Divider
+              borderColor={COLORS.grey35}
+              css={`
+                @media ${RESPONSIVENESS.touchscreenMediaQuerySpecs} {
+                  display: none;
+                }
+              `}
+            />
+          </>
         ) : null}
       </Flex>
-      {props.tagtext != null && (
-        <Divider
-          borderColor={COLORS.grey35}
-          css={`
-            @media ${RESPONSIVENESS.touchscreenMediaQuerySpecs} {
-              display: none;
-            }
-          `}
-        />
-      )}
       {content}
     </Flex>
   )
