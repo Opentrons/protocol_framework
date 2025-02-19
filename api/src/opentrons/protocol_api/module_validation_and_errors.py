@@ -1,7 +1,7 @@
 """Contains module command validation functions and module errors for heater-shaker."""
 
 # TODO (spp, 2022-03-22): Move these values to heater-shaker module definition.
-HEATER_SHAKER_TEMPERATURE_MIN = 37
+HEATER_SHAKER_TEMPERATURE_MIN = 30
 HEATER_SHAKER_TEMPERATURE_MAX = 95
 HEATER_SHAKER_SPEED_MIN = 200
 HEATER_SHAKER_SPEED_MAX = 3000
