@@ -178,9 +178,6 @@ class LoadLabwareImplementation(
             display_name=params.displayName,
         )
 
-        # TODO(jbl 2023-06-23) these validation checks happen after the labware is loaded, because they rely on
-        #   on the definition. In practice this will not cause any issues since they will raise protocol ending
-        #   exception, but for correctness should be refactored to do this check beforehand.
         if isinstance(verified_location, OnLabwareLocation):
             self._state_view.labware.raise_if_labware_cannot_be_stacked(
                 top_labware_definition=loaded_labware.definition,
