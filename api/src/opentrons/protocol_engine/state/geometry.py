@@ -23,7 +23,6 @@ from ..errors import (
     LabwareNotLoadedOnModuleError,
     LabwareMovementNotAllowedError,
     OperationLocationNotInWellError,
-    WrongModuleTypeError,
 )
 from ..resources import (
     fixture_validation,
@@ -53,6 +52,7 @@ from ..types import (
     CurrentPipetteLocation,
     TipGeometry,
     LabwareMovementOffsetData,
+    InStackerHopperLocation,
     OnDeckLabwareLocation,
     AddressableAreaLocation,
     AddressableOffsetVector,
@@ -409,7 +409,11 @@ class GeometryView:
         elif isinstance(location, OnLabwareLocation):
             labware_data = self._labware.get(location.labwareId)
             return self._get_calibrated_module_offset(labware_data.location)
-        elif location == OFF_DECK_LOCATION or location == SYSTEM_LOCATION:
+        elif (
+            location == OFF_DECK_LOCATION
+            or location == SYSTEM_LOCATION
+            or isinstance(location, InStackerHopperLocation)
+        ):
             raise errors.LabwareNotOnDeckError(
                 "Labware does not have a slot or module associated with it"
                 " since it is no longer on the deck."
@@ -1546,13 +1550,6 @@ class GeometryView:
             OnCutoutFixtureLocationSequenceComponent
             | NotOnDeckLocationSequenceComponent
         ) = self._cutout_fixture_location_sequence_from_addressable_area(module_aa)
-        try:
-            self._modules.get_flex_stacker_substate(labware_location.moduleId)
-            base_location = NotOnDeckLocationSequenceComponent(
-                logicalLocationName=OFF_DECK_LOCATION
-            )
-        except WrongModuleTypeError:
-            pass
 
         if self._modules.get_deck_supports_module_fixtures():
             # On a deck with modules as cutout fixtures, we want, in order,
@@ -1584,6 +1581,21 @@ class GeometryView:
                 ),
                 base_location,
             ]
+
+    def _recurse_labware_location_from_stacker_hopper(
+        self,
+        labware_location: InStackerHopperLocation,
+        building: LabwareLocationSequence,
+    ) -> LabwareLocationSequence:
+        loc = self._modules.get_location(labware_location.moduleId)
+        model = self._modules.get_connected_model(labware_location.moduleId)
+        module_aa = self._modules.ensure_and_convert_module_fixture_location(
+            loc.slotName, model
+        )
+        cutout_base = self._cutout_fixture_location_sequence_from_addressable_area(
+            module_aa
+        )
+        return building + [labware_location, cutout_base]
 
     def _recurse_labware_location(
         self,
@@ -1627,6 +1639,10 @@ class GeometryView:
                     labware_location.slotName.value
                 ),
             ]
+        elif isinstance(labware_location, InStackerHopperLocation):
+            return self._recurse_labware_location_from_stacker_hopper(
+                labware_location, building
+            )
         else:
             _LOG.warn(f"Unhandled labware location kind: {labware_location}")
             return building

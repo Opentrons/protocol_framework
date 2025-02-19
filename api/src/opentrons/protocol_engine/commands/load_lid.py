@@ -10,7 +10,7 @@ from opentrons_shared_data.labware.labware_definition import LabwareDefinition
 from ..errors import LabwareCannotBeStackedError, LabwareIsNotAllowedInLocationError
 from ..resources import labware_validation
 from ..types import (
-    LabwareLocation,
+    LoadableLabwareLocation,
     OnLabwareLocation,
     OnLabwareLocationSequenceComponent,
 )
@@ -31,7 +31,7 @@ LoadLidCommandType = Literal["loadLid"]
 class LoadLidParams(BaseModel):
     """Payload required to load a lid onto a labware."""
 
-    location: LabwareLocation = Field(
+    location: LoadableLabwareLocation = Field(
         ...,
         description="Labware the lid should be loaded onto.",
     )

@@ -27,12 +27,12 @@ from opentrons.protocol_engine.commands.flex_stacker.store import StoreImpl
 from opentrons.protocol_engine.types import (
     DeckSlotLocation,
     Dimensions,
-    OFF_DECK_LOCATION,
     LoadedLabware,
     OverlapOffset,
-    OnModuleLocationSequenceComponent,
     OnAddressableAreaLocationSequenceComponent,
-    NotOnDeckLocationSequenceComponent,
+    OnModuleLocationSequenceComponent,
+    InStackerHopperLocation,
+    OnCutoutFixtureLocationSequenceComponent,
 )
 from opentrons.protocol_engine.errors import CannotPerformModuleAction
 from opentrons.types import DeckSlotName
@@ -112,6 +112,18 @@ async def test_store(
             ),
         ]
     )
+    decoy.when(
+        state_view.geometry.get_predicted_location_sequence(
+            InStackerHopperLocation(moduleId="flex-stacker-id")
+        )
+    ).then_return(
+        [
+            InStackerHopperLocation(moduleId="flex-stacker-id"),
+            OnCutoutFixtureLocationSequenceComponent(
+                cutoutId="cutoutA3", possibleCutoutFixtureIds=["flexStackerModuleV1"]
+            ),
+        ]
+    )
 
     with expectation:
         result = await subject.execute(data)
@@ -127,16 +139,17 @@ async def test_store(
                     ),
                 ],
                 eventualDestinationLocationSequence=[
-                    OnModuleLocationSequenceComponent(moduleId="flex-stacker-id"),
-                    NotOnDeckLocationSequenceComponent(
-                        logicalLocationName=OFF_DECK_LOCATION
+                    InStackerHopperLocation(moduleId="flex-stacker-id"),
+                    OnCutoutFixtureLocationSequenceComponent(
+                        cutoutId="cutoutA3",
+                        possibleCutoutFixtureIds=["flexStackerModuleV1"],
                     ),
                 ],
             ),
             state_update=StateUpdate(
                 labware_location=LabwareLocationUpdate(
                     labware_id="labware-id",
-                    new_location=OFF_DECK_LOCATION,
+                    new_location=InStackerHopperLocation(moduleId="flex-stacker-id"),
                     offset_id=None,
                 ),
                 flex_stacker_state_update=FlexStackerStateUpdate(

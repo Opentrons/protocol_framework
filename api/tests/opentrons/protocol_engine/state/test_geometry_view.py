@@ -76,6 +76,7 @@ from opentrons.protocol_engine.types import (
     OnLabwareLocationSequenceComponent,
     NotOnDeckLocationSequenceComponent,
     OnCutoutFixtureLocationSequenceComponent,
+    InStackerHopperLocation,
 )
 from opentrons.protocol_engine.commands import (
     CommandStatus,
@@ -4004,7 +4005,7 @@ def test_get_location_sequence_stacker_hopper(
                 labware_id="labware-id-1",
                 definition=nice_labware_definition,
                 offset_id=None,
-                new_location=ModuleLocation(moduleId="module-id-1"),
+                new_location=InStackerHopperLocation(moduleId="module-id-1"),
                 display_name=None,
             ),
             flex_stacker_state_update=FlexStackerStateUpdate(
@@ -4022,9 +4023,12 @@ def test_get_location_sequence_stacker_hopper(
     labware_store.handle_action(load_labware)
     location_sequence = subject.get_location_sequence("labware-id-1")
     assert location_sequence == [
-        OnAddressableAreaLocationSequenceComponent(
-            addressableAreaName="flexStackerModuleV1A4"
+        InStackerHopperLocation(moduleId="module-id-1"),
+        OnCutoutFixtureLocationSequenceComponent(
+            possibleCutoutFixtureIds=[
+                "flexStackerModuleV1",
+                "flexStackerModuleV1WithMagneticBlockV1",
+            ],
+            cutoutId="cutoutA3",
         ),
-        OnModuleLocationSequenceComponent(moduleId="module-id-1"),
-        NotOnDeckLocationSequenceComponent(logicalLocationName=OFF_DECK_LOCATION),
     ]

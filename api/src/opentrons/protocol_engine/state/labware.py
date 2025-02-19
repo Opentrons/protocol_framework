@@ -44,6 +44,7 @@ from ..types import (
     LabwareOffsetVector,
     LabwareOffsetLocationSequence,
     LegacyLabwareOffsetLocation,
+    InStackerHopperLocation,
     LabwareLocation,
     LoadedLabware,
     ModuleLocation,
@@ -478,6 +479,13 @@ class LabwareView:
         parent = self.get_location(labware_id)
         if isinstance(parent, OnLabwareLocation):
             return self.get_parent_location(parent.labwareId)
+        elif isinstance(parent, InStackerHopperLocation):
+            # TODO: This function really wants to return something like an "EventuallyOnDeckLocation"
+            # and either raise or return None for labware that isn't traceable to a place on the robot
+            # deck (i.e. not in a stacker hopper, not off-deck, not in system). We don't really have
+            # that concept yet but should add it soon. In the meantime, other checks should prevent
+            # this being called in those cases.
+            return ModuleLocation(moduleId=parent.moduleId)
         return parent
 
     def get_highest_child_labware(self, labware_id: str) -> str:
