@@ -94,14 +94,14 @@ def _binary_search_liquid_volume_at_height(
 def _get_nominal_volume_range_for_dynamic_tracking(
     well: Well,
     pipette: InstrumentContext,
-    submerge_mm: float,
+    mm_offset_pipette_tip: float,
     mm_offset_well_top: float,
 ) -> Tuple[float, float]:
     # this function calculate the MIN and MAX possible WELL volumes
     # that a given pipette at a given submerge depth can DYNAMICALLY pipette
     min_vol = _binary_search_liquid_volume_at_height(
         well,
-        pipette.get_minimum_liquid_sense_height() + abs(submerge_mm),
+        pipette.get_minimum_liquid_sense_height() + abs(mm_offset_pipette_tip),
     )
     max_vol = _binary_search_liquid_volume_at_height(
         well,
@@ -114,8 +114,8 @@ def _get_add_then_remove_volumes_for_test_well(
     well: Well,
     pipette: InstrumentContext,
     submerge_mm: float,
-    mm_offset_well_top: float = 0.0,
     mm_offset_min_vol: float = 0.0,
+    mm_offset_well_top: float = 0.0,
 ) -> Tuple[float, float]:
     # Returns the volumes to ADD and REMOVE to/from a given test well.
     # Use `mm_offset_min_vol_to_ending_height` to set a millimeter tolerance
@@ -124,61 +124,55 @@ def _get_add_then_remove_volumes_for_test_well(
     min_vol, max_vol = _get_nominal_volume_range_for_dynamic_tracking(
         well,
         pipette,
-        submerge_mm=submerge_mm,
+        mm_offset_pipette_tip=submerge_mm + mm_offset_min_vol,
         mm_offset_well_top=mm_offset_well_top,
     )
     # always try to aspirate 1000ul (b/c it creates largest Z travel)
     remove_vol = min(max_vol - min_vol, pipette.max_volume)
-    assert well.current_liquid_height == 0
-    min_vol_height = well.estimate_liquid_height_after_pipetting(min_vol)
-    ending_height = min_vol_height + mm_offset_min_vol
-    ending_volume = _binary_search_liquid_volume_at_height(well, ending_height)
-    add_vol = ending_volume + remove_vol
-    assert add_vol < max_vol, f"offset {mm_offset_min_vol} too large"
-    return add_vol, remove_vol
+    return max_vol, remove_vol
 
 
-def _get_multi_dispense_volumes(current_volume: float) -> List[float]:
+def _get_multi_dispense_volumes(volume_in_tip: float) -> List[float]:
     # 1x dispenses
-    if current_volume < 200:
-        disp_vols = [current_volume]
-    elif current_volume <= 250:
-        disp_vols = [current_volume]
+    if volume_in_tip < 200:
+        disp_vols = [volume_in_tip]
+    elif volume_in_tip <= 250:
+        disp_vols = [volume_in_tip]
 
     # 2x dispenses
-    elif current_volume <= 200 + 200:
-        disp_vols = [200, current_volume - 200]
-    elif current_volume <= 250 + 200:
-        disp_vols = [current_volume - 200, 200]
-    elif current_volume <= 250 + 250:
-        disp_vols = [250, current_volume - 250]
+    elif volume_in_tip <= 200 + 200:
+        disp_vols = [200, volume_in_tip - 200]
+    elif volume_in_tip <= 250 + 200:
+        disp_vols = [volume_in_tip - 200, 200]
+    elif volume_in_tip <= 250 + 250:
+        disp_vols = [250, volume_in_tip - 250]
 
     # 3x dispenses
-    elif current_volume <= 200 + 200 + 200:
-        disp_vols = [200, 200, current_volume - (200 + 200)]
-    elif current_volume <= 250 + 200 + 200:
-        disp_vols = [current_volume - (200 + 200), 200, 200]
-    elif current_volume <= 250 + 250 + 200:
-        disp_vols = [250, current_volume - (200 + 250), 200]
-    elif current_volume <= 250 + 250 + 250:
-        disp_vols = [250, 250, current_volume - (250 + 250)]
+    elif volume_in_tip <= 200 + 200 + 200:
+        disp_vols = [200, 200, volume_in_tip - (200 + 200)]
+    elif volume_in_tip <= 250 + 200 + 200:
+        disp_vols = [volume_in_tip - (200 + 200), 200, 200]
+    elif volume_in_tip <= 250 + 250 + 200:
+        disp_vols = [250, volume_in_tip - (200 + 250), 200]
+    elif volume_in_tip <= 250 + 250 + 250:
+        disp_vols = [250, 250, volume_in_tip - (250 + 250)]
 
     # 4x dispenses
-    elif current_volume <= 200 + 200 + 200 + 200:
-        disp_vols = [200, 200, 200, current_volume - (200 + 200 + 200)]
-    elif current_volume <= 250 + 200 + 200 + 200:
-        disp_vols = [current_volume - (200 + 200 + 200), 200, 200, 200]
-    elif current_volume <= 250 + 250 + 200 + 200:
-        disp_vols = [250, current_volume - (200 + 200 + 250), 200, 200]
-    elif current_volume <= 250 + 250 + 250 + 200:
-        disp_vols = [250, 250, current_volume - (250 + 250 + 200), 200]
-    elif current_volume <= 250 + 250 + 250 + 250:
-        disp_vols = [250, 250, 250, current_volume - (250 + 250 + 250)]
+    elif volume_in_tip <= 200 + 200 + 200 + 200:
+        disp_vols = [200, 200, 200, volume_in_tip - (200 + 200 + 200)]
+    elif volume_in_tip <= 250 + 200 + 200 + 200:
+        disp_vols = [volume_in_tip - (200 + 200 + 200), 200, 200, 200]
+    elif volume_in_tip <= 250 + 250 + 200 + 200:
+        disp_vols = [250, volume_in_tip - (200 + 200 + 250), 200, 200]
+    elif volume_in_tip <= 250 + 250 + 250 + 200:
+        disp_vols = [250, 250, volume_in_tip - (250 + 250 + 200), 200]
+    elif volume_in_tip <= 250 + 250 + 250 + 250:
+        disp_vols = [250, 250, 250, volume_in_tip - (250 + 250 + 250)]
 
     else:
         raise ValueError("this shouldn't happen")
 
-    assert sum(disp_vols) == current_volume
+    assert sum(disp_vols) == volume_in_tip
     for vol in disp_vols:
         # NOTE: we can support smaller volumes if we change the test to:
         #       a) use diluent
@@ -299,16 +293,6 @@ def add_parameters(parameters: ParameterContext) -> None:
         minimum=-10.0,
         maximum=0.0,
     )
-    # NOTE: (sigler) this represents the deformation
-    #       observed at the top ~1mm of the PCR well. We assume all labware have
-    #       a similar thing going on, so let's stay away (eg: 2mm) from the top.
-    parameters.add_float(
-        display_name="mm_offset_well_top",
-        variable_name="mm_offset_well_top",
-        default=-2.0,
-        minimum=-100.0,
-        maximum=0.0,
-    )
     # factor of safety (defined in mm) to guarantee that the liquid height
     # will NOT be too LOW, such that the pipette cannot reach the defined
     # SUBMERGE depth
@@ -318,6 +302,16 @@ def add_parameters(parameters: ParameterContext) -> None:
         default=3.0,
         minimum=0.0,
         maximum=100.0,
+    )
+    # NOTE: (sigler) this represents the deformation
+    #       observed at the top ~1mm of the PCR well. We assume all labware have
+    #       a similar thing going on, so let's stay away (eg: 2mm) from the top.
+    parameters.add_float(
+        display_name="mm_offset_well_top",
+        variable_name="mm_offset_well_top",
+        default=-2.0,
+        minimum=-100.0,
+        maximum=0.0,
     )
 
 
@@ -329,12 +323,12 @@ def run(ctx: ProtocolContext) -> None:
     test_labware_load_name = ctx.params.test_labware  # type: ignore[attr-defined]
     reservoir_load_name = ctx.params.reservoir  # type: ignore[attr-defined]
     mount = ctx.params.mount  # type: ignore[attr-defined]
-    mm_offset_well_top = ctx.params.mm_offset_well_top  # type: ignore[attr-defined]
-    mm_offset_min_vol = ctx.params.mm_offset_min_vol  # type: ignore[attr-defined]
     submerge_mm = {
         AspirateMode.MENISCUS: ctx.params.submerge_no_lld,  # type: ignore[attr-defined]
         AspirateMode.MENISCUS_LLD: ctx.params.submerge_yes_lld,  # type: ignore[attr-defined]
     }
+    mm_offset_min_vol = ctx.params.mm_offset_min_vol  # type: ignore[attr-defined]
+    mm_offset_well_top = ctx.params.mm_offset_well_top  # type: ignore[attr-defined]
 
     # LOAD PIPETTES
     num_tip_slots = len([s for s in SLOTS.keys() if "tip" in s])
@@ -387,15 +381,14 @@ def run(ctx: ProtocolContext) -> None:
                 test_well,
                 pipette,
                 submerge_mm,
-                mm_offset_well_top,
                 mm_offset_min_vol,
+                mm_offset_well_top,
             )
             multi_dispense_vols = _get_multi_dispense_volumes(
-                current_volume=ul_to_remove
+                volume_in_tip=ul_to_remove
             )
             multi_dispense_wells = [
-                remaining_dst_wells.pop(0)
-                for _ in range(len(multi_dispense_vols))
+                remaining_dst_wells.pop(0) for _ in range(len(multi_dispense_vols))
             ]
 
             # ADD DYE TO TEST-LABWARE
