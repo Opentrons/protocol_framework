@@ -131,7 +131,7 @@ export const moveLiquidFormToArgs = (
     hydratedFormData.aspirate_touchTip_mmFromTop ??
     DEFAULT_MM_TOUCH_TIP_OFFSET_FROM_TOP
   const touchTipAfterAspirateSpeed =
-    hydratedFormData.aspirate_touchTip_speed ?? 200
+    hydratedFormData.aspirate_touchTip_speed ?? null
   const touchTipAfterDispense = Boolean(
     hydratedFormData.dispense_touchTip_checkbox
   )
@@ -139,7 +139,7 @@ export const moveLiquidFormToArgs = (
     hydratedFormData.dispense_touchTip_mmFromTop ??
     DEFAULT_MM_TOUCH_TIP_OFFSET_FROM_TOP
   const touchTipAfterDispenseSpeed =
-    hydratedFormData.aspirate_touchTip_speed ?? 200
+    hydratedFormData.aspirate_touchTip_speed ?? null
   const mixBeforeAspirate = getMixData(
     hydratedFormData,
     'aspirate_mix_checkbox',

@@ -53,7 +53,6 @@ export type FormErrorKey =
   | 'PAUSE_TEMP_REQUIRED'
   | 'LABWARE_TO_MOVE_REQUIRED'
   | 'NEW_LABWARE_LOCATION_REQUIRED'
-  | 'TOUCH_TIP_SPEED_REQUIRED'
 
 export interface FormError {
   title: string
