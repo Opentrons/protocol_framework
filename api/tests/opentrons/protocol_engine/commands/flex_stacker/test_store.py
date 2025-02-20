@@ -8,6 +8,7 @@ from unittest.mock import sentinel
 
 from opentrons.calibration_storage.helpers import uri_from_details
 from opentrons.hardware_control.modules import FlexStacker
+from opentrons.protocol_engine.resources import ModelUtils
 
 from opentrons.protocol_engine.state.update_types import (
     StateUpdate,
@@ -56,12 +57,15 @@ async def test_store(
     decoy: Decoy,
     state_view: StateView,
     equipment: EquipmentHandler,
+    model_utils: ModelUtils,
     in_static_mode: bool,
     expectation: ContextManager[Any],
     tiprack_lid_def: LabwareDefinition,
 ) -> None:
     """It should be able to store a labware."""
-    subject = StoreImpl(state_view=state_view, equipment=equipment)
+    subject = StoreImpl(
+        state_view=state_view, equipment=equipment, model_utils=model_utils
+    )
     data = flex_stacker.StoreParams(moduleId="flex-stacker-id")
 
     fs_module_substate = FlexStackerSubState(

@@ -8,6 +8,7 @@ from pydantic import Field, TypeAdapter
 from opentrons.util.get_union_elements import get_union_elements
 
 from .command import DefinedErrorData
+from .module_action_common import StackerShuttleEmptyError
 from .pipetting_common import (
     OverpressureError,
     LiquidNotFoundError,
@@ -898,6 +899,7 @@ CommandDefinedErrorData = Union[
     DefinedErrorData[LiquidNotFoundError],
     DefinedErrorData[GripperMovementError],
     DefinedErrorData[StallOrCollisionError],
+    DefinedErrorData[StackerShuttleEmptyError],
 ]
 
 

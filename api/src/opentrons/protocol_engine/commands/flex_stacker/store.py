@@ -1,17 +1,25 @@
 """Command models to retrieve a labware from a Flex Stacker."""
 
 from __future__ import annotations
-from typing import Optional, Literal, TYPE_CHECKING
+from typing import Optional, Literal, TYPE_CHECKING, Union
 from typing_extensions import Type
 
 from pydantic import BaseModel, Field
 
-from ..command import AbstractCommandImpl, BaseCommand, BaseCommandCreate, SuccessData
+from ..command import (
+    AbstractCommandImpl,
+    BaseCommand,
+    BaseCommandCreate,
+    SuccessData,
+    DefinedErrorData,
+)
+from ..module_action_common import StackerShuttleEmptyError
 from ...errors import (
     ErrorOccurrence,
     CannotPerformModuleAction,
     LabwareNotLoadedOnModuleError,
 )
+from ...resources import ModelUtils
 from ...state import update_types
 from ...types import (
     LabwareLocationSequence,
@@ -48,19 +56,27 @@ class StoreResult(BaseModel):
     )
 
 
-class StoreImpl(AbstractCommandImpl[StoreParams, SuccessData[StoreResult]]):
+_ExecuteReturn = Union[
+    SuccessData[StoreResult],
+    DefinedErrorData[StackerShuttleEmptyError],
+]
+
+
+class StoreImpl(AbstractCommandImpl[StoreParams, _ExecuteReturn]):
     """Implementation of a labware storage command."""
 
     def __init__(
         self,
         state_view: StateView,
         equipment: EquipmentHandler,
+        model_utils: ModelUtils,
         **kwargs: object,
     ) -> None:
         self._state_view = state_view
         self._equipment = equipment
+        self._model_utils = model_utils
 
-    async def execute(self, params: StoreParams) -> SuccessData[StoreResult]:
+    async def execute(self, params: StoreParams) -> _ExecuteReturn:
         """Execute the labware storage command."""
         stacker_state = self._state_view.modules.get_flex_stacker_substate(
             params.moduleId
@@ -75,9 +91,20 @@ class StoreImpl(AbstractCommandImpl[StoreParams, SuccessData[StoreResult]]):
 
         try:
             lw_id = self._state_view.labware.get_id_by_module(params.moduleId)
-        except LabwareNotLoadedOnModuleError:
-            raise CannotPerformModuleAction(
-                "Cannot store labware if Flex Stacker carriage is empty"
+        except LabwareNotLoadedOnModuleError as e:
+            return DefinedErrorData(
+                public=StackerShuttleEmptyError(
+                    id=self._model_utils.generate_id(),
+                    createdAt=self._model_utils.get_timestamp(),
+                    wrappedErrors=[
+                        ErrorOccurrence.from_failed(
+                            id=self._model_utils.generate_id(),
+                            createdAt=self._model_utils.get_timestamp(),
+                            error=e,
+                        )
+                    ],
+                ),
+                state_update=None,
             )
 
         original_location_sequence = self._state_view.geometry.get_location_sequence(

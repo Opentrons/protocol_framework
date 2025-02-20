@@ -2,15 +2,10 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Literal, Any
+from typing import Literal
 
 from opentrons_shared_data.errors import ErrorCodes
 from ..errors import ErrorOccurrence
-
-
-if TYPE_CHECKING:
-    from ..execution.movement import MovementHandler
-    from ..resources.model_utils import ModelUtils
 
 
 class StackerShuttleEmptyError(ErrorOccurrence):
