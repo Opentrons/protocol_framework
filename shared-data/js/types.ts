@@ -30,7 +30,7 @@ import type {
   FLEX_STACKER_MODULE_V1,
   FLEX_STACKER_MODULE_TYPE,
 } from './constants'
-import type { RunTimeCommand, LabwareLocation } from '../command/types'
+import type { RunTimeCommand, LoadedLabwareLocation } from '../command/types'
 import type { AddressableAreaName, CutoutFixtureId, CutoutId } from '../deck'
 import type { PipetteName } from './pipettes'
 import type { CommandAnnotation } from '../commandAnnotation/types'
@@ -259,6 +259,7 @@ export interface LabwareDefinition2 {
   allowedRoles?: LabwareRoles[]
   stackingOffsetWithLabware?: Record<string, LabwareOffset>
   stackingOffsetWithModule?: Record<string, LabwareOffset>
+  stackLimit?: number
 }
 
 export interface LabwareDefinition3 {
@@ -682,7 +683,7 @@ export interface LoadedLabware {
   id: string
   loadName: string
   definitionUri: string
-  location: LabwareLocation
+  location: LoadedLabwareLocation
   offsetId?: string
   displayName?: string
 }

@@ -12,8 +12,8 @@ import { getAllLiquidClassDefs } from '@opentrons/shared-data'
 import { getEnableLiquidClasses } from '../../../../../../feature-flags/selectors'
 import { getLiquidEntities } from '../../../../../../step-forms/selectors'
 import { getLiquidClassDisplayName } from '../../../../../../liquid-defs/utils'
-import { SingleStepMoveLiquidTools } from './SingleStepMoveLiquidTools'
-import { MultipleStepsMoveLiquidTools } from './MultipleStepsMoveLiquidTools'
+import { FirstStepMoveLiquidTools } from './FirstStepMoveLiquidTools'
+import { SecondStepsMoveLiquidTools } from './SecondStepsMoveLiquidTools'
 
 import type { StepFormProps } from '../../types'
 
@@ -98,14 +98,17 @@ export function MoveLiquidTools(props: StepFormProps): JSX.Element {
     liquidClassOptions.unshift(liquidClassOptions.pop()!)
   }
 
-  return toolboxStep === 0 ? (
-    <SingleStepMoveLiquidTools
-      propsForFields={propsForFields}
-      formData={formData}
-      visibleFormErrors={visibleFormErrors}
-    />
-  ) : (
-    <>
+  // Object mapping step numbers to functions returning the correct JSX
+  const stepComponents: Record<number, () => JSX.Element> = {
+    0: () => (
+      <FirstStepMoveLiquidTools
+        propsForFields={propsForFields}
+        formData={formData}
+        visibleFormErrors={visibleFormErrors}
+      />
+    ),
+    1: () => (
+      <>
       {enableLiquidClasses ? (
         <Flex
           flexDirection={DIRECTION_COLUMN}
@@ -144,14 +147,21 @@ export function MoveLiquidTools(props: StepFormProps): JSX.Element {
           </Flex>
         </Flex>
       ) : null}
-      <MultipleStepsMoveLiquidTools
-        propsForFields={propsForFields}
-        formData={formData}
-        tab={tab}
-        setTab={setTab}
-        setShowFormErrors={setShowFormErrors}
-        visibleFormErrors={visibleFormErrors}
-      />
+      <SecondStepsMoveLiquidTools
+          propsForFields={propsForFields}
+          formData={formData}
+          tab={tab}
+          setTab={setTab}
+          setShowFormErrors={setShowFormErrors}
+          visibleFormErrors={visibleFormErrors}
+        />
     </>
-  )
+    ),
+    // 2: () => (
+    //   third step tools here
+    // ),
+  }
+
+  const StepComponent = stepComponents[toolboxStep] ?? stepComponents[0]
+  return StepComponent()
 }

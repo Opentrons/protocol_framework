@@ -73,6 +73,15 @@ class OnLabwareLocation(BaseModel):
     )
 
 
+class InStackerHopperLocation(BaseModel):
+    """The location of a labware in a stacker hopper."""
+
+    kind: Literal["inStackerHopper"] = "inStackerHopper"
+    moduleId: str = Field(
+        ..., description="The ID of the stacker in which this labware is."
+    )
+
+
 _OffDeckLocationType = Literal["offDeck"]
 _SystemLocationType = Literal["systemLocation"]
 OFF_DECK_LOCATION: _OffDeckLocationType = "offDeck"
@@ -136,6 +145,7 @@ LabwareLocationSequence = list[
     | OnAddressableAreaLocationSequenceComponent
     | NotOnDeckLocationSequenceComponent
     | OnCutoutFixtureLocationSequenceComponent
+    | InStackerHopperLocation
 ]
 """Labware location specifier."""
 
@@ -146,8 +156,19 @@ LabwareLocation = Union[
     _OffDeckLocationType,
     _SystemLocationType,
     AddressableAreaLocation,
+    InStackerHopperLocation,
 ]
 """Union of all locations where it's legal to keep a labware."""
+
+LoadableLabwareLocation = Union[
+    DeckSlotLocation,
+    ModuleLocation,
+    OnLabwareLocation,
+    _OffDeckLocationType,
+    _SystemLocationType,
+    AddressableAreaLocation,
+]
+"""Union of all locations where it's legal to load a labware."""
 
 OnDeckLabwareLocation = Union[
     DeckSlotLocation, ModuleLocation, OnLabwareLocation, AddressableAreaLocation

@@ -34,6 +34,7 @@ from opentrons_shared_data.labware.labware_definition import (
     Vector as LabwareDefinitionVector,
     ConicalFrustum,
 )
+from opentrons_shared_data.labware import load_definition as load_labware_definition
 
 from opentrons.protocol_engine import errors
 from opentrons.protocol_engine.types import (
@@ -76,6 +77,7 @@ from opentrons.protocol_engine.types import (
     OnLabwareLocationSequenceComponent,
     NotOnDeckLocationSequenceComponent,
     OnCutoutFixtureLocationSequenceComponent,
+    InStackerHopperLocation,
 )
 from opentrons.protocol_engine.commands import (
     CommandStatus,
@@ -216,9 +218,9 @@ def module_store(state_config: Config) -> ModuleStore:
 
 
 @pytest.fixture
-def module_view(module_store: ModuleStore) -> ModuleView:
+def module_view(module_store: ModuleStore, state_config: Config) -> ModuleView:
     """Get a module view of a real labware store."""
-    return ModuleView(module_store._state)
+    return ModuleView(state=module_store._state)
 
 
 @pytest.fixture
@@ -4004,7 +4006,7 @@ def test_get_location_sequence_stacker_hopper(
                 labware_id="labware-id-1",
                 definition=nice_labware_definition,
                 offset_id=None,
-                new_location=ModuleLocation(moduleId="module-id-1"),
+                new_location=InStackerHopperLocation(moduleId="module-id-1"),
                 display_name=None,
             ),
             flex_stacker_state_update=FlexStackerStateUpdate(
@@ -4022,9 +4024,55 @@ def test_get_location_sequence_stacker_hopper(
     labware_store.handle_action(load_labware)
     location_sequence = subject.get_location_sequence("labware-id-1")
     assert location_sequence == [
-        OnAddressableAreaLocationSequenceComponent(
-            addressableAreaName="flexStackerModuleV1A4"
+        InStackerHopperLocation(moduleId="module-id-1"),
+        OnCutoutFixtureLocationSequenceComponent(
+            possibleCutoutFixtureIds=[
+                "flexStackerModuleV1",
+                "flexStackerModuleV1WithMagneticBlockV1",
+            ],
+            cutoutId="cutoutA3",
         ),
-        OnModuleLocationSequenceComponent(moduleId="module-id-1"),
-        NotOnDeckLocationSequenceComponent(logicalLocationName=OFF_DECK_LOCATION),
     ]
+
+
+@pytest.mark.parametrize("use_mocks", [False])
+@pytest.mark.parametrize(
+    "definition_list,height",
+    [
+        pytest.param([], 0, id="empty-list"),
+        pytest.param(
+            [
+                LabwareDefinition.model_validate(
+                    load_labware_definition(
+                        "corning_96_wellplate_360ul_flat", version=2
+                    )
+                )
+            ],
+            14.22,
+            id="single-labware",
+        ),
+        pytest.param(
+            [
+                LabwareDefinition.model_validate(
+                    load_labware_definition(
+                        "opentrons_flex_tiprack_lid", version=1, schema=3
+                    )
+                ),
+                LabwareDefinition.model_validate(
+                    load_labware_definition(
+                        "opentrons_flex_96_tiprack_1000ul", version=1
+                    )
+                ),
+            ],
+            99 + 17 - 14,
+            id="tiprack-plus-lid",
+        ),
+    ],
+)
+def test_get_height_of_labware_stack(
+    subject: GeometryView,
+    definition_list: list[LabwareDefinition],
+    height: float,
+) -> None:
+    """It should correctly calculate the height of labware stacks."""
+    assert subject.get_height_of_labware_stack(definition_list) == height

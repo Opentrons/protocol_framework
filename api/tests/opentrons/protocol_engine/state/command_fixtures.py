@@ -14,7 +14,7 @@ from opentrons.protocol_engine.types import (
     MovementAxis,
     WellLocation,
     LiquidHandlingWellLocation,
-    LabwareLocation,
+    LoadableLabwareLocation,
     DeckSlotLocation,
     LabwareMovementStrategy,
     AddressableOffsetVector,
@@ -633,7 +633,7 @@ def create_touch_tip_command(
 
 
 def create_move_labware_command(
-    new_location: LabwareLocation,
+    new_location: LoadableLabwareLocation,
     strategy: LabwareMovementStrategy,
     labware_id: str = "labware-id",
     offset_id: Optional[str] = None,
