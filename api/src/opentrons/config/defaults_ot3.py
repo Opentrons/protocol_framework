@@ -22,7 +22,9 @@ DEFAULT_PIPETTE_OFFSET = [0.0, 0.0, 0.0]
 DEFAULT_MODULE_OFFSET = [0.0, 0.0, 0.0]
 
 DEFAULT_LIQUID_PROBE_SETTINGS: Final[LiquidProbeSettings] = LiquidProbeSettings(
+    mount_discontinuity=5,
     mount_speed=35,
+    mount_acceleration=150,
     plunger_speed=15,
     plunger_impulse_time=0.2,
     sensor_threshold_pascals=15,
@@ -303,6 +305,12 @@ def _build_default_liquid_probe(
 ) -> LiquidProbeSettings:
     return LiquidProbeSettings(
         mount_speed=from_conf.get("mount_speed", default.mount_speed),
+        mount_discontinuity=from_conf.get(
+            "mount_discontinuity", default.mount_discontinuity
+        ),
+        mount_acceleration=from_conf.get(
+            "mount_acceleration", default.mount_acceleration
+        ),
         plunger_speed=from_conf.get("plunger_speed", default.plunger_speed),
         plunger_impulse_time=from_conf.get(
             "plunger_impulse_time", default.plunger_impulse_time

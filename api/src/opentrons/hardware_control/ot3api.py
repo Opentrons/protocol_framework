@@ -2695,21 +2695,21 @@ class OT3API(
         mount: OT3Mount,
         probe_settings: LiquidProbeSettings,
         probe: InstrumentProbeType,
-        mount_acceleration: float,
-        mount_discontinuity: float,
         p_travel: float,
         z_offset_for_plunger_prep: float,
         force_both_sensors: bool = False,
         response_queue: Optional[PipetteSensorResponseQueue] = None,
     ) -> float:
         plunger_direction = -1 if probe_settings.aspirate_while_sensing else 1
-        print(f"Liquid probe pass discontinuity {mount_discontinuity} acceleration {mount_acceleration}")
+        print(
+            f"Liquid probe pass discontinuity {probe_settings.mount_discontinuity} acceleration {probe_settings.mount_acceleration}"
+        )
         end_z = await self._backend.liquid_probe(
             mount,
             p_travel,
             probe_settings.mount_speed,
-            mount_discontinuity,
-            mount_acceleration,
+            probe_settings.mount_discontinuity,
+            probe_settings.mount_acceleration,
             (probe_settings.plunger_speed * plunger_direction),
             probe_settings.sensor_threshold_pascals,
             probe_settings.plunger_impulse_time,
@@ -2813,14 +2813,6 @@ class OT3API(
             probe_settings.plunger_reset_offset, z_offset_per_pass
         )
 
-        mount_discontinuity = self.config.motion_settings.max_speed_discontinuity[
-            GantryLoad.HIGH_THROUGHPUT
-        ][OT3AxisKind.Z]
-
-        mount_acceleration= self.config.motion_settings.acceleration[
-            GantryLoad.HIGH_THROUGHPUT
-        ][OT3AxisKind.Z]
-
         async def prep_plunger_for_probe_move(
             position: top_types.Point, aspirate_while_sensing: bool
         ) -> None:
@@ -2900,8 +2892,6 @@ class OT3API(
                     checked_mount,
                     probe_settings,
                     checked_probe,
-                    mount_acceleration,
-                    mount_discontinuity,
                     plunger_travel_mm + sensor_baseline_plunger_move_mm,
                     z_offset_for_plunger_prep,
                     force_both_sensors,
