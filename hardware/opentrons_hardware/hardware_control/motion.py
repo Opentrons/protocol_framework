@@ -35,7 +35,7 @@ class MoveType(int, Enum):
             MoveStopCondition.none: cls.linear,
             MoveStopCondition.limit_switch: cls.home,
             MoveStopCondition.sync_line: cls.calibration,
-            MoveStopCondition.encoder_position: cls.linear,
+            MoveStopCondition.encoder_position_or_safe_stop: cls.linear,
             MoveStopCondition.gripper_force: cls.grip,
             MoveStopCondition.stall: cls.linear,
             MoveStopCondition.limit_switch_backoff: cls.linear,
@@ -52,7 +52,7 @@ class MoveGroupSingleAxisStep:
     velocity_mm_sec: np.float64
     duration_sec: np.float64
     acceleration_mm_sec_sq: np.float64 = np.float64(0)
-    stop_condition: MoveStopCondition = MoveStopCondition.none
+    stop_condition: Union[MoveStopCondition, int] = MoveStopCondition.none
     move_type: MoveType = MoveType.linear
     sensor_type: Optional[SensorType] = None
     sensor_id: Optional[SensorId] = None

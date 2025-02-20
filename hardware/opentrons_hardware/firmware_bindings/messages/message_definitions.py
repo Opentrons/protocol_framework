@@ -265,6 +265,13 @@ class MoveCompleted(BaseMessage):  # noqa: D101
 
 
 @dataclass
+class MoveConditionMet(BaseMessage):  # noqa: D101
+    payload: payloads.MoveCompletedPayload
+    payload_type: Type[payloads.MoveCompletedPayload] = payloads.MoveCompletedPayload
+    message_id: Literal[MessageId.move_condition_met] = MessageId.move_condition_met
+
+
+@dataclass
 class MotorPositionRequest(EmptyPayloadMessage):  # noqa: D101
     message_id: Literal[
         MessageId.motor_position_request

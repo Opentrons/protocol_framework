@@ -650,7 +650,7 @@ async def test_gripper_jaw_width(
         # only moving the gripper jaw
         assert list(move_group[0].keys()) == [NodeId.gripper_g]
         step = move_group[0][NodeId.gripper_g]
-        assert step.stop_condition == MoveStopCondition.encoder_position
+        assert step.stop_condition == MoveStopCondition.encoder_position_or_safe_stop
         assert step.move_type == MoveType.linear
 
 

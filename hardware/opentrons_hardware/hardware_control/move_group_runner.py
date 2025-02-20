@@ -347,7 +347,10 @@ class MoveGroupRunner:
             )
             return AddSensorLinearMoveRequest(payload=sensor_move_payload)
         else:
-            stop_cond = step.stop_condition.value
+            if isinstance(step.stop_condition, MoveStopCondition):
+                stop_cond = step.stop_condition.value
+            else:
+                stop_cond = step.stop_condition
             if self._ignore_stalls:
                 stop_cond += MoveStopCondition.ignore_stalls.value
             linear_payload = AddLinearMoveRequestPayload(
@@ -419,7 +422,7 @@ class MoveScheduler:
         # For each move group create a set identifying the node and seq id.
         self._moves: List[Set[Tuple[int, int]]] = []
         self._durations: List[float] = []
-        self._stop_condition: List[List[MoveStopCondition]] = []
+        self._stop_condition: List[List[int]] = []
         self._start_at_index = start_at_index
         self._expected_tip_action_motors = []
 
@@ -442,7 +445,13 @@ class MoveScheduler:
                 else:
                     expected_motors.append([])
                 for step in move_group[seq_id]:
-                    stop_cond.append(move_group[seq_id][step].stop_condition)
+                    if isinstance(
+                        move_group[seq_id][step].stop_condition, MoveStopCondition
+                    ):
+                        condition = move_group[seq_id][step].stop_condition.value  # type: ignore [attr-defined]
+                    else:
+                        condition = move_group[seq_id][step].stop_condition
+                    stop_cond.append(condition)
 
             self._moves.append(move_set)
             self._stop_condition.append(stop_cond)
@@ -511,7 +520,7 @@ class MoveScheduler:
             stop_cond = self._stop_condition[group_id][seq_id]
             if (
                 (
-                    stop_cond.value
+                    stop_cond
                     & (
                         MoveStopCondition.limit_switch.value
                         | MoveStopCondition.limit_switch_backoff.value
@@ -519,21 +528,26 @@ class MoveScheduler:
                 )
                 != 0
             ) and ack_id != MoveAckId.stopped_by_condition:
+                pretty_condition = (
+                    MoveStopCondition.limit_switch
+                    if MoveStopCondition.limit_switch.value & stop_cond
+                    else MoveStopCondition.limit_switch_backoff
+                )
                 log.error(
-                    f"Homing move from node {node_id} completed without meeting condition {stop_cond}"
+                    f"Homing move from node {node_id} completed without meeting condition {pretty_condition}"
                 )
                 self._errors.append(
                     MoveConditionNotMetError(
                         detail={
                             "node": NodeId(node_id).name,
-                            "stop-condition": stop_cond.name,
+                            "stop-condition": pretty_condition.name,
                         }
                     )
                 )
                 self._should_stop = True
                 self._event.set()
             if (
-                stop_cond.value & MoveStopCondition.stall.value
+                stop_cond & MoveStopCondition.stall.value
             ) and ack_id == MoveAckId.stopped_by_condition:
                 # When an axis has a stop-on-stall move and stalls, it will clear the rest of its executing moves.
                 # If we wait for those moves, we'll time out.

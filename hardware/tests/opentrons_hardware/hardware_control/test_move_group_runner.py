@@ -212,7 +212,7 @@ def move_group_gripper_multiple() -> MoveGroups:
                     pwm_duty_cycle=float32(50),
                     encoder_position_um=int32(80000),
                     stay_engaged=False,
-                    stop_condition=MoveStopCondition.encoder_position,
+                    stop_condition=MoveStopCondition.encoder_position_or_safe_stop,
                     move_type=MoveType.linear,
                 ),
             }
