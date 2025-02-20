@@ -1,18 +1,28 @@
 import { describe, it, expect } from 'vitest'
 import { screen } from '@testing-library/react'
 
+import { i18n } from '../../../assets/localization'
 import { renderWithProviders } from '../../../__testing-utils__'
-import { EndUserAgreementFooter } from '../index'
+import { EndUserAgreementFooter } from '..'
 
 const render = () => {
-  return renderWithProviders(<EndUserAgreementFooter />)
+  return renderWithProviders(<EndUserAgreementFooter />, { i18nInstance: i18n })
 }
 
+const currntYear = new Date().getFullYear()
+
 describe('EndUserAgreementFooter', () => {
-  it('should render text and links', () => {
+  it('should render Footer component', () => {
+    render()
+    screen.getByText('Privacy Policy')
+    screen.getByText('End user license agreement')
+    screen.getByText(`Copyright © ${currntYear} Opentrons`)
+  })
+
+  it('should render links', () => {
     render()
     expect(
-      screen.getByRole('link', { name: 'Privacy policy' })
+      screen.getByRole('link', { name: 'Privacy Policy' })
     ).toHaveAttribute('href', 'https://opentrons.com/privacy-policy')
     expect(
       screen.getByRole('link', { name: 'End user license agreement' })
