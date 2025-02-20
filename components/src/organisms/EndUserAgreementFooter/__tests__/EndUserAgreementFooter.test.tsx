@@ -10,12 +10,11 @@ const render = () => {
 describe('EndUserAgreementFooter', () => {
   it('should render text and links', () => {
     render()
-    screen.getByText('Copyright © 2024 Opentrons')
     expect(
-      screen.getByRole('link', { name: 'privacy policy' })
+      screen.getByRole('link', { name: 'Privacy policy' })
     ).toHaveAttribute('href', 'https://opentrons.com/privacy-policy')
     expect(
-      screen.getByRole('link', { name: 'end user license agreement' })
+      screen.getByRole('link', { name: 'End user license agreement' })
     ).toHaveAttribute('href', 'https://opentrons.com/eula')
   })
 })

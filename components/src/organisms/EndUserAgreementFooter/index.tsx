@@ -1,3 +1,4 @@
+import { css } from 'styled-components'
 import { StyledText } from '../../atoms'
 import { COLORS } from '../../helix-design-system'
 import { Flex, Link } from '../../primitives'
@@ -7,6 +8,7 @@ import {
   TEXT_DECORATION_UNDERLINE,
 } from '../../styles'
 import { SPACING } from '../../ui-style-constants'
+import { getYearFromDate } from './util'
 
 const PRIVACY_POLICY_URL = 'https://opentrons.com/privacy-policy'
 const EULA_URL = 'https://opentrons.com/eula'
@@ -28,8 +30,9 @@ export function EndUserAgreementFooter(): JSX.Element {
           href={PRIVACY_POLICY_URL}
           color={COLORS.black90}
           textDecoration={TEXT_DECORATION_UNDERLINE}
+          css={LINK_BUTTON_STYLE}
         >
-          privacy policy
+          Privacy policy
         </Link>{' '}
         and{' '}
         <Link
@@ -37,13 +40,32 @@ export function EndUserAgreementFooter(): JSX.Element {
           href={EULA_URL}
           color={COLORS.black90}
           textDecoration={TEXT_DECORATION_UNDERLINE}
+          css={LINK_BUTTON_STYLE}
         >
-          end user license agreement
+          End user license agreement
         </Link>
       </StyledText>
       <StyledText desktopStyle="captionRegular">
-        Copyright © 2024 Opentrons
+        {`Copyright © ${getYearFromDate()} Opentrons`}
       </StyledText>
     </Flex>
   )
 }
+
+const LINK_BUTTON_STYLE = css`
+  color: ${COLORS.black90};
+
+  &:hover {
+    color: ${COLORS.blue50};
+  }
+
+  &:focus-visible {
+    color: ${COLORS.blue50};
+    outline: 2px solid ${COLORS.blue50};
+    outline-offset: 0.25rem;
+  }
+
+  &:disabled {
+    color: ${COLORS.grey40};
+  }
+`
