@@ -14,7 +14,7 @@ const currntYear = new Date().getFullYear()
 describe('EndUserAgreementFooter', () => {
   it('should render Footer component', () => {
     render()
-    screen.getByText('Privacy Policy')
+    screen.getByText('Privacy policy')
     screen.getByText('End user license agreement')
     screen.getByText(`Copyright © ${currntYear} Opentrons`)
   })
@@ -22,7 +22,7 @@ describe('EndUserAgreementFooter', () => {
   it('should render links', () => {
     render()
     expect(
-      screen.getByRole('link', { name: 'Privacy Policy' })
+      screen.getByRole('link', { name: 'Privacy policy' })
     ).toHaveAttribute('href', 'https://opentrons.com/privacy-policy')
     expect(
       screen.getByRole('link', { name: 'End user license agreement' })

@@ -113,7 +113,7 @@
   "pd_version": "Protocol designer version",
   "pipette": "Pipette",
   "primary_order": "Primary order",
-  "privacy_policy": "By continuing, you agree to the Opentrons <privacyPolicyLink>Privacy Policy</privacyPolicyLink> and <EULALink>End user license agreement</EULALink>",
+  "privacy_policy": "By continuing, you agree to the Opentrons <privacyPolicyLink>Privacy policy</privacyPolicyLink> and <EULALink>End user license agreement</EULALink>",
   "privacy": "Privacy",
   "protocol_designer": "Protocol Designer",
   "re_export": "To use this definition, use Labware Creator to give it a unique load name and display name.",
