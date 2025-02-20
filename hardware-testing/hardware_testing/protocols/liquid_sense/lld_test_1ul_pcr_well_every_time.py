@@ -163,6 +163,7 @@ def run(ctx: ProtocolContext) -> None:
     src_labware = ctx.load_labware(
         SRC_LABWARE, location=SLOTS["src"], version=get_latest_version(SRC_LABWARE)
     )
+    src_labware.load_empty(src_labware.wells())
 
     # LOAD stack of plates and lids, lid on bottom plate on top
     lids_and_plates = [ctx.load_labware("plate_lid", SLOTS["lids"])]
