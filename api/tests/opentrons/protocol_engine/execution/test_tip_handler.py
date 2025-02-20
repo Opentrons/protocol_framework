@@ -8,7 +8,7 @@ from contextlib import nullcontext as does_not_raise
 
 from opentrons.types import Mount, MountType, Point
 from opentrons.hardware_control import API as HardwareAPI
-from opentrons.hardware_control.types import TipStateType
+from opentrons.hardware_control.types import TipStateType, TipScrapeType
 from opentrons.hardware_control.protocols.types import OT2RobotType, FlexRobotType
 
 from opentrons.protocol_engine.state.state import StateView
@@ -258,7 +258,10 @@ async def test_drop_tip(
 
     decoy.verify(
         await mock_hardware_api.tip_drop_moves(
-            mount=Mount.RIGHT, ignore_plunger=False, home_after=True
+            mount=Mount.RIGHT,
+            ignore_plunger=False,
+            home_after=True,
+            scrape_type=TipScrapeType.NONE,
         )
     )
     decoy.verify(mock_hardware_api.remove_tip(mount=Mount.RIGHT))

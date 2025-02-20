@@ -42,6 +42,7 @@ from opentrons.protocol_engine.types import (
     ModuleDefinition,
     OFF_DECK_LOCATION,
     FlowRates,
+    AddressableAreaLocation,
 )
 
 from opentrons.protocol_engine.state.config import Config
@@ -63,6 +64,7 @@ from opentrons.protocol_engine.execution.equipment import (
     LoadedLabwareData,
 )
 from ..pipette_fixtures import get_default_nozzle_map
+from opentrons.protocol_engine.resources import deck_configuration_provider
 
 
 def _make_config(use_virtual_modules: bool) -> Config:
@@ -1149,9 +1151,22 @@ async def test_load_module(
     decoy.when(state_store.config).then_return(_make_config(use_virtual_modules=False))
 
     decoy.when(
+        state_store.geometry._addressable_areas.get_addressable_area_base_slot(
+            DeckSlotName.SLOT_1.value
+        )
+    ).then_return(DeckSlotName.SLOT_1)
+    decoy.when(
+        state_store.geometry._addressable_areas.get_cutout_id_by_deck_slot_name(
+            slot_name=DeckSlotName.SLOT_1
+        )
+    ).then_return("cutout1")
+
+    decoy.when(
         state_store.modules.select_hardware_module_to_load(
             model=ModuleModel.TEMPERATURE_MODULE_V1,
-            location=DeckSlotLocation(slotName=DeckSlotName.SLOT_1),
+            location=deck_configuration_provider.get_cutout_id_by_deck_slot_name(
+                slot_name=DeckSlotName.SLOT_1
+            ),
             attached_modules=[
                 HardwareModule(serial_number="serial-1", definition=tempdeck_v1_def),
                 HardwareModule(serial_number="serial-2", definition=tempdeck_v2_def),
@@ -1162,7 +1177,7 @@ async def test_load_module(
 
     result = await subject.load_module(
         model=ModuleModel.TEMPERATURE_MODULE_V1,
-        location=DeckSlotLocation(slotName=DeckSlotName.SLOT_1),
+        location=AddressableAreaLocation(addressableAreaName=DeckSlotName.SLOT_1.value),
         module_id="input-module-id",
     )
 
@@ -1200,7 +1215,7 @@ async def test_load_module_using_virtual(
 
     result = await subject.load_module(
         model=ModuleModel.TEMPERATURE_MODULE_V1,
-        location=DeckSlotLocation(slotName=DeckSlotName.SLOT_1),
+        location=AddressableAreaLocation(addressableAreaName=DeckSlotName.SLOT_1.value),
         module_id="input-module-id",
     )
 
@@ -1229,7 +1244,7 @@ async def test_load_magnetic_block(
 
     result = await subject.load_magnetic_block(
         model=ModuleModel.MAGNETIC_BLOCK_V1,
-        location=DeckSlotLocation(slotName=DeckSlotName.SLOT_1),
+        location=AddressableAreaLocation(addressableAreaName=DeckSlotName.SLOT_1.value),
         module_id="input-module-id",
     )
 

@@ -1645,7 +1645,9 @@
           {
             "cutoutId": "cutoutD1",
             "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
+            "possibleCutoutFixtureIds": [
+              "temperatureModuleV2"
+            ]
           }
         ]
       },
@@ -2842,7 +2844,9 @@
           {
             "cutoutId": "cutoutD1",
             "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
+            "possibleCutoutFixtureIds": [
+              "temperatureModuleV2"
+            ]
           }
         ]
       },
@@ -5478,7 +5482,8 @@
             "cutoutId": "cutoutA3",
             "kind": "onCutoutFixture",
             "possibleCutoutFixtureIds": [
-              "stagingAreaRightSlot"
+              "stagingAreaRightSlot",
+              "stagingAreaSlotWithMagneticBlockV1"
             ]
           }
         ]
@@ -17198,7 +17203,9 @@
           {
             "cutoutId": "cutoutB1",
             "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
+            "possibleCutoutFixtureIds": [
+              "thermocyclerModuleV2Front"
+            ]
           }
         ],
         "immediateDestinationLocationSequence": [
@@ -17213,7 +17220,9 @@
           {
             "cutoutId": "cutoutB1",
             "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
+            "possibleCutoutFixtureIds": [
+              "thermocyclerModuleV2Front"
+            ]
           }
         ],
         "originLocationSequence": [
@@ -20877,7 +20886,9 @@
           {
             "cutoutId": "cutoutB1",
             "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
+            "possibleCutoutFixtureIds": [
+              "thermocyclerModuleV2Front"
+            ]
           }
         ]
       },
@@ -23663,7 +23674,9 @@
           {
             "cutoutId": "cutoutA3",
             "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
+            "possibleCutoutFixtureIds": [
+              "stagingAreaSlotWithMagneticBlockV1"
+            ]
           }
         ],
         "immediateDestinationLocationSequence": [
@@ -23678,7 +23691,9 @@
           {
             "cutoutId": "cutoutA3",
             "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
+            "possibleCutoutFixtureIds": [
+              "stagingAreaSlotWithMagneticBlockV1"
+            ]
           }
         ],
         "originLocationSequence": [
@@ -24781,7 +24796,9 @@
           {
             "cutoutId": "cutoutA3",
             "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
+            "possibleCutoutFixtureIds": [
+              "stagingAreaSlotWithMagneticBlockV1"
+            ]
           }
         ]
       },
@@ -26461,7 +26478,9 @@
           {
             "cutoutId": "cutoutA3",
             "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
+            "possibleCutoutFixtureIds": [
+              "stagingAreaSlotWithMagneticBlockV1"
+            ]
           }
         ],
         "immediateDestinationLocationSequence": [
@@ -26476,7 +26495,9 @@
           {
             "cutoutId": "cutoutA3",
             "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
+            "possibleCutoutFixtureIds": [
+              "stagingAreaSlotWithMagneticBlockV1"
+            ]
           }
         ],
         "originLocationSequence": [
@@ -26844,7 +26865,9 @@
           {
             "cutoutId": "cutoutA3",
             "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
+            "possibleCutoutFixtureIds": [
+              "stagingAreaSlotWithMagneticBlockV1"
+            ]
           }
         ]
       },
@@ -27820,7 +27843,9 @@
           {
             "cutoutId": "cutoutB1",
             "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
+            "possibleCutoutFixtureIds": [
+              "thermocyclerModuleV2Front"
+            ]
           }
         ],
         "immediateDestinationLocationSequence": [
@@ -27835,7 +27860,9 @@
           {
             "cutoutId": "cutoutB1",
             "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
+            "possibleCutoutFixtureIds": [
+              "thermocyclerModuleV2Front"
+            ]
           }
         ],
         "originLocationSequence": [
@@ -30760,7 +30787,9 @@
           {
             "cutoutId": "cutoutB1",
             "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
+            "possibleCutoutFixtureIds": [
+              "thermocyclerModuleV2Front"
+            ]
           }
         ]
       },
@@ -35271,7 +35300,9 @@
           {
             "cutoutId": "cutoutA3",
             "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
+            "possibleCutoutFixtureIds": [
+              "stagingAreaSlotWithMagneticBlockV1"
+            ]
           }
         ],
         "immediateDestinationLocationSequence": [
@@ -35286,7 +35317,9 @@
           {
             "cutoutId": "cutoutA3",
             "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
+            "possibleCutoutFixtureIds": [
+              "stagingAreaSlotWithMagneticBlockV1"
+            ]
           }
         ],
         "originLocationSequence": [
@@ -36423,7 +36456,9 @@
           {
             "cutoutId": "cutoutA3",
             "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
+            "possibleCutoutFixtureIds": [
+              "stagingAreaSlotWithMagneticBlockV1"
+            ]
           }
         ]
       },
@@ -38448,7 +38483,9 @@
           {
             "cutoutId": "cutoutA3",
             "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
+            "possibleCutoutFixtureIds": [
+              "stagingAreaSlotWithMagneticBlockV1"
+            ]
           }
         ],
         "immediateDestinationLocationSequence": [
@@ -38463,7 +38500,9 @@
           {
             "cutoutId": "cutoutA3",
             "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
+            "possibleCutoutFixtureIds": [
+              "stagingAreaSlotWithMagneticBlockV1"
+            ]
           }
         ],
         "originLocationSequence": [
@@ -38728,7 +38767,9 @@
           {
             "cutoutId": "cutoutB1",
             "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
+            "possibleCutoutFixtureIds": [
+              "thermocyclerModuleV2Front"
+            ]
           }
         ],
         "immediateDestinationLocationSequence": [
@@ -38743,7 +38784,9 @@
           {
             "cutoutId": "cutoutB1",
             "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
+            "possibleCutoutFixtureIds": [
+              "thermocyclerModuleV2Front"
+            ]
           }
         ],
         "originLocationSequence": [
@@ -38758,7 +38801,9 @@
           {
             "cutoutId": "cutoutA3",
             "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
+            "possibleCutoutFixtureIds": [
+              "stagingAreaSlotWithMagneticBlockV1"
+            ]
           }
         ]
       },

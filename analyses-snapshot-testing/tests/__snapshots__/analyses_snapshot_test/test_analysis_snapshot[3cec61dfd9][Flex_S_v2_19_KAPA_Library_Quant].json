@@ -1353,7 +1353,9 @@
           {
             "cutoutId": "cutoutB1",
             "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
+            "possibleCutoutFixtureIds": [
+              "thermocyclerModuleV2Front"
+            ]
           }
         ]
       },
@@ -7354,7 +7356,9 @@
           {
             "cutoutId": "cutoutC1",
             "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
+            "possibleCutoutFixtureIds": [
+              "temperatureModuleV2"
+            ]
           }
         ]
       },
@@ -8551,7 +8555,9 @@
           {
             "cutoutId": "cutoutC1",
             "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
+            "possibleCutoutFixtureIds": [
+              "temperatureModuleV2"
+            ]
           }
         ]
       },
@@ -12477,8 +12483,6 @@
             "kind": "onCutoutFixture",
             "possibleCutoutFixtureIds": [
               "flexStackerModuleV1",
-              "flexStackerModuleV1WithWasteChuteRightAdapterCovered",
-              "flexStackerModuleV1WithWasteChuteRightAdapterNoCover",
               "singleRightSlot",
               "stagingAreaRightSlot"
             ]
@@ -13030,6 +13034,7 @@
         "alternateDropLocation": false,
         "labwareId": "UUID",
         "pipetteId": "UUID",
+        "scrape_tips": true,
         "wellLocation": {
           "offset": {
             "x": 0.0,
@@ -15201,6 +15206,7 @@
         "alternateDropLocation": false,
         "labwareId": "UUID",
         "pipetteId": "UUID",
+        "scrape_tips": true,
         "wellLocation": {
           "offset": {
             "x": 0.0,
@@ -16156,6 +16162,7 @@
         "alternateDropLocation": false,
         "labwareId": "UUID",
         "pipetteId": "UUID",
+        "scrape_tips": true,
         "wellLocation": {
           "offset": {
             "x": 0.0,
@@ -17111,6 +17118,7 @@
         "alternateDropLocation": false,
         "labwareId": "UUID",
         "pipetteId": "UUID",
+        "scrape_tips": true,
         "wellLocation": {
           "offset": {
             "x": 0.0,
@@ -18080,6 +18088,7 @@
         "alternateDropLocation": false,
         "labwareId": "UUID",
         "pipetteId": "UUID",
+        "scrape_tips": true,
         "wellLocation": {
           "offset": {
             "x": 0.0,
@@ -19035,6 +19044,7 @@
         "alternateDropLocation": false,
         "labwareId": "UUID",
         "pipetteId": "UUID",
+        "scrape_tips": true,
         "wellLocation": {
           "offset": {
             "x": 0.0,
@@ -19990,6 +20000,7 @@
         "alternateDropLocation": false,
         "labwareId": "UUID",
         "pipetteId": "UUID",
+        "scrape_tips": true,
         "wellLocation": {
           "offset": {
             "x": 0.0,
@@ -20680,6 +20691,7 @@
         "alternateDropLocation": false,
         "labwareId": "UUID",
         "pipetteId": "UUID",
+        "scrape_tips": true,
         "wellLocation": {
           "offset": {
             "x": 0.0,
@@ -21276,6 +21288,7 @@
         "alternateDropLocation": false,
         "labwareId": "UUID",
         "pipetteId": "UUID",
+        "scrape_tips": true,
         "wellLocation": {
           "offset": {
             "x": 0.0,
@@ -21872,6 +21885,7 @@
         "alternateDropLocation": false,
         "labwareId": "UUID",
         "pipetteId": "UUID",
+        "scrape_tips": true,
         "wellLocation": {
           "offset": {
             "x": 0.0,
@@ -22908,6 +22922,7 @@
         "alternateDropLocation": false,
         "labwareId": "UUID",
         "pipetteId": "UUID",
+        "scrape_tips": true,
         "wellLocation": {
           "offset": {
             "x": 0.0,
@@ -23902,6 +23917,7 @@
         "alternateDropLocation": false,
         "labwareId": "UUID",
         "pipetteId": "UUID",
+        "scrape_tips": true,
         "wellLocation": {
           "offset": {
             "x": 0.0,
@@ -24896,6 +24912,7 @@
         "alternateDropLocation": false,
         "labwareId": "UUID",
         "pipetteId": "UUID",
+        "scrape_tips": true,
         "wellLocation": {
           "offset": {
             "x": 0.0,
@@ -27092,6 +27109,7 @@
         "alternateDropLocation": false,
         "labwareId": "UUID",
         "pipetteId": "UUID",
+        "scrape_tips": true,
         "wellLocation": {
           "offset": {
             "x": 0.0,

@@ -3704,8 +3704,6 @@
             "kind": "onCutoutFixture",
             "possibleCutoutFixtureIds": [
               "flexStackerModuleV1",
-              "flexStackerModuleV1WithWasteChuteRightAdapterCovered",
-              "flexStackerModuleV1WithWasteChuteRightAdapterNoCover",
               "singleRightSlot",
               "stagingAreaRightSlot"
             ]
@@ -11674,6 +11672,7 @@
         "alternateDropLocation": false,
         "labwareId": "UUID",
         "pipetteId": "UUID",
+        "scrape_tips": false,
         "wellLocation": {
           "offset": {
             "x": 0.0,
@@ -12244,6 +12243,7 @@
         "alternateDropLocation": false,
         "labwareId": "UUID",
         "pipetteId": "UUID",
+        "scrape_tips": false,
         "wellLocation": {
           "offset": {
             "x": 0.0,
@@ -12301,7 +12301,9 @@
           {
             "cutoutId": "cutoutC1",
             "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
+            "possibleCutoutFixtureIds": [
+              "magneticBlockV1"
+            ]
           }
         ],
         "immediateDestinationLocationSequence": [
@@ -12316,7 +12318,9 @@
           {
             "cutoutId": "cutoutC1",
             "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
+            "possibleCutoutFixtureIds": [
+              "magneticBlockV1"
+            ]
           }
         ],
         "originLocationSequence": [
@@ -12467,7 +12471,9 @@
           {
             "cutoutId": "cutoutC1",
             "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
+            "possibleCutoutFixtureIds": [
+              "magneticBlockV1"
+            ]
           }
         ]
       },
@@ -13270,6 +13276,7 @@
         "alternateDropLocation": false,
         "labwareId": "UUID",
         "pipetteId": "UUID",
+        "scrape_tips": false,
         "wellLocation": {
           "offset": {
             "x": 0.0,
@@ -13327,7 +13334,9 @@
           {
             "cutoutId": "cutoutC1",
             "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
+            "possibleCutoutFixtureIds": [
+              "magneticBlockV1"
+            ]
           }
         ],
         "immediateDestinationLocationSequence": [
@@ -13342,7 +13351,9 @@
           {
             "cutoutId": "cutoutC1",
             "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
+            "possibleCutoutFixtureIds": [
+              "magneticBlockV1"
+            ]
           }
         ],
         "originLocationSequence": [
@@ -13742,6 +13753,7 @@
         "alternateDropLocation": false,
         "labwareId": "UUID",
         "pipetteId": "UUID",
+        "scrape_tips": false,
         "wellLocation": {
           "offset": {
             "x": 0.0,
@@ -14158,6 +14170,7 @@
         "alternateDropLocation": false,
         "labwareId": "UUID",
         "pipetteId": "UUID",
+        "scrape_tips": false,
         "wellLocation": {
           "offset": {
             "x": 0.0,
@@ -14558,6 +14571,7 @@
         "alternateDropLocation": false,
         "labwareId": "UUID",
         "pipetteId": "UUID",
+        "scrape_tips": false,
         "wellLocation": {
           "offset": {
             "x": 0.0,
@@ -14974,6 +14988,7 @@
         "alternateDropLocation": false,
         "labwareId": "UUID",
         "pipetteId": "UUID",
+        "scrape_tips": false,
         "wellLocation": {
           "offset": {
             "x": 0.0,
@@ -15374,6 +15389,7 @@
         "alternateDropLocation": false,
         "labwareId": "UUID",
         "pipetteId": "UUID",
+        "scrape_tips": false,
         "wellLocation": {
           "offset": {
             "x": 0.0,
