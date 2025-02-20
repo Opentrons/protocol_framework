@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { screen } from '@testing-library/react'
-import { renderWithProviders } from '../../../testing/utils'
+
+import { renderWithProviders } from '../../../__testing-utils__'
 import { EndUserAgreementFooter } from '../index'
 
 const render = () => {
