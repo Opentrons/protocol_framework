@@ -110,12 +110,15 @@ export const Select: Story = {
 export const LabwareWithLidAndQuantity: Story = {
   args: {
     layout: 'stacked',
-    type: 'location-colon-location',
+    type: 'location',
     labwareName: 'Labware with lid',
     subText: 'With Tip Rack Lid',
     tagText: 'Quantity: 3',
     currentLocationProps: {
       deckLabel: 'STACKER A',
+    },
+    newLocationProps: {
+      deckLabel: 'OFF-DECK',
     },
   },
 }

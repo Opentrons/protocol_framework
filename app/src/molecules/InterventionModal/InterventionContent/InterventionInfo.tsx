@@ -12,8 +12,7 @@ import {
   ALIGN_CENTER,
   RESPONSIVENESS,
   Tag,
-  SPACING_1,
-  SPACING_3,
+  SPACING_2,
   TYPOGRAPHY,
 } from '@opentrons/components'
 import { Divider } from '/app/atoms/structure/Divider'
@@ -65,7 +64,7 @@ export function InterventionInfo(props: InterventionInfoProps): JSX.Element {
               color={COLORS.grey60}
               css={css`
                 ${LINE_CLAMP_STYLE}
-                margin: ${SPACING_1} 0;
+                margin: ${SPACING_2} 0;
                 @media ${RESPONSIVENESS.touchscreenMediaQuerySpecs} {
                   font-size: ${TYPOGRAPHY.fontSize22};
                 }
@@ -77,7 +76,7 @@ export function InterventionInfo(props: InterventionInfoProps): JSX.Element {
             <Divider
               borderColor={COLORS.grey35}
               css={`
-                margin-top: ${SPACING_3};
+                margin: ${SPACING_2} 0 0 0;
                 @media ${RESPONSIVENESS.touchscreenMediaQuerySpecs} {
                   border-bottom-color: ${COLORS.grey60};
                 }
