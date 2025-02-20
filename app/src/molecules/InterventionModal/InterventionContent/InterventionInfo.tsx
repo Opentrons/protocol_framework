@@ -13,6 +13,7 @@ import {
   RESPONSIVENESS,
   Tag,
   SPACING_1,
+  SPACING_3,
   TYPOGRAPHY,
 } from '@opentrons/components'
 import { Divider } from '/app/atoms/structure/Divider'
@@ -76,6 +77,7 @@ export function InterventionInfo(props: InterventionInfoProps): JSX.Element {
             <Divider
               borderColor={COLORS.grey35}
               css={`
+                margin-top: ${SPACING_3};
                 @media ${RESPONSIVENESS.touchscreenMediaQuerySpecs} {
                   border-bottom-color: ${COLORS.grey60};
                 }
