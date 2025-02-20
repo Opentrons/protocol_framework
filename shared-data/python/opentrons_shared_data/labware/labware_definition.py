@@ -506,6 +506,9 @@ class LabwareDefinition2(BaseModel):
 
 
 class LabwareDefinition3(BaseModel):
+    otSharedSchema: Annotated[
+        Literal["#/labware/schemas/3"], Field(alias="$otSharedSchema")
+    ]
     schemaVersion: Literal[3]
     version: Annotated[int, Field(ge=1)]
     namespace: Annotated[str, Field(pattern=SAFE_STRING_REGEX)]
