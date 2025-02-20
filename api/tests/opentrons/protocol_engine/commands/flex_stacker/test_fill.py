@@ -38,7 +38,6 @@ def subject(state_view: StateView, run_control: RunControlHandler) -> FillImpl:
 @pytest.mark.parametrize(
     "current_count,count_param,target_count",
     [
-        pytest.param(0, 0, 0, id="empty-to-empty"),
         pytest.param(0, 5, 5, id="empty-to-full"),
         pytest.param(5, 5, 5, id="full-noop"),
         pytest.param(5, 4, 5, id="size-minimum"),

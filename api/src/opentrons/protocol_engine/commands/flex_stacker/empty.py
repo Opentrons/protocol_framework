@@ -51,6 +51,7 @@ class EmptyParams(BaseModel):
             "Do not use the value in the parameters as an outside observer; instead, use the count value "
             "from the results."
         ),
+        ge=0,
     )
 
 
