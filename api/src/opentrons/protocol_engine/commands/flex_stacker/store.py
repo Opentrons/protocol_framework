@@ -104,7 +104,6 @@ class StoreImpl(AbstractCommandImpl[StoreParams, _ExecuteReturn]):
                         )
                     ],
                 ),
-                state_update=None,
             )
 
         original_location_sequence = self._state_view.geometry.get_location_sequence(
