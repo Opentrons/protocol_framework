@@ -2699,6 +2699,7 @@ class OT3API(
         z_offset_for_plunger_prep: float,
         force_both_sensors: bool = False,
         response_queue: Optional[PipetteSensorResponseQueue] = None,
+        use_fast_motion: bool = False,
     ) -> float:
         plunger_direction = -1 if probe_settings.aspirate_while_sensing else 1
         print(
@@ -2718,6 +2719,7 @@ class OT3API(
             probe=probe,
             force_both_sensors=force_both_sensors,
             response_queue=response_queue,
+            use_fast_motion=use_fast_motion,
         )
         machine_pos = await self._backend.update_position()
         machine_pos[Axis.by_mount(mount)] = end_z
@@ -2739,6 +2741,7 @@ class OT3API(
         probe: Optional[InstrumentProbeType] = None,
         force_both_sensors: bool = False,
         response_queue: Optional[PipetteSensorResponseQueue] = None,
+        use_fast_motion: bool = False,
     ) -> float:
         """Search for and return liquid level height.
 
@@ -2785,26 +2788,46 @@ class OT3API(
 
         starting_position = await self.gantry_position(checked_mount, refresh=True)
 
-        sensor_baseline_plunger_move_mm = (
+        # To get rid of the signal noise we start moving the plunger for a little bit
+        # before turning on the sensor.
+        plunger_impulse_distance = (
             probe_settings.plunger_impulse_time * probe_settings.plunger_speed
         )
         total_plunger_axis_mm = (
             instrument.plunger_positions.bottom - instrument.plunger_positions.top
         )
         max_allowed_plunger_distance_mm = total_plunger_axis_mm - (
-            instrument.backlash_distance + sensor_baseline_plunger_move_mm
+            instrument.backlash_distance + plunger_impulse_distance
         )
-        if max_z_dist > 8:
-            sensor_baseline_z_move_mm = 4.0
-        else:
-            # height where probe action will begin
+
+        z_distance_during_impulse = 0.0
+        if use_fast_motion:
+            # The first few samples of the sensor are eaten up to create a moving baseline
+            # We compute the corisponding z distance here based on what speed the mount will be going when it turns on the sensor
             sensor_baseline_z_move_mm = OT3API.liquid_probe_non_responsive_z_distance(
                 probe_settings.mount_speed,
                 probe_settings.samples_for_baselining,
                 probe_settings.sample_time_sec,
             )
+            # During a slow probe, we don't start moving the Z until the sensor is on, but in fast probe
+            # we use the impulse time before the sensor turns on to ramp the z speed up to it's max speed
+            z_distance_during_impulse = (
+                probe_settings.mount_discontinuity * probe_settings.plunger_impulse_time
+                + 0.5
+                * probe_settings.mount_acceleration
+                * probe_settings.plunger_impulse_time**2
+            )
+        else:
+            sensor_baseline_z_move_mm = OT3API.liquid_probe_non_responsive_z_distance(
+                probe_settings.mount_discontinuity,
+                probe_settings.samples_for_baselining,
+                probe_settings.sample_time_sec,
+            )
+        # This is how far the z overlaps, it is the distance wasted during the plunger baseline, plus the distance if any the z needs to accelerate up to speed plus a safety factor overlap distance
         z_offset_per_pass = (
-            sensor_baseline_z_move_mm + probe_settings.z_overlap_between_passes_mm
+            sensor_baseline_z_move_mm
+            + probe_settings.z_overlap_between_passes_mm
+            + z_distance_during_impulse
         )
 
         # height that is considered safe to reset the plunger without disturbing liquid
@@ -2851,32 +2874,34 @@ class OT3API(
                 starting_position.z - max_z_dist
             )
             print(f"Total remaining z distance {total_remaining_z_dist}")
-            if total_remaining_z_dist > 8:
-                finish_probe_move_duration = (
-                    (total_remaining_z_dist - 4) / probe_settings.mount_speed
-                ) + 0.2
-            else:
-                mount_acceleration = 0
-                probe_settings.mount_speed = mount_discontinuity
-                finish_probe_move_duration = (
-                    total_remaining_z_dist / probe_settings.mount_speed
-                )
-                sensor_baseline_z_move_mm = (
-                    OT3API.liquid_probe_non_responsive_z_distance(
-                        probe_settings.mount_speed,
-                        probe_settings.samples_for_baselining,
-                        probe_settings.sample_time_sec,
+            if use_fast_motion:
+                if total_remaining_z_dist < 4:
+                    # If the toal remaining distance is < 4 than it is not safe to do a fast move anymore
+                    finish_probe_move_duration = (
+                        total_remaining_z_dist / probe_settings.mount_discontinuity
                     )
-                )
-                z_offset_per_pass = (
-                    sensor_baseline_z_move_mm
-                    + probe_settings.z_overlap_between_passes_mm
-                )
-
-                # height that is considered safe to reset the plunger without disturbing liquid
-                # this usually needs to at least 1-2mm from liquid, to avoid splashes from air
-                z_offset_for_plunger_prep = max(
-                    probe_settings.plunger_reset_offset, z_offset_per_pass
+                    sensor_baseline_z_move_mm = (
+                        OT3API.liquid_probe_non_responsive_z_distance(
+                            probe_settings.mount_discontinuity,
+                            probe_settings.samples_for_baselining,
+                            probe_settings.sample_time_sec,
+                        )
+                    )
+                    z_offset_per_pass = (
+                        sensor_baseline_z_move_mm
+                        + probe_settings.z_overlap_between_passes_mm
+                    )
+                    z_offset_for_plunger_prep = max(
+                        probe_settings.plunger_reset_offset, z_offset_per_pass
+                    )
+                    use_fast_motion = False
+                else:
+                    finish_probe_move_duration = (
+                        (total_remaining_z_dist - 4) / probe_settings.mount_speed
+                    ) + 0.2
+            else:
+                finish_probe_move_duration = (
+                    total_remaining_z_dist / probe_settings.mount_discontinuity
                 )
 
             finish_probe_plunger_distance_mm = (
@@ -2892,10 +2917,11 @@ class OT3API(
                     checked_mount,
                     probe_settings,
                     checked_probe,
-                    plunger_travel_mm + sensor_baseline_plunger_move_mm,
+                    plunger_travel_mm + plunger_impulse_distance,
                     z_offset_for_plunger_prep,
                     force_both_sensors,
                     response_queue,
+                    use_fast_motion,
                 )
                 # if we made it here without an error we found the liquid
                 error = None

@@ -171,6 +171,7 @@ class FlexBackend(Protocol):
         probe: InstrumentProbeType = InstrumentProbeType.PRIMARY,
         force_both_sensors: bool = False,
         response_queue: Optional[PipetteSensorResponseQueue] = None,
+        use_fast_motion: bool = False,
     ) -> float:
         ...
 

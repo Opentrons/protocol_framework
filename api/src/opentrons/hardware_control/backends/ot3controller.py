@@ -1504,6 +1504,7 @@ class OT3Controller(FlexBackend):
         probe: InstrumentProbeType = InstrumentProbeType.PRIMARY,
         force_both_sensors: bool = False,
         response_queue: Optional[PipetteSensorResponseQueue] = None,
+        use_fast_motion: bool = False,
     ) -> float:
         head_node = axis_to_node(Axis.by_mount(mount))
         tool = sensor_node_for_pipette(OT3Mount(mount.value))
@@ -1549,6 +1550,7 @@ class OT3Controller(FlexBackend):
             sensor_id=sensor_id_for_instrument(probe),
             force_both_sensors=force_both_sensors,
             emplace_data=response_capture,
+            use_fast_motion=use_fast_motion,
         )
         for node, point in positions.items():
             self._position.update({node: point.motor_position})
