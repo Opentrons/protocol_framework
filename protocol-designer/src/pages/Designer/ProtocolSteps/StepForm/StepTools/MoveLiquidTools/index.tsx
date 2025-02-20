@@ -109,57 +109,65 @@ export function MoveLiquidTools(props: StepFormProps): JSX.Element {
     ),
     1: () => (
       <>
-      {enableLiquidClasses ? (
-        <Flex
-          flexDirection={DIRECTION_COLUMN}
-          width="100%"
-          paddingY={SPACING.spacing16}
-          gridGap={SPACING.spacing12}
-        >
-          <Flex padding={`0 ${SPACING.spacing16}`}>
-            <StyledText desktopStyle="bodyDefaultRegular">
-              {t('protocol_steps:apply_liquid_classes')}
-            </StyledText>
-          </Flex>
+        {enableLiquidClasses ? (
           <Flex
             flexDirection={DIRECTION_COLUMN}
-            gridGap={SPACING.spacing4}
             width="100%"
-            padding={`0 ${SPACING.spacing16}`}
+            paddingY={SPACING.spacing16}
+            gridGap={SPACING.spacing12}
           >
-            {liquidClassOptions.map(options => {
-              const { name, subButtonLabel } = options
-              console.log(name)
-              return (
-                <RadioButton
-                  key={name}
-                  onChange={() => {
-                    setSelectedLiquidClass(name)
-                  }}
-                  buttonLabel={name}
-                  subButtonLabel={subButtonLabel}
-                  buttonValue={name}
-                  isSelected={selectedLiquidClass === name}
-                  largeDesktopBorderRadius
-                />
-              )
-            })}
+            <Flex padding={`0 ${SPACING.spacing16}`}>
+              <StyledText desktopStyle="bodyDefaultRegular">
+                {t('protocol_steps:apply_liquid_classes')}
+              </StyledText>
+            </Flex>
+            <Flex
+              flexDirection={DIRECTION_COLUMN}
+              gridGap={SPACING.spacing4}
+              width="100%"
+              padding={`0 ${SPACING.spacing16}`}
+            >
+              {liquidClassOptions.map(options => {
+                const { name, subButtonLabel } = options
+                console.log(name)
+                return (
+                  <RadioButton
+                    key={name}
+                    onChange={() => {
+                      setSelectedLiquidClass(name)
+                    }}
+                    buttonLabel={name}
+                    subButtonLabel={subButtonLabel}
+                    buttonValue={name}
+                    isSelected={selectedLiquidClass === name}
+                    largeDesktopBorderRadius
+                  />
+                )
+              })}
+            </Flex>
           </Flex>
-        </Flex>
-      ) : null}
-      <SecondStepsMoveLiquidTools
-          propsForFields={propsForFields}
-          formData={formData}
-          tab={tab}
-          setTab={setTab}
-          setShowFormErrors={setShowFormErrors}
-          visibleFormErrors={visibleFormErrors}
-        />
-    </>
+        ) : (
+          <SecondStepsMoveLiquidTools
+            propsForFields={propsForFields}
+            formData={formData}
+            tab={tab}
+            setTab={setTab}
+            setShowFormErrors={setShowFormErrors}
+            visibleFormErrors={visibleFormErrors}
+          />
+        )}
+      </>
     ),
-    // 2: () => (
-    //   third step tools here
-    // ),
+    2: () => (
+      <SecondStepsMoveLiquidTools
+        propsForFields={propsForFields}
+        formData={formData}
+        tab={tab}
+        setTab={setTab}
+        setShowFormErrors={setShowFormErrors}
+        visibleFormErrors={visibleFormErrors}
+      />
+    ),
   }
 
   const StepComponent = stepComponents[toolboxStep] ?? stepComponents[0]
