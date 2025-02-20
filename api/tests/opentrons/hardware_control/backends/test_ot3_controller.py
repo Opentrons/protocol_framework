@@ -755,7 +755,9 @@ async def test_liquid_probe(
         await controller.liquid_probe(
             mount=mount,
             max_p_distance=fake_max_p_dist,
-            mount_speed=fake_liquid_settings.mount_speed,
+            max_mount_speed=fake_liquid_settings.mount_speed,
+            mount_discontinuity=5,
+            mount_acceleration=100,
             plunger_speed=fake_liquid_settings.plunger_speed,
             threshold_pascals=fake_liquid_settings.sensor_threshold_pascals,
             plunger_impulse_time=fake_liquid_settings.plunger_impulse_time,

@@ -1493,7 +1493,9 @@ class OT3Controller(FlexBackend):
         self,
         mount: OT3Mount,
         max_p_distance: float,
-        mount_speed: float,
+        max_mount_speed: float,
+        mount_discontinuity: float,
+        mount_acceleration: float,
         plunger_speed: float,
         threshold_pascals: float,
         plunger_impulse_time: float,
@@ -1531,13 +1533,15 @@ class OT3Controller(FlexBackend):
                     }
                 )
 
-        positions = await liquid_probe(
+        positions, result = await liquid_probe(
             messenger=self._messenger,
             tool=tool,
             head_node=head_node,
             max_p_distance=max_p_distance,
             plunger_speed=plunger_speed,
-            mount_speed=mount_speed,
+            max_mount_speed=max_mount_speed,
+            mount_discontinuity=mount_discontinuity,
+            mount_acceleration=mount_acceleration,
             threshold_pascals=threshold_pascals,
             plunger_impulse_time=plunger_impulse_time,
             num_baseline_reads=num_baseline_reads,
@@ -1549,11 +1553,7 @@ class OT3Controller(FlexBackend):
         for node, point in positions.items():
             self._position.update({node: point.motor_position})
             self._encoder_position.update({node: point.encoder_position})
-        if (
-            head_node not in positions
-            or positions[head_node].move_ack
-            == MoveCompleteAck.complete_without_condition
-        ):
+        if result < -10:
             raise PipetteLiquidNotFoundError(
                 "Liquid not found during probe.",
                 {
@@ -1561,7 +1561,7 @@ class OT3Controller(FlexBackend):
                     for node, point in positions.items()
                 },
             )
-        return self._position[axis_to_node(Axis.by_mount(mount))]
+        return result
 
     async def capacitive_probe(
         self,
