@@ -49,6 +49,14 @@
   "heater_shaker_settings": "Heater-Shaker Settings",
   "in": "in",
   "into": "into",
+  "liquid_classes": {
+    "water": "Aqueous",
+    "water_subtext": "Deionized water",
+    "glycerol": "Viscous",
+    "glycerol_subtext": "50% glycerol",
+    "ethanol": "Volatile",
+    "ethanol_subtext": "80% ethanol"
+  },
   "magnetic_module": {
     "disengage": "<semiBoldText>{{module}}</semiBoldText><text>disengaged</text>",
     "engage": "<semiBoldText>{{module}}</semiBoldText><text>engaged to</text><tag/>"

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
 import {
@@ -8,14 +8,14 @@ import {
   SPACING,
   StyledText,
 } from '@opentrons/components'
+import { getAllLiquidClassDefs } from '@opentrons/shared-data'
 import { getEnableLiquidClasses } from '../../../../../../feature-flags/selectors'
+import { getLiquidEntities } from '../../../../../../step-forms/selectors'
+import { getLiquidClassDisplayName } from '../../../../../../liquid-defs/utils'
 import { SingleStepMoveLiquidTools } from './SingleStepMoveLiquidTools'
 import { MultipleStepsMoveLiquidTools } from './MultipleStepsMoveLiquidTools'
 
 import type { StepFormProps } from '../../types'
-import type { ChangeEvent } from 'react'
-import { getAllLiquidClassDefs } from '@opentrons/shared-data'
-import { getLiquidEntities } from '../../../../../../step-forms/selectors'
 
 export function MoveLiquidTools(props: StepFormProps): JSX.Element {
   const {
@@ -27,12 +27,11 @@ export function MoveLiquidTools(props: StepFormProps): JSX.Element {
     tab,
     setTab,
   } = props
-  const { t } = useTranslation(['protocol_steps', 'form'])
+  const { t } = useTranslation(['protocol_steps'])
   const enableLiquidClasses = useSelector(getEnableLiquidClasses)
   const liquids = useSelector(getLiquidEntities)
   const liquidClassDefs = getAllLiquidClassDefs()
 
-  // Map assigned liquid classes to their respective liquids
   const liquidClassToLiquidsMap: Record<string, string[]> = {}
   Object.values(liquids).forEach(({ displayName, liquidClass }) => {
     if (liquidClass) {
@@ -49,8 +48,14 @@ export function MoveLiquidTools(props: StepFormProps): JSX.Element {
   const hasAssignedLiquidClasses = assignedLiquidClasses.length > 0
 
   const defaultSelectedLiquidClass = hasAssignedLiquidClasses
-    ? assignedLiquidClasses[0]
-    : 'noLiquidClass'
+    ? t(
+        `protocol_steps:liquid_classes.${getLiquidClassDisplayName(
+          assignedLiquidClasses[0]
+        )
+          ?.split('-')[0]
+          .toLowerCase()}`
+      )
+    : t('protocol_steps:no_liquid_class')
 
   const [selectedLiquidClass, setSelectedLiquidClass] = useState(
     defaultSelectedLiquidClass
@@ -63,8 +68,11 @@ export function MoveLiquidTools(props: StepFormProps): JSX.Element {
   const liquidClassOptions = [
     ...Object.entries(liquidClassDefs).map(
       ([liquidClassDefName, { displayName }]) => ({
-        name: displayName,
-        value: liquidClassDefName,
+        name: t(
+          `protocol_steps:liquid_classes.${displayName
+            .split('-')[0]
+            .toLowerCase()}`
+        ),
         subButtonLabel:
           liquidClassToLiquidsMap[liquidClassDefName] != null
             ? t('protocol_steps:assigned_liquid', {
@@ -72,7 +80,11 @@ export function MoveLiquidTools(props: StepFormProps): JSX.Element {
                   ', '
                 ),
               })
-            : t(`protocol_steps:${liquidClassDefName}`),
+            : t(
+                `protocol_steps:liquid_classes.${displayName
+                  .split('-')[0]
+                  .toLowerCase()}_subtext`
+              ),
       })
     ),
     {
@@ -113,18 +125,18 @@ export function MoveLiquidTools(props: StepFormProps): JSX.Element {
             padding={`0 ${SPACING.spacing16}`}
           >
             {liquidClassOptions.map(options => {
-              const { name, value, subButtonLabel } = options
+              const { name, subButtonLabel } = options
+              console.log(name)
               return (
                 <RadioButton
                   key={name}
                   onChange={() => {
-                    setSelectedLiquidClass(value)
+                    setSelectedLiquidClass(name)
                   }}
                   buttonLabel={name}
                   subButtonLabel={subButtonLabel}
-                  buttonValue={value}
-                  isSelected={selectedLiquidClass === value}
-                  maxLines={1}
+                  buttonValue={name}
+                  isSelected={selectedLiquidClass === name}
                   largeDesktopBorderRadius
                 />
               )
