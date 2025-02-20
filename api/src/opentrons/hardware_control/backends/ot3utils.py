@@ -42,6 +42,8 @@ from opentrons_hardware.hardware_control.motion_planning import (
 )
 from opentrons_hardware.hardware_control.tool_sensors import (
     InstrumentProbeTarget,
+)
+from opentrons_hardware.hardware_control.liquid_probe_utils import (
     PipetteProbeTarget,
 )
 from opentrons_hardware.hardware_control.motion_planning.move_utils import (
