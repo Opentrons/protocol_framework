@@ -83,7 +83,18 @@
       "x": 0,
       "y": 0,
       "z": 6.6
+    },
+    "nest_12_reservoir_15ml":{
+      "x": 0, 
+      "y": 0, 
+      "z": 5
+    },
+    "nest_96_wellplate_2ml_deep":{
+      "x":0,
+      "y":0,
+      "z":5
     }
+
   },
   "stackLimit": 11,
   "compatibleParentLabware": [
@@ -94,6 +105,8 @@
     "opentrons_flex_deck_riser",
     "protocol_engine_lid_stack_object",
     "corning_96_wellplate_360ul_flat",
+    "nest_12_reservoir_15ml",
+    "nest_96_wellplate_2ml_deep",
     "plate_lid"
   ],
   "gripForce": 15,

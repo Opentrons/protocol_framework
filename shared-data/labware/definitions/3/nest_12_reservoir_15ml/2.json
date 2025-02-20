@@ -239,13 +239,14 @@
     "nest_96_wellplate_2ml_deep":{
       "x": 0, 
       "y": 0,
-      "z": 1
+      "z": 0.7
     }
   },
   "stackLimit": 3,
   "compatibleParentLabware": [
     "nest_12_reservoir_15ml",
-    "nest_96_wellplate_2ml_deep"
+    "nest_96_wellplate_2ml_deep",
+    "plate_lid"
   ],
   "innerLabwareGeometry": {
     "cuboidalWell": {
