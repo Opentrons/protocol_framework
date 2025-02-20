@@ -38,6 +38,7 @@ export function InputStepFormField(
     ...otherProps
   } = props
   const { t } = useTranslation('tooltip')
+
   return (
     <Flex padding={padding} width="100%">
       <InputField
