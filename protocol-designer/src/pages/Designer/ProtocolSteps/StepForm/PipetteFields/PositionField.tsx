@@ -224,8 +224,9 @@ export function PositionField(props: PositionFieldProps): JSX.Element {
           }
           disabled={disabled}
           readOnly
-          onClick={() => {
+          onClick={e => {
             handleOpen(false)
+            e.stopPropagation()
           }}
           value={String(zValue)}
           isIndeterminate={isIndeterminate}
