@@ -55,7 +55,7 @@ def add_parameters(parameters: ParameterContext) -> None:
         variable_name="baseline", display_name="Baseline", default=False
     )
     parameters.add_bool(
-        variable_name = "test_gripper_only", display_name="Gripper Only", default = True
+        variable_name="test_gripper_only", display_name="Gripper Only", default=False
     )
     create_dye_source_well_parameter(parameters)
     parameters.add_int(
@@ -100,7 +100,7 @@ def run(ctx: ProtocolContext) -> None:
     skip_diluent = ctx.params.skip_diluent  # type: ignore[attr-defined]
     push_out = ctx.params.push_out  # type: ignore[attr-defined]
     use_test_matrix = ctx.params.use_test_matrix  # type: ignore[attr-defined]
-    test_gripper_only = ctx.params.test_gripper_only # type: ignore[attr-defined]
+    test_gripper_only = ctx.params.test_gripper_only  # type: ignore[attr-defined]
     TRIALS = columns * 8 * num_of_plates
     ctx.load_trash_bin("A1")
     # Test Matrix
@@ -141,9 +141,7 @@ def run(ctx: ProtocolContext) -> None:
         version=get_latest_version(DILUENT_LABWARE),
     )
     # Load diluent reservoir lid
-    diluent_lid = diluent_reservoir.load_labware(
-        "plate_lid"
-    )
+    diluent_lid = diluent_reservoir.load_labware("plate_lid")
     pipette = ctx.load_instrument(
         f"flex_1channel_{PIP_VOLUME}", mount="left", tip_racks=tip_racks_50s
     )
@@ -163,15 +161,18 @@ def run(ctx: ProtocolContext) -> None:
     src_labware = ctx.load_labware(
         SRC_LABWARE, location=SLOTS["src"], version=get_latest_version(SRC_LABWARE)
     )
+    # Load src_labware as empty
 
     # LOAD stack of plates and lids, lid on bottom plate on top
     lids_and_plates = [ctx.load_labware("plate_lid", SLOTS["lids"])]
     dst_labwares = []
     for i in range(num_of_plates):
-        dst_labware = lids_and_plates[-1].load_labware(DST_LABWARE, version = get_latest_version(DST_LABWARE))
+        dst_labware = lids_and_plates[-1].load_labware(
+            DST_LABWARE, version=get_latest_version(DST_LABWARE)
+        )
         lids_and_plates.append(dst_labware)
         dst_labwares.append(dst_labware)
-        if i < (num_of_plates-1):
+        if i < (num_of_plates - 1):
             lids_and_plates.append(lids_and_plates[-1].load_labware("plate_lid"))
     dst_labwares.reverse()
     lids_and_plates.reverse()
@@ -197,7 +198,7 @@ def run(ctx: ProtocolContext) -> None:
         volume_list_c = [2.0]
         dye_c_plates = 1
     elif num_of_plates == 5:
-        volume_list_c =[2.0, 5.0]
+        volume_list_c = [2.0, 5.0]
         dye_c_plates = 2
     else:
         dye_c_plates = 0
@@ -207,7 +208,7 @@ def run(ctx: ProtocolContext) -> None:
     )
     dye_d = ctx.define_liquid("dye_d", "#FF0000")
     dye_c = ctx.define_liquid("dye_c", "F1C232")
-    
+
     # SOURCE WELL
     if baseline:
         # if baseline, do not load dye
@@ -216,6 +217,7 @@ def run(ctx: ProtocolContext) -> None:
     else:
         src_holder.load_liquid([src_holder["A1"]], total_dye_needed_d + 100, dye_d)
         src_holder.load_liquid([src_holder["A2"]], total_dye_needed_c + 100, dye_c)
+        src_labware.load_empty(src_labware.wells())
     for dst_labware in dst_labwares:
         if not diluent:
             # if skipping diluent step, preload with diluent
@@ -230,11 +232,17 @@ def run(ctx: ProtocolContext) -> None:
     ) -> int:
         """Fill plate with dye from source."""
         ctx.move_labware(
-            src_lid, diluent_lid, use_gripper=True, pick_up_offset={"x": 0, "y": 0, "z": -3}
-            )  # move lid off of source plate
+            src_lid,
+            diluent_lid,
+            use_gripper=True,
+            pick_up_offset={"x": 0, "y": 0, "z": -3},
+        )  # move lid off of source plate
         if not test_gripper_only:
             dye_needed_in_well = (vol * columns) + DEAD_VOL_DYE
-            src_wells = [src_labware[f"{well_letter}{plate_num+1}"] for well_letter in test_matrix.keys()]
+            src_wells = [
+                src_labware[f"{well_letter}{plate_num+1}"]
+                for well_letter in test_matrix.keys()
+            ]
             pipette.configure_for_volume(dye_needed_in_well)
             pipette.pick_up_tip()
             num_of_transfers = 1
@@ -251,7 +259,10 @@ def run(ctx: ProtocolContext) -> None:
             pipette.drop_tip()
             tip_counter += 1
         ctx.move_labware(
-            src_lid, src_holder, use_gripper=True, pick_up_offset={"x": 0, "y": 0, "z": -3}
+            src_lid,
+            src_holder,
+            use_gripper=True,
+            pick_up_offset={"x": 0, "y": 0, "z": -3},
         )  # put lid back on source plate
         return tip_counter
 
@@ -263,7 +274,10 @@ def run(ctx: ProtocolContext) -> None:
         if initial_fill:
             print(f"--------------plate in loop {n}")
         ctx.move_labware(
-            diluent_lid, src_lid, use_gripper=True, pick_up_offset = {"x":0, "y":0, "z": -3}
+            diluent_lid,
+            src_lid,
+            use_gripper=True,
+            pick_up_offset={"x": 0, "y": 0, "z": -3},
         )  # move lid off diluent reservoir
         if not test_gripper_only:
             ctx.comment("FILLING DESTINATION PLATE WITH DILUENT")
@@ -296,7 +310,10 @@ def run(ctx: ProtocolContext) -> None:
                 dst_well = plate[f"A{i_index + 1}"]
             diluent_pipette.return_tip()
         ctx.move_labware(
-            diluent_lid, diluent_reservoir, use_gripper=True, pick_up_offset= {"x":0,"y":0,"z":-3}
+            diluent_lid,
+            diluent_reservoir,
+            use_gripper=True,
+            pick_up_offset={"x": 0, "y": 0, "z": -3},
         )  # put lid back on diluent reservoir
 
     def _run_trial(
@@ -310,28 +327,8 @@ def run(ctx: ProtocolContext) -> None:
         asp_behavior = test_matrix[well_name_letter]["ASP"]
         dsp_behavior = test_matrix[well_name_letter]["DSP"]
         src_well_letter = well_name_letter
-        src_well_str = src_well_letter + str(plate_num+1)
+        src_well_str = src_well_letter + str(plate_num + 1)
         src_well = src_labware[src_well_str]
-        if tip_counter > (4*96):
-            # if 4 tip racks have been used, switch out two of them
-            # tip rack a3 goes to d3
-            ctx.move_labware(tip_racks_50s[0], "D3", use_gripper=True)
-            # tip rack b4 goes to a3
-            ctx.move_labware(tip_racks_50s[4], SLOTS["tips"][0], use_gripper=True)
-            # tip rack d3 goes to b4
-            ctx.move_labware(tip_racks_50s[0], SLOTS["tips"][4], use_gripper=True)
-            # tip rack b2 goes to d3
-            ctx.move_labware(tip_racks_50s[1], "D3", use_gripper=True)
-            # tip rack c4 goes to b2
-            ctx.move_labware(tip_racks_50s[5], SLOTS["tips"][1], use_gripper=True)
-            # tip rack d3 goes to c4
-            ctx.move_labware(tip_racks_50s[1], SLOTS["tips"][5], use_gripper = True)
-            # tip rack b3 goes to d3
-            ctx.move_labware(tip_racks_50s[2], "D3", use_gripper = True)
-            ctx.move_labware(tip_racks_50s[6], SLOTS["tips"][2], use_gripper = True)
-            ctx.move_labware(tip_racks_50s[2], SLOTS["tips"][6], use_gripper = True)
-            
-            tip_counter = 0
         tip_counter += 1
         pipette.pick_up_tip()
         if "LLD" in asp_behavior:
@@ -347,12 +344,6 @@ def run(ctx: ProtocolContext) -> None:
         if "M" in asp_behavior:
             # NOTE: if liquid height is <2.5mm, protocol may error out
             #       this can be avoided by adding extra starting liquid in the SRC labware
-            # need to probe new well before doing meniscus relative
-            if (dst_well.well_name == "C1"  or dst_well.well_name == "D1") and asp_behavior == "M":
-                pipette.require_liquid_presence(src_well)
-                pipette.drop_tip()
-                pipette.pick_up_tip()
-                tip_counter += 2
             SUBMERGE_MM = -2
             pipette.aspirate(target_ul, src_well.meniscus(SUBMERGE_MM))
         else:
@@ -371,11 +362,13 @@ def run(ctx: ProtocolContext) -> None:
             pipette.dispense(target_ul, dst_well.top(), push_out=push_out)  # top
         pipette.drop_tip()
         return tip_counter
+
     n = 0
     if not skip_diluent:
         for (vol, plate) in zip(volume_list, dst_labwares):
             lid_for_plate = plate.parent
-            if tip_counter >= ((4*96)-10):
+            print(tip_counter)
+            if tip_counter >= ((4 * 96) - 21):
                 # if 4 tip racks have been used, switch out two of them
                 print("started moving tip racks before plate move")
                 # tip rack a3 goes to d3
@@ -389,20 +382,21 @@ def run(ctx: ProtocolContext) -> None:
                 # tip rack c4 goes to b2
                 ctx.move_labware(tip_racks_50s[5], SLOTS["tips"][1], use_gripper=True)
                 # tip rack d3 goes to c4
-                ctx.move_labware(tip_racks_50s[1], SLOTS["tips"][5], use_gripper = True)
+                ctx.move_labware(tip_racks_50s[1], SLOTS["tips"][5], use_gripper=True)
                 # tip rack b3 goes to d3
-                ctx.move_labware(tip_racks_50s[2], "D3", use_gripper = True)
-                ctx.move_labware(tip_racks_50s[6], SLOTS["tips"][2], use_gripper = True)
-                ctx.move_labware(tip_racks_50s[2], SLOTS["tips"][6], use_gripper = True)
-                
+                ctx.move_labware(tip_racks_50s[2], "D3", use_gripper=True)
+                ctx.move_labware(tip_racks_50s[6], SLOTS["tips"][2], use_gripper=True)
+                ctx.move_labware(tip_racks_50s[2], SLOTS["tips"][6], use_gripper=True)
+
                 tip_counter = 0
-            ctx.move_labware(plate, "D3", use_gripper = True)
+            ctx.move_labware(plate, "D3", use_gripper=True)
             # FILL PLATE WITH DILUENT
             fill_plate_with_diluent(
                 plate=plate, baseline=baseline, initial_fill=True, vol=vol
             )
             if not baseline:
                 # FILL SOURCE PLATE WITH DYE
+                print(tip_counter)
                 tip_counter = fill_well_with_dye(
                     plate=plate, vol=vol, plate_num=n, tip_counter=tip_counter
                 )
@@ -421,10 +415,10 @@ def run(ctx: ProtocolContext) -> None:
             )
             if n == 0:
                 # if first plate, move to slot D1
-                ctx.move_labware(plate, "D1", use_gripper = True)
+                ctx.move_labware(plate, "D1", use_gripper=True)
             else:
                 # for all other plates, stack on previous lid
-                ctx.move_labware(plate, previous_lid, use_gripper = True)
+                ctx.move_labware(plate, previous_lid, use_gripper=True)
             # move lid onto plate
             if n != (num_of_plates - 1):
                 ctx.move_labware(lid_for_plate, plate, use_gripper=True)
