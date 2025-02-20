@@ -13,7 +13,7 @@ import {
   RESPONSIVENESS,
   Tag,
   SPACING_1,
-  TYPOGRAPHY
+  TYPOGRAPHY,
 } from '@opentrons/components'
 import { Divider } from '/app/atoms/structure/Divider'
 
@@ -56,35 +56,7 @@ export function InterventionInfo(props: InterventionInfoProps): JSX.Element {
         >
           {props.labwareNickname ?? props.labwareName}
         </StyledText>
-        {props.layout === 'default' ? (
-          <>
-            {props.labwareNickname != null ? (
-              <>
-                <StyledText
-                  oddStyle="hidden"
-                  desktopStyle="bodyDefaultRegular"
-                  color={COLORS.grey60}
-                  css={css`
-                    ${LINE_CLAMP_STYLE}
-                    @media ${RESPONSIVENESS.touchscreenMediaQuerySpecs} {
-                      display: none;
-                    }
-                  `}
-                >
-                  {props.labwareNickname}{' '}
-                </StyledText>
-                <Divider
-                  borderColor={COLORS.grey35}
-                  css={`
-                    @media ${RESPONSIVENESS.touchscreenMediaQuerySpecs} {
-                      display: none;
-                    }
-                  `}
-                />
-              </>
-            ) : null}
-          </>
-        ) : (
+        {props.layout === 'stacked' ? (
           <>
             <StyledText
               oddStyle="hidden"
@@ -94,7 +66,7 @@ export function InterventionInfo(props: InterventionInfoProps): JSX.Element {
                 ${LINE_CLAMP_STYLE}
                 margin: ${SPACING_1} 0;
                 @media ${RESPONSIVENESS.touchscreenMediaQuerySpecs} {
-                  font-size: ${TYPOGRAPHY.fontSize22}
+                  font-size: ${TYPOGRAPHY.fontSize22};
                 }
               `}
             >
@@ -105,12 +77,12 @@ export function InterventionInfo(props: InterventionInfoProps): JSX.Element {
               borderColor={COLORS.grey35}
               css={`
                 @media ${RESPONSIVENESS.touchscreenMediaQuerySpecs} {
-                  border-bottom-color: ${COLORS.grey60}
+                  border-bottom-color: ${COLORS.grey60};
                 }
               `}
             />
           </>
-        )}
+        ) : null}
       </Flex>
       {content}
     </Flex>
