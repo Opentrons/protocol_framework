@@ -19,7 +19,7 @@ from opentrons.types import Point
 from ..types import (
     ModuleModel,
     CurrentWell,
-    LabwareLocation,
+    LoadableLabwareLocation,
     DeckSlotLocation,
     ModuleLocation,
     OnLabwareLocation,
@@ -68,7 +68,9 @@ class MoveLabwareParams(BaseModel):
     """Input parameters for a ``moveLabware`` command."""
 
     labwareId: str = Field(..., description="The ID of the labware to move.")
-    newLocation: LabwareLocation = Field(..., description="Where to move the labware.")
+    newLocation: LoadableLabwareLocation = Field(
+        ..., description="Where to move the labware."
+    )
     strategy: LabwareMovementStrategy = Field(
         ...,
         description="Whether to use the gripper to perform the labware movement"

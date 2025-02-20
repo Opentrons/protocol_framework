@@ -10,7 +10,7 @@ from opentrons_shared_data.labware.labware_definition import LabwareDefinition
 from ..errors import LabwareCannotBeStackedError, LabwareIsNotAllowedInLocationError
 from ..resources import labware_validation
 from ..types import (
-    LabwareLocation,
+    LoadableLabwareLocation,
     OnLabwareLocation,
     OnLabwareLocationSequenceComponent,
 )
@@ -31,7 +31,7 @@ LoadLidCommandType = Literal["loadLid"]
 class LoadLidParams(BaseModel):
     """Payload required to load a lid onto a labware."""
 
-    location: LabwareLocation = Field(
+    location: LoadableLabwareLocation = Field(
         ...,
         description="Labware the lid should be loaded onto.",
     )
@@ -87,9 +87,6 @@ class LoadLidImplementation(
             labware_id=None,
         )
 
-        # TODO(chb 2024-12-12) these validation checks happen after the labware is loaded, because they rely on
-        #   on the definition. In practice this will not cause any issues since they will raise protocol ending
-        #   exception, but for correctness should be refactored to do this check beforehand.
         if not labware_validation.validate_definition_is_lid(loaded_labware.definition):
             raise LabwareCannotBeStackedError(
                 f"Labware {params.loadName} is not a Lid and cannot be loaded onto {self._state_view.labware.get_display_name(params.location.labwareId)}."

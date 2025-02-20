@@ -3590,8 +3590,6 @@
             "kind": "onCutoutFixture",
             "possibleCutoutFixtureIds": [
               "flexStackerModuleV1",
-              "flexStackerModuleV1WithWasteChuteRightAdapterCovered",
-              "flexStackerModuleV1WithWasteChuteRightAdapterNoCover",
               "singleRightSlot",
               "stagingAreaRightSlot"
             ]

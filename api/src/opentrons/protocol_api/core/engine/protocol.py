@@ -48,7 +48,7 @@ from opentrons.protocol_engine.types import (
     ModuleModel as ProtocolEngineModuleModel,
     OFF_DECK_LOCATION,
     SYSTEM_LOCATION,
-    LabwareLocation,
+    LoadableLabwareLocation,
     NonStackedLocation,
 )
 from opentrons.protocol_engine.clients import SyncClient as ProtocolEngineClient
@@ -1135,7 +1135,7 @@ class ProtocolCore(
             WasteChute,
             TrashBin,
         ],
-    ) -> LabwareLocation:
+    ) -> LoadableLabwareLocation:
         if isinstance(location, LabwareCore):
             return OnLabwareLocation(labwareId=location.labware_id)
         else:
