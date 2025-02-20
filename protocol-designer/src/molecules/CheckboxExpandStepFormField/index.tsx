@@ -41,10 +41,13 @@ export function CheckboxExpandStepFormField(
   return (
     <>
       <ListButton
-        type={disabled ? 'notConnected' : 'noActive'}
+        type="noActive"
         padding={SPACING.spacing12}
+        disabled={disabled}
         onClick={() => {
-          checkboxUpdateValue(!checkboxValue)
+          if (!disabled) {
+            checkboxUpdateValue(!checkboxValue)
+          }
         }}
       >
         <Flex

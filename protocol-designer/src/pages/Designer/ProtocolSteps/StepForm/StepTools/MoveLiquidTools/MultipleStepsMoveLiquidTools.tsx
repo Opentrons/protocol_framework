@@ -424,8 +424,12 @@ export const MultipleStepsMoveLiquidTools = ({
               <InputStepFormField
                 showTooltip={false}
                 padding="0"
-                title={t('protocol_steps:touchTip_speed')}
+                title={t('form:step_edit_form.field.touchTip_speed.label')}
                 {...propsForFields[`${tab}_touchTip_speed`]}
+                errorToShow={getFormLevelError(
+                  `${tab}_touchTip_speed`,
+                  mappedErrorsToField
+                )}
                 units={t('application:units.millimeterPerSec')}
               />
 
