@@ -217,7 +217,7 @@ export const MultipleStepsMoveLiquidTools = ({
             labwareId={
               formData[
                 getLabwareFieldForPositioningField(
-                  addFieldNamePrefix('mmFromBottom')
+                  addFieldNamePrefix('retract_mmFromBottom')
                 )
               ]
             }
