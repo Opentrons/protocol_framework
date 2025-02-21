@@ -148,6 +148,12 @@ async def test_set_stored_labware_happypath(
         ).then_return((sentinel.adapter_definition, sentinel.unused))
         adapter_definition = sentinel.adapter_definition
     result = await subject.execute(params)
+    decoy.verify(
+        state_view.labware.raise_if_stacker_labware_pool_is_not_valid(
+            sentinel.primary_definition, lid_definition, adapter_definition
+        )
+    )
+
     assert result == SuccessData(
         public=SetStoredLabwareResult.model_construct(
             primaryLabwareDefinition=sentinel.primary_definition,

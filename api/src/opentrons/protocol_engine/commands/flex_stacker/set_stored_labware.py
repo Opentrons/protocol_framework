@@ -125,7 +125,6 @@ class SetStoredLabwareImpl(
             namespace=params.primaryLabware.namespace,
             version=params.primaryLabware.version,
         )
-        definition_stack = [labware_def]
         lid_def: LabwareDefinition | None = None
         if params.lidLabware:
             lid_def, _ = await self._equipment.load_definition_for_details(
@@ -133,7 +132,6 @@ class SetStoredLabwareImpl(
                 namespace=params.lidLabware.namespace,
                 version=params.lidLabware.version,
             )
-            definition_stack.insert(0, lid_def)
         adapter_def: LabwareDefinition | None = None
         if params.adapterLabware:
             adapter_def, _ = await self._equipment.load_definition_for_details(
@@ -141,7 +139,10 @@ class SetStoredLabwareImpl(
                 namespace=params.adapterLabware.namespace,
                 version=params.adapterLabware.version,
             )
-            definition_stack.insert(-1, adapter_def)
+
+        self._state_view.labware.raise_if_stacker_labware_pool_is_not_valid(
+            labware_def, lid_def, adapter_def
+        )
 
         # TODO: propagate the limit on max height of the stacker
         initial_count = params.initialCount if params.initialCount is not None else 5
