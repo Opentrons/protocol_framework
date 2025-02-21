@@ -1,45 +1,20 @@
 """Functions for commanding motion limited by tool sensors."""
-import asyncio
-from contextlib import AsyncExitStack
-from functools import partial
 from typing import (
     Any,
-    Union,
     List,
-    Iterator,
     Tuple,
     Dict,
-    Callable,
-    AsyncContextManager,
     Optional,
-    AsyncIterator,
-    Mapping,
 )
 from logging import getLogger
 from numpy import float64
 from math import copysign
 from typing_extensions import Literal
-from contextlib import asynccontextmanager
 from opentrons_hardware.firmware_bindings.constants import (
     NodeId,
     SensorId,
     SensorType,
     SensorOutputBinding,
-    ErrorCode,
-    SensorThresholdMode,
-)
-from opentrons_hardware.firmware_bindings.messages.payloads import (
-    SendAccumulatedSensorDataPayload,
-    BindSensorOutputRequestPayload,
-)
-from opentrons_hardware.firmware_bindings.messages.fields import (
-    SensorIdField,
-    SensorOutputBindingField,
-    SensorTypeField,
-)
-from opentrons_hardware.firmware_bindings.messages.message_definitions import (
-    BindSensorOutputRequest,
-    SendAccumulatedSensorDataRequest,
 )
 from opentrons_hardware.firmware_bindings.messages import (
     message_definitions,
@@ -47,17 +22,6 @@ from opentrons_hardware.firmware_bindings.messages import (
 )
 from opentrons_hardware.firmware_bindings.arbitration_id import ArbitrationId
 
-from opentrons_hardware.sensors.sensor_driver import SensorDriver, LogListener
-from opentrons_hardware.sensors.types import (
-    sensor_fixed_point_conversion,
-    SensorDataType,
-)
-from opentrons_hardware.sensors.sensor_types import (
-    SensorInformation,
-    PressureSensor,
-    CapacitiveSensor,
-)
-from opentrons_hardware.sensors.scheduler import SensorScheduler
 from opentrons_hardware.drivers.can_bus.can_messenger import CanMessenger
 from opentrons_hardware.hardware_control.motion import (
     MoveStopCondition,
@@ -65,9 +29,7 @@ from opentrons_hardware.hardware_control.motion import (
     MoveGroupStep,
     MoveGroupSingleAxisStep,
 )
-from opentrons_hardware.hardware_control.move_group_runner import MoveGroupRunner
 from opentrons_hardware.hardware_control.types import (
-    MotorPositionStatus,
     MoveCompleteAck,
 )
 
@@ -85,15 +47,18 @@ class ProbeResultListener:
         messenger: CanMessenger,
         head_node: NodeId,
     ) -> None:
+        """Build a new listener."""
         self.head_node = head_node
         self.success = False
         self.result: Tuple[float, float] = (0.0, 0.0)
         self.messenger = messenger
 
     def probe_successful(self) -> bool:
+        """Return true if the listener heard a successful completion."""
         return self.success
 
     def probe_result(self) -> Tuple[float, float]:
+        """Return a Tuple of the encoder and stepper position where liquid was found."""
         return self.result
 
     async def __aenter__(self) -> None:
@@ -306,7 +271,10 @@ def plan_liquid_probe_motion(
     sensor_binding: Optional[int],
     use_fast_motion: bool,
 ) -> Tuple[List[MoveGroupStep], List[MoveGroupStep]]:
+    """Plan the move group for a liquid probe depending on the settings.
 
+    Returns the probing move group and the raise_z move group.
+    """
     p_prep_distance = float(plunger_impulse_time * plunger_speed)
     p_pass_distance = float(max_p_distance - p_prep_distance)
 
@@ -315,7 +283,7 @@ def plan_liquid_probe_motion(
         # TODO: handle this better
         assert z_flat_time > 0
         z_acceleration_distance = (
-            mount_discontinuity * plunger_impulse_time + 0.5 * mount_acceleration**2
+            mount_discontinuity * plunger_impulse_time + 0.5 * mount_acceleration*plunger_impulse_time**2
         )
         z_flat_speed_distance = z_flat_time * max_mount_speed
         move_group = _build_group_for_trapazoid(
@@ -365,7 +333,7 @@ def plan_liquid_probe_motion(
         )
         move_group = [lower_plunger, sensor_group]
         z_rise_height = z_offset_for_plunger_prep
-
+    print(f"Creating raise z step dist {z_rise_height} vel {mount_discontinuity} duration {z_rise_height / mount_discontinuity}")
     raise_z = create_step(
         distance={head_node: float64(z_rise_height)},
         velocity={head_node: float64(-1 * mount_discontinuity)},

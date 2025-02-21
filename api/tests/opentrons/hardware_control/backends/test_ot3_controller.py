@@ -190,6 +190,8 @@ async def controller(
 def fake_liquid_settings() -> LiquidProbeSettings:
     return LiquidProbeSettings(
         mount_speed=40,
+        mount_discontinuity=40,
+        mount_acceleration=0,
         plunger_speed=10,
         plunger_impulse_time=0.2,
         sensor_threshold_pascals=15,

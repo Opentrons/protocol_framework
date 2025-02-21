@@ -35,13 +35,13 @@ from opentrons_hardware.firmware_bindings.messages.fields import (
 
 from tests.conftest import CanLoopback
 
+from opentrons_hardware.hardware_control.liquid_probe_utils import PipetteProbeTarget
 from opentrons_hardware.hardware_control.tool_sensors import (
     capacitive_probe,
     capacitive_pass,
     liquid_probe,
     check_overpressure,
     InstrumentProbeTarget,
-    PipetteProbeTarget,
 )
 from opentrons_hardware.firmware_bindings.constants import (
     NodeId,
@@ -240,7 +240,7 @@ async def test_liquid_probe(
 
     message_send_loopback.add_responder(move_responder)
 
-    position = await liquid_probe(
+    position, result = await liquid_probe(
         messenger=mock_messenger,
         tool=target_node,
         head_node=motor_node,

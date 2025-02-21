@@ -3,7 +3,6 @@ import asyncio
 from contextlib import AsyncExitStack
 from functools import partial
 from typing import (
-    Any,
     Union,
     List,
     Iterator,
@@ -16,8 +15,6 @@ from typing import (
     Mapping,
 )
 from logging import getLogger
-from numpy import float64
-from math import copysign
 from typing_extensions import Literal
 from contextlib import asynccontextmanager
 from opentrons_hardware.firmware_bindings.constants import (
@@ -41,11 +38,6 @@ from opentrons_hardware.firmware_bindings.messages.message_definitions import (
     BindSensorOutputRequest,
     SendAccumulatedSensorDataRequest,
 )
-from opentrons_hardware.firmware_bindings.messages import (
-    message_definitions,
-    MessageDefinition,
-)
-from opentrons_hardware.firmware_bindings.arbitration_id import ArbitrationId
 
 from opentrons_hardware.sensors.sensor_driver import SensorDriver, LogListener
 from opentrons_hardware.sensors.types import (
@@ -61,22 +53,11 @@ from opentrons_hardware.sensors.scheduler import SensorScheduler
 from opentrons_hardware.drivers.can_bus.can_messenger import CanMessenger
 from opentrons_hardware.hardware_control.motion import (
     MoveStopCondition,
-    create_step,
-    MoveGroupStep,
-    MoveGroupSingleAxisStep,
 )
 from opentrons_hardware.hardware_control.move_group_runner import MoveGroupRunner
 from opentrons_hardware.hardware_control.types import (
     MotorPositionStatus,
-    MoveCompleteAck,
 )
-
-LOG = getLogger(__name__)
-
-InstrumentProbeTarget = Union[PipetteProbeTarget, Literal[NodeId.gripper]]
-ProbeSensorDict = Union[
-    Dict[SensorId, PressureSensor], Dict[SensorId, CapacitiveSensor]
-]
 
 from .liquid_probe_utils import (
     ProbeResultListener,
@@ -85,6 +66,14 @@ from .liquid_probe_utils import (
     plan_liquid_probe_motion,
     PipetteProbeTarget,
 )
+
+
+LOG = getLogger(__name__)
+
+InstrumentProbeTarget = Union[PipetteProbeTarget, Literal[NodeId.gripper]]
+ProbeSensorDict = Union[
+    Dict[SensorId, PressureSensor], Dict[SensorId, CapacitiveSensor]
+]
 
 
 async def _setup_pressure_sensors(
@@ -259,7 +248,7 @@ async def liquid_probe(
 
     result_listener = ProbeResultListener(messenger, head_node)
     # LOG.info(
-    ##    f"Starting LLD pass: {head_node} {sensor_id} max p distance {max_p_distance} max z distance {z_flat_speed_distance + 2 * z_acceleration_distance}"
+    #    f"Starting LLD pass: {head_node} {sensor_id} max p distance {max_p_distance} max z distance {z_flat_speed_distance + 2 * z_acceleration_distance}"
     # )
     async with AsyncExitStack() as binding_stack:
         for listener in sensor_listeners.values():

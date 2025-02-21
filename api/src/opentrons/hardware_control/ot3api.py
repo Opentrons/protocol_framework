@@ -2803,7 +2803,7 @@ class OT3API(
         z_distance_during_impulse = 0.0
         if use_fast_motion:
             # The first few samples of the sensor are eaten up to create a moving baseline
-            # We compute the corisponding z distance here based on what speed the mount will be going when it turns on the sensor
+            # We compute the corresponding z distance here based on what speed the mount will be going when it turns on the sensor
             sensor_baseline_z_move_mm = OT3API.liquid_probe_non_responsive_z_distance(
                 probe_settings.mount_speed,
                 probe_settings.samples_for_baselining,
@@ -2823,7 +2823,8 @@ class OT3API(
                 probe_settings.samples_for_baselining,
                 probe_settings.sample_time_sec,
             )
-        # This is how far the z overlaps, it is the distance wasted during the plunger baseline, plus the distance if any the z needs to accelerate up to speed plus a safety factor overlap distance
+        # This is how far the z overlaps, it is the distance wasted during the plunger baseline,
+        # plus the distance if any the z needs to accelerate up to speed plus a safety factor overlap distance
         z_offset_per_pass = (
             sensor_baseline_z_move_mm
             + probe_settings.z_overlap_between_passes_mm
@@ -2875,11 +2876,13 @@ class OT3API(
             )
             print(f"Total remaining z distance {total_remaining_z_dist}")
             if use_fast_motion:
-                if total_remaining_z_dist < 4:
-                    # If the toal remaining distance is < 4 than it is not safe to do a fast move anymore
+                if total_remaining_z_dist < z_distance_during_impulse:
+                    # If the total remaining distance is < z_distance_during_impulse then it is not safe to do a fast move anymore
+                    # Note: z_distance_during_impulse is the distance the z travels during acceleration/deceleration)
                     finish_probe_move_duration = (
                         total_remaining_z_dist / probe_settings.mount_discontinuity
                     )
+                    # Reset the sensor baseline distance using the discontinuity speed and update the other downstream variables
                     sensor_baseline_z_move_mm = (
                         OT3API.liquid_probe_non_responsive_z_distance(
                             probe_settings.mount_discontinuity,
@@ -2896,9 +2899,12 @@ class OT3API(
                     )
                     use_fast_motion = False
                 else:
+                    # this is the time to do the "flat" part of the z motion trapezoid + the deceleration time.
+                    # Note: acceleration time == deceleration time == plunger_impulse_time
                     finish_probe_move_duration = (
-                        (total_remaining_z_dist - 4) / probe_settings.mount_speed
-                    ) + 0.2
+                        (total_remaining_z_dist - z_distance_during_impulse)
+                        / probe_settings.mount_speed
+                    ) + probe_settings.plunger_impulse_time
             else:
                 finish_probe_move_duration = (
                     total_remaining_z_dist / probe_settings.mount_discontinuity
