@@ -9,7 +9,7 @@ import type { StyleProps } from '../../primitives'
 
 export * from './ListButtonChildren/index'
 
-type ListButtonType = 'noActive' | 'connected' | 'notConnected' | 'white'
+type ListButtonType = 'noActive' | 'connected' | 'notConnected' | 'onColor'
 
 interface ListButtonProps extends StyleProps {
   type: ListButtonType
@@ -35,7 +35,7 @@ const LISTBUTTON_PROPS_BY_TYPE: Record<
     backgroundColor: COLORS.yellow30,
     hoverBackgroundColor: COLORS.yellow35,
   },
-  white: {
+  onColor: {
     backgroundColor: COLORS.white,
     hoverBackgroundColor: COLORS.grey10,
   },

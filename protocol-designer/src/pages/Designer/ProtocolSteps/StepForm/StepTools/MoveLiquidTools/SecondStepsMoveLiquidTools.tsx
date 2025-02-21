@@ -446,7 +446,7 @@ export const SecondStepsMoveLiquidTools = ({
                 }
                 showButton
                 padding="0"
-                listButtonType="white"
+                listButtonType="onColor"
               />
             </Flex>
           ) : null}
