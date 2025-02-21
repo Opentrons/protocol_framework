@@ -76,6 +76,7 @@ export function ToggleExpandStepFormField(
       type="noActive"
       padding={SPACING.spacing12}
       onClick={onToggleUpdateValue}
+      width="100%"
     >
       <Flex flexDirection={DIRECTION_COLUMN} width="100%">
         <Flex justifyContent={JUSTIFY_SPACE_BETWEEN} alignItems={ALIGN_CENTER}>

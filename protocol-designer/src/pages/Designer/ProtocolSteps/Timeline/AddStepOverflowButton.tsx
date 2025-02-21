@@ -45,7 +45,7 @@ export function AddStepOverflowButton(
         <StyledText desktopStyle="bodyDefaultRegular">
           {i18n.format(
             t(`application:stepType.${stepType}`, stepType),
-            'capitalize'
+            'titleCase'
           )}
         </StyledText>
       </MenuButton>

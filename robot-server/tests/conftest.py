@@ -239,6 +239,7 @@ def set_up_tip_length_temp_directory(server_temp_directory: str) -> None:
     attached_pip_list = ["123", "321"]
     tip_length_list = [30.5, 31.5]
     definition = labware.get_labware_definition("opentrons_96_filtertiprack_200ul")
+    assert definition["schemaVersion"] == 2  # Required by create_tip_length_data().
     for pip, tip_len in zip(attached_pip_list, tip_length_list):
         cal_data = create_tip_length_data(definition, tip_len)
         save_tip_length_calibration(pip, cal_data)
@@ -332,13 +333,19 @@ def minimal_labware_def() -> LabwareDefinition:
 @pytest.fixture
 def custom_tiprack_def() -> LabwareDefinition:
     return {
-        "metadata": {"displayName": "minimal labware"},
+        "metadata": {
+            "displayName": "minimal labware",
+            "displayCategory": "tipRack",
+            "displayVolumeUnits": "µL",
+        },
         "cornerOffsetFromSlot": {"x": 10, "y": 10, "z": 5},
         "parameters": {
             "isTiprack": True,
             "tipLength": 55.3,
             "tipOverlap": 2.8,
             "loadName": "minimal_labware_def",
+            "format": "96Standard",
+            "isMagneticModuleCompatible": False,
         },
         "ordering": [["A1"], ["A2"]],
         "wells": {

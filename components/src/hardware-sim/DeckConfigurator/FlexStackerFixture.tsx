@@ -33,6 +33,7 @@ interface FlexStackerFixtureProps {
 
 const FLEX_STACKER_FIXTURE_DISPLAY_NAME = 'Stacker'
 const FLEX_STACKER_WASTE_CHUTE_DISPLAY_NAME = 'Stacker + Waste chute'
+const FLEX_STACKER_MAG_BLOCK_DISPLAY_NAME = 'Stacker + Mag Block'
 
 export function FlexStackerFixture(
   props: FlexStackerFixtureProps
@@ -49,6 +50,12 @@ export function FlexStackerFixture(
   const cutoutDef = deckDefinition.locations.cutouts.find(
     cutout => cutout.id === fixtureLocation
   )
+  let displayName = FLEX_STACKER_FIXTURE_DISPLAY_NAME
+  if (hasWasteChute) {
+    displayName = FLEX_STACKER_WASTE_CHUTE_DISPLAY_NAME
+  } else if (cutoutFixtureId === 'flexStackerModuleV1WithMagneticBlockV1') {
+    displayName = FLEX_STACKER_MAG_BLOCK_DISPLAY_NAME
+  }
 
   /**
    * deck definition cutout position is the position of the single slot located within that cutout
@@ -82,11 +89,7 @@ export function FlexStackerFixture(
             : () => {}
         }
       >
-        <Text css={TYPOGRAPHY.smallBodyTextSemiBold}>
-          {hasWasteChute
-            ? FLEX_STACKER_WASTE_CHUTE_DISPLAY_NAME
-            : FLEX_STACKER_FIXTURE_DISPLAY_NAME}
-        </Text>
+        <Text css={TYPOGRAPHY.smallBodyTextSemiBold}>{displayName}</Text>
         {handleClickRemove != null ? (
           <Icon name="remove" color={COLORS.white} size="2rem" />
         ) : null}

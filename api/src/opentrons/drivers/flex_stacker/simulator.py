@@ -15,6 +15,10 @@ from .types import (
     MoveParams,
     LimitSwitchStatus,
     StallGuardParams,
+    TOFSensor,
+    TOFSensorMode,
+    TOFSensorState,
+    TOFSensorStatus,
 )
 
 
@@ -32,6 +36,9 @@ class SimulatingDriver(AbstractFlexStackerDriver):
         }
         self._motor_registers: Dict[StackerAxis, Dict[int, int]] = {
             a: {} for a in StackerAxis
+        }
+        self._tof_registers: Dict[TOFSensor, Dict[int, int]] = {
+            a: {} for a in TOFSensor
         }
 
     def set_limit_switch(self, status: LimitSwitchStatus) -> bool:
@@ -97,6 +104,10 @@ class SimulatingDriver(AbstractFlexStackerDriver):
         self._stallgard_threshold[axis] = StallGuardParams(axis, enable, threshold)
         return True
 
+    async def enable_tof_sensor(self, sensor: TOFSensor, enable: bool) -> bool:
+        """Enable or disable the TOF sensor."""
+        return True
+
     async def set_motor_driver_register(
         self, axis: StackerAxis, reg: int, value: int
     ) -> bool:
@@ -107,6 +118,26 @@ class SimulatingDriver(AbstractFlexStackerDriver):
     async def get_motor_driver_register(self, axis: StackerAxis, reg: int) -> int:
         """Gets the register value of the given motor axis driver."""
         return self._motor_registers[axis].get(reg, 0)
+
+    async def set_tof_driver_register(
+        self, sensor: TOFSensor, reg: int, value: int
+    ) -> bool:
+        """Set the register of the given tof sensor driver to the given value."""
+        self._tof_registers[sensor].update({reg: value})
+        return True
+
+    async def get_tof_driver_register(self, sensor: TOFSensor, reg: int) -> int:
+        """Gets the register value of the given tof sensor driver."""
+        return self._tof_registers[sensor].get(reg, 0)
+
+    async def get_tof_sensor_status(self, sensor: TOFSensor) -> TOFSensorStatus:
+        """Get the status of the tof sensor."""
+        return TOFSensorStatus(
+            sensor=sensor,
+            mode=TOFSensorMode.MEASURE,
+            state=TOFSensorState.IDLE,
+            ok=True,
+        )
 
     async def get_motion_params(self, axis: StackerAxis) -> MoveParams:
         """Get the motion parameters used by the given axis motor."""

@@ -1,4 +1,5 @@
 """Test Flex Stacker retrieve command implementation."""
+
 import pytest
 from decoy import Decoy
 from contextlib import nullcontext as does_not_raise
@@ -28,6 +29,10 @@ from opentrons.protocol_engine.types import (
     ModuleLocation,
     LoadedLabware,
     OverlapOffset,
+    OnModuleLocationSequenceComponent,
+    OnAddressableAreaLocationSequenceComponent,
+    InStackerHopperLocation,
+    OnCutoutFixtureLocationSequenceComponent,
 )
 from opentrons.protocol_engine.errors import CannotPerformModuleAction
 from opentrons.types import DeckSlotName
@@ -64,6 +69,10 @@ async def test_retrieve(
         module_id=FlexStackerId("flex-stacker-id"),
         in_static_mode=in_static_mode,
         hopper_labware_ids=["labware-id"],
+        pool_primary_definition=None,
+        pool_adapter_definition=None,
+        pool_lid_definition=None,
+        pool_count=0,
     )
     fs_hardware = decoy.mock(cls=FlexStacker)
 
@@ -95,6 +104,29 @@ async def test_retrieve(
     decoy.when(
         equipment.get_module_hardware_api(FlexStackerId("flex-stacker-id"))
     ).then_return(fs_hardware)
+    decoy.when(state_view.geometry.get_location_sequence("labware-id")).then_return(
+        [
+            InStackerHopperLocation(moduleId="flex-stacker-id"),
+            OnCutoutFixtureLocationSequenceComponent(
+                cutoutId="cutoutB4", possibleCutoutFixtureIds=["flexStackerModuleV1"]
+            ),
+        ]
+    )
+    decoy.when(
+        state_view.geometry.get_predicted_location_sequence(
+            ModuleLocation(moduleId="flex-stacker-id")
+        )
+    ).then_return(
+        [
+            OnAddressableAreaLocationSequenceComponent(
+                addressableAreaName="flexStackerV1B4"
+            ),
+            OnModuleLocationSequenceComponent(moduleId="flex-stacker-id"),
+            OnCutoutFixtureLocationSequenceComponent(
+                cutoutId="cutoutB3", possibleCutoutFixtureIds=["flexStackerModuleV1"]
+            ),
+        ]
+    )
 
     with expectation:
         result = await subject.execute(data)
@@ -103,7 +135,26 @@ async def test_retrieve(
         decoy.verify(await fs_hardware.dispense_labware(labware_height=4), times=1)
 
         assert result == SuccessData(
-            public=flex_stacker.RetrieveResult(labware_id="labware-id"),
+            public=flex_stacker.RetrieveResult(
+                labware_id="labware-id",
+                originLocationSequence=[
+                    InStackerHopperLocation(moduleId="flex-stacker-id"),
+                    OnCutoutFixtureLocationSequenceComponent(
+                        cutoutId="cutoutB4",
+                        possibleCutoutFixtureIds=["flexStackerModuleV1"],
+                    ),
+                ],
+                eventualDestinationLocationSequence=[
+                    OnAddressableAreaLocationSequenceComponent(
+                        addressableAreaName="flexStackerV1B4",
+                    ),
+                    OnModuleLocationSequenceComponent(moduleId="flex-stacker-id"),
+                    OnCutoutFixtureLocationSequenceComponent(
+                        cutoutId="cutoutB3",
+                        possibleCutoutFixtureIds=["flexStackerModuleV1"],
+                    ),
+                ],
+            ),
             state_update=StateUpdate(
                 labware_location=LabwareLocationUpdate(
                     labware_id="labware-id",

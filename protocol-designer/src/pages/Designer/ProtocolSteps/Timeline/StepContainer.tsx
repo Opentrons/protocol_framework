@@ -294,6 +294,7 @@ export function StepContainer(props: StepContainerProps): JSX.Element {
               confirmDelete={confirmDelete}
               confirmMultiDelete={confirmMultiDelete}
               multiSelectItemIds={multiSelectItemIds}
+              sidebarWidth={sidebarWidth}
             />,
             getMainPagePortalEl()
           )
