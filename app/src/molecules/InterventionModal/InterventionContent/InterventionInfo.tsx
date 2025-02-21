@@ -65,10 +65,10 @@ export function InterventionInfo(props: InterventionInfoProps): JSX.Element {
               color={COLORS.grey60}
               css={css`
                 ${LINE_CLAMP_STYLE}
-                margin: 0 0.125rem ${SPACING_2} 0;
+                margin: 0.125rem 0 ${SPACING_2} 0;
                 @media ${RESPONSIVENESS.touchscreenMediaQuerySpecs} {
                   font-size: ${TYPOGRAPHY.fontSize22};
-                  margin: 0 ${SPACING_1} ${SPACING_2} 0;
+                  margin: ${SPACING_1} 0 ${SPACING_2} 0;
                 }
               `}
             >
