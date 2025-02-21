@@ -129,6 +129,7 @@ class RunArgs:
     test_well: str
     wet: bool
     dial_front_channel: bool
+    use_fast_motion: bool
 
     @classmethod
     def _get_protocol_context(cls, args: argparse.Namespace) -> ProtocolContext:
@@ -265,6 +266,7 @@ class RunArgs:
             test_well=args.test_well,
             wet=args.wet,
             dial_front_channel=args.dial_front_channel,
+            use_fast_motion=args.use_fast_motion,
         )
 
 
@@ -304,6 +306,7 @@ if __name__ == "__main__":
     parser.add_argument("--dial-front-channel", action="store_true")
     parser.add_argument("--log-can", action="store_true")
     parser.add_argument("--google-drive", action="store_true")
+    parser.add_argument("--use-fast-motion", action="store_true")
 
     args = parser.parse_args()
 
@@ -313,9 +316,9 @@ if __name__ == "__main__":
     data_dir = get_testing_data_directory()
     test_directory = f"{data_dir}/{run_args.name}/{run_args.run_id}"
     data_file = f"/{test_directory}/serial.log"
-    google_sheet: Optional[google_sheets_tool.google_sheet] = None
     sheet_id: Optional[str] = None
-    google_drive: Optional[google_drive_tool.google_drive] = None
+    google_sheet = None
+    google_drive = None
     try:
         if not run_args.ctx.is_simulating():
             if args.log_can:

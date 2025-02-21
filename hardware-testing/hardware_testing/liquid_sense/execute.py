@@ -455,7 +455,12 @@ def _run_trial(
     # TODO add in stuff for secondary probe
     try:
         height = hw_api.liquid_probe(
-            hw_mount, z_distance, lps, probe_target, response_queue=data_capture
+            hw_mount,
+            z_distance,
+            lps,
+            probe_target,
+            response_queue=data_capture,
+            use_fast_motion=run_args.use_fast_motion,
         )
         result: LLDResult = LLDResult.success
         # write the data files that used to be made automatically
