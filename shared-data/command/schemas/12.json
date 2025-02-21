@@ -5007,10 +5007,18 @@
           "description": "The details of the adapter under the primary labware, if any."
         },
         "initialCount": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
           "description": "The number of labware that should be initially stored in the stacker. This number will be silently clamped to the maximum number of labware that will fit; do not rely on the parameter to know how many labware are in the stacker.",
-          "minimum": 0,
-          "title": "Initialcount",
-          "type": "integer"
+          "title": "Initialcount"
         },
         "lidLabware": {
           "anyOf": [
@@ -5034,7 +5042,7 @@
           "description": "The details of the primary labware (i.e. not the lid or adapter, if any) stored in the stacker."
         }
       },
-      "required": ["moduleId", "initialCount", "primaryLabware"],
+      "required": ["moduleId", "primaryLabware"],
       "title": "SetStoredLabwareParams",
       "type": "object"
     },
