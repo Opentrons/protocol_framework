@@ -1,6 +1,5 @@
 import {
   ALIGN_CENTER,
-  Btn,
   COLORS,
   Check,
   DIRECTION_COLUMN,
@@ -49,6 +48,7 @@ export function CheckboxExpandStepFormField(
             checkboxUpdateValue(!checkboxValue)
           }
         }}
+        color={disabled ? COLORS.grey40 : COLORS.black90}
       >
         <Flex
           width="100%"
@@ -62,13 +62,11 @@ export function CheckboxExpandStepFormField(
             <StyledText desktopStyle="bodyDefaultRegular" {...targetProps}>
               {title}
             </StyledText>
-            <Btn disabled={disabled}>
-              <Check
-                color={COLORS.blue50}
-                isChecked={isChecked}
-                disabled={disabled}
-              />
-            </Btn>
+            <Check
+              color={COLORS.blue50}
+              isChecked={isChecked}
+              disabled={disabled}
+            />
           </Flex>
           {children}
         </Flex>

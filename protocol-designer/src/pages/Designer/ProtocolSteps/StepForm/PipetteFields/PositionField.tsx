@@ -20,6 +20,7 @@ import { getIsDelayPositionField } from '../../../../../form-types'
 import { getDefaultMmFromEdge } from '../../../../../organisms/TipPositionModal/utils'
 import { selectors as stepFormSelectors } from '../../../../../step-forms'
 
+import type { ComponentProps } from 'react'
 import type {
   TipXOffsetFields,
   TipYOffsetFields,
@@ -37,7 +38,7 @@ interface PositionFieldProps {
   labwareId?: string | null
   padding?: string
   showButton?: boolean
-  listButtonType?: React.ComponentProps<typeof ListButton>['type']
+  listButtonType?: ComponentProps<typeof ListButton>['type']
 }
 
 export function PositionField(props: PositionFieldProps): JSX.Element {
