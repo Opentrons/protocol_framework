@@ -45,7 +45,6 @@ export function MultiInputField(props: MultiInputFieldProps): JSX.Element {
   } = props
   const [targetProps, tooltipProps] = useHoverTooltip()
   const { t } = useTranslation(['protocol_steps', 'form', 'tooltip'])
-
   return (
     <Flex
       flexDirection={DIRECTION_COLUMN}
