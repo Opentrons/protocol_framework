@@ -1161,7 +1161,11 @@ class FlexStackerContext(ModuleContext):
     def retrieve(self) -> Labware:
         """Release and return a labware at the bottom of the labware stack."""
         self._core.retrieve()
+
         labware_core = self._protocol_core.get_labware_on_module(self._core)
+        if labware_core is not None and labware_core.is_adapter():
+            labware_core = self._protocol_core.get_labware_on_labware(labware_core)
+
         # the core retrieve command should have already raised the error
         # if labware_core is None, this is just to satisfy the type checker
         assert labware_core is not None, "Retrieve failed to return labware"
