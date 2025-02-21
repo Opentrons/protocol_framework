@@ -1493,7 +1493,9 @@ class OT3Controller(FlexBackend):
         self,
         mount: OT3Mount,
         max_p_distance: float,
-        mount_speed: float,
+        max_mount_speed: float,
+        mount_discontinuity: float,
+        mount_acceleration: float,
         plunger_speed: float,
         threshold_pascals: float,
         plunger_impulse_time: float,
@@ -1502,6 +1504,7 @@ class OT3Controller(FlexBackend):
         probe: InstrumentProbeType = InstrumentProbeType.PRIMARY,
         force_both_sensors: bool = False,
         response_queue: Optional[PipetteSensorResponseQueue] = None,
+        use_fast_motion: bool = False,
     ) -> float:
         head_node = axis_to_node(Axis.by_mount(mount))
         tool = sensor_node_for_pipette(OT3Mount(mount.value))
@@ -1531,13 +1534,15 @@ class OT3Controller(FlexBackend):
                     }
                 )
 
-        positions = await liquid_probe(
+        positions, result = await liquid_probe(
             messenger=self._messenger,
             tool=tool,
             head_node=head_node,
             max_p_distance=max_p_distance,
             plunger_speed=plunger_speed,
-            mount_speed=mount_speed,
+            max_mount_speed=max_mount_speed,
+            mount_discontinuity=mount_discontinuity,
+            mount_acceleration=mount_acceleration,
             threshold_pascals=threshold_pascals,
             plunger_impulse_time=plunger_impulse_time,
             num_baseline_reads=num_baseline_reads,
@@ -1545,15 +1550,12 @@ class OT3Controller(FlexBackend):
             sensor_id=sensor_id_for_instrument(probe),
             force_both_sensors=force_both_sensors,
             emplace_data=response_capture,
+            use_fast_motion=use_fast_motion,
         )
         for node, point in positions.items():
             self._position.update({node: point.motor_position})
             self._encoder_position.update({node: point.encoder_position})
-        if (
-            head_node not in positions
-            or positions[head_node].move_ack
-            == MoveCompleteAck.complete_without_condition
-        ):
+        if result < -10:
             raise PipetteLiquidNotFoundError(
                 "Liquid not found during probe.",
                 {
@@ -1561,7 +1563,7 @@ class OT3Controller(FlexBackend):
                     for node, point in positions.items()
                 },
             )
-        return self._position[axis_to_node(Axis.by_mount(mount))]
+        return result
 
     async def capacitive_probe(
         self,

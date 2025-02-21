@@ -176,6 +176,7 @@ class MessageId(int, Enum):
     home_request = 0x20
     add_sensor_move_request = 0x23
     move_completed = 0x13
+    move_condition_met = 0x11
 
     motor_position_request = 0x12
     motor_position_response = 0x14
@@ -427,7 +428,10 @@ class MoveStopCondition(int, Enum):
     none = 0x0
     limit_switch = 0x1
     sync_line = 0x2
-    encoder_position = 0x4
+    # we've run out of room on this enum so this one is pulling double duty
+    # when sent to an brushed motor its an "encoder position" MSC and its a
+    # "safe stop" MSC when sent to a a stepper
+    encoder_position_or_safe_stop = 0x4
     gripper_force = 0x8
     stall = 0x10
     ignore_stalls = 0x20

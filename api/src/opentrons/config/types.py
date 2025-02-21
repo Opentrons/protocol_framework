@@ -118,7 +118,9 @@ class ZSenseSettings:
 
 @dataclass
 class LiquidProbeSettings:
+    mount_discontinuity: float
     mount_speed: float
+    mount_acceleration: float
     plunger_speed: float
     plunger_impulse_time: float
     sensor_threshold_pascals: float

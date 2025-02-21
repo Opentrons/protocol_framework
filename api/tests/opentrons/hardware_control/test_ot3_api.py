@@ -118,6 +118,8 @@ def fake_settings() -> CapacitivePassSettings:
 def fake_liquid_settings() -> LiquidProbeSettings:
     return LiquidProbeSettings(
         mount_speed=5,
+        mount_discontinuity=5,
+        mount_acceleration=0,
         plunger_speed=15,
         plunger_impulse_time=0.2,
         sensor_threshold_pascals=15,
@@ -922,6 +924,8 @@ async def test_liquid_probe(
         mock_liquid_probe.return_value = 140
         fake_settings_aspirate = LiquidProbeSettings(
             mount_speed=5,
+            mount_discontinuity=5,
+            mount_acceleration=0,
             plunger_speed=15,
             plunger_impulse_time=0.2,
             sensor_threshold_pascals=15,
@@ -1200,6 +1204,8 @@ async def test_multi_liquid_probe(
 
         fake_settings_aspirate = LiquidProbeSettings(
             mount_speed=1,
+            mount_discontinuity=1,
+            mount_acceleration=0,
             plunger_speed=71.5,
             plunger_impulse_time=0.2,
             sensor_threshold_pascals=15,
@@ -1281,6 +1287,8 @@ async def test_liquid_not_found(
 
     fake_settings_aspirate = LiquidProbeSettings(
         mount_speed=5,
+        mount_discontinuity=5,
+        mount_acceleration=0,
         plunger_speed=71.5,
         plunger_impulse_time=0.2,
         sensor_threshold_pascals=15,

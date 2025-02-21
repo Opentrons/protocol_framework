@@ -348,7 +348,9 @@ class OT3Simulator(FlexBackend):
         self,
         mount: OT3Mount,
         max_p_distance: float,
-        mount_speed: float,
+        max_mount_speed: float,
+        mount_discontinuity: float,
+        mount_acceleration: float,
         plunger_speed: float,
         threshold_pascals: float,
         plunger_impulse_time: float,
@@ -357,6 +359,7 @@ class OT3Simulator(FlexBackend):
         probe: InstrumentProbeType = InstrumentProbeType.PRIMARY,
         force_both_sensors: bool = False,
         response_queue: Optional[PipetteSensorResponseQueue] = None,
+        use_fast_motion: bool = False,
     ) -> float:
         z_axis = Axis.by_mount(mount)
         pos = self._position

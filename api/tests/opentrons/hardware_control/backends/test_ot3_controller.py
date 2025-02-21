@@ -190,6 +190,8 @@ async def controller(
 def fake_liquid_settings() -> LiquidProbeSettings:
     return LiquidProbeSettings(
         mount_speed=40,
+        mount_discontinuity=40,
+        mount_acceleration=0,
         plunger_speed=10,
         plunger_impulse_time=0.2,
         sensor_threshold_pascals=15,
@@ -650,7 +652,7 @@ async def test_gripper_jaw_width(
         # only moving the gripper jaw
         assert list(move_group[0].keys()) == [NodeId.gripper_g]
         step = move_group[0][NodeId.gripper_g]
-        assert step.stop_condition == MoveStopCondition.encoder_position
+        assert step.stop_condition == MoveStopCondition.encoder_position_or_safe_stop
         assert step.move_type == MoveType.linear
 
 
@@ -755,7 +757,9 @@ async def test_liquid_probe(
         await controller.liquid_probe(
             mount=mount,
             max_p_distance=fake_max_p_dist,
-            mount_speed=fake_liquid_settings.mount_speed,
+            max_mount_speed=fake_liquid_settings.mount_speed,
+            mount_discontinuity=5,
+            mount_acceleration=100,
             plunger_speed=fake_liquid_settings.plunger_speed,
             threshold_pascals=fake_liquid_settings.sensor_threshold_pascals,
             plunger_impulse_time=fake_liquid_settings.plunger_impulse_time,

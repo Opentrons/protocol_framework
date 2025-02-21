@@ -42,6 +42,8 @@ from opentrons_hardware.hardware_control.motion_planning import (
 )
 from opentrons_hardware.hardware_control.tool_sensors import (
     InstrumentProbeTarget,
+)
+from opentrons_hardware.hardware_control.liquid_probe_utils import (
     PipetteProbeTarget,
 )
 from opentrons_hardware.hardware_control.motion_planning.move_utils import (
@@ -529,7 +531,7 @@ def create_gripper_jaw_hold_group(encoder_position_um: int) -> MoveGroup:
         duration=np.float64(GRIPPER_JAW_GRIP_TIME),
         duty_cycle=np.float32(0),
         encoder_position_um=np.int32(encoder_position_um),
-        stop_condition=MoveStopCondition.encoder_position,
+        stop_condition=MoveStopCondition.encoder_position_or_safe_stop,
         move_type=MoveType.linear,
     )
     move_group: MoveGroup = [step]

@@ -15,8 +15,6 @@ from typing import (
     Mapping,
 )
 from logging import getLogger
-from numpy import float64
-from math import copysign
 from typing_extensions import Literal
 from contextlib import asynccontextmanager
 from opentrons_hardware.firmware_bindings.constants import (
@@ -40,6 +38,7 @@ from opentrons_hardware.firmware_bindings.messages.message_definitions import (
     BindSensorOutputRequest,
     SendAccumulatedSensorDataRequest,
 )
+
 from opentrons_hardware.sensors.sensor_driver import SensorDriver, LogListener
 from opentrons_hardware.sensors.types import (
     sensor_fixed_point_conversion,
@@ -54,105 +53,27 @@ from opentrons_hardware.sensors.scheduler import SensorScheduler
 from opentrons_hardware.drivers.can_bus.can_messenger import CanMessenger
 from opentrons_hardware.hardware_control.motion import (
     MoveStopCondition,
-    create_step,
-    MoveGroupStep,
 )
 from opentrons_hardware.hardware_control.move_group_runner import MoveGroupRunner
 from opentrons_hardware.hardware_control.types import (
     MotorPositionStatus,
-    MoveCompleteAck,
 )
+
+from .liquid_probe_utils import (
+    ProbeResultListener,
+    _fix_pass_step_for_buffer,
+    _build_pass_step,
+    plan_liquid_probe_motion,
+    PipetteProbeTarget,
+)
+
 
 LOG = getLogger(__name__)
 
-PipetteProbeTarget = Literal[NodeId.pipette_left, NodeId.pipette_right]
 InstrumentProbeTarget = Union[PipetteProbeTarget, Literal[NodeId.gripper]]
 ProbeSensorDict = Union[
     Dict[SensorId, PressureSensor], Dict[SensorId, CapacitiveSensor]
 ]
-
-
-def _fix_pass_step_for_buffer(
-    move_group: MoveGroupStep,
-    movers: List[NodeId],
-    distance: Dict[NodeId, float],
-    speed: Dict[NodeId, float],
-    sensor_type: SensorType,
-    sensor_id: SensorId,
-    stop_condition: MoveStopCondition = MoveStopCondition.sync_line,
-    binding_flags: Optional[int] = None,
-) -> MoveGroupStep:
-    if binding_flags is None:
-        binding_flags = (
-            SensorOutputBinding.auto_baseline_report
-            + SensorOutputBinding.sync
-            + SensorOutputBinding.report
-        )
-    tool_nodes = [
-        i
-        for i in movers
-        if i in [NodeId.pipette_left, NodeId.pipette_right, NodeId.gripper]
-    ]
-    if sensor_type == SensorType.pressure:
-        tool_move = create_step(
-            distance={ax: float64(abs(distance[ax])) for ax in movers},
-            velocity={
-                ax: float64(speed[ax] * copysign(1.0, distance[ax])) for ax in movers
-            },
-            acceleration={},
-            # use any node present to calculate duration of the move, assuming the durations
-            #   will be the same
-            duration=float64(abs(distance[movers[0]] / speed[movers[0]])),
-            present_nodes=tool_nodes,
-            stop_condition=MoveStopCondition.sensor_report,
-            sensor_type_pass=sensor_type,
-            sensor_id_pass=sensor_id,
-            sensor_binding_flags=binding_flags,
-        )
-    elif sensor_type == SensorType.capacitive:
-        tool_move = create_step(
-            distance={},
-            velocity={},
-            acceleration={},
-            # use any node present to calculate duration of the move, assuming the durations
-            #   will be the same
-            duration=float64(abs(distance[movers[0]] / speed[movers[0]])),
-            present_nodes=tool_nodes,
-            stop_condition=MoveStopCondition.sync_line,
-            sensor_type_pass=sensor_type,
-            sensor_id_pass=sensor_id,
-            sensor_binding_flags=binding_flags,
-        )
-    for node in tool_nodes:
-        move_group[node] = tool_move[node]
-    return move_group
-
-
-def _build_pass_step(
-    movers: List[NodeId],
-    distance: Dict[NodeId, float],
-    speed: Dict[NodeId, float],
-    sensor_type: SensorType,
-    sensor_id: SensorId,
-    stop_condition: MoveStopCondition = MoveStopCondition.sync_line,
-    binding_flags: Optional[int] = None,
-) -> MoveGroupStep:
-    move_group = create_step(
-        distance={ax: float64(abs(distance[ax])) for ax in movers},
-        velocity={
-            ax: float64(speed[ax] * copysign(1.0, distance[ax])) for ax in movers
-        },
-        acceleration={},
-        # use any node present to calculate duration of the move, assuming the durations
-        #   will be the same
-        duration=float64(abs(distance[movers[0]] / speed[movers[0]])),
-        present_nodes=movers,
-        stop_condition=stop_condition,
-        sensor_type_pass=sensor_type,
-        sensor_id_pass=sensor_id,
-        sensor_binding_flags=binding_flags,
-    )
-    return move_group
 
 
 async def _setup_pressure_sensors(
@@ -265,7 +186,9 @@ async def liquid_probe(
     head_node: NodeId,
     max_p_distance: float,
     plunger_speed: float,
-    mount_speed: float,
+    max_mount_speed: float,
+    mount_discontinuity: float,
+    mount_acceleration: float,
     threshold_pascals: float,
     plunger_impulse_time: float,
     num_baseline_reads: int,
@@ -275,7 +198,8 @@ async def liquid_probe(
     emplace_data: Optional[
         Callable[[Dict[SensorId, List[SensorDataType]]], None]
     ] = None,
-) -> Dict[NodeId, MotorPositionStatus]:
+    use_fast_motion: bool = False,
+) -> Tuple[Dict[NodeId, MotorPositionStatus], float]:
     """Move the mount and pipette simultaneously while reading from the pressure sensor."""
     sensor_driver = SensorDriver()
     threshold_fixed_point = threshold_pascals * sensor_fixed_point_conversion
@@ -298,78 +222,60 @@ async def liquid_probe(
         sensor_driver,
         True,
     )
-    p_prep_distance = float(plunger_impulse_time * plunger_speed)
-    p_pass_distance = float(max_p_distance - p_prep_distance)
-    max_z_distance = (p_pass_distance / plunger_speed) * mount_speed
 
-    lower_plunger = create_step(
-        distance={tool: float64(p_prep_distance)},
-        velocity={tool: float64(plunger_speed)},
-        acceleration={},
-        duration=float64(plunger_impulse_time),
-        present_nodes=[tool],
+    move_group, raise_z = plan_liquid_probe_motion(
+        tool,
+        head_node,
+        max_p_distance,
+        plunger_speed,
+        max_mount_speed,
+        mount_discontinuity,
+        mount_acceleration,
+        plunger_impulse_time,
+        z_offset_for_plunger_prep,
+        sensor_id,
+        sensor_binding,
+        use_fast_motion,
     )
 
-    sensor_group = _build_pass_step(
-        movers=[head_node, tool],
-        distance={head_node: max_z_distance, tool: p_pass_distance},
-        speed={head_node: mount_speed, tool: plunger_speed},
-        sensor_type=SensorType.pressure,
-        sensor_id=sensor_id,
-        stop_condition=MoveStopCondition.sync_line,
-        binding_flags=sensor_binding,
-    )
+    sensor_runner = MoveGroupRunner(move_groups=[move_group])
+    raise_z_runner = MoveGroupRunner(move_groups=[raise_z])
 
-    sensor_group = _fix_pass_step_for_buffer(
-        sensor_group,
-        movers=[head_node, tool],
-        distance={head_node: max_z_distance, tool: p_pass_distance},
-        speed={head_node: mount_speed, tool: plunger_speed},
-        sensor_type=SensorType.pressure,
-        sensor_id=sensor_id,
-        stop_condition=MoveStopCondition.sync_line,
-        binding_flags=sensor_binding,
-    )
-    sensor_runner = MoveGroupRunner(move_groups=[[lower_plunger], [sensor_group]])
-
-    # Only raise the z a little so we don't do a huge slow travel
-    raise_z = create_step(
-        distance={head_node: float64(z_offset_for_plunger_prep)},
-        velocity={head_node: float64(-1 * mount_speed)},
-        acceleration={},
-        duration=float64(z_offset_for_plunger_prep / mount_speed),
-        present_nodes=[head_node],
-    )
-
-    raise_z_runner = MoveGroupRunner(move_groups=[[raise_z]])
-    listeners = {
+    sensor_listeners = {
         s_id: LogListener(messenger, pressure_sensors[s_id])
         for s_id in pressure_sensors.keys()
     }
 
-    LOG.info(
-        f"Starting LLD pass: {head_node} {sensor_id} max p distance {max_p_distance} max z distance {max_z_distance}"
-    )
+    result_listener = ProbeResultListener(messenger, head_node)
+    # LOG.info(
+    #    f"Starting LLD pass: {head_node} {sensor_id} max p distance {max_p_distance} max z distance {z_flat_speed_distance + 2 * z_acceleration_distance}"
+    # )
     async with AsyncExitStack() as binding_stack:
-        for listener in listeners.values():
+        for listener in sensor_listeners.values():
             await binding_stack.enter_async_context(listener)
+        await binding_stack.enter_async_context(result_listener)
         positions = await sensor_runner.run(can_messenger=messenger)
-        if positions[head_node].move_ack == MoveCompleteAck.stopped_by_condition:
+        if result_listener.probe_successful():
+            # if positions[head_node].move_ack == MoveCompleteAck.stopped_by_condition:
+            motor, encoder = result_listener.probe_result()
             LOG.info(
-                f"Liquid found {head_node} motor_postion {positions[head_node].motor_position} encoder position {positions[head_node].encoder_position}"
+                f"Liquid found {head_node} motor_postion {motor} encoder position {encoder}"
             )
             await raise_z_runner.run(can_messenger=messenger)
-        await finalize_logs(messenger, tool, listeners, pressure_sensors)
+        await finalize_logs(messenger, tool, sensor_listeners, pressure_sensors)
 
     # give response data to any consumer that wants it
     if emplace_data:
-        for s_id in listeners.keys():
-            data = listeners[s_id].get_data()
+        for s_id in sensor_listeners.keys():
+            data = sensor_listeners[s_id].get_data()
             if data:
                 for d in data:
                     emplace_data({s_id: data})
-
-    return positions
+    if result_listener.probe_successful():
+        _, encoder = result_listener.probe_result()
+        return (positions, encoder)
+    else:
+        return (positions, -1000)
 
 
 async def check_overpressure(
@@ -446,7 +352,6 @@ async def capacitive_probe(
         speed=probe_speed,
         sensor_type=SensorType.capacitive,
         sensor_id=sensor_id,
-        stop_condition=MoveStopCondition.sync_line,
     )
 
     runner = MoveGroupRunner(move_groups=[[sensor_group]])

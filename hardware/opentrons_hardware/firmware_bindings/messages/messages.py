@@ -32,6 +32,7 @@ MessageDefinition = Union[
     defs.ExecuteMoveGroupRequest,
     defs.ClearAllMoveGroupsRequest,
     defs.MoveCompleted,
+    defs.MoveConditionMet,
     defs.MotorPositionRequest,
     defs.MotorPositionResponse,
     defs.UpdateMotorPositionEstimationRequest,
