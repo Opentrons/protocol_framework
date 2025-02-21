@@ -161,6 +161,7 @@ class LabwareStore(HasState[LabwareState], HandlesActions):
         """Modify state in reaction to an action."""
         for state_update in get_state_updates(action):
             self._add_loaded_labware(state_update)
+            self._add_batch_loaded_labwares(state_update)
             self._add_loaded_lid_stack(state_update)
             self._set_labware_location(state_update)
             self._set_labware_lid(state_update)
@@ -228,6 +229,50 @@ class LabwareStore(HasState[LabwareState], HandlesActions):
                 offsetId=loaded_labware_update.offset_id,
                 displayName=display_name,
             )
+
+    def _add_batch_loaded_labwares(
+        self, state_update: update_types.StateUpdate
+    ) -> None:
+        batch_loaded_labware_update = state_update.batch_loaded_labware
+        if batch_loaded_labware_update != update_types.NO_CHANGE:
+            # If the labware load refers to an offset, that offset must actually exist.
+            for labware_id in batch_loaded_labware_update.new_locations_by_id:
+                if batch_loaded_labware_update.offset_ids_by_id[labware_id] is not None:
+                    assert (
+                        batch_loaded_labware_update.offset_ids_by_id[labware_id]
+                        in self._state.labware_offsets_by_id
+                    )
+
+                definition_uri = uri_from_details(
+                    namespace=batch_loaded_labware_update.definitions_by_id[
+                        labware_id
+                    ].namespace,
+                    load_name=batch_loaded_labware_update.definitions_by_id[
+                        labware_id
+                    ].parameters.loadName,
+                    version=batch_loaded_labware_update.definitions_by_id[
+                        labware_id
+                    ].version,
+                )
+
+                self._state.definitions_by_uri[
+                    definition_uri
+                ] = batch_loaded_labware_update.definitions_by_id[labware_id]
+
+                location = batch_loaded_labware_update.new_locations_by_id[labware_id]
+
+                self._state.labware_by_id[labware_id] = LoadedLabware.model_construct(
+                    id=labware_id,
+                    location=location,
+                    loadName=batch_loaded_labware_update.definitions_by_id[
+                        labware_id
+                    ].parameters.loadName,
+                    definitionUri=definition_uri,
+                    offsetId=batch_loaded_labware_update.offset_ids_by_id[labware_id],
+                    displayName=batch_loaded_labware_update.display_names_by_id[
+                        labware_id
+                    ],
+                )
 
     def _add_loaded_lid_stack(self, state_update: update_types.StateUpdate) -> None:
         loaded_lid_stack_update = state_update.loaded_lid_stack

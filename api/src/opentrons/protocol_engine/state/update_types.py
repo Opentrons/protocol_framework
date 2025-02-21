@@ -125,6 +125,23 @@ class LoadedLabwareUpdate:
 
 
 @dataclasses.dataclass
+class BatchLoadedLabwareUpdate:
+    """An update that loads a new labware."""
+
+    new_locations_by_id: typing.Dict[str, LabwareLocation]
+    """Each new labwares's initial location keyed by Labware ID."""
+
+    offset_ids_by_id: typing.Dict[str, str | None]
+    """The ID of each labware's offset keyed by labware ID."""
+
+    display_names_by_id: typing.Dict[str, str | None]
+    """The Display Name for each new labware keyed by labware ID"""
+
+    definitions_by_id: typing.Dict[str, LabwareDefinition]
+    """The Labware Definition for each labware keyed by Labware ID."""
+
+
+@dataclasses.dataclass
 class LoadedLidStackUpdate:
     """An update that loads a new lid stack."""
 
@@ -421,6 +438,8 @@ class StateUpdate:
 
     loaded_labware: LoadedLabwareUpdate | NoChangeType = NO_CHANGE
 
+    batch_loaded_labware: BatchLoadedLabwareUpdate | NoChangeType = NO_CHANGE
+
     loaded_lid_stack: LoadedLidStackUpdate | NoChangeType = NO_CHANGE
 
     labware_lid: LabwareLidUpdate | NoChangeType = NO_CHANGE
@@ -567,6 +586,22 @@ class StateUpdate:
             offset_id=offset_id,
             new_location=location,
             display_name=display_name,
+        )
+        return self
+
+    def set_batch_loaded_labware(
+        self: Self,
+        definitions_by_id: typing.Dict[str, LabwareDefinition],
+        offset_ids_by_id: typing.Dict[str, str | None],
+        display_names_by_id: typing.Dict[str, str | None],
+        new_locations_by_id: typing.Dict[str, LabwareLocation],
+    ) -> Self:
+        """Add a set of new labwares to state. See `BatchLoadedLabwareUpdate`."""
+        self.batch_loaded_labware = BatchLoadedLabwareUpdate(
+            new_locations_by_id=new_locations_by_id,
+            offset_ids_by_id=offset_ids_by_id,
+            display_names_by_id=display_names_by_id,
+            definitions_by_id=definitions_by_id,
         )
         return self
 

@@ -63,7 +63,9 @@ async def test_retrieve(
 ) -> None:
     """It should be able to retrieve a labware."""
     subject = RetrieveImpl(state_view=state_view, equipment=equipment)
-    data = flex_stacker.RetrieveParams(moduleId="flex-stacker-id")
+    data = flex_stacker.RetrieveParams(
+        moduleId="flex-stacker-id", namespace="opentrons", version=1
+    )
 
     fs_module_substate = FlexStackerSubState(
         module_id=FlexStackerId("flex-stacker-id"),
