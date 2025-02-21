@@ -20,7 +20,6 @@ import { getIsDelayPositionField } from '../../../../../form-types'
 import { getDefaultMmFromEdge } from '../../../../../organisms/TipPositionModal/utils'
 import { selectors as stepFormSelectors } from '../../../../../step-forms'
 
-import type { ComponentProps } from 'react'
 import type {
   TipXOffsetFields,
   TipYOffsetFields,
@@ -38,7 +37,7 @@ interface PositionFieldProps {
   labwareId?: string | null
   padding?: string
   showButton?: boolean
-  listButtonType?: ComponentProps<typeof ListButton>['type']
+  isNested?: boolean
 }
 
 export function PositionField(props: PositionFieldProps): JSX.Element {
@@ -51,7 +50,7 @@ export function PositionField(props: PositionFieldProps): JSX.Element {
     prefix,
     padding = `0 ${SPACING.spacing16}`,
     showButton = false,
-    listButtonType = 'noActive',
+    isNested = false,
   } = props
   const {
     name: zName,
@@ -187,7 +186,7 @@ export function PositionField(props: PositionFieldProps): JSX.Element {
           </StyledText>
           <ListButton
             padding={SPACING.spacing12}
-            type={listButtonType}
+            type={isNested ? 'onColor' : 'noActive'}
             onClick={() => {
               handleOpen(true)
             }}
@@ -195,7 +194,7 @@ export function PositionField(props: PositionFieldProps): JSX.Element {
             alignItems={ALIGN_CENTER}
             testId={`PositionField_ListButton_${prefix}`}
           >
-            <Icon name="tip-position" size="1.25rem" />
+            {!isNested ? <Icon name="tip-position" size="1.25rem" /> : null}
             <StyledText desktopStyle="bodyDefaultRegular">
               {xField != null && yField != null
                 ? t('protocol_steps:well_position', {
