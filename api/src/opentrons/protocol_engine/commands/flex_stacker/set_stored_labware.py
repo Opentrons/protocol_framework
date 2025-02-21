@@ -41,14 +41,6 @@ class SetStoredLabwareParams(BaseModel):
         ...,
         description="Unique ID of the Flex Stacker.",
     )
-    initialCount: int = Field(
-        ...,
-        description=(
-            "The number of labware that should be initially stored in the stacker. This number will be silently clamped to "
-            "the maximum number of labware that will fit; do not rely on the parameter to know how many labware are in the stacker."
-        ),
-        ge=0,
-    )
     primaryLabware: StackerStoredLabwareDetails = Field(
         ...,
         description="The details of the primary labware (i.e. not the lid or adapter, if any) stored in the stacker.",
@@ -60,6 +52,14 @@ class SetStoredLabwareParams(BaseModel):
     adapterLabware: StackerStoredLabwareDetails | None = Field(
         default=None,
         description="The details of the adapter under the primary labware, if any.",
+    )
+    initialCount: int | None = Field(
+        None,
+        description=(
+            "The number of labware that should be initially stored in the stacker. This number will be silently clamped to "
+            "the maximum number of labware that will fit; do not rely on the parameter to know how many labware are in the stacker."
+        ),
+        ge=0,
     )
 
 
@@ -144,7 +144,8 @@ class SetStoredLabwareImpl(
             definition_stack.insert(-1, adapter_def)
 
         # TODO: propagate the limit on max height of the stacker
-        count = min(params.initialCount, 5)
+        initial_count = params.initialCount if params.initialCount is not None else 5
+        count = min(initial_count, 5)
 
         state_update = (
             update_types.StateUpdate()
@@ -154,7 +155,7 @@ class SetStoredLabwareImpl(
             .update_flex_stacker_labware_pool_count(params.moduleId, count)
         )
         return SuccessData(
-            public=SetStoredLabwareResult(
+            public=SetStoredLabwareResult.model_construct(
                 primaryLabwareDefinition=labware_def,
                 lidLabwareDefinition=lid_def,
                 adapterLabwareDefinition=adapter_def,
