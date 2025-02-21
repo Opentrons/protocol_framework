@@ -44,7 +44,7 @@ crc_device_id = {"01": "45C9", "02": "45FA", "03": "442B", "04": "459C", "05": "
 class AsairSensorError(Exception):
     """Asair sensor error."""
 
-    def __init__(self, ret_code: str = None) -> None:
+    def __init__(self, ret_code: str = "") -> None:
         """Constructor."""
         super().__init__(ret_code)
 
@@ -76,12 +76,16 @@ class AsairSensorBase(ABC):
         ...
 
 
-def BuildAsairSensor(simulate: bool, autosearch: bool = True) -> AsairSensorBase:
+def BuildAsairSensor(
+    simulate: bool, autosearch: bool = True, port_substr: str = ""
+) -> AsairSensorBase:
     """Try to find and return an Asair sensor, if not found return a simulator."""
     ui.print_title("Connecting to Environmental sensor")
     if not simulate:
         if not autosearch:
-            port = list_ports_and_select(device_name="Asair environmental sensor")
+            port = list_ports_and_select(
+                device_name="Asair environmental sensor", port_substr=port_substr
+            )
             sensor = AsairSensor.connect(port)
             ui.print_info(f"Found sensor on port {port}")
             return sensor
