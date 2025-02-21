@@ -1,6 +1,7 @@
 import { getWellRatio } from '../../../../../steplist/utils'
 import type { PathOption, StepType } from '../../../../../form-types'
 import { getPipetteCapacity } from '../../../../../pipettes/pipetteData'
+import type { MoveLiquidPrefixType } from '../../../../../resources/types'
 import {
   volumeInCapacityForMultiDispense,
   volumeInCapacityForMultiAspirate,

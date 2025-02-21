@@ -15,6 +15,7 @@ import {
   useHoverTooltip,
 } from '@opentrons/components'
 import { getWellsDepth, getWellDimension } from '@opentrons/shared-data'
+import { prefixMap } from 'opentrons-ai-client/src/resources/utils'
 import { TipPositionModal, ZTipPositionModal } from '../../../../../organisms'
 import { getIsDelayPositionField } from '../../../../../form-types'
 import { getDefaultMmFromEdge } from '../../../../../organisms/TipPositionModal/utils'
@@ -28,6 +29,7 @@ import type {
 import type { PositionSpecs } from '../../../../../organisms'
 import type { FieldPropsByName } from '../types'
 import type { MoveLiquidPrefixType } from '../../../../../resources/types'
+
 interface PositionFieldProps {
   prefix: MoveLiquidPrefixType
   propsForFields: FieldPropsByName
@@ -36,7 +38,7 @@ interface PositionFieldProps {
   yField?: TipYOffsetFields
   labwareId?: string | null
   padding?: string
-  isWhiteButton?: boolean | null
+  isWhiteButton?: boolean
 }
 
 export function PositionField(props: PositionFieldProps): JSX.Element {
@@ -48,7 +50,7 @@ export function PositionField(props: PositionFieldProps): JSX.Element {
     yField,
     prefix,
     padding = `0 ${SPACING.spacing16}`,
-    isWhiteButton,
+    isWhiteButton = false,
   } = props
   const {
     name: zName,
@@ -165,7 +167,7 @@ export function PositionField(props: PositionFieldProps): JSX.Element {
     )
   }
 
-  const isRetract = prefix.includes('retract') ?? false
+  const isRetract = prefixMap[prefix] === 'retract'
 
   return (
     <>
@@ -181,14 +183,14 @@ export function PositionField(props: PositionFieldProps): JSX.Element {
           <StyledText desktopStyle="bodyDefaultRegular" color={COLORS.grey60}>
             {i18n.format(
               t('protocol_steps:tip_position', {
-                prefix: isRetract ? 'retract' : prefix,
+                prefix: prefixMap[prefix],
               }),
               'capitalize'
             )}
           </StyledText>
           <ListButton
             padding={SPACING.spacing12}
-            type={isWhiteButton ?? false ? 'onColor' : 'noActive'}
+            type={isWhiteButton ? 'onColor' : 'noActive'}
             onClick={() => {
               handleOpen(true)
             }}
@@ -196,9 +198,7 @@ export function PositionField(props: PositionFieldProps): JSX.Element {
             alignItems={ALIGN_CENTER}
             testId={`PositionField_ListButton_${prefix}`}
           >
-            {!(isWhiteButton ?? false) && (
-              <Icon name="tip-position" size="1.25rem" />
-            )}
+            {!isWhiteButton && <Icon name="tip-position" size="1.25rem" />}
             <StyledText
               desktopStyle={isRetract ? 'captionRegular' : 'bodyDefaultRegular'}
             >

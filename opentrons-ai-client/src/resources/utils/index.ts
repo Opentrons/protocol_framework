@@ -1,3 +1,5 @@
+import type { MoveLiquidPrefixType } from 'protocol-designer/src/resources/types'
+
 /**
  * Calculates the number of lines in a given string.
  * @param input - The string to calculate the number of lines for.
@@ -18,6 +20,14 @@ export const isLocalhost = (): boolean => {
   return (
     host === 'localhost' || host === '127.0.0.1' || host.startsWith('192.168.')
   )
+}
+
+export const prefixMap: Record<MoveLiquidPrefixType, string> = {
+  aspirate: 'aspirate',
+  dispense: 'dispense',
+  mix: 'mix',
+  aspirate_retract: 'retract',
+  dispense_retract: 'retract',
 }
 
 export * from './labware'

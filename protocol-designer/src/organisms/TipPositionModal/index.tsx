@@ -17,6 +17,7 @@ import {
   InputField,
   TYPOGRAPHY,
 } from '@opentrons/components'
+import { prefixMap } from 'opentrons-ai-client/src/resources/utils'
 import { getIsTouchTipField } from '../../form-types'
 import { LINK_BUTTON_STYLE } from '../../atoms'
 import { getMainPagePortalEl } from '../Portal'
@@ -232,15 +233,13 @@ export function TipPositionModal(
       parseInt(yValue) < PERCENT_RANGE_TO_SHOW_WARNING * yMinWidth)
   const isZValueAtBottom = zValue != null && zValue === '0'
 
-  const prefixTitle = prefix.includes('retract') ? 'retract' : prefix
-
   return createPortal(
     <Modal
       marginLeft="0"
       type="info"
       width="37.125rem"
       closeOnOutsideClick
-      title={t('shared:tip_position', { prefix: prefixTitle })}
+      title={t('shared:tip_position', { prefix: prefixMap[prefix] })}
       onClose={handleCancel}
       footer={
         <Flex
