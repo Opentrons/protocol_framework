@@ -2052,6 +2052,10 @@ def test_dispense_liquid_class_during_multi_dispense(
     disposal_volume = test_transfer_properties.multi_dispense.disposal_by_volume.get_for_volume(  # type: ignore[union-attr]
         123
     )
+    conditioning_volume = 50
+    test_transfer_properties.multi_dispense.conditioning_by_volume.set_for_volume(  # type: ignore[union-attr]
+        123, conditioning_volume
+    )
     decoy.when(
         transfer_components_executor.absolute_point_from_position_reference_and_offset(
             well=dest_well,
@@ -2084,6 +2088,7 @@ def test_dispense_liquid_class_during_multi_dispense(
         tip_contents=[],
         add_final_air_gap=True,
         trash_location=Location(Point(1, 2, 3), labware=None),
+        conditioning_volume=conditioning_volume,
         disposal_volume=disposal_volume,
     )
     decoy.verify(
@@ -2099,6 +2104,7 @@ def test_dispense_liquid_class_during_multi_dispense(
             trash_location=Location(Point(1, 2, 3), labware=None),
             source_location=source_location,
             source_well=source_well,
+            conditioning_volume=conditioning_volume,
             add_final_air_gap=True,
             is_last_retract=False,
         ),
@@ -2122,8 +2128,13 @@ def test_last_dispense_liquid_class_during_multi_dispense(
     test_transfer_properties = test_liquid_class.get_for(
         "flex_1channel_50", "opentrons_flex_96_tiprack_50ul"
     )
-    disposal_volume = test_transfer_properties.multi_dispense.disposal_by_volume.get_for_volume(  # type: ignore[union-attr]
-        123
+    disposal_volume = 0
+    test_transfer_properties.multi_dispense.disposal_by_volume.set_for_volume(  # type: ignore[union-attr]
+        123, disposal_volume
+    )
+    conditioning_volume = 50
+    test_transfer_properties.multi_dispense.conditioning_by_volume.set_for_volume(  # type: ignore[union-attr]
+        123, conditioning_volume
     )
     decoy.when(
         transfer_components_executor.absolute_point_from_position_reference_and_offset(
@@ -2147,7 +2158,7 @@ def test_last_dispense_liquid_class_during_multi_dispense(
     ).then_return(LiquidAndAirGapPair(liquid=333, air_gap=444))
     decoy.when(
         mock_engine_client.state.pipettes.get_aspirated_volume("abc123")
-    ).then_return(disposal_volume)
+    ).then_return(123)
     result = subject.dispense_liquid_class_during_multi_dispense(
         volume=123,
         dest=(dest_location, dest_well),
@@ -2157,6 +2168,7 @@ def test_last_dispense_liquid_class_during_multi_dispense(
         tip_contents=[],
         add_final_air_gap=True,
         trash_location=Location(Point(1, 2, 3), labware=None),
+        conditioning_volume=conditioning_volume,
         disposal_volume=disposal_volume,
     )
     decoy.verify(
@@ -2166,12 +2178,15 @@ def test_last_dispense_liquid_class_during_multi_dispense(
         mock_transfer_components_executor.dispense_and_wait(
             dispense_properties=test_transfer_properties.multi_dispense,  # type: ignore[arg-type]
             volume=123,
-            push_out_override=0,
+            push_out_override=test_transfer_properties.dispense.push_out_by_volume.get_for_volume(
+                123
+            ),
         ),
         mock_transfer_components_executor.retract_during_multi_dispensing(
             trash_location=Location(Point(1, 2, 3), labware=None),
             source_location=source_location,
             source_well=source_well,
+            conditioning_volume=conditioning_volume,
             add_final_air_gap=True,
             is_last_retract=True,
         ),

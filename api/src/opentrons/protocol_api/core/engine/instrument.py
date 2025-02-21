@@ -1417,6 +1417,7 @@ class InstrumentCore(AbstractInstrument[WellCore, LabwareCore]):
                         if is_last_step and new_tip == TransferTipPolicyV2.NEVER
                         else True,
                         trash_location=trash_location,
+                        conditioning_volume=conditioning_vol,
                         disposal_volume=disposal_vol,
                     )
                 )
@@ -1663,13 +1664,13 @@ class InstrumentCore(AbstractInstrument[WellCore, LabwareCore]):
         components_executor.aspirate_and_wait(volume=volume)
         if (
             transfer_type == tx_comps_executor.TransferType.ONE_TO_MANY
-            and conditioning_volume is not None
+            and conditioning_volume not in [None, 0]
             and transfer_properties.multi_dispense is not None
         ):
             # Dispense the conditioning volume
             components_executor.dispense_and_wait(
                 dispense_properties=transfer_properties.multi_dispense,
-                volume=conditioning_volume,
+                volume=conditioning_volume or 0.0,
                 push_out_override=0,
             )
             components_executor.retract_after_aspiration(
@@ -1789,6 +1790,7 @@ class InstrumentCore(AbstractInstrument[WellCore, LabwareCore]):
         tip_contents: List[tx_comps_executor.LiquidAndAirGapPair],
         add_final_air_gap: bool,
         trash_location: Union[Location, TrashBin, WasteChute],
+        conditioning_volume: float,
         disposal_volume: float,
     ) -> List[tx_comps_executor.LiquidAndAirGapPair]:
         """Execute a dispense step that's part of a multi-dispense.
@@ -1852,8 +1854,9 @@ class InstrumentCore(AbstractInstrument[WellCore, LabwareCore]):
             ),
         )
         components_executor.submerge(submerge_properties=dispense_props.submerge)
+        tip_starting_volume = self.get_current_volume()
         is_last_dispense_without_disposal_vol = (
-            disposal_volume == 0 and self.get_current_volume() == volume
+            disposal_volume == 0 and tip_starting_volume == volume
         )
         push_out_vol = (
             # TODO (spp): verify if it's okay to use push_out_by_volume of single dispense
@@ -1871,8 +1874,9 @@ class InstrumentCore(AbstractInstrument[WellCore, LabwareCore]):
             trash_location=trash_location,
             source_location=source[0] if source else None,
             source_well=source[1] if source else None,
+            conditioning_volume=conditioning_volume,
             add_final_air_gap=add_final_air_gap,
-            is_last_retract=self.get_current_volume() == disposal_volume,
+            is_last_retract=tip_starting_volume - volume == disposal_volume,
         )
         last_contents = components_executor.tip_state.last_liquid_and_air_gap_in_tip
         new_tip_contents = tip_contents[0:-1] + [last_contents]

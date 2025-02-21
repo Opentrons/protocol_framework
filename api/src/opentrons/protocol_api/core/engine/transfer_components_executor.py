@@ -18,6 +18,7 @@ from opentrons.protocol_api._liquid_properties import (
     MixProperties,
     SingleDispenseProperties,
     MultiDispenseProperties,
+    TouchTipProperties,
 )
 from opentrons.protocol_engine.errors import TouchTipDisabledError
 from opentrons.types import Location, Point
@@ -415,6 +416,7 @@ class TransferComponentsExecutor:
         # we won't be moving to a Trash or a Source for Blowout after this air gap,
         # then skip the final air gap if we have been told to do so.
         self._do_touch_tip_and_air_gap(
+            touch_tip_properties=retract_props.touch_tip,
             location=retract_location,
             well=self._target_well,
             skip_air_gap=True if is_final_air_gap and not add_final_air_gap else False,
@@ -466,6 +468,7 @@ class TransferComponentsExecutor:
             self._tip_state.ready_to_aspirate = False
             # Do touch tip and air gap again after blowing out into source well or trash
             self._do_touch_tip_and_air_gap(
+                touch_tip_properties=retract_props.touch_tip,
                 location=touch_tip_and_air_gap_location,
                 well=touch_tip_and_air_gap_well,
                 skip_air_gap=not add_final_air_gap,
@@ -476,6 +479,7 @@ class TransferComponentsExecutor:
         trash_location: Union[Location, TrashBin, WasteChute],
         source_location: Optional[Location],
         source_well: Optional[WellCore],
+        conditioning_volume: float,
         add_final_air_gap: bool,
         is_last_retract: bool,
     ) -> None:
@@ -541,24 +545,37 @@ class TransferComponentsExecutor:
                 in_place=True,
             )
             self._tip_state.ready_to_aspirate = False
-        is_final_air_gap = (
+
+        is_final_air_gap_of_current_retract = (
             blowout_props.enabled
             and blowout_props.location == BlowoutLocation.DESTINATION
         ) or not blowout_props.enabled
+
+        if is_final_air_gap_of_current_retract:
+            if conditioning_volume > 0:
+                add_air_gap = is_last_retract and add_final_air_gap
+            else:
+                add_air_gap = add_final_air_gap
+        else:
+            if conditioning_volume > 0:
+                add_air_gap = is_last_retract
+            else:
+                add_air_gap = True
+
         # Regardless of the blowout location, do touch tip
-        # when leaving the dispense well. If this will be the final air gap, i.e,
-        # we won't be moving to a Trash or a Source for Blowout after this air gap,
-        # then skip the final air gap if we have been told to do so.
+        # when leaving the dispense well.
+        # Add an air gap depending on conditioning volume + whether this is
+        # the last step of a multi-dispense sequence + whether this is the last step
+        # of the entire liquid distribution.
         self._do_touch_tip_and_air_gap(
+            touch_tip_properties=retract_props.touch_tip,
             location=retract_location,
             well=self._target_well,
-            skip_air_gap=False
-            if is_last_retract and not is_final_air_gap
-            else not add_final_air_gap,
+            skip_air_gap=not add_air_gap,
         )
 
         if (
-            is_last_retract
+            is_last_retract  # We can do a blowout only on the last multi-dispense step
             and blowout_props.enabled
             and blowout_props.location != BlowoutLocation.DESTINATION
         ):
@@ -601,26 +618,33 @@ class TransferComponentsExecutor:
             last_air_gap = self._tip_state.last_liquid_and_air_gap_in_tip.air_gap
             self._tip_state.delete_air_gap(last_air_gap)
             self._tip_state.ready_to_aspirate = False
+
             # Do touch tip and air gap again after blowing out into source well or trash
             self._do_touch_tip_and_air_gap(
+                touch_tip_properties=retract_props.touch_tip,
                 location=touch_tip_and_air_gap_location,
                 well=touch_tip_and_air_gap_well,
-                skip_air_gap=not add_final_air_gap,
+                skip_air_gap=not (
+                    # Same check as before for when it's the final air gap of current retract
+                    conditioning_volume > 0
+                    and is_last_retract
+                    and add_final_air_gap
+                ),
             )
 
     def _do_touch_tip_and_air_gap(
         self,
+        touch_tip_properties: TouchTipProperties,
         location: Optional[Location],
         well: Optional[WellCore],
         skip_air_gap: bool,
     ) -> None:
         """Perform touch tip and air gap as part of post-dispense retract."""
-        touch_tip_props = self._transfer_properties.dispense.retract.touch_tip
-        if touch_tip_props.enabled:
+        if touch_tip_properties.enabled:
             assert (
-                touch_tip_props.speed is not None
-                and touch_tip_props.z_offset is not None
-                and touch_tip_props.mm_to_edge is not None
+                touch_tip_properties.speed is not None
+                and touch_tip_properties.z_offset is not None
+                and touch_tip_properties.mm_to_edge is not None
             )
             # TODO:, check that when blow out is a non-dest-well,
             #  whether the touch tip params from transfer props should be used for
@@ -631,9 +655,9 @@ class TransferComponentsExecutor:
                         location=location,
                         well_core=well,
                         radius=1,
-                        z_offset=touch_tip_props.z_offset,
-                        speed=touch_tip_props.speed,
-                        mm_from_edge=touch_tip_props.mm_to_edge,
+                        z_offset=touch_tip_properties.z_offset,
+                        speed=touch_tip_properties.speed,
+                        mm_from_edge=touch_tip_properties.mm_to_edge,
                     )
                 except TouchTipDisabledError:
                     # TODO: log a warning
@@ -649,17 +673,16 @@ class TransferComponentsExecutor:
                     speed=None,
                 )
 
-        if self._transfer_type != TransferType.ONE_TO_MANY:
-            # TODO: check if it is okay to just do `prepare_to_aspirate` unconditionally
-            if not self._tip_state.ready_to_aspirate:
-                self._instrument.prepare_to_aspirate()
-                self._tip_state.ready_to_aspirate = True
-            if not skip_air_gap:
-                self._add_air_gap(
-                    air_gap_volume=self._transfer_properties.aspirate.retract.air_gap_by_volume.get_for_volume(
-                        0
-                    )
+        # TODO: check if it is okay to just do `prepare_to_aspirate` unconditionally
+        if not self._tip_state.ready_to_aspirate:
+            self._instrument.prepare_to_aspirate()
+            self._tip_state.ready_to_aspirate = True
+        if not skip_air_gap:
+            self._add_air_gap(
+                air_gap_volume=self._transfer_properties.aspirate.retract.air_gap_by_volume.get_for_volume(
+                    0
                 )
+            )
 
     def _add_air_gap(self, air_gap_volume: float) -> None:
         """Add an air gap."""
