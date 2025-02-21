@@ -24,7 +24,7 @@ USB_VID = 0x0403
 USB_PID = 0x6001
 
 
-addrs = {
+crc_reading = {
     "01": "C40B",
     "02": "C438",
     "03": "C5E9",
@@ -37,6 +37,8 @@ addrs = {
     "10": "C74A",
     "0A": "48d9",
 }
+
+crc_device_id = {"01": "45C9", "02": "45FA", "03": "442B", "04": "459C", "05": "444D"}
 
 
 class AsairSensorError(Exception):
@@ -96,7 +98,7 @@ def BuildAsairSensor(
                     ui.print_info(f"Trying to connect to env sensor on port {port}")
                     sensor = AsairSensor.connect(port)
                     ser_id = sensor.get_serial()
-                    if ser_id == " ":
+                    if len(ser_id) > 1:
                         ui.print_info(f"Found env sensor {ser_id} on port {port}")
                         return sensor
                 except:  # noqa: E722
@@ -157,7 +159,7 @@ class AsairSensor(AsairSensorBase):
     def get_reading(self) -> Reading:
         """Get a reading."""
         data_packet = "{}0300000002{}".format(
-            self._sensor_address, addrs[self._sensor_address]
+            self._sensor_address, crc_reading[self._sensor_address]
         )
         log.debug(f"sending {data_packet}")
         command_bytes = codecs.decode(data_packet.encode(), "hex")
@@ -190,8 +192,8 @@ class AsairSensor(AsairSensorBase):
 
     def get_serial(self) -> str:
         """Read the device ID register."""
-        data_packet = "{}0300000002{}".format(
-            self._sensor_address, addrs[self._sensor_address]
+        data_packet = "{}0300080002{}".format(
+            self._sensor_address, crc_device_id[self._sensor_address]
         )
         log.debug(f"sending {data_packet}")
         command_bytes = codecs.decode(data_packet.encode(), "hex")
