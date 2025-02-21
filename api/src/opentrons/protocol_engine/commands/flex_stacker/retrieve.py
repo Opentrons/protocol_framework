@@ -21,6 +21,7 @@ from ...types import (
 )
 from opentrons_shared_data.labware.labware_definition import LabwareDefinition
 from pydantic.json_schema import SkipJsonSchema
+from opentrons.calibration_storage.helpers import uri_from_details
 
 if TYPE_CHECKING:
     from opentrons.protocol_engine.state.state import StateView
@@ -89,15 +90,39 @@ class RetrieveParams(BaseModel):
 class RetrieveResult(BaseModel):
     """Result data from a labware retrieval command."""
 
-    labware_id: str = Field(
+    labwareId: str = Field(
         ...,
-        description="The labware ID of the retrieved labware.",
+        description="The labware ID of the primary retrieved labware.",
     )
-    originLocationSequence: LabwareLocationSequence | None = Field(
-        None, description="The origin location of the labware."
+    adapterId: str | None = Field(
+        None,
+        description="The optional Adapter Labware ID of the adapter under a primary labware.",
     )
-    eventualDestinationLocationSequence: LabwareLocationSequence | None = Field(
-        None, description="The eventual destination of the labware."
+    lidId: str | None = Field(
+        None,
+        description="The optional Lid Labware ID of the lid on a primary labware.",
+    )
+    primaryLocationSequence: LabwareLocationSequence = Field(
+        ..., description="The origin location of the primary labware."
+    )
+    lidLocationSequence: LabwareLocationSequence | None = Field(
+        None,
+        description="The origin location of the adapter labware under a primary labware.",
+    )
+    adapterLocationSequence: LabwareLocationSequence | None = Field(
+        None, description="The origin location of the lid labware on a primary labware."
+    )
+    primaryLabwareURI: str = Field(
+        ...,
+        description="The labware definition URI of the primary labware.",
+    )
+    adapterLabwareURI: str | None = Field(
+        None,
+        description="The labware definition URI of the adapter labware.",
+    )
+    lidLabwareURI: str | None = Field(
+        None,
+        description="The labware definition URI of the lid labware.",
     )
 
 
@@ -204,13 +229,55 @@ class RetrieveImpl(AbstractCommandImpl[RetrieveParams, SuccessData[RetrieveResul
 
         # Get the labware dimensions for the labware being retrieved,
         # which is the first one in the hopper labware id list
-        original_location_sequence = self._state_view.geometry.get_location_sequence(
-            loaded_labware.labware_id
-        )
-        destination_location_sequence = (
+        primary_location_sequence = (
             self._state_view.geometry.get_predicted_location_sequence(
-                ModuleLocation(moduleId=params.moduleId)
+                new_locations_by_id[loaded_labware.labware_id]
             )
+        )
+        adapter_location_sequence = (
+            self._state_view.geometry.get_predicted_location_sequence(
+                new_locations_by_id[adapter_lw.labware_id]
+            )
+            if adapter_lw is not None
+            else None
+        )
+        lid_location_sequence = (
+            self._state_view.geometry.get_predicted_location_sequence(
+                new_locations_by_id[lid_lw.labware_id]
+            )
+            if lid_lw is not None
+            else None
+        )
+
+        # Get the Labware URIs where relevant
+        primary_uri = str(
+            uri_from_details(
+                namespace=loaded_labware.definition.namespace,
+                load_name=loaded_labware.definition.parameters.loadName,
+                version=loaded_labware.definition.version,
+            )
+        )
+        adapter_uri = (
+            str(
+                uri_from_details(
+                    namespace=adapter_lw.definition.namespace,
+                    load_name=adapter_lw.definition.parameters.loadName,
+                    version=adapter_lw.definition.version,
+                )
+            )
+            if adapter_lw is not None
+            else None
+        )
+        lid_uri = (
+            str(
+                uri_from_details(
+                    namespace=lid_lw.definition.namespace,
+                    load_name=lid_lw.definition.parameters.loadName,
+                    version=lid_lw.definition.version,
+                )
+            )
+            if lid_lw is not None
+            else None
         )
 
         labware_height = self._state_view.geometry.get_height_of_labware_stack(
@@ -239,6 +306,9 @@ class RetrieveImpl(AbstractCommandImpl[RetrieveParams, SuccessData[RetrieveResul
             offset_ids_by_id=offset_ids_by_id,
             new_locations_by_id=new_locations_by_id,
         )
+        state_update.update_flex_stacker_labware_pool_count(
+            module_id=params.moduleId, count=stacker_state.pool_count - 1
+        )
 
         if lid_lw is not None:
             state_update.set_lids(
@@ -251,9 +321,15 @@ class RetrieveImpl(AbstractCommandImpl[RetrieveParams, SuccessData[RetrieveResul
         )
         return SuccessData(
             public=RetrieveResult(
-                labware_id=loaded_labware.labware_id,
-                originLocationSequence=original_location_sequence,
-                eventualDestinationLocationSequence=destination_location_sequence,
+                labwareId=loaded_labware.labware_id,
+                adapterId=adapter_lw.labware_id if adapter_lw is not None else None,
+                lidId=lid_lw.labware_id if lid_lw is not None else None,
+                primaryLocationSequence=primary_location_sequence,
+                adapterLocationSequence=adapter_location_sequence,
+                lidLocationSequence=lid_location_sequence,
+                primaryLabwareURI=primary_uri,
+                adapterLabwareURI=adapter_uri,
+                lidLabwareURI=lid_uri,
             ),
             state_update=state_update,
         )
