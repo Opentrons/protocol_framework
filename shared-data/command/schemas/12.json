@@ -4621,13 +4621,48 @@
     "RetrieveParams": {
       "description": "Input parameters for a labware retrieval command.",
       "properties": {
+        "adapterDisplayName": {
+          "description": "An optional user-specified display name or label for an adapter.",
+          "title": "Adapterdisplayname",
+          "type": "string"
+        },
+        "adapterId": {
+          "description": "An optional ID to assign to an adapter. If None, an ID will be generated.",
+          "title": "Adapterid",
+          "type": "string"
+        },
+        "displayName": {
+          "description": "An optional user-specified display name or label for this labware.",
+          "title": "Displayname",
+          "type": "string"
+        },
+        "labwareId": {
+          "description": "An optional ID to assign to this labware. If None, an ID will be generated.",
+          "title": "Labwareid",
+          "type": "string"
+        },
+        "lidId": {
+          "description": "An optional ID to assign to a lid. If None, an ID will be generated.",
+          "title": "Lidid",
+          "type": "string"
+        },
         "moduleId": {
           "description": "Unique ID of the Flex Stacker.",
           "title": "Moduleid",
           "type": "string"
+        },
+        "namespace": {
+          "description": "The namespace the lid labware definition belongs to.",
+          "title": "Namespace",
+          "type": "string"
+        },
+        "version": {
+          "description": "The lid labware definition version.",
+          "title": "Version",
+          "type": "integer"
         }
       },
-      "required": ["moduleId"],
+      "required": ["moduleId", "namespace", "version"],
       "title": "RetrieveParams",
       "type": "object"
     },

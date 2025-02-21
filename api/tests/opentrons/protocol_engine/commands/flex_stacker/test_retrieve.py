@@ -43,7 +43,7 @@ from opentrons.protocol_engine.execution import LoadedLabwareData
 
 from opentrons_shared_data.labware.labware_definition import (
     LabwareDefinition,
-    Parameters,
+    Parameters2 as Parameters,
     Metadata,
 )
 
