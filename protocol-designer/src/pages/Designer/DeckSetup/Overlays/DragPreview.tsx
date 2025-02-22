@@ -31,12 +31,10 @@ export function DragPreview(props: DragPreviewProps): JSX.Element | null {
   const width = item.labwareOnDeck.def.dimensions.xDimension
   const height = item.labwareOnDeck.def.dimensions.yDimension
 
-  // const cursor = getRobotCoordsFromDOMCoords(currentOffset.x, currentOffset.y)
   const extraPadding = 25
-
   const cursor = getRobotCoordsFromDOMCoords(
-    currentOffset.x + extraPadding, // Adjust X position
-    currentOffset.y + extraPadding * 1.2 // Adjust Y position 1.5 prevents dragging
+    currentOffset.x + extraPadding,
+    currentOffset.y + extraPadding * 1.2 // Note(kk:02/24/2025) from 1.5 prevents dragging a labware
   )
 
   return (
