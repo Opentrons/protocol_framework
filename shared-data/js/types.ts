@@ -720,7 +720,7 @@ interface DelayProperties {
 }
 interface TouchTipParams {
   zOffset: number
-  mmToEdge: number
+  mmFromEdge: number
   speed: number
 }
 interface TouchTipProperties {
