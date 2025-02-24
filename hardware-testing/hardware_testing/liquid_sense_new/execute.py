@@ -186,6 +186,8 @@ def _load_scale(
 def run(
     tip: int,
     run_args: RunArgs,
+    google_sheet: Optional[google_sheets_tool.google_sheet],
+    sheet_id: Optional[str],
     starting_tip: str = "A1",
 ) -> None:
     """Run a liquid probe test."""
