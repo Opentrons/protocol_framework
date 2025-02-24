@@ -3,6 +3,7 @@ from typing import List, Optional, Protocol
 from .types import (
     LEDPattern,
     LimitSwitchStatus,
+    MeasurementKind,
     MoveResult,
     StackerAxis,
     PlatformStatus,
@@ -11,6 +12,9 @@ from .types import (
     StackerInfo,
     LEDColor,
     StallGuardParams,
+    TOFMeasurement,
+    TOFMeasurementFrame,
+    TOFMeasurementResult,
     TOFSensor,
     TOFSensorStatus,
 )
@@ -63,6 +67,25 @@ class AbstractFlexStackerDriver(Protocol):
 
     async def enable_tof_sensor(self, sensor: TOFSensor, enable: bool) -> bool:
         """Enable or disable the TOF sensor."""
+        ...
+
+    async def start_tof_measurement(
+        self,
+        sensor: TOFSensor,
+        kind: MeasurementKind = MeasurementKind.HISTOGRAM,
+        cancel: bool = False,
+    ) -> TOFMeasurement:
+        """Start or Cancel Measurements from the TOF sensor."""
+        ...
+
+    async def get_tof_measurement(
+        self, sensor: TOFSensor, resend: bool = False
+    ) -> TOFMeasurementFrame:
+        """Get the next measurement frame from TOF sensor or resend previous."""
+        ...
+
+    async def get_tof_histogram(self, sensor: TOFSensor) -> TOFMeasurementResult:
+        """Get the full histogram measurement from the TOF sensor."""
         ...
 
     async def set_motor_driver_register(
