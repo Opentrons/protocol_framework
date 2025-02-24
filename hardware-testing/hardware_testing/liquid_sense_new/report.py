@@ -10,32 +10,6 @@ from hardware_testing.data.csv_report import (
     CSVLineRepeating,
 )
 
-"""
-CSV Test Report:
- - Serial numbers:
-   - Robot
-   - Pipette
-   - Scale
-   - Environment sensor
- - Config:
-   - protocol name
-   - pipette_volume
-   - pipette_mount
-   - tip_volume
-   - trials
-   - plunger direction
-   - liquid
-   - labware type
-   - speed
-   - start height offset
- - Trials
-    trial-x-{tipsize}ul
- - Results
-    {tipsize}ul-average
-    {tipsize}ul-cv
-    {tipsize}ul-d
-"""
-
 
 def build_serial_number_section() -> CSVSection:
     """Build section."""
@@ -66,13 +40,13 @@ def build_config_section() -> CSVSection:
 def build_trials_section(trials: int, tips: List[int]) -> CSVSection:
     """Build section."""
     lines: List[Union[CSVLine, CSVLineRepeating]] = [
-        CSVLine("trial_number", [str, str, str, str, str, str, str, str, str, str])
+        CSVLine("trial_number", [str, str, str, str, str, str, str, str])
     ]
     lines.extend(
         [
             CSVLine(
                 f"trial-baseline-{tip}ul",
-                [float, float, float, float, float, float, float, float, str],
+                [float, float, float, float, float, float, str],
             )
             for tip in tips
         ]
@@ -81,7 +55,7 @@ def build_trials_section(trials: int, tips: List[int]) -> CSVSection:
         [
             CSVLine(
                 f"trial-{t + 1}-{tip}ul",
-                [float, float, float, float, float, float, float, float, float, str],
+                [float, float, float, float, float, float, float, str],
             )
             for tip in tips
             for t in range(trials)

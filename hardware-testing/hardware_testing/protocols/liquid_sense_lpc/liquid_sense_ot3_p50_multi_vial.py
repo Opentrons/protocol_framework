@@ -9,7 +9,7 @@ SLOT_DIAL = 9
 SLOTS_TIPRACK = {
     50: [3],
 }
-LABWARE_ON_SCALE = "radwag_pipette_calibration_vial"
+LABWARE_ON_SCALE = "opentrons_15_tuberack_nest_15ml_conical"
 
 
 def run(ctx: ProtocolContext) -> None:

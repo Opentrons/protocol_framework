@@ -9,7 +9,6 @@ from hardware_testing.gravimetric.workarounds import get_sync_hw_api
 from hardware_testing.gravimetric.helpers import (
     _jog_to_find_liquid_height,
 )
-from hardware_testing.gravimetric.config import LIQUID_PROBE_SETTINGS
 from hardware_testing.gravimetric.tips import get_unused_tips
 from hardware_testing.data import ui, get_testing_data_directory
 from opentrons.hardware_control.types import (
@@ -20,11 +19,6 @@ from opentrons.hardware_control.types import (
     PipetteSensorResponseQueue,
 )
 
-from hardware_testing.gravimetric.measurement.scale import Scale
-from hardware_testing.gravimetric.measurement.record import (
-    GravimetricRecorder,
-    GravimetricRecorderConfig,
-)
 from opentrons.protocol_api._types import OffDeckType
 
 from opentrons.protocol_api import ProtocolContext, Well, Labware
@@ -130,43 +124,6 @@ def _load_test_well(run_args: RunArgs) -> Labware:
         labware_on_scale, location=slot_scale, namespace=namespace
     )
     return labware_on_scale
-
-
-def _load_scale(
-    name: str,
-    scale: Scale,
-    run_id: str,
-    pipette_tag: str,
-    start_time: float,
-    simulating: bool,
-) -> GravimetricRecorder:
-    ui.print_header("LOAD SCALE")
-    ui.print_info(
-        "Some Radwag settings cannot be controlled remotely.\n"
-        "Listed below are the things the must be done using the touchscreen:\n"
-        "  1) Set profile to USER\n"
-        "  2) Set screensaver to NONE\n"
-    )
-    recorder = GravimetricRecorder(
-        GravimetricRecorderConfig(
-            test_name=name,
-            run_id=run_id,
-            tag=pipette_tag,
-            start_time=start_time,
-            duration=0,
-            frequency=1000 if simulating else 60,
-            stable=False,
-        ),
-        scale,
-        simulate=simulating,
-        start_graph=False,
-    )
-    ui.print_info(f'found scale "{recorder.serial_number}"')
-    if simulating:
-        recorder.set_simulation_mass(0)
-    recorder.record(in_thread=True)
-    ui.print_info(f'scale is recording to "{recorder.file_name}"')
-    return recorder
 
 
 # flake8: noqa: C901
@@ -280,7 +237,7 @@ def run(
                 run_args.pipette.move_to(test_well.bottom(1))
                 run_args.pipette.move_to(test_well.top(z=2))
             start_pos = hw_api.current_position_ot3(OT3Mount.LEFT)
-            height, result = _run_trial(run_args, tip, test_well, trial, start_pos)
+            height, result = _run_trial(run_args, tip, trial, start_pos)
             end_pos = hw_api.current_position_ot3(OT3Mount.LEFT)
             ui.print_info("Dropping tip")
             if run_args.return_tip:
@@ -338,14 +295,10 @@ def _test_for_blockage(datafile: str, threshold: float) -> bool:
 def _run_trial(
     run_args: RunArgs,
     tip: int,
-    well: Well,
     trial: int,
     start_pos: Dict[Axis, float],
 ) -> Tuple[float, LLDResult]:
     hw_api = get_sync_hw_api(run_args.ctx)
-    lqid_cfg: Dict[str, int] = LIQUID_PROBE_SETTINGS[run_args.pipette_volume][
-        run_args.pipette_channels
-    ][tip]
     data_dir = get_testing_data_directory()
     probes: List[InstrumentProbeType] = [InstrumentProbeType.PRIMARY]
     probe_target: InstrumentProbeType = InstrumentProbeType.PRIMARY

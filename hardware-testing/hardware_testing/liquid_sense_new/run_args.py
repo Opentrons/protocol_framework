@@ -2,6 +2,8 @@
 
 import argparse
 from dataclasses import dataclass
+from json import load as json_load
+from pathlib import Path
 from typing import List, Any, Optional
 
 from opentrons.protocol_api import InstrumentContext, ProtocolContext
@@ -63,10 +65,23 @@ class RunArgs:
                 ui.print_info(f"\t{offset.createdAt}:")
                 ui.print_info(f"\t\t{offset.definitionUri}")
                 ui.print_info(f"\t\t{offset.vector}")
+        # gather the custom labware (for simulation)
+        custom_defs = {}
+        if args.simulate:
+            labware_dir = Path(__file__).parent.parent / "labware"
+            custom_def_uris = [
+                "radwag_pipette_calibration_vial",
+                "dial_indicator",
+            ]
+            for def_uri in custom_def_uris:
+                with open(labware_dir / def_uri / "1.json", "r") as f:
+                    custom_def = json_load(f)
+                custom_defs[def_uri] = custom_def
         _ctx = helpers.get_api_context(
             API_LEVEL,  # type: ignore[attr-defined]
             is_simulating=args.simulate,
             pipette_left=PIPETTE_MODEL_NAME[args.pipette][args.channels],
+            extra_labware=custom_defs,
         )
         for offset in LABWARE_OFFSETS:
             engine = _ctx._core._engine_client._transport._engine  # type: ignore[attr-defined]
