@@ -13,6 +13,8 @@ import {
 } from '@opentrons/components'
 import { getFileMetadata } from '/protocol-designer/file-data/selectors'
 
+const BUTTON_NAME = 'SettingsIconButton'
+
 export const SettingsIcon = (): JSX.Element => {
   const location = useLocation()
   const navigate = useNavigate()
@@ -41,7 +43,8 @@ export const SettingsIcon = (): JSX.Element => {
       <Btn
         onClick={handleNavigate}
         css={GEAR_ICON_STYLE}
-        data-testid="SettingsIconButton"
+        data-testid={BUTTON_NAME}
+        aria-label={BUTTON_NAME}
       >
         <Flex justifyContent={JUSTIFY_CENTER}>
           <Icon size="1rem" name="gear" />

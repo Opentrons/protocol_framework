@@ -8,7 +8,9 @@ from opentrons.protocol_engine import commands as cmd
 from opentrons.protocol_engine.commands import LoadModuleResult
 
 from opentrons_shared_data.deck.types import DeckDefinitionV5, SlotDefV3
-from opentrons_shared_data.labware.labware_definition import LabwareDefinition
+from opentrons_shared_data.labware.labware_definition import (
+    labware_definition_type_adapter,
+)
 from opentrons_shared_data.labware.types import LabwareDefinition as LabwareDefDict
 from opentrons_shared_data import liquid_classes
 from opentrons_shared_data.liquid_classes.liquid_class_definition import (
@@ -48,7 +50,7 @@ from opentrons.protocol_engine.types import (
     ModuleModel as ProtocolEngineModuleModel,
     OFF_DECK_LOCATION,
     SYSTEM_LOCATION,
-    LabwareLocation,
+    LoadableLabwareLocation,
     NonStackedLocation,
 )
 from opentrons.protocol_engine.clients import SyncClient as ProtocolEngineClient
@@ -196,7 +198,7 @@ class ProtocolCore(
     ) -> LabwareLoadParams:
         """Add a labware definition to the set of loadable definitions."""
         uri = self._engine_client.add_labware_definition(
-            LabwareDefinition.model_validate(definition)
+            labware_definition_type_adapter.validate_python(definition)
         )
         return LabwareLoadParams.from_uri(uri)
 
@@ -1135,7 +1137,7 @@ class ProtocolCore(
             WasteChute,
             TrashBin,
         ],
-    ) -> LabwareLocation:
+    ) -> LoadableLabwareLocation:
         if isinstance(location, LabwareCore):
             return OnLabwareLocation(labwareId=location.labware_id)
         else:

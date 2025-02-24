@@ -406,6 +406,20 @@ const ABSORBANCE_READER_MODULE_ID_REQUIRED: FormError = {
   showAtField: true,
   page: 0,
 }
+const ASPIRATE_TOUCH_TIP_SPEED_REQUIRED: FormError = {
+  title: 'Touch tip speed required',
+  dependentFields: ['aspirate_touchTip_speed'],
+  showAtForm: false,
+  showAtField: true,
+  page: 1,
+}
+const DISPENSE_TOUCH_TIP_SPEED_REQUIRED: FormError = {
+  title: 'Touch tip speed required',
+  dependentFields: ['dispense_touchTip_speed'],
+  showAtForm: false,
+  showAtField: true,
+  page: 1,
+}
 
 export interface HydratedFormData {
   [key: string]: any
@@ -920,6 +934,22 @@ export const fileNameRequired = (
   const { absorbanceReaderFormType, fileName } = fields
   return !fileName && absorbanceReaderFormType === ABSORBANCE_READER_READ
     ? FILENAME_REQUIRED
+    : null
+}
+export const aspirateTouchTipSpeedRequired = (
+  fields: HydratedFormData
+): FormError | null => {
+  const { aspirate_touchTip_speed, aspirate_touchTip_checkbox } = fields
+  return aspirate_touchTip_checkbox && !aspirate_touchTip_speed
+    ? ASPIRATE_TOUCH_TIP_SPEED_REQUIRED
+    : null
+}
+export const dispenseTouchTipSpeedRequired = (
+  fields: HydratedFormData
+): FormError | null => {
+  const { dispense_touchTip_speed, dispense_touchTip_checkbox } = fields
+  return dispense_touchTip_checkbox && !dispense_touchTip_speed
+    ? DISPENSE_TOUCH_TIP_SPEED_REQUIRED
     : null
 }
 

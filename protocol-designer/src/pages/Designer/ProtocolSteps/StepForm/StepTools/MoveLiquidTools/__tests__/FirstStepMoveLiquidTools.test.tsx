@@ -20,11 +20,11 @@ import {
   DropTipField,
   PickUpTipField,
   TipWellSelectionField,
-} from '/protocol-designer/pages/Designer/ProtocolSteps/StepForm/PipetteFields'
-import { getEnableReturnTip } from '/protocol-designer/feature-flags/selectors'
-import propsForFieldsForSingleStep from '/protocol-designer/__fixtures__/propsForFieldsForSingleStep.json'
-import formDataForSingleStep from '/protocol-designer/__fixtures__/formDataForSingleStep.json'
-import { SingleStepMoveLiquidTools } from '../SingleStepMoveLiquidTools'
+} from '../../../PipetteFields'
+import { getEnableReturnTip } from '../../../../../../../feature-flags/selectors'
+import propsForFieldsForSingleStep from '../../../../../../../__fixtures__/propsForFieldsForSingleStep.json'
+import formDataForSingleStep from '../../../../../../../__fixtures__/formDataForSingleStep.json'
+import { FirstStepMoveLiquidTools } from '../FirstStepMoveLiquidTools'
 
 import type { ComponentProps } from 'react'
 import type { LabwareDefinition2 } from '@opentrons/shared-data'
@@ -38,14 +38,14 @@ vi.mock('/protocol-designer/feature-flags/selectors')
 const labwareId = 'mockLabwareId'
 const pipetteId = 'mockPipetteId'
 
-const render = (props: ComponentProps<typeof SingleStepMoveLiquidTools>) => {
-  return renderWithProviders(<SingleStepMoveLiquidTools {...props} />, {
+const render = (props: ComponentProps<typeof FirstStepMoveLiquidTools>) => {
+  return renderWithProviders(<FirstStepMoveLiquidTools {...props} />, {
     i18nInstance: i18n,
   })
 }
 
-describe('SingleStepMoveLiquidTools', () => {
-  let props: ComponentProps<typeof SingleStepMoveLiquidTools>
+describe('FirstStepMoveLiquidTools', () => {
+  let props: ComponentProps<typeof FirstStepMoveLiquidTools>
   beforeEach(() => {
     props = {
       propsForFields: propsForFieldsForSingleStep as any,

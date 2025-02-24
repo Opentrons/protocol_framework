@@ -74,7 +74,7 @@ export function Navigation(): JSX.Element | null {
               {t('import')}
             </StyledText>
           </Flex>
-          <input type="file" onChange={loadFile} />
+          <input type="file" onChange={loadFile} aria-label={t('import')} />
         </StyledLabel>
         {location.pathname === '/createNew' ? null : <SettingsIcon />}
       </Flex>

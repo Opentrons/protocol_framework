@@ -65,6 +65,7 @@ from .module import (
     ABSMeasureMode,
     ModuleOffsetVector,
     ModuleOffsetData,
+    StackerFillEmptyStrategy,
 )
 from .location import (
     DeckSlotLocation,
@@ -78,12 +79,14 @@ from .location import (
     OnDeckLabwareLocation,
     NonStackedLocation,
     DeckPoint,
+    InStackerHopperLocation,
     OnLabwareLocationSequenceComponent,
     OnModuleLocationSequenceComponent,
     OnAddressableAreaLocationSequenceComponent,
     NotOnDeckLocationSequenceComponent,
     OnCutoutFixtureLocationSequenceComponent,
     LabwareLocationSequence,
+    LoadableLabwareLocation,
     labware_location_is_system,
     labware_location_is_off_deck,
 )
@@ -198,6 +201,7 @@ __all__ = [
     "ABSMeasureMode",
     "ModuleOffsetVector",
     "ModuleOffsetData",
+    "StackerFillEmptyStrategy",
     # Locations of things on deck
     "DeckSlotLocation",
     "StagingSlotLocation",
@@ -212,12 +216,14 @@ __all__ = [
     "DeckPoint",
     "OffDeckLocationType",
     "SystemLocationType",
+    "InStackerHopperLocation",
     "OnLabwareLocationSequenceComponent",
     "OnModuleLocationSequenceComponent",
     "OnAddressableAreaLocationSequenceComponent",
     "NotOnDeckLocationSequenceComponent",
     "OnCutoutFixtureLocationSequenceComponent",
     "LabwareLocationSequence",
+    "LoadableLabwareLocation",
     "labware_location_is_off_deck",
     "labware_location_is_system",
     # Labware offset location

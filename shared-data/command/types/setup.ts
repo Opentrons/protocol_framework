@@ -129,6 +129,8 @@ export type LabwareLocation =
   | { labwareId: string }
   | { addressableAreaName: AddressableAreaName }
 
+export type LoadedLabwareLocation = LabwareLocation | InStackerHopperLocation
+
 export type OnDeckLabwareLocation =
   | { slotName: string }
   | { moduleId: string }
@@ -143,6 +145,11 @@ export type NonStackedLocation =
 
 export interface ModuleLocation {
   slotName: string
+}
+
+export interface InStackerHopperLocation {
+  kind: 'inStackerHopper'
+  moduleId: string
 }
 
 export interface OnLabwareLocationSequenceComponent {
@@ -178,6 +185,7 @@ export type LocationSequenceComponent =
   | OnAddressableAreaLocationSequenceComponent
   | NotOnDeckLocationSequenceComponent
   | OnCutoutFixtureLocationSequenceComponent
+  | InStackerHopperLocation
 
 export type LabwareLocationSequence = LocationSequenceComponent[]
 

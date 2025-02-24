@@ -30,7 +30,7 @@ import type {
   FLEX_STACKER_MODULE_V1,
   FLEX_STACKER_MODULE_TYPE,
 } from './constants'
-import type { RunTimeCommand, LabwareLocation } from '../command/types'
+import type { RunTimeCommand, LoadedLabwareLocation } from '../command/types'
 import type { AddressableAreaName, CutoutFixtureId, CutoutId } from '../deck'
 import type { PipetteName } from './pipettes'
 import type { CommandAnnotation } from '../commandAnnotation/types'
@@ -264,6 +264,7 @@ export interface LabwareDefinition2 {
 
 export interface LabwareDefinition3 {
   version: number
+  $otSharedSchema: '#/labware/schemas/3'
   schemaVersion: 3
   namespace: string
   metadata: LabwareMetadata
@@ -683,7 +684,7 @@ export interface LoadedLabware {
   id: string
   loadName: string
   definitionUri: string
-  location: LabwareLocation
+  location: LoadedLabwareLocation
   offsetId?: string
   displayName?: string
 }
