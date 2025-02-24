@@ -140,6 +140,15 @@ export const ModuleSteps = {
       cy.contains('Other').click()
     },
   }),
+  DefineCustomWavelegthSingle: (wavelength: string): StepThunk => ({
+    call: () => {
+      // Goes through all the wavelengths
+      cy.contains('Custom wavelength')
+        .closest('div.Flex-sc-1qhp8l7-0.ivRgZg')
+        .find('input.InputField__StyledInput-sc-1gyyvht-0.cLVzBl')
+        .type('500')
+    },
+  }),
 }
 
 /**

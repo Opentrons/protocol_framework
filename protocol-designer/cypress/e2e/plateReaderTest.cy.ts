@@ -71,24 +71,27 @@ describe('The Redesigned Create Protocol Landing Page', () => {
     steps.add(SetupSteps.SelectLabwareByDisplayName('Armadillo 96 Well Plate'))
     steps.add(SetupSteps.ProtocolStepsH())
     steps.add(SetupSteps.AddStep())
+    // Move labware attempt to Plate Reader
     steps.add(SetupSteps.AddMoveStep())
     steps.add(SetupSteps.UseGripperinMove())
     steps.add(SetupSteps.ChoseSourceMoveLabware())
     steps.add(SetupSteps.selectDropdownLabware('Armadillo 96 Well Plate'))
     steps.add(SetupSteps.ChoseDestinationMoveLabware())
     steps.add(SetupSteps.selectDropdownLabware('Absorbance Plate Reader'))
-
     steps.add(SetupSteps.MoveToPlateReader())
     steps.add(SetupSteps.Save())
     steps.add(ModuleVerifications.NoMoveToPlateReaderWhenClosed())
+    // You can't move to Plate Reader while it's closed
     steps.add(SetupSteps.DeleteSteps())
     steps.add(SetupSteps.AddStep())
     steps.add(ModuleSteps.StartPlateReaderStep())
     steps.add(ModuleVerifications.PlateReaderPart1NoInitilization())
     steps.add(SetupSteps.Continue())
+    // Define a plate read
     steps.add(ModuleVerifications.PlateReaderPart2NoInitilization())
     steps.add(ModuleSteps.DefineInitilizationSingle())
-
+    steps.add(ModuleSteps.DefineCustomWavelegthSingle('300'))
+    steps.add(SetupSteps.Save())
     steps.execute()
   })
 })
