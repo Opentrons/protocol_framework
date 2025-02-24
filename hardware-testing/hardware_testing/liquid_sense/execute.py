@@ -265,7 +265,7 @@ def run(
         env_data.relative_humidity,
         env_data.temperature,
         test_well.top().point.z - liquid_height_from_deck,
-        tip_offset - lpc_offset,
+        tip_offset,
         google_sheet,
         run_args.run_id,
     )

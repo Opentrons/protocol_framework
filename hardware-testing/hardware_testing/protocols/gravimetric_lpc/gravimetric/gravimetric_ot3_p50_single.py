@@ -25,4 +25,4 @@ def run(ctx: ProtocolContext) -> None:
         pipette.pick_up_tip(rack["A1"])
         pipette.aspirate(10, vial["A1"].top())
         pipette.dispense(10, vial["A1"].top())
-        pipette.drop_tip(home_after=False)
+        pipette.return_tip(home_after=False)

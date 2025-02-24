@@ -233,6 +233,7 @@ class LogListener:
         self,
         messenger: CanMessenger,
         sensor: Union[PressureSensor, CapacitiveSensor],
+        log_header: str = "",
     ) -> None:
         """Build the capturer."""
         self.response_queue: asyncio.Queue[SensorDataType] = asyncio.Queue()
@@ -243,6 +244,7 @@ class LogListener:
         self.sensor = sensor
         self.type = sensor.sensor.sensor_type
         self.id = sensor.sensor.sensor_id
+        self.log_header = log_header
 
     def get_data(self) -> Optional[List[SensorDataType]]:
         """Return the sensor data captured by this listener."""
@@ -257,12 +259,16 @@ class LogListener:
         """Start logging sensor readings."""
         self.messenger.add_listener(self, None)
         self.start_time = time.time()
-        SENSOR_LOG.info(f"Data capture for {self.tool.name} started {self.start_time}")
+        SENSOR_LOG.info(
+            f"{self.log_header}Data capture for {self.tool.name} started {self.start_time}"
+        )
 
     async def __aexit__(self, *args: Any) -> None:
         """Finish the capture."""
         self.messenger.remove_listener(self)
-        SENSOR_LOG.info(f"Data capture for {self.tool.name} ended {time.time()}")
+        SENSOR_LOG.info(
+            f"{self.log_header}Data capture for {self.tool.name} ended {time.time()}"
+        )
 
     def set_stop_ack(self, message_index: int = 0) -> None:
         """Tell the Listener which message index to wait for."""
@@ -274,7 +280,9 @@ class LogListener:
         with suppress(asyncio.TimeoutError):
             await asyncio.wait_for(self.event.wait(), wait_time)
         if not self.event.is_set():
-            SENSOR_LOG.error("Did not receive the full data set from the sensor")
+            SENSOR_LOG.error(
+                f"{self.log_header}Did not receive the full data set from the sensor"
+            )
         self.event = None
 
     def __call__(
@@ -298,7 +306,7 @@ class LogListener:
             )
             self.response_queue.put_nowait(data)
             SENSOR_LOG.info(
-                f"Revieved from {arbitration_id}: {message.payload.sensor_id}:{message.payload.sensor}: {data}"
+                f"{self.log_header}Revieved from {arbitration_id}: {message.payload.sensor_id}:{message.payload.sensor}: {data.to_float()}"
             )
         if isinstance(message, message_definitions.BatchReadFromSensorResponse):
             data_length = message.payload.data_length.value
@@ -307,20 +315,22 @@ class LogListener:
                 int.from_bytes(data_bytes[i * 4 : i * 4 + 4], byteorder="little")
                 for i in range(data_length)
             ]
-            data_floats = [
+            sensor_data = [
                 sensor_types.SensorDataType.build(d, message.payload.sensor)
                 for d in data_ints
             ]
 
-            for d in data_floats:
+            for d in sensor_data:
                 self.response_queue.put_nowait(d)
+
+            data_floats = [d.to_float() for d in sensor_data]
             SENSOR_LOG.info(
-                f"Revieved from {arbitration_id}: {message.payload.sensor_id}:{message.payload.sensor}: {data_floats}"
+                f"{self.log_header}Revieved from {arbitration_id}: {message.payload.sensor_id}:{message.payload.sensor}: {data_floats}"
             )
         if isinstance(message, message_definitions.Acknowledgement):
             if (
                 self.event is not None
                 and message.payload.message_index.value == self.expected_ack
             ):
-                SENSOR_LOG.info("Finished receiving sensor data")
+                SENSOR_LOG.info(f"{self.log_header}Finished receiving sensor data")
                 self.event.set()

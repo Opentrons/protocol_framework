@@ -343,7 +343,7 @@ async def liquid_probe(
 
     raise_z_runner = MoveGroupRunner(move_groups=[[raise_z]])
     listeners = {
-        s_id: LogListener(messenger, pressure_sensors[s_id])
+        s_id: LogListener(messenger, pressure_sensors[s_id], "Liquid Probe: ")
         for s_id in pressure_sensors.keys()
     }
 
@@ -452,7 +452,7 @@ async def capacitive_probe(
     runner = MoveGroupRunner(move_groups=[[sensor_group]])
 
     listeners = {
-        s_id: LogListener(messenger, capacitive_sensors[s_id])
+        s_id: LogListener(messenger, capacitive_sensors[s_id], "Capacitive Probe: ")
         for s_id in capacitive_sensors.keys()
     }
     async with AsyncExitStack() as binding_stack:
@@ -531,12 +531,13 @@ async def grab_pressure(
         sensors.append(SensorId.S1)
     else:
         sensors.append(sensor_id)
-
+    pressure_sensors: Dict[SensorId, PressureSensor] = {}
     for sensor in sensors:
         pressure_sensor = PressureSensor.build(
             sensor_id=sensor,
             node_id=tool,
         )
+        pressure_sensors[sensor] = pressure_sensor
         num_baseline_reads = 10
         # TODO: RH log this baseline and remove noqa
         pressure_baseline = await sensor_driver.get_baseline(  # noqa: F841
@@ -554,7 +555,16 @@ async def grab_pressure(
             expected_nodes=[tool],
         )
     try:
-        yield
+        listeners = {
+            s_id: LogListener(
+                messenger, pressure_sensors[s_id], "Explicit grab_pressure call :"
+            )
+            for s_id in pressure_sensors.keys()
+        }
+        async with AsyncExitStack() as binding_stack:
+            for listener in listeners.values():
+                await binding_stack.enter_async_context(listener)
+            yield
     finally:
         for sensor in sensors:
             await messenger.ensure_send(
