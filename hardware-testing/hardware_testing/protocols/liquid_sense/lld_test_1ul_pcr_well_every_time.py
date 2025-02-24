@@ -13,7 +13,7 @@ from hardware_testing.protocols import (
 )
 import math
 
-metadata = {"protocolName": "LLD 1uL PCR-to-MVS-19FEB"}
+metadata = {"protocolName": "LLD 1uL PCR-to-MVS-24FEB"}
 requirements = {"robotType": "Flex", "apiLevel": "2.22"}
 
 SLOTS = {
@@ -82,7 +82,13 @@ def add_parameters(parameters: ParameterContext) -> None:
     parameters.add_bool(
         variable_name="use_test_matrix", display_name="Use Test Matrix", default=True
     )
-
+    parameters.add_float(
+        variable_name = "dot_bottom_submerge_depth",
+        display_name = "Dot bottom submerge depth",
+        default = 1.5,
+        maximum = 2,
+        minimum = 0.5
+    )
 
 def get_latest_version(load_name: str) -> int:
     labware_def_location = (
