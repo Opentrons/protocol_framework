@@ -201,9 +201,7 @@ export function PositionField(props: PositionFieldProps): JSX.Element {
             testId={`PositionField_ListButton_${prefix}`}
           >
             {!isNested ? <Icon name="tip-position" size="1.25rem" /> : null}
-            <StyledText
-              desktopStyle={isRetract ? 'captionRegular' : 'bodyDefaultRegular'}
-            >
+            <StyledText desktopStyle="bodyDefaultRegular">
               {xField != null && yField != null
                 ? t(
                     isRetract

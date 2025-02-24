@@ -92,7 +92,7 @@ export function MultiInputField(props: MultiInputFieldProps): JSX.Element {
               xField={`${prefix}_x_position`}
               yField={`${prefix}_y_position`}
               labwareId={labwareId}
-              isWhiteButton={true}
+              isNested
             />
           )}
         </Flex>
