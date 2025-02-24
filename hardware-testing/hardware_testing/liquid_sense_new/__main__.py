@@ -15,7 +15,6 @@ from hardware_testing.data import (
 
 from .run_args import RunArgs
 from .execute import run
-from .config import API_LEVEL, LIQUID_SENSE_CFG, PIPETTE_MODEL_NAME
 
 
 if __name__ == "__main__":

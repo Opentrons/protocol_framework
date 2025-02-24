@@ -305,6 +305,7 @@ def _run_trial(
     if run_args.pipette_channels > 1:
         probes.append(InstrumentProbeType.SECONDARY)
         probe_target = InstrumentProbeType.BOTH
+
     data_files: Dict[InstrumentProbeType, str] = {}
     data_capture: PipetteSensorResponseQueue = PipetteSensorResponseQueue()
     for probe in probes:
