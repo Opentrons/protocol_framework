@@ -17,7 +17,7 @@ import {
   InputField,
   TYPOGRAPHY,
 } from '@opentrons/components'
-import { prefixMap } from 'opentrons-ai-client/src/resources/utils'
+import { prefixMap } from '../../resources/utils'
 import { getIsTouchTipField } from '../../form-types'
 import { LINK_BUTTON_STYLE } from '../../atoms'
 import { getMainPagePortalEl } from '../Portal'
