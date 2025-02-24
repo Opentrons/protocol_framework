@@ -470,7 +470,6 @@ def _run_trial(
         _calculate_meniscus_relative_offsets(is_aspirate=True)
         # FIXME: This assumes whatever is in the pipette from last trial is air (not liquid),
         #        and so this would break any sort of multi-dispense testing
-        assumed_air_gap = trial.pipette.current_volume
         if tune_volume_correction:
             _prev_vol_corr_val_asp = (
                 transfer_properties.aspirate.correction_by_volume.get_for_volume(
@@ -503,6 +502,7 @@ def _run_trial(
                     break
                 except ValueError as e:
                     print(e)
+        assumed_air_gap = trial.pipette.current_volume
         tip_contents = trial.pipette._core.aspirate_liquid_class(
             volume=trial.volume,
             source=(Location(Point(), trial.well), trial.well._core),

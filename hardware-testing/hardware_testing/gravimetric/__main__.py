@@ -4,6 +4,7 @@ import argparse
 from typing import List, Union, Dict, Optional, Any, Tuple
 from dataclasses import dataclass
 from opentrons.protocol_api import ProtocolContext
+from opentrons.protocols.api_support.definitions import MAX_SUPPORTED_VERSION
 from . import report
 import subprocess
 from time import sleep
@@ -48,6 +49,8 @@ from hardware_testing.drivers import asair_sensor
 from opentrons.protocol_api import InstrumentContext, disposal_locations
 from opentrons.protocol_engine.types import LabwareOffset
 
+
+API_LEVEL = str(MAX_SUPPORTED_VERSION)
 
 CUSTOM_LABWARE_URIS = ["radwag_pipette_calibration_vial"]
 
