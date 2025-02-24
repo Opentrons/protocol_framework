@@ -305,6 +305,12 @@ export const SetupSteps = {
     },
   }),
 
+  AddPlateReader: (): StepThunk => ({
+    call: () => {
+      cy.contains(SetupContent.PlateReader).click()
+    },
+  }),
+
   /**
    * Click "Edit protocol".
    */
@@ -314,39 +320,9 @@ export const SetupSteps = {
     },
   }),
 
-  /**
-   * Choose deck slot A1.
-   */
-  ChoseDeckSlotA1: (): StepThunk => ({
-    call: () => {
-      chooseDeckSlot('A1').click()
-    },
-  }),
-
-  /**
-   * Choose deck slot A2.
-   */
-  ChoseDeckSlotA2: (): StepThunk => ({
-    call: () => {
-      chooseDeckSlot('A2').click()
-    },
-  }),
-
-  /**
-   * Choose deck slot A3.
-   */
-  ChoseDeckSlotA3: (): StepThunk => ({
-    call: () => {
-      chooseDeckSlot('A3').click()
-    },
-  }),
-
-  /**
-   * Choose deck slot.
-   */
   ChoseDeckSlot: (deckSlot: string): StepThunk => ({
     call: () => {
-      chooseDeckSlot(deckSlot).click()
+      chooseDeckSlot(deckSlot).click({ force: true })
     },
   }),
 
@@ -355,7 +331,7 @@ export const SetupSteps = {
    */
   AddHardwareLabware: (): StepThunk => ({
     call: () => {
-      cy.contains(SetupContent.AddLabwareToDeck).click()
+      cy.contains(SetupContent.AddLabwareToDeck).click({ force: true })
     },
   }),
 
@@ -389,9 +365,9 @@ export const SetupSteps = {
   /**
    * Choose deck slot C2 with a labware-locating approach.
    */
-  ChoseDeckSlotC2Labware: (): StepThunk => ({
+  ChoseDeckSlotLabware: (deckslot: string): StepThunk => ({
     call: () => {
-      chooseDeckSlot('C2')
+      chooseDeckSlot(deckslot)
         .find('.Box-sc-8ozbhb-0.kIDovv')
         .find('a[role="button"]')
         .contains(SetupContent.EditSlot)
@@ -405,6 +381,24 @@ export const SetupSteps = {
   AddLiquid: (): StepThunk => ({
     call: () => {
       cy.contains('button', SetupContent.AddLiquid).click()
+    },
+  }),
+
+  AddMoveStep: (): StepThunk => ({
+    call: () => {
+      cy.contains('button', 'Move').should('be.visible').click()
+    },
+  }),
+
+  UseGripperinMove: (): StepThunk => ({
+    call: () => {
+      cy.contains('button', 'Use gripper').should('be.visible').click()
+    },
+  }),
+
+  MoveToPlateReader: (): StepThunk => ({
+    call: () => {
+      cy.contains('button', 'Use gripper').should('be.visible').click()
     },
   }),
 
@@ -886,6 +880,12 @@ export const SetupVerifications = {
     },
   }),
 
+  AbsorbanceNotSelectable: (): StepThunk => ({
+    call: () => {
+      cy.contains('button', SetupContent.PlateReader).should('be.disabled')
+    },
+  }),
+
   /**
    * Verify you can open the "Transfer" pop-out panel.
    */
@@ -898,13 +898,6 @@ export const SetupVerifications = {
       cy.contains('Volume per well')
       cy.contains('Tip handling')
       cy.contains('Tip drop location')
-    },
-  }),
-
-  AbsorbanceNotSelectable: (): StepThunk => ({
-    // Verifies that the "Plate Reader" button is disabled and cannot be selected
-    call: () => {
-      cy.contains('button', SetupContent.PlateReader).should('be.disabled')
     },
   }),
 
