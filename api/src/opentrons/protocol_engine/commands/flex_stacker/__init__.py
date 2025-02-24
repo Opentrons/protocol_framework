@@ -30,6 +30,7 @@ from .set_stored_labware import (
     SetStoredLabwareResult,
     SetStoredLabware,
     SetStoredLabwareCreate,
+    StackerStoredLabwareDetails,
 )
 
 from .fill import FillCommandType, FillParams, FillResult, Fill, FillCreate
@@ -62,6 +63,7 @@ __all__ = [
     "SetStoredLabwareResult",
     "SetStoredLabware",
     "SetStoredLabwareCreate",
+    "StackerStoredLabwareDetails",
     # flexStacker/fill
     "FillCommandType",
     "FillParams",

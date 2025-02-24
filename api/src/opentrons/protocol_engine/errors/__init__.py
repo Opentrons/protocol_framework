@@ -87,6 +87,7 @@ from .exceptions import (
     LiquidClassRedefinitionError,
     OffsetLocationInvalidError,
     FlexStackerLabwarePoolNotYetDefinedError,
+    FlexStackerNotLogicallyEmptyError,
 )
 
 from .error_occurrence import ErrorOccurrence, ProtocolCommandFailedError
@@ -169,6 +170,7 @@ __all__ = [
     "NotSupportedOnRobotType",
     "OffsetLocationInvalidError",
     "FlexStackerLabwarePoolNotYetDefinedError",
+    "FlexStackerNotLogicallyEmptyError",
     # error occurrence models
     "ErrorOccurrence",
     "CommandNotAllowedError",

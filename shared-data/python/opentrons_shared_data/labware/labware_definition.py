@@ -484,8 +484,7 @@ class InnerWellGeometry(BaseModel):
 
 
 class LabwareDefinition2(BaseModel):
-    # todo(mm, 2025-02-18): Is it correct to accept schemaVersion==1 here?
-    schemaVersion: Literal[1, 2]
+    schemaVersion: Literal[2]
     version: Annotated[int, Field(ge=1)]
     namespace: Annotated[str, Field(pattern=SAFE_STRING_REGEX)]
     metadata: Metadata

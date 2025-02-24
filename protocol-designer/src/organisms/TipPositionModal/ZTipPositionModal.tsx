@@ -51,11 +51,12 @@ export function ZTipPositionModal(props: ZTipPositionModalProps): JSX.Element {
     name === 'aspirate_touchTip_mmFromTop' ||
     name === 'dispense_touchTip_mmFromTop' ||
     name === 'mix_touchTip_mmFromTop'
-  const defaultMm = isPositionFromTop
-    ? 0
-    : utils.getDefaultMmFromEdge({
-        name,
-      })
+  const defaultMm =
+    isPositionFromTop && !getIsTouchTipField(name)
+      ? 0
+      : utils.getDefaultMmFromEdge({
+          name,
+        })
 
   const [value, setValue] = useState<string | null>(
     zValue !== null ? String(zValue) : null

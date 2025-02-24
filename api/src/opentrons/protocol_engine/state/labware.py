@@ -1009,6 +1009,41 @@ class LabwareView:
                 f" maximum allowed labware height is {_PLATE_READER_MAX_LABWARE_Z_MM}mm."
             )
 
+    def raise_if_stacker_labware_pool_is_not_valid(
+        self,
+        primary_labware_definition: LabwareDefinition,
+        lid_labware_definition: LabwareDefinition | None,
+        adapter_labware_definition: LabwareDefinition | None,
+    ) -> None:
+        """Raise if the primary, lid, and adapter do not go together."""
+        if lid_labware_definition:
+            if not labware_validation.validate_definition_is_lid(
+                lid_labware_definition
+            ):
+                raise errors.LabwareCannotBeStackedError(
+                    f"Labware {lid_labware_definition.parameters.loadName} cannot be used as a lid in the Flex Stacker."
+                )
+            if not labware_validation.validate_labware_can_be_stacked(
+                lid_labware_definition, primary_labware_definition.parameters.loadName
+            ):
+                raise errors.LabwareCannotBeStackedError(
+                    f"Labware {lid_labware_definition.parameters.loadName} cannot be used as a lid for {primary_labware_definition.parameters.loadName}"
+                )
+        if adapter_labware_definition:
+            if not labware_validation.validate_definition_is_adapter(
+                adapter_labware_definition
+            ):
+                raise errors.LabwareCannotBeStackedError(
+                    f"Labware {adapter_labware_definition.parameters.loadName} cannot be used as an adapter in the Flex Stacker."
+                )
+            if not labware_validation.validate_labware_can_be_stacked(
+                primary_labware_definition,
+                adapter_labware_definition.parameters.loadName,
+            ):
+                raise errors.LabwareCannotBeStackedError(
+                    f"Labware {adapter_labware_definition.parameters.loadName} cannot be used as an adapter for {primary_labware_definition.parameters.loadName}"
+                )
+
     def raise_if_labware_cannot_be_stacked(  # noqa: C901
         self, top_labware_definition: LabwareDefinition, bottom_labware_id: str
     ) -> None:
