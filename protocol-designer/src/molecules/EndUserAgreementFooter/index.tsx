@@ -1,4 +1,5 @@
 import { Trans, useTranslation } from 'react-i18next'
+
 import {
   ALIGN_CENTER,
   COLORS,
@@ -9,8 +10,9 @@ import {
   StyledText,
   TYPOGRAPHY,
 } from '@opentrons/components'
-import { getYearFromDate } from './utils'
+
 import { LINK_BUTTON_STYLE } from '../../atoms'
+import { getYearFromDate } from './utils'
 
 const PRIVACY_POLICY_URL = 'https://opentrons.com/privacy-policy'
 const EULA_URL = 'https://opentrons.com/eula'
@@ -51,7 +53,6 @@ export function EndUserAgreementFooter(): JSX.Element {
         />
       </StyledText>
       <StyledText desktopStyle="captionRegular">
-        {/* {`Copyright © ${getYearFromDate()} Opentrons`} */}
         {t('copyright', { year: getYearFromDate() })}
       </StyledText>
     </Flex>
