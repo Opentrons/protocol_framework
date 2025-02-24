@@ -327,50 +327,50 @@
       "sections": [
         {
           "shape": "conical",
-          "bottomDiameter": 8.9,
           "topDiameter": 9.28,
+          "bottomDiameter": 8.9,
           "topHeight": 39.28,
           "bottomHeight": 15.04
         },
         {
           "shape": "conical",
-          "bottomDiameter": 8.74,
           "topDiameter": 8.9,
+          "bottomDiameter": 8.74,
           "topHeight": 15.04,
           "bottomHeight": 6.26
         },
         {
           "shape": "conical",
-          "bottomDiameter": 8,
           "topDiameter": 8.74,
+          "bottomDiameter": 8,
           "topHeight": 6.26,
           "bottomHeight": 3.98
         },
         {
           "shape": "conical",
-          "bottomDiameter": 7.2,
           "topDiameter": 8,
+          "bottomDiameter": 7.2,
           "topHeight": 3.98,
           "bottomHeight": 2.74
         },
         {
           "shape": "conical",
-          "bottomDiameter": 7,
           "topDiameter": 7.2,
+          "bottomDiameter": 7,
           "topHeight": 2.74,
           "bottomHeight": 2.59
         },
         {
           "shape": "conical",
-          "bottomDiameter": 6,
           "topDiameter": 7,
+          "bottomDiameter": 6,
           "topHeight": 2.59,
           "bottomHeight": 1.83
         },
         {
           "shape": "conical",
-          "bottomDiameter": 5,
           "topDiameter": 6,
+          "bottomDiameter": 5,
           "topHeight": 1.83,
           "bottomHeight": 1.21
         },
