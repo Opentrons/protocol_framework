@@ -5,6 +5,7 @@ import { describe, expect, it, test } from 'vitest'
 import type { LabwareDefinition3 } from '../types'
 import Ajv from 'ajv'
 import schema from '../../labware/schemas/3.json'
+import { chunk, range } from 'lodash'
 
 const fixturesDir = path.join(__dirname, '../../labware/fixtures/3')
 const definitionsDir = path.join(__dirname, '../../labware/definitions/3')
@@ -22,6 +23,35 @@ const checkGeometryDefinitions = (labwareDef: LabwareDefinition3): void => {
         (a, b) => b.topHeight - a.topHeight
       )
       expect(sortedSectionList).toStrictEqual(sectionList)
+    }
+  })
+
+  test('the bottom of each geometry should be at height 0', () => {
+    for (const geometry of Object.values(
+      labwareDef.innerLabwareGeometry ?? {}
+    )) {
+      const bottomFrustum = geometry.sections[geometry.sections.length - 1]
+      expect(bottomFrustum.bottomHeight).toStrictEqual(0)
+    }
+  })
+
+  test('geometry sections should have topHeight > bottomHeight', () => {
+    for (const geometry of Object.values(
+      labwareDef.innerLabwareGeometry ?? {}
+    )) {
+      for (const section of geometry.sections) {
+        expect(section.topHeight).toBeGreaterThan(section.bottomHeight)
+      }
+    }
+  })
+
+  test('geometry sections should connect above and below', () => {
+    for (const geometry of Object.values(
+      labwareDef.innerLabwareGeometry ?? {}
+    )) {
+      for (const [above, below] of pairs(geometry.sections)) {
+        expect(above.bottomHeight).toStrictEqual(below.topHeight)
+      }
     }
   })
 
@@ -89,3 +119,12 @@ describe(`test labware definitions with schema v3`, () => {
     checkGeometryDefinitions(labwareDef)
   })
 })
+
+// [1, 2, 3, 4] -> [[1, 2], [2, 3], [3, 4]]
+// [1] -> []
+function pairs<T>(array: T[]): [T, T][] {
+  return range(array.length - 1).map(firstIndex => [
+    array[firstIndex],
+    array[firstIndex + 1],
+  ])
+}
