@@ -30,7 +30,6 @@ SLOTS = {
 TARGET_UL = 1
 SUBMERGE_MM_LLD = -1.5
 SUBMERGE_MM = -3.0
-BOTTOM_MM = 0.5
 
 TIP_VOLUME = 50
 PIP_VOLUME = 50
@@ -108,6 +107,7 @@ def run(ctx: ProtocolContext) -> None:
     use_test_matrix = ctx.params.use_test_matrix  # type: ignore[attr-defined]
     test_gripper_only = ctx.params.test_gripper_only  # type: ignore[attr-defined]
     TRIALS = columns * 8 * num_of_plates
+    BOTTOM_MM = ctx.params.dot_bottom_submerge_depth # type: ignore[attr-defined]
     ctx.load_trash_bin("A1")
     # Test Matrix
     test_matrix = {
