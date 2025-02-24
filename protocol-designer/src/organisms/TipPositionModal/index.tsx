@@ -17,6 +17,7 @@ import {
   InputField,
   TYPOGRAPHY,
 } from '@opentrons/components'
+import { prefixMap } from '../../resources/utils'
 import { getIsTouchTipField } from '../../form-types'
 import { LINK_BUTTON_STYLE } from '../../atoms'
 import { getMainPagePortalEl } from '../Portal'
@@ -238,7 +239,7 @@ export function TipPositionModal(
       type="info"
       width="37.125rem"
       closeOnOutsideClick
-      title={t('shared:tip_position', { prefix })}
+      title={t('shared:tip_position', { prefix: prefixMap[prefix] })}
       onClose={handleCancel}
       footer={
         <Flex
