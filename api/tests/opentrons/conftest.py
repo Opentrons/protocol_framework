@@ -986,7 +986,13 @@ def maximal_liquid_class_def() -> LiquidClassSchemaV1:
                                 offset=Coordinate(x=2, y=3, z=1),
                                 speed=50,
                                 airGapByVolume=[(1.0, 0.1), (49.9, 0.1), (50.0, 0.0)],
-                                blowout=BlowoutProperties(enable=False, params=None),
+                                blowout=BlowoutProperties(
+                                    enable=False,
+                                    params=BlowoutParams(
+                                        location=BlowoutLocation.DESTINATION,
+                                        flowRate=10,
+                                    ),
+                                ),
                                 touchTip=TouchTipProperties(
                                     enable=False,
                                     params=LiquidClassTouchTipParams(

@@ -1340,7 +1340,8 @@ class InstrumentCore(AbstractInstrument[WellCore, LabwareCore]):
                 increment=None,
             )
 
-        if new_tip == TransferTipPolicyV2.ONCE:
+        tip_used = False
+        if new_tip != TransferTipPolicyV2.NEVER:
             _pick_up_tip()
 
         post_disp_tip_contents = [
@@ -1384,7 +1385,7 @@ class InstrumentCore(AbstractInstrument[WellCore, LabwareCore]):
             except StopIteration:
                 is_last_step = True
 
-            if new_tip == TransferTipPolicyV2.ALWAYS:
+            if new_tip == TransferTipPolicyV2.ALWAYS and tip_used:
                 _drop_tip()
                 _pick_up_tip()
                 post_disp_tip_contents = [
@@ -1421,6 +1422,7 @@ class InstrumentCore(AbstractInstrument[WellCore, LabwareCore]):
                         disposal_volume=disposal_vol,
                     )
                 )
+            tip_used = True
 
         if new_tip != TransferTipPolicyV2.NEVER:
             _drop_tip()
