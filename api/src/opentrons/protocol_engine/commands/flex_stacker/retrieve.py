@@ -11,6 +11,7 @@ from ...errors import (
     ErrorOccurrence,
     CannotPerformModuleAction,
     LocationIsOccupiedError,
+    FlexStackerLabwarePoolNotYetDefinedError,
 )
 from ...state import update_types
 from ...types import (
@@ -25,6 +26,7 @@ from opentrons.calibration_storage.helpers import uri_from_details
 
 if TYPE_CHECKING:
     from opentrons.protocol_engine.state.state import StateView
+    from opentrons.protocol_engine.state.module_substates import FlexStackerSubState
     from opentrons.protocol_engine.execution import EquipmentHandler
 
 RetrieveCommandType = Literal["flexStacker/retrieve"]
@@ -41,14 +43,6 @@ class RetrieveParams(BaseModel):
         ...,
         description="Unique ID of the Flex Stacker.",
     )
-    namespace: str = Field(
-        ...,
-        description="The namespace the lid labware definition belongs to.",
-    )
-    version: int = Field(
-        ...,
-        description="The lid labware definition version.",
-    )
     labwareId: str | SkipJsonSchema[None] = Field(
         None,
         description="An optional ID to assign to this labware. If None, an ID "
@@ -59,24 +53,12 @@ class RetrieveParams(BaseModel):
         None,
         description="An optional user-specified display name "
         "or label for this labware.",
-        # NOTE: v4/5 JSON protocols will always have a displayName which will be the
-        #  user-specified label OR the displayName property of the labware's definition.
-        # TODO: Make sure v6 JSON protocols don't do that.
         json_schema_extra=_remove_default,
     )
     adapterId: str | SkipJsonSchema[None] = Field(
         None,
         description="An optional ID to assign to an adapter. If None, an ID "
         "will be generated.",
-        json_schema_extra=_remove_default,
-    )
-    adapterDisplayName: str | SkipJsonSchema[None] = Field(
-        None,
-        description="An optional user-specified display name "
-        "or label for an adapter.",
-        # NOTE: v4/5 JSON protocols will always have a displayName which will be the
-        #  user-specified label OR the displayName property of the labware's definition.
-        # TODO: Make sure v6 JSON protocols don't do that.
         json_schema_extra=_remove_default,
     )
     lidId: str | SkipJsonSchema[None] = Field(
@@ -138,28 +120,9 @@ class RetrieveImpl(AbstractCommandImpl[RetrieveParams, SuccessData[RetrieveResul
         self._state_view = state_view
         self._equipment = equipment
 
-    async def execute(self, params: RetrieveParams) -> SuccessData[RetrieveResult]:
-        """Execute the labware retrieval command."""
-        stacker_state = self._state_view.modules.get_flex_stacker_substate(
-            params.moduleId
-        )
-
-        if stacker_state.in_static_mode:
-            raise CannotPerformModuleAction(
-                "Cannot retrieve labware from Flex Stacker while in static mode"
-            )
-
-        stacker_loc = ModuleLocation(moduleId=params.moduleId)
-        # Allow propagation of ModuleNotAttachedError.
-        stacker_hw = self._equipment.get_module_hardware_api(stacker_state.module_id)
-
-        try:
-            self._state_view.labware.raise_if_labware_in_location(stacker_loc)
-        except LocationIsOccupiedError:
-            raise CannotPerformModuleAction(
-                "Cannot retrieve a labware from Flex Stacker if the carriage is occupied"
-            )
-
+    async def _load_labware_from_pool(
+        self, params: RetrieveParams, stacker_state: FlexStackerSubState
+    ) -> tuple[RetrieveResult, update_types.StateUpdate, list[LabwareDefinition]]:
         state_update = update_types.StateUpdate()
 
         # If there is an adapter load it
@@ -170,18 +133,16 @@ class RetrieveImpl(AbstractCommandImpl[RetrieveParams, SuccessData[RetrieveResul
         display_names_by_id: Dict[str, str | None] = {}
         new_locations_by_id: Dict[str, LabwareLocation] = {}
         if stacker_state.pool_adapter_definition is not None:
-            adapter_lw = await self._equipment.load_labware(
-                load_name=stacker_state.pool_adapter_definition.parameters.loadName,
-                namespace=params.namespace,
-                version=params.version,
+            adapter_lw = await self._equipment.load_labware_from_definition(
+                definition=stacker_state.pool_adapter_definition,
                 location=ModuleLocation(moduleId=params.moduleId),
                 labware_id=params.adapterId,
             )
             definitions_by_id[adapter_lw.labware_id] = adapter_lw.definition
             offset_ids_by_id[adapter_lw.labware_id] = adapter_lw.offsetId
-            display_names_by_id[
-                adapter_lw.labware_id
-            ] = adapter_lw.definition.metadata.displayName
+            display_names_by_id[adapter_lw.labware_id] = (
+                adapter_lw.definition.metadata.displayName
+            )
             new_locations_by_id[adapter_lw.labware_id] = ModuleLocation(
                 moduleId=params.moduleId
             )
@@ -190,20 +151,20 @@ class RetrieveImpl(AbstractCommandImpl[RetrieveParams, SuccessData[RetrieveResul
             raise CannotPerformModuleAction(
                 f"Flex Stacker {params.moduleId} has no labware to retrieve"
             )
-        loaded_labware = await self._equipment.load_labware(
-            load_name=stacker_state.pool_primary_definition.parameters.loadName,
-            namespace=params.namespace,
-            version=params.version,
-            location=ModuleLocation(moduleId=params.moduleId)
-            if adapter_lw is None
-            else OnLabwareLocation(labwareId=adapter_lw.labware_id),
+        loaded_labware = await self._equipment.load_labware_from_definition(
+            definition=stacker_state.pool_primary_definition,
+            location=(
+                ModuleLocation(moduleId=params.moduleId)
+                if adapter_lw is None
+                else OnLabwareLocation(labwareId=adapter_lw.labware_id)
+            ),
             labware_id=params.labwareId,
         )
         definitions_by_id[loaded_labware.labware_id] = loaded_labware.definition
         offset_ids_by_id[loaded_labware.labware_id] = loaded_labware.offsetId
-        display_names_by_id[
-            loaded_labware.labware_id
-        ] = loaded_labware.definition.metadata.displayName
+        display_names_by_id[loaded_labware.labware_id] = (
+            loaded_labware.definition.metadata.displayName
+        )
         new_locations_by_id[loaded_labware.labware_id] = (
             ModuleLocation(moduleId=params.moduleId)
             if adapter_lw is None
@@ -211,18 +172,16 @@ class RetrieveImpl(AbstractCommandImpl[RetrieveParams, SuccessData[RetrieveResul
         )
         # If there is a lid load it
         if stacker_state.pool_lid_definition is not None:
-            lid_lw = await self._equipment.load_labware(
-                load_name=stacker_state.pool_lid_definition.parameters.loadName,
-                namespace=params.namespace,
-                version=params.version,
+            lid_lw = await self._equipment.load_labware_from_definition(
+                definition=stacker_state.pool_lid_definition,
                 location=OnLabwareLocation(labwareId=loaded_labware.labware_id),
                 labware_id=params.lidId,
             )
             definitions_by_id[lid_lw.labware_id] = lid_lw.definition
             offset_ids_by_id[lid_lw.labware_id] = lid_lw.offsetId
-            display_names_by_id[
-                lid_lw.labware_id
-            ] = lid_lw.definition.metadata.displayName
+            display_names_by_id[lid_lw.labware_id] = (
+                lid_lw.definition.metadata.displayName
+            )
             new_locations_by_id[lid_lw.labware_id] = OnLabwareLocation(
                 labwareId=loaded_labware.labware_id
             )
@@ -279,9 +238,72 @@ class RetrieveImpl(AbstractCommandImpl[RetrieveParams, SuccessData[RetrieveResul
             if lid_lw is not None
             else None
         )
+        state_update.set_batch_loaded_labware(
+            definitions_by_id=definitions_by_id,
+            display_names_by_id=display_names_by_id,
+            offset_ids_by_id=offset_ids_by_id,
+            new_locations_by_id=new_locations_by_id,
+        )
+        state_update.update_flex_stacker_labware_pool_count(
+            module_id=params.moduleId, count=stacker_state.pool_count - 1
+        )
+
+        if lid_lw is not None:
+            state_update.set_lids(
+                parent_labware_ids=[loaded_labware.labware_id],
+                lid_ids=[lid_lw.labware_id],
+            )
+
+        return (
+            RetrieveResult(
+                labwareId=loaded_labware.labware_id,
+                adapterId=adapter_lw.labware_id if adapter_lw is not None else None,
+                lidId=lid_lw.labware_id if lid_lw is not None else None,
+                primaryLocationSequence=primary_location_sequence,
+                adapterLocationSequence=adapter_location_sequence,
+                lidLocationSequence=lid_location_sequence,
+                primaryLabwareURI=primary_uri,
+                adapterLabwareURI=adapter_uri,
+                lidLabwareURI=lid_uri,
+            ),
+            state_update,
+        )
+
+    async def execute(self, params: RetrieveParams) -> SuccessData[RetrieveResult]:
+        """Execute the labware retrieval command."""
+        stacker_state = self._state_view.modules.get_flex_stacker_substate(
+            params.moduleId
+        )
+
+        if stacker_state.in_static_mode:
+            raise CannotPerformModuleAction(
+                "Cannot retrieve labware from Flex Stacker while in static mode"
+            )
+
+        pool_definitions = stacker_state.get_pool_definition_ordered_list()
+        if pool_definitions is None:
+            location = self._state_view.modules.get_location(params.moduleId)
+            raise FlexStackerLabwarePoolNotYetDefinedError(
+                message=f"The Flex Stacker in {location} has not been configured yet and cannot be filled."
+            )
+
+        stacker_loc = ModuleLocation(moduleId=params.moduleId)
+        # Allow propagation of ModuleNotAttachedError.
+        stacker_hw = self._equipment.get_module_hardware_api(stacker_state.module_id)
+
+        try:
+            self._state_view.labware.raise_if_labware_in_location(stacker_loc)
+        except LocationIsOccupiedError:
+            raise CannotPerformModuleAction(
+                "Cannot retrieve a labware from Flex Stacker if the carriage is occupied"
+            )
+
+        retrieve_result, state_update = await self._load_labware_from_pool(
+            params, stacker_state
+        )
 
         labware_height = self._state_view.geometry.get_height_of_labware_stack(
-            definitions=list(definitions_by_id.values())
+            definitions=pool_definitions
         )
 
         if stacker_hw is not None:
@@ -300,37 +322,12 @@ class RetrieveImpl(AbstractCommandImpl[RetrieveParams, SuccessData[RetrieveResul
             )
         )
         state_update.set_addressable_area_used(stacker_area)
-        state_update.set_batch_loaded_labware(
-            definitions_by_id=definitions_by_id,
-            display_names_by_id=display_names_by_id,
-            offset_ids_by_id=offset_ids_by_id,
-            new_locations_by_id=new_locations_by_id,
-        )
-        state_update.update_flex_stacker_labware_pool_count(
-            module_id=params.moduleId, count=stacker_state.pool_count - 1
-        )
-
-        if lid_lw is not None:
-            state_update.set_lids(
-                parent_labware_ids=[loaded_labware.labware_id],
-                lid_ids=[lid_lw.labware_id],
-            )
 
         state_update.retrieve_flex_stacker_labware(
-            module_id=params.moduleId, labware_id=loaded_labware.labware_id
+            module_id=params.moduleId, labware_id=retrieve_result.labwareId
         )
         return SuccessData(
-            public=RetrieveResult(
-                labwareId=loaded_labware.labware_id,
-                adapterId=adapter_lw.labware_id if adapter_lw is not None else None,
-                lidId=lid_lw.labware_id if lid_lw is not None else None,
-                primaryLocationSequence=primary_location_sequence,
-                adapterLocationSequence=adapter_location_sequence,
-                lidLocationSequence=lid_location_sequence,
-                primaryLabwareURI=primary_uri,
-                adapterLabwareURI=adapter_uri,
-                lidLabwareURI=lid_uri,
-            ),
+            public=retrieve_result,
             state_update=state_update,
         )
 
