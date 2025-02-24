@@ -1262,14 +1262,6 @@
             "brand": "Opentrons",
             "brandId": []
           },
-          "compatibleParentLabware": [
-            "armadillo_96_wellplate_200ul_pcr_full_skirt",
-            "biorad_96_wellplate_200ul_pcr",
-            "opentrons_96_wellplate_200ul_pcr_full_skirt",
-            "opentrons_flex_deck_riser",
-            "opentrons_tough_pcr_auto_sealing_lid",
-            "protocol_engine_lid_stack_object"
-          ],
           "cornerOffsetFromSlot": {
             "x": 0,
             "y": 0,
@@ -1341,7 +1333,7 @@
             "loadName": "opentrons_tough_pcr_auto_sealing_lid",
             "quirks": []
           },
-          "schemaVersion": 3,
+          "schemaVersion": 2,
           "stackLimit": 5,
           "stackingOffsetWithLabware": {
             "armadillo_96_wellplate_200ul_pcr_full_skirt": {
@@ -1373,11 +1365,6 @@
               "x": 0,
               "y": 0,
               "z": 6.492
-            },
-            "protocol_engine_lid_stack_object": {
-              "x": 0,
-              "y": 0,
-              "z": 0
             }
           },
           "stackingOffsetWithModule": {
@@ -1404,7 +1391,8 @@
             "cutoutId": "cutoutA3",
             "kind": "onCutoutFixture",
             "possibleCutoutFixtureIds": [
-              "stagingAreaRightSlot"
+              "stagingAreaRightSlot",
+              "stagingAreaSlotWithMagneticBlockV1"
             ]
           }
         ]
@@ -1437,14 +1425,6 @@
             "brand": "Opentrons",
             "brandId": []
           },
-          "compatibleParentLabware": [
-            "armadillo_96_wellplate_200ul_pcr_full_skirt",
-            "biorad_96_wellplate_200ul_pcr",
-            "opentrons_96_wellplate_200ul_pcr_full_skirt",
-            "opentrons_flex_deck_riser",
-            "opentrons_tough_pcr_auto_sealing_lid",
-            "protocol_engine_lid_stack_object"
-          ],
           "cornerOffsetFromSlot": {
             "x": 0,
             "y": 0,
@@ -1516,7 +1496,7 @@
             "loadName": "opentrons_tough_pcr_auto_sealing_lid",
             "quirks": []
           },
-          "schemaVersion": 3,
+          "schemaVersion": 2,
           "stackLimit": 5,
           "stackingOffsetWithLabware": {
             "armadillo_96_wellplate_200ul_pcr_full_skirt": {
@@ -1548,11 +1528,6 @@
               "x": 0,
               "y": 0,
               "z": 6.492
-            },
-            "protocol_engine_lid_stack_object": {
-              "x": 0,
-              "y": 0,
-              "z": 0
             }
           },
           "stackingOffsetWithModule": {
@@ -1583,7 +1558,8 @@
             "cutoutId": "cutoutA3",
             "kind": "onCutoutFixture",
             "possibleCutoutFixtureIds": [
-              "stagingAreaRightSlot"
+              "stagingAreaRightSlot",
+              "stagingAreaSlotWithMagneticBlockV1"
             ]
           }
         ]
@@ -1616,14 +1592,6 @@
             "brand": "Opentrons",
             "brandId": []
           },
-          "compatibleParentLabware": [
-            "armadillo_96_wellplate_200ul_pcr_full_skirt",
-            "biorad_96_wellplate_200ul_pcr",
-            "opentrons_96_wellplate_200ul_pcr_full_skirt",
-            "opentrons_flex_deck_riser",
-            "opentrons_tough_pcr_auto_sealing_lid",
-            "protocol_engine_lid_stack_object"
-          ],
           "cornerOffsetFromSlot": {
             "x": 0,
             "y": 0,
@@ -1695,7 +1663,7 @@
             "loadName": "opentrons_tough_pcr_auto_sealing_lid",
             "quirks": []
           },
-          "schemaVersion": 3,
+          "schemaVersion": 2,
           "stackLimit": 5,
           "stackingOffsetWithLabware": {
             "armadillo_96_wellplate_200ul_pcr_full_skirt": {
@@ -1727,11 +1695,6 @@
               "x": 0,
               "y": 0,
               "z": 6.492
-            },
-            "protocol_engine_lid_stack_object": {
-              "x": 0,
-              "y": 0,
-              "z": 0
             }
           },
           "stackingOffsetWithModule": {
@@ -1766,7 +1729,8 @@
             "cutoutId": "cutoutA3",
             "kind": "onCutoutFixture",
             "possibleCutoutFixtureIds": [
-              "stagingAreaRightSlot"
+              "stagingAreaRightSlot",
+              "stagingAreaSlotWithMagneticBlockV1"
             ]
           }
         ]
@@ -1799,14 +1763,6 @@
             "brand": "Opentrons",
             "brandId": []
           },
-          "compatibleParentLabware": [
-            "armadillo_96_wellplate_200ul_pcr_full_skirt",
-            "biorad_96_wellplate_200ul_pcr",
-            "opentrons_96_wellplate_200ul_pcr_full_skirt",
-            "opentrons_flex_deck_riser",
-            "opentrons_tough_pcr_auto_sealing_lid",
-            "protocol_engine_lid_stack_object"
-          ],
           "cornerOffsetFromSlot": {
             "x": 0,
             "y": 0,
@@ -1878,7 +1834,7 @@
             "loadName": "opentrons_tough_pcr_auto_sealing_lid",
             "quirks": []
           },
-          "schemaVersion": 3,
+          "schemaVersion": 2,
           "stackLimit": 5,
           "stackingOffsetWithLabware": {
             "armadillo_96_wellplate_200ul_pcr_full_skirt": {
@@ -1910,11 +1866,6 @@
               "x": 0,
               "y": 0,
               "z": 6.492
-            },
-            "protocol_engine_lid_stack_object": {
-              "x": 0,
-              "y": 0,
-              "z": 0
             }
           },
           "stackingOffsetWithModule": {
@@ -1953,7 +1904,8 @@
             "cutoutId": "cutoutA3",
             "kind": "onCutoutFixture",
             "possibleCutoutFixtureIds": [
-              "stagingAreaRightSlot"
+              "stagingAreaRightSlot",
+              "stagingAreaSlotWithMagneticBlockV1"
             ]
           }
         ]
@@ -1986,14 +1938,6 @@
             "brand": "Opentrons",
             "brandId": []
           },
-          "compatibleParentLabware": [
-            "armadillo_96_wellplate_200ul_pcr_full_skirt",
-            "biorad_96_wellplate_200ul_pcr",
-            "opentrons_96_wellplate_200ul_pcr_full_skirt",
-            "opentrons_flex_deck_riser",
-            "opentrons_tough_pcr_auto_sealing_lid",
-            "protocol_engine_lid_stack_object"
-          ],
           "cornerOffsetFromSlot": {
             "x": 0,
             "y": 0,
@@ -2065,7 +2009,7 @@
             "loadName": "opentrons_tough_pcr_auto_sealing_lid",
             "quirks": []
           },
-          "schemaVersion": 3,
+          "schemaVersion": 2,
           "stackLimit": 5,
           "stackingOffsetWithLabware": {
             "armadillo_96_wellplate_200ul_pcr_full_skirt": {
@@ -2097,11 +2041,6 @@
               "x": 0,
               "y": 0,
               "z": 6.492
-            },
-            "protocol_engine_lid_stack_object": {
-              "x": 0,
-              "y": 0,
-              "z": 0
             }
           },
           "stackingOffsetWithModule": {
@@ -2144,7 +2083,8 @@
             "cutoutId": "cutoutA3",
             "kind": "onCutoutFixture",
             "possibleCutoutFixtureIds": [
-              "stagingAreaRightSlot"
+              "stagingAreaRightSlot",
+              "stagingAreaSlotWithMagneticBlockV1"
             ]
           }
         ]
@@ -3402,7 +3342,9 @@
           {
             "cutoutId": "cutoutD1",
             "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
+            "possibleCutoutFixtureIds": [
+              "temperatureModuleV2"
+            ]
           }
         ]
       },
@@ -4582,7 +4524,9 @@
           {
             "cutoutId": "cutoutC1",
             "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
+            "possibleCutoutFixtureIds": [
+              "heaterShakerModuleV1"
+            ]
           }
         ]
       },
@@ -10727,7 +10671,9 @@
           {
             "cutoutId": "cutoutB1",
             "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
+            "possibleCutoutFixtureIds": [
+              "thermocyclerModuleV2Front"
+            ]
           }
         ],
         "immediateDestinationLocationSequence": [
@@ -10742,7 +10688,9 @@
           {
             "cutoutId": "cutoutB1",
             "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
+            "possibleCutoutFixtureIds": [
+              "thermocyclerModuleV2Front"
+            ]
           }
         ],
         "originLocationSequence": [
@@ -10829,7 +10777,9 @@
           {
             "cutoutId": "cutoutB1",
             "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
+            "possibleCutoutFixtureIds": [
+              "thermocyclerModuleV2Front"
+            ]
           }
         ]
       },
@@ -13356,6 +13306,7 @@
         "alternateDropLocation": false,
         "labwareId": "UUID",
         "pipetteId": "UUID",
+        "scrape_tips": false,
         "wellLocation": {
           "offset": {
             "x": 0.0,
@@ -13370,7 +13321,7 @@
         "position": {
           "x": 178.38,
           "y": 395.38,
-          "z": 90.88
+          "z": 42.12400000000001
         }
       },
       "startedAt": "TIMESTAMP",
@@ -14187,6 +14138,7 @@
         "homeAfter": false,
         "labwareId": "UUID",
         "pipetteId": "UUID",
+        "scrape_tips": false,
         "wellLocation": {
           "offset": {
             "x": 0.0,
@@ -14201,7 +14153,7 @@
         "position": {
           "x": 178.38,
           "y": 395.38,
-          "z": 90.88
+          "z": 42.12400000000001
         }
       },
       "startedAt": "TIMESTAMP",
@@ -14374,7 +14326,9 @@
           {
             "cutoutId": "cutoutB1",
             "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
+            "possibleCutoutFixtureIds": [
+              "thermocyclerModuleV2Front"
+            ]
           }
         ],
         "immediateDestinationLocationSequence": [
@@ -14389,7 +14343,9 @@
           {
             "cutoutId": "cutoutB1",
             "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
+            "possibleCutoutFixtureIds": [
+              "thermocyclerModuleV2Front"
+            ]
           }
         ],
         "originLocationSequence": [
@@ -14440,7 +14396,9 @@
           {
             "cutoutId": "cutoutB1",
             "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
+            "possibleCutoutFixtureIds": [
+              "thermocyclerModuleV2Front"
+            ]
           }
         ],
         "immediateDestinationLocationSequence": [
@@ -14459,7 +14417,9 @@
           {
             "cutoutId": "cutoutB1",
             "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
+            "possibleCutoutFixtureIds": [
+              "thermocyclerModuleV2Front"
+            ]
           }
         ],
         "originLocationSequence": [
@@ -14491,7 +14451,8 @@
             "cutoutId": "cutoutA3",
             "kind": "onCutoutFixture",
             "possibleCutoutFixtureIds": [
-              "stagingAreaRightSlot"
+              "stagingAreaRightSlot",
+              "stagingAreaSlotWithMagneticBlockV1"
             ]
           }
         ]
@@ -14641,7 +14602,9 @@
           {
             "cutoutId": "cutoutB1",
             "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
+            "possibleCutoutFixtureIds": [
+              "thermocyclerModuleV2Front"
+            ]
           }
         ]
       },
@@ -14723,7 +14686,9 @@
           {
             "cutoutId": "cutoutC1",
             "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
+            "possibleCutoutFixtureIds": [
+              "heaterShakerModuleV1"
+            ]
           }
         ],
         "immediateDestinationLocationSequence": [
@@ -14742,7 +14707,9 @@
           {
             "cutoutId": "cutoutC1",
             "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
+            "possibleCutoutFixtureIds": [
+              "heaterShakerModuleV1"
+            ]
           }
         ],
         "originLocationSequence": [
@@ -14757,7 +14724,9 @@
           {
             "cutoutId": "cutoutB1",
             "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
+            "possibleCutoutFixtureIds": [
+              "thermocyclerModuleV2Front"
+            ]
           }
         ]
       },
@@ -14899,7 +14868,9 @@
           {
             "cutoutId": "cutoutD1",
             "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
+            "possibleCutoutFixtureIds": [
+              "temperatureModuleV2"
+            ]
           }
         ],
         "immediateDestinationLocationSequence": [
@@ -14918,7 +14889,9 @@
           {
             "cutoutId": "cutoutD1",
             "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
+            "possibleCutoutFixtureIds": [
+              "temperatureModuleV2"
+            ]
           }
         ],
         "originLocationSequence": [
@@ -14937,7 +14910,9 @@
           {
             "cutoutId": "cutoutC1",
             "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
+            "possibleCutoutFixtureIds": [
+              "heaterShakerModuleV1"
+            ]
           }
         ]
       },
@@ -15016,7 +14991,9 @@
           {
             "cutoutId": "cutoutB3",
             "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
+            "possibleCutoutFixtureIds": [
+              "absorbanceReaderV1"
+            ]
           }
         ],
         "immediateDestinationLocationSequence": [
@@ -15031,7 +15008,9 @@
           {
             "cutoutId": "cutoutB3",
             "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
+            "possibleCutoutFixtureIds": [
+              "absorbanceReaderV1"
+            ]
           }
         ],
         "originLocationSequence": [
@@ -15050,7 +15029,9 @@
           {
             "cutoutId": "cutoutD1",
             "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
+            "possibleCutoutFixtureIds": [
+              "temperatureModuleV2"
+            ]
           }
         ]
       },
@@ -15285,7 +15266,9 @@
           {
             "cutoutId": "cutoutB3",
             "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
+            "possibleCutoutFixtureIds": [
+              "absorbanceReaderV1"
+            ]
           }
         ]
       },
@@ -15882,6 +15865,7 @@
         "alternateDropLocation": false,
         "labwareId": "UUID",
         "pipetteId": "UUID",
+        "scrape_tips": false,
         "wellLocation": {
           "offset": {
             "x": 0.0,
@@ -15896,7 +15880,7 @@
         "position": {
           "x": 178.38,
           "y": 395.38,
-          "z": 90.88
+          "z": 42.12400000000001
         }
       },
       "startedAt": "TIMESTAMP",

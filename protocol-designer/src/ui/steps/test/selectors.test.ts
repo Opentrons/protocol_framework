@@ -517,6 +517,10 @@ describe('_getSavedMultiSelectFieldValues', () => {
           value: -1,
           isIndeterminate: false,
         },
+        aspirate_touchTip_speed: {
+          isIndeterminate: false,
+          value: undefined,
+        },
         aspirate_retract_delay_seconds: {
           isIndeterminate: false,
           value: undefined,
@@ -605,6 +609,10 @@ describe('_getSavedMultiSelectFieldValues', () => {
         dispense_touchTip_mmFromTop: {
           value: -1,
           isIndeterminate: false,
+        },
+        dispense_touchTip_speed: {
+          isIndeterminate: false,
+          value: undefined,
         },
         dispense_retract_delay_seconds: {
           isIndeterminate: false,
@@ -829,6 +837,10 @@ describe('_getSavedMultiSelectFieldValues', () => {
           isIndeterminate: false,
           value: -1,
         },
+        aspirate_touchTip_speed: {
+          isIndeterminate: false,
+          value: undefined,
+        },
         aspirate_submerge_delay_seconds: {
           isIndeterminate: false,
           value: undefined,
@@ -908,6 +920,10 @@ describe('_getSavedMultiSelectFieldValues', () => {
         dispense_touchTip_mmFromTop: {
           isIndeterminate: false,
           value: -1,
+        },
+        dispense_touchTip_speed: {
+          isIndeterminate: false,
+          value: undefined,
         },
         dispense_retract_delay_seconds: {
           isIndeterminate: false,

@@ -312,13 +312,15 @@ export const createPythonFile: Selector<string> = createSelector(
   getInitialRobotState,
   getRobotStateTimeline,
   ingredSelectors.getLiquidsByLabwareId,
+  uiLabwareSelectors.getLabwareNicknamesById,
   (
     fileMetadata,
     robotType,
     invariantContext,
     robotState,
     robotStateTimeline,
-    liquidsByLabwareId
+    liquidsByLabwareId,
+    labwareNicknamesById
   ) => {
     return (
       [
@@ -330,7 +332,8 @@ export const createPythonFile: Selector<string> = createSelector(
           invariantContext,
           robotState,
           robotStateTimeline,
-          liquidsByLabwareId
+          liquidsByLabwareId,
+          labwareNicknamesById
         ),
       ]
         .filter(section => section) // skip any blank sections

@@ -43,7 +43,7 @@ describe('getDefaultsForStepType', () => {
         aspirate_submerge_speed: null,
         aspirate_touchTip_checkbox: false,
         aspirate_touchTip_mmFromTop: null,
-
+        aspirate_touchTip_speed: null,
         dispense_flowRate: null,
         dispense_labware: null,
         dispense_wells: [],
@@ -62,7 +62,7 @@ describe('getDefaultsForStepType', () => {
         dispense_submerge_speed: null,
         dispense_touchTip_checkbox: false,
         dispense_touchTip_mmFromTop: null,
-
+        dispense_touchTip_speed: null,
         disposalVolume_checkbox: false,
         disposalVolume_volume: null,
 

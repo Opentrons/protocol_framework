@@ -464,8 +464,7 @@ function RowLabware({
     matchedModule.attachedModuleMatch.moduleType === HEATERSHAKER_MODULE_TYPE
       ? matchedModule.attachedModuleMatch
       : null
-  const isStacked =
-    topLabwareQuantity > 1 || adapterName != null || matchedModule != null
+  const isStacked = topLabwareQuantity > 1 || adapterName != null
 
   let slotName: string = slot
   let location: JSX.Element = <DeckInfoLabel deckLabel={slotName} />

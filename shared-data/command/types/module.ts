@@ -1,4 +1,5 @@
 import type { CommonCommandRunTimeInfo, CommonCommandCreateInfo } from '.'
+import type { LabwareDefinition2 } from '../../js'
 
 export type ModuleRunTimeCommand =
   | MagneticModuleEngageMagnetRunTimeCommand
@@ -28,6 +29,7 @@ export type ModuleRunTimeCommand =
   | AbsorbanceReaderCloseLidRunTimeCommand
   | AbsorbanceReaderInitializeRunTimeCommand
   | AbsorbanceReaderReadRunTimeCommand
+  | FlexStackerSetStoredLabwareRunTimeCommand
 
 export type ModuleCreateCommand =
   | MagneticModuleEngageMagnetCreateCommand
@@ -57,6 +59,7 @@ export type ModuleCreateCommand =
   | AbsorbanceReaderCloseLidCreateCommand
   | AbsorbanceReaderInitializeCreateCommand
   | AbsorbanceReaderReadCreateCommand
+  | FlexStackerSetStoredLabwareCreateCommand
 
 export interface MagneticModuleEngageMagnetCreateCommand
   extends CommonCommandCreateInfo {
@@ -379,4 +382,33 @@ export interface TCExtendedProfileParams {
   moduleId: string
   profileElements: Array<TCProfileCycle | AtomicProfileStep>
   blockMaxVolumeUl?: number
+}
+
+export interface FlexStackerStoredLabwareDetails {
+  loadName: string
+  namespace: string
+  version: number
+}
+
+export interface FlexStackerSetStoredLabwareCreateCommand
+  extends CommonCommandCreateInfo {
+  commandType: 'flexStacker/setStoredLabware'
+  params: {
+    moduleId: string
+    initialCount: number
+    primaryLabware: FlexStackerStoredLabwareDetails
+    lidLabware: FlexStackerStoredLabwareDetails | null
+    adapterLabware: FlexStackerStoredLabwareDetails | null
+  }
+}
+
+export interface FlexStackerSetStoredLabwareRunTimeCommand
+  extends FlexStackerSetStoredLabwareCreateCommand,
+    CommonCommandRunTimeInfo {
+  result?: {
+    primaryLabwareDefinition: LabwareDefinition2
+    lidLabwareDefinition?: LabwareDefinition2 | null
+    adapterLabwareDefinition?: LabwareDefinition2 | null
+    count: number
+  }
 }

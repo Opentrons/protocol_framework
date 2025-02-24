@@ -9,11 +9,7 @@ import type { StyleProps } from '../../primitives'
 
 export * from './ListButtonChildren/index'
 
-export type ListButtonType =
-  | 'noActive'
-  | 'connected'
-  | 'notConnected'
-  | 'onColor'
+type ListButtonType = 'noActive' | 'connected' | 'notConnected' | 'onColor'
 
 interface ListButtonProps extends StyleProps {
   type: ListButtonType
@@ -86,7 +82,10 @@ export function ListButton(props: ListButtonProps): JSX.Element {
   return (
     <Flex
       data-testid={testId ?? `ListButton_${type}`}
-      onClick={onClick}
+      onClick={(e: MouseEvent) => {
+        onClick?.()
+        e.stopPropagation()
+      }}
       css={LIST_BUTTON_STYLE}
       tabIndex={0}
       {...styleProps}
