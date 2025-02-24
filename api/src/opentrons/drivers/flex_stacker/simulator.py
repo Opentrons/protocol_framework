@@ -6,6 +6,7 @@ from .abstract import AbstractFlexStackerDriver
 from .types import (
     LEDColor,
     LEDPattern,
+    MeasurementKind,
     MoveResult,
     StackerAxis,
     PlatformStatus,
@@ -15,6 +16,9 @@ from .types import (
     MoveParams,
     LimitSwitchStatus,
     StallGuardParams,
+    TOFMeasurement,
+    TOFMeasurementFrame,
+    TOFMeasurementResult,
     TOFSensor,
     TOFSensorMode,
     TOFSensorState,
@@ -107,6 +111,38 @@ class SimulatingDriver(AbstractFlexStackerDriver):
     async def enable_tof_sensor(self, sensor: TOFSensor, enable: bool) -> bool:
         """Enable or disable the TOF sensor."""
         return True
+
+    async def start_tof_measurement(
+        self,
+        sensor: TOFSensor,
+        kind: MeasurementKind = MeasurementKind.HISTOGRAM,
+        cancel: bool = False,
+    ) -> TOFMeasurement:
+        """Start or Cancel Measurements from the TOF sensor."""
+        return TOFMeasurement(
+            sensor=sensor,
+            kind=kind,
+            cancelled=cancel,
+            total_bytes=3840,
+        )
+
+    async def get_tof_measurement(
+        self, sensor: TOFSensor, resend: bool = False
+    ) -> TOFMeasurementFrame:
+        """Get the next measurement frame from TOF sensor or resend previous."""
+        return TOFMeasurementFrame(
+            sensor=sensor,
+            frame_id=1,
+            data=bytes([0x81, 0x1, 0x0, 0x0F, 0x1, 0x80, 0x0, 0x2 * 128]),
+        )
+
+    async def get_tof_histogram(self, sensor: TOFSensor) -> TOFMeasurementResult:
+        """Get the full histogram measurement from the TOF sensor."""
+        return TOFMeasurementResult(
+            sensor=sensor,
+            kind=MeasurementKind.HISTOGRAM,
+            channels={c: 123 for c in range(10)},
+        )
 
     async def set_motor_driver_register(
         self, axis: StackerAxis, reg: int, value: int
