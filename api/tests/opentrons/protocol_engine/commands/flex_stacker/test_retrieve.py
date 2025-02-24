@@ -101,24 +101,6 @@ async def test_retrieve_raises_when_static(
         state_view.modules.get_flex_stacker_substate(module_id=stacker_id)
     ).then_return(fs_module_substate)
 
-    decoy.when(
-        await equipment.load_labware_by_definition(
-            definition=flex_50uL_tiprack,
-            location=ModuleLocation(moduleId=stacker_id),
-            labware_id=None,
-        )
-    ).then_return(LoadedLabwareData("labware-id", flex_50uL_tiprack, None))
-
-    decoy.when(
-        state_view.geometry.get_predicted_location_sequence(
-            ModuleLocation(moduleId=stacker_id)
-        )
-    ).then_return(_stacker_base_loc_seq(stacker_id))
-
-    decoy.when(
-        state_view.geometry.get_height_of_labware_stack(definitions=[flex_50uL_tiprack])
-    ).then_return(4)
-
     with pytest.raises(
         CannotPerformModuleAction,
         match="Cannot retrieve labware from Flex Stacker while in static mode",

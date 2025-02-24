@@ -717,14 +717,6 @@ class FlexStackerCore(ModuleCore, AbstractFlexStackerCore):
 
     def retrieve(self) -> None:
         """Retrieve a labware from the Flex Stacker's hopper."""
-
-        stacker = self._engine_client.state.modules.get_flex_stacker_substate(
-            self.module_id
-        )
-        if stacker.pool_primary_definition is None:
-            raise CannotPerformModuleAction(
-                f"Flex Stacker {self.module_id} has no labware to retrieve"
-            )
         self._engine_client.execute_command(
             cmd.flex_stacker.RetrieveParams(
                 moduleId=self.module_id,

@@ -122,7 +122,7 @@ class RetrieveImpl(AbstractCommandImpl[RetrieveParams, SuccessData[RetrieveResul
 
     async def _load_labware_from_pool(
         self, params: RetrieveParams, stacker_state: FlexStackerSubState
-    ) -> tuple[RetrieveResult, update_types.StateUpdate, list[LabwareDefinition]]:
+    ) -> tuple[RetrieveResult, update_types.StateUpdate]:
         state_update = update_types.StateUpdate()
 
         # If there is an adapter load it
@@ -140,9 +140,9 @@ class RetrieveImpl(AbstractCommandImpl[RetrieveParams, SuccessData[RetrieveResul
             )
             definitions_by_id[adapter_lw.labware_id] = adapter_lw.definition
             offset_ids_by_id[adapter_lw.labware_id] = adapter_lw.offsetId
-            display_names_by_id[adapter_lw.labware_id] = (
-                adapter_lw.definition.metadata.displayName
-            )
+            display_names_by_id[
+                adapter_lw.labware_id
+            ] = adapter_lw.definition.metadata.displayName
             new_locations_by_id[adapter_lw.labware_id] = ModuleLocation(
                 moduleId=params.moduleId
             )
@@ -162,9 +162,9 @@ class RetrieveImpl(AbstractCommandImpl[RetrieveParams, SuccessData[RetrieveResul
         )
         definitions_by_id[loaded_labware.labware_id] = loaded_labware.definition
         offset_ids_by_id[loaded_labware.labware_id] = loaded_labware.offsetId
-        display_names_by_id[loaded_labware.labware_id] = (
-            loaded_labware.definition.metadata.displayName
-        )
+        display_names_by_id[
+            loaded_labware.labware_id
+        ] = loaded_labware.definition.metadata.displayName
         new_locations_by_id[loaded_labware.labware_id] = (
             ModuleLocation(moduleId=params.moduleId)
             if adapter_lw is None
@@ -179,9 +179,9 @@ class RetrieveImpl(AbstractCommandImpl[RetrieveParams, SuccessData[RetrieveResul
             )
             definitions_by_id[lid_lw.labware_id] = lid_lw.definition
             offset_ids_by_id[lid_lw.labware_id] = lid_lw.offsetId
-            display_names_by_id[lid_lw.labware_id] = (
-                lid_lw.definition.metadata.displayName
-            )
+            display_names_by_id[
+                lid_lw.labware_id
+            ] = lid_lw.definition.metadata.displayName
             new_locations_by_id[lid_lw.labware_id] = OnLabwareLocation(
                 labwareId=loaded_labware.labware_id
             )

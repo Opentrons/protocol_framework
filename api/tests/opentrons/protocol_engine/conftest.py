@@ -153,7 +153,7 @@ def tip_rack_def() -> LabwareDefinition:
 
 @pytest.fixture(scope="session")
 def tiprack_adapter_def() -> LabwareDefinition:
-    """Get the definition of a flex 96 channel tiprack adapter"""
+    """Get the definition of a flex 96 channel tiprack adapter."""
     return labware_definition_type_adapter.validate_python(
         load_definition("opentrons_flex_96_tiprack_adapter", 1)
     )
