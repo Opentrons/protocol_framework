@@ -114,6 +114,9 @@ class StoreImpl(AbstractCommandImpl[StoreParams, SuccessData[StoreResult]]):
         state_update.store_flex_stacker_labware(
             module_id=params.moduleId, labware_id=lw_id
         )
+        state_update.update_flex_stacker_labware_pool_count(
+            module_id=params.moduleId, count=stacker_state.pool_count + 1
+        )
 
         return SuccessData(
             public=StoreResult(

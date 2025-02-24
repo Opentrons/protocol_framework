@@ -164,6 +164,7 @@ async def test_store(
                     hopper_labware_update=FlexStackerStoreLabware(
                         labware_id="labware-id"
                     ),
+                    pool_count=1,
                 ),
             ),
         )
