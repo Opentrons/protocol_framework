@@ -12,7 +12,6 @@ describe('The Redesigned Create Protocol Landing Page', () => {
   it('content and step 1 flow works', () => {
     cy.clickCreateNew()
     cy.verifyCreateNewHeader()
-
     const steps = new StepBuilder()
     steps.add(SetupVerifications.OnStep1())
     steps.add(SetupVerifications.FlexSelected())
@@ -53,46 +52,68 @@ describe('The Redesigned Create Protocol Landing Page', () => {
     steps.add(SetupSteps.ClickLabwareHeader())
     steps.add(SetupSteps.ClickWellPlatesSection())
     steps.add(SetupSteps.SelectLabwareByDisplayName('Bio-Rad 96 Well Plate'))
-
     steps.add(SetupSteps.ChoseDeckSlotC2Labware())
-
     steps.add(SetupSteps.AddLiquid())
     steps.add(SetupSteps.ClickLiquidButton())
     steps.add(SetupSteps.DefineLiquid())
     steps.add(SetupSteps.LiquidSaveWIP())
-
     steps.add(SetupSteps.WellSelector(['A1', 'A2']))
     steps.add(SetupSteps.LiquidDropdown())
     steps.add(SetupVerifications.LiquidPage())
     steps.add(UniversalSteps.Snapshot())
     steps.add(SetupSteps.SelectLiquidWells())
-
     steps.add(SetupSteps.SetVolumeAndSaveForWells('150'))
     steps.add(SetupSteps.ChoseDeckSlot('C3'))
-
     steps.add(SetupSteps.AddHardwareLabware())
     steps.add(SetupSteps.ClickLabwareHeader())
     steps.add(SetupSteps.ClickWellPlatesSection())
     steps.add(SetupSteps.SelectLabwareByDisplayName('Armadillo 96 Well Plate'))
-
     steps.add(SetupSteps.ProtocolStepsH())
     steps.add(SetupSteps.AddStep())
     steps.add(SetupVerifications.TransferPopOut())
     steps.add(UniversalSteps.Snapshot())
-
+    // ToDO alexjoel42 organize repeats into a for loop
+    // Source
     steps.add(SetupSteps.AddSourceLabwareDropdown())
-    steps.add(SetupSteps.selectDropdownLabware('Armadillo 96 Well Plate'))
+    steps.add(SetupSteps.selectDropdownLabware('Bio-Rad 96 Well Plate'))
     steps.add(SetupSteps.SelectSourceWells())
     steps.add(SetupSteps.WellSelector(['A1', 'A2']))
     steps.add(SetupSteps.SaveSelectedWells())
+    // Destination
     steps.add(SetupSteps.ChoseDestinationLabware())
-    steps.add(SetupSteps.selectDropdownLabware('Bio-Rad 96 Well Plate'))
+    steps.add(SetupSteps.selectDropdownLabware('Armadillo 96 Well Plate'))
     steps.add(SetupSteps.SelectDestinationWells())
     steps.add(SetupSteps.WellSelector(['A1', 'A2']))
     steps.add(SetupSteps.SaveSelectedWells())
     steps.add(SetupSteps.InputTransferVolume('30'))
     steps.add(SetupSteps.Continue())
+    // Aspirate
     steps.add(SetupSteps.PrewetAspirate())
+    steps.add(SetupSteps.Delay())
+    steps.add(SetupSteps.TouchTipAspirate())
+    steps.add(SetupSteps.MixAspirate())
+    steps.add(SetupSteps.AspirateMixVolume('20'))
+    steps.add(SetupSteps.AspirateMixTimes('2'))
+    steps.add(SetupSteps.AirGap())
+    steps.add(SetupSteps.AspirateAirGapVolume('10'))
+    steps.add(SetupVerifications.Delay())
+    // steps.add(SetupVerifications.PreWet())
+    steps.add(SetupVerifications.TouchTip())
+    steps.add(SetupVerifications.MixT())
+    steps.add(SetupVerifications.AirGap())
+    // Dispense
+    steps.add(SetupSteps.SelectDispense())
+    steps.add(SetupSteps.Delay())
+    steps.add(SetupSteps.TouchTipAspirate())
+    steps.add(SetupSteps.MixAspirate())
+    steps.add(SetupSteps.DispenseMixVolume('20'))
+    steps.add(SetupSteps.DispenseMixTimes())
+    steps.add(SetupSteps.AirGap())
+    steps.add(SetupSteps.DispenseAirGapVolume('10'))
+    steps.add(SetupSteps.BlowoutTransferDestination())
+    steps.add(SetupVerifications.ExtraDispenseTransfer())
+    steps.add(SetupSteps.Save())
+
     /* 
     SetupSteps.SelectDestinationWells,
     SetupSteps.WellSelector,
@@ -104,17 +125,20 @@ describe('The Redesigned Create Protocol Landing Page', () => {
     SetupSteps.DelayAspirate,
     SetupSteps.TouchTipAspirate,
     SetupSteps.MixAspirate,
+    SetupSteps.AspirateMixVolume('20'),
+    SetupSteps.AspirateMixTimes('2'),
     SetupSteps.AirGapAspirate,
+    SetupSteps.AspirateAirGapVolume('10'),
+    boop 
     SetupVerifications.Delay,
     SetupVerifications.PreWet,
     SetupVerifications.TouchTip,
     SetupVerifications.MixT,
     SetupVerifications.AirGap,
-    SetupSteps.AspirateMixVolume('20'),
-    SetupSteps.AspirateMixTimes('2'),
-    SetupSteps.AspirateAirGapVolume('10'),
+    Bap 
+  
     SetupSteps.SelectDispense,
-    SetupSteps.DelayAspirate,
+    SetupSteps.Delay,
     SetupSteps.TouchTipAspirate,
     SetupSteps.MixAspirate,
     SetupSteps.AirGapAspirate,

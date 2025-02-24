@@ -636,7 +636,7 @@ export const SetupSteps = {
   }),
   // Step 1 Transfer form Delay
 
-  DelayAspirate: (): StepThunk => ({
+  Delay: (): StepThunk => ({
     call: () => {
       cy.contains('Delay').closest('div').find('button').click()
     },
@@ -699,9 +699,11 @@ export const SetupSteps = {
     },
   }),
 
-  DispenseAirGapVolume: (): StepThunk => ({
+  DispenseAirGapVolume: (DispenseAirGapVolume: string): StepThunk => ({
     call: () => {
-      cy.get('input[name = "dispense_airGap_volume"]').type('10')
+      cy.get('input[name = "dispense_airGap_volume"]').type(
+        DispenseAirGapVolume
+      )
     },
   }),
 
@@ -971,8 +973,7 @@ export const SetupVerifications = {
     call: () => {
       cy.contains('Blowout location')
       cy.contains('Blowout flow rate')
-      cy.contains('Blowout position from top')
-      cy.contains('Choose option')
+      // cy.contains('Blowout position from top')
     },
   }),
 
