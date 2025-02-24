@@ -3,19 +3,6 @@
 import statistics
 from typing import List, Union
 
-from hardware_testing.data import ui
-
-try:
-    from abr_testing.automation import google_sheets_tool
-except ImportError:
-    ui.print_error(
-        "Unable to import abr repo if this isn't a simulation push the abr_testing package"
-    )
-    from . import google_sheets_tool  # type: ignore[no-redef]
-
-    pass
-
-
 from hardware_testing.data.csv_report import (
     CSVReport,
     CSVSection,

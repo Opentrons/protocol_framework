@@ -4,8 +4,7 @@ import time
 from enum import Enum
 from typing import Dict, Any, List, Tuple, Optional
 from .report import store_tip_results, store_trial, store_baseline_trial
-from opentrons.config.types import LiquidProbeSettings
-from .__main__ import RunArgs
+from .run_args import RunArgs
 from hardware_testing.gravimetric.workarounds import get_sync_hw_api
 from hardware_testing.gravimetric.helpers import (
     _jog_to_find_liquid_height,
@@ -15,13 +14,11 @@ from hardware_testing.gravimetric.tips import get_unused_tips
 from hardware_testing.data import ui, get_testing_data_directory
 from opentrons.hardware_control.types import (
     InstrumentProbeType,
-    PipetteSensorId,
     OT3Mount,
     Axis,
     top_types,
     PipetteSensorResponseQueue,
 )
-from opentrons.hardware_control.dev_types import PipetteDict
 
 from hardware_testing.gravimetric.measurement.scale import Scale
 from hardware_testing.gravimetric.measurement.record import (
@@ -33,16 +30,6 @@ from opentrons.protocol_api._types import OffDeckType
 from opentrons.protocol_api import ProtocolContext, Well, Labware
 
 from opentrons_shared_data.errors.exceptions import PipetteLiquidNotFoundError
-
-try:
-    from abr_testing.automation import google_sheets_tool
-except ImportError:
-    ui.print_error(
-        "Unable to import abr repo if this isn't a simulation push the abr_testing package"
-    )
-    from . import google_sheets_tool  # type: ignore[no-redef]
-
-    pass
 
 
 class LLDResult(Enum):
@@ -186,8 +173,6 @@ def _load_scale(
 def run(
     tip: int,
     run_args: RunArgs,
-    google_sheet: Optional[google_sheets_tool.google_sheet],
-    sheet_id: Optional[str],
     starting_tip: str = "A1",
 ) -> None:
     """Run a liquid probe test."""
@@ -256,18 +241,12 @@ def run(
         run_args.pipette.drop_tip()
         run_args.pipette._retract()
 
-    env_data = run_args.environment_sensor.get_reading()
-
     store_baseline_trial(
         run_args.test_report,
         tip,
         liquid_height_from_deck,
-        env_data.relative_humidity,
-        env_data.temperature,
         test_well.top().point.z - liquid_height_from_deck,
         tip_offset - lpc_offset,
-        google_sheet,
-        run_args.run_id,
     )
 
     trials_before_jog = run_args.trials_before_jog
@@ -311,29 +290,19 @@ def run(
                 run_args.pipette._retract()
             results.append(height)
             adjusted_results.append(height + tip_length_offset)
-            env_data = run_args.environment_sensor.get_reading()
             hw_pipette = hw_api.hardware_pipettes[top_types.Mount.LEFT]
-            plunger_start = (
-                hw_pipette.plunger_positions.bottom
-                if run_args.aspirate
-                else hw_pipette.plunger_positions.top
-            )
+            plunger_start = hw_pipette.plunger_positions.top
             store_trial(
                 run_args.test_report,
                 trial,
                 tip,
                 height,
                 end_pos[Axis.P_L],
-                env_data.relative_humidity,
-                env_data.temperature,
                 start_pos[Axis.Z_L] - height,
                 plunger_start - end_pos[Axis.P_L],
                 tip_length_offset,
                 liquid_height_from_deck,
                 result.value,
-                google_sheet,
-                run_args.run_id,
-                sheet_id,
             )
             ui.print_info(
                 f"\n\n Z axis start pos {start_pos[Axis.Z_L]} end pos {end_pos[Axis.Z_L]}"
@@ -354,44 +323,6 @@ def get_plunger_travel(run_args: RunArgs) -> float:
     plunger_positions = hw_api._pipette_handler.get_pipette(hw_mount).plunger_positions
     plunger_travel = plunger_positions.bottom - plunger_positions.top
     return plunger_travel
-
-
-def find_max_z_distances(
-    run_args: RunArgs, well: Well, p_speed: float, tip: float
-) -> List[float]:
-    """Returns a list of max z distances for each probe.
-
-    Each element is the max travel for the z mount for a particular call
-    to hw_api.liquid_probe, it is the limit of z distance the pipette can
-    move with the combination of z speed and plunger speed,
-    if the distance would exceed the well depth then the number is
-    truncated to avoid collisions.
-    """
-    hw_mount = OT3Mount.LEFT if run_args.pipette.mount == "left" else OT3Mount.RIGHT
-    hw_api = get_sync_hw_api(run_args.ctx)
-    attached_instrument: PipetteDict = hw_api._pipette_handler.get_attached_instrument(
-        hw_mount
-    )
-    lld_settings = attached_instrument["lld_settings"]
-    z_speed = run_args.z_speed
-    if lld_settings is not None:
-        min_height = lld_settings[f"t{int(tip)}"]["minHeight"]
-    else:
-        ui.print_warning("No minimum height for pipette")
-        min_height = 0.5
-    max_z_distance = well.top().point.z - well.bottom().point.z - min_height + 2
-    plunger_travel = get_plunger_travel(run_args)
-    if p_speed == 0:
-        p_travel_time = 10.0
-    else:
-        p_travel_time = plunger_travel / p_speed
-
-    z_travels: List[float] = []
-    while max_z_distance > 0:
-        next_travel = min(p_travel_time * z_speed, max_z_distance)
-        z_travels.append(next_travel)
-        max_z_distance -= next_travel
-    return z_travels
 
 
 def _test_for_blockage(datafile: str, threshold: float) -> bool:
@@ -429,82 +360,17 @@ def _run_trial(
         ui.print_info(f"logging pressure data to {data_file}")
         data_files[probe] = data_file
 
-    plunger_speed = (
-        lqid_cfg["plunger_speed"]
-        if run_args.plunger_speed == -1
-        else run_args.plunger_speed
-    )
-
     start_height = start_pos[Axis.Z_L]
     height = 2 * start_height
-    z_distances: List[float] = find_max_z_distances(run_args, well, plunger_speed, tip)
-    if run_args.no_multi_pass:
-        z_distance = z_distances[0]
-    else:
-        z_distance = sum(z_distances)
-
-    lps = LiquidProbeSettings(
-        mount_speed=run_args.z_speed,
-        plunger_speed=plunger_speed,
-        plunger_impulse_time=0.2,
-        sensor_threshold_pascals=lqid_cfg["sensor_threshold_pascals"],
-        aspirate_while_sensing=run_args.aspirate,
-        z_overlap_between_passes_mm=0.1,
-        plunger_reset_offset=2.0,
-        samples_for_baselining=20,
-        sample_time_sec=0.004,
-    )
 
     hw_mount = OT3Mount.LEFT if run_args.pipette.mount == "left" else OT3Mount.RIGHT
-    run_args.recorder.set_sample_tag(f"trial-{trial}-{tip}ul")
-    # TODO add in stuff for secondary probe
     try:
         height = hw_api.liquid_probe(
-            hw_mount, z_distance, lps, probe_target, response_queue=data_capture
+            hw_mount, max_z_dist=20, probe_settings=None, probe=probe_target, response_queue=data_capture
         )
         result: LLDResult = LLDResult.success
-        # write the data files that used to be made automatically
-        if not run_args.ctx.is_simulating():
-            for probe in probes:
-                sensor_id = (
-                    PipetteSensorId.S0
-                    if probe == InstrumentProbeType.PRIMARY
-                    else PipetteSensorId.S1
-                )
-                as_dict = data_capture.get_nowait()
-                data = [d.to_float() for d in as_dict[sensor_id]]
-                with open(data_files[probe], "w") as d_file:
-                    writer = csv.writer(d_file)
-                    writer.writerow(
-                        [
-                            "time(s)",
-                            "Pressure(pascals)",
-                            "z_velocity(mm/s)",
-                            "plunger_velocity(mm/s)",
-                            "threshold(pascals)",
-                        ]
-                    )
-                    writer.writerow(
-                        [
-                            "0",
-                            "0",
-                            f"{run_args.z_speed}",
-                            f"{plunger_speed}",
-                            f"{lqid_cfg['sensor_threshold_pascals']}",
-                        ]
-                    )
-                    for i in range(len(data)):
-                        writer.writerow([f"{i*0.004}", f"{data[i]}"])
-        if not run_args.ctx.is_simulating():
-            for probe in data_files:
-                if _test_for_blockage(data_files[probe], lps.sensor_threshold_pascals):
-                    result = LLDResult.blockage
-                    break
     except PipetteLiquidNotFoundError as lnf:
         ui.print_info(f"Liquid not found current position {lnf.detail}")
         result = LLDResult.not_found
-
-    run_args.recorder.clear_sample_tag()
-
     ui.print_info(f"Trial {trial} complete")
     return height, result
