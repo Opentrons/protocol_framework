@@ -311,12 +311,16 @@ export const createPythonFile: Selector<string> = createSelector(
   stepFormSelectors.getInvariantContext,
   getInitialRobotState,
   getRobotStateTimeline,
+  ingredSelectors.getLiquidsByLabwareId,
+  uiLabwareSelectors.getLabwareNicknamesById,
   (
     fileMetadata,
     robotType,
     invariantContext,
     robotState,
-    robotStateTimeline
+    robotStateTimeline,
+    liquidsByLabwareId,
+    labwareNicknamesById
   ) => {
     return (
       [
@@ -324,7 +328,13 @@ export const createPythonFile: Selector<string> = createSelector(
         pythonImports(),
         pythonMetadata(fileMetadata),
         pythonRequirements(robotType),
-        pythonDefRun(invariantContext, robotState, robotStateTimeline),
+        pythonDefRun(
+          invariantContext,
+          robotState,
+          robotStateTimeline,
+          liquidsByLabwareId,
+          labwareNicknamesById
+        ),
       ]
         .filter(section => section) // skip any blank sections
         .join('\n\n') + '\n'

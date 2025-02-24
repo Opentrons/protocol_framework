@@ -56,7 +56,9 @@ export const getLoadCommandText = ({
         loadedModules: commandTextData?.modules ?? [],
         t,
       })
-      const labwareName = command.result?.definition.metadata.displayName
+      const labwareName =
+        command.params.displayName ??
+        command.result?.definition.metadata.displayName
       // use in preposition for modules and slots, on for labware and adapters
       let displayLocation = t('in_location', { location })
       if (

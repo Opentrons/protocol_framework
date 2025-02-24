@@ -5,7 +5,6 @@ this module shouldn't be imported unless typing.TYPE_CHECKING is true.
 """
 from typing import NewType
 from typing_extensions import Literal, TypedDict, NotRequired
-from .labware_definition import InnerWellGeometry
 from .constants import (
     CircularType,
     RectangularType,
@@ -55,16 +54,19 @@ class GripperOffsets(TypedDict):
     dropOffset: Vector
 
 
-class LabwareParameters(TypedDict):
+class LabwareParameters2(TypedDict):
     format: LabwareFormat
     isTiprack: bool
     loadName: str
     isMagneticModuleCompatible: bool
-    isDeckSlotCompatible: NotRequired[bool]
     quirks: NotRequired[list[str]]
     tipLength: NotRequired[float]
     tipOverlap: NotRequired[float]
     magneticModuleEngageHeight: NotRequired[float]
+
+
+class LabwareParameters3(LabwareParameters2, TypedDict):
+    isDeckSlotCompatible: NotRequired[bool]
 
 
 class LabwareBrandData(TypedDict):
@@ -86,30 +88,49 @@ class LabwareDimensions(TypedDict):
     xDimension: float
 
 
-class CircularWellDefinition(TypedDict):
+class _WellCommon2(TypedDict):
+    depth: float
+    totalLiquidVolume: float
+    x: float
+    y: float
+    z: float
+
+
+class CircularWellDefinition2(_WellCommon2, TypedDict):
     shape: CircularType
-    depth: float
-    totalLiquidVolume: float
-    x: float
-    y: float
-    z: float
     diameter: float
-    geometryDefinitionId: NotRequired[str]
 
 
-class RectangularWellDefinition(TypedDict):
+class RectangularWellDefinition2(_WellCommon2, TypedDict):
     shape: RectangularType
-    depth: float
-    totalLiquidVolume: float
-    x: float
-    y: float
-    z: float
     xDimension: float
     yDimension: float
+
+
+WellDefinition2 = CircularWellDefinition2 | RectangularWellDefinition2
+
+
+class _WellCommon3(TypedDict):
+    depth: float
+    totalLiquidVolume: float
+    x: float
+    y: float
+    z: float
     geometryDefinitionId: NotRequired[str | None]
 
 
-WellDefinition = CircularWellDefinition | RectangularWellDefinition
+class CircularWellDefinition3(_WellCommon3, TypedDict):
+    shape: CircularType
+    diameter: float
+
+
+class RectangularWellDefinition3(_WellCommon3, TypedDict):
+    shape: RectangularType
+    xDimension: float
+    yDimension: float
+
+
+WellDefinition3 = CircularWellDefinition3 | RectangularWellDefinition3
 
 
 class WellGroupMetadata(TypedDict):
@@ -124,17 +145,17 @@ class WellGroup(TypedDict):
     brand: NotRequired[LabwareBrandData]
 
 
-class LabwareDefinition(TypedDict):
-    schemaVersion: Literal[2, 3]
+class LabwareDefinition2(TypedDict):
+    schemaVersion: Literal[2]
     version: int
     namespace: str
     metadata: LabwareMetadata
     brand: LabwareBrandData
-    parameters: LabwareParameters
+    parameters: LabwareParameters2
     cornerOffsetFromSlot: Vector
     ordering: list[list[str]]
     dimensions: LabwareDimensions
-    wells: dict[str, WellDefinition]
+    wells: dict[str, WellDefinition2]
     groups: list[WellGroup]
     stackingOffsetWithLabware: NotRequired[dict[str, Vector]]
     stackingOffsetWithModule: NotRequired[dict[str, Vector]]
@@ -142,6 +163,40 @@ class LabwareDefinition(TypedDict):
     gripperOffsets: NotRequired[dict[str, GripperOffsets]]
     gripForce: NotRequired[float]
     gripHeightFromLabwareBottom: NotRequired[float]
-    innerLabwareGeometry: NotRequired[dict[str, InnerWellGeometry] | None]
-    compatibleParentLabware: NotRequired[list[str]]
     stackLimit: NotRequired[int]
+
+
+# Class to mix in the "$otSharedSchema" key. This cannot be defined with the normal
+# TypedDict class syntax because it contains a dollar sign.
+_OTSharedSchemaMixin = TypedDict(
+    "_OTSharedSchemaMixin", {"$otSharedSchema": Literal["#/labware/schemas/3"]}
+)
+
+
+class LabwareDefinition3(_OTSharedSchemaMixin, TypedDict):
+    schemaVersion: Literal[3]
+    version: int
+    namespace: str
+    metadata: LabwareMetadata
+    brand: LabwareBrandData
+    parameters: LabwareParameters3
+    cornerOffsetFromSlot: Vector
+    ordering: list[list[str]]
+    dimensions: LabwareDimensions
+    wells: dict[str, WellDefinition3]
+    groups: list[WellGroup]
+    stackingOffsetWithLabware: NotRequired[dict[str, Vector]]
+    stackingOffsetWithModule: NotRequired[dict[str, Vector]]
+    allowedRoles: NotRequired[list[LabwareRoles]]
+    gripperOffsets: NotRequired[dict[str, GripperOffsets]]
+    gripForce: NotRequired[float]
+    gripHeightFromLabwareBottom: NotRequired[float]
+    stackLimit: NotRequired[int]
+    # The innerLabwareGeometry dict values are not currently modeled in these
+    # TypedDict-based bindings. The only code that cares about them
+    # currentlyuses our Pydantic-based bindings instead.
+    innerLabwareGeometry: NotRequired[dict[str, object] | None]
+    compatibleParentLabware: NotRequired[list[str]]
+
+
+LabwareDefinition = LabwareDefinition2 | LabwareDefinition3

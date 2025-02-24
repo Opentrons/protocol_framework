@@ -55,7 +55,7 @@ export const content = {
   transfer: 'Transfer',
   mix: 'Mix',
   pause: 'Pause',
-  heaterShaker: 'Heater-shaker',
+  heaterShaker: 'Heater-Shaker',
   thermocyler: 'Thermocycler',
 }
 
@@ -70,7 +70,7 @@ export const locators = {
   settings: 'Settings',
   privacyPolicy: 'a[href="https://opentrons.com/privacy-policy"]',
   eula: 'a[href="https://opentrons.com/eula"]',
-  privacyToggle: 'Settings_hotKeys',
+  privacyToggle: 'Settings_OT_PD_ENABLE_HOT_KEYS_DISPLAY',
   analyticsToggleTestId: 'analyticsToggle',
   confirm: 'Confirm',
 }

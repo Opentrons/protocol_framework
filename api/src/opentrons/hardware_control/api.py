@@ -58,6 +58,7 @@ from .types import (
     SubSystem,
     SubSystemState,
     HardwareFeatureFlags,
+    TipScrapeType,
 )
 from . import modules
 from .robot_calibration import (
@@ -1255,6 +1256,7 @@ class API(
         mount: top_types.Mount,
         home_after: bool = True,
         ignore_plunger: bool = False,
+        scrape_type: TipScrapeType = TipScrapeType.NONE,
     ) -> None:
         spec, _ = self.plan_check_drop_tip(mount, home_after)
 

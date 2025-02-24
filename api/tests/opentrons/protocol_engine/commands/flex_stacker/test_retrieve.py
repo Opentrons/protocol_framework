@@ -31,8 +31,8 @@ from opentrons.protocol_engine.types import (
     OverlapOffset,
     OnModuleLocationSequenceComponent,
     OnAddressableAreaLocationSequenceComponent,
-    NotOnDeckLocationSequenceComponent,
-    OFF_DECK_LOCATION,
+    InStackerHopperLocation,
+    OnCutoutFixtureLocationSequenceComponent,
 )
 from opentrons.protocol_engine.errors import CannotPerformModuleAction
 from opentrons.types import DeckSlotName
@@ -69,6 +69,10 @@ async def test_retrieve(
         module_id=FlexStackerId("flex-stacker-id"),
         in_static_mode=in_static_mode,
         hopper_labware_ids=["labware-id"],
+        pool_primary_definition=None,
+        pool_adapter_definition=None,
+        pool_lid_definition=None,
+        pool_count=0,
     )
     fs_hardware = decoy.mock(cls=FlexStacker)
 
@@ -102,15 +106,26 @@ async def test_retrieve(
     ).then_return(fs_hardware)
     decoy.when(state_view.geometry.get_location_sequence("labware-id")).then_return(
         [
-            OnModuleLocationSequenceComponent(moduleId="flex-stacker-id"),
-            NotOnDeckLocationSequenceComponent(logicalLocationName=OFF_DECK_LOCATION),
+            InStackerHopperLocation(moduleId="flex-stacker-id"),
+            OnCutoutFixtureLocationSequenceComponent(
+                cutoutId="cutoutB4", possibleCutoutFixtureIds=["flexStackerModuleV1"]
+            ),
         ]
     )
     decoy.when(
-        state_view.modules.get_provided_addressable_area("flex-stacker-id")
-    ).then_return("flexStackerV1B4")
-    decoy.when(state_view.modules.get_location("flex-stacker-id")).then_return(
-        DeckSlotLocation(slotName=DeckSlotName.SLOT_B3)
+        state_view.geometry.get_predicted_location_sequence(
+            ModuleLocation(moduleId="flex-stacker-id")
+        )
+    ).then_return(
+        [
+            OnAddressableAreaLocationSequenceComponent(
+                addressableAreaName="flexStackerV1B4"
+            ),
+            OnModuleLocationSequenceComponent(moduleId="flex-stacker-id"),
+            OnCutoutFixtureLocationSequenceComponent(
+                cutoutId="cutoutB3", possibleCutoutFixtureIds=["flexStackerModuleV1"]
+            ),
+        ]
     )
 
     with expectation:
@@ -123,15 +138,20 @@ async def test_retrieve(
             public=flex_stacker.RetrieveResult(
                 labware_id="labware-id",
                 originLocationSequence=[
-                    OnModuleLocationSequenceComponent(moduleId="flex-stacker-id"),
-                    NotOnDeckLocationSequenceComponent(
-                        logicalLocationName=OFF_DECK_LOCATION
+                    InStackerHopperLocation(moduleId="flex-stacker-id"),
+                    OnCutoutFixtureLocationSequenceComponent(
+                        cutoutId="cutoutB4",
+                        possibleCutoutFixtureIds=["flexStackerModuleV1"],
                     ),
                 ],
                 eventualDestinationLocationSequence=[
-                    OnModuleLocationSequenceComponent(moduleId="flex-stacker-id"),
                     OnAddressableAreaLocationSequenceComponent(
                         addressableAreaName="flexStackerV1B4",
+                    ),
+                    OnModuleLocationSequenceComponent(moduleId="flex-stacker-id"),
+                    OnCutoutFixtureLocationSequenceComponent(
+                        cutoutId="cutoutB3",
+                        possibleCutoutFixtureIds=["flexStackerModuleV1"],
                     ),
                 ],
             ),

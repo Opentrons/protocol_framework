@@ -29,6 +29,7 @@ module.exports = {
     'import/no-default-export': 'error',
     '@typescript-eslint/promise-function-async': 'off',
     '@typescript-eslint/default-param-last': 'off',
+    '@typescript-eslint/consistent-indexed-object-style': 'off',
 
     // TODO(mc, 2021-01-29): fix these and remove warning overrides
     'lines-between-class-members': 'warn',

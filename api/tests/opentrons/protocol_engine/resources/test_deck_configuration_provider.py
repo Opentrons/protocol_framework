@@ -211,6 +211,27 @@ def test_get_provided_addressable_area_names(
                         {"D3", "flexStackerModuleV1D4"}
                     ),
                 ),
+            },
+            lazy_fixture("ot3_standard_deck_def"),
+        ),
+        (
+            "flexStackerModuleV1D4",
+            "cutoutD3",
+            {
+                PotentialCutoutFixture(
+                    cutout_id="cutoutD3",
+                    cutout_fixture_id="flexStackerModuleV1",
+                    provided_addressable_areas=frozenset(
+                        {"D3", "flexStackerModuleV1D4"}
+                    ),
+                ),
+                PotentialCutoutFixture(
+                    cutout_id="cutoutD3",
+                    cutout_fixture_id="flexStackerModuleV1WithMagneticBlockV1",
+                    provided_addressable_areas=frozenset(
+                        {"flexStackerModuleV1D4", "magneticBlockV1D3"}
+                    ),
+                ),
                 PotentialCutoutFixture(
                     cutout_id="cutoutD3",
                     cutout_fixture_id="flexStackerModuleV1WithWasteChuteRightAdapterCovered",
@@ -219,7 +240,6 @@ def test_get_provided_addressable_area_names(
                             "1ChannelWasteChute",
                             "8ChannelWasteChute",
                             "flexStackerModuleV1D4",
-                            "D3",
                         }
                     ),
                 ),
@@ -233,7 +253,6 @@ def test_get_provided_addressable_area_names(
                             "96ChannelWasteChute",
                             "gripperWasteChute",
                             "flexStackerModuleV1D4",
-                            "D3",
                         }
                     ),
                 ),

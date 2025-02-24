@@ -8,8 +8,8 @@ import pytest
 from decoy import Decoy, matchers
 
 from opentrons_shared_data.labware.labware_definition import (
-    LabwareDefinition,
-    Parameters,
+    LabwareDefinition2,
+    Parameters2,
     Dimensions,
 )
 from opentrons_shared_data.errors.exceptions import (
@@ -138,7 +138,9 @@ async def test_manual_move_labware_implementation(
     result = await subject.execute(data)
     decoy.verify(await run_control.wait_for_resume(), times=times_pause_called)
     decoy.verify(
-        state_view.labware.raise_if_labware_has_labware_on_top("my-cool-labware-id")
+        state_view.labware.raise_if_labware_has_non_lid_labware_on_top(
+            "my-cool-labware-id"
+        )
     )
     assert result == SuccessData(
         public=MoveLabwareResult(
@@ -192,7 +194,7 @@ async def test_move_labware_implementation_on_labware(
     decoy.when(
         state_view.labware.get_definition(labware_id="my-cool-labware-id")
     ).then_return(
-        LabwareDefinition.model_construct(namespace="spacename")  # type: ignore[call-arg]
+        LabwareDefinition2.model_construct(namespace="spacename")  # type: ignore[call-arg]
     )
     decoy.when(
         state_view.geometry.ensure_location_not_occupied(
@@ -221,12 +223,14 @@ async def test_move_labware_implementation_on_labware(
 
     result = await subject.execute(data)
     decoy.verify(
-        state_view.labware.raise_if_labware_has_labware_on_top("my-cool-labware-id"),
+        state_view.labware.raise_if_labware_has_non_lid_labware_on_top(
+            "my-cool-labware-id"
+        ),
         state_view.labware.raise_if_labware_has_labware_on_top(
             "my-even-cooler-labware-id"
         ),
         state_view.labware.raise_if_labware_cannot_be_stacked(
-            LabwareDefinition.model_construct(namespace="spacename"),  # type: ignore[call-arg]
+            LabwareDefinition2.model_construct(namespace="spacename"),  # type: ignore[call-arg]
             "my-even-cooler-labware-id",
         ),
     )
@@ -329,7 +333,9 @@ async def test_gripper_move_labware_implementation(
 
     result = await subject.execute(data)
     decoy.verify(
-        state_view.labware.raise_if_labware_has_labware_on_top("my-cool-labware-id"),
+        state_view.labware.raise_if_labware_has_non_lid_labware_on_top(
+            "my-cool-labware-id"
+        ),
         await labware_movement.move_labware_with_gripper(
             labware_id="my-cool-labware-id",
             current_location=sentinel.from_location_validated_for_gripper,
@@ -389,7 +395,7 @@ async def test_gripper_error(
     labware_namespace = "labware-namespace"
     labware_load_name = "load-name"
     labware_definition_uri = "opentrons-test/load-name/1"
-    labware_def = LabwareDefinition.model_construct(  # type: ignore[call-arg]
+    labware_def = LabwareDefinition2.model_construct(  # type: ignore[call-arg]
         namespace=labware_namespace,
     )
     origin_location = DeckSlotLocation(slotName=DeckSlotName.SLOT_A1)
@@ -399,7 +405,7 @@ async def test_gripper_error(
 
     # Common MoveLabwareImplementation boilerplate:
     decoy.when(state_view.labware.get_definition(labware_id=labware_id)).then_return(
-        LabwareDefinition.model_construct(namespace=labware_namespace)  # type: ignore[call-arg]
+        LabwareDefinition2.model_construct(namespace=labware_namespace)  # type: ignore[call-arg]
     )
     decoy.when(state_view.labware.get(labware_id=labware_id)).then_return(
         LoadedLabware(
@@ -573,7 +579,7 @@ async def test_gripper_move_to_waste_chute_implementation(
         pickUpOffset=LabwareOffsetVector(x=1, y=2, z=3),
         dropOffset=None,
     )
-    labware_def = LabwareDefinition.model_construct(  # type: ignore[call-arg]
+    labware_def = LabwareDefinition2.model_construct(  # type: ignore[call-arg]
         namespace="my-cool-namespace",
         dimensions=Dimensions(
             yDimension=labware_width, zDimension=labware_width, xDimension=labware_width
@@ -621,7 +627,9 @@ async def test_gripper_move_to_waste_chute_implementation(
 
     result = await subject.execute(data)
     decoy.verify(
-        state_view.labware.raise_if_labware_has_labware_on_top("my-cool-labware-id"),
+        state_view.labware.raise_if_labware_has_non_lid_labware_on_top(
+            "my-cool-labware-id"
+        ),
         await labware_movement.move_labware_with_gripper(
             labware_id="my-cool-labware-id",
             current_location=from_location,
@@ -790,8 +798,8 @@ async def test_move_labware_raises_when_moving_adapter_with_gripper(
         strategy=LabwareMovementStrategy.USING_GRIPPER,
     )
 
-    definition = LabwareDefinition.model_construct(  # type: ignore[call-arg]
-        parameters=Parameters.model_construct(loadName="My cool adapter"),  # type: ignore[call-arg]
+    definition = LabwareDefinition2.model_construct(  # type: ignore[call-arg]
+        parameters=Parameters2.model_construct(loadName="My cool adapter"),  # type: ignore[call-arg]
     )
 
     decoy.when(state_view.labware.get(labware_id="my-cool-labware-id")).then_return(
@@ -831,8 +839,8 @@ async def test_move_labware_raises_when_moving_labware_with_gripper_incompatible
         strategy=LabwareMovementStrategy.USING_GRIPPER,
     )
 
-    definition = LabwareDefinition.model_construct(  # type: ignore[call-arg]
-        parameters=Parameters.model_construct(loadName="My cool labware"),  # type: ignore[call-arg]
+    definition = LabwareDefinition2.model_construct(  # type: ignore[call-arg]
+        parameters=Parameters2.model_construct(loadName="My cool labware"),  # type: ignore[call-arg]
     )
 
     decoy.when(state_view.labware.get(labware_id="my-cool-labware-id")).then_return(
@@ -881,7 +889,7 @@ async def test_move_labware_with_gripper_raises_on_ot2(
     decoy.when(
         state_view.labware.get_definition(labware_id="my-cool-labware-id")
     ).then_return(
-        LabwareDefinition.model_construct(namespace="spacename")  # type: ignore[call-arg]
+        LabwareDefinition2.model_construct(namespace="spacename")  # type: ignore[call-arg]
     )
 
     decoy.when(state_view.config).then_return(
@@ -903,8 +911,8 @@ async def test_move_labware_raises_when_moving_fixed_trash_labware(
         strategy=LabwareMovementStrategy.USING_GRIPPER,
     )
 
-    definition = LabwareDefinition.model_construct(  # type: ignore[call-arg]
-        parameters=Parameters.model_construct(  # type: ignore[call-arg]
+    definition = LabwareDefinition2.model_construct(  # type: ignore[call-arg]
+        parameters=Parameters2.model_construct(  # type: ignore[call-arg]
             loadName="My cool labware", quirks=["fixedTrash"]
         ),
     )

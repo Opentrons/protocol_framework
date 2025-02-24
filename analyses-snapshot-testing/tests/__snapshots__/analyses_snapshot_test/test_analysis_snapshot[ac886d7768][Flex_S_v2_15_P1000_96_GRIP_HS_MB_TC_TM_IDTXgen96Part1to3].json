@@ -3704,8 +3704,6 @@
             "kind": "onCutoutFixture",
             "possibleCutoutFixtureIds": [
               "flexStackerModuleV1",
-              "flexStackerModuleV1WithWasteChuteRightAdapterCovered",
-              "flexStackerModuleV1WithWasteChuteRightAdapterNoCover",
               "singleRightSlot",
               "stagingAreaRightSlot"
             ]
@@ -11674,6 +11672,7 @@
         "alternateDropLocation": false,
         "labwareId": "UUID",
         "pipetteId": "UUID",
+        "scrape_tips": false,
         "wellLocation": {
           "offset": {
             "x": 0.0,
@@ -11688,7 +11687,7 @@
         "position": {
           "x": 342.38,
           "y": 181.38,
-          "z": 98.42
+          "z": 75.26
         }
       },
       "startedAt": "TIMESTAMP",
@@ -12244,6 +12243,7 @@
         "alternateDropLocation": false,
         "labwareId": "UUID",
         "pipetteId": "UUID",
+        "scrape_tips": false,
         "wellLocation": {
           "offset": {
             "x": 0.0,
@@ -12258,7 +12258,7 @@
         "position": {
           "x": 342.38,
           "y": 181.38,
-          "z": 98.42
+          "z": 75.26
         }
       },
       "startedAt": "TIMESTAMP",
@@ -12301,7 +12301,9 @@
           {
             "cutoutId": "cutoutC1",
             "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
+            "possibleCutoutFixtureIds": [
+              "magneticBlockV1"
+            ]
           }
         ],
         "immediateDestinationLocationSequence": [
@@ -12316,7 +12318,9 @@
           {
             "cutoutId": "cutoutC1",
             "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
+            "possibleCutoutFixtureIds": [
+              "magneticBlockV1"
+            ]
           }
         ],
         "originLocationSequence": [
@@ -12467,7 +12471,9 @@
           {
             "cutoutId": "cutoutC1",
             "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
+            "possibleCutoutFixtureIds": [
+              "magneticBlockV1"
+            ]
           }
         ]
       },
@@ -13270,6 +13276,7 @@
         "alternateDropLocation": false,
         "labwareId": "UUID",
         "pipetteId": "UUID",
+        "scrape_tips": false,
         "wellLocation": {
           "offset": {
             "x": 0.0,
@@ -13284,7 +13291,7 @@
         "position": {
           "x": 342.38,
           "y": 288.38,
-          "z": 98.33
+          "z": 74.99000000000001
         }
       },
       "startedAt": "TIMESTAMP",
@@ -13327,7 +13334,9 @@
           {
             "cutoutId": "cutoutC1",
             "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
+            "possibleCutoutFixtureIds": [
+              "magneticBlockV1"
+            ]
           }
         ],
         "immediateDestinationLocationSequence": [
@@ -13342,7 +13351,9 @@
           {
             "cutoutId": "cutoutC1",
             "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
+            "possibleCutoutFixtureIds": [
+              "magneticBlockV1"
+            ]
           }
         ],
         "originLocationSequence": [
@@ -13742,6 +13753,7 @@
         "alternateDropLocation": false,
         "labwareId": "UUID",
         "pipetteId": "UUID",
+        "scrape_tips": false,
         "wellLocation": {
           "offset": {
             "x": 0.0,
@@ -13756,7 +13768,7 @@
         "position": {
           "x": 342.38,
           "y": 288.38,
-          "z": 98.33
+          "z": 74.99000000000001
         }
       },
       "startedAt": "TIMESTAMP",
@@ -14158,6 +14170,7 @@
         "alternateDropLocation": false,
         "labwareId": "UUID",
         "pipetteId": "UUID",
+        "scrape_tips": false,
         "wellLocation": {
           "offset": {
             "x": 0.0,
@@ -14172,7 +14185,7 @@
         "position": {
           "x": 342.38,
           "y": 288.38,
-          "z": 98.33
+          "z": 74.99000000000001
         }
       },
       "startedAt": "TIMESTAMP",
@@ -14558,6 +14571,7 @@
         "alternateDropLocation": false,
         "labwareId": "UUID",
         "pipetteId": "UUID",
+        "scrape_tips": false,
         "wellLocation": {
           "offset": {
             "x": 0.0,
@@ -14572,7 +14586,7 @@
         "position": {
           "x": 342.38,
           "y": 288.38,
-          "z": 98.33
+          "z": 74.99000000000001
         }
       },
       "startedAt": "TIMESTAMP",
@@ -14974,6 +14988,7 @@
         "alternateDropLocation": false,
         "labwareId": "UUID",
         "pipetteId": "UUID",
+        "scrape_tips": false,
         "wellLocation": {
           "offset": {
             "x": 0.0,
@@ -14988,7 +15003,7 @@
         "position": {
           "x": 342.38,
           "y": 288.38,
-          "z": 98.33
+          "z": 74.99000000000001
         }
       },
       "startedAt": "TIMESTAMP",
@@ -15374,6 +15389,7 @@
         "alternateDropLocation": false,
         "labwareId": "UUID",
         "pipetteId": "UUID",
+        "scrape_tips": false,
         "wellLocation": {
           "offset": {
             "x": 0.0,
@@ -15388,7 +15404,7 @@
         "position": {
           "x": 342.38,
           "y": 288.38,
-          "z": 98.33
+          "z": 74.99000000000001
         }
       },
       "startedAt": "TIMESTAMP",

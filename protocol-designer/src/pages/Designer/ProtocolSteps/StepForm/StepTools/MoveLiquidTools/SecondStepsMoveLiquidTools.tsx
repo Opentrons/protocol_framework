@@ -49,7 +49,7 @@ import type { StepFormErrors } from '../../../../../../steplist'
 const addPrefix = (prefix: string) => (fieldName: string): StepFieldName =>
   `${prefix}_${fieldName}`
 
-interface MultipleStepsMoveLiquidToolsProps {
+interface SecondStepsMoveLiquidToolsProps {
   propsForFields: FieldPropsByName
   formData: FormData
   tab: LiquidHandlingTab
@@ -58,14 +58,14 @@ interface MultipleStepsMoveLiquidToolsProps {
   visibleFormErrors: StepFormErrors
 }
 
-export const MultipleStepsMoveLiquidTools = ({
+export const SecondStepsMoveLiquidTools = ({
   propsForFields,
   formData,
   tab,
   setTab,
   setShowFormErrors,
   visibleFormErrors,
-}: MultipleStepsMoveLiquidToolsProps): JSX.Element => {
+}: SecondStepsMoveLiquidToolsProps): JSX.Element => {
   const { t, i18n } = useTranslation(['protocol_steps', 'form', 'tooltip'])
   const [targetProps, tooltipProps] = useHoverTooltip()
   const labwares = useSelector(getLabwareEntities)
@@ -420,18 +420,35 @@ export const MultipleStepsMoveLiquidTools = ({
           }
         >
           {formData[`${tab}_touchTip_checkbox`] === true ? (
-            <PositionField
-              prefix={tab}
-              propsForFields={propsForFields}
-              zField={`${tab}_touchTip_mmFromTop`}
-              labwareId={
-                formData[
-                  getLabwareFieldForPositioningField(
-                    addFieldNamePrefix('touchTip_mmFromTop')
-                  )
-                ]
-              }
-            />
+            <Flex flexDirection={DIRECTION_COLUMN} gridGap={SPACING.spacing10}>
+              <InputStepFormField
+                showTooltip={false}
+                padding="0"
+                title={t('form:step_edit_form.field.touchTip_speed.label')}
+                {...propsForFields[`${tab}_touchTip_speed`]}
+                errorToShow={getFormLevelError(
+                  `${tab}_touchTip_speed`,
+                  mappedErrorsToField
+                )}
+                units={t('application:units.millimeterPerSec')}
+              />
+
+              <PositionField
+                prefix={tab}
+                propsForFields={propsForFields}
+                zField={`${tab}_touchTip_mmFromTop`}
+                labwareId={
+                  formData[
+                    getLabwareFieldForPositioningField(
+                      addFieldNamePrefix('touchTip_mmFromTop')
+                    )
+                  ]
+                }
+                showButton
+                padding="0"
+                isNested
+              />
+            </Flex>
           ) : null}
         </CheckboxExpandStepFormField>
         <CheckboxExpandStepFormField

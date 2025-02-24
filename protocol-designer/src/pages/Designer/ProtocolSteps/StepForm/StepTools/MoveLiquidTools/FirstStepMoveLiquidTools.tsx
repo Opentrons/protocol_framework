@@ -28,17 +28,17 @@ import type { FieldPropsByName } from '../../types'
 import type { FormData } from '../../../../../../form-types'
 import type { StepFormErrors } from '../../../../../../steplist'
 
-interface SingleStepMoveLiquidToolsProps {
+interface FirstStepMoveLiquidToolsProps {
   propsForFields: FieldPropsByName
   formData: FormData
   visibleFormErrors: StepFormErrors
 }
 
-export function SingleStepMoveLiquidTools({
+export function FirstStepMoveLiquidTools({
   propsForFields,
   formData,
   visibleFormErrors,
-}: SingleStepMoveLiquidToolsProps): JSX.Element {
+}: FirstStepMoveLiquidToolsProps): JSX.Element {
   const { t } = useTranslation('protocol_steps')
   const labwares = useSelector(getLabwareEntities)
   const pipettes = useSelector(getPipetteEntities)
