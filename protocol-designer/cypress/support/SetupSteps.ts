@@ -39,6 +39,7 @@ export enum SetupContent {
   HeaterShaker = 'Heater-Shaker Module GEN1',
   Tempdeck2 = 'Temperature Module GEN2',
   MagBlock = 'Magnetic Block GEN1',
+  PlateReader = 'Absorbance Plate Reader Module GEN1',
   ModulePageH = 'Add your modules',
   ModulePageB = 'Select modules to use in your protocol.',
   EditProtocol = 'Edit protocol',
@@ -77,15 +78,20 @@ export enum SetupLocators {
   Button = 'button',
   TempdeckTempInput = 'input[name="targetTemperature"]',
   DoneButtonLabwareSelection = '[data-testid="Toolbox_confirmButton"]',
+  AspirateWells = 'input[name="aspirate_wells"]',
+  div = 'div',
+  button = 'button',
+  svg = 'svg',
+  exist = 'exist',
+  StepOptionsTestIDThreeDots = 'button.Btn-sc-o3dtr1-0.OverflowBtn___StyledBtn-sc-1mslfxo-0',
 }
 
 /**
  * Helper function to select a labware by display name.
- * Clicks "Done" after selecting.
+ * No longer clicks "Done" after selecting.
  */
 function selectLabwareByDisplayName(displayName: string): void {
   cy.contains(displayName).click({ force: true })
-  cy.get(SetupLocators.DoneButtonLabwareSelection).click({ force: true })
 }
 
 /**
@@ -182,6 +188,13 @@ export const SetupSteps = {
    * Select a labware by display name, then click "Done".
    */
   SelectLabwareByDisplayName: (displayName: string): StepThunk => ({
+    call: () => {
+      selectLabwareByDisplayName(displayName)
+      cy.get(SetupLocators.DoneButtonLabwareSelection).click({ force: true })
+    },
+  }),
+
+  selectDropdownLabware: (displayName: string): StepThunk => ({
     call: () => {
       selectLabwareByDisplayName(displayName)
     },
@@ -530,6 +543,183 @@ export const SetupSteps = {
         .click({ force: true })
     },
   }),
+  /**
+   * Chose source labware on a step form
+   */
+  ChoseSourceLabware: (): StepThunk => ({
+    call: () => {
+      cy.contains('p', 'Choose option').closest('div[tabindex="0"]').click()
+    },
+  }),
+
+  // Chose source to move labware on a stepform
+  ChoseSourceMoveLabware: (): StepThunk => ({
+    call: () => {
+      cy.contains('Choose option').eq(0).click()
+    },
+  }),
+  // Chose destination to move labware
+  ChoseDestinationMoveLabware: (): StepThunk => ({
+    call: () => {
+      cy.contains('Choose option').click()
+    },
+  }),
+  // Chose labware being moved to
+  ChoseDestinationLabware: (): StepThunk => ({
+    call: () => {
+      cy.contains('Choose option').click()
+    },
+  }),
+  // Add source labware on stepform
+  AddSourceLabwareDropdown: (): StepThunk => ({
+    call: () => {
+      cy.contains('Source labware')
+        .closest('div.Flex-sc-1qhp8l7-0.bsOFGI')
+        .find('div[tabindex="0"].Flex-sc-1qhp8l7-0.sc-bqWxrE')
+        .click()
+    },
+  }),
+
+  // Select destination wells
+  SelectSourceWells: (): StepThunk => ({
+    call: () => {
+      cy.get('input[name="aspirate_wells"]')
+        .should('have.value', 'Choose wells')
+        .click()
+    },
+  }),
+
+  // Select destination wells
+  SelectDestinationWells: (): StepThunk => ({
+    call: () => {
+      cy.get('input[name="dispense_wells"]')
+        .should('have.value', 'Choose wells')
+        .click()
+    },
+  }),
+  // Save selected wells
+  SaveSelectedWells: (): StepThunk => ({
+    call: () => {
+      cy.contains(SetupContent.Save).click({ force: true })
+    },
+  }),
+  // Generic save button
+  Save: (): StepThunk => ({
+    call: () => {
+      cy.contains(SetupContent.Save).click({ force: true })
+    },
+  }),
+  // ToDo Refactor to input any volume
+
+  InputTransferVolume: (TransferVolume: string): StepThunk => ({
+    call: () => {
+      cy.get('input[name="volume"]').type(TransferVolume)
+    },
+  }),
+  // Continue to the next part of the transfer form
+  Continue: (): StepThunk => ({
+    call: () => {
+      cy.contains('Continue').click()
+    },
+  }),
+
+  // ToDo @alexjoel42, please combine into one transfer
+
+  // Step 1 Transfer form prewet checkbox
+  PrewetAspirate: (): StepThunk => ({
+    call: () => {
+      cy.contains('Pre-wet tip')
+        .closest('div.Flex-sc-1qhp8l7-0.fJriNr') // MOST IMPORTANT: Pinpoint the correct container
+        .find('div.Checkbox___StyledFlex3-sc-1mvp7vt-0.gZwGCw.btdgeU') // Select the checkbox div
+        .click()
+    },
+  }),
+  // Step 1 Transfer form Delay
+
+  DelayAspirate: (): StepThunk => ({
+    call: () => {
+      cy.contains('Delay').closest('div').find('button').click()
+    },
+  }),
+  // Step 1 Transfer form touch tip
+  TouchTipAspirate: (): StepThunk => ({
+    call: () => {
+      cy.contains('Touch tip').closest('div').find('button').click()
+    },
+  }),
+  // Step 1 Transfer form mix checkbox
+  MixAspirate: (): StepThunk => ({
+    call: () => {
+      cy.contains('Mix').closest('div').find('button').click()
+    },
+  }),
+  // Step 1 Transfer form airgap checkbox
+  AirGap: (): StepThunk => ({
+    call: () => {
+      cy.contains('Air gap').closest('div').find('button').click()
+    },
+  }),
+  // Step 1 Transfer form mix volume
+  AspirateMixVolume: (MixAspirateVolume: string): StepThunk => ({
+    call: () => {
+      cy.get('input[name = "aspirate_mix_volume"]').type(MixAspirateVolume)
+    },
+  }),
+
+  AspirateMixTimes: (MixTimesAspirate: string): StepThunk => ({
+    call: () => {
+      cy.get('input[name = "aspirate_mix_times"]').type(MixTimesAspirate)
+    },
+  }),
+
+  AspirateAirGapVolume: (AirGapAspirateVolume: string): StepThunk => ({
+    call: () => {
+      cy.get('input[name = "aspirate_airGap_volume"]').type(
+        AirGapAspirateVolume
+      )
+    },
+  }),
+  // Select dispense on the transfer form
+
+  SelectDispense: (): StepThunk => ({
+    call: () => {
+      cy.contains('Dispense').click()
+    },
+  }),
+  // Dispense mix volume
+  DispenseMixVolume: (DispenseMixVolume: string): StepThunk => ({
+    call: () => {
+      cy.get('input[name = "dispense_mix_volume"]').type(DispenseMixVolume)
+    },
+  }),
+
+  DispenseMixTimes: (): StepThunk => ({
+    call: () => {
+      cy.get('input[name = "dispense_mix_times"]').type('2')
+    },
+  }),
+
+  DispenseAirGapVolume: (): StepThunk => ({
+    call: () => {
+      cy.get('input[name = "dispense_airGap_volume"]').type('10')
+    },
+  }),
+
+  BlowoutTransferDestination: (): StepThunk => ({
+    call: () => {
+      cy.contains('Blowout').closest('div').find('button').click()
+      cy.contains('Choose option').click()
+      cy.contains('Destination Well').click()
+    },
+  }),
+
+  DeleteSteps: (): StepThunk => ({
+    call: () => {
+      cy.get(SetupLocators.StepOptionsTestIDThreeDots).click()
+      cy.contains('Delete step').click()
+      cy.contains('button', 'Delete step').click()
+    },
+  }),
 }
 
 /**
@@ -706,6 +896,83 @@ export const SetupVerifications = {
       cy.contains('Volume per well')
       cy.contains('Tip handling')
       cy.contains('Tip drop location')
+    },
+  }),
+
+  AbsorbanceNotSelectable: (): StepThunk => ({
+    // Verifies that the "Plate Reader" button is disabled and cannot be selected
+    call: () => {
+      cy.contains('button', SetupContent.PlateReader).should('be.disabled')
+    },
+  }),
+
+  Delay: (): StepThunk => ({
+    // Verifies that the "Delay" button has an associated SVG icon with proper attributes
+    call: () => {
+      cy.contains('Delay')
+        .closest('div')
+        .find('button')
+        .find('svg')
+        .should('exist')
+        .and('have.attr', 'aria-hidden', 'true')
+    },
+  }),
+
+  PreWet: (): StepThunk => ({
+    // Verifies that the "Pre-wet tip" button has an associated SVG icon with proper attributes
+    call: () => {
+      cy.contains('Pre-wet tip')
+        .closest('div')
+        .find('button')
+        .find('svg')
+        .should('exist')
+        .and('have.attr', 'aria-hidden', 'true')
+    },
+  }),
+
+  TouchTip: (): StepThunk => ({
+    // Verifies that the "Touch tip" button has an associated SVG icon with proper attributes
+    call: () => {
+      cy.contains('Touch tip')
+        .closest('div')
+        .find('button')
+        .find('svg')
+        .should('exist')
+        .and('have.attr', 'aria-hidden', 'true')
+    },
+  }),
+
+  MixT: (): StepThunk => ({
+    // Verifies that the "Mix" button has an associated SVG icon with proper attributes
+    call: () => {
+      cy.contains('Mix')
+        .closest('div')
+        .find('button')
+        .find('svg')
+        .should('exist')
+        .and('have.attr', 'aria-hidden', 'true')
+    },
+  }),
+
+  AirGap: (): StepThunk => ({
+    // Verifies that the "Air gap" button has an associated SVG icon with proper attributes
+    call: () => {
+      cy.contains('Air gap')
+        .closest('div')
+        .find('button')
+        .find('svg')
+        .should('exist')
+        .and('have.attr', 'aria-hidden', 'true')
+    },
+  }),
+
+  ExtraDispenseTransfer: (): StepThunk => ({
+    // Verifies that all key elements related to "Blowout" in transfer settings are present
+    call: () => {
+      cy.contains('Blowout location')
+      cy.contains('Blowout flow rate')
+      cy.contains('Blowout position from top')
+      cy.contains('Choose option')
     },
   }),
 
