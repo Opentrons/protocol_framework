@@ -9,7 +9,6 @@ from hardware_testing.data.csv_report import (
     CSVResult,
 )
 
-from opentrons.drivers.flex_stacker.types import HardwareRevision
 from .driver import FlexStackerInterface as FlexStacker
 
 
