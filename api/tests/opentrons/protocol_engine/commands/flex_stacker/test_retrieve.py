@@ -2,10 +2,7 @@
 
 import pytest
 from decoy import Decoy
-from contextlib import nullcontext as does_not_raise
-from typing import ContextManager, Any
 
-from opentrons.calibration_storage.helpers import uri_from_details
 from opentrons.hardware_control.modules import FlexStacker
 
 from opentrons.protocol_engine.state.state import StateView
@@ -29,13 +26,12 @@ from opentrons.protocol_engine.types import (
     Dimensions,
     ModuleLocation,
     ModuleModel,
-    LoadedLabware,
     LoadedModule,
     OverlapOffset,
     OnModuleLocationSequenceComponent,
     OnAddressableAreaLocationSequenceComponent,
-    InStackerHopperLocation,
     OnCutoutFixtureLocationSequenceComponent,
+    LabwareLocationSequence,
 )
 from opentrons.protocol_engine.errors import CannotPerformModuleAction
 from opentrons.types import DeckSlotName
@@ -43,56 +39,32 @@ from opentrons.protocol_engine.execution import LoadedLabwareData
 
 from opentrons_shared_data.labware.labware_definition import (
     LabwareDefinition,
-    Parameters2 as Parameters,
-    Metadata,
 )
 
 
-@pytest.mark.parametrize(
-    "in_static_mode,expectation",
-    [
-        (
-            True,
-            pytest.raises(
-                CannotPerformModuleAction,
-                match="Cannot retrieve labware from Flex Stacker while in static mode",
-            ),
-        ),
-        (False, does_not_raise()),
-    ],
-)
-async def test_retrieve(
+async def test_retrieve_raises_when_static(
     decoy: Decoy,
     state_view: StateView,
     equipment: EquipmentHandler,
-    in_static_mode: bool,
-    expectation: ContextManager[Any],
-    tiprack_lid_def: LabwareDefinition,
+    flex_50uL_tiprack: LabwareDefinition,
+    stacker_id: FlexStackerId,
+    stacker_hardware: FlexStacker,
 ) -> None:
-    """It should be able to retrieve a labware."""
+    """It should raise an exception when called in static mode."""
     subject = RetrieveImpl(state_view=state_view, equipment=equipment)
-    data = flex_stacker.RetrieveParams(
-        moduleId="flex-stacker-id", namespace="opentrons", version=1
-    )
-    labware_def = LabwareDefinition.model_construct(  # type: ignore[call-arg]
-        parameters=Parameters.model_construct(loadName="tiprack"),  # type: ignore[call-arg]
-        namespace="world",
-        version=123,
-        metadata=Metadata.model_construct(displayName="tiprack"),  # type: ignore[call-arg]
-    )
+    data = flex_stacker.RetrieveParams(moduleId=stacker_id)
 
     fs_module_substate = FlexStackerSubState(
-        module_id=FlexStackerId("flex-stacker-id"),
-        in_static_mode=in_static_mode,
-        hopper_labware_ids=["labware-id"],
-        pool_primary_definition=labware_def,
+        module_id=stacker_id,
+        in_static_mode=True,
+        hopper_labware_ids=[],
+        pool_primary_definition=flex_50uL_tiprack,
         pool_adapter_definition=None,
         pool_lid_definition=None,
         pool_count=1,
     )
-    fs_hardware = decoy.mock(cls=FlexStacker)
     decoy.when(
-        state_view.modules.get_flex_stacker_substate(module_id="flex-stacker-id")
+        state_view.modules.get_flex_stacker_substate(module_id=stacker_id)
     ).then_return(fs_module_substate)
 
     decoy.when(
@@ -100,16 +72,47 @@ async def test_retrieve(
             "tiprack",
             "opentrons",
             1,
-            ModuleLocation(moduleId="flex-stacker-id"),
+            ModuleLocation(moduleId=stacker_id),
             None,
         )
-    ).then_return(LoadedLabwareData("labware-id", labware_def, None))
-    decoy.when(state_view.modules.get_location("flex-stacker-id")).then_return(
+    ).then_return(LoadedLabwareData("labware-id", flex_50uL_tiprack, None))
+
+    decoy.when(
+        state_view.geometry.get_predicted_location_sequence(
+            ModuleLocation(moduleId=stacker_id)
+        )
+    ).then_return(
+        [
+            OnAddressableAreaLocationSequenceComponent(
+                addressableAreaName="flexStackerV1B4"
+            ),
+            OnModuleLocationSequenceComponent(moduleId=stacker_id),
+            OnCutoutFixtureLocationSequenceComponent(
+                cutoutId="cutoutB3", possibleCutoutFixtureIds=["flexStackerModuleV1"]
+            ),
+        ]
+    )
+
+    decoy.when(
+        state_view.geometry.get_height_of_labware_stack(definitions=[flex_50uL_tiprack])
+    ).then_return(4)
+
+    with pytest.raises(
+        CannotPerformModuleAction,
+        match="Cannot retrieve labware from Flex Stacker while in static mode",
+    ):
+        await subject.execute(data)
+
+
+def _prep_stacker_own_location(
+    decoy: Decoy, state_view: StateView, stacker_id: str
+) -> None:
+    decoy.when(state_view.modules.get_location(stacker_id)).then_return(
         DeckSlotLocation(slotName=DeckSlotName(value="B3")),
     )
-    decoy.when(state_view.modules.get("flex-stacker-id")).then_return(
+    decoy.when(state_view.modules.get(stacker_id)).then_return(
         LoadedModule(
-            id="flex-stacker-id",
+            id=stacker_id,
             location=DeckSlotLocation(slotName=DeckSlotName(value="B3")),
             model=ModuleModel.FLEX_STACKER_MODULE_V1,
             serialNumber="HIIIII",
@@ -121,100 +124,95 @@ async def test_retrieve(
         )
     ).then_return("flexStackerV1B4")
 
-    decoy.when(state_view.labware.get("labware-id")).then_return(
-        LoadedLabware(
-            id="labware-id",
-            loadName="tiprack",
-            definitionUri=uri_from_details(namespace="a", load_name="b", version=1),
-            location=DeckSlotLocation(slotName=DeckSlotName.SLOT_3),
-            offsetId=None,
-            lid_id="lid-id",
-            displayName="Labware",
-        )
+
+def _stacker_base_loc_seq(stacker_id: str) -> LabwareLocationSequence:
+    return [
+        OnAddressableAreaLocationSequenceComponent(
+            addressableAreaName="flexStackerV1B4"
+        ),
+        OnModuleLocationSequenceComponent(moduleId=stacker_id),
+        OnCutoutFixtureLocationSequenceComponent(
+            cutoutId="cutoutB3", possibleCutoutFixtureIds=["flexStackerModuleV1"]
+        ),
+    ]
+
+
+async def test_retrieve_primary_only(
+    decoy: Decoy,
+    state_view: StateView,
+    equipment: EquipmentHandler,
+    flex_50uL_tiprack: LabwareDefinition,
+    stacker_id: FlexStackerId,
+    stacker_hardware: FlexStacker,
+) -> None:
+    """It should be able to retrieve a labware."""
+    subject = RetrieveImpl(state_view=state_view, equipment=equipment)
+    data = flex_stacker.RetrieveParams(moduleId=stacker_id)
+
+    fs_module_substate = FlexStackerSubState(
+        module_id=stacker_id,
+        in_static_mode=False,
+        hopper_labware_ids=[],
+        pool_primary_definition=flex_50uL_tiprack,
+        pool_adapter_definition=None,
+        pool_lid_definition=None,
+        pool_count=1,
     )
+    decoy.when(
+        state_view.modules.get_flex_stacker_substate(module_id=stacker_id)
+    ).then_return(fs_module_substate)
+
+    decoy.when(
+        await equipment.load_labware_from_definition(
+            definition=flex_50uL_tiprack,
+            location=ModuleLocation(moduleId=stacker_id),
+            labware_id=None,
+        )
+    ).then_return(LoadedLabwareData("labware-id", flex_50uL_tiprack, None))
 
     decoy.when(state_view.labware.get_dimensions(labware_id="labware-id")).then_return(
         Dimensions(x=1, y=1, z=1)
     )
 
-    decoy.when(state_view.labware.get_definition("lid-id")).then_return(tiprack_lid_def)
-
-    decoy.when(
-        state_view.labware.get_labware_overlap_offsets(tiprack_lid_def, "tiprack")
-    ).then_return(OverlapOffset(x=0, y=0, z=14))
-
-    decoy.when(
-        equipment.get_module_hardware_api(FlexStackerId("flex-stacker-id"))
-    ).then_return(fs_hardware)
-    decoy.when(state_view.geometry.get_location_sequence("labware-id")).then_return(
-        [
-            InStackerHopperLocation(moduleId="flex-stacker-id"),
-            OnCutoutFixtureLocationSequenceComponent(
-                cutoutId="cutoutB4", possibleCutoutFixtureIds=["flexStackerModuleV1"]
-            ),
-        ]
-    )
     decoy.when(
         state_view.geometry.get_predicted_location_sequence(
-            ModuleLocation(moduleId="flex-stacker-id")
+            ModuleLocation(moduleId=stacker_id)
         )
-    ).then_return(
-        [
-            OnAddressableAreaLocationSequenceComponent(
-                addressableAreaName="flexStackerV1B4"
-            ),
-            OnModuleLocationSequenceComponent(moduleId="flex-stacker-id"),
-            OnCutoutFixtureLocationSequenceComponent(
-                cutoutId="cutoutB3", possibleCutoutFixtureIds=["flexStackerModuleV1"]
-            ),
-        ]
-    )
+    ).then_return(_stacker_base_loc_seq(stacker_id))
 
     decoy.when(
-        state_view.geometry.get_height_of_labware_stack(definitions=[labware_def])
+        state_view.geometry.get_height_of_labware_stack(definitions=[flex_50uL_tiprack])
     ).then_return(4)
 
-    with expectation:
-        result = await subject.execute(data)
+    _prep_stacker_own_location(decoy, state_view, stacker_id)
 
-    if not in_static_mode:
-        decoy.verify(await fs_hardware.dispense_labware(labware_height=4), times=1)
+    result = await subject.execute(data)
 
-        result == SuccessData(
-            public=flex_stacker.RetrieveResult(
-                labwareId="labware-id",
-                primaryLocationSequence=[
-                    OnAddressableAreaLocationSequenceComponent(
-                        addressableAreaName="flexStackerV1B4",
-                    ),
-                    OnModuleLocationSequenceComponent(moduleId="flex-stacker-id"),
-                    OnCutoutFixtureLocationSequenceComponent(
-                        cutoutId="cutoutB3",
-                        possibleCutoutFixtureIds=["flexStackerModuleV1"],
-                    ),
-                ],
-                primaryLabwareURI="fancy_uri",
+    decoy.verify(await stacker_hardware.dispense_labware(labware_height=4), times=1)
+    _ = OverlapOffset(x=0, y=1, z=2)
+
+    result == SuccessData(
+        public=flex_stacker.RetrieveResult(
+            labwareId="labware-id",
+            primaryLocationSequence=_stacker_base_loc_seq(stacker_id),
+            primaryLabwareURI="fancy_uri",
+        ),
+        state_update=StateUpdate(
+            batch_loaded_labware=BatchLoadedLabwareUpdate(
+                new_locations_by_id={"labware-id": ModuleLocation(moduleId=stacker_id)},
+                offset_ids_by_id={"labware-id": None},
+                display_names_by_id={"labware-id": "tiprack"},
+                definitions_by_id={"labware-id": flex_50uL_tiprack},
             ),
-            state_update=StateUpdate(
-                batch_loaded_labware=BatchLoadedLabwareUpdate(
-                    new_locations_by_id={
-                        "labware-id": ModuleLocation(moduleId="flex-stacker-id")
-                    },
-                    offset_ids_by_id={"labware-id": None},
-                    display_names_by_id={"labware-id": "tiprack"},
-                    definitions_by_id={"labware-id": labware_def},
+            flex_stacker_state_update=FlexStackerStateUpdate(
+                module_id=stacker_id,
+                hopper_labware_update=FlexStackerRetrieveLabware(
+                    labware_id="labware-id"
                 ),
-                flex_stacker_state_update=FlexStackerStateUpdate(
-                    module_id="flex-stacker-id",
-                    hopper_labware_update=FlexStackerRetrieveLabware(
-                        labware_id="labware-id"
-                    ),
-                    pool_count=0,
-                ),
-                addressable_area_used=AddressableAreaUsedUpdate(
-                    addressable_area_name="flexStackerV1B4"
-                ),
+                pool_count=0,
             ),
-        )
-
-        # raise ValueError(f"result: {result}                                     success: {test}")
+            addressable_area_used=AddressableAreaUsedUpdate(
+                addressable_area_name="flexStackerV1B4"
+            ),
+        ),
+    )

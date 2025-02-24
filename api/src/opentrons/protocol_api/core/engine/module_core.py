@@ -725,20 +725,9 @@ class FlexStackerCore(ModuleCore, AbstractFlexStackerCore):
             raise CannotPerformModuleAction(
                 f"Flex Stacker {self.module_id} has no labware to retrieve"
             )
-        custom_labware_params = (
-            self._engine_client.state.labware.find_custom_labware_load_params()
-        )
-        namespace, version = load_labware_params.resolve(
-            stacker.pool_primary_definition.parameters.loadName,
-            None,
-            None,
-            custom_labware_params,
-        )
         self._engine_client.execute_command(
             cmd.flex_stacker.RetrieveParams(
                 moduleId=self.module_id,
-                namespace=namespace,
-                version=version,
             )
         )
 
