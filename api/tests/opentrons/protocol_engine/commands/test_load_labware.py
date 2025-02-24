@@ -1,4 +1,5 @@
 """Test load labware commands."""
+
 import inspect
 from typing import Optional
 from unittest.mock import sentinel
@@ -18,12 +19,15 @@ from opentrons.protocol_engine.errors import (
 from opentrons.protocol_engine.types import (
     AddressableAreaLocation,
     DeckSlotLocation,
-    LabwareLocation,
+    LoadableLabwareLocation,
     OnLabwareLocation,
     ModuleLocation,
     ModuleModel,
     LoadedModule,
-    OFF_DECK_LOCATION,
+    InStackerHopperLocation,
+    OnLabwareLocationSequenceComponent,
+    OnAddressableAreaLocationSequenceComponent,
+    OnCutoutFixtureLocationSequenceComponent,
 )
 from opentrons.protocol_engine.execution import LoadedLabwareData, EquipmentHandler
 from opentrons.protocol_engine.resources import labware_validation
@@ -71,7 +75,7 @@ async def test_load_labware_on_slot_or_addressable_area(
     equipment: EquipmentHandler,
     state_view: StateView,
     display_name: Optional[str],
-    location: LabwareLocation,
+    location: LoadableLabwareLocation,
     expected_addressable_area_name: str,
 ) -> None:
     """A LoadLabware command should have an execution implementation."""
@@ -83,6 +87,17 @@ async def test_load_labware_on_slot_or_addressable_area(
         namespace="opentrons-test",
         version=1,
         displayName=display_name,
+    )
+    decoy.when(
+        state_view.geometry.get_predicted_location_sequence(
+            sentinel.validated_empty_location
+        )
+    ).then_return(
+        [
+            OnAddressableAreaLocationSequenceComponent(
+                addressableAreaName=expected_addressable_area_name,
+            )
+        ]
     )
 
     decoy.when(state_view.geometry.ensure_location_not_occupied(location)).then_return(
@@ -100,7 +115,7 @@ async def test_load_labware_on_slot_or_addressable_area(
         LoadedLabwareData(
             labware_id="labware-id",
             definition=well_plate_def,
-            offsetId="labware-offset-id",
+            offsetId=None,
         )
     )
 
@@ -114,13 +129,18 @@ async def test_load_labware_on_slot_or_addressable_area(
         public=LoadLabwareResult(
             labwareId="labware-id",
             definition=well_plate_def,
-            offsetId="labware-offset-id",
+            offsetId=None,
+            locationSequence=[
+                OnAddressableAreaLocationSequenceComponent(
+                    addressableAreaName=expected_addressable_area_name,
+                )
+            ],
         ),
         state_update=StateUpdate(
             loaded_labware=LoadedLabwareUpdate(
                 labware_id="labware-id",
                 definition=well_plate_def,
-                offset_id="labware-offset-id",
+                offset_id=None,
                 new_location=sentinel.validated_empty_location,
                 display_name=display_name,
             ),
@@ -190,6 +210,18 @@ async def test_load_labware_on_labware(
             offsetId="labware-offset-id",
         )
     )
+    decoy.when(
+        state_view.geometry.get_predicted_location_sequence(
+            OnLabwareLocation(labwareId="another-labware-id")
+        )
+    ).then_return(
+        [
+            OnLabwareLocationSequenceComponent(
+                labwareId="other-labware-id", lidId=None
+            ),
+            OnAddressableAreaLocationSequenceComponent(addressableAreaName="A3"),
+        ]
+    )
 
     decoy.when(
         labware_validation.validate_definition_is_labware(well_plate_def)
@@ -201,6 +233,12 @@ async def test_load_labware_on_labware(
             labwareId="labware-id",
             definition=well_plate_def,
             offsetId="labware-offset-id",
+            locationSequence=[
+                OnLabwareLocationSequenceComponent(
+                    labwareId="other-labware-id", lidId=None
+                ),
+                OnAddressableAreaLocationSequenceComponent(addressableAreaName="A3"),
+            ],
         ),
         state_update=StateUpdate(
             loaded_labware=LoadedLabwareUpdate(
@@ -279,12 +317,28 @@ async def test_load_labware_in_flex_stacker(
             module_id=FlexStackerId("some-module-id"),
             in_static_mode=False,
             hopper_labware_ids=[],
+            pool_primary_definition=None,
+            pool_adapter_definition=None,
+            pool_lid_definition=None,
+            pool_count=0,
         )
+    )
+    decoy.when(
+        state_view.geometry.get_predicted_location_sequence(
+            InStackerHopperLocation(moduleId="some-module-id")
+        )
+    ).then_return(
+        [
+            InStackerHopperLocation(moduleId="some-module-id"),
+            OnCutoutFixtureLocationSequenceComponent(
+                cutoutId="cutoutA3", possibleCutoutFixtureIds=["flexStackerModuleV1"]
+            ),
+        ]
     )
 
     decoy.when(
         await equipment.load_labware(
-            location=OFF_DECK_LOCATION,
+            location=InStackerHopperLocation(moduleId="some-module-id"),
             load_name="some-load-name",
             namespace="opentrons-test",
             version=1,
@@ -294,7 +348,7 @@ async def test_load_labware_in_flex_stacker(
         LoadedLabwareData(
             labware_id="labware-id",
             definition=well_plate_def,
-            offsetId="labware-offset-id",
+            offsetId=None,
         )
     )
 
@@ -304,14 +358,21 @@ async def test_load_labware_in_flex_stacker(
         public=LoadLabwareResult(
             labwareId="labware-id",
             definition=well_plate_def,
-            offsetId="labware-offset-id",
+            offsetId=None,
+            locationSequence=[
+                InStackerHopperLocation(moduleId="some-module-id"),
+                OnCutoutFixtureLocationSequenceComponent(
+                    cutoutId="cutoutA3",
+                    possibleCutoutFixtureIds=["flexStackerModuleV1"],
+                ),
+            ],
         ),
         state_update=StateUpdate(
             loaded_labware=LoadedLabwareUpdate(
                 labware_id="labware-id",
                 definition=well_plate_def,
-                offset_id="labware-offset-id",
-                new_location=OFF_DECK_LOCATION,
+                offset_id=None,
+                new_location=InStackerHopperLocation(moduleId="some-module-id"),
                 display_name=display_name,
             ),
             flex_stacker_state_update=FlexStackerStateUpdate(

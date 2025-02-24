@@ -6,7 +6,10 @@ from datetime import datetime
 from decoy import Decoy, matchers
 from unittest.mock import sentinel
 
-from opentrons_shared_data.labware.labware_definition import LabwareDefinition
+from opentrons_shared_data.labware.labware_definition import (
+    LabwareDefinition,
+    labware_definition_type_adapter,
+)
 
 from opentrons_shared_data.errors.exceptions import StallOrCollisionDetectedError
 
@@ -36,20 +39,16 @@ from opentrons.protocol_engine.execution import (
     PipettingHandler,
 )
 from opentrons.hardware_control import HardwareControlAPI
-import json
-from opentrons_shared_data import load_shared_data
+
+from opentrons_shared_data.labware import load_definition
 
 
 @pytest.fixture
 def evotips_definition() -> LabwareDefinition:
     """A fixturee of the evotips definition."""
     # TODO (chb 2025-01-29): When we migrate all labware to v3 we can clean this up
-    return LabwareDefinition.model_validate(
-        json.loads(
-            load_shared_data(
-                "labware/definitions/3/evotips_opentrons_96_labware/1.json"
-            )
-        )
+    return labware_definition_type_adapter.validate_python(
+        load_definition("evotips_opentrons_96_labware", 1)
     )
 
 
@@ -102,7 +101,6 @@ async def test_success(
     decoy.when(
         state_view.geometry.get_nominal_tip_geometry("pipette-id", "labware-id", "A3")
     ).then_return(TipGeometry(length=42, diameter=5, volume=300))
-    decoy.when(state_view.pipettes.get_maximum_volume("pipette-id")).then_return(1000)
 
     decoy.when(
         await tip_handler.pick_up_tip(
@@ -135,7 +133,7 @@ async def test_success(
             ),
             pipette_aspirated_fluid=update_types.PipetteAspiratedFluidUpdate(
                 pipette_id="pipette-id",
-                fluid=AspiratedFluid(kind=FluidKind.LIQUID, volume=1000),
+                fluid=AspiratedFluid(kind=FluidKind.LIQUID, volume=400),
             ),
         ),
     )
@@ -202,7 +200,6 @@ async def test_no_tip_physically_missing_error(
     decoy.when(state_view.labware.get_definition(labware_id)).then_return(
         evotips_definition
     )
-    decoy.when(state_view.pipettes.get_maximum_volume(pipette_id)).then_return(1000)
 
     result = await subject.execute(
         EvotipSealPipetteParams(
@@ -224,7 +221,7 @@ async def test_no_tip_physically_missing_error(
             ),
             pipette_aspirated_fluid=update_types.PipetteAspiratedFluidUpdate(
                 pipette_id="pipette-id",
-                fluid=AspiratedFluid(kind=FluidKind.LIQUID, volume=1000),
+                fluid=AspiratedFluid(kind=FluidKind.LIQUID, volume=400),
             ),
         ),
     )

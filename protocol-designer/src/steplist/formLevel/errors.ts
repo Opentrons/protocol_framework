@@ -21,8 +21,10 @@ import { getTimeFromForm } from '../utils/getTimeFromForm'
 
 import type { ReactNode } from 'react'
 import type { LabwareDefinition2, PipetteV2Specs } from '@opentrons/shared-data'
-import type { LabwareEntities, PipetteEntity } from '@opentrons/step-generation'
+import type { PipetteEntity } from '@opentrons/step-generation'
 import type { StepFieldName } from '../../form-types'
+import type { ModuleEntities } from '../../step-forms'
+import type { LiquidHandlingTab } from '../../pages/Designer/ProtocolSteps/StepForm/types'
 /*******************
  ** Error Messages **
  ********************/
@@ -59,7 +61,7 @@ export interface FormError {
   showAtField?: boolean
   showAtForm?: boolean
   page?: number
-  tab?: 'aspirate' | 'dispense'
+  tab?: LiquidHandlingTab
 }
 const INCOMPATIBLE_ASPIRATE_LABWARE: FormError = {
   title: 'Selected aspirate labware is incompatible with pipette',
@@ -113,10 +115,14 @@ const ENGAGE_HEIGHT_REQUIRED: FormError = {
 const ENGAGE_HEIGHT_MIN_EXCEEDED: FormError = {
   title: 'Specified distance is below module minimum',
   dependentFields: ['magnetAction', 'engageHeight'],
+  showAtForm: false,
+  showAtField: true,
 }
 const ENGAGE_HEIGHT_MAX_EXCEEDED: FormError = {
   title: 'Specified distance is above module maximum',
   dependentFields: ['magnetAction', 'engageHeight'],
+  showAtForm: false,
+  showAtField: true,
 }
 const MODULE_ID_REQUIRED: FormError = {
   title:
@@ -400,6 +406,20 @@ const ABSORBANCE_READER_MODULE_ID_REQUIRED: FormError = {
   showAtField: true,
   page: 0,
 }
+const ASPIRATE_TOUCH_TIP_SPEED_REQUIRED: FormError = {
+  title: 'Touch tip speed required',
+  dependentFields: ['aspirate_touchTip_speed'],
+  showAtForm: false,
+  showAtField: true,
+  page: 1,
+}
+const DISPENSE_TOUCH_TIP_SPEED_REQUIRED: FormError = {
+  title: 'Touch tip speed required',
+  dependentFields: ['dispense_touchTip_speed'],
+  showAtForm: false,
+  showAtField: true,
+  page: 1,
+}
 
 export interface HydratedFormData {
   [key: string]: any
@@ -407,7 +427,7 @@ export interface HydratedFormData {
 
 export type FormErrorChecker = (
   arg: HydratedFormData,
-  labwareEntities?: LabwareEntities
+  moduleEntities?: ModuleEntities
 ) => FormError | null
 // TODO: test these
 
@@ -554,7 +574,7 @@ export const targetTemperatureRequired = (
   fields: HydratedFormData
 ): FormError | null => {
   const { setTemperature, targetTemperature } = fields
-  return setTemperature && !targetTemperature
+  return JSON.parse(String(setTemperature ?? false)) && !targetTemperature
     ? TARGET_TEMPERATURE_REQUIRED
     : null
 }
@@ -672,27 +692,32 @@ export const newLabwareLocationRequired = (
     : null
 }
 export const engageHeightRangeExceeded = (
-  fields: HydratedFormData
+  fields: HydratedFormData,
+  moduleEntities?: ModuleEntities
 ): FormError | null => {
-  const { magnetAction, engageHeight } = fields
-  const moduleEntity = fields.meta?.module
-  const model = moduleEntity?.model
-
+  const { magnetAction, engageHeight, moduleId } = fields
+  if (moduleEntities == null) {
+    return null
+  }
+  const moduleModel = moduleEntities[moduleId].model
+  const engageHeightCast = Number(engageHeight)
   if (magnetAction === 'engage') {
-    if (model === MAGNETIC_MODULE_V1) {
-      if (engageHeight < MIN_ENGAGE_HEIGHT_V1) {
+    if (moduleModel === MAGNETIC_MODULE_V1) {
+      if (engageHeightCast < MIN_ENGAGE_HEIGHT_V1) {
         return ENGAGE_HEIGHT_MIN_EXCEEDED
-      } else if (engageHeight > MAX_ENGAGE_HEIGHT_V1) {
+      } else if (engageHeightCast > MAX_ENGAGE_HEIGHT_V1) {
         return ENGAGE_HEIGHT_MAX_EXCEEDED
       }
-    } else if (model === MAGNETIC_MODULE_V2) {
-      if (engageHeight < MIN_ENGAGE_HEIGHT_V2) {
+    } else if (moduleModel === MAGNETIC_MODULE_V2) {
+      if (engageHeightCast < MIN_ENGAGE_HEIGHT_V2) {
         return ENGAGE_HEIGHT_MIN_EXCEEDED
-      } else if (engageHeight > MAX_ENGAGE_HEIGHT_V2) {
+      } else if (engageHeightCast > MAX_ENGAGE_HEIGHT_V2) {
         return ENGAGE_HEIGHT_MAX_EXCEEDED
       }
     } else {
-      console.warn(`unhandled model for engageHeightRangeExceeded: ${model}`)
+      console.warn(
+        `unhandled model for engageHeightRangeExceeded: ${moduleModel}`
+      )
     }
   }
 
@@ -911,20 +936,35 @@ export const fileNameRequired = (
     ? FILENAME_REQUIRED
     : null
 }
+export const aspirateTouchTipSpeedRequired = (
+  fields: HydratedFormData
+): FormError | null => {
+  const { aspirate_touchTip_speed, aspirate_touchTip_checkbox } = fields
+  return aspirate_touchTip_checkbox && !aspirate_touchTip_speed
+    ? ASPIRATE_TOUCH_TIP_SPEED_REQUIRED
+    : null
+}
+export const dispenseTouchTipSpeedRequired = (
+  fields: HydratedFormData
+): FormError | null => {
+  const { dispense_touchTip_speed, dispense_touchTip_checkbox } = fields
+  return dispense_touchTip_checkbox && !dispense_touchTip_speed
+    ? DISPENSE_TOUCH_TIP_SPEED_REQUIRED
+    : null
+}
 
 /*******************
  **     Helpers    **
  ********************/
 type ComposeErrors = (
   ...errorCheckers: FormErrorChecker[]
-) => (arg: HydratedFormData) => FormError[]
+) => (arg: HydratedFormData, moduleEntities?: ModuleEntities) => FormError[]
 export const composeErrors: ComposeErrors = (
   ...errorCheckers: FormErrorChecker[]
-) => value =>
-  errorCheckers.reduce<FormError[]>((acc, errorChecker) => {
-    const possibleError = errorChecker(value)
-    return possibleError ? [...acc, possibleError] : acc
-  }, [])
+) => (formData: HydratedFormData, moduleEntities?: ModuleEntities) =>
+  errorCheckers
+    .map(checker => checker(formData, moduleEntities))
+    .filter((error): error is FormError => error !== null)
 
 export const getIsOutOfRange = (
   value: any,

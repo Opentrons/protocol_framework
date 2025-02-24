@@ -7,7 +7,7 @@ import type {
   LoadLabwareCreateCommand,
   ProtocolFile,
 } from '@opentrons/shared-data'
-import type { LiquidEntities } from '@opentrons/step-generation'
+import type { Ingredients } from '@opentrons/step-generation'
 import type { DesignerApplicationData } from './utils/getLoadLiquidCommands'
 import type { PDMetadata } from '../../file-types'
 
@@ -30,15 +30,14 @@ export const migrateFile = (
 
   const ingredients = designerApplication.data.ingredients
 
-  const migratedIngredients: LiquidEntities = Object.entries(
+  const migratedIngredients: Ingredients = Object.entries(
     ingredients
-  ).reduce<LiquidEntities>((acc, [id, ingredient]) => {
+  ).reduce<Ingredients>((acc, [id, ingredient]) => {
     acc[id] = {
       displayName: ingredient.name ?? '',
       liquidClass: ingredient.liquidClass,
       description: ingredient.description ?? null,
       liquidGroupId: id,
-      pythonName: `liquid_${parseInt(id) + 1}`,
       displayColor: liquids[id].displayColor ?? swatchColors(id),
     }
     return acc
@@ -101,6 +100,8 @@ export const migrateFile = (
           dispense_submerge_delay_seconds: null,
           aspirate_submerge_speed: null,
           dispense_submerge_speed: null,
+          aspirate_touchTip_speed: null,
+          dispense_touchTip_speed: null,
         },
       }
     }

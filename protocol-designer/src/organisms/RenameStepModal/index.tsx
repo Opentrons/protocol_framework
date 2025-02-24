@@ -2,9 +2,8 @@ import { useState } from 'react'
 import { useDispatch } from 'react-redux'
 import { useTranslation } from 'react-i18next'
 import { createPortal } from 'react-dom'
-import styled from 'styled-components'
+
 import {
-  BORDERS,
   COLORS,
   DIRECTION_COLUMN,
   Flex,
@@ -14,12 +13,14 @@ import {
   SecondaryButton,
   SPACING,
   StyledText,
-  TYPOGRAPHY,
   InputField,
 } from '@opentrons/components'
+
+import { TextAreaField } from '../../molecules'
 import { capitalizeFirstLetter } from '../../pages/Designer/ProtocolSteps/StepForm/utils'
 import { getMainPagePortalEl } from '../Portal'
 import { renameStep } from '../../labware-ingred/actions'
+
 import type { FormData } from '../../form-types'
 
 const MAX_STEP_NAME_LENGTH = 60
@@ -101,15 +102,13 @@ export function RenameStepModal(props: RenameStepModalProps): JSX.Element {
             />
           </Flex>
           <Flex flexDirection={DIRECTION_COLUMN} gridGap={SPACING.spacing4}>
-            <StyledText color={COLORS.grey60} desktopStyle="captionRegular">
-              {t('form:step_edit_form.field.step_notes.label')}
-            </StyledText>
-
-            <DescriptionField
+            <TextAreaField
+              title={t('form:step_edit_form.field.step_notes.label')}
               value={stepDetails}
               onChange={e => {
-                setStepDetails(e.target.value)
+                setStepDetails(e.target.value as string)
               }}
+              height="4.75rem"
             />
           </Flex>
         </Flex>
@@ -118,13 +117,3 @@ export function RenameStepModal(props: RenameStepModalProps): JSX.Element {
     getMainPagePortalEl()
   )
 }
-
-const DescriptionField = styled.textarea`
-  min-height: 5rem;
-  width: 100%;
-  border: ${BORDERS.lineBorder};
-  border-radius: ${BORDERS.borderRadius4};
-  padding: ${SPACING.spacing8};
-  font-size: ${TYPOGRAPHY.fontSizeH3};
-  resize: none;
-`

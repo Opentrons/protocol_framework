@@ -8,7 +8,7 @@
   "metadata": {
     "displayName": "Opentrons Flex Tiprack Lid",
     "displayCategory": "lid",
-    "displayVolumeUnits": "\u00b5L",
+    "displayVolumeUnits": "µL",
     "tags": []
   },
   "dimensions": {
@@ -112,5 +112,6 @@
         "z": 50.0
       }
     }
-  }
+  },
+  "$otSharedSchema": "#/labware/schemas/3"
 }

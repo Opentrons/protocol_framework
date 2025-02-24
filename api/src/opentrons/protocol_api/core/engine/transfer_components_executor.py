@@ -144,7 +144,7 @@ class TransferComponentsExecutor:
             minimum_z_height=None,
             speed=None,
         )
-        if self._transfer_type == TransferType.ONE_TO_ONE:
+        if self._transfer_type != TransferType.ONE_TO_MANY:
             self._remove_air_gap(location=submerge_start_location)
         self._instrument.move_to(
             location=self._target_location,
@@ -319,9 +319,15 @@ class TransferComponentsExecutor:
                 # Full speed because the tip will already be out of the liquid
                 speed=None,
             )
+        # For consolidate, we need to know the total amount that is in the pipette since this
+        # may not be the first aspirate
+        if self._transfer_type == TransferType.MANY_TO_ONE:
+            volume_for_air_gap = self._instrument.get_current_volume()
+        else:
+            volume_for_air_gap = volume
         self._add_air_gap(
             air_gap_volume=self._transfer_properties.aspirate.retract.air_gap_by_volume.get_for_volume(
-                volume
+                volume_for_air_gap
             )
         )
 
@@ -556,7 +562,7 @@ class TransferComponentsExecutor:
             rate=1,
             flow_rate=flow_rate,
             in_place=True,
-            is_meniscus=None,
+            is_meniscus=False,
             push_out=0,
             correction_volume=correction_volume,
         )
@@ -581,10 +587,6 @@ def absolute_point_from_position_reference_and_offset(
         case PositionReference.WELL_CENTER:
             reference_point = well.get_center()
         case PositionReference.LIQUID_MENISCUS:
-            # raise NotImplementedError(
-            #     "Liquid transfer using liquid-meniscus relative positioning"
-            #     " is not yet implemented."
-            # )
             reference_point = well.get_meniscus()
         case _:
             raise ValueError(f"Unknown position reference {position_reference}")

@@ -21,9 +21,9 @@
     ]
   },
   "metadata": {
-    "displayName": "Opentrons 96 Well Aluminum Block with NEST Well Plate 100 \u00b5L",
+    "displayName": "Opentrons 96 Well Aluminum Block with NEST Well Plate 100 µL",
     "displayCategory": "aluminumBlock",
-    "displayVolumeUnits": "\u00b5L",
+    "displayVolumeUnits": "µL",
     "tags": []
   },
   "dimensions": {
@@ -996,7 +996,7 @@
   "groups": [
     {
       "metadata": {
-        "displayName": "NEST 96 Well Plate 100 \u00b5L",
+        "displayName": "NEST 96 Well Plate 100 µL",
         "displayCategory": "wellPlate",
         "wellBottomShape": "v"
       },
@@ -1145,5 +1145,6 @@
         }
       ]
     }
-  }
+  },
+  "$otSharedSchema": "#/labware/schemas/3"
 }

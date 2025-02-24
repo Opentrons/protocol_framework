@@ -45,6 +45,10 @@ export const getEnableLiquidClasses: Selector<boolean> = createSelector(
   getFeatureFlagData,
   flags => flags.OT_PD_ENABLE_LIQUID_CLASSES ?? false
 )
+export const getEnableMutlipleTempsOT2: Selector<boolean> = createSelector(
+  getFeatureFlagData,
+  flags => flags.OT_PD_ENABLE_MULTIPLE_TEMPS_OT2 ?? false
+)
 export const getEnableTimelineScrubber: Selector<boolean> = createSelector(
   getFeatureFlagData,
   flags => flags.OT_PD_ENABLE_TIMELINE_SCRUBBER ?? false

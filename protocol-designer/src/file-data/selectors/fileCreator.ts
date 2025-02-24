@@ -26,12 +26,19 @@ import {
   getModulesLoadInfo,
   getPipettesLoadInfo,
 } from './utils'
+import {
+  pythonDefRun,
+  pythonImports,
+  pythonMetadata,
+  pythonRequirements,
+} from './pythonFile'
 
 import type { SecondOrderCommandAnnotation } from '@opentrons/shared-data/commandAnnotation/types'
 import type {
   PipetteEntity,
   LabwareEntities,
   PipetteEntities,
+  Ingredients,
 } from '@opentrons/step-generation'
 import type {
   CommandAnnotationV1Mixin,
@@ -92,34 +99,34 @@ export const createFile: Selector<ProtocolFile> = createSelector(
   getRobotStateTimeline,
   getRobotType,
   dismissSelectors.getAllDismissedWarnings,
-  stepFormSelectors.getLiquidEntities,
   ingredSelectors.getLiquidsByLabwareId,
   stepFormSelectors.getSavedStepForms,
   stepFormSelectors.getOrderedStepIds,
-  stepFormSelectors.getLabwareEntities,
-  stepFormSelectors.getModuleEntities,
-  stepFormSelectors.getPipetteEntities,
   uiLabwareSelectors.getLabwareNicknamesById,
   labwareDefSelectors.getLabwareDefsByURI,
   getStepGroups,
+  stepFormSelectors.getInvariantContext,
   (
     fileMetadata,
     initialRobotState,
     robotStateTimeline,
     robotType,
     dismissedWarnings,
-    liquidEntities,
     ingredLocations,
     savedStepForms,
     orderedStepIds,
-    labwareEntities,
-    moduleEntities,
-    pipetteEntities,
     labwareNicknamesById,
     labwareDefsByURI,
-    stepGroups
+    stepGroups,
+    invariantContext
   ) => {
     const { author, description, created } = fileMetadata
+    const {
+      pipetteEntities,
+      labwareEntities,
+      liquidEntities,
+      moduleEntities,
+    } = invariantContext
 
     const loadCommands = getLoadCommands(
       initialRobotState,
@@ -139,6 +146,29 @@ export const createFile: Selector<ProtocolFile> = createSelector(
     const savedOrderedStepIds = orderedStepIds.filter(
       stepId => savedStepForms[stepId]
     )
+
+    const ingredients: Ingredients = Object.entries(liquidEntities).reduce(
+      (acc: Ingredients, [liquidId, liquidData]) => {
+        const {
+          displayName,
+          description,
+          displayColor,
+          liquidGroupId,
+          liquidClass,
+        } = liquidData
+
+        acc[liquidId] = {
+          displayName,
+          description,
+          displayColor,
+          liquidGroupId,
+          liquidClass,
+        }
+        return acc
+      },
+      {}
+    )
+
     const designerApplication = {
       name: 'opentrons/protocol-designer',
       version: applicationVersion,
@@ -150,7 +180,7 @@ export const createFile: Selector<ProtocolFile> = createSelector(
             p.tiprackDefURI
         ),
         dismissedWarnings,
-        ingredients: liquidEntities,
+        ingredients,
         ingredLocations,
         savedStepForms,
         orderedStepIds: savedOrderedStepIds,
@@ -272,5 +302,42 @@ export const createFile: Selector<ProtocolFile> = createSelector(
       ...commandv8Mixin,
       ...commandAnnotionaV1Mixin,
     }
+  }
+)
+
+export const createPythonFile: Selector<string> = createSelector(
+  getFileMetadata,
+  getRobotType,
+  stepFormSelectors.getInvariantContext,
+  getInitialRobotState,
+  getRobotStateTimeline,
+  ingredSelectors.getLiquidsByLabwareId,
+  uiLabwareSelectors.getLabwareNicknamesById,
+  (
+    fileMetadata,
+    robotType,
+    invariantContext,
+    robotState,
+    robotStateTimeline,
+    liquidsByLabwareId,
+    labwareNicknamesById
+  ) => {
+    return (
+      [
+        // Here are the sections of the Python file:
+        pythonImports(),
+        pythonMetadata(fileMetadata),
+        pythonRequirements(robotType),
+        pythonDefRun(
+          invariantContext,
+          robotState,
+          robotStateTimeline,
+          liquidsByLabwareId,
+          labwareNicknamesById
+        ),
+      ]
+        .filter(section => section) // skip any blank sections
+        .join('\n\n') + '\n'
+    )
   }
 )

@@ -1,5 +1,4 @@
 """Test evotip dispense in place commands."""
-import json
 
 import pytest
 from decoy import Decoy
@@ -17,7 +16,10 @@ from opentrons.protocol_engine.execution import (
     MovementHandler,
 )
 
-from opentrons_shared_data.labware.labware_definition import LabwareDefinition
+from opentrons_shared_data.labware.labware_definition import (
+    LabwareDefinition,
+    labware_definition_type_adapter,
+)
 from opentrons.protocol_engine.commands.command import SuccessData
 from opentrons.protocol_engine.commands.evotip_dispense import (
     EvotipDispenseParams,
@@ -28,19 +30,15 @@ from opentrons.protocol_engine.resources import ModelUtils
 from opentrons.protocol_engine.state.state import StateView
 from opentrons.protocol_engine.state import update_types
 
-from opentrons_shared_data import load_shared_data
+from opentrons_shared_data.labware import load_definition
 
 
 @pytest.fixture
 def evotips_definition() -> LabwareDefinition:
     """A fixturee of the evotips definition."""
     # TODO (chb 2025-01-29): When we migrate all labware to v3 we can clean this up
-    return LabwareDefinition.model_validate(
-        json.loads(
-            load_shared_data(
-                "labware/definitions/3/evotips_opentrons_96_labware/1.json"
-            )
-        )
+    return labware_definition_type_adapter.validate_python(
+        load_definition("evotips_opentrons_96_labware", 1)
     )
 
 

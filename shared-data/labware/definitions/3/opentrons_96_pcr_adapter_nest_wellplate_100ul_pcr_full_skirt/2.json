@@ -19,9 +19,9 @@
     "links": []
   },
   "metadata": {
-    "displayName": "Opentrons 96 PCR Heater-Shaker Adapter with NEST Well Plate 100 \u00b5l",
+    "displayName": "Opentrons 96 PCR Heater-Shaker Adapter with NEST Well Plate 100 µl",
     "displayCategory": "adapter",
-    "displayVolumeUnits": "\u00b5L",
+    "displayVolumeUnits": "µL",
     "tags": []
   },
   "dimensions": {
@@ -994,7 +994,7 @@
   "groups": [
     {
       "metadata": {
-        "displayName": "NEST 96 Well Plate 100 \u00b5L PCR Full Skirt",
+        "displayName": "NEST 96 Well Plate 100 µL PCR Full Skirt",
         "displayCategory": "wellPlate",
         "wellBottomShape": "v"
       },
@@ -1143,5 +1143,6 @@
         }
       ]
     }
-  }
+  },
+  "$otSharedSchema": "#/labware/schemas/3"
 }

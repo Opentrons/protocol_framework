@@ -19,6 +19,7 @@ import { TipPositionModal, ZTipPositionModal } from '../../../../../organisms'
 import { getIsDelayPositionField } from '../../../../../form-types'
 import { getDefaultMmFromEdge } from '../../../../../organisms/TipPositionModal/utils'
 import { selectors as stepFormSelectors } from '../../../../../step-forms'
+
 import type {
   TipXOffsetFields,
   TipYOffsetFields,
@@ -26,14 +27,17 @@ import type {
 } from '../../../../../form-types'
 import type { PositionSpecs } from '../../../../../organisms'
 import type { FieldPropsByName } from '../types'
+import type { MoveLiquidPrefixType } from '../../../../../resources/types'
 interface PositionFieldProps {
-  prefix: 'aspirate' | 'dispense' | 'mix'
+  prefix: MoveLiquidPrefixType
   propsForFields: FieldPropsByName
   zField: TipZOffsetFields
   xField?: TipXOffsetFields
   yField?: TipYOffsetFields
   labwareId?: string | null
   padding?: string
+  showButton?: boolean
+  isNested?: boolean
 }
 
 export function PositionField(props: PositionFieldProps): JSX.Element {
@@ -45,6 +49,8 @@ export function PositionField(props: PositionFieldProps): JSX.Element {
     yField,
     prefix,
     padding = `0 ${SPACING.spacing16}`,
+    showButton = false,
+    isNested = false,
   } = props
   const {
     name: zName,
@@ -165,7 +171,7 @@ export function PositionField(props: PositionFieldProps): JSX.Element {
     <>
       <Tooltip tooltipProps={tooltipProps}>{tooltipContent}</Tooltip>
       {isModalOpen ? modal : null}
-      {yField != null && xField != null ? (
+      {(yField != null && xField != null) || showButton ? (
         <Flex
           {...targetProps}
           padding={padding}
@@ -180,26 +186,31 @@ export function PositionField(props: PositionFieldProps): JSX.Element {
           </StyledText>
           <ListButton
             padding={SPACING.spacing12}
-            type="noActive"
+            type={isNested ? 'onColor' : 'noActive'}
             onClick={() => {
               handleOpen(true)
             }}
             gridGap={SPACING.spacing8}
             alignItems={ALIGN_CENTER}
+            testId={`PositionField_ListButton_${prefix}`}
           >
-            <Icon name="tip-position" size="1.25rem" />
+            {!isNested ? <Icon name="tip-position" size="1.25rem" /> : null}
             <StyledText desktopStyle="bodyDefaultRegular">
-              {t('protocol_steps:well_position', {
-                x:
-                  propsForFields[xField].value != null
-                    ? Number(propsForFields[xField].value)
-                    : 0,
-                y:
-                  propsForFields[yField].value != null
-                    ? Number(propsForFields[yField].value)
-                    : 0,
-                z: zValue,
-              })}
+              {xField != null && yField != null
+                ? t('protocol_steps:well_position', {
+                    x:
+                      propsForFields[xField]?.value != null
+                        ? Number(propsForFields[xField]?.value)
+                        : 0,
+                    y:
+                      propsForFields[yField]?.value != null
+                        ? Number(propsForFields[yField]?.value)
+                        : 0,
+                    z: zValue,
+                  })
+                : t('protocol_steps:well_position_z_only', {
+                    z: zValue,
+                  })}
             </StyledText>
           </ListButton>
         </Flex>
@@ -212,8 +223,9 @@ export function PositionField(props: PositionFieldProps): JSX.Element {
           }
           disabled={disabled}
           readOnly
-          onClick={() => {
+          onClick={e => {
             handleOpen(false)
+            e.stopPropagation()
           }}
           value={String(zValue)}
           isIndeterminate={isIndeterminate}

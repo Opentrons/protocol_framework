@@ -438,9 +438,9 @@
     "brandId": []
   },
   "metadata": {
-    "displayName": "Opentrons Universal Flat Heater-Shaker Adapter with Corning 384 Well Plate 112 \u00b5l Flat",
+    "displayName": "Opentrons Universal Flat Heater-Shaker Adapter with Corning 384 Well Plate 112 µl Flat",
     "displayCategory": "adapter",
-    "displayVolumeUnits": "\u00b5L",
+    "displayVolumeUnits": "µL",
     "tags": []
   },
   "dimensions": {
@@ -4677,7 +4677,7 @@
   "groups": [
     {
       "metadata": {
-        "displayName": "Corning 384 Well Plate 112 \u00b5L Flat",
+        "displayName": "Corning 384 Well Plate 112 µL Flat",
         "displayCategory": "wellPlate",
         "wellBottomShape": "flat"
       },
@@ -5103,5 +5103,6 @@
         }
       ]
     }
-  }
+  },
+  "$otSharedSchema": "#/labware/schemas/3"
 }

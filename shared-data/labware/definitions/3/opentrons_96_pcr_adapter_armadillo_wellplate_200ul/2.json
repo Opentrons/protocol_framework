@@ -10,9 +10,9 @@
     "isMagneticModuleCompatible": false
   },
   "metadata": {
-    "displayName": "Opentrons 96 PCR Heater-Shaker Adapter with Armadillo Well Plate 200 \u00b5l",
+    "displayName": "Opentrons 96 PCR Heater-Shaker Adapter with Armadillo Well Plate 200 µl",
     "displayCategory": "aluminumBlock",
-    "displayVolumeUnits": "\u00b5L",
+    "displayVolumeUnits": "µL",
     "tags": []
   },
   "brand": {
@@ -1009,7 +1009,7 @@
   "groups": [
     {
       "metadata": {
-        "displayName": "Armadillo 96 Well Plate 200 \u00b5L PCR Full Skirt",
+        "displayName": "Armadillo 96 Well Plate 200 µL PCR Full Skirt",
         "displayCategory": "wellPlate",
         "wellBottomShape": "v"
       },
@@ -1145,5 +1145,6 @@
         }
       ]
     }
-  }
+  },
+  "$otSharedSchema": "#/labware/schemas/3"
 }
