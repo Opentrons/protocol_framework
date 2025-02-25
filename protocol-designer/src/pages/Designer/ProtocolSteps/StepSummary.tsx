@@ -114,7 +114,7 @@ export function StepSummary(props: StepSummaryProps): JSX.Element | null {
       const mixLabwareDisplayName = labwareNicknamesById[mixLabwareId]
       const mixWellsDisplay = getWellsForStepSummary(
         mix_wells as string[],
-        flatten(labwareEntities[mixLabware].def.ordering)
+        flatten(labwareEntities[mixLabware]?.def.ordering)
       )
 
       stepSummaryContent = (
