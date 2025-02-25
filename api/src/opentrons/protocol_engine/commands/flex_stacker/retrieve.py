@@ -287,6 +287,11 @@ class RetrieveImpl(AbstractCommandImpl[RetrieveParams, SuccessData[RetrieveResul
                 message=f"The Flex Stacker in {location} has not been configured yet and cannot be filled."
             )
 
+        if stacker_state.pool_count == 0:
+            raise CannotPerformModuleAction(
+                message="Cannot retrieve labware from Flex Stacker because it contains no labware"
+            )
+
         stacker_loc = ModuleLocation(moduleId=params.moduleId)
         # Allow propagation of ModuleNotAttachedError.
         stacker_hw = self._equipment.get_module_hardware_api(stacker_state.module_id)
