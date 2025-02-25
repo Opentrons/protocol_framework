@@ -291,7 +291,7 @@ export function StepSummary(props: StepSummaryProps): JSX.Element | null {
       const labwareName = labwareNicknamesById[labware]
       let newLocationName = newLocation
       if (newLocation in modules) {
-        newLocationName = getModuleDisplayName(modules[newLocation].model)
+        newLocationName = getModuleDisplayName(modules[newLocation]?.model)
       } else if (newLocation in labwareEntities) {
         newLocationName = labwareNicknamesById[newLocation]
       } else if (newLocation === 'offDeck') {
