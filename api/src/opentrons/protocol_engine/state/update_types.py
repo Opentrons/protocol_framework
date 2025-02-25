@@ -107,6 +107,16 @@ class LabwareLocationUpdate:
 
 
 @dataclasses.dataclass
+class BatchLabwareLocationUpdate:
+    """An update to the locations of multiple labware."""
+
+    new_locations_by_id: dict[str, LabwareLocation]
+    """The new locations of each ID."""
+    new_offset_ids_by_id: dict[str, str | None]
+    """The new offsets of each id."""
+
+
+@dataclasses.dataclass
 class LoadedLabwareUpdate:
     """An update that loads a new labware."""
 
@@ -126,7 +136,7 @@ class LoadedLabwareUpdate:
 
 @dataclasses.dataclass
 class BatchLoadedLabwareUpdate:
-    """An update that loads a new labware."""
+    """An update that loads multiple new labware."""
 
     new_locations_by_id: typing.Dict[str, LabwareLocation]
     """Each new labwares's initial location keyed by Labware ID."""
@@ -436,6 +446,8 @@ class StateUpdate:
 
     labware_location: LabwareLocationUpdate | NoChangeType = NO_CHANGE
 
+    batch_labware_location: BatchLabwareLocationUpdate | NoChangeType = NO_CHANGE
+
     loaded_labware: LoadedLabwareUpdate | NoChangeType = NO_CHANGE
 
     batch_loaded_labware: BatchLoadedLabwareUpdate | NoChangeType = NO_CHANGE
@@ -568,6 +580,19 @@ class StateUpdate:
             labware_id=labware_id,
             new_location=new_location,
             offset_id=new_offset_id,
+        )
+        return self
+
+    def set_batch_labware_location(
+        self: Self,
+        *,
+        new_locations_by_id: typing.Dict[str, LabwareLocation],
+        new_offset_ids_by_id: typing.Dict[str, str | None],
+    ) -> Self:
+        """Update the location of multiple labware objects."""
+        self.batch_labware_location = BatchLabwareLocationUpdate(
+            new_locations_by_id=new_locations_by_id,
+            new_offset_ids_by_id=new_offset_ids_by_id,
         )
         return self
 
