@@ -138,7 +138,11 @@ class WellCore(AbstractWellCore):
 
     def get_meniscus(self) -> Union[Point, Literal["SimulatedProbeResult"]]:
         """Get the coordinate of the well's meniscus."""
-        return self.current_liquid_height()
+        current_liquid_height = self.current_liquid_height()
+        if isinstance(current_liquid_height, float):
+            return self.get_bottom(z_offset=current_liquid_height)
+        else:
+            return current_liquid_height
 
     def load_liquid(
         self,
