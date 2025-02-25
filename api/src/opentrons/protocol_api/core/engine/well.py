@@ -7,8 +7,6 @@ from opentrons.protocol_engine import WellLocation, WellOrigin, WellOffset
 from opentrons.protocol_engine import commands as cmd
 from opentrons.protocol_engine.clients import SyncClient as EngineClient
 from opentrons.protocols.api_support.util import UnsupportedAPIError
-
-# from opentrons.protocol_engine.state.update_types import SimulatedType
 from opentrons.types import Point
 
 from . import point_calculations
@@ -140,7 +138,11 @@ class WellCore(AbstractWellCore):
     # this gets the coordinates of the well bottom w a z offset of current liquid height
     def get_meniscus(self) -> Point:
         """Get the coordinate of the well's meniscus."""
-        return self.get_bottom(self.current_liquid_height())
+        current_liquid_height = self.current_liquid_height()
+        if not isinstance(current_liquid_height, float):
+            return self.get_bottom(0)
+        else:
+            return self.get_bottom(current_liquid_height)
 
     def load_liquid(
         self,
