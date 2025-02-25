@@ -337,7 +337,7 @@ const mockLiquidEntities: LiquidEntities = {
   [liquid2]: {
     liquidGroupId: liquid2,
     pythonName: 'liquid_2',
-    description: null,
+    description: '',
     displayName: 'sulfur',
     displayColor: 'mock display color 2',
   },

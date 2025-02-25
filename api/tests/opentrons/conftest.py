@@ -36,7 +36,7 @@ except (OSError, ModuleNotFoundError):
 
 from opentrons_shared_data.robot.types import RobotTypeEnum
 from opentrons_shared_data.protocol.types import JsonProtocol
-from opentrons_shared_data.labware.types import LabwareDefinition
+from opentrons_shared_data.labware.types import LabwareDefinition, LabwareDefinition2
 from opentrons_shared_data.module.types import ModuleDefinitionV3
 from opentrons_shared_data.liquid_classes.liquid_class_definition import (
     LiquidClassSchemaV1,
@@ -606,7 +606,7 @@ def get_bundle_fixture() -> Callable[[str], Bundle]:
 
 
 @pytest.fixture()
-def minimal_labware_def() -> LabwareDefinition:
+def minimal_labware_def() -> LabwareDefinition2:
     return {
         "metadata": {
             "displayName": "minimal labware",
@@ -652,7 +652,7 @@ def minimal_labware_def() -> LabwareDefinition:
 
 
 @pytest.fixture()
-def minimal_labware_def2() -> LabwareDefinition:
+def minimal_labware_def2() -> LabwareDefinition2:
     return {
         "metadata": {
             "displayName": "other test labware",
@@ -733,14 +733,14 @@ def minimal_labware_def2() -> LabwareDefinition:
 
 
 @pytest.fixture()
-def min_lw_impl(minimal_labware_def: LabwareDefinition) -> LegacyLabwareCore:
+def min_lw_impl(minimal_labware_def: LabwareDefinition2) -> LegacyLabwareCore:
     return LegacyLabwareCore(
         definition=minimal_labware_def, parent=Location(Point(0, 0, 0), "deck")
     )
 
 
 @pytest.fixture()
-def min_lw2_impl(minimal_labware_def2: LabwareDefinition) -> LegacyLabwareCore:
+def min_lw2_impl(minimal_labware_def2: LabwareDefinition2) -> LegacyLabwareCore:
     return LegacyLabwareCore(
         definition=minimal_labware_def2, parent=Location(Point(0, 0, 0), "deck")
     )
