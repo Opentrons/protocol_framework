@@ -50,7 +50,7 @@ export function MoveLiquidTools(props: StepFormProps): JSX.Element {
   const defaultSelectedLiquidClass = hasAssignedLiquidClasses
     ? t(
         `protocol_steps:liquid_classes.${getLiquidClassDisplayName(
-          assignedLiquidClasses[0]
+          assignedLiquidClasses[0] ?? null
         )
           ?.split('-')[0]
           .toLowerCase()}`
@@ -93,9 +93,11 @@ export function MoveLiquidTools(props: StepFormProps): JSX.Element {
       subButtonLabel: '',
     },
   ]
-
   if (!hasAssignedLiquidClasses) {
-    liquidClassOptions.unshift(liquidClassOptions.pop()!)
+    const poppedOption = liquidClassOptions.pop()
+    if (poppedOption !== undefined) {
+      liquidClassOptions.unshift(poppedOption)
+    }
   }
 
   // Object mapping step numbers to functions returning the correct JSX
@@ -129,7 +131,6 @@ export function MoveLiquidTools(props: StepFormProps): JSX.Element {
             >
               {liquidClassOptions.map(options => {
                 const { name, subButtonLabel } = options
-                console.log(name)
                 return (
                   <RadioButton
                     key={name}
