@@ -5,7 +5,7 @@ import { describe, expect, it, test } from 'vitest'
 import type { LabwareDefinition3 } from '../types'
 import Ajv from 'ajv'
 import schema from '../../labware/schemas/3.json'
-import { chunk, range } from 'lodash'
+import { range } from 'lodash'
 
 const fixturesDir = path.join(__dirname, '../../labware/fixtures/3')
 const definitionsDir = path.join(__dirname, '../../labware/definitions/3')
@@ -122,7 +122,7 @@ describe(`test labware definitions with schema v3`, () => {
 
 // [1, 2, 3, 4] -> [[1, 2], [2, 3], [3, 4]]
 // [1] -> []
-function pairs<T>(array: T[]): [T, T][] {
+function pairs<T>(array: T[]): Array<[T, T]> {
   return range(array.length - 1).map(firstIndex => [
     array[firstIndex],
     array[firstIndex + 1],
