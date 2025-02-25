@@ -356,8 +356,7 @@ def _find_volume_in_partial_frustum(
 
 def find_volume_at_well_height(
     target_height: Union[float, Literal["SimulatedProbeResult"]],
-    well_geometry: InnerWellGeometry
-    # ) -> Union[SimulatedType, float]:
+    well_geometry: InnerWellGeometry,
 ) -> Union[Literal["SimulatedProbeResult"], float]:
     """Find the volume within a well, at a known height."""
     if target_height == "SimulatedProbeResult":

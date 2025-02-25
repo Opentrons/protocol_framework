@@ -8,7 +8,6 @@ from opentrons.protocol_engine import commands as cmd
 from opentrons.protocol_engine.clients import SyncClient as EngineClient
 from opentrons.protocols.api_support.util import UnsupportedAPIError
 
-# from opentrons.protocol_engine.state.update_types import SimulatedType
 from opentrons.types import Point
 
 from . import point_calculations
@@ -137,14 +136,9 @@ class WellCore(AbstractWellCore):
             well_location=WellLocation(origin=WellOrigin.CENTER),
         )
 
-    # this gets the coordinates of the well bottom w a z offset of current liquid height
-    def get_meniscus(self) -> Point:
+    def get_meniscus(self) -> Union[Point, Literal["SimulatedProbeResult"]]:
         """Get the coordinate of the well's meniscus."""
-        current_liquid_height = self.current_liquid_height()
-        if not isinstance(current_liquid_height, float):
-            return self.get_bottom(0)
-        else:
-            return self.get_bottom(current_liquid_height)
+        return self.current_liquid_height()
 
     def load_liquid(
         self,
@@ -180,7 +174,7 @@ class WellCore(AbstractWellCore):
     def estimate_liquid_height_after_pipetting(
         self,
         operation_volume: float,
-    ) -> float:
+    ) -> Union[float, Literal["SimulatedProbeResult"]]:
         """Return an estimate of liquid height after pipetting without raising an error."""
         labware_id = self.labware_id
         well_name = self._name

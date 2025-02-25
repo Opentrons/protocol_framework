@@ -50,7 +50,7 @@ class WellStore(HasState[WellState], HandlesActions):
         """Initialize a well store and its state."""
         self._state = WellState(loaded_volumes={}, probed_heights={}, probed_volumes={})
 
-    def handle_action(self, action: Action) -> None:  # bookmark
+    def handle_action(self, action: Action) -> None:
         """Modify state in reaction to an action."""
         for state_update in get_state_updates(action):
             if state_update.liquid_loaded != update_types.NO_CHANGE:
@@ -131,15 +131,21 @@ class WellStore(HasState[WellState], HandlesActions):
             labware_id in self._state.probed_volumes
             and well_name in self._state.probed_volumes[labware_id]
         ):
+            prev_probed_vol_info = self._state.probed_volumes[labware_id][well_name]
             if volume_added is update_types.CLEAR:
                 del self._state.probed_volumes[labware_id][well_name]
             elif (
                 self._state.probed_volumes[labware_id][well_name].volume
                 == "SimulatedProbeResult"
             ):
+                self._state.probed_volumes[labware_id][well_name] = ProbedVolumeInfo(
+                    volume="SimulatedProbeResult",
+                    last_probed=prev_probed_vol_info.last_probed,
+                    operations_since_probe=prev_probed_vol_info.operations_since_probe
+                    + 1,
+                )
                 return
             else:
-                prev_probed_vol_info = self._state.probed_volumes[labware_id][well_name]
                 if prev_probed_vol_info.volume is None:
                     new_vol_info: float | None = None
                 else:
@@ -268,9 +274,6 @@ def _height_from_info(
 ) -> Union[float, Literal["SimulatedProbeResult"], None]:
     if info is None:
         return None
-    # elif info.height == update_types.SIMULATED:
-    #     return "SimulatedType"
-    # reveal_type(info.height)
     return info.height
 
 
@@ -280,7 +283,6 @@ MaybeClear = TypeVar("MaybeClear")
 def _none_from_clear(
     inval: Union[MaybeClear, update_types.ClearType]
 ) -> MaybeClear | None:
-    # see if it can be update_types.SIMULATED in here
-    if inval == update_types.CLEAR:  # or inval == "SimulatedProbeResult":
+    if inval == update_types.CLEAR:
         return None
     return inval
