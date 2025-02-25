@@ -7,6 +7,8 @@ from opentrons.protocol_engine import WellLocation, WellOrigin, WellOffset
 from opentrons.protocol_engine import commands as cmd
 from opentrons.protocol_engine.clients import SyncClient as EngineClient
 from opentrons.protocols.api_support.util import UnsupportedAPIError
+
+# from opentrons.protocol_engine.state.update_types import SimulatedType
 from opentrons.types import Point
 
 from . import point_calculations
@@ -199,14 +201,10 @@ class WellCore(AbstractWellCore):
             labware_id=labware_id, well_name=well_name
         )
 
-    def get_liquid_volume(self) -> float:
+    def get_liquid_volume(self) -> Union[float, Literal["SimulatedProbeResult"]]:
         """Return the current volume in a well."""
         labware_id = self.labware_id
         well_name = self._name
-        volume_result = self._engine_client.state.geometry.get_current_well_volume(
+        return self._engine_client.state.geometry.get_current_well_volume(
             labware_id=labware_id, well_name=well_name
         )
-        if volume_result == "SimulatedProbeResult":
-            return 0.0  # temporary
-        else:
-            return volume_result

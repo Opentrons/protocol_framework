@@ -757,7 +757,6 @@ class StateUpdate:
             volume=volume,
             last_probed=last_probed,
         )
-        # raise Exception(f"liquid probed = {self.liquid_probed}") # noice
         return self
 
     def set_liquid_operated(

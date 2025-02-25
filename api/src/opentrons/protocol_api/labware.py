@@ -19,11 +19,12 @@ from typing import (
     List,
     Dict,
     Optional,
-    Union,
     Tuple,
     cast,
     Sequence,
     Mapping,
+    Union,
+    Literal,
 )
 
 from opentrons_shared_data.labware.types import (
@@ -324,17 +325,12 @@ class Well:
         )
 
     @requires_version(2, 21)
-    def current_liquid_height(self) -> float:
+    def current_liquid_height(self) -> Union[float, Literal["SimulatedProbeResult"]]:
         """Get the current liquid height in a well."""
-        current_height = self._core.current_liquid_height()
-        if not isinstance(current_height, float):
-            # return the middle of the well, this value should never be used
-            # for motion planning
-            return self._core.depth / 2
-        return current_height
+        return self._core.current_liquid_height()
 
     @requires_version(2, 21)
-    def current_liquid_volume(self) -> float:
+    def current_liquid_volume(self) -> Union[float, Literal["SimulatedProbeResult"]]:
         """Get the current liquid volume in a well."""
         return self._core.get_liquid_volume()
 

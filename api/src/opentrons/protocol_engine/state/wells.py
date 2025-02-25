@@ -53,7 +53,6 @@ class WellStore(HasState[WellState], HandlesActions):
     def handle_action(self, action: Action) -> None:  # bookmark
         """Modify state in reaction to an action."""
         for state_update in get_state_updates(action):
-            raise Exception(f"liquid probed = {state_update.liquid_probed}")
             if state_update.liquid_loaded != update_types.NO_CHANGE:
                 self._handle_liquid_loaded_update(state_update.liquid_loaded)
             if state_update.liquid_probed != update_types.NO_CHANGE:
@@ -83,6 +82,7 @@ class WellStore(HasState[WellState], HandlesActions):
             self._state.probed_heights[labware_id] = {}
         if labware_id not in self._state.probed_volumes:
             self._state.probed_volumes[labware_id] = {}
+            # fix none from clear I think
         self._state.probed_heights[labware_id][well_name] = ProbedHeightInfo(
             height=_none_from_clear(state_update.height),
             last_probed=state_update.last_probed,
@@ -203,7 +203,6 @@ class WellView:
         update_times: List[datetime] = []
         if info.loaded_volume is not None and info.loaded_volume.volume is not None:
             update_times.append(info.loaded_volume.last_loaded)
-        # make sure I dont mess this up
         if info.probed_height is not None and info.probed_height.height is not None:
             update_times.append(info.probed_height.last_probed)
         if info.probed_volume is not None and info.probed_volume.volume is not None:
@@ -279,9 +278,9 @@ MaybeClear = TypeVar("MaybeClear")
 
 
 def _none_from_clear(
-    inval: Union[MaybeClear, update_types.ClearType, Literal["SimulatedProbeResult"]]
+    inval: Union[MaybeClear, update_types.ClearType]
 ) -> MaybeClear | None:
     # see if it can be update_types.SIMULATED in here
-    if inval == update_types.CLEAR or inval == "SimulatedProbeResult":
+    if inval == update_types.CLEAR:  # or inval == "SimulatedProbeResult":
         return None
     return inval

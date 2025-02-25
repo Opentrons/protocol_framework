@@ -174,7 +174,6 @@ async def _execute_common(  # noqa: C901
         )
 
     # liquid_probe process start position
-    # raise Exception(f"well location = {params.wellLocation}") its well.top
     move_result = await move_to_well(
         movement=movement,
         model_utils=model_utils,
@@ -310,7 +309,6 @@ class LiquidProbeImplementation(
             )
         else:
             try:
-                # raise Exception(f"here lol")
                 well_volume: Union[
                     float, update_types.ClearType, Literal["SimulatedProbeResult"]
                 ] = self._state_view.geometry.get_well_volume_at_height(
@@ -318,10 +316,8 @@ class LiquidProbeImplementation(
                     well_name=params.wellName,
                     height=z_pos_or_error,
                 )  # bookmark
-                # raise Exception(f"well volume = {z_pos_or_error}") # noice
             except IncompleteLabwareDefinitionError:
                 well_volume = update_types.CLEAR
-            # import new union type here, pass it to set_liquid_probed
             state_update.set_liquid_probed(
                 labware_id=params.labwareId,
                 well_name=params.wellName,
