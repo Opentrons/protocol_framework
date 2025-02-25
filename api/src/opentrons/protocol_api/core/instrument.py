@@ -12,7 +12,6 @@ from opentrons.protocols.advanced_control.transfers.common import TransferTipPol
 from opentrons.protocol_api._nozzle_layout import NozzleLayout
 from opentrons.protocol_api._liquid import LiquidClass
 
-# from opentrons.protocol_engine.state.update_types import SimulatedType
 from ..disposal_locations import TrashBin, WasteChute
 from .well import WellCoreType
 from .labware import LabwareCoreType

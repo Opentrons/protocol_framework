@@ -84,8 +84,6 @@ from .frustum_helpers import (
 )
 from ._well_math import wells_covered_by_pipette_configuration, nozzles_per_well
 
-# from .update_types import SimulatedType, SIMULATED
-
 
 _LOG = getLogger(__name__)
 SLOT_WIDTH = 128
@@ -489,7 +487,6 @@ class GeometryView:
                     f"Specifying {well_location.origin} with an offset of {well_location.offset} results in an operation location below the bottom of the well"
                 )
             else:
-                # this is getting raised, I'm returning 0 somewhere arbitrarily
                 raise OperationLocationNotInWellError(
                     f"Specifying {well_location.origin} with an offset of {well_location.offset} and a volume offset of {well_location.volumeOffset} results in an operation location below the bottom of the well"
                 )
@@ -501,7 +498,6 @@ class GeometryView:
         well_location: Optional[WellLocations] = None,
         operation_volume: Optional[float] = None,
         pipette_id: Optional[str] = None,
-        # ) -> Union[Point, Literal["SimulatedProbeResult"]]:
     ) -> Point:
         """Given relative well location in a labware, get absolute position."""
         labware_pos = self.get_labware_position(labware_id)
@@ -519,7 +515,6 @@ class GeometryView:
                 operation_volume=operation_volume,
             )
             if not isinstance(offset_adjustment, float):
-                # return offset_adjustment
                 return Point()
             offset = offset.model_copy(update={"z": offset.z + offset_adjustment})
             self.validate_well_position(
@@ -1783,7 +1778,6 @@ class GeometryView:
                 initial_height=initial_handling_height,
                 volume=volume,
             )
-            # this code should never reached but mypy
             if liquid_height_after == "SimulatedProbeResult":
                 raise errors.LiquidHeightUnknownError(
                     "unknown simulated liquid height."
@@ -1949,7 +1943,7 @@ class GeometryView:
         well_name: str,
         initial_height: Union[float, Literal["SimulatedProbeResult"]],
         volume: float,
-    ) -> float:
+    ) -> Union[float, Literal["SimulatedProbeResult"]]:
         """Return what the height of liquid in a labware well after liquid handling will be.
 
         This raises no error if the value returned is an invalid physical location, so it should never be
@@ -1959,12 +1953,7 @@ class GeometryView:
             labware_id=labware_id, well_name=well_name
         )
         if initial_height == "SimulatedProbeResult":
-            # return the middle of the well, only because the return value of this function
-            #  will never be used for motion planning
-            well_definition = self._labware.get_well_definition(
-                labware_id=labware_id, well_name=well_name
-            )
-            return well_definition.depth / 2
+            return initial_height
         initial_volume = find_volume_at_well_height(
             target_height=initial_height, well_geometry=well_geometry
         )
@@ -1976,8 +1965,6 @@ class GeometryView:
             well_geometry=well_geometry,
             raise_error_if_result_invalid=False,
         )
-        # if well_volume == "SimulatedProbeResult":
-        #     raise errors.LiquidHeightUnknownError("Unknown simulated liquid height.")
         return well_volume
 
     def get_well_height_at_volume(

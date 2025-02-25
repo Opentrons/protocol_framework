@@ -186,7 +186,6 @@ async def _execute_common(  # noqa: C901
         return move_result
     try:
         current_position = await gantry_mover.get_position(params.pipetteId)
-        # should be #SimulatedProbeResult
         z_pos = await pipetting.liquid_probe_in_place(
             pipette_id=pipette_id,
             labware_id=labware_id,
@@ -227,7 +226,6 @@ async def _execute_common(  # noqa: C901
             ),
         )
     else:
-        # move_result.state_update needs to be simulated
         return _ExecuteCommonResult(
             z_pos_or_error=z_pos,
             state_update=move_result.state_update,
@@ -271,7 +269,6 @@ class LiquidProbeImplementation(
             MustHomeError: as an undefined error, if the plunger is not in a valid
                 position.
         """
-        # should be "SimulatedProbeResult"
         result = await _execute_common(
             state_view=self._state_view,
             movement=self._movement,
@@ -315,7 +312,7 @@ class LiquidProbeImplementation(
                     labware_id=params.labwareId,
                     well_name=params.wellName,
                     height=z_pos_or_error,
-                )  # bookmark
+                )
             except IncompleteLabwareDefinitionError:
                 well_volume = update_types.CLEAR
             state_update.set_liquid_probed(
