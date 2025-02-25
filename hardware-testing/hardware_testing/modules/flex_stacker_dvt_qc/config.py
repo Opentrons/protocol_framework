@@ -10,6 +10,8 @@ from . import (
     test_z_axis_basic,
     test_x_axis_basic,
     test_l_axis_basic,
+    test_z_axis_current_speed,
+    test_x_axis_current_speed,
     test_door_switch,
     test_estop,
 )
@@ -24,6 +26,8 @@ class TestSection(enum.Enum):
     Z_AXIS_BASIC = "Z_AXIS_BASIC"
     L_AXIS_BASIC = "L_AXIS_BASIC"
     X_AXIS_BASIC = "X_AXIS_BASIC"
+    Z_AXIS_CURRENT_SPEED = "Z_AXIS_CURRENT_SPEED"
+    X_AXIS_CURRENT_SPEED = "X_AXIS_CURRENT_SPEED"
 
 
 @dataclass
@@ -50,6 +54,14 @@ TESTS = [
     (
         TestSection.L_AXIS_BASIC,
         test_l_axis_basic.run,
+    ),
+    (
+        TestSection.Z_AXIS_CURRENT_SPEED,
+        test_z_axis_current_speed.run,
+    ),
+    (
+        TestSection.X_AXIS_CURRENT_SPEED,
+        test_x_axis_current_speed.run,
     ),
     (
         TestSection.ESTOP,
@@ -90,6 +102,14 @@ def build_report(test_name: str) -> CSVReport:
             CSVSection(
                 title=TestSection.L_AXIS_BASIC.value,
                 lines=test_l_axis_basic.build_csv_lines(),
+            ),
+            CSVSection(
+                title=TestSection.Z_AXIS_CURRENT_SPEED.value,
+                lines=test_z_axis_current_speed.build_csv_lines(),
+            ),
+            CSVSection(
+                title=TestSection.X_AXIS_CURRENT_SPEED.value,
+                lines=test_x_axis_current_speed.build_csv_lines(),
             ),
         ],
     )
