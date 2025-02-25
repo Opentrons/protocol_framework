@@ -187,6 +187,7 @@ async def _execute_common(  # noqa: C901
         return move_result
     try:
         current_position = await gantry_mover.get_position(params.pipetteId)
+        # should be #SimulatedProbeResult
         z_pos = await pipetting.liquid_probe_in_place(
             pipette_id=pipette_id,
             labware_id=labware_id,

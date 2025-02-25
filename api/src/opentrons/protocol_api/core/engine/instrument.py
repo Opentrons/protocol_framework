@@ -17,7 +17,6 @@ from opentrons.types import (
     Mount,
     NozzleConfigurationType,
     NozzleMapInterface,
-    MeniscusTrackingTarget,
 )
 from opentrons.hardware_control import SyncHardwareAPI
 from opentrons.hardware_control.dev_types import PipetteDict
