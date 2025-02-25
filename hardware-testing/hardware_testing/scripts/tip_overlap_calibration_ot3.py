@@ -3,7 +3,6 @@ import argparse
 import asyncio
 from enum import Enum
 from json import load as json_load
-from pathlib import Path
 from time import sleep
 from typing import Dict, Optional, Tuple
 
@@ -121,7 +120,7 @@ async def main(
 
         ui.print_header("PROBE the CALIBRATION-SQUARE")
         square_pos = types.Point(
-            *get_calibration_square_position_in_slot(slot=SLOT_CENTER)
+            *get_calibration_square_position_in_slot(slot=SLOT_CENTER) + Z_PREP_OFFSET
         )
         await api.retract(mnt)
         await api.move_to(mnt, square_pos + types.Point(z=PROBE_DISTANCE_MM))
