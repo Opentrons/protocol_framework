@@ -1,7 +1,17 @@
 """Basic well data state and store."""
 
 from dataclasses import dataclass
-from typing import Dict, List, Union, Iterator, Optional, Tuple, overload, TypeVar
+from typing import (
+    Dict,
+    List,
+    Union,
+    Iterator,
+    Optional,
+    Tuple,
+    overload,
+    TypeVar,
+    Literal,
+)
 from datetime import datetime
 
 from opentrons.protocol_engine.types import (
@@ -40,9 +50,10 @@ class WellStore(HasState[WellState], HandlesActions):
         """Initialize a well store and its state."""
         self._state = WellState(loaded_volumes={}, probed_heights={}, probed_volumes={})
 
-    def handle_action(self, action: Action) -> None:
+    def handle_action(self, action: Action) -> None:  # bookmark
         """Modify state in reaction to an action."""
         for state_update in get_state_updates(action):
+            raise Exception(f"liquid probed = {state_update.liquid_probed}")
             if state_update.liquid_loaded != update_types.NO_CHANGE:
                 self._handle_liquid_loaded_update(state_update.liquid_loaded)
             if state_update.liquid_probed != update_types.NO_CHANGE:
@@ -94,7 +105,7 @@ class WellStore(HasState[WellState], HandlesActions):
         self,
         labware_id: str,
         well_name: str,
-        volume_added: float | update_types.ClearType,
+        volume_added: Union[float, update_types.ClearType],
     ) -> None:
         if (
             labware_id in self._state.loaded_volumes
@@ -122,11 +133,17 @@ class WellStore(HasState[WellState], HandlesActions):
         ):
             if volume_added is update_types.CLEAR:
                 del self._state.probed_volumes[labware_id][well_name]
+            elif (
+                self._state.probed_volumes[labware_id][well_name].volume
+                == "SimulatedProbeResult"
+            ):
+                return
             else:
                 prev_probed_vol_info = self._state.probed_volumes[labware_id][well_name]
                 if prev_probed_vol_info.volume is None:
                     new_vol_info: float | None = None
                 else:
+                    assert isinstance(prev_probed_vol_info.volume, float)
                     new_vol_info = prev_probed_vol_info.volume + volume_added
                 self._state.probed_volumes[labware_id][well_name] = ProbedVolumeInfo(
                     volume=new_vol_info,
@@ -186,6 +203,7 @@ class WellView:
         update_times: List[datetime] = []
         if info.loaded_volume is not None and info.loaded_volume.volume is not None:
             update_times.append(info.loaded_volume.last_loaded)
+        # make sure I dont mess this up
         if info.probed_height is not None and info.probed_height.height is not None:
             update_times.append(info.probed_height.last_probed)
         if info.probed_volume is not None and info.probed_volume.volume is not None:
@@ -240,22 +258,30 @@ def _volume_from_info(info: Optional[LoadedVolumeInfo]) -> Optional[float]:
 
 def _volume_from_info(
     info: Union[ProbedVolumeInfo, LoadedVolumeInfo, None],
-) -> Optional[float]:
+) -> Union[float, Literal["SimulatedProbeResult"], None]:
     if info is None:
         return None
     return info.volume
 
 
-def _height_from_info(info: Optional[ProbedHeightInfo]) -> Optional[float]:
+def _height_from_info(
+    info: Optional[ProbedHeightInfo],
+) -> Union[float, Literal["SimulatedProbeResult"], None]:
     if info is None:
         return None
+    # elif info.height == update_types.SIMULATED:
+    #     return "SimulatedType"
+    # reveal_type(info.height)
     return info.height
 
 
 MaybeClear = TypeVar("MaybeClear")
 
 
-def _none_from_clear(inval: MaybeClear | update_types.ClearType) -> MaybeClear | None:
-    if inval == update_types.CLEAR:
+def _none_from_clear(
+    inval: Union[MaybeClear, update_types.ClearType, Literal["SimulatedProbeResult"]]
+) -> MaybeClear | None:
+    # see if it can be update_types.SIMULATED in here
+    if inval == update_types.CLEAR or inval == "SimulatedProbeResult":
         return None
     return inval
