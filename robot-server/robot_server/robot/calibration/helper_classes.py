@@ -1,4 +1,5 @@
 import typing
+from typing_extensions import Self
 
 from opentrons.types import Mount
 from enum import Enum
@@ -14,7 +15,7 @@ class RobotHealthCheck(Enum):
     IN_THRESHOLD = "IN_THRESHOLD"
     OUTSIDE_THRESHOLD = "OUTSIDE_THRESHOLD"
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.name
 
     @classmethod
@@ -31,26 +32,29 @@ class PipetteRank(str, Enum):
     first = "first"
     second = "second"
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.name
 
-    def __ge__(self, other):
-        if self.__class__ is other.__class__:
+    # todo(mm, 2025-02-14): PipetteRank ordering relies on the fact that the
+    # string "first" comes alphabetically before the string "second"? D:
+
+    def __ge__(self, other: object) -> bool:
+        if isinstance(other, PipetteRank):
             return self.value >= other.value
         return NotImplemented
 
-    def __gt__(self, other):
-        if self.__class__ is other.__class__:
+    def __gt__(self, other: object) -> bool:
+        if isinstance(other, PipetteRank):
             return self.value > other.value
         return NotImplemented
 
-    def __le__(self, other):
-        if self.__class__ is other.__class__:
+    def __le__(self, other: object) -> bool:
+        if isinstance(other, PipetteRank):
             return self.value <= other.value
         return NotImplemented
 
-    def __lt__(self, other):
-        if self.__class__ is other.__class__:
+    def __lt__(self, other: object) -> bool:
+        if isinstance(other, PipetteRank):
             return self.value < other.value
         return NotImplemented
 
@@ -74,11 +78,11 @@ class SupportedCommands:
 
     loadLabware: bool = False
 
-    def __init__(self, namespace: str):
+    def __init__(self, namespace: str) -> None:
         self._namespace = namespace
 
-    def supported(self):
-        commands = []
+    def supported(self) -> list[str]:
+        commands: list[str] = []
         for field in fields(self):
             result = getattr(self, field.name)
             if result:
@@ -112,9 +116,9 @@ class AttachedPipette(BaseModel):
     serial: typing.Optional[str] = Field(
         None, description="The serial number of the attached pipette"
     )
-    defaultTipracks: typing.Optional[typing.List[typing.Dict[str, typing.Any]]] = Field(
-        None, description="A list of default tipracks for this pipette"
-    )
+    defaultTipracks: typing.Optional[
+        typing.Sequence[typing.Mapping[str, typing.Any]]
+    ] = Field(None, description="A list of default tipracks for this pipette")
 
 
 class RequiredLabware(BaseModel):
@@ -134,7 +138,9 @@ class RequiredLabware(BaseModel):
     definition: typing.Dict[str, typing.Any]
 
     @classmethod
-    def from_lw(cls, lw: labware.Labware, slot: typing.Optional[DeckLocation] = None):
+    def from_lw(
+        cls, lw: labware.Labware, slot: typing.Optional[DeckLocation] = None
+    ) -> Self:
         if not slot:
             # TODO(mc, 2021-09-08): lw.parent is not necessarily a slot
             slot = lw.parent  # type: ignore[assignment]

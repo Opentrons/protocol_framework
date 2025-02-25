@@ -11,7 +11,7 @@ from opentrons_shared_data.labware.labware_definition import LabwareDefinition
 from ..errors import LabwareIsNotAllowedInLocationError, ProtocolEngineError
 from ..resources import fixture_validation, labware_validation
 from ..types import (
-    LabwareLocation,
+    LoadableLabwareLocation,
     SYSTEM_LOCATION,
     OnLabwareLocation,
     DeckSlotLocation,
@@ -44,7 +44,7 @@ _LID_STACK_PE_VERSION = 1
 class LoadLidStackParams(BaseModel):
     """Payload required to load a lid stack onto a location."""
 
-    location: LabwareLocation = Field(
+    location: LoadableLabwareLocation = Field(
         ...,
         description="Location the lid stack should be loaded into.",
     )
@@ -93,7 +93,7 @@ class LoadLidStackResult(BaseModel):
         ...,
         description="The full definition data for this lid labware.",
     )
-    location: LabwareLocation = Field(
+    location: LoadableLabwareLocation = Field(
         ..., description="The Location that the stack of lid labware has been loaded."
     )
     stackLocationSequence: LabwareLocationSequence | None = Field(
@@ -117,7 +117,7 @@ class LoadLidStackImplementation(
         self._equipment = equipment
         self._state_view = state_view
 
-    def _validate_location(self, params: LoadLidStackParams) -> LabwareLocation:
+    def _validate_location(self, params: LoadLidStackParams) -> LoadableLabwareLocation:
         if isinstance(params.location, AddressableAreaLocation):
             area_name = params.location.addressableAreaName
             if not (
@@ -142,7 +142,7 @@ class LoadLidStackImplementation(
 
     def _format_results(
         self,
-        verified_location: LabwareLocation,
+        verified_location: LoadableLabwareLocation,
         lid_stack_object: LoadedLabwareData,
         loaded_lid_labwares: list[LoadedLabwareData],
         lid_labware_definition: LabwareDefinition | None,

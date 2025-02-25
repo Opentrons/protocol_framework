@@ -15,8 +15,6 @@ from ...errors import (
 from ...state import update_types
 from ...types import (
     ModuleLocation,
-    OnAddressableAreaLocationSequenceComponent,
-    OnModuleLocationSequenceComponent,
     LabwareLocationSequence,
 )
 
@@ -98,6 +96,11 @@ class RetrieveImpl(AbstractCommandImpl[RetrieveParams, SuccessData[RetrieveResul
         original_location_sequence = self._state_view.geometry.get_location_sequence(
             lw_id
         )
+        destination_location_sequence = (
+            self._state_view.geometry.get_predicted_location_sequence(
+                ModuleLocation(moduleId=params.moduleId)
+            )
+        )
         labware = self._state_view.labware.get(lw_id)
         labware_height = self._state_view.labware.get_dimensions(labware_id=lw_id).z
         if labware.lid_id is not None:
@@ -110,9 +113,6 @@ class RetrieveImpl(AbstractCommandImpl[RetrieveParams, SuccessData[RetrieveResul
         if stacker_hw is not None:
             await stacker_hw.dispense_labware(labware_height=labware_height)
 
-        own_addressable_area = self._state_view.modules.get_provided_addressable_area(
-            params.moduleId
-        )
         # update the state to reflect the labware is now in the flex stacker slot
         state_update.set_labware_location(
             labware_id=lw_id,
@@ -126,12 +126,7 @@ class RetrieveImpl(AbstractCommandImpl[RetrieveParams, SuccessData[RetrieveResul
             public=RetrieveResult(
                 labware_id=lw_id,
                 originLocationSequence=original_location_sequence,
-                eventualDestinationLocationSequence=[
-                    OnModuleLocationSequenceComponent(moduleId=params.moduleId),
-                    OnAddressableAreaLocationSequenceComponent(
-                        addressableAreaName=own_addressable_area,
-                    ),
-                ],
+                eventualDestinationLocationSequence=destination_location_sequence,
             ),
             state_update=state_update,
         )

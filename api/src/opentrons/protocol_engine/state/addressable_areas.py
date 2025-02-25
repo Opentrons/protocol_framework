@@ -549,6 +549,44 @@ class AddressableAreaView:
                     return opentrons_module_serial_number
         return None
 
+    def get_serial_number_by_cutout_id(self, slot_cutout_id: str) -> str | None:
+        """Gets serial number from deck at a given cutout ID if one exists."""
+        deck_config = self._state.deck_configuration
+        if deck_config:
+            for (
+                cutout_id,
+                cutout_fixture_id,
+                opentrons_module_serial_number,
+            ) in deck_config:
+                if cutout_id == slot_cutout_id:
+                    return opentrons_module_serial_number
+        return None
+
+    def get_fixture_serial_from_deck_configuration_by_addressable_area(
+        self, addressable_area_name: str
+    ) -> Optional[str]:
+        """Get the serial number provided by the deck configuration for a Fixture that provides a given addressable area."""
+        deck_config = self._state.deck_configuration
+        if deck_config:
+            potential_fixtures = (
+                deck_configuration_provider.get_potential_cutout_fixtures(
+                    addressable_area_name, self._state.deck_definition
+                )
+            )
+            slot_cutout_id = potential_fixtures[0]
+            fixture_ids = [
+                fixture.cutout_fixture_id for fixture in potential_fixtures[1]
+            ]
+            # This will only ever be one under current assumptions
+            for (
+                cutout_id,
+                cutout_fixture_id,
+                opentrons_module_serial_number,
+            ) in deck_config:
+                if cutout_id == slot_cutout_id and cutout_fixture_id in fixture_ids:
+                    return opentrons_module_serial_number
+        return None
+
     def get_slot_definition(self, slot_id: str) -> SlotDefV3:
         """Get the definition of a slot in the deck.
 

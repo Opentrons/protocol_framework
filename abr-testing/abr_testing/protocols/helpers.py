@@ -200,6 +200,16 @@ def create_two_pipette_mount_parameters(parameters: ParameterContext) -> None:
     )
 
 
+def create_dry_run_parameter(parameters: ParameterContext) -> None:
+    """Create dry run parameter."""
+    parameters.add_bool(
+        variable_name="dry_run",
+        display_name="Dry Run",
+        description="If Dry Run is True, skip incubation.",
+        default=False,
+    )
+
+
 def create_csv_parameter(parameters: ParameterContext) -> None:
     """Create parameter for sample volume csvs."""
     parameters.add_csv_file(

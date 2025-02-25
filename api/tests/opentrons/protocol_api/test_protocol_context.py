@@ -17,6 +17,7 @@ from opentrons.hardware_control.modules.types import (
     ModuleType,
     TemperatureModuleModel,
     FlexStackerModuleModel,
+    MagneticBlockModel,
 )
 from opentrons.protocols.api_support import instrument as mock_instrument_support
 from opentrons.protocols.api_support.types import APIVersion
@@ -1347,6 +1348,159 @@ def test_load_flex_stacker_on_staging_slot(
 
     assert isinstance(result, ModuleContext)
     decoy.verify(mock_core_map.add(mock_module_core, result), times=1)
+
+
+@pytest.mark.parametrize(
+    ("invert_load_order"),
+    [
+        True,
+        False,
+    ],
+)
+def test_load_flex_stacker_and_mag_block_combinations(
+    decoy: Decoy,
+    mock_core: ProtocolCore,
+    mock_core_map: LoadedCoreMap,
+    api_version: APIVersion,
+    subject: ProtocolContext,
+    invert_load_order: bool,
+) -> None:
+    """It should load a Flex stacker and a Magnetic block in both acceptable orders."""
+    mock_module_core_1: FlexStackerCore = decoy.mock(cls=FlexStackerCore)
+    mock_module_core_2: MagneticBlockCore = decoy.mock(cls=MagneticBlockCore)
+
+    decoy.when(mock_core.robot_type).then_return("OT-3 Standard")
+
+    def _load_stacker() -> None:
+        # Load a Flex Stacker at "B4" -> CutoutB3
+        decoy.when(
+            mock_validation.ensure_module_model("flexStackerModuleV1")
+        ).then_return(FlexStackerModuleModel.FLEX_STACKER_V1)
+        decoy.when(
+            mock_validation.ensure_and_convert_deck_slot(
+                "B4", api_version, "OT-3 Standard"
+            )
+        ).then_return(StagingSlotName.SLOT_B4)
+        decoy.when(
+            mock_validation.convert_flex_stacker_load_slot(StagingSlotName.SLOT_B4)
+        ).then_return(DeckSlotName.SLOT_B3)
+
+        decoy.when(
+            mock_core.load_module(
+                model=FlexStackerModuleModel.FLEX_STACKER_V1,
+                deck_slot=DeckSlotName.SLOT_B3,
+                configuration=None,
+            )
+        ).then_return(mock_module_core_1)
+
+        decoy.when(mock_module_core_1.get_model()).then_return(
+            FlexStackerModuleModel.FLEX_STACKER_V1
+        )
+        decoy.when(mock_module_core_1.get_serial_number()).then_return("cap'n crunch")
+        decoy.when(mock_module_core_1.get_deck_slot()).then_return(DeckSlotName.SLOT_B3)
+
+        result = subject.load_module(module_name="flexStackerModuleV1", location="B4")
+
+        assert isinstance(result, ModuleContext)
+        decoy.verify(mock_core_map.add(mock_module_core_1, result), times=1)
+
+    def _load_mag() -> None:
+        # Load a Mag Block on the B3 slot
+        decoy.when(mock_validation.ensure_module_model("magneticBlockV1")).then_return(
+            MagneticBlockModel.MAGNETIC_BLOCK_V1
+        )
+        decoy.when(
+            mock_validation.ensure_and_convert_deck_slot(
+                "B3", api_version, "OT-3 Standard"
+            )
+        ).then_return(DeckSlotName.SLOT_B3)
+        decoy.when(
+            mock_core.load_module(
+                model=MagneticBlockModel.MAGNETIC_BLOCK_V1,
+                deck_slot=DeckSlotName.SLOT_B3,
+                configuration=None,
+            )
+        ).then_return(mock_module_core_2)
+        result = subject.load_module(module_name="magneticBlockV1", location="B3")
+
+        assert isinstance(result, ModuleContext)
+        decoy.verify(mock_core_map.add(mock_module_core_2, result), times=1)
+
+    if invert_load_order:
+        _load_mag()
+        _load_stacker()
+    elif invert_load_order is False:
+        _load_stacker()
+        _load_mag()
+
+
+@pytest.mark.parametrize(
+    ("invert_load_order"),
+    [
+        True,
+        False,
+    ],
+)
+def test_load_flex_stacker_and_waste_chute_combinations(
+    decoy: Decoy,
+    mock_core: ProtocolCore,
+    mock_core_map: LoadedCoreMap,
+    api_version: APIVersion,
+    subject: ProtocolContext,
+    invert_load_order: bool,
+) -> None:
+    """It should load a Flex stacker and a Waste Chute in both acceptable orders."""
+
+    def _load_stacker() -> None:
+        mock_module_core: FlexStackerCore = decoy.mock(cls=FlexStackerCore)
+        decoy.when(mock_core.robot_type).then_return("OT-3 Standard")
+        # Load a Flex Stacker at "B4" -> CutoutB3
+        decoy.when(
+            mock_validation.ensure_module_model("flexStackerModuleV1")
+        ).then_return(FlexStackerModuleModel.FLEX_STACKER_V1)
+        decoy.when(
+            mock_validation.ensure_and_convert_deck_slot(
+                "D4", api_version, "OT-3 Standard"
+            )
+        ).then_return(StagingSlotName.SLOT_D4)
+        decoy.when(
+            mock_validation.convert_flex_stacker_load_slot(StagingSlotName.SLOT_D4)
+        ).then_return(DeckSlotName.SLOT_D3)
+
+        decoy.when(
+            mock_core.load_module(
+                model=FlexStackerModuleModel.FLEX_STACKER_V1,
+                deck_slot=DeckSlotName.SLOT_D3,
+                configuration=None,
+            )
+        ).then_return(mock_module_core)
+
+        decoy.when(mock_module_core.get_model()).then_return(
+            FlexStackerModuleModel.FLEX_STACKER_V1
+        )
+        decoy.when(mock_module_core.get_serial_number()).then_return(
+            "cooooookie crisp!"
+        )
+        decoy.when(mock_module_core.get_deck_slot()).then_return(DeckSlotName.SLOT_D3)
+
+        result = subject.load_module(module_name="flexStackerModuleV1", location="D4")
+
+        assert isinstance(result, ModuleContext)
+        decoy.verify(mock_core_map.add(mock_module_core, result), times=1)
+
+    def _load_chute() -> None:
+        # Load a Waste Chute on the Flex Stacker's B3 slot
+        mock_chute = decoy.mock(cls=WasteChute)
+        decoy.when(mock_core.load_waste_chute()).then_return(mock_chute)
+        result = subject.load_waste_chute()
+        assert result == mock_chute
+
+    if invert_load_order:
+        _load_chute()
+        _load_stacker()
+    elif invert_load_order is False:
+        _load_stacker()
+        _load_chute()
 
 
 def test_loaded_modules(
