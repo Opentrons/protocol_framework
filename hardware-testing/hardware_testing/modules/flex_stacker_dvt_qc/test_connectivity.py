@@ -9,6 +9,7 @@ from hardware_testing.data.csv_report import (
     CSVResult,
 )
 
+from opentrons.drivers.flex_stacker.types import HardwareRevision
 from .driver import FlexStackerInterface as FlexStacker
 
 
@@ -25,7 +26,8 @@ async def test_gcode(stacker: FlexStacker, report: CSVReport) -> None:
     """Send and receive response for GCODE M115."""
     success = True
     info = await stacker._driver.get_device_info()
-    ui.print_info(f"Hardware Revision: {info.hw}")
+    if info.hw != HardwareRevision.DVT:
+        ui.print_warning(f"Hardware Revision is {info.hw}, expected DVT")
     report(
         "CONNECTIVITY",
         "usb-get-device-info",
@@ -44,7 +46,7 @@ async def test_eeprom(stacker: FlexStacker, report: CSVReport) -> None:
     report.set_tag(serial)
     info = await stacker._driver.get_device_info()
     if info.sn != serial:
-        print("Serial number is not set properly")
+        ui.print_error("Serial number is not set properly")
         success = False
     report(
         "CONNECTIVITY",
