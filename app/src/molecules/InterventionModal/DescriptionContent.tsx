@@ -7,6 +7,8 @@ import {
 } from '@opentrons/components'
 import { InlineNotification } from '/app/atoms/InlineNotification'
 
+import type { ReactNode } from 'react'
+
 interface NotificationProps {
   notificationHeader?: string
   notificationMessage?: string
@@ -14,7 +16,7 @@ interface NotificationProps {
 
 export interface DescriptionContentProps extends NotificationProps {
   headline: string
-  message: string
+  message: string | ReactNode
 }
 
 export function DescriptionContent(
@@ -46,12 +48,16 @@ export function DescriptionContent(
         >
           {props.headline}
         </StyledText>
-        <StyledText
-          oddStyle="bodyTextRegular"
-          desktopStyle="bodyDefaultRegular"
-        >
-          {props.message}
-        </StyledText>
+        {typeof props.message === 'string' ? (
+          <StyledText
+            oddStyle="bodyTextRegular"
+            desktopStyle="bodyDefaultRegular"
+          >
+            {props.message}
+          </StyledText>
+        ) : (
+          props.message
+        )}
       </Flex>
       <NotificationIfSpecified {...props} />
     </Flex>
