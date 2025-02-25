@@ -31,8 +31,7 @@
       "totalLiquidVolume": 2000,
       "x": 15.28,
       "y": 13.9,
-      "z": 13.42,
-      "geometryDefinitionId": "conicalWell"
+      "z": 13.42
     },
     "C1": {
       "depth": 38.58,
@@ -41,8 +40,7 @@
       "totalLiquidVolume": 2000,
       "x": 15.28,
       "y": 33.4,
-      "z": 13.42,
-      "geometryDefinitionId": "conicalWell"
+      "z": 13.42
     },
     "B1": {
       "depth": 38.58,
@@ -51,8 +49,7 @@
       "totalLiquidVolume": 2000,
       "x": 15.28,
       "y": 52.9,
-      "z": 13.42,
-      "geometryDefinitionId": "conicalWell"
+      "z": 13.42
     },
     "A1": {
       "depth": 38.58,
@@ -61,8 +58,7 @@
       "totalLiquidVolume": 2000,
       "x": 15.28,
       "y": 72.4,
-      "z": 13.42,
-      "geometryDefinitionId": "conicalWell"
+      "z": 13.42
     },
     "D2": {
       "depth": 38.58,
@@ -71,8 +67,7 @@
       "totalLiquidVolume": 2000,
       "x": 34.78,
       "y": 13.9,
-      "z": 13.42,
-      "geometryDefinitionId": "conicalWell"
+      "z": 13.42
     },
     "C2": {
       "depth": 38.58,
@@ -81,8 +76,7 @@
       "totalLiquidVolume": 2000,
       "x": 34.78,
       "y": 33.4,
-      "z": 13.42,
-      "geometryDefinitionId": "conicalWell"
+      "z": 13.42
     },
     "B2": {
       "depth": 38.58,
@@ -91,8 +85,7 @@
       "totalLiquidVolume": 2000,
       "x": 34.78,
       "y": 52.9,
-      "z": 13.42,
-      "geometryDefinitionId": "conicalWell"
+      "z": 13.42
     },
     "A2": {
       "depth": 38.58,
@@ -101,8 +94,7 @@
       "totalLiquidVolume": 2000,
       "x": 34.78,
       "y": 72.4,
-      "z": 13.42,
-      "geometryDefinitionId": "conicalWell"
+      "z": 13.42
     },
     "D3": {
       "depth": 38.58,
@@ -111,8 +103,7 @@
       "totalLiquidVolume": 2000,
       "x": 54.28,
       "y": 13.9,
-      "z": 13.42,
-      "geometryDefinitionId": "conicalWell"
+      "z": 13.42
     },
     "C3": {
       "depth": 38.58,
@@ -121,8 +112,7 @@
       "totalLiquidVolume": 2000,
       "x": 54.28,
       "y": 33.4,
-      "z": 13.42,
-      "geometryDefinitionId": "conicalWell"
+      "z": 13.42
     },
     "B3": {
       "depth": 38.58,
@@ -131,8 +121,7 @@
       "totalLiquidVolume": 2000,
       "x": 54.28,
       "y": 52.9,
-      "z": 13.42,
-      "geometryDefinitionId": "conicalWell"
+      "z": 13.42
     },
     "A3": {
       "depth": 38.58,
@@ -141,8 +130,7 @@
       "totalLiquidVolume": 2000,
       "x": 54.28,
       "y": 72.4,
-      "z": 13.42,
-      "geometryDefinitionId": "conicalWell"
+      "z": 13.42
     },
     "D4": {
       "depth": 38.58,
@@ -151,8 +139,7 @@
       "totalLiquidVolume": 2000,
       "x": 73.78,
       "y": 13.9,
-      "z": 13.42,
-      "geometryDefinitionId": "conicalWell"
+      "z": 13.42
     },
     "C4": {
       "depth": 38.58,
@@ -161,8 +148,7 @@
       "totalLiquidVolume": 2000,
       "x": 73.78,
       "y": 33.4,
-      "z": 13.42,
-      "geometryDefinitionId": "conicalWell"
+      "z": 13.42
     },
     "B4": {
       "depth": 38.58,
@@ -171,8 +157,7 @@
       "totalLiquidVolume": 2000,
       "x": 73.78,
       "y": 52.9,
-      "z": 13.42,
-      "geometryDefinitionId": "conicalWell"
+      "z": 13.42
     },
     "A4": {
       "depth": 38.58,
@@ -181,8 +166,7 @@
       "totalLiquidVolume": 2000,
       "x": 73.78,
       "y": 72.4,
-      "z": 13.42,
-      "geometryDefinitionId": "conicalWell"
+      "z": 13.42
     },
     "D5": {
       "depth": 38.58,
@@ -191,8 +175,7 @@
       "totalLiquidVolume": 2000,
       "x": 93.28,
       "y": 13.9,
-      "z": 13.42,
-      "geometryDefinitionId": "conicalWell"
+      "z": 13.42
     },
     "C5": {
       "depth": 38.58,
@@ -201,8 +184,7 @@
       "totalLiquidVolume": 2000,
       "x": 93.28,
       "y": 33.4,
-      "z": 13.42,
-      "geometryDefinitionId": "conicalWell"
+      "z": 13.42
     },
     "B5": {
       "depth": 38.58,
@@ -211,8 +193,7 @@
       "totalLiquidVolume": 2000,
       "x": 93.28,
       "y": 52.9,
-      "z": 13.42,
-      "geometryDefinitionId": "conicalWell"
+      "z": 13.42
     },
     "A5": {
       "depth": 38.58,
@@ -221,8 +202,7 @@
       "totalLiquidVolume": 2000,
       "x": 93.28,
       "y": 72.4,
-      "z": 13.42,
-      "geometryDefinitionId": "conicalWell"
+      "z": 13.42
     },
     "D6": {
       "depth": 38.58,
@@ -231,8 +211,7 @@
       "totalLiquidVolume": 2000,
       "x": 112.78,
       "y": 13.9,
-      "z": 13.42,
-      "geometryDefinitionId": "conicalWell"
+      "z": 13.42
     },
     "C6": {
       "depth": 38.58,
@@ -241,8 +220,7 @@
       "totalLiquidVolume": 2000,
       "x": 112.78,
       "y": 33.4,
-      "z": 13.42,
-      "geometryDefinitionId": "conicalWell"
+      "z": 13.42
     },
     "B6": {
       "depth": 38.58,
@@ -251,8 +229,7 @@
       "totalLiquidVolume": 2000,
       "x": 112.78,
       "y": 52.9,
-      "z": 13.42,
-      "geometryDefinitionId": "conicalWell"
+      "z": 13.42
     },
     "A6": {
       "depth": 38.58,
@@ -261,8 +238,7 @@
       "totalLiquidVolume": 2000,
       "x": 112.78,
       "y": 72.4,
-      "z": 13.42,
-      "geometryDefinitionId": "conicalWell"
+      "z": 13.42
     }
   },
   "parameters": {
@@ -329,11 +305,6 @@
     "x": 0,
     "y": 0,
     "z": 0
-  },
-  "innerLabwareGeometry": {
-    "conicalWell": {
-      "sections": []
-    }
   },
   "$otSharedSchema": "#/labware/schemas/3"
 }
