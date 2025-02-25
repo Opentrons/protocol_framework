@@ -1051,6 +1051,10 @@ def test_water_distribution_with_volume_more_than_tip_max(
     )
 
     water = simulated_protocol_context.define_liquid_class("water")
+    water_props = water.get_for(pipette_1k, tiprack)
+    water_props.multi_dispense.retract.blowout.location = "destination"  # type: ignore[union-attr]
+    water_props.multi_dispense.retract.blowout.flow_rate = pipette_1k.flow_rate.blow_out  # type: ignore[union-attr]
+    water_props.multi_dispense.retract.blowout.enabled = True  # type: ignore[union-attr]
     with mock.patch.object(
         InstrumentCore,
         "pick_up_tip",
@@ -1119,6 +1123,10 @@ def test_order_of_water_distribution_steps_using_multi_dispense(
 
     water = simulated_protocol_context.define_liquid_class("water")
     water_props = water.get_for(pipette_1k, tiprack)
+    water_props.multi_dispense.retract.blowout.location = "destination"  # type: ignore[union-attr]
+    water_props.multi_dispense.retract.blowout.flow_rate = pipette_1k.flow_rate.blow_out  # type: ignore[union-attr]
+    water_props.multi_dispense.retract.blowout.enabled = True  # type: ignore[union-attr]
+
     expected_conditioning_volume = water_props.multi_dispense.conditioning_by_volume.get_for_volume(120)  # type: ignore[union-attr]
     expected_disposal_volume = water_props.multi_dispense.disposal_by_volume.get_for_volume(120)  # type: ignore[union-attr]
 
@@ -1441,6 +1449,9 @@ def test_order_of_water_distribution_steps_using_mixed_dispense(
 
     water = simulated_protocol_context.define_liquid_class("water")
     water_props = water.get_for(pipette_1k, tiprack)
+    water_props.multi_dispense.retract.blowout.location = "destination"  # type: ignore[union-attr]
+    water_props.multi_dispense.retract.blowout.flow_rate = pipette_1k.flow_rate.blow_out  # type: ignore[union-attr]
+    water_props.multi_dispense.retract.blowout.enabled = True  # type: ignore[union-attr]
     expected_conditioning_volume = water_props.multi_dispense.conditioning_by_volume.get_for_volume(800)  # type: ignore[union-attr]
     expected_disposal_volume = water_props.multi_dispense.disposal_by_volume.get_for_volume(800)  # type: ignore[union-attr]
     expected_air_gap = water_props.aspirate.retract.air_gap_by_volume.get_for_volume(
@@ -1604,3 +1615,36 @@ def test_order_of_water_distribution_steps_using_mixed_dispense(
             ),
         ]
         assert mock_manager.mock_calls == expected_calls
+
+
+@pytest.mark.ot3_only
+@pytest.mark.parametrize(
+    "simulated_protocol_context", [("2.23", "Flex")], indirect=True
+)
+def test_water_distribution_raises_error_for_disposal_vol_without_blowout(
+    simulated_protocol_context: ProtocolContext,
+) -> None:
+    """It should execute the distribute steps with the expected tip pick ups."""
+    trash = simulated_protocol_context.load_trash_bin("A3")
+    tiprack = simulated_protocol_context.load_labware(
+        "opentrons_flex_96_tiprack_1000ul", "D1"
+    )
+    pipette_1k = simulated_protocol_context.load_instrument(
+        "flex_1channel_1000", mount="left", tip_racks=[tiprack]
+    )
+    nest_plate = simulated_protocol_context.load_labware(
+        "nest_96_wellplate_200ul_flat", "C3"
+    )
+    water = simulated_protocol_context.define_liquid_class("water")
+    with pytest.raises(
+        RuntimeError,
+        match="Specify a blowout location and enable blowout when using a disposal volume",
+    ):
+        pipette_1k.distribute_liquid(
+            liquid_class=water,
+            volume=140,
+            source=nest_plate.rows()[0][0],
+            dest=nest_plate.rows()[1],
+            new_tip="once",
+            trash_location=trash,
+        )

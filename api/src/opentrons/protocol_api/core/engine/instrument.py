@@ -1443,6 +1443,17 @@ class InstrumentCore(AbstractInstrument[WellCore, LabwareCore]):
                 disposal_vol = 0
                 use_single_dispense = True
 
+            if (
+                not use_single_dispense
+                and disposal_vol > 0
+                and not transfer_props.multi_dispense.retract.blowout.enabled
+            ):
+                raise RuntimeError(
+                    "The distribution uses a disposal volume but location for disposing off"
+                    " the disposal volume is not found since blowout is disabled."
+                    " Specify a blowout location and enable blowout when using a disposal volume."
+                )
+
             # Aspirate the total volume determined by the loop above
             tip_contents = self.aspirate_liquid_class(
                 volume=total_aspirate_volume + conditioning_vol + disposal_vol,
