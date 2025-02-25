@@ -147,8 +147,7 @@ class TransferComponentsExecutor:
             minimum_z_height=None,
             speed=None,
         )
-        if self._transfer_type != TransferType.ONE_TO_MANY:
-            self._remove_air_gap(location=submerge_start_location)
+        self._remove_air_gap(location=submerge_start_location)
         self._instrument.move_to(
             location=self._target_location,
             well_core=self._target_well,
@@ -483,28 +482,11 @@ class TransferComponentsExecutor:
         add_final_air_gap: bool,
         is_last_retract: bool,
     ) -> None:
-        """Execute post-dispense retraction steps.
-        1. Position ref+offset is the ending position. Move to this position using specified speed
-        2. If blowout is enabled and “destination”
-            - Do blow-out (at the retract position)
-            - Leave plunger down
-        3. Touch-tip
-        4. If not ready-to-aspirate
-            - Prepare-to-aspirate (at the retract position)
-        5. Air-gap (at the retract position)
-            - This air gap is for preventing any stray droplets from falling while moving the pipette.
-                It will be performed out of caution even if we just did a blow_out and should *hypothetically*
-                have no liquid left in the tip.
-            - This air gap will be removed at the next aspirate.
-                If this is the last step of the transfer, and we aren't dropping the tip off,
-                then the air gap will be left as is(?).
-        6. If blowout is “source” or “trash”
-            - Move to location (top of Well)
-            - Do blow-out (top of well)
-            - Do touch-tip (?????) (only if it’s in a non-trash location)
-            - Prepare-to-aspirate (top of well)
-            - Do air-gap (top of well)
-        7. If drop tip, move to drop tip location, drop tip
+        """Execute post-dispense retraction steps when the dispense is a part of a multi-dispense.
+
+        This function is mostly similar to the single-dispense retract function except
+        that it handles air gaps differently based on the disposal volume, conditioning volume
+        and whether we are moving to another dispense or going back to the source.
         """
         # TODO: Raise error if retract is below the meniscus
 

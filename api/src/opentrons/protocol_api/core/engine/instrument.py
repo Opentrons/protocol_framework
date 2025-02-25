@@ -1228,7 +1228,7 @@ class InstrumentCore(AbstractInstrument[WellCore, LabwareCore]):
         tip_racks: List[Tuple[Location, LabwareCore]],
         trash_location: Union[Location, TrashBin, WasteChute],
     ) -> None:
-        """Execute transfer using liquid class properties.
+        """Execute a distribution using liquid class properties.
 
         Args:
             liquid_class: The liquid class to use for transfer properties.
@@ -1242,6 +1242,14 @@ class InstrumentCore(AbstractInstrument[WellCore, LabwareCore]):
                      or 'per source'.
             tiprack_uri: The URI of the tiprack that the transfer settings are for.
             tip_drop_location: Location where the tip will be dropped (if appropriate).
+
+        This method distributes the liquid in the source well into multiple destinations.
+        It can accomplish this by either doing a multi-dispense (aspirate once and then
+        dispense multiple times consecutively) or by doing multiple single-dispenses
+        (going back to aspirate after each dispense). Whether it does a multi-dispense or
+        multiple single dispenses is determined by whether multi-dispense properties
+        are available in the liquid class and whether the tip in use can hold multiple
+        volumes to be dispensed whithout having to refill.
         """
         if not tip_racks:
             raise RuntimeError(
@@ -1261,6 +1269,10 @@ class InstrumentCore(AbstractInstrument[WellCore, LabwareCore]):
             tip_rack=tiprack_uri_for_transfer_props,
         )
 
+        # If there are no multi-dispense properties or if the volume to distribute
+        # per destination well is so large that the tip cannot hold enough liquid
+        # to consecutively distribute to at least two wells, then we resort to using
+        # a regular, one-to-one transfer to carry out the distribution.
         min_asp_vol_for_multi_dispense = 2 * volume
         if transfer_props.multi_dispense is None or (
             transfer_props.multi_dispense is not None
@@ -1293,6 +1305,8 @@ class InstrumentCore(AbstractInstrument[WellCore, LabwareCore]):
             tiprack_uri=tiprack_uri_for_transfer_props,
         )
 
+        # This will return a generator that provides pairs of destination well and
+        # the volume to dispense into it
         dest_per_volume_step = tx_commons.expand_for_volume_constraints(
             volumes=[volume for _ in range(len(dest))],
             targets=dest,
@@ -1344,7 +1358,7 @@ class InstrumentCore(AbstractInstrument[WellCore, LabwareCore]):
         if new_tip != TransferTipPolicyV2.NEVER:
             _pick_up_tip()
 
-        post_disp_tip_contents = [
+        tip_contents = [
             tx_comps_executor.LiquidAndAirGapPair(
                 liquid=0,
                 air_gap=0,
@@ -1352,10 +1366,16 @@ class InstrumentCore(AbstractInstrument[WellCore, LabwareCore]):
         ]
         next_step_volume, next_dest = next(dest_per_volume_step)
         is_last_step = False
+
+        # This loop will run until the last step has been executed
         while not is_last_step:
             total_aspirate_volume = 0.0
             vol_dest_combo = []
-            while (
+
+            # This loop looks at the next volumes to dispense and calculates how many
+            # dispense volumes plus their conditioning & disposal volumes can fit into
+            # the tip. It then collects these volumes and their destinations in a list.
+            while not is_last_step and (
                 total_aspirate_volume
                 + next_step_volume
                 + transfer_props.multi_dispense.disposal_by_volume.get_for_volume(
@@ -1368,6 +1388,10 @@ class InstrumentCore(AbstractInstrument[WellCore, LabwareCore]):
             ):
                 total_aspirate_volume += next_step_volume
                 vol_dest_combo.append((next_step_volume, next_dest))
+                try:
+                    next_step_volume, next_dest = next(dest_per_volume_step)
+                except StopIteration:
+                    is_last_step = True
 
             conditioning_vol = (
                 transfer_props.multi_dispense.conditioning_by_volume.get_for_volume(
@@ -1380,46 +1404,70 @@ class InstrumentCore(AbstractInstrument[WellCore, LabwareCore]):
                 )
             )
 
-            try:
-                next_step_volume, next_dest = next(dest_per_volume_step)
-            except StopIteration:
-                is_last_step = True
-
             if new_tip == TransferTipPolicyV2.ALWAYS and tip_used:
                 _drop_tip()
                 _pick_up_tip()
-                post_disp_tip_contents = [
+                tip_contents = [
                     tx_comps_executor.LiquidAndAirGapPair(
                         liquid=0,
                         air_gap=0,
                     )
                 ]
+            use_single_dispense = False
 
-            post_asp_tip_contents = self.aspirate_liquid_class(
+            if total_aspirate_volume == volume and len(vol_dest_combo) == 1:
+                # We are only doing a single transfer. Either because this is the last
+                # remaining volume to dispense or, once this function accepts a list of
+                # volumes, the next pair of volumes is too large to be multi-dispensed.
+                # So we won't use conditioning volume or disposal volume
+                conditioning_vol = 0
+                disposal_vol = 0
+                use_single_dispense = True
+
+            # Aspirate the total volume determined by the loop above
+            tip_contents = self.aspirate_liquid_class(
                 volume=total_aspirate_volume + conditioning_vol + disposal_vol,
                 source=source,
                 transfer_properties=transfer_props,
                 transfer_type=tx_comps_executor.TransferType.ONE_TO_MANY,
-                tip_contents=post_disp_tip_contents,
+                tip_contents=tip_contents,
                 conditioning_volume=conditioning_vol,
             )
-            for dispense_num, (next_vol, next_dest) in enumerate(vol_dest_combo):
-                post_disp_tip_contents = (
-                    self.dispense_liquid_class_during_multi_dispense(
+
+            # If the tip has volumes correspoinding to multiple destinations, then
+            # multi-dispense in those destinations.
+            # If the tip has a volume corresponding to a single destination, then
+            # do a single-dispense into that destination.
+            for next_vol, next_dest in vol_dest_combo:
+                tip_contents = (
+                    self.dispense_liquid_class(
                         volume=next_vol,
                         dest=next_dest,
                         source=source,
                         transfer_properties=transfer_props,
                         transfer_type=tx_comps_executor.TransferType.ONE_TO_MANY,
-                        tip_contents=post_asp_tip_contents
-                        if dispense_num == 1
-                        else post_disp_tip_contents,
+                        tip_contents=tip_contents,
                         add_final_air_gap=False
                         if is_last_step and new_tip == TransferTipPolicyV2.NEVER
                         else True,
                         trash_location=trash_location,
-                        conditioning_volume=conditioning_vol,
-                        disposal_volume=disposal_vol,
+                    )
+                    if use_single_dispense
+                    else (
+                        self.dispense_liquid_class_during_multi_dispense(
+                            volume=next_vol,
+                            dest=next_dest,
+                            source=source,
+                            transfer_properties=transfer_props,
+                            transfer_type=tx_comps_executor.TransferType.ONE_TO_MANY,
+                            tip_contents=tip_contents,
+                            add_final_air_gap=False
+                            if is_last_step and new_tip == TransferTipPolicyV2.NEVER
+                            else True,
+                            trash_location=trash_location,
+                            conditioning_volume=conditioning_vol,
+                            disposal_volume=disposal_vol,
+                        )
                     )
                 )
             tip_used = True
@@ -1784,7 +1832,7 @@ class InstrumentCore(AbstractInstrument[WellCore, LabwareCore]):
 
     def dispense_liquid_class_during_multi_dispense(
         self,
-        volume: float,  # Total aspirated volume, including the disposal volume
+        volume: float,
         dest: Tuple[Location, WellCore],
         source: Optional[Tuple[Location, WellCore]],
         transfer_properties: TransferProperties,
@@ -1796,31 +1844,11 @@ class InstrumentCore(AbstractInstrument[WellCore, LabwareCore]):
         disposal_volume: float,
     ) -> List[tx_comps_executor.LiquidAndAirGapPair]:
         """Execute a dispense step that's part of a multi-dispense.
-        1. Move pipette to the ‘submerge’ position with normal speed.
-            - The pipette will move in an arc- move to max z height of labware
-              (if asp & disp are in same labware)
-              or max z height of all labware (if asp & disp are in separate labware)
-        2. Air gap removal:
-            - If dispense location is above the meniscus, DO NOT remove air gap
-              (it will be dispensed along with rest of the liquid later).
-              All other scenarios, remove the air gap by doing a dispense
-            - Flow rate = min(dispenseFlowRate, (airGapByVolume)/sec)
-            - Use the post-dispense delay
-        4. Move to the dispense position at the specified ‘submerge’ speed
-           (even if we might not be moving into the liquid)
-           - Do a delay (submerge delay)
-        6. Dispense:
-            - Dispense at the specified flow rate.
-            - Do a push out as specified ONLY IF there is no mix following the dispense AND the tip is empty.
-            Volume for push out is the volume being dispensed. So if we are dispensing 50uL, use pushOutByVolume[50] as push out volume.
-        7. Delay
-        8. Mix using the same flow rate and delays as specified for asp+disp,
-           with the volume and the number of repetitions specified. Use the delays in asp & disp.
-            - If the dispense position is outside the liquid, then raise error if mix is enabled.
-              Can only be checked if using liquid level detection/ meniscus-based positioning.
-            - If the user wants to perform a mix then they should specify a dispense position that’s inside the liquid OR do mix() on the wells after transfer.
-            - Do push out at the last dispense.
-        9. Retract
+
+        This executes a dispense step very similar to a single dispense except that:
+        - it uses the multi-dispense properties from the liquid class
+        - handles push-out based on disposal volume in addition to the existing conditions
+        - delegates the retraction steps to a different, multi-dispense retract function
 
         Return:
             List of liquid and air gap pairs in tip.
