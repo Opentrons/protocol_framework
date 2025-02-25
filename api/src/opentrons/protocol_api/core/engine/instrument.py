@@ -1235,6 +1235,7 @@ class InstrumentCore(AbstractInstrument[WellCore, LabwareCore]):
         if new_tip != TransferTipPolicyV2.NEVER:
             _drop_tip()
 
+    # TODO(spp, 2025-02-25): wire up return tip
     def distribute_liquid(  # noqa: C901
         self,
         liquid_class: LiquidClass,
