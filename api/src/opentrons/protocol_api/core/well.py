@@ -72,7 +72,7 @@ class AbstractWellCore(ABC):
         """Get the coordinate of the well's center."""
 
     @abstractmethod
-    def get_meniscus(self) -> Point:
+    def get_meniscus(self) -> Union[Point, Literal["SimulatedProbeResult"]]:
         """Get the coordinate of the well's meniscus."""
 
     @abstractmethod
@@ -91,7 +91,7 @@ class AbstractWellCore(ABC):
     def estimate_liquid_height_after_pipetting(
         self,
         operation_volume: float,
-    ) -> float:
+    ) -> Union[float, Literal["SimulatedProbeResult"]]:
         """Estimate what the liquid height will be after pipetting, without raising an error."""
 
     @abstractmethod

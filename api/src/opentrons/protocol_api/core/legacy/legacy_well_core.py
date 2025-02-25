@@ -106,7 +106,7 @@ class LegacyWellCore(AbstractWellCore):
         """Get the coordinate of the well's center."""
         return self._geometry.center()
 
-    def get_meniscus(self) -> Point:
+    def get_meniscus(self) -> Union[Point, Literal["SimulatedProbeResult"]]:
         """Get the coordinate of the well's center."""
         raise APIVersionError(api_element="Getting a meniscus")
 
@@ -125,7 +125,7 @@ class LegacyWellCore(AbstractWellCore):
     def estimate_liquid_height_after_pipetting(
         self,
         operation_volume: float,
-    ) -> float:
+    ) -> Union[float, Literal["SimulatedProbeResult"]]:
         """Estimate what the liquid height will be after pipetting, without raising an error."""
         return 0.0
 
