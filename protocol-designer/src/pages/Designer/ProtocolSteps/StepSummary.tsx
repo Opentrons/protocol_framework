@@ -137,8 +137,9 @@ export function StepSummary(props: StepSummaryProps): JSX.Element | null {
         engageHeight,
         magnetAction,
       } = currentStep
+      const moduleModel = modules[magneticModuleId]?.model
       const magneticModuleDisplayName =
-        getModuleDisplayName(modules[magneticModuleId]?.model) ?? unknownModule
+        moduleModel != null ? getModuleDisplayName(moduleModel) : unknownModule
       stepSummaryContent =
         magnetAction === 'engage' ? (
           <StyledTrans
@@ -239,8 +240,11 @@ export function StepSummary(props: StepSummaryProps): JSX.Element | null {
           )
           break
         case 'untilTemperature':
+          const moduleModel = modules[pauseModuleId]?.model
           const pauseModuleDisplayName =
-            getModuleDisplayName(modules[pauseModuleId]?.model) ?? unknownModule
+            modules[pauseModuleId]?.model != null
+              ? getModuleDisplayName(moduleModel)
+              : unknownModule
           stepSummaryContent = (
             <StyledTrans
               i18nKey="protocol_steps:pause.untilTemperature"
@@ -269,8 +273,11 @@ export function StepSummary(props: StepSummaryProps): JSX.Element | null {
       } = currentStep
       const isSettingTemperature =
         setTemperature != null && JSON.parse(String(setTemperature ?? false))
+      const moduleModel = modules[tempModuleId]?.model
       const tempModuleDisplayName =
-        getModuleDisplayName(modules[tempModuleId]?.model) ?? unknownModule
+        moduleModel != null
+          ? getModuleDisplayName(modules[tempModuleId]?.model)
+          : unknownModule
       stepSummaryContent = isSettingTemperature ? (
         <StyledTrans
           i18nKey={'protocol_steps:temperature_module.active'}
@@ -291,7 +298,7 @@ export function StepSummary(props: StepSummaryProps): JSX.Element | null {
       const labwareName = labwareNicknamesById[labware]
       let newLocationName = newLocation
       if (newLocation in modules) {
-        newLocationName = getModuleDisplayName(modules[newLocation]?.model)
+        newLocationName = getModuleDisplayName(modules[newLocation].model)
       } else if (newLocation in labwareEntities) {
         newLocationName = labwareNicknamesById[newLocation]
       } else if (newLocation === 'offDeck') {
@@ -378,9 +385,9 @@ export function StepSummary(props: StepSummaryProps): JSX.Element | null {
         targetHeaterShakerTemperature,
         targetSpeed,
       } = currentStep
+      const moduleModel = modules[heaterShakerModuleId]?.model
       const moduleDisplayName =
-        getModuleDisplayName(modules[heaterShakerModuleId]?.model) ??
-        unknownModule
+        moduleModel != null ? getModuleDisplayName(moduleModel) : unknownModule
       stepSummaryContent = (
         <StepSummaryContainer>
           <StyledTrans
