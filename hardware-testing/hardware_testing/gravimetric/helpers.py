@@ -111,11 +111,11 @@ def get_api_context(
             "Starting opentrons-robot-server, so we can http GET labware offsets"
         )
         offsets = http_get_all_labware_offsets()
-        # print(f"found {len(offsets)} labware offsets")
-        # for offset in offsets:
-        #     print(f"\t{offset.createdAt}:")
-        #     print(f"\t\t{offset.definitionUri}")
-        #     print(f"\t\t{offset.vector}")
+        print(f"found {len(offsets)} labware offsets")
+        for offset in offsets:
+            print(f"\t{offset.createdAt}:")
+            print(f"\t\t{offset.definitionUri}")
+            print(f"\t\t{offset.vector}")
     else:
         offsets = []
         if not is_simulating:
