@@ -1,83 +1,108 @@
-import os, sys
 import asyncio
 import csv
-from hardware_testing.drivers import mark10
-import threading
-import argparse
 import time
+import argparse
+import logging
+from typing import Dict, Any
 
-from opentrons.hardware_control.ot3api import OT3API
+from hardware_testing.drivers import mark10
+from opentrons.hardware_control.ot3api import OT3API # type: ignore
 from hardware_testing.opentrons_api import helpers_ot3
-from opentrons.drivers.flex_stacker.types import (
+from opentrons.drivers.flex_stacker.types import ( # type: ignore
     StackerAxis,
     Direction,
     LEDColor,
     LEDPattern,
 )
 
-from opentrons.drivers.flex_stacker.driver import (
+from opentrons.drivers.flex_stacker.driver import ( # type: ignore
     STACKER_MOTION_CONFIG,
     STALLGUARD_CONFIG,
     FlexStackerDriver,
 )
 
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+log = logging.getlogger(__name__)
+
+class TimerError(Exception):
+    """A custom exception used to report errors in use of Timer class"""
+    pass
+
 class Timer:
     def __init__(self):
         self._start_time = None
-        self._elasped_time = None
+        self._elapsed_time = None
 
     def start(self):
         """Start a new timer"""
         self._start_time = time.perf_counter()
 
-    def elasped_time(self):
+    def elapsed_time(self):
         """report the elapsed time"""
-        self._elasped_time = time.perf_counter() - self._start_time
-        return self._elasped_time
+        self._elapsed_time = time.perf_counter() - self._start_time
+        return self._elapsed_time
 
     def stop_time(self):
+        """Stop the timer, and report the elapsed time"""
         if self._start_time is None:
-            raise TimerError(f"Timer is not running. Use .start() to start it")
+            raise TimerError("Timer is not running. Use .start() to start it")
         stop_time = time.perf_counter()
 
 async def force_func(fg_var, sg_value, trial, axis, timer, timeout):
+    # Start the timer
     timer.start()
-    t = timer.elasped_time()
+    t = timer.elapsed_time()
+
+    # Directory to save the data
     dir = '/data/stallguard/'
+
+    # Get speed and current from configuration 
     speed = STACKER_MOTION_CONFIG[axis]['move'].max_speed
     current = STACKER_MOTION_CONFIG[axis]['move'].current
+
+    # Create the file name based on parameters
     file_name = f'{axis}_SG_val_{sg_value}_Speed_{speed}_{current}_Amps.csv'
+
+    # Open the file and write the data
     with open(dir + file_name, 'a', newline = '') as file:
         writer = csv.writer(file)
+        # Write the header if it's the first trial
         if trial == 1:
             fields = ["Time(s)", "Force(N)", "SG Value", "Trials"]
             writer.writerow(fields)
+        
+        # Collect data until timeout
         while t < timeout:
-            t = timer.elasped_time()
+            t = timer.elapsed_time()
             fg_reading = await fg_var.read_force()
             data = [t, fg_reading, sg_value, trial]
             writer.writerow(data)
             # print(data)
+            # Flush the file to ensure data is written
             file.flush()
+        
+        # Close the file
         file.close()
 
 async def move(s, a, d, d_2):
     try:
-        print(f'I am Moving')
+        print('Stacker Moving')
+        # Move the stacker axis
         resp = await s.move_axis(axis = a,
-                            direction = d, distance = d_2)
+                                direction = d, 
+                                distance = d_2)
         print(f'Finished')
         return resp
     except Exception as e:
         raise(e)
-
-def build_arg_parser():
-    arg_parser = argparse.ArgumentParser(description="Motion Parameter Test Script")
-    arg_parser.add_argument("-c", "--cycles", default = 5, type = int, help = "number of cycles to execute")
-    arg_parser.add_argument("-a", "--axis", default = 'x', type = str, help = "Choose a Axis")
-    arg_parser.add_argument("-f", "--force_gauge", required=False, action='store_false', help = "Force gauge")
-    arg_parser.add_argument("-t", "--test", default="sg_test", choices=["sg_test","repeatability_test"])
-    return arg_parser
+    
+def get_axis_mapping() -> Dict[str, Any]:
+    return {
+        'x': {'total_travel': 202, 'axis': StackerAxis.X},
+        'z': {'total_travel': 202, 'axis': StackerAxis.Z},
+        'l': {'total_travel': 30, 'axis': StackerAxis.L},
+    }
 
 async def main(args) -> None:
     t = Timer()
@@ -196,7 +221,20 @@ async def repeatablity_test(args) -> None:
         await stacker.home_axis(test_axis, Direction.RETRACT)
         await stacker._driver.set_stallguard_threshold(test_axis, True, sg_value)
 
+def build_arg_parser():
+    arg_parser = argparse.ArgumentParser(description="Motion Parameter Test Script")
+    arg_parser.add_argument("-c", "--cycles", default = 5, type = int, help = "number of cycles to execute")
+    arg_parser.add_argument("-a", "--axis", default = 'x', type = str, help = "Choose a Axis")
+    arg_parser.add_argument("-f", "--force_gauge", required=False, action='store_false', help = "Force gauge")
+    arg_parser.add_argument("-t", "--test", default="sg_test", choices=["sg_test","repeatability_test"])
+    return arg_parser
+
 if __name__ == '__main__':
     arg_parser = build_arg_parser()
     options = arg_parser.parse_args()
-    asyncio.run(main(options))
+    if options.test == "sg_test":
+        asyncio.run(main(options))
+    elif options.test == "repeatability_test":
+        asyncio.run(repeatablity_test(options))
+    else:
+        raise("Unknown Test Type")
