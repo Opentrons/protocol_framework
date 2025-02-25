@@ -1,7 +1,7 @@
 """Abstract interface for Well core implementations."""
 
 from abc import ABC, abstractmethod
-from typing import TypeVar, Optional
+from typing import TypeVar, Optional, Union, Literal
 
 from opentrons.types import Point
 
@@ -95,7 +95,7 @@ class AbstractWellCore(ABC):
         """Estimate what the liquid height will be after pipetting, without raising an error."""
 
     @abstractmethod
-    def current_liquid_height(self) -> float:
+    def current_liquid_height(self) -> Union[float, Literal["SimulatedProbeResult"]]:
         """Get the current liquid height."""
 
     @abstractmethod

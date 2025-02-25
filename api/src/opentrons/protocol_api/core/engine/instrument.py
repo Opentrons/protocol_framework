@@ -2,8 +2,23 @@
 
 from __future__ import annotations
 
-from typing import Optional, TYPE_CHECKING, cast, Union, List, Tuple, NamedTuple
-from opentrons.types import Location, Mount, NozzleConfigurationType, NozzleMapInterface
+from typing import (
+    Optional,
+    TYPE_CHECKING,
+    cast,
+    Union,
+    List,
+    Tuple,
+    NamedTuple,
+    Literal,
+)
+from opentrons.types import (
+    Location,
+    Mount,
+    NozzleConfigurationType,
+    NozzleMapInterface,
+    MeniscusTrackingTarget,
+)
 from opentrons.hardware_control import SyncHardwareAPI
 from opentrons.hardware_control.dev_types import PipetteDict
 from opentrons.protocols.api_support.util import FlowRates, find_value_for_api_version
@@ -2053,7 +2068,7 @@ class InstrumentCore(AbstractInstrument[WellCore, LabwareCore]):
 
     def liquid_probe_without_recovery(
         self, well_core: WellCore, loc: Location
-    ) -> float:
+    ) -> Union[float, Literal["SimulatedProbeResult"]]:
         labware_id = well_core.labware_id
         well_name = well_core.get_name()
         well_location = WellLocation(
@@ -2069,7 +2084,8 @@ class InstrumentCore(AbstractInstrument[WellCore, LabwareCore]):
         )
 
         self._protocol_core.set_last_location(location=loc, mount=self.get_mount())
-
+        if not isinstance(result.z_position, float):
+            return "SimulatedProbeResult"
         return result.z_position
 
     def nozzle_configuration_valid_for_lld(self) -> bool:

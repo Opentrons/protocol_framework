@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Optional, Union, List, Tuple
+from typing import TYPE_CHECKING, Optional, Union, List, Tuple, Literal
 
 from opentrons import types
 from opentrons.hardware_control import CriticalPoint
@@ -686,7 +686,7 @@ class LegacyInstrumentCore(AbstractInstrument[LegacyWellCore, LegacyLabwareCore]
 
     def liquid_probe_without_recovery(
         self, well_core: WellCore, loc: types.Location
-    ) -> float:
+    ) -> Union[float, Literal["SimulatedProbeResult"]]:
         """This will never be called because it was added in API 2.20."""
         assert False, "liquid_probe_without_recovery only supported in API 2.20 & later"
 

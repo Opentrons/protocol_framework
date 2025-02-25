@@ -1,5 +1,5 @@
 """Helper functions for liquid-level related calculations inside a given frustum."""
-from typing import List, Tuple
+from typing import List, Tuple, Union, Literal
 from numpy import pi, iscomplex, roots, real
 from math import isclose
 
@@ -355,9 +355,13 @@ def _find_volume_in_partial_frustum(
 
 
 def find_volume_at_well_height(
-    target_height: float, well_geometry: InnerWellGeometry
-) -> float:
+    target_height: Union[float, Literal["SimulatedProbeResult"]],
+    well_geometry: InnerWellGeometry
+    # ) -> Union[SimulatedType, float]:
+) -> Union[Literal["SimulatedProbeResult"], float]:
     """Find the volume within a well, at a known height."""
+    if target_height == "SimulatedProbeResult":
+        return target_height
     volumetric_capacity = get_well_volumetric_capacity(well_geometry)
     max_height = volumetric_capacity[-1][0]
     if target_height < 0 or target_height > max_height:

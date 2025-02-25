@@ -1,5 +1,5 @@
 """ProtocolEngine-based Well core implementations."""
-from typing import Optional
+from typing import Optional, Union, Literal
 
 from opentrons_shared_data.labware.constants import WELL_NAME_PATTERN
 
@@ -7,6 +7,8 @@ from opentrons.protocol_engine import WellLocation, WellOrigin, WellOffset
 from opentrons.protocol_engine import commands as cmd
 from opentrons.protocol_engine.clients import SyncClient as EngineClient
 from opentrons.protocols.api_support.util import UnsupportedAPIError
+
+# from opentrons.protocol_engine.state.update_types import SimulatedType
 from opentrons.types import Point
 
 from . import point_calculations
@@ -135,6 +137,7 @@ class WellCore(AbstractWellCore):
             well_location=WellLocation(origin=WellOrigin.CENTER),
         )
 
+    # this gets the coordinates of the well bottom w a z offset of current liquid height
     def get_meniscus(self) -> Point:
         """Get the coordinate of the well's meniscus."""
         return self.get_bottom(self.current_liquid_height())
@@ -186,7 +189,7 @@ class WellCore(AbstractWellCore):
         )
         return projected_final_height
 
-    def current_liquid_height(self) -> float:
+    def current_liquid_height(self) -> Union[float, Literal["SimulatedProbeResult"]]:
         """Return the current liquid height within a well."""
         labware_id = self.labware_id
         well_name = self._name
@@ -198,6 +201,10 @@ class WellCore(AbstractWellCore):
         """Return the current volume in a well."""
         labware_id = self.labware_id
         well_name = self._name
-        return self._engine_client.state.geometry.get_current_well_volume(
+        volume_result = self._engine_client.state.geometry.get_current_well_volume(
             labware_id=labware_id, well_name=well_name
         )
+        if volume_result == "SimulatedProbeResult":
+            return 0.0  # temporary
+        else:
+            return volume_result

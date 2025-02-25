@@ -2589,6 +2589,10 @@ class InstrumentContext(publisher.CommandPublisher):
         self._raise_if_pressure_not_supported_by_pipette()
         loc = well.top()
         height = self._core.liquid_probe_without_recovery(well._core, loc)
+        if not isinstance(height, float):
+            # return the middle of the well, this value should never be used
+            # for motion planning
+            return well.depth / 2
         return height
 
     def _raise_if_configuration_not_supported_by_pipette(
