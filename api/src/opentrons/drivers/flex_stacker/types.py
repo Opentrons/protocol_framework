@@ -20,12 +20,16 @@ class GCODE(str, Enum):
     GET_DOOR_SWITCH = "M122"
     GET_STALLGUARD_THRESHOLD = "M911"
     GET_MOTOR_DRIVER_REGISTER = "M920"
+    GET_TOF_SENSOR_STATUS = "M215"
+    GET_TOF_DRIVER_REGISTER = "M222"
+    ENABLE_TOF_SENSOR = "M224"
     SET_LED = "M200"
     SET_SERIAL_NUMBER = "M996"
     SET_RUN_CURRENT = "M906"
     SET_IHOLD_CURRENT = "M907"
     SET_STALLGUARD = "M910"
     SET_MOTOR_DRIVER_REGISTER = "M921"
+    SET_TOF_DRIVER_REGISTER = "M223"
     ENTER_BOOTLOADER = "dfu"
 
     def build_command(self) -> CommandBuilder:
@@ -65,16 +69,19 @@ class StackerInfo:
         }
 
 
-class StackerAxis(Enum):
+class StackerAxis(str, Enum):
     """Stacker Axis."""
 
     X = "X"
     Z = "Z"
     L = "L"
 
-    def __str__(self) -> str:
-        """Name."""
-        return self.name
+
+class TOFSensor(str, Enum):
+    """Stacker TOF sensor."""
+
+    X = "X"
+    Z = "Z"
 
 
 class LEDColor(Enum):
@@ -113,6 +120,24 @@ class Direction(Enum):
     def distance(self, distance: float) -> float:
         """Get signed distance, where retract direction is negative."""
         return distance * -1 if self == Direction.RETRACT else distance
+
+
+class TOFSensorState(Enum):
+    """TOF Sensor state."""
+
+    DISABLED = 0
+    INITIALIZING = 1
+    IDLE = 2
+    MEASURING = 3
+    ERROR = 4
+
+
+class TOFSensorMode(Enum):
+    """The mode the sensor is in."""
+
+    UNKNOWN = 0
+    MEASURE = 0x03
+    BOOTLOADER = 0x80
 
 
 @dataclass
@@ -163,6 +188,16 @@ class PlatformStatus:
             "extent": self.E,
             "retract": self.R,
         }
+
+
+@dataclass
+class TOFSensorStatus:
+    """Stacker TOF sensor status."""
+
+    sensor: TOFSensor
+    state: TOFSensorState
+    mode: TOFSensorMode
+    ok: bool
 
 
 @dataclass

@@ -1,10 +1,8 @@
 import { useDispatch, useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
 import { createPortal } from 'react-dom'
-import styled from 'styled-components'
 import { useForm } from 'react-hook-form'
 import {
-  BORDERS,
   COLORS,
   DIRECTION_COLUMN,
   Flex,
@@ -15,10 +13,10 @@ import {
   SecondaryButton,
   SPACING,
   StyledText,
-  TYPOGRAPHY,
 } from '@opentrons/components'
 import { getMainPagePortalEl } from '../Portal'
 import { actions, selectors as fileSelectors } from '../../file-data'
+import { TextAreaField } from '../../molecules'
 import type { FileMetadataFields } from '../../file-data'
 
 interface EditProtocolMetadataModalProps {
@@ -91,13 +89,11 @@ export function EditProtocolMetadataModal(
             />
           </Flex>
           <Flex flexDirection={DIRECTION_COLUMN} gridGap={SPACING.spacing4}>
-            <StyledText color={COLORS.grey60} desktopStyle="captionRegular">
-              {t('description')}
-            </StyledText>
-
-            <DescriptionField
-              placeholder={description ?? ''}
+            <TextAreaField
+              title={t('description')}
+              value={description ?? ''}
               {...register('description')}
+              height="6rem"
             />
           </Flex>
           <Flex flexDirection={DIRECTION_COLUMN} gridGap={SPACING.spacing4}>
@@ -116,13 +112,3 @@ export function EditProtocolMetadataModal(
     getMainPagePortalEl()
   )
 }
-
-const DescriptionField = styled.textarea`
-  min-height: 5rem;
-  width: 100%;
-  border: ${BORDERS.lineBorder};
-  border-radius: ${BORDERS.borderRadius4};
-  padding: ${SPACING.spacing8};
-  font-size: ${TYPOGRAPHY.fontSizeH3};
-  resize: none;
-`

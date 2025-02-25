@@ -47,6 +47,8 @@ export const LABWAREV2_DO_NOT_LIST = [
   //  temporarily blocking evotips until it is out of beta
   'evotips_flex_96_tiprack_adapter',
   'evotips_opentrons_96_labware',
+  //  temporarily block tiprack lids until stacker launches
+  'opentrons_flex_tiprack_lid',
 ]
 // NOTE(sa, 2020-7-14): in PD we do not want to list calibration blocks
 // or the adapter/labware combos since we migrated to splitting them up
@@ -66,6 +68,8 @@ export const PD_DO_NOT_LIST = [
   //  temporarily blocking evotips until it is supported in PD
   'evotips_flex_96_tiprack_adapter',
   'evotips_opentrons_96_labware',
+  // temporarily blocking tiprack lids until stacker launches
+  'opentrons_flex_tiprack_lid',
 ]
 
 export function getIsLabwareV1Tiprack(def: LabwareDefinition1): boolean {

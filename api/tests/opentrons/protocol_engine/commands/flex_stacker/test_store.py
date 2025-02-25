@@ -4,6 +4,7 @@ import pytest
 from decoy import Decoy
 from contextlib import nullcontext as does_not_raise
 from typing import ContextManager, Any
+from unittest.mock import sentinel
 
 from opentrons.calibration_storage.helpers import uri_from_details
 from opentrons.hardware_control.modules import FlexStacker
@@ -26,13 +27,11 @@ from opentrons.protocol_engine.commands.command import SuccessData
 from opentrons.protocol_engine.commands.flex_stacker.store import StoreImpl
 from opentrons.protocol_engine.types import (
     DeckSlotLocation,
-    Dimensions,
-    OFF_DECK_LOCATION,
     LoadedLabware,
-    OverlapOffset,
-    OnModuleLocationSequenceComponent,
     OnAddressableAreaLocationSequenceComponent,
-    NotOnDeckLocationSequenceComponent,
+    OnModuleLocationSequenceComponent,
+    InStackerHopperLocation,
+    OnCutoutFixtureLocationSequenceComponent,
 )
 from opentrons.protocol_engine.errors import CannotPerformModuleAction
 from opentrons.types import DeckSlotName
@@ -69,6 +68,10 @@ async def test_store(
         module_id=FlexStackerId("flex-stacker-id"),
         in_static_mode=in_static_mode,
         hopper_labware_ids=["labware-id"],
+        pool_primary_definition=None,
+        pool_adapter_definition=None,
+        pool_lid_definition=None,
+        pool_count=0,
     )
     fs_hardware = decoy.mock(cls=FlexStacker)
 
@@ -90,16 +93,20 @@ async def test_store(
             displayName="Labware",
         )
     )
-
-    decoy.when(state_view.labware.get_dimensions(labware_id="labware-id")).then_return(
-        Dimensions(x=1, y=1, z=1)
+    decoy.when(state_view.labware.get_lid_id_by_labware_id("labware-id")).then_return(
+        "lid-id"
     )
-
-    decoy.when(state_view.labware.get_definition("lid-id")).then_return(tiprack_lid_def)
-
+    decoy.when(state_view.labware.get_definition("lid-id")).then_return(
+        sentinel.lid_definition
+    )
+    decoy.when(state_view.labware.get_definition("labware-id")).then_return(
+        sentinel.base_labware_definition
+    )
     decoy.when(
-        state_view.labware.get_labware_overlap_offsets(tiprack_lid_def, "tiprack")
-    ).then_return(OverlapOffset(x=0, y=0, z=14))
+        state_view.geometry.get_height_of_labware_stack(
+            [sentinel.lid_definition, sentinel.base_labware_definition]
+        )
+    ).then_return(4)
 
     decoy.when(
         equipment.get_module_hardware_api(FlexStackerId("flex-stacker-id"))
@@ -109,6 +116,18 @@ async def test_store(
             OnModuleLocationSequenceComponent(moduleId="flex-stacker-id"),
             OnAddressableAreaLocationSequenceComponent(
                 addressableAreaName="flexStackerV1B4",
+            ),
+        ]
+    )
+    decoy.when(
+        state_view.geometry.get_predicted_location_sequence(
+            InStackerHopperLocation(moduleId="flex-stacker-id")
+        )
+    ).then_return(
+        [
+            InStackerHopperLocation(moduleId="flex-stacker-id"),
+            OnCutoutFixtureLocationSequenceComponent(
+                cutoutId="cutoutA3", possibleCutoutFixtureIds=["flexStackerModuleV1"]
             ),
         ]
     )
@@ -127,16 +146,17 @@ async def test_store(
                     ),
                 ],
                 eventualDestinationLocationSequence=[
-                    OnModuleLocationSequenceComponent(moduleId="flex-stacker-id"),
-                    NotOnDeckLocationSequenceComponent(
-                        logicalLocationName=OFF_DECK_LOCATION
+                    InStackerHopperLocation(moduleId="flex-stacker-id"),
+                    OnCutoutFixtureLocationSequenceComponent(
+                        cutoutId="cutoutA3",
+                        possibleCutoutFixtureIds=["flexStackerModuleV1"],
                     ),
                 ],
             ),
             state_update=StateUpdate(
                 labware_location=LabwareLocationUpdate(
                     labware_id="labware-id",
-                    new_location=OFF_DECK_LOCATION,
+                    new_location=InStackerHopperLocation(moduleId="flex-stacker-id"),
                     offset_id=None,
                 ),
                 flex_stacker_state_update=FlexStackerStateUpdate(

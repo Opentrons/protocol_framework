@@ -44,17 +44,27 @@ class WellCore(AbstractWellCore):
     @property
     def diameter(self) -> Optional[float]:
         """Get the well's diameter, if circular."""
-        return self._definition.diameter
+        return (
+            self._definition.diameter if self._definition.shape == "circular" else None
+        )
 
     @property
     def length(self) -> Optional[float]:
         """Get the well's length, if rectangular."""
-        return self._definition.xDimension
+        return (
+            self._definition.xDimension
+            if self._definition.shape == "rectangular"
+            else None
+        )
 
     @property
     def width(self) -> Optional[float]:
         """Get the well's width, if rectangular."""
-        return self._definition.yDimension
+        return (
+            self._definition.yDimension
+            if self._definition.shape == "rectangular"
+            else None
+        )
 
     @property
     def depth(self) -> float:
@@ -124,6 +134,10 @@ class WellCore(AbstractWellCore):
             labware_id=self._labware_id,
             well_location=WellLocation(origin=WellOrigin.CENTER),
         )
+
+    def get_meniscus(self) -> Point:
+        """Get the coordinate of the well's meniscus."""
+        return self.get_bottom(self.current_liquid_height())
 
     def load_liquid(
         self,

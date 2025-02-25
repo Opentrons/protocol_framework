@@ -2,7 +2,7 @@ from typing import Optional
 from typing_extensions import Protocol
 
 from opentrons.types import Point
-from opentrons.hardware_control.types import CriticalPoint
+from opentrons.hardware_control.types import CriticalPoint, TipScrapeType
 from .types import MountArgType, CalibrationType, ConfigType
 
 from .instrument_configurer import InstrumentConfigurer
@@ -191,6 +191,7 @@ class LiquidHandler(
         mount: MountArgType,
         home_after: bool = True,
         ignore_plunger: bool = False,
+        scrape_type: TipScrapeType = TipScrapeType.NONE,
     ) -> None:
         ...
 

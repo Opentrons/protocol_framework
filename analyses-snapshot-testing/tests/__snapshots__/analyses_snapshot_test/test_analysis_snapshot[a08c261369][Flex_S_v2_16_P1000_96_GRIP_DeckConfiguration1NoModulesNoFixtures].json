@@ -9088,6 +9088,7 @@
         "alternateDropLocation": false,
         "labwareId": "UUID",
         "pipetteId": "UUID",
+        "scrape_tips": false,
         "wellLocation": {
           "offset": {
             "x": 0.0,
@@ -9102,7 +9103,7 @@
         "position": {
           "x": 342.38,
           "y": 181.38,
-          "z": 90.88
+          "z": 42.12400000000001
         }
       },
       "startedAt": "TIMESTAMP",
@@ -9220,6 +9221,7 @@
         "alternateDropLocation": false,
         "labwareId": "UUID",
         "pipetteId": "UUID",
+        "scrape_tips": false,
         "wellLocation": {
           "offset": {
             "x": 0.0,
@@ -9234,7 +9236,7 @@
         "position": {
           "x": 178.38,
           "y": 74.38,
-          "z": 90.88
+          "z": 42.12400000000001
         }
       },
       "startedAt": "TIMESTAMP",
@@ -9568,6 +9570,7 @@
         "alternateDropLocation": false,
         "labwareId": "UUID",
         "pipetteId": "UUID",
+        "scrape_tips": false,
         "wellLocation": {
           "offset": {
             "x": 0.0,
@@ -9582,7 +9585,7 @@
         "position": {
           "x": 342.38,
           "y": 181.38,
-          "z": 90.88
+          "z": 42.12400000000001
         }
       },
       "startedAt": "TIMESTAMP",
@@ -9700,6 +9703,7 @@
         "alternateDropLocation": false,
         "labwareId": "UUID",
         "pipetteId": "UUID",
+        "scrape_tips": false,
         "wellLocation": {
           "offset": {
             "x": 0.0,
@@ -9714,7 +9718,7 @@
         "position": {
           "x": 178.38,
           "y": 74.38,
-          "z": 90.88
+          "z": 42.12400000000001
         }
       },
       "startedAt": "TIMESTAMP",

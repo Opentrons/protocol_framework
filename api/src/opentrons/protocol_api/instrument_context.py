@@ -1528,6 +1528,7 @@ class InstrumentContext(publisher.CommandPublisher):
         trash_location: Optional[
             Union[types.Location, labware.Well, TrashBin, WasteChute]
         ] = None,
+        return_tip: bool = False,
     ) -> InstrumentContext:
         """Transfer liquid from source to dest using the specified liquid class properties.
 
@@ -1599,6 +1600,7 @@ class InstrumentContext(publisher.CommandPublisher):
                 for rack in tip_racks
             ],
             trash_location=checked_trash_location,
+            return_tip=return_tip,
         )
         return self
 
@@ -1615,6 +1617,7 @@ class InstrumentContext(publisher.CommandPublisher):
         trash_location: Optional[
             Union[types.Location, labware.Well, TrashBin, WasteChute]
         ] = None,
+        return_tip: bool = False,
     ) -> InstrumentContext:
         """
         Distribute liquid from a single source to multiple destinations
@@ -1678,6 +1681,7 @@ class InstrumentContext(publisher.CommandPublisher):
                 for rack in tip_racks
             ],
             trash_location=checked_trash_location,
+            return_tip=return_tip,
         )
         return self
 
@@ -1694,6 +1698,7 @@ class InstrumentContext(publisher.CommandPublisher):
         trash_location: Optional[
             Union[types.Location, labware.Well, TrashBin, WasteChute]
         ] = None,
+        return_tip: bool = False,
     ) -> InstrumentContext:
         """
         Consolidate liquid from multiple sources to a single destination
@@ -1725,6 +1730,10 @@ class InstrumentContext(publisher.CommandPublisher):
                 )
             else:
                 tip_racks = [self._last_tip_picked_up_from.parent]
+        elif valid_new_tip == TransferTipPolicyV2.PER_SOURCE:
+            raise RuntimeError(
+                'Tip transfer policy "per source" incompatible with consolidate.'
+            )
         else:
             tip_racks = self._tip_racks
         if self.current_volume != 0:
@@ -1761,6 +1770,7 @@ class InstrumentContext(publisher.CommandPublisher):
                 for rack in tip_racks
             ],
             trash_location=checked_trash_location,
+            return_tip=return_tip,
         )
         return self
 
