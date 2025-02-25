@@ -80,7 +80,7 @@ export function DragPreview(props: DragPreviewProps): JSX.Element | null {
       height={height}
       innerDivProps={{
         style: {
-          opacity: '0.2',
+          opacity: 0.2,
           ...DECK_CONTROLS_STYLE,
           position: POSITION_ABSOLUTE,
           cursor: CURSOR_GRABBING,
@@ -89,7 +89,9 @@ export function DragPreview(props: DragPreviewProps): JSX.Element | null {
       }}
     >
       <>
-        <DragPreviewImage src={previewImage} connect={preview} />
+        {isDragging && (
+          <DragPreviewImage src={previewImage} connect={preview} />
+        )}
         <Flex
           ref={drag}
           width={width}
