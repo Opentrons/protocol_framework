@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from abc import abstractmethod, ABC
-from typing import Any, Generic, Optional, TypeVar, Union, List, Tuple
+from typing import Any, Generic, Optional, TypeVar, Union, List, Tuple, Literal
 
 from opentrons import types
 from opentrons.hardware_control.dev_types import PipetteDict
@@ -11,6 +11,8 @@ from opentrons.protocols.api_support.util import FlowRates
 from opentrons.protocols.advanced_control.transfers.common import TransferTipPolicyV2
 from opentrons.protocol_api._nozzle_layout import NozzleLayout
 from opentrons.protocol_api._liquid import LiquidClass
+
+# from opentrons.protocol_engine.state.update_types import SimulatedType
 from ..disposal_locations import TrashBin, WasteChute
 from .well import WellCoreType
 from .labware import LabwareCoreType
@@ -426,7 +428,7 @@ class AbstractInstrument(ABC, Generic[WellCoreType, LabwareCoreType]):
     @abstractmethod
     def liquid_probe_without_recovery(
         self, well_core: WellCoreType, loc: types.Location
-    ) -> float:
+    ) -> Union[float, Literal["SimulatedProbeResult"]]:
         """Do a liquid probe to find the level of the liquid in the well."""
         ...
 

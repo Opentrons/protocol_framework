@@ -326,7 +326,12 @@ class Well:
     @requires_version(2, 21)
     def current_liquid_height(self) -> float:
         """Get the current liquid height in a well."""
-        return self._core.current_liquid_height()
+        current_height = self._core.current_liquid_height()
+        if not isinstance(current_height, float):
+            # return the middle of the well, this value should never be used
+            # for motion planning
+            return self._core.depth / 2
+        return current_height
 
     @requires_version(2, 21)
     def current_liquid_volume(self) -> float:

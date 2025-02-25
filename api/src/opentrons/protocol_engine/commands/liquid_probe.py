@@ -80,7 +80,7 @@ class TryLiquidProbeParams(_CommonParams):
 class LiquidProbeResult(DestinationPositionResult):
     """Result data from the execution of a `liquidProbe` command."""
 
-    z_position: float = Field(
+    z_position: Union[float, Literal["SimulatedProbeResult"]] = Field(
         ..., description="The Z coordinate, in mm, of the found liquid in deck space."
     )
     # New fields should use camelCase. z_position is snake_case for historical reasons.
@@ -89,7 +89,9 @@ class LiquidProbeResult(DestinationPositionResult):
 class TryLiquidProbeResult(DestinationPositionResult):
     """Result data from the execution of a `tryLiquidProbe` command."""
 
-    z_position: float | SkipJsonSchema[None] = Field(
+    z_position: Union[
+        float, SkipJsonSchema[None], Literal["SimulatedProbeResult"]
+    ] = Field(
         ...,
         description=(
             "The Z coordinate, in mm, of the found liquid in deck space."
@@ -116,8 +118,9 @@ class _ExecuteCommonResult(NamedTuple):
     # If the probe succeeded, the z_pos that it returned.
     # Or, if the probe found no liquid, the error representing that,
     # so calling code can propagate those details up.
-    z_pos_or_error: float | PipetteLiquidNotFoundError | PipetteOverpressureError
-
+    z_pos_or_error: float | PipetteLiquidNotFoundError | PipetteOverpressureError | Literal[
+        "SimulatedProbeResult"
+    ]
     state_update: update_types.StateUpdate
     deck_point: DeckPoint
 
@@ -171,6 +174,7 @@ async def _execute_common(  # noqa: C901
         )
 
     # liquid_probe process start position
+    # raise Exception(f"well location = {params.wellLocation}") its well.top
     move_result = await move_to_well(
         movement=movement,
         model_utils=model_utils,
@@ -223,6 +227,7 @@ async def _execute_common(  # noqa: C901
             ),
         )
     else:
+        # move_result.state_update needs to be simulated
         return _ExecuteCommonResult(
             z_pos_or_error=z_pos,
             state_update=move_result.state_update,
@@ -266,6 +271,7 @@ class LiquidProbeImplementation(
             MustHomeError: as an undefined error, if the plunger is not in a valid
                 position.
         """
+        # should be "SimulatedProbeResult"
         result = await _execute_common(
             state_view=self._state_view,
             movement=self._movement,
@@ -303,15 +309,18 @@ class LiquidProbeImplementation(
             )
         else:
             try:
-                well_volume: float | update_types.ClearType = (
-                    self._state_view.geometry.get_well_volume_at_height(
-                        labware_id=params.labwareId,
-                        well_name=params.wellName,
-                        height=z_pos_or_error,
-                    )
-                )
+                # raise Exception(f"here lol")
+                well_volume: Union[
+                    float, update_types.ClearType, Literal["SimulatedProbeResult"]
+                ] = self._state_view.geometry.get_well_volume_at_height(
+                    labware_id=params.labwareId,
+                    well_name=params.wellName,
+                    height=z_pos_or_error,
+                )  # bookmark
+                # raise Exception(f"well volume = {z_pos_or_error}") # noice
             except IncompleteLabwareDefinitionError:
                 well_volume = update_types.CLEAR
+            # import new union type here, pass it to set_liquid_probed
             state_update.set_liquid_probed(
                 labware_id=params.labwareId,
                 well_name=params.wellName,
@@ -370,7 +379,9 @@ class TryLiquidProbeImplementation(
             z_pos_or_error, (PipetteLiquidNotFoundError, PipetteOverpressureError)
         ):
             z_pos = None
-            well_volume: float | update_types.ClearType = update_types.CLEAR
+            well_volume: Union[
+                float, update_types.ClearType, Literal["SimulatedProbeResult"]
+            ] = update_types.CLEAR
         else:
             z_pos = z_pos_or_error
             try:

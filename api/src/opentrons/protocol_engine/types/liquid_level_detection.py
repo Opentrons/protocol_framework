@@ -1,7 +1,9 @@
 """Protocol Engine types to do with liquid level detection."""
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Optional
+from typing import Optional, Union, Literal
+
+# from ..state.update_types import SimulatedType
 
 from pydantic import BaseModel
 
@@ -17,14 +19,14 @@ class LoadedVolumeInfo(BaseModel):
 class ProbedHeightInfo(BaseModel):
     """A well's liquid height, initialized by a LiquidProbe, cleared by Aspirate and Dispense."""
 
-    height: Optional[float] = None
+    height: Union[float, Literal["SimulatedProbeResult"], None]
     last_probed: datetime
 
 
 class ProbedVolumeInfo(BaseModel):
     """A well's liquid volume, initialized by a LiquidProbe, updated by Aspirate and Dispense."""
 
-    volume: Optional[float] = None
+    volume: Union[float, Literal["SimulatedProbeResult"], None] = None
     last_probed: datetime
     operations_since_probe: int
 
@@ -35,7 +37,7 @@ class WellInfoSummary(BaseModel):
     labware_id: str
     well_name: str
     loaded_volume: Optional[float] = None
-    probed_height: Optional[float] = None
+    probed_height: Union[float, Literal["SimulatedProbeResult"], None] = None
     probed_volume: Optional[float] = None
 
 

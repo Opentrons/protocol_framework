@@ -3681,6 +3681,9 @@ def test_get_well_volume_at_height(
         well_name=well_name,
         height=vol_2_input_height_from_bottom,
     )
+    # breakpoint()
+    assert isinstance(found_volume_bottom, float)
+    assert isinstance(found_volume_top, float)
     assert isclose(found_volume_bottom, expected_volume_bottom, rel_tol=0.01)
     assert isclose(found_volume_top, expected_volume_top, rel_tol=0.01)
 
