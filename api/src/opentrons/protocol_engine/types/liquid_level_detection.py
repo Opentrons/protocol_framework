@@ -38,7 +38,7 @@ class WellInfoSummary(BaseModel):
     well_name: str
     loaded_volume: Optional[float] = None
     probed_height: Union[float, Literal["SimulatedProbeResult"], None] = None
-    probed_volume: Optional[float] = None
+    probed_volume: Union[float, Literal["SimulatedProbeResult"], None] = None
 
 
 @dataclass

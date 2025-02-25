@@ -84,6 +84,8 @@ from .frustum_helpers import (
 )
 from ._well_math import wells_covered_by_pipette_configuration, nozzles_per_well
 
+# from .update_types import SimulatedType, SIMULATED
+
 
 _LOG = getLogger(__name__)
 SLOT_WIDTH = 128
@@ -487,6 +489,7 @@ class GeometryView:
                     f"Specifying {well_location.origin} with an offset of {well_location.offset} results in an operation location below the bottom of the well"
                 )
             else:
+                # this is getting raised, I'm returning 0 somewhere arbitrarily
                 raise OperationLocationNotInWellError(
                     f"Specifying {well_location.origin} with an offset of {well_location.offset} and a volume offset of {well_location.volumeOffset} results in an operation location below the bottom of the well"
                 )
@@ -498,6 +501,7 @@ class GeometryView:
         well_location: Optional[WellLocations] = None,
         operation_volume: Optional[float] = None,
         pipette_id: Optional[str] = None,
+        # ) -> Union[Point, Literal["SimulatedProbeResult"]]:
     ) -> Point:
         """Given relative well location in a labware, get absolute position."""
         labware_pos = self.get_labware_position(labware_id)
@@ -514,6 +518,9 @@ class GeometryView:
                 well_depth=well_depth,
                 operation_volume=operation_volume,
             )
+            if not isinstance(offset_adjustment, float):
+                # return offset_adjustment
+                return Point()
             offset = offset.model_copy(update={"z": offset.z + offset_adjustment})
             self.validate_well_position(
                 well_location=well_location, z_offset=offset.z, pipette_id=pipette_id
@@ -1740,12 +1747,13 @@ class GeometryView:
         well_location: WellLocations,
         well_depth: float,
         operation_volume: Optional[float] = None,
-    ) -> float:
+    ) -> Union[float, Literal["SimulatedProbeResult"]]:
         """Return a z-axis distance that accounts for well handling height and operation volume.
 
         Distance is with reference to the well bottom.
         """
         # TODO(pbm, 10-23-24): refactor to smartly reduce height/volume conversions
+
         initial_handling_height = self.get_well_handling_height(
             labware_id=labware_id,
             well_name=well_name,
@@ -1753,7 +1761,7 @@ class GeometryView:
             well_depth=well_depth,
         )
         if initial_handling_height == "SimulatedProbeResult":
-            return 0.0
+            return initial_handling_height
         # if we're tracking a MENISCUS origin, and targeting either the beginning
         #   position of the liquid or doing dynamic tracking, return the initial height
         if (
@@ -1791,7 +1799,6 @@ class GeometryView:
     ) -> Union[float, Literal["SimulatedProbeResult"]]:
         """Returns most recently updated volume in specified well."""
         last_updated = self._wells.get_last_liquid_update(labware_id, well_name)
-        # raise Exception(f"last updated = {last_updated}")
         if last_updated is None:
             raise errors.LiquidHeightUnknownError(
                 "Must LiquidProbe or LoadLiquid before specifying WellOrigin.MENISCUS."
@@ -1840,7 +1847,6 @@ class GeometryView:
     ) -> Union[float, Literal["SimulatedProbeResult"]]:
         """Returns stored meniscus height in specified well."""
         last_updated = self._wells.get_last_liquid_update(labware_id, well_name)
-        # raise Exception(f"last updated = {last_updated}") # is None
         if last_updated is None:
             raise errors.LiquidHeightUnknownError(
                 "Must LiquidProbe or LoadLiquid before specifying WellOrigin.MENISCUS."
@@ -1990,9 +1996,7 @@ class GeometryView:
         height: Union[float, Literal["SimulatedProbeResult"]],
     ) -> Union[float, Literal["SimulatedProbeResult"]]:
         """Convert well height to volume."""
-        # raise Exception(f"height = {height}")
         well_geometry = self._labware.get_well_geometry(labware_id, well_name)
-        # raise Exception(f"height = {height}")
         if height == "SimulatedProbeResult":
             return height
         return find_volume_at_well_height(

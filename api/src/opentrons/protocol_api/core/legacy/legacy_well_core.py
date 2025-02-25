@@ -133,7 +133,7 @@ class LegacyWellCore(AbstractWellCore):
         """Get the current liquid height."""
         return 0.0
 
-    def get_liquid_volume(self) -> float:
+    def get_liquid_volume(self) -> Union[float, Literal["SimulatedProbeResult"]]:
         """Get the current well volume."""
         return 0.0
 
