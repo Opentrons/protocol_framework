@@ -345,7 +345,10 @@ class Well:
         return self._core.get_liquid_volume()
 
     @requires_version(2, 21)
-    def estimate_liquid_height_after_pipetting(self, operation_volume: float) -> float:
+    def estimate_liquid_height_after_pipetting(
+        self,
+        operation_volume: float,
+    ) -> Union[float, Literal["SimulatedProbeResult"]]:
         """Check the height of the liquid within a well.
 
         :returns: The height, in mm, of the liquid from the deck.
