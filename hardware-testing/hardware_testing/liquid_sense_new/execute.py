@@ -139,6 +139,7 @@ def run(
     liquid_height: float = 0.0
     liquid_height_from_deck: float = 0.0
     tip_offset: float = 0.0
+    trials_before_jog = run_args.trials_before_jog
     hw_api = get_sync_hw_api(run_args.ctx)
     test_well: Well = test_labware[run_args.test_well]
     _load_tipracks(run_args.ctx, run_args.pipette_channels, run_args.protocol_cfg, tip)
@@ -159,65 +160,46 @@ def run(
         x_offset = 0 if run_args.pipette_channels != 96 else 9 * -11
         dial_target = dial_target.move(top_types.Point(y=y_offset, x=x_offset))
 
-    def read_dial() -> float:
+    def move_to_dial_and_read() -> float:
+        if run_args.dial_indicator is None:
+            return 0.0
+        ui.print_info("Taking a baseline dial-indicator reading")
+        run_args.pipette.move_to(dial_target)
         time.sleep(2)
         dial_value = run_args.dial_indicator.read()  # type: ignore[union-attr]
+        run_args.pipette._retract()
         return dial_value
 
-    lpc_offset = 0.0
-    if run_args.dial_indicator is not None:
-        run_args.pipette.move_to(dial_target)
-        lpc_offset = read_dial()
-        run_args.pipette._retract()
-
-    def _get_tip_offset() -> float:
-        tip_offset = 0.0
-        if run_args.dial_indicator is not None:
-            run_args.pipette.move_to(dial_target)
-            tip_offset = read_dial()
-            run_args.pipette._retract()
-        return tip_offset
-
-    def _get_target_height() -> None:
+    def _cache_true_liquid_height() -> None:
         nonlocal liquid_height, liquid_height_from_deck, tip_offset
         run_args.pipette.pick_up_tip(tips[0])
         if run_args.pipette_channels < 96:
             del tips[: run_args.pipette_channels]
-        tip_offset = _get_tip_offset()
+        tip_offset = move_to_dial_and_read()
         liquid_height = _jog_to_find_liquid_height(
             run_args.ctx, run_args.pipette, test_well
         )
         liquid_height_from_deck = test_well.bottom(liquid_height).point.z
         run_args.pipette._retract()
+        if run_args.return_tip:
+            run_args.pipette.return_tip()
+        else:
+            run_args.pipette.drop_tip()
+            run_args.pipette._retract()
 
-    _get_target_height()
-
-    if run_args.return_tip:
-        run_args.pipette.return_tip()
-    else:
-        run_args.pipette.drop_tip()
-        run_args.pipette._retract()
-
-    store_baseline_trial(
-        run_args.test_report,
-        tip,
-        liquid_height_from_deck,
-        test_well.top().point.z - liquid_height_from_deck,
-        tip_offset - lpc_offset,
-    )
-
-    trials_before_jog = run_args.trials_before_jog
-
+    lpc_offset = move_to_dial_and_read()
     try:
         for trial in range(run_args.trials):
-            if trial > 0 and trial % trials_before_jog == 0:
-                _get_target_height()
-                if run_args.return_tip:
-                    run_args.pipette.return_tip()
-                else:
-                    run_args.pipette.drop_tip()
-                    run_args.pipette._retract()
-
+            if trial % trials_before_jog == 0:
+                _cache_true_liquid_height()
+                if trial == 0:
+                    store_baseline_trial(
+                        run_args.test_report,
+                        tip,
+                        liquid_height_from_deck,
+                        test_well.top().point.z - liquid_height_from_deck,
+                        tip_offset - lpc_offset,
+                    )
             ui.print_info(f"Picking up {tip}ul tip")
             if run_args.pipette_channels == 96:
                 run_args.pipette._retract()
@@ -229,7 +211,8 @@ def run(
             if run_args.dial_indicator is not None:
                 run_args.pipette._retract()
                 run_args.pipette.move_to(dial_target)
-                tip_length_offset = tip_offset - read_dial()
+                dial_val = move_to_dial_and_read()
+                tip_length_offset = tip_offset - dial_val
                 run_args.pipette._retract()
                 ui.print_info(f"Tip Offset  {tip_length_offset}")
             run_args.pipette.move_to(test_well.top(z=2))
@@ -238,6 +221,12 @@ def run(
                 run_args.pipette.move_to(test_well.top(z=2))
             start_pos = hw_api.current_position_ot3(OT3Mount.LEFT)
             height, result = _run_trial(run_args, tip, trial, start_pos)
+            adj_height = height + tip_length_offset
+            results.append(height)
+            adjusted_results.append(adj_height)
+            ui.print_info(f"Trial results: "
+                          f"height={round(height, 2)}, "
+                          f"adjusted_height={round(adj_height, 2)}")
             end_pos = hw_api.current_position_ot3(OT3Mount.LEFT)
             ui.print_info("Dropping tip")
             if run_args.return_tip:
@@ -245,8 +234,6 @@ def run(
             else:
                 run_args.pipette.drop_tip()
                 run_args.pipette._retract()
-            results.append(height)
-            adjusted_results.append(height + tip_length_offset)
             hw_pipette = hw_api.hardware_pipettes[top_types.Mount.LEFT]
             plunger_start = hw_pipette.plunger_positions.top
             store_trial(
@@ -261,14 +248,7 @@ def run(
                 liquid_height_from_deck,
                 result.value,
             )
-            ui.print_info(
-                f"\n\n Z axis start pos {start_pos[Axis.Z_L]} end pos {end_pos[Axis.Z_L]}"
-            )
-            ui.print_info(
-                f"plunger start pos {plunger_start} end pos {end_pos[Axis.P_L]}\n\n"
-            )
     finally:
-        ui.print_info(f"RESULTS: \n{results}")
         ui.print_info(f"Adjusted RESULTS: \n{adjusted_results}")
         store_tip_results(run_args.test_report, tip, results, adjusted_results)
 
@@ -326,5 +306,4 @@ def _run_trial(
     except PipetteLiquidNotFoundError as lnf:
         ui.print_info(f"Liquid not found current position {lnf.detail}")
         result = LLDResult.not_found
-    ui.print_info(f"Trial {trial} complete")
     return height, result
