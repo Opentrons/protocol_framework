@@ -15,6 +15,7 @@ from . import (
     test_door_switch,
     test_estop,
     test_ui_leds,
+    test_uv_lockout_switch,
 )
 
 
@@ -30,6 +31,7 @@ class TestSection(enum.Enum):
     Z_AXIS_CURRENT_SPEED = "Z_AXIS_CURRENT_SPEED"
     X_AXIS_CURRENT_SPEED = "X_AXIS_CURRENT_SPEED"
     UI_LEDS = "UI_LEDS"
+    UV_LOCKOUT_SWITCH = "UV_LOCKOUT_SWITCH"
 
 
 @dataclass
@@ -77,6 +79,10 @@ TESTS = [
         TestSection.UI_LEDS,
         test_ui_leds.run,
     ),
+    (
+        TestSection.UV_LOCKOUT_SWITCH,
+        test_uv_lockout_switch.run,
+    ),
 ]
 
 
@@ -120,6 +126,10 @@ def build_report(test_name: str) -> CSVReport:
             CSVSection(
                 title=TestSection.UI_LEDS.value,
                 lines=test_ui_leds.build_csv_lines(),
+            ),
+            CSVSection(
+                title=TestSection.UV_LOCKOUT_SWITCH.value,
+                lines=test_uv_lockout_switch.build_csv_lines(),
             ),
         ],
     )
