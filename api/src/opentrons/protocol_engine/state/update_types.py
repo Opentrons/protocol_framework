@@ -1,5 +1,7 @@
 """Structures to represent changes that commands want to make to engine state."""
 
+from __future__ import annotations
+
 import dataclasses
 import enum
 import typing
@@ -105,6 +107,16 @@ class LabwareLocationUpdate:
 
 
 @dataclasses.dataclass
+class BatchLabwareLocationUpdate:
+    """An update to the locations of multiple labware."""
+
+    new_locations_by_id: dict[str, LabwareLocation]
+    """The new locations of each ID."""
+    new_offset_ids_by_id: dict[str, str | None]
+    """The new offsets of each id."""
+
+
+@dataclasses.dataclass
 class LoadedLabwareUpdate:
     """An update that loads a new labware."""
 
@@ -120,6 +132,23 @@ class LoadedLabwareUpdate:
     display_name: str | None
 
     definition: LabwareDefinition
+
+
+@dataclasses.dataclass
+class BatchLoadedLabwareUpdate:
+    """An update that loads multiple new labware."""
+
+    new_locations_by_id: typing.Dict[str, LabwareLocation]
+    """Each new labwares's initial location keyed by Labware ID."""
+
+    offset_ids_by_id: typing.Dict[str, str | None]
+    """The ID of each labware's offset keyed by labware ID."""
+
+    display_names_by_id: typing.Dict[str, str | None]
+    """The Display Name for each new labware keyed by labware ID"""
+
+    definitions_by_id: typing.Dict[str, LabwareDefinition]
+    """The Labware Definition for each labware keyed by Labware ID."""
 
 
 @dataclasses.dataclass
@@ -308,9 +337,9 @@ class AbsorbanceReaderStateUpdate:
     module_id: str
     absorbance_reader_lid: AbsorbanceReaderLidUpdate | NoChangeType = NO_CHANGE
     absorbance_reader_data: AbsorbanceReaderDataUpdate | NoChangeType = NO_CHANGE
-    initialize_absorbance_reader_update: AbsorbanceReaderInitializeUpdate | NoChangeType = (
-        NO_CHANGE
-    )
+    initialize_absorbance_reader_update: (
+        AbsorbanceReaderInitializeUpdate | NoChangeType
+    ) = NO_CHANGE
 
 
 @dataclasses.dataclass
@@ -335,14 +364,40 @@ class FlexStackerStoreLabware:
 
 
 @dataclasses.dataclass
+class FlexStackerPoolConstraint:
+    """The labware definitions that are contained in the pool."""
+
+    primary_definition: LabwareDefinition
+    lid_definition: LabwareDefinition | None
+    adapter_definition: LabwareDefinition | None
+
+
+@dataclasses.dataclass
 class FlexStackerStateUpdate:
     """An update to the Flex Stacker module state."""
 
     module_id: str
     in_static_mode: bool | NoChangeType = NO_CHANGE
-    hopper_labware_update: FlexStackerLoadHopperLabware | FlexStackerRetrieveLabware | FlexStackerStoreLabware | NoChangeType = (
-        NO_CHANGE
-    )
+    hopper_labware_update: (
+        FlexStackerLoadHopperLabware
+        | FlexStackerRetrieveLabware
+        | FlexStackerStoreLabware
+        | NoChangeType
+    ) = NO_CHANGE
+    pool_constraint: FlexStackerPoolConstraint | NoChangeType = NO_CHANGE
+    pool_count: int | NoChangeType = NO_CHANGE
+
+    @classmethod
+    def create_or_override(
+        cls,
+        maybe_inst: FlexStackerStateUpdate | NoChangeType,
+        module_id: str,
+    ) -> FlexStackerStateUpdate:
+        """Build or default a state update."""
+        if maybe_inst == NO_CHANGE:
+            return FlexStackerStateUpdate(module_id=module_id)
+        else:
+            return maybe_inst
 
 
 @dataclasses.dataclass
@@ -391,7 +446,11 @@ class StateUpdate:
 
     labware_location: LabwareLocationUpdate | NoChangeType = NO_CHANGE
 
+    batch_labware_location: BatchLabwareLocationUpdate | NoChangeType = NO_CHANGE
+
     loaded_labware: LoadedLabwareUpdate | NoChangeType = NO_CHANGE
+
+    batch_loaded_labware: BatchLoadedLabwareUpdate | NoChangeType = NO_CHANGE
 
     loaded_lid_stack: LoadedLidStackUpdate | NoChangeType = NO_CHANGE
 
@@ -524,6 +583,19 @@ class StateUpdate:
         )
         return self
 
+    def set_batch_labware_location(
+        self: Self,
+        *,
+        new_locations_by_id: typing.Dict[str, LabwareLocation],
+        new_offset_ids_by_id: typing.Dict[str, str | None],
+    ) -> Self:
+        """Update the location of multiple labware objects."""
+        self.batch_labware_location = BatchLabwareLocationUpdate(
+            new_locations_by_id=new_locations_by_id,
+            new_offset_ids_by_id=new_offset_ids_by_id,
+        )
+        return self
+
     def set_loaded_labware(
         self: Self,
         definition: LabwareDefinition,
@@ -539,6 +611,22 @@ class StateUpdate:
             offset_id=offset_id,
             new_location=location,
             display_name=display_name,
+        )
+        return self
+
+    def set_batch_loaded_labware(
+        self: Self,
+        definitions_by_id: typing.Dict[str, LabwareDefinition],
+        offset_ids_by_id: typing.Dict[str, str | None],
+        display_names_by_id: typing.Dict[str, str | None],
+        new_locations_by_id: typing.Dict[str, LabwareLocation],
+    ) -> Self:
+        """Add a set of new labwares to state. See `BatchLoadedLabwareUpdate`."""
+        self.batch_loaded_labware = BatchLoadedLabwareUpdate(
+            new_locations_by_id=new_locations_by_id,
+            offset_ids_by_id=offset_ids_by_id,
+            display_names_by_id=display_names_by_id,
+            definitions_by_id=definitions_by_id,
         )
         return self
 
@@ -753,8 +841,10 @@ class StateUpdate:
         labware_id: str,
     ) -> Self:
         """Add a labware definition to the engine."""
-        self.flex_stacker_state_update = FlexStackerStateUpdate(
-            module_id=module_id,
+        self.flex_stacker_state_update = dataclasses.replace(
+            FlexStackerStateUpdate.create_or_override(
+                self.flex_stacker_state_update, module_id
+            ),
             hopper_labware_update=FlexStackerLoadHopperLabware(labware_id=labware_id),
         )
         return self
@@ -765,8 +855,10 @@ class StateUpdate:
         labware_id: str,
     ) -> Self:
         """Add a labware definition to the engine."""
-        self.flex_stacker_state_update = FlexStackerStateUpdate(
-            module_id=module_id,
+        self.flex_stacker_state_update = dataclasses.replace(
+            FlexStackerStateUpdate.create_or_override(
+                self.flex_stacker_state_update, module_id
+            ),
             hopper_labware_update=FlexStackerRetrieveLabware(labware_id=labware_id),
         )
         return self
@@ -777,8 +869,10 @@ class StateUpdate:
         labware_id: str,
     ) -> Self:
         """Add a labware definition to the engine."""
-        self.flex_stacker_state_update = FlexStackerStateUpdate(
-            module_id=module_id,
+        self.flex_stacker_state_update = dataclasses.replace(
+            FlexStackerStateUpdate.create_or_override(
+                self.flex_stacker_state_update, module_id
+            ),
             hopper_labware_update=FlexStackerStoreLabware(labware_id=labware_id),
         )
         return self
@@ -789,8 +883,42 @@ class StateUpdate:
         static_mode: bool,
     ) -> Self:
         """Update the mode of the Flex Stacker."""
-        self.flex_stacker_state_update = FlexStackerStateUpdate(
-            module_id=module_id,
+        self.flex_stacker_state_update = dataclasses.replace(
+            FlexStackerStateUpdate.create_or_override(
+                self.flex_stacker_state_update, module_id
+            ),
             in_static_mode=static_mode,
+        )
+        return self
+
+    def update_flex_stacker_labware_pool_definition(
+        self,
+        module_id: str,
+        primary_definition: LabwareDefinition,
+        adapter_definition: LabwareDefinition | None,
+        lid_definition: LabwareDefinition | None,
+    ) -> Self:
+        """Constrain the labware pool to a specific definition."""
+        self.flex_stacker_state_update = dataclasses.replace(
+            FlexStackerStateUpdate.create_or_override(
+                self.flex_stacker_state_update, module_id
+            ),
+            pool_constraint=FlexStackerPoolConstraint(
+                primary_definition=primary_definition,
+                lid_definition=lid_definition,
+                adapter_definition=adapter_definition,
+            ),
+        )
+        return self
+
+    def update_flex_stacker_labware_pool_count(
+        self, module_id: str, count: int
+    ) -> Self:
+        """Set the labware pool to a specific count."""
+        self.flex_stacker_state_update = dataclasses.replace(
+            FlexStackerStateUpdate.create_or_override(
+                self.flex_stacker_state_update, module_id
+            ),
+            pool_count=count,
         )
         return self

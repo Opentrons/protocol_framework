@@ -10,13 +10,13 @@ By installing and using Opentrons software, you agree to the Opentrons End-User 
 
 ## Opentrons App Changes in 8.3.0
 
-Welcome to the v8.3.0 release of the Opentrons App! This release adds support for Evosep Evotips on the Flex, as well as other features.
+Welcome to the v8.3.0 release of the Opentrons App! This release adds support for Mandarin in the app or Flex touchscreen and includes other beta features for our commercial partners.
+
+Note: The Mac and Linux versions of the Opentrons App now require macOS 10.16 and Ubuntu 20.04 or newer.
 
 ### New Features
 
-- Use Evosep Evotips in Python API version 2.22 protocols for protein sample purification. Only available with the Flex 96-channel pipette.
-- Change the app or Flex touchscreen language to Mandarin in Settings.
-- Load a newly modified Flex 8-Channel EM 1000 µL pipette equipped with a PEEK motor component to automate emulsion applications.
+- Change the app or Flex touchscreen language to Mandarin in Settings. This feature is only supported in app v8.3.0 or higher. If you need to downgrade your software version, first change the app language back to English in Settings.
 
 ### Improved Features
 

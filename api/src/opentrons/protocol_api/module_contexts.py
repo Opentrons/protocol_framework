@@ -1161,7 +1161,11 @@ class FlexStackerContext(ModuleContext):
     def retrieve(self) -> Labware:
         """Release and return a labware at the bottom of the labware stack."""
         self._core.retrieve()
+
         labware_core = self._protocol_core.get_labware_on_module(self._core)
+        if labware_core is not None and labware_core.is_adapter():
+            labware_core = self._protocol_core.get_labware_on_labware(labware_core)
+
         # the core retrieve command should have already raised the error
         # if labware_core is None, this is just to satisfy the type checker
         assert labware_core is not None, "Retrieve failed to return labware"
@@ -1188,3 +1192,78 @@ class FlexStackerContext(ModuleContext):
         """
         assert labware._core is not None
         self._core.store()
+
+    @requires_version(2, 23)
+    def set_stored_labware(
+        self,
+        load_name: str,
+        namespace: str | None = None,
+        version: int | None = None,
+        adapter: str | None = None,
+        lid: str | None = None,
+        count: int | None = None,
+    ) -> None:
+        """Configure what kind of labware the Flex Stacker will store.
+
+        :param str load_name: A string to use for looking up a labware definition.
+            You can find the ``load_name`` for any Opentrons-verified labware on the
+            `Labware Library <https://labware.opentrons.com>`__.
+        :param str namespace: The namespace that the labware definition belongs to.
+            If unspecified, the API will automatically search two namespaces:
+
+              - ``"opentrons"``, to load standard Opentrons labware definitions.
+              - ``"custom_beta"``, to load custom labware definitions created with the
+                `Custom Labware Creator <https://labware.opentrons.com/create>`__.
+
+            You might need to specify an explicit ``namespace`` if you have a custom
+            definition whose ``load_name`` is the same as an Opentrons-verified
+            definition, and you want to explicitly choose one or the other.
+        :param version: The version of the labware definition. You should normally
+            leave this unspecified to let ``load_labware()`` choose a version
+            automatically.
+        :param adapter: An adapter to load the labware on top of. Accepts the same
+            values as the ``load_name`` parameter of :py:meth:`.load_adapter`. The
+            adapter will use the same namespace as the labware, and the API will
+            choose the adapter's version automatically.
+        :param lid: A lid to load the on top of the main labware. Accepts the same
+            values as the ``load_name`` parameter of :py:meth:`.load_lid_stack`. The
+            lid will use the same namespace as the labware, and the API will
+            choose the lid's version automatically.
+        :param count: The number of labware that the Flex Stacker should start the protocol
+            storing. If not specified, this will be the maximum amount of this kind of
+            labware that the Flex Stacker is capable of storing.
+
+        """
+        self._core.set_stored_labware(
+            main_load_name=load_name,
+            main_namespace=namespace,
+            main_version=version,
+            lid_load_name=lid,
+            lid_namespace=namespace,
+            lid_version=version,
+            adapter_load_name=adapter,
+            adapter_namespace=namespace,
+            adapter_version=version,
+            count=count,
+        )
+
+    @requires_version(2, 23)
+    def fill(self, message: str, count: int | None = None) -> None:
+        """Pause the protocol to add more labware to the Flex Stacker.
+
+        :param message: A message to display in the Opentrons App to note what kind of labware to add.
+        :param count: The amount of labware the Flex Stacker should hold after this command is executed.
+                      If not specified, the Flex Stacker should be full after this command is executed.
+        """
+        self._core.fill(message, count)
+
+    @requires_version(2, 23)
+    def empty(self, message: str) -> None:
+        """Pause the protocol to remove labware from the Flex Stacker.
+
+        :param message: A message to display in the Opentrons App to note what should be removed from
+                        the Flex Stacker.
+        """
+        self._core.empty(
+            message,
+        )

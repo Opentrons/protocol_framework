@@ -44,6 +44,7 @@ EvotipSealPipetteCommandType = Literal["evotipSealPipette"]
 _PREP_DISTANCE_DEFAULT = 8.25
 _PRESS_DISTANCE_DEFAULT = 3.5
 _EJECTOR_PUSH_MM_DEFAULT = 7.0
+_SAFE_TOP_VOLUME = 400
 
 
 class TipPickUpParams(BaseModel):
@@ -240,7 +241,6 @@ class EvotipSealPipetteImplementation(
         tip_geometry = self._state_view.geometry.get_nominal_tip_geometry(
             pipette_id, labware_id, well_name
         )
-        maximum_volume = self._state_view.pipettes.get_maximum_volume(pipette_id)
         if self._state_view.pipettes.get_mount(pipette_id) == MountType.LEFT:
             await self._hardware_api.home(axes=[Axis.P_L])
         else:
@@ -281,7 +281,7 @@ class EvotipSealPipetteImplementation(
             self._tip_handler.cache_tip(pipette_id, tip_geometry)
             hw_instr = self._hardware_api.hardware_instruments[mount.to_hw_mount()]
             if hw_instr is not None:
-                hw_instr.set_current_volume(maximum_volume)
+                hw_instr.set_current_volume(_SAFE_TOP_VOLUME)
 
         state_update = StateUpdate()
         state_update.update_pipette_tip_state(
@@ -291,7 +291,7 @@ class EvotipSealPipetteImplementation(
 
         state_update.set_fluid_aspirated(
             pipette_id=pipette_id,
-            fluid=AspiratedFluid(kind=FluidKind.LIQUID, volume=maximum_volume),
+            fluid=AspiratedFluid(kind=FluidKind.LIQUID, volume=_SAFE_TOP_VOLUME),
         )
         return SuccessData(
             public=EvotipSealPipetteResult(

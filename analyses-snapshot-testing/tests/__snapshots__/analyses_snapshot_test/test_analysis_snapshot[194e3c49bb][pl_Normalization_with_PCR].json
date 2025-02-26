@@ -973,7 +973,9 @@
           {
             "cutoutId": "cutoutD1",
             "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
+            "possibleCutoutFixtureIds": [
+              "temperatureModuleV2"
+            ]
           }
         ]
       },
@@ -2166,7 +2168,9 @@
           {
             "cutoutId": "cutoutB1",
             "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
+            "possibleCutoutFixtureIds": [
+              "thermocyclerModuleV2Front"
+            ]
           }
         ]
       },
@@ -3331,8 +3335,6 @@
             "kind": "onCutoutFixture",
             "possibleCutoutFixtureIds": [
               "flexStackerModuleV1",
-              "flexStackerModuleV1WithWasteChuteRightAdapterCovered",
-              "flexStackerModuleV1WithWasteChuteRightAdapterNoCover",
               "singleRightSlot",
               "stagingAreaRightSlot"
             ]
@@ -6094,6 +6096,7 @@
         "alternateDropLocation": false,
         "labwareId": "UUID",
         "pipetteId": "UUID",
+        "scrape_tips": true,
         "wellLocation": {
           "offset": {
             "x": 0.0,
@@ -6709,6 +6712,7 @@
         "alternateDropLocation": false,
         "labwareId": "UUID",
         "pipetteId": "UUID",
+        "scrape_tips": true,
         "wellLocation": {
           "offset": {
             "x": 0.0,
@@ -7551,6 +7555,7 @@
         "alternateDropLocation": false,
         "labwareId": "UUID",
         "pipetteId": "UUID",
+        "scrape_tips": true,
         "wellLocation": {
           "offset": {
             "x": 0.0,
@@ -8395,6 +8400,7 @@
         "alternateDropLocation": false,
         "labwareId": "UUID",
         "pipetteId": "UUID",
+        "scrape_tips": true,
         "wellLocation": {
           "offset": {
             "x": 0.0,
@@ -9239,6 +9245,7 @@
         "alternateDropLocation": false,
         "labwareId": "UUID",
         "pipetteId": "UUID",
+        "scrape_tips": true,
         "wellLocation": {
           "offset": {
             "x": 0.0,

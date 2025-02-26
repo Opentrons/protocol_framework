@@ -1329,7 +1329,9 @@
           {
             "cutoutId": "cutoutB1",
             "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
+            "possibleCutoutFixtureIds": [
+              "thermocyclerModuleV2Front"
+            ]
           }
         ]
       },
@@ -5363,7 +5365,9 @@
           {
             "cutoutId": "cutoutD3",
             "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
+            "possibleCutoutFixtureIds": [
+              "temperatureModuleV2"
+            ]
           }
         ]
       },
@@ -6560,7 +6564,9 @@
           {
             "cutoutId": "cutoutD3",
             "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
+            "possibleCutoutFixtureIds": [
+              "temperatureModuleV2"
+            ]
           }
         ]
       },
@@ -9568,7 +9574,9 @@
           {
             "cutoutId": "cutoutD1",
             "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
+            "possibleCutoutFixtureIds": [
+              "heaterShakerModuleV1"
+            ]
           }
         ]
       },
@@ -18091,6 +18099,7 @@
         "alternateDropLocation": true,
         "labwareId": "UUID",
         "pipetteId": "UUID",
+        "scrape_tips": false,
         "wellLocation": {
           "offset": {
             "x": 0.0,
@@ -18773,6 +18782,7 @@
         "alternateDropLocation": true,
         "labwareId": "UUID",
         "pipetteId": "UUID",
+        "scrape_tips": false,
         "wellLocation": {
           "offset": {
             "x": 0.0,
@@ -19451,6 +19461,7 @@
         "alternateDropLocation": true,
         "labwareId": "UUID",
         "pipetteId": "UUID",
+        "scrape_tips": false,
         "wellLocation": {
           "offset": {
             "x": 0.0,
@@ -21779,6 +21790,7 @@
         "alternateDropLocation": true,
         "labwareId": "UUID",
         "pipetteId": "UUID",
+        "scrape_tips": false,
         "wellLocation": {
           "offset": {
             "x": 0.0,
@@ -21840,7 +21852,11 @@
           {
             "cutoutId": "cutoutC3",
             "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
+            "possibleCutoutFixtureIds": [
+              "flexStackerModuleV1WithMagneticBlockV1",
+              "magneticBlockV1",
+              "stagingAreaSlotWithMagneticBlockV1"
+            ]
           }
         ],
         "immediateDestinationLocationSequence": [
@@ -21855,7 +21871,11 @@
           {
             "cutoutId": "cutoutC3",
             "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
+            "possibleCutoutFixtureIds": [
+              "flexStackerModuleV1WithMagneticBlockV1",
+              "magneticBlockV1",
+              "stagingAreaSlotWithMagneticBlockV1"
+            ]
           }
         ],
         "originLocationSequence": [
@@ -21870,7 +21890,9 @@
           {
             "cutoutId": "cutoutB1",
             "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
+            "possibleCutoutFixtureIds": [
+              "thermocyclerModuleV2Front"
+            ]
           }
         ]
       },
@@ -22129,6 +22151,7 @@
         "alternateDropLocation": true,
         "labwareId": "UUID",
         "pipetteId": "UUID",
+        "scrape_tips": false,
         "wellLocation": {
           "offset": {
             "x": 0.0,
@@ -22533,6 +22556,7 @@
         "alternateDropLocation": true,
         "labwareId": "UUID",
         "pipetteId": "UUID",
+        "scrape_tips": false,
         "wellLocation": {
           "offset": {
             "x": 0.0,
@@ -22923,6 +22947,7 @@
         "alternateDropLocation": true,
         "labwareId": "UUID",
         "pipetteId": "UUID",
+        "scrape_tips": false,
         "wellLocation": {
           "offset": {
             "x": 0.0,
@@ -22998,7 +23023,9 @@
           {
             "cutoutId": "cutoutB1",
             "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
+            "possibleCutoutFixtureIds": [
+              "thermocyclerModuleV2Front"
+            ]
           }
         ],
         "immediateDestinationLocationSequence": [
@@ -23013,7 +23040,9 @@
           {
             "cutoutId": "cutoutB1",
             "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
+            "possibleCutoutFixtureIds": [
+              "thermocyclerModuleV2Front"
+            ]
           }
         ],
         "originLocationSequence": [
@@ -23028,7 +23057,11 @@
           {
             "cutoutId": "cutoutC3",
             "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
+            "possibleCutoutFixtureIds": [
+              "flexStackerModuleV1WithMagneticBlockV1",
+              "magneticBlockV1",
+              "stagingAreaSlotWithMagneticBlockV1"
+            ]
           }
         ]
       },
@@ -24074,6 +24107,7 @@
         "alternateDropLocation": true,
         "labwareId": "UUID",
         "pipetteId": "UUID",
+        "scrape_tips": false,
         "wellLocation": {
           "offset": {
             "x": 0.0,
@@ -24121,7 +24155,11 @@
           {
             "cutoutId": "cutoutC3",
             "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
+            "possibleCutoutFixtureIds": [
+              "flexStackerModuleV1WithMagneticBlockV1",
+              "magneticBlockV1",
+              "stagingAreaSlotWithMagneticBlockV1"
+            ]
           }
         ],
         "immediateDestinationLocationSequence": [
@@ -24136,7 +24174,11 @@
           {
             "cutoutId": "cutoutC3",
             "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
+            "possibleCutoutFixtureIds": [
+              "flexStackerModuleV1WithMagneticBlockV1",
+              "magneticBlockV1",
+              "stagingAreaSlotWithMagneticBlockV1"
+            ]
           }
         ],
         "originLocationSequence": [
@@ -24151,7 +24193,9 @@
           {
             "cutoutId": "cutoutB1",
             "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
+            "possibleCutoutFixtureIds": [
+              "thermocyclerModuleV2Front"
+            ]
           }
         ]
       },
@@ -24199,7 +24243,9 @@
           {
             "cutoutId": "cutoutB1",
             "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
+            "possibleCutoutFixtureIds": [
+              "thermocyclerModuleV2Front"
+            ]
           }
         ],
         "immediateDestinationLocationSequence": [
@@ -24214,7 +24260,9 @@
           {
             "cutoutId": "cutoutB1",
             "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
+            "possibleCutoutFixtureIds": [
+              "thermocyclerModuleV2Front"
+            ]
           }
         ],
         "originLocationSequence": [
@@ -24417,6 +24465,7 @@
         "alternateDropLocation": true,
         "labwareId": "UUID",
         "pipetteId": "UUID",
+        "scrape_tips": false,
         "wellLocation": {
           "offset": {
             "x": 0.0,
@@ -24474,7 +24523,11 @@
           {
             "cutoutId": "cutoutC3",
             "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
+            "possibleCutoutFixtureIds": [
+              "flexStackerModuleV1WithMagneticBlockV1",
+              "magneticBlockV1",
+              "stagingAreaSlotWithMagneticBlockV1"
+            ]
           }
         ]
       },
@@ -24671,6 +24724,7 @@
         "alternateDropLocation": true,
         "labwareId": "UUID",
         "pipetteId": "UUID",
+        "scrape_tips": false,
         "wellLocation": {
           "offset": {
             "x": 0.0,
@@ -25268,6 +25322,7 @@
         "alternateDropLocation": true,
         "labwareId": "UUID",
         "pipetteId": "UUID",
+        "scrape_tips": false,
         "wellLocation": {
           "offset": {
             "x": 0.0,
@@ -27909,6 +27964,7 @@
         "alternateDropLocation": true,
         "labwareId": "UUID",
         "pipetteId": "UUID",
+        "scrape_tips": false,
         "wellLocation": {
           "offset": {
             "x": 0.0,
@@ -27970,7 +28026,11 @@
           {
             "cutoutId": "cutoutC3",
             "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
+            "possibleCutoutFixtureIds": [
+              "flexStackerModuleV1WithMagneticBlockV1",
+              "magneticBlockV1",
+              "stagingAreaSlotWithMagneticBlockV1"
+            ]
           }
         ],
         "immediateDestinationLocationSequence": [
@@ -27985,7 +28045,11 @@
           {
             "cutoutId": "cutoutC3",
             "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
+            "possibleCutoutFixtureIds": [
+              "flexStackerModuleV1WithMagneticBlockV1",
+              "magneticBlockV1",
+              "stagingAreaSlotWithMagneticBlockV1"
+            ]
           }
         ],
         "originLocationSequence": [
@@ -28000,7 +28064,9 @@
           {
             "cutoutId": "cutoutB1",
             "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
+            "possibleCutoutFixtureIds": [
+              "thermocyclerModuleV2Front"
+            ]
           }
         ]
       },
@@ -28259,6 +28325,7 @@
         "alternateDropLocation": true,
         "labwareId": "UUID",
         "pipetteId": "UUID",
+        "scrape_tips": false,
         "wellLocation": {
           "offset": {
             "x": 0.0,
@@ -28631,6 +28698,7 @@
         "alternateDropLocation": true,
         "labwareId": "UUID",
         "pipetteId": "UUID",
+        "scrape_tips": false,
         "wellLocation": {
           "offset": {
             "x": 0.0,
@@ -28989,6 +29057,7 @@
         "alternateDropLocation": true,
         "labwareId": "UUID",
         "pipetteId": "UUID",
+        "scrape_tips": false,
         "wellLocation": {
           "offset": {
             "x": 0.0,
@@ -29064,7 +29133,9 @@
           {
             "cutoutId": "cutoutB1",
             "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
+            "possibleCutoutFixtureIds": [
+              "thermocyclerModuleV2Front"
+            ]
           }
         ],
         "immediateDestinationLocationSequence": [
@@ -29079,7 +29150,9 @@
           {
             "cutoutId": "cutoutB1",
             "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
+            "possibleCutoutFixtureIds": [
+              "thermocyclerModuleV2Front"
+            ]
           }
         ],
         "originLocationSequence": [
@@ -29094,7 +29167,11 @@
           {
             "cutoutId": "cutoutC3",
             "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
+            "possibleCutoutFixtureIds": [
+              "flexStackerModuleV1WithMagneticBlockV1",
+              "magneticBlockV1",
+              "stagingAreaSlotWithMagneticBlockV1"
+            ]
           }
         ]
       },
@@ -30140,6 +30217,7 @@
         "alternateDropLocation": true,
         "labwareId": "UUID",
         "pipetteId": "UUID",
+        "scrape_tips": false,
         "wellLocation": {
           "offset": {
             "x": 0.0,
@@ -30187,7 +30265,11 @@
           {
             "cutoutId": "cutoutC3",
             "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
+            "possibleCutoutFixtureIds": [
+              "flexStackerModuleV1WithMagneticBlockV1",
+              "magneticBlockV1",
+              "stagingAreaSlotWithMagneticBlockV1"
+            ]
           }
         ],
         "immediateDestinationLocationSequence": [
@@ -30202,7 +30284,11 @@
           {
             "cutoutId": "cutoutC3",
             "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
+            "possibleCutoutFixtureIds": [
+              "flexStackerModuleV1WithMagneticBlockV1",
+              "magneticBlockV1",
+              "stagingAreaSlotWithMagneticBlockV1"
+            ]
           }
         ],
         "originLocationSequence": [
@@ -30217,7 +30303,9 @@
           {
             "cutoutId": "cutoutB1",
             "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
+            "possibleCutoutFixtureIds": [
+              "thermocyclerModuleV2Front"
+            ]
           }
         ]
       },
@@ -30265,7 +30353,9 @@
           {
             "cutoutId": "cutoutB1",
             "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
+            "possibleCutoutFixtureIds": [
+              "thermocyclerModuleV2Front"
+            ]
           }
         ],
         "immediateDestinationLocationSequence": [
@@ -30280,7 +30370,9 @@
           {
             "cutoutId": "cutoutB1",
             "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
+            "possibleCutoutFixtureIds": [
+              "thermocyclerModuleV2Front"
+            ]
           }
         ],
         "originLocationSequence": [
@@ -30483,6 +30575,7 @@
         "alternateDropLocation": true,
         "labwareId": "UUID",
         "pipetteId": "UUID",
+        "scrape_tips": false,
         "wellLocation": {
           "offset": {
             "x": 0.0,

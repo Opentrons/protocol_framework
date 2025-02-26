@@ -2,7 +2,7 @@ import logging
 from typing import Optional, Any
 
 from opentrons_shared_data.labware.types import (
-    LabwareDefinition as LabwareDefinitionDict,
+    LabwareDefinition2 as LabwareDefinition2Dict,
 )
 
 from opentrons import types
@@ -56,7 +56,7 @@ def validate_blowout_location(
 
 
 def tip_length_for(
-    pipette: PipetteDict, tip_rack_definition: LabwareDefinitionDict
+    pipette: PipetteDict, tip_rack_definition: LabwareDefinition2Dict
 ) -> float:
     """Get the tip length, including overlap, for a tip from this rack"""
     try:

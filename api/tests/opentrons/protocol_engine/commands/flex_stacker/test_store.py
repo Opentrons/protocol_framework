@@ -1,18 +1,17 @@
 """Test Flex Stacker store command implementation."""
 
+from unittest.mock import sentinel
+
 import pytest
 from decoy import Decoy
-from contextlib import nullcontext as does_not_raise
-from typing import ContextManager, Any
 
-from opentrons.calibration_storage.helpers import uri_from_details
 from opentrons.hardware_control.modules import FlexStacker
 
 from opentrons.protocol_engine.state.update_types import (
     StateUpdate,
     FlexStackerStateUpdate,
     FlexStackerStoreLabware,
-    LabwareLocationUpdate,
+    BatchLabwareLocationUpdate,
 )
 
 from opentrons.protocol_engine.state.state import StateView
@@ -25,125 +24,389 @@ from opentrons.protocol_engine.commands import flex_stacker
 from opentrons.protocol_engine.commands.command import SuccessData
 from opentrons.protocol_engine.commands.flex_stacker.store import StoreImpl
 from opentrons.protocol_engine.types import (
-    DeckSlotLocation,
-    Dimensions,
-    OFF_DECK_LOCATION,
-    LoadedLabware,
-    OverlapOffset,
-    OnModuleLocationSequenceComponent,
     OnAddressableAreaLocationSequenceComponent,
-    NotOnDeckLocationSequenceComponent,
+    OnModuleLocationSequenceComponent,
+    InStackerHopperLocation,
+    OnCutoutFixtureLocationSequenceComponent,
 )
-from opentrons.protocol_engine.errors import CannotPerformModuleAction
-from opentrons.types import DeckSlotName
+from opentrons.protocol_engine.errors import (
+    CannotPerformModuleAction,
+    LabwareNotLoadedOnModuleError,
+    FlexStackerLabwarePoolNotYetDefinedError,
+)
 
 from opentrons_shared_data.labware.labware_definition import LabwareDefinition
 
 
+async def test_store_raises_in_static_mode(
+    decoy: Decoy,
+    equipment: EquipmentHandler,
+    state_view: StateView,
+    stacker_id: FlexStackerId,
+    flex_50uL_tiprack: LabwareDefinition,
+) -> None:
+    """It should raise if called when the stacker is static."""
+    subject = StoreImpl(state_view=state_view, equipment=equipment)
+    data = flex_stacker.StoreParams(moduleId=stacker_id)
+
+    fs_module_substate = FlexStackerSubState(
+        module_id=stacker_id,
+        in_static_mode=True,
+        hopper_labware_ids=["labware-id"],
+        pool_primary_definition=flex_50uL_tiprack,
+        pool_adapter_definition=None,
+        pool_lid_definition=None,
+        pool_count=0,
+    )
+    decoy.when(
+        state_view.modules.get_flex_stacker_substate(module_id=stacker_id)
+    ).then_return(fs_module_substate)
+    with pytest.raises(
+        CannotPerformModuleAction,
+        match="Cannot store labware in Flex Stacker while in static mode",
+    ):
+        await subject.execute(data)
+
+
+async def test_store_raises_if_full(
+    decoy: Decoy,
+    equipment: EquipmentHandler,
+    state_view: StateView,
+    stacker_id: FlexStackerId,
+    flex_50uL_tiprack: LabwareDefinition,
+) -> None:
+    """It should raise if called when the stacker is full."""
+    subject = StoreImpl(state_view=state_view, equipment=equipment)
+    data = flex_stacker.StoreParams(moduleId=stacker_id)
+
+    fs_module_substate = FlexStackerSubState(
+        module_id=stacker_id,
+        in_static_mode=False,
+        hopper_labware_ids=["labware-id"],
+        pool_primary_definition=flex_50uL_tiprack,
+        pool_adapter_definition=None,
+        pool_lid_definition=None,
+        pool_count=5,
+    )
+    decoy.when(
+        state_view.modules.get_flex_stacker_substate(module_id=stacker_id)
+    ).then_return(fs_module_substate)
+    with pytest.raises(
+        CannotPerformModuleAction,
+        match="Cannot store labware in Flex Stacker while it is full",
+    ):
+        await subject.execute(data)
+
+
+async def test_store_raises_if_carriage_logically_empty(
+    decoy: Decoy,
+    equipment: EquipmentHandler,
+    state_view: StateView,
+    stacker_id: FlexStackerId,
+    flex_50uL_tiprack: LabwareDefinition,
+) -> None:
+    """It should raise if called with a known-empty carriage."""
+    subject = StoreImpl(state_view=state_view, equipment=equipment)
+    data = flex_stacker.StoreParams(moduleId=stacker_id)
+
+    fs_module_substate = FlexStackerSubState(
+        module_id=stacker_id,
+        in_static_mode=False,
+        hopper_labware_ids=["labware-id"],
+        pool_primary_definition=flex_50uL_tiprack,
+        pool_adapter_definition=None,
+        pool_lid_definition=None,
+        pool_count=1,
+    )
+    decoy.when(
+        state_view.modules.get_flex_stacker_substate(module_id=stacker_id)
+    ).then_return(fs_module_substate)
+    decoy.when(state_view.labware.get_id_by_module(stacker_id)).then_raise(
+        LabwareNotLoadedOnModuleError()
+    )
+    with pytest.raises(
+        CannotPerformModuleAction,
+        match="Cannot store labware if Flex Stacker carriage is empty",
+    ):
+        await subject.execute(data)
+
+
+async def test_store_raises_if_not_configured(
+    decoy: Decoy,
+    equipment: EquipmentHandler,
+    state_view: StateView,
+    stacker_id: FlexStackerId,
+) -> None:
+    """It should raise if called before the stacker is configured."""
+    subject = StoreImpl(state_view=state_view, equipment=equipment)
+    data = flex_stacker.StoreParams(moduleId=stacker_id)
+    fs_module_substate = FlexStackerSubState(
+        module_id=stacker_id,
+        in_static_mode=False,
+        hopper_labware_ids=["labware-id"],
+        pool_primary_definition=None,
+        pool_adapter_definition=None,
+        pool_lid_definition=None,
+        pool_count=1,
+    )
+    decoy.when(
+        state_view.modules.get_flex_stacker_substate(module_id=stacker_id)
+    ).then_return(fs_module_substate)
+    with pytest.raises(
+        FlexStackerLabwarePoolNotYetDefinedError,
+        match="The Flex Stacker has not been configured yet and cannot be filled.",
+    ):
+        await subject.execute(data)
+
+
 @pytest.mark.parametrize(
-    "in_static_mode,expectation",
-    [
-        (
-            True,
-            pytest.raises(
-                CannotPerformModuleAction,
-                match="Cannot store labware in Flex Stacker while in static mode",
-            ),
+    argnames=["pool_adapter", "pool_lid", "param_adapter", "param_lid"],
+    argvalues=[
+        pytest.param(
+            sentinel.pool_adapter,
+            sentinel.pool_lid,
+            None,
+            sentinel.pool_lid,
+            id="missing-adapter",
         ),
-        (False, does_not_raise()),
+        pytest.param(
+            sentinel.pool_adapter, None, None, None, id="missing-adapter-no-lid"
+        ),
+        pytest.param(
+            sentinel.pool_adapter,
+            sentinel.pool_lid,
+            sentinel.pool_adapter,
+            None,
+            id="missing-lid",
+        ),
+        pytest.param(None, sentinel.pool_lid, None, None, id="missing-lid-no-adapter"),
+        pytest.param(
+            None, None, sentinel.param_adapter, None, id="extra-adapter-no-lid"
+        ),
+        pytest.param(
+            None,
+            sentinel.pool_lid,
+            sentinel.param_adapter,
+            sentinel.pool_lid,
+            id="extra-adapter",
+        ),
+        pytest.param(
+            sentinel.pool_adapter,
+            None,
+            sentinel.pool_adapter,
+            sentinel.param_lid,
+            id="extra-lid",
+        ),
+        pytest.param(None, None, None, sentinel.param_lid, id="extra-lid-no-adapter"),
+        pytest.param(
+            None,
+            None,
+            sentinel.param_adapter,
+            sentinel.param_lid,
+            id="extra-lid-and-adapter",
+        ),
+        pytest.param(
+            sentinel.pool_adapter,
+            sentinel.pool_lid,
+            None,
+            None,
+            id="missing-lid-and-adapter",
+        ),
+        pytest.param(
+            sentinel.pool_adapter,
+            sentinel.pool_lid,
+            sentinel.pool_adapter,
+            sentinel.param_lid,
+            id="wrong-lid",
+        ),
+        pytest.param(
+            None, sentinel.pool_lid, None, sentinel.param_lid, id="wrong-lid-no-adapter"
+        ),
+        pytest.param(
+            sentinel.pool_adapter,
+            sentinel.pool_lid,
+            sentinel.param_adapter,
+            sentinel.pool_lid,
+            id="wrong-adapter",
+        ),
+        pytest.param(
+            sentinel.pool_adapter,
+            None,
+            sentinel.param_adapter,
+            None,
+            id="wrong-adapter-no-lid",
+        ),
+        pytest.param(
+            sentinel.pool_adapter,
+            sentinel.pool_lid,
+            sentinel.param_adapter,
+            sentinel.param_lid,
+            id="wrong-lid-and-adapter",
+        ),
     ],
 )
+async def test_store_raises_if_labware_does_not_match(
+    decoy: Decoy,
+    state_view: StateView,
+    equipment: EquipmentHandler,
+    stacker_id: FlexStackerId,
+    stacker_hardware: FlexStacker,
+    pool_adapter: LabwareDefinition | None,
+    pool_lid: LabwareDefinition | None,
+    param_adapter: LabwareDefinition | None,
+    param_lid: LabwareDefinition | None,
+) -> None:
+    """It should raise if the labware to be stored does not match the labware pool parameters."""
+    subject = StoreImpl(state_view=state_view, equipment=equipment)
+    data = flex_stacker.StoreParams(moduleId=stacker_id)
+
+    fs_module_substate = FlexStackerSubState(
+        module_id=stacker_id,
+        in_static_mode=False,
+        hopper_labware_ids=["labware-id"],
+        pool_primary_definition=sentinel.primary,
+        pool_adapter_definition=pool_adapter,
+        pool_lid_definition=pool_lid,
+        pool_count=0,
+    )
+
+    decoy.when(
+        state_view.modules.get_flex_stacker_substate(module_id=stacker_id)
+    ).then_return(fs_module_substate)
+
+    if param_adapter is not None:
+        decoy.when(
+            state_view.labware.get_id_by_module(module_id=stacker_id)
+        ).then_return("adapter-id")
+        if param_lid is not None:
+            decoy.when(
+                state_view.labware.get_labware_stack_from_parent("adapter-id")
+            ).then_return(["lid-id", "labware-id", "adapter-id"])
+        else:
+            decoy.when(
+                state_view.labware.get_labware_stack_from_parent("adapter-id")
+            ).then_return(["labware-id", "adapter-id"])
+    else:
+        decoy.when(
+            state_view.labware.get_id_by_module(module_id=stacker_id)
+        ).then_return("labware-id")
+        if param_lid is not None:
+            decoy.when(
+                state_view.labware.get_labware_stack_from_parent("labware-id")
+            ).then_return(["lid-id", "labware-id"])
+        else:
+            decoy.when(
+                state_view.labware.get_labware_stack_from_parent("labware-id")
+            ).then_return(["labware-id"])
+
+    decoy.when(state_view.labware.get_definition("labware-id")).then_return(
+        sentinel.primary
+    )
+    if param_lid is not None:
+        decoy.when(state_view.labware.get_definition("lid-id")).then_return(param_lid)
+    if param_adapter is not None:
+        decoy.when(state_view.labware.get_definition("adapter-id")).then_return(
+            param_adapter
+        )
+
+    with pytest.raises(
+        CannotPerformModuleAction,
+        match="Cannot store labware stack that does not correspond with Flex Stacker configuration",
+    ):
+        await subject.execute(data)
+
+
 async def test_store(
     decoy: Decoy,
     state_view: StateView,
     equipment: EquipmentHandler,
-    in_static_mode: bool,
-    expectation: ContextManager[Any],
-    tiprack_lid_def: LabwareDefinition,
+    stacker_id: FlexStackerId,
+    stacker_hardware: FlexStacker,
+    flex_50uL_tiprack: LabwareDefinition,
 ) -> None:
     """It should be able to store a labware."""
     subject = StoreImpl(state_view=state_view, equipment=equipment)
-    data = flex_stacker.StoreParams(moduleId="flex-stacker-id")
+    data = flex_stacker.StoreParams(moduleId=stacker_id)
 
     fs_module_substate = FlexStackerSubState(
-        module_id=FlexStackerId("flex-stacker-id"),
-        in_static_mode=in_static_mode,
+        module_id=stacker_id,
+        in_static_mode=False,
         hopper_labware_ids=["labware-id"],
+        pool_primary_definition=flex_50uL_tiprack,
+        pool_adapter_definition=None,
+        pool_lid_definition=None,
+        pool_count=0,
     )
-    fs_hardware = decoy.mock(cls=FlexStacker)
 
     decoy.when(
-        state_view.modules.get_flex_stacker_substate(module_id="flex-stacker-id")
+        state_view.modules.get_flex_stacker_substate(module_id=stacker_id)
     ).then_return(fs_module_substate)
 
-    decoy.when(
-        state_view.labware.get_id_by_module(module_id="flex-stacker-id")
-    ).then_return("labware-id")
-    decoy.when(state_view.labware.get("labware-id")).then_return(
-        LoadedLabware(
-            id="labware-id",
-            loadName="tiprack",
-            definitionUri=uri_from_details(namespace="a", load_name="b", version=1),
-            location=DeckSlotLocation(slotName=DeckSlotName.SLOT_3),
-            offsetId=None,
-            lid_id="lid-id",
-            displayName="Labware",
-        )
+    decoy.when(state_view.labware.get_id_by_module(module_id=stacker_id)).then_return(
+        "labware-id"
     )
-
-    decoy.when(state_view.labware.get_dimensions(labware_id="labware-id")).then_return(
-        Dimensions(x=1, y=1, z=1)
+    decoy.when(
+        state_view.labware.get_labware_stack_from_parent("labware-id")
+    ).then_return(["labware-id"])
+    decoy.when(state_view.labware.get_definition("labware-id")).then_return(
+        flex_50uL_tiprack
     )
-
-    decoy.when(state_view.labware.get_definition("lid-id")).then_return(tiprack_lid_def)
-
     decoy.when(
-        state_view.labware.get_labware_overlap_offsets(tiprack_lid_def, "tiprack")
-    ).then_return(OverlapOffset(x=0, y=0, z=14))
+        state_view.geometry.get_height_of_labware_stack([flex_50uL_tiprack])
+    ).then_return(4)
 
-    decoy.when(
-        equipment.get_module_hardware_api(FlexStackerId("flex-stacker-id"))
-    ).then_return(fs_hardware)
     decoy.when(state_view.geometry.get_location_sequence("labware-id")).then_return(
         [
-            OnModuleLocationSequenceComponent(moduleId="flex-stacker-id"),
+            OnModuleLocationSequenceComponent(moduleId=stacker_id),
             OnAddressableAreaLocationSequenceComponent(
                 addressableAreaName="flexStackerV1B4",
             ),
         ]
     )
-
-    with expectation:
-        result = await subject.execute(data)
-
-    if not in_static_mode:
-        decoy.verify(await fs_hardware.store_labware(labware_height=4), times=1)
-        assert result == SuccessData(
-            public=flex_stacker.StoreResult(
-                originLocationSequence=[
-                    OnModuleLocationSequenceComponent(moduleId="flex-stacker-id"),
-                    OnAddressableAreaLocationSequenceComponent(
-                        addressableAreaName="flexStackerV1B4",
-                    ),
-                ],
-                eventualDestinationLocationSequence=[
-                    OnModuleLocationSequenceComponent(moduleId="flex-stacker-id"),
-                    NotOnDeckLocationSequenceComponent(
-                        logicalLocationName=OFF_DECK_LOCATION
-                    ),
-                ],
-            ),
-            state_update=StateUpdate(
-                labware_location=LabwareLocationUpdate(
-                    labware_id="labware-id",
-                    new_location=OFF_DECK_LOCATION,
-                    offset_id=None,
-                ),
-                flex_stacker_state_update=FlexStackerStateUpdate(
-                    module_id="flex-stacker-id",
-                    hopper_labware_update=FlexStackerStoreLabware(
-                        labware_id="labware-id"
-                    ),
-                ),
-            ),
+    decoy.when(
+        state_view.geometry.get_predicted_location_sequence(
+            InStackerHopperLocation(moduleId=stacker_id)
         )
+    ).then_return(
+        [
+            InStackerHopperLocation(moduleId=stacker_id),
+            OnCutoutFixtureLocationSequenceComponent(
+                cutoutId="cutoutA3", possibleCutoutFixtureIds=["flexStackerModuleV1"]
+            ),
+        ]
+    )
+
+    result = await subject.execute(data)
+
+    decoy.verify(await stacker_hardware.store_labware(labware_height=4), times=1)
+    assert result == SuccessData(
+        public=flex_stacker.StoreResult(
+            primaryOriginLocationSequence=[
+                OnModuleLocationSequenceComponent(moduleId=stacker_id),
+                OnAddressableAreaLocationSequenceComponent(
+                    addressableAreaName="flexStackerV1B4",
+                ),
+            ],
+            primaryLabwareId="labware-id",
+            eventualDestinationLocationSequence=[
+                InStackerHopperLocation(moduleId=stacker_id),
+                OnCutoutFixtureLocationSequenceComponent(
+                    cutoutId="cutoutA3",
+                    possibleCutoutFixtureIds=["flexStackerModuleV1"],
+                ),
+            ],
+        ),
+        state_update=StateUpdate(
+            batch_labware_location=BatchLabwareLocationUpdate(
+                new_locations_by_id={
+                    "labware-id": InStackerHopperLocation(moduleId=stacker_id)
+                },
+                new_offset_ids_by_id={"labware-id": None},
+            ),
+            flex_stacker_state_update=FlexStackerStateUpdate(
+                module_id=stacker_id,
+                hopper_labware_update=FlexStackerStoreLabware(labware_id="labware-id"),
+                pool_count=1,
+            ),
+        ),
+    )

@@ -28,7 +28,7 @@ metadata = {
 
 requirements = {"robotType": "Flex", "apiLevel": "2.21"}
 
-HELLMA_PLATE_SLOT = "D4"
+HELLMA_PLATE_SLOT = "D3"
 PLATE_READER_SLOT = "C3"
 
 # SCRIPT SETTINGS
@@ -119,8 +119,6 @@ def run(protocol: ProtocolContext) -> None:
     plate_name_str = "hellma_plate_" + str(plate_orientation)
     global p200_tips
     global p50_tips
-    # WASTE BIN
-    protocol.load_waste_chute()
     # TIP RACKS
     tiprack_200_1 = protocol.load_labware("opentrons_flex_96_tiprack_200ul", "B2")
     tiprack_200_2 = protocol.load_labware("opentrons_flex_96_tiprack_200ul", "C2")

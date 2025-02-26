@@ -1666,7 +1666,9 @@
           {
             "cutoutId": "cutoutD1",
             "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
+            "possibleCutoutFixtureIds": [
+              "heaterShakerModuleV1"
+            ]
           }
         ]
       },
@@ -4571,7 +4573,9 @@
           {
             "cutoutId": "cutoutD3",
             "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
+            "possibleCutoutFixtureIds": [
+              "temperatureModuleV2"
+            ]
           }
         ]
       },
@@ -8531,7 +8535,9 @@
           {
             "cutoutId": "cutoutB1",
             "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
+            "possibleCutoutFixtureIds": [
+              "thermocyclerModuleV2Front"
+            ]
           }
         ]
       },
@@ -12634,6 +12640,7 @@
         "alternateDropLocation": false,
         "labwareId": "UUID",
         "pipetteId": "UUID",
+        "scrape_tips": false,
         "wellLocation": {
           "offset": {
             "x": 0.0,
@@ -12648,7 +12655,7 @@
         "position": {
           "x": 178.38,
           "y": 74.38,
-          "z": 98.33
+          "z": 74.99000000000001
         }
       },
       "startedAt": "TIMESTAMP",
@@ -13408,6 +13415,7 @@
         "alternateDropLocation": false,
         "labwareId": "UUID",
         "pipetteId": "UUID",
+        "scrape_tips": false,
         "wellLocation": {
           "offset": {
             "x": 0.0,
@@ -13422,7 +13430,7 @@
         "position": {
           "x": 178.38,
           "y": 288.38,
-          "z": 98.33
+          "z": 74.99000000000001
         }
       },
       "startedAt": "TIMESTAMP",
@@ -13526,7 +13534,9 @@
           {
             "cutoutId": "cutoutC1",
             "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
+            "possibleCutoutFixtureIds": [
+              "magneticBlockV1"
+            ]
           }
         ],
         "immediateDestinationLocationSequence": [
@@ -13541,7 +13551,9 @@
           {
             "cutoutId": "cutoutC1",
             "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
+            "possibleCutoutFixtureIds": [
+              "magneticBlockV1"
+            ]
           }
         ],
         "originLocationSequence": [
@@ -13556,7 +13568,9 @@
           {
             "cutoutId": "cutoutD1",
             "kind": "onCutoutFixture",
-            "possibleCutoutFixtureIds": []
+            "possibleCutoutFixtureIds": [
+              "heaterShakerModuleV1"
+            ]
           }
         ]
       },
@@ -13957,6 +13971,7 @@
         "alternateDropLocation": false,
         "labwareId": "UUID",
         "pipetteId": "UUID",
+        "scrape_tips": false,
         "wellLocation": {
           "offset": {
             "x": 0.0,
@@ -13971,7 +13986,7 @@
         "position": {
           "x": 178.38,
           "y": 288.38,
-          "z": 98.33
+          "z": 74.99000000000001
         }
       },
       "startedAt": "TIMESTAMP",
@@ -16907,6 +16922,7 @@
         "alternateDropLocation": false,
         "labwareId": "UUID",
         "pipetteId": "UUID",
+        "scrape_tips": false,
         "wellLocation": {
           "offset": {
             "x": 0.0,
@@ -16921,7 +16937,7 @@
         "position": {
           "x": 178.38,
           "y": 74.38,
-          "z": 98.33
+          "z": 74.99000000000001
         }
       },
       "startedAt": "TIMESTAMP",
@@ -17307,6 +17323,7 @@
         "alternateDropLocation": false,
         "labwareId": "UUID",
         "pipetteId": "UUID",
+        "scrape_tips": false,
         "wellLocation": {
           "offset": {
             "x": 0.0,
@@ -17321,7 +17338,7 @@
         "position": {
           "x": 178.38,
           "y": 74.38,
-          "z": 98.33
+          "z": 74.99000000000001
         }
       },
       "startedAt": "TIMESTAMP",
@@ -17723,6 +17740,7 @@
         "alternateDropLocation": false,
         "labwareId": "UUID",
         "pipetteId": "UUID",
+        "scrape_tips": false,
         "wellLocation": {
           "offset": {
             "x": 0.0,
@@ -17737,7 +17755,7 @@
         "position": {
           "x": 178.38,
           "y": 74.38,
-          "z": 98.33
+          "z": 74.99000000000001
         }
       },
       "startedAt": "TIMESTAMP",
@@ -18123,6 +18141,7 @@
         "alternateDropLocation": false,
         "labwareId": "UUID",
         "pipetteId": "UUID",
+        "scrape_tips": false,
         "wellLocation": {
           "offset": {
             "x": 0.0,
@@ -18137,7 +18156,7 @@
         "position": {
           "x": 178.38,
           "y": 74.38,
-          "z": 98.33
+          "z": 74.99000000000001
         }
       },
       "startedAt": "TIMESTAMP",

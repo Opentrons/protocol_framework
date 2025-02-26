@@ -351,6 +351,9 @@ export const transfer: CommandCreator<TransferArgs> = (
                       z: args.touchTipAfterAspirateOffsetMmFromTop,
                     },
                   },
+                  ...(args.touchTipAfterAspirateSpeed != null
+                    ? { speed: args.touchTipAfterAspirateSpeed }
+                    : {}),
                 }),
               ]
             : []
@@ -368,6 +371,9 @@ export const transfer: CommandCreator<TransferArgs> = (
                         z: args.touchTipAfterDispenseOffsetMmFromTop,
                       },
                     },
+                    ...(args.touchTipAfterDispenseSpeed != null
+                      ? { speed: args.touchTipAfterDispenseSpeed }
+                      : {}),
                   }),
                 ]
               : []
@@ -436,6 +442,7 @@ export const transfer: CommandCreator<TransferArgs> = (
                     },
                     tipRack: args.tipRack,
                     nozzles: args.nozzles,
+                    isAirGap: true,
                   }),
                   ...(dispenseDelay != null
                     ? [
