@@ -1241,6 +1241,8 @@ class ModuleView:
         self, data: List[float]
     ) -> Dict[str, float]:
         """Return the data from the Absorbance Reader module in a map of wells for each read value."""
+        print(f"data: {data}")
+        print(f"len(data) {len(data)}")
         if len(data) == 96:
             # We have to reverse the reader values because the Opentrons Absorbance Reader is rotated 180 degrees on the deck
             data.reverse()

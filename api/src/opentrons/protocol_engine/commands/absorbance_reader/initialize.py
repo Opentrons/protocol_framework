@@ -122,6 +122,7 @@ class InitializeImpl(
                 reference_wavelength=params.referenceWavelength,
             )
 
+        print(f"abs_reader_substate: {abs_reader_substate}")
         state_update.initialize_absorbance_reader(
             abs_reader_substate.module_id,
             params.measureMode,

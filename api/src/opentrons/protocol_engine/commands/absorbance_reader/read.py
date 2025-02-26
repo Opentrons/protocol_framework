@@ -118,6 +118,7 @@ class ReadAbsorbanceImpl(
             if abs_reader._measurement_config is not None:
                 sample_wavelengths = abs_reader._measurement_config.sample_wavelengths
                 for wavelength, result in zip(sample_wavelengths, results):
+                    print("converting in command")
                     converted_values = (
                         self._state_view.modules.convert_absorbance_reader_data_points(
                             data=result

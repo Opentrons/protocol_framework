@@ -634,6 +634,7 @@ class AbsorbanceReaderCore(ModuleCore, AbstractAbsorbanceReaderCore):
         wavelengths = self._engine_client.state.modules.get_absorbance_reader_substate(
             self.module_id
         ).configured_wavelengths
+        print(f"wavelengths: {wavelengths}")
         if wavelengths is None:
             raise CannotPerformModuleAction(
                 "Cannot perform Read action on Absorbance Reader without calling `.initialize(...)` first."
@@ -659,6 +660,9 @@ class AbsorbanceReaderCore(ModuleCore, AbstractAbsorbanceReaderCore):
         # When using virtual modules, return all zeroes
         virtual_asbsorbance_result: Dict[int, Dict[str, float]] = {}
         for wavelength in wavelengths:
+            print("something is not working")
+            print(f"wavelength: {wavelength}")
+            print(f"[0] * 96: {[0] * 96}")
             converted_values = (
                 self._engine_client.state.modules.convert_absorbance_reader_data_points(
                     data=[0] * 96
