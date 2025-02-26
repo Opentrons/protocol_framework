@@ -2,16 +2,16 @@ import { describe, it, beforeEach } from 'vitest'
 import { screen } from '@testing-library/react'
 
 import { renderWithProviders } from '../../../testing/utils'
-import { SubListTable } from '..'
+import { ListTable } from '..'
 
 import type { ComponentProps } from 'react'
 
-const render = (props: ComponentProps<typeof SubListTable>) => {
-  return renderWithProviders(<SubListTable {...props} />)[0]
+const render = (props: ComponentProps<typeof ListTable>) => {
+  return renderWithProviders(<ListTable {...props} />)[0]
 }
 
-describe('SubListTable', () => {
-  let props: ComponentProps<typeof SubListTable>
+describe('ListTable', () => {
+  let props: ComponentProps<typeof ListTable>
 
   beforeEach(() => {
     props = {

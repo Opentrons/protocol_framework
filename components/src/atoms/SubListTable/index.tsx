@@ -18,11 +18,8 @@ export interface SubListTableProps {
   headers?: [string?, string?, string?]
 }
 
-// SubListTable does not contain the semantic HTML table identity.
+// SubListTable does not contain the semantic HTML table identity but is otherwise equivalent to ListTable.
 // Use SubListTable when there should a table-esque component in a real table (ListTable).
-// NOTE: Design does not include ListTable as a general component - this currently exists
-// only in the 'app' namespace. If this is ever utilized by a web app, it would be a
-// good idea to relocate ListTable to components.
 export function SubListTable({
   headers,
   children,
