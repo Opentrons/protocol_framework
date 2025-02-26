@@ -9,8 +9,6 @@ from typing import (
     Optional,
     Tuple,
     overload,
-    TypeVar,
-    Literal,
 )
 from datetime import datetime
 
@@ -21,6 +19,7 @@ from opentrons.protocol_engine.types import (
     WellInfoSummary,
     WellLiquidInfo,
 )
+from opentrons.types import SimulatedProbeResult, LiquidTrackingType
 
 from . import update_types
 from ._abstract_store import HasState, HandlesActions
@@ -82,12 +81,14 @@ class WellStore(HasState[WellState], HandlesActions):
             self._state.probed_heights[labware_id] = {}
         if labware_id not in self._state.probed_volumes:
             self._state.probed_volumes[labware_id] = {}
+        updated_height = _none_from_clear(state_update.height)
+        updated_volume = _none_from_clear(state_update.volume)
         self._state.probed_heights[labware_id][well_name] = ProbedHeightInfo(
-            height=_none_from_clear(state_update.height),
+            height=updated_height,
             last_probed=state_update.last_probed,
         )
         self._state.probed_volumes[labware_id][well_name] = ProbedVolumeInfo(
-            volume=_none_from_clear(state_update.volume),
+            volume=updated_volume,
             last_probed=state_update.last_probed,
             operations_since_probe=0,
         )
@@ -133,12 +134,15 @@ class WellStore(HasState[WellState], HandlesActions):
             prev_probed_vol_info = self._state.probed_volumes[labware_id][well_name]
             if volume_added is update_types.CLEAR:
                 del self._state.probed_volumes[labware_id][well_name]
-            elif (
-                self._state.probed_volumes[labware_id][well_name].volume
-                == "SimulatedProbeResult"
+            elif isinstance(
+                prev_probed_vol_info.volume,
+                SimulatedProbeResult,
             ):
+                prev_probed_vol_info.volume.simulate_probed_aspirate_dispense(
+                    volume_added
+                )
                 self._state.probed_volumes[labware_id][well_name] = ProbedVolumeInfo(
-                    volume="SimulatedProbeResult",
+                    volume=prev_probed_vol_info.volume,
                     last_probed=prev_probed_vol_info.last_probed,
                     operations_since_probe=prev_probed_vol_info.operations_since_probe
                     + 1,
@@ -262,7 +266,7 @@ def _volume_from_info(info: Optional[LoadedVolumeInfo]) -> Optional[float]:
 
 def _volume_from_info(
     info: Union[ProbedVolumeInfo, LoadedVolumeInfo, None],
-) -> Union[float, Literal["SimulatedProbeResult"], None]:
+) -> Union[LiquidTrackingType, None]:
     if info is None:
         return None
     return info.volume
@@ -270,18 +274,17 @@ def _volume_from_info(
 
 def _height_from_info(
     info: Optional[ProbedHeightInfo],
-) -> Union[float, Literal["SimulatedProbeResult"], None]:
+) -> Union[LiquidTrackingType, None]:
     if info is None:
         return None
     return info.height
 
 
-MaybeClear = TypeVar("MaybeClear")
-
-
 def _none_from_clear(
-    inval: Union[MaybeClear, update_types.ClearType]
-) -> MaybeClear | None:
+    inval: LiquidTrackingType | update_types.ClearType,
+) -> LiquidTrackingType | None:
     if inval == update_types.CLEAR:
         return None
-    return inval
+    else:
+        assert isinstance(inval, float) or isinstance(inval, SimulatedProbeResult)
+        return inval

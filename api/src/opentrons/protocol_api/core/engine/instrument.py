@@ -10,13 +10,13 @@ from typing import (
     List,
     Tuple,
     NamedTuple,
-    Literal,
 )
 from opentrons.types import (
     Location,
     Mount,
     NozzleConfigurationType,
     NozzleMapInterface,
+    LiquidTrackingType,
 )
 from opentrons.hardware_control import SyncHardwareAPI
 from opentrons.hardware_control.dev_types import PipetteDict
@@ -2067,7 +2067,7 @@ class InstrumentCore(AbstractInstrument[WellCore, LabwareCore]):
 
     def liquid_probe_without_recovery(
         self, well_core: WellCore, loc: Location
-    ) -> Union[float, Literal["SimulatedProbeResult"]]:
+    ) -> LiquidTrackingType:
         labware_id = well_core.labware_id
         well_name = well_core.get_name()
         well_location = WellLocation(
@@ -2083,8 +2083,6 @@ class InstrumentCore(AbstractInstrument[WellCore, LabwareCore]):
         )
 
         self._protocol_core.set_last_location(location=loc, mount=self.get_mount())
-        if not isinstance(result.z_position, float):
-            return "SimulatedProbeResult"
         return result.z_position
 
     def nozzle_configuration_valid_for_lld(self) -> bool:
