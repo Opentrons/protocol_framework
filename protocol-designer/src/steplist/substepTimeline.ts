@@ -290,35 +290,31 @@ export const substepTimelineMultiChannel = (
         command.commandType === 'aspirateInPlace'
       ) {
         const { volume } = command.params
-        const prevCommand =
-          'commands' in nextFrame ? nextFrame.commands[index - 1] : null
-
-        const moveToAddressableAreaCommand =
-          prevCommand?.commandType === 'moveToAddressableArea'
-            ? prevCommand
-            : null
-        if (moveToAddressableAreaCommand == null) {
+        const prevMoveToAddressableAreaCommand = getPreviousMoveToAddressableAreaCommand(
+          nextFrame
+        )
+        if (prevMoveToAddressableAreaCommand == null) {
           console.error(
             `expected to find moveToAddressableArea command assosciated with the ${command.commandType} but could not`
           )
         }
         const trashCutoutFixture =
-          moveToAddressableAreaCommand?.params.addressableAreaName ===
+          prevMoveToAddressableAreaCommand?.params.addressableAreaName ===
           'fixedTrash'
             ? 'fixedTrashSlot'
             : 'trashBinAdapter'
 
         const cutoutFixture =
           wasteChuteddressableAreaNamesPipette.includes(
-            moveToAddressableAreaCommand?.params.addressableAreaName ?? ''
+            prevMoveToAddressableAreaCommand?.params.addressableAreaName ?? ''
           ) ||
-          moveToAddressableAreaCommand?.params.addressableAreaName ===
+          prevMoveToAddressableAreaCommand?.params.addressableAreaName ===
             '96ChannelWasteChute'
             ? 'wasteChuteRightAdapterNoCover'
             : trashCutoutFixture
 
         const cutoutId = getCutoutIdByAddressableArea(
-          moveToAddressableAreaCommand?.params
+          prevMoveToAddressableAreaCommand?.params
             .addressableAreaName as AddressableAreaName,
           cutoutFixture,
           trashCutoutFixture === 'fixedTrashSlot'
