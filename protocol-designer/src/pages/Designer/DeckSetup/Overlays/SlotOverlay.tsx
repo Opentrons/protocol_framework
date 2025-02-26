@@ -1,5 +1,5 @@
 import { useSelector } from 'react-redux'
-import { useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import {
   ALIGN_CENTER,
   BORDERS,
@@ -45,6 +45,7 @@ export function SlotOverlay(props: SlotOverlayProps): JSX.Element | null {
   } = props
   const robotType = useSelector(getRobotType)
   const deckSetup = useSelector(getInitialDeckSetup)
+  const [stableOpacity, setStableOpacity] = useState<string>(slotFillOpacity)
   const { additionalEquipmentOnDeck, modules } = deckSetup
   const deckDef = useMemo(() => getDeckDefFromRobotType(robotType), [])
   const hasTCOnSlot = Object.values(modules).find(
@@ -60,6 +61,16 @@ export function SlotOverlay(props: SlotOverlayProps): JSX.Element | null {
       slotId as AddressableAreaName,
       deckDef.cutoutFixtures
     ) ?? 'cutoutD1'
+
+  // Debounce opacity changes to prevent flickering
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setStableOpacity(slotFillOpacity)
+    }, 50)
+    return () => {
+      clearTimeout(timer)
+    }
+  }, [slotFillOpacity])
 
   //  return null for TC slots
   if (slotPosition === null || (hasTCOnSlot && tcSlots.includes(slotId)))
@@ -96,7 +107,7 @@ export function SlotOverlay(props: SlotOverlayProps): JSX.Element | null {
         y={y}
         flexProps={{ flex: '1' }}
         foreignObjectProps={{
-          opacity: slotFillOpacity,
+          opacity: stableOpacity,
           flex: '1',
           zIndex: 10,
           cursor: CURSOR_GRABBING,
@@ -120,7 +131,7 @@ export function SlotOverlay(props: SlotOverlayProps): JSX.Element | null {
         y={y}
         flexProps={{ flex: '1' }}
         foreignObjectProps={{
-          opacity: slotFillOpacity,
+          opacity: stableOpacity,
           flex: '1',
           zIndex: 10,
           cursor: CURSOR_GRABBING,
