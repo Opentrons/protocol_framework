@@ -84,6 +84,7 @@ export enum SetupLocators {
   svg = 'svg',
   exist = 'exist',
   StepOptionsTestIDThreeDots = 'button.Btn-sc-o3dtr1-0.OverflowBtn___StyledBtn-sc-1mslfxo-0',
+  AspirateCheckbox = 'div.Checkbox___StyledFlex3-sc-1mvp7vt-0.gZwGCw.btdgeU',
 }
 
 /**
@@ -623,8 +624,8 @@ export const SetupSteps = {
   PrewetAspirate: (): StepThunk => ({
     call: () => {
       cy.contains('Pre-wet tip')
-        .closest('div.Flex-sc-1qhp8l7-0.fJriNr') // MOST IMPORTANT: Pinpoint the correct container
-        .find('div.Checkbox___StyledFlex3-sc-1mvp7vt-0.gZwGCw.btdgeU') // Select the checkbox div
+        .closest('div.Flex-sc-1qhp8l7-0.fJriNr')
+        .find(SetupLocators.AspirateCheckbox)
         .click()
     },
   }),
@@ -632,25 +633,37 @@ export const SetupSteps = {
 
   Delay: (): StepThunk => ({
     call: () => {
-      cy.contains('Delay').closest('div').find('button').click()
+      cy.contains('Delay')
+        .closest('div')
+        .find(SetupLocators.AspirateCheckbox)
+        .click()
     },
   }),
   // Step 1 Transfer form touch tip
   TouchTipAspirate: (): StepThunk => ({
     call: () => {
-      cy.contains('Touch tip').closest('div').find('button').click()
+      cy.contains('Touch tip')
+        .closest('div')
+        .find(SetupLocators.AspirateCheckbox)
+        .click()
     },
   }),
   // Step 1 Transfer form mix checkbox
   MixAspirate: (): StepThunk => ({
     call: () => {
-      cy.contains('Mix').closest('div').find('button').click()
+      cy.contains('Mix')
+        .closest('div')
+        .find(SetupLocators.AspirateCheckbox)
+        .click()
     },
   }),
   // Step 1 Transfer form airgap checkbox
   AirGap: (): StepThunk => ({
     call: () => {
-      cy.contains('Air gap').closest('div').find('button').click()
+      cy.contains('Air gap')
+        .closest('div')
+        .find(SetupLocators.AspirateCheckbox)
+        .click()
     },
   }),
   // Step 1 Transfer form mix volume
@@ -703,7 +716,9 @@ export const SetupSteps = {
 
   BlowoutTransferDestination: (): StepThunk => ({
     call: () => {
-      cy.contains('Blowout').closest('div').find('button').click()
+      cy.contains('Blowout')
+        .closest('div[data-testid="ListButton_noActive"]')
+        .click()
       cy.contains('Choose option').click()
       cy.contains('Destination Well').click()
     },
@@ -905,23 +920,17 @@ export const SetupVerifications = {
     // Verifies that the "Delay" button has an associated SVG icon with proper attributes
     call: () => {
       cy.contains('Delay')
-        .closest('div')
-        .find('button')
-        .find('svg')
-        .should('exist')
-        .and('have.attr', 'aria-hidden', 'true')
+        .closest('div[data-testid="ListButton_noActive"]')
+        .find('path[aria-roledescription="ot-checkbox"]')
     },
   }),
 
   PreWet: (): StepThunk => ({
     // Verifies that the "Pre-wet tip" button has an associated SVG icon with proper attributes
     call: () => {
-      cy.contains('Pre-wet tip')
-        .closest('div')
-        .find('button')
-        .find('svg')
-        .should('exist')
-        .and('have.attr', 'aria-hidden', 'true')
+      cy.contains('PreWet')
+        .closest('div[data-testid="ListButton_noActive"]')
+        .find('path[aria-roledescription="ot-checkbox"]')
     },
   }),
 
@@ -929,11 +938,8 @@ export const SetupVerifications = {
     // Verifies that the "Touch tip" button has an associated SVG icon with proper attributes
     call: () => {
       cy.contains('Touch tip')
-        .closest('div')
-        .find('button')
-        .find('svg')
-        .should('exist')
-        .and('have.attr', 'aria-hidden', 'true')
+        .closest('div[data-testid="ListButton_noActive"]')
+        .find('path[aria-roledescription="ot-checkbox"]')
     },
   }),
 
@@ -941,11 +947,8 @@ export const SetupVerifications = {
     // Verifies that the "Mix" button has an associated SVG icon with proper attributes
     call: () => {
       cy.contains('Mix')
-        .closest('div')
-        .find('button')
-        .find('svg')
-        .should('exist')
-        .and('have.attr', 'aria-hidden', 'true')
+        .closest('div[data-testid="ListButton_noActive"]')
+        .find('path[aria-roledescription="ot-checkbox"]')
     },
   }),
 
@@ -953,11 +956,8 @@ export const SetupVerifications = {
     // Verifies that the "Air gap" button has an associated SVG icon with proper attributes
     call: () => {
       cy.contains('Air gap')
-        .closest('div')
-        .find('button')
-        .find('svg')
-        .should('exist')
-        .and('have.attr', 'aria-hidden', 'true')
+        .closest('div[data-testid="ListButton_noActive"]')
+        .find('path[aria-roledescription="ot-checkbox"]')
     },
   }),
 

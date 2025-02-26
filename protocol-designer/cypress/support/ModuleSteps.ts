@@ -124,7 +124,7 @@ export const ModuleSteps = {
   }),
   StartPlateReaderStep: (): StepThunk => ({
     call: () => {
-      cy.contains('Absorbance plate reader').click()
+      cy.contains('Absorbance Plate Reader').click()
     },
   }),
   DefineInitilizationSingle: (): StepThunk => ({
