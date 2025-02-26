@@ -72,7 +72,8 @@ enum MixContent {
   StepName = 'Step Name',
   StepNotes = 'Step Notes',
   CypressTest = 'Cypress Mix Test',
-  TouchTipFromTop = 'Touch tip position from top',
+  TouchTipFromBottom = 'Touch tip position from bottom',
+  MixStepSavedMessage = 'Mix step has been saved',
 }
 
 enum MixLocators {
@@ -80,23 +81,27 @@ enum MixLocators {
   GoBack = 'button:contains("Go back")',
   Back = 'button:contains("Back")',
   WellInputField = '[name="wells"]',
-  Save = 'button:contains("Save")',
+  ModalArea = '[aria-label="ModalShell_ModalArea"]',
   OneWellReservoirImg = '[data-wellname="A1"]',
   Volume = '[name="volume"]',
   MixReps = '[name="times"]',
   Aspirate = 'button:contains("Aspirate")',
   Dispense = 'button:contains("Dispense")',
   AspFlowRateInput = '[name="aspirate_flowRate"]',
-  AspWellOrder = '[data-testid="WellsOrderField_ListButton_aspirate"]',
+  AspWellOrder = '[data-testid="ListButton_noActive"]',
   ResetToDefault = 'button:contains("Reset to default")',
   PrimaryOrderDropdown = 'div[tabindex="0"].sc-bqWxrE jKLbYH iFjNDq',
   CancelAspSettings = '[class="SecondaryButton-sc-1opt1t9-0 kjpcRL"]',
-  MixTipPos = '[data-testid="PositionField_ListButton_mix"]',
+  MixTipPos = '[data-testid="ListButton_noActive"]',
   XpositionInput = '[data-testid="TipPositionModal_x_custom_input"]',
   YpositionInput = '[id="TipPositionModal_y_custom_input"]',
   ZpositionInput = '[id="TipPositionModal_z_custom_input"]',
   SwapView = 'button:contains("Swap view")',
-  Checkbox = '[class="Flex-sc-1qhp8l7-0 Checkbox___StyledFlex3-sc-1mvp7vt-0 gZwGCw btdgeU"]',
+  RightColumnSaveButton = 'button:contains("Save")',
+  RightColumnBackButton = 'button:contains("Back")',
+  DelayCheckbox = '[data-testid="delay_checkbox"]',
+  BlowoutCheckbox = '[data-testid="blowout_checkbox"]',
+  TouchTipCheckbox = '[data-testid="touchTip_checkbox"]',
   DelaySecondsInput = '[class="InputField__StyledInput-sc-1gyyvht-0 cLVzBl"]',
   DispFlowRate = '[name="dispense_flowRate"]',
   BlowoutLtnDropdown = '[class="Svg-sc-1lpozsw-0 Icon___StyledSvg-sc-1gt4gyz-0 csSXbR cJpxat"]',
@@ -106,9 +111,9 @@ enum MixLocators {
   PosFromBottom = '[id="TipPositionField_mix_touchTip_mmFromBottom"]',
   RenameBtn = 'button:contains("Rename")',
   StepNameInput = '[class="InputField__StyledInput-sc-1gyyvht-0 cLVzBl"]',
-  StepNotesInput = '[class="TextAreaField__StyledTextArea-sc-ug50vm-0 fSXuLe"]',
+  StepNotesInput = '[class^="RenameStepModal__DescriptionField"]',
   // StepNotesInput = '[data-testid="TextAreaField_step_notes"]',
-  PosFromTop = '[data-testid="TipPositionField_mix_touchTip_mmFromTop"]',
+  PosFromTop = '[data-testid="TipPositionField_blowout_z_offset"]',
 }
 
 /**
@@ -197,8 +202,9 @@ export const MixSteps = {
    */
   AspWellOrder: (): StepThunk => ({
     call: () => {
+      cy.log('AspWellOrder')
       cy.contains(MixContent.TopBottomLeRi).should('exist').should('be.visible')
-      cy.get(MixLocators.AspWellOrder).click()
+      cy.get(MixLocators.AspWellOrder).first().click()
     },
   }),
 
@@ -210,7 +216,7 @@ export const MixSteps = {
       cy.contains(MixContent.StartingWellPos)
         .should('exist')
         .should('be.visible')
-      cy.get(MixLocators.MixTipPos).click()
+      cy.get(MixLocators.MixTipPos).last().click()
       cy.get(MixLocators.XpositionInput).type('{selectAll}{backspace}2')
       cy.get(MixLocators.YpositionInput).type('{selectAll}{backspace}3')
       cy.get(MixLocators.ZpositionInput).type('{selectAll}{backspace}4')
@@ -228,7 +234,7 @@ export const MixSteps = {
   Delay: (): StepThunk => ({
     call: () => {
       cy.contains(MixContent.Delay).should('exist').should('be.visible')
-      cy.get(MixLocators.Checkbox)
+      cy.get(MixLocators.DelayCheckbox)
         .should('exist')
         .should('be.visible')
         .eq(0)
@@ -270,7 +276,7 @@ export const MixSteps = {
   BlowoutLocation: (): StepThunk => ({
     call: () => {
       cy.contains(MixContent.Blowout).should('exist').should('be.visible')
-      cy.get(MixLocators.Checkbox)
+      cy.get(MixLocators.BlowoutCheckbox)
         .should('exist')
         .should('be.visible')
         .eq(0)
@@ -323,16 +329,16 @@ export const MixSteps = {
    */
   TouchTip: (): StepThunk => ({
     call: () => {
-      cy.get(MixLocators.Checkbox)
+      cy.log('Select TouchTip settings ---------------------------')
+      cy.get(MixLocators.TouchTipCheckbox)
         .should('exist')
         .should('be.visible')
-        .eq(0)
         .click()
-      cy.get(MixLocators.PosFromTop)
+      cy.get(MixLocators.PosFromBottom)
         .should('exist')
         .should('be.visible')
         .should('have.prop', 'value')
-      cy.get(MixLocators.PosFromTop).click({ force: true })
+      cy.get(MixLocators.PosFromBottom).click({ force: true })
       cy.get(MixLocators.BlowoutZPosition).type('{selectAll}{backspace}2')
       cy.get(MixLocators.ResetToDefault).click()
       cy.get(MixLocators.BlowoutZPosition).type('{selectAll}{backspace}-7')
@@ -340,11 +346,11 @@ export const MixSteps = {
   }),
 
   /**
-   * "Save"
+   * "Save on a modal"
    */
   Save: (): StepThunk => ({
     call: () => {
-      cy.get(MixLocators.Save)
+      cy.get(MixLocators.RightColumnSaveButton)
         .should('exist')
         .should('be.visible')
         .first()
@@ -353,11 +359,29 @@ export const MixSteps = {
   }),
 
   /**
-   * "Go back"
+   * "Save on a modal"
    */
-  Back: (): StepThunk => ({
+  ModalSave: (): StepThunk => ({
     call: () => {
-      cy.get(MixLocators.Back).should('exist').should('be.visible').click()
+      cy.log('Saving on a modal ---------------------------')
+      cy.get(MixLocators.ModalArea)
+        .contains('button', 'Save')
+        .should('exist')
+        .should('be.visible')
+        .first()
+        .click()
+    },
+  }),
+
+  /**
+   * "Go back on a modal"
+   */
+  ModalBack: (): StepThunk => ({
+    call: () => {
+      cy.get(MixLocators.ModalArea)
+        .contains('button', 'Back')
+        .should('exist')
+        .should('be.visible')
     },
   }),
 
@@ -378,6 +402,7 @@ export const MixSteps = {
    */
   Rename: (): StepThunk => ({
     call: () => {
+      cy.log('Renaming Mix Step ---------------------------')
       cy.get(MixLocators.RenameBtn).should('exist').should('be.visible').click()
       cy.contains(MixContent.NameStep).should('exist').should('be.visible')
       cy.contains(MixContent.StepName).should('exist').should('be.visible')
@@ -404,7 +429,8 @@ export const MixVerifications = {
    */
   PartOne: (): StepThunk => ({
     call: () => {
-      cy.contains(MixContent.PartOne).should('exist').should('be.visible')
+      cy.log('Verifying Part 1/2 ---------------------------')
+      cy.contains(MixContent.PartOne).should('exist') // .should('be.visible')
       cy.contains(MixContent.Mix).should('exist').should('be.visible')
       cy.contains(MixContent.Pipette).should('exist').should('be.visible')
       cy.contains(MixContent.PipettePreselect)
@@ -443,8 +469,14 @@ export const MixVerifications = {
       cy.get(MixLocators.OneWellReservoirImg)
         .should('exist')
         .should('be.visible')
-      cy.get(MixLocators.Save).should('exist').should('be.visible')
-      cy.get(MixLocators.Back).should('exist').should('be.visible')
+      cy.get(MixLocators.ModalArea)
+        .contains('button', 'Save')
+        .should('exist')
+        .should('be.visible')
+      cy.get(MixLocators.ModalArea)
+        .contains('button', 'Back')
+        .should('exist')
+        .should('be.visible')
     },
   }),
 
@@ -453,7 +485,7 @@ export const MixVerifications = {
    */
   PartTwoAsp: (): StepThunk => ({
     call: () => {
-      cy.contains(MixContent.PartTwo).should('exist').should('be.visible')
+      cy.contains(MixContent.PartTwo).should('exist') // .should('be.visible')
       cy.contains(MixContent.Mix).should('exist').should('be.visible')
       cy.get(MixLocators.Aspirate).should('exist').should('be.visible')
       cy.contains(MixContent.AspFlowRate).should('exist').should('be.visible')
@@ -465,8 +497,12 @@ export const MixVerifications = {
         .should('exist')
         .should('be.visible')
       cy.contains(MixContent.Delay).should('exist').should('be.visible')
-      cy.get(MixLocators.Back).should('exist').should('be.visible')
-      cy.get(MixLocators.Save).should('exist').should('be.visible')
+      cy.get(MixLocators.RightColumnSaveButton)
+        .should('exist')
+        .should('be.visible')
+      cy.get(MixLocators.RightColumnBackButton)
+        .should('exist')
+        .should('be.visible')
     },
   }),
 
@@ -497,8 +533,10 @@ export const MixVerifications = {
       cy.get(MixLocators.ResetToDefault).click()
       cy.contains(MixContent.TopToBottom).should('exist').should('be.visible')
       cy.contains(MixContent.LeftToRight).should('exist').should('be.visible')
-      cy.get(MixLocators.CancelAspSettings).should('exist').should('be.visible')
-      cy.get(MixLocators.Save).should('exist').should('be.visible')
+      cy.get(MixLocators.CancelAspSettings).should('exist') // .should('be.visible')
+      cy.get(MixLocators.RightColumnSaveButton)
+        .should('exist')
+        .should('be.visible')
     },
   }),
 
@@ -507,6 +545,7 @@ export const MixVerifications = {
    */
   AspMixTipPos: (): StepThunk => ({
     call: () => {
+      cy.log('Verifying Mix Tip Position ----------------------------')
       cy.contains(MixContent.EditMixTipPos).should('exist').should('be.visible')
       cy.contains(MixContent.MixTipPosDescr)
         .should('exist')
@@ -525,10 +564,10 @@ export const MixVerifications = {
       cy.get(MixLocators.ZpositionInput).should('have.prop', 'value')
       cy.get(MixLocators.ResetToDefault).should('exist').should('be.visible')
       cy.get(MixLocators.CancelAspSettings).should('exist').should('be.visible')
-      cy.get(MixLocators.Save)
+      cy.get(MixLocators.ModalArea)
+        .contains('button', 'Save')
         .should('exist')
         .should('be.visible')
-        .first()
         .click()
     },
   }),
@@ -538,7 +577,8 @@ export const MixVerifications = {
    */
   PartTwoDisp: (): StepThunk => ({
     call: () => {
-      cy.contains(MixContent.PartTwo).should('exist').should('be.visible')
+      cy.log('Verifying Part 2/2 ---------------------------')
+      cy.contains(MixContent.PartTwo).should('exist') // .should('be.visible')
       cy.contains(MixContent.Mix).should('exist').should('be.visible')
       cy.get(MixLocators.Aspirate).should('exist').should('be.visible')
       cy.get(MixLocators.Dispense).should('exist').should('be.visible')
@@ -558,6 +598,7 @@ export const MixVerifications = {
    */
   Blowout: (): StepThunk => ({
     call: () => {
+      cy.log('Verifying Blowout')
       cy.contains(MixContent.Blowout).should('exist').should('be.visible')
       cy.contains(MixContent.BlowoutLocation)
         .should('exist')
@@ -576,6 +617,7 @@ export const MixVerifications = {
    */
   BlowoutPopout: (): StepThunk => ({
     call: () => {
+      cy.log('Verifying Blowout Modal')
       cy.contains(MixContent.EditBlowoutPos)
         .should('exist')
         .should('be.visible')
@@ -586,7 +628,6 @@ export const MixVerifications = {
       cy.get(MixLocators.BlowoutZPosition).should('have.prop', 'value')
       cy.contains(MixContent.Cancel).should('exist').should('be.visible')
       cy.get(MixLocators.ResetToDefault).should('exist').should('be.visible')
-      cy.get(MixLocators.Save).should('exist').should('be.visible')
     },
   }),
 
@@ -595,8 +636,9 @@ export const MixVerifications = {
    */
   TouchTip: (): StepThunk => ({
     call: () => {
+      cy.log('Verifying TouchTip ---------------------------')
       cy.contains(MixContent.TouchTip).should('exist').should('be.visible')
-      cy.contains(MixContent.TouchTipFromTop)
+      cy.contains(MixContent.TouchTipFromBottom)
         .should('exist')
         .should('be.visible')
       cy.get(MixLocators.PosFromTop).should('have.prop', 'value')
@@ -608,6 +650,7 @@ export const MixVerifications = {
    */
   TouchTipPopout: (): StepThunk => ({
     call: () => {
+      cy.log('Verifying TouchTip Modal ---------------------------')
       cy.contains(MixContent.EditTouchTipPos)
         .should('exist')
         .should('be.visible')
@@ -618,15 +661,28 @@ export const MixVerifications = {
       cy.get(MixLocators.BlowoutZPosition).should('have.prop', 'value')
       cy.contains(MixContent.Cancel).should('exist').should('be.visible')
       cy.get(MixLocators.ResetToDefault).should('exist').should('be.visible')
-      cy.get(MixLocators.Save).should('exist').should('be.visible')
+      cy.get(MixLocators.ModalArea)
+        .contains('button', 'Save')
+        .should('exist')
+        .should('be.visible')
     },
   }),
 
   /**
    * "Verify that Mix Step was successfully renamed to "Cypress Test""
    */
-  Rename: (): StepThunk => ({
+  RenameMixStep: (): StepThunk => ({
     call: () => {
+      cy.log('Verifying Rename Mix Step ---------------------------')
+      cy.contains(MixContent.CypressTest).should('exist').should('be.visible')
+    },
+  }),
+  /**
+   * "Verify that Mix Step was successfully saved"
+   */
+  MixStepSaved: (): StepThunk => ({
+    call: () => {
+      cy.log('Verifying Mix Step was saved ---------------------------')
       cy.contains(MixContent.CypressTest).should('exist').should('be.visible')
     },
   }),

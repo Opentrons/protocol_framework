@@ -69,7 +69,7 @@ export enum SetupLocators {
   MagblockImage = 'img[alt="magneticBlockType"]',
   HeaterShakerImage = 'img[alt="heaterShakerModuleType"]',
   TemperatureModuleImage = 'img[alt="temperatureModuleType"]',
-  LiquidNameInput = 'input[name="displayName"]',
+  LiquidNameInput = 'input[name="name"]',
   ModalShellArea = 'div[aria-label="ModalShell_ModalArea"]',
   SaveButton = 'button[type="submit"]',
   LiquidsDropdown = 'div[tabindex="0"].sc-bqWxrE',
