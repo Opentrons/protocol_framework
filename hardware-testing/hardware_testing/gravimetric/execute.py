@@ -611,6 +611,7 @@ def run(cfg: config.GravimetricConfig, resources: TestResources) -> None:  # noq
     print(tipracks)
     for _tiprack in tipracks:
         try:
+            tip_numbers = 0
             ui.print_title("FIND LIQUID HEIGHT")
             # first_tip = _next_tip_for_channel(cfg, resources, 0, total_tips)
             first_tip = _tiprack['A1']
@@ -671,6 +672,8 @@ def run(cfg: config.GravimetricConfig, resources: TestResources) -> None:  # noq
                 False,
                 resources.env_sensor,
             )
+            ui.print_title("Debug Mode")
+            print("trial: ", cfg.trials)
             
             for volume in trials.keys():
                 actual_asp_list_all = []
@@ -690,8 +693,7 @@ def run(cfg: config.GravimetricConfig, resources: TestResources) -> None:  # noq
                     aspirate_data_list = []
                     dispense_data_list = []
                     for run_trial in trials[volume][channel]:
-                        print("run trial:")
-                        print(run_trial)
+                        tip_numbers += 1
                         trial_count += 1
                         ui.print_header(
                             f"{volume} uL channel {channel + 1} ({run_trial.trial + 1}/{cfg.trials})"
@@ -699,9 +701,10 @@ def run(cfg: config.GravimetricConfig, resources: TestResources) -> None:  # noq
                         ui.print_info(f"trial total {trial_count}/{trial_total}")
                         # NOTE: always pick-up new tip for each trial
                         #       b/c it seems tips heatup
-                        next_tip: Well = _next_tip_for_channel(
-                            cfg, resources, channel, total_tips
-                        )
+                        # next_tip: Well = _next_tip_for_channel(
+                        #     cfg, resources, channel, total_tips
+                        # )
+                        next_tip: Well = _tiprack[get_tip_position_by_num(tip_numbers+1)]
                         next_tip_location = next_tip.top().move(channel_offset)
                         if not cfg.same_tip:
                             _pick_up_tip(
