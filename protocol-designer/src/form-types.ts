@@ -244,6 +244,7 @@ export interface HydratedMoveLiquidFormData extends AnnotationFields {
   dispense_wells: string[]
   disposalVolume_checkbox: boolean
   dropTip_location: string
+  liquidClassesSupported: boolean
   nozzles: NozzleConfigurationStyle | null
   path: PathOption
   pipette: PipetteEntity
@@ -308,6 +309,7 @@ export interface HydratedMixFormData extends AnnotationFields {
   dropTip_location: string
   id: string
   labware: LabwareEntity
+  liquidClassesSupported: boolean
   mix_touchTip_checkbox: boolean
   mix_wellOrder_first: WellOrderOption
   mix_wellOrder_second: WellOrderOption

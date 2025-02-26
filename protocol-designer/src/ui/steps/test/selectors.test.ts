@@ -657,6 +657,10 @@ describe('_getSavedMultiSelectFieldValues', () => {
           value: undefined,
           isIndeterminate: false,
         },
+        liquidClassesSupported: {
+          isIndeterminate: false,
+          value: undefined,
+        },
       })
     })
   })
@@ -929,6 +933,7 @@ describe('_getSavedMultiSelectFieldValues', () => {
           value: undefined,
           isIndeterminate: false,
         },
+        liquidClassesSupported: { isIndeterminate: false },
       })
     })
   })
@@ -1003,6 +1008,7 @@ describe('_getSavedMultiSelectFieldValues', () => {
           value: undefined,
           isIndeterminate: false,
         },
+        liquidClassesSupported: { isIndeterminate: false },
       })
     })
   })
@@ -1094,6 +1100,7 @@ describe('_getSavedMultiSelectFieldValues', () => {
         pickUpTip_wellNames: {
           isIndeterminate: false,
         },
+        liquidClassesSupported: { isIndeterminate: false },
       })
     })
   })
