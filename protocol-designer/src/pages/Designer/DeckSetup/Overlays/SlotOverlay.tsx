@@ -47,7 +47,8 @@ export function SlotOverlay(props: SlotOverlayProps): JSX.Element | null {
   const deckSetup = useSelector(getInitialDeckSetup)
   const [stableOpacity, setStableOpacity] = useState<string>(slotFillOpacity)
   const { additionalEquipmentOnDeck, modules } = deckSetup
-  const deckDef = useMemo(() => getDeckDefFromRobotType(robotType), [])
+  const deckDef = useMemo(() => getDeckDefFromRobotType(robotType), [robotType])
+
   const hasTCOnSlot = Object.values(modules).find(
     module => module.slot === slotId && module.type === THERMOCYCLER_MODULE_TYPE
   )
@@ -62,7 +63,6 @@ export function SlotOverlay(props: SlotOverlayProps): JSX.Element | null {
       deckDef.cutoutFixtures
     ) ?? 'cutoutD1'
 
-  // Debounce opacity changes to prevent flickering
   useEffect(() => {
     const timer = setTimeout(() => {
       setStableOpacity(slotFillOpacity)
@@ -72,73 +72,45 @@ export function SlotOverlay(props: SlotOverlayProps): JSX.Element | null {
     }
   }, [slotFillOpacity])
 
-  //  return null for TC slots
   if (slotPosition === null || (hasTCOnSlot && tcSlots.includes(slotId)))
     return null
 
-  const slotFill = (
-    <Flex
-      alignItems={ALIGN_CENTER}
-      backgroundColor={slotFillColor}
-      borderRadius={BORDERS.borderRadius4}
-      gridGap={SPACING.spacing8}
-      justifyContent={JUSTIFY_CENTER}
-      width="100%"
+  const { width, height, x, y } =
+    robotType === FLEX_ROBOT_TYPE
+      ? getFlexHoverDimensions(
+          stagingAreaLocations,
+          cutoutId,
+          slotId,
+          hasTCOnSlot != null,
+          slotPosition
+        )
+      : getOT2HoverDimensions(hasTCOnSlot != null, slotPosition)
+
+  return (
+    <RobotCoordsForeignObject
+      key={`${robotType.toLowerCase()}_slotOverlay`}
+      width={width}
+      height={height}
+      x={x}
+      y={y}
+      flexProps={{ flex: '1' }}
+      foreignObjectProps={{
+        opacity: stableOpacity,
+        flex: '1',
+        zIndex: 10,
+        cursor: CURSOR_GRABBING,
+      }}
     >
-      {children}
-    </Flex>
+      <Flex
+        alignItems={ALIGN_CENTER}
+        backgroundColor={slotFillColor}
+        borderRadius={BORDERS.borderRadius4}
+        gridGap={SPACING.spacing8}
+        justifyContent={JUSTIFY_CENTER}
+        width="100%"
+      >
+        {children}
+      </Flex>
+    </RobotCoordsForeignObject>
   )
-
-  if (robotType === FLEX_ROBOT_TYPE) {
-    const { width, height, x, y } = getFlexHoverDimensions(
-      stagingAreaLocations,
-      cutoutId,
-      slotId,
-      hasTCOnSlot != null,
-      slotPosition
-    )
-
-    return (
-      <RobotCoordsForeignObject
-        key="flex_slotOverlay"
-        width={width}
-        height={height}
-        x={x}
-        y={y}
-        flexProps={{ flex: '1' }}
-        foreignObjectProps={{
-          opacity: stableOpacity,
-          flex: '1',
-          zIndex: 10,
-          cursor: CURSOR_GRABBING,
-        }}
-      >
-        {slotFill}
-      </RobotCoordsForeignObject>
-    )
-  } else {
-    const { width, height, x, y } = getOT2HoverDimensions(
-      hasTCOnSlot != null,
-      slotPosition
-    )
-
-    return (
-      <RobotCoordsForeignObject
-        key="ot2_slotOverlay"
-        width={width}
-        height={height}
-        x={x}
-        y={y}
-        flexProps={{ flex: '1' }}
-        foreignObjectProps={{
-          opacity: stableOpacity,
-          flex: '1',
-          zIndex: 10,
-          cursor: CURSOR_GRABBING,
-        }}
-      >
-        {slotFill}
-      </RobotCoordsForeignObject>
-    )
-  }
 }
