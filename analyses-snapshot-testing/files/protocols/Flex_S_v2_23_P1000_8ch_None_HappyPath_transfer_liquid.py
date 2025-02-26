@@ -49,21 +49,21 @@ def run(protocol_context):
     )
 
     # https://opentrons.atlassian.net/browse/AUTH-1420
-    # pipette_8ch_1000.transfer_liquid(
-    #     liquid_class=ethanol_class,
-    #     volume=volume,
-    #     source=source.wells_by_name()[ETHANOL_SOURCE_WELL],
-    #     dest=target.wells_by_name()[ETHANOL_TARGET_WELL],
-    #     new_tip=new_tip,
-    #     trash_location=trash,
-    # )
+    pipette_8ch_1000.transfer_liquid(
+        liquid_class=ethanol_class,
+        volume=volume,
+        source=source.wells_by_name()[ETHANOL_SOURCE_WELL],
+        dest=target.wells_by_name()[ETHANOL_TARGET_WELL],
+        new_tip=new_tip,
+        trash_location=trash,
+    )
 
     # https://opentrons.atlassian.net/browse/AUTH-1421
-    # pipette_8ch_1000.transfer_liquid(
-    #     liquid_class=glycerol_class,
-    #     volume=volume,
-    #     source=source.wells_by_name()[GLYCEROL_SOURCE_WELL],
-    #     dest=target.wells_by_name()[GLYCEROL_TARGET_WELL],
-    #     new_tip=new_tip,
-    #     trash_location=trash,
-    # )
+    pipette_8ch_1000.transfer_liquid(
+        liquid_class=glycerol_class,
+        volume=volume,
+        source=source.wells_by_name()[GLYCEROL_SOURCE_WELL],
+        dest=target.wells_by_name()[GLYCEROL_TARGET_WELL],
+        new_tip=new_tip,
+        trash_location=trash,
+    )

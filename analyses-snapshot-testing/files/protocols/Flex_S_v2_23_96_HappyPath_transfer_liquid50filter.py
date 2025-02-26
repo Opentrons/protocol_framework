@@ -1,5 +1,5 @@
 requirements = {"robotType": "Flex", "apiLevel": "2.23"}
-metadata = {"protocolName": "96 Channel transfer_liquid"}
+metadata = {"protocolName": "96 Channel transfer_liquid opentrons_flex_96_filtertiprack_50ul"}
 
 
 def run(protocol_context):
@@ -8,10 +8,11 @@ def run(protocol_context):
     ethanol_class = protocol_context.define_liquid_class("ethanol_80")
     glycerol_class = protocol_context.define_liquid_class("glycerol_50")
 
-    tiprack_200_1 = protocol_context.load_labware("opentrons_flex_96_tiprack_200ul", "A1", adapter="opentrons_flex_96_tiprack_adapter")
-    tiprack_200_2 = protocol_context.load_labware("opentrons_flex_96_tiprack_200ul", "A2", adapter="opentrons_flex_96_tiprack_adapter")
-    tiprack_200_3 = protocol_context.load_labware("opentrons_flex_96_tiprack_200ul", "B2", adapter="opentrons_flex_96_tiprack_adapter")
-    tip_racks = [tiprack_200_1, tiprack_200_2, tiprack_200_3]
+    tiprack_50_1 = protocol_context.load_labware("opentrons_flex_96_filtertiprack_50ul", "A1", adapter="opentrons_flex_96_tiprack_adapter")
+    tiprack_50_2 = protocol_context.load_labware("opentrons_flex_96_filtertiprack_50ul", "A2", adapter="opentrons_flex_96_tiprack_adapter")
+    tiprack_50_3 = protocol_context.load_labware("opentrons_flex_96_filtertiprack_50ul", "B2", adapter="opentrons_flex_96_tiprack_adapter")
+
+    tip_racks = [tiprack_50_1, tiprack_50_2, tiprack_50_3]
     trash = protocol_context.load_trash_bin("A3")
     pipette_96 = protocol_context.load_instrument("flex_96channel_1000", "right", tip_racks=tip_racks)
 
@@ -49,21 +50,21 @@ def run(protocol_context):
     )
 
     # https://opentrons.atlassian.net/browse/AUTH-1420
-    # pipette_1000.transfer_liquid(
-    #     liquid_class=ethanol_class,
-    #     volume=volume,
-    #     source=source.wells_by_name()[ETHANOL_SOURCE_WELL],
-    #     dest=target.wells_by_name()[ETHANOL_TARGET_WELL],
-    #     new_tip=new_tip,
-    #     trash_location=trash,
-    # )
+    pipette_96.transfer_liquid(
+        liquid_class=ethanol_class,
+        volume=volume,
+        source=ethanol_source.wells_by_name()[SOURCE_WELL],
+        dest=target.wells_by_name()[SOURCE_WELL],
+        new_tip=new_tip,
+        trash_location=trash,
+    )
 
     # https://opentrons.atlassian.net/browse/AUTH-1421
-    # pipette_1000.transfer_liquid(
-    #     liquid_class=glycerol_class,
-    #     volume=volume,
-    #     source=source.wells_by_name()[GLYCEROL_SOURCE_WELL],
-    #     dest=target.wells_by_name()[GLYCEROL_TARGET_WELL],
-    #     new_tip=new_tip,
-    #     trash_location=trash,
-    # )
+    pipette_96.transfer_liquid(
+        liquid_class=glycerol_class,
+        volume=volume,
+        source=ethanol_source.wells_by_name()[SOURCE_WELL],
+        dest=target.wells_by_name()[SOURCE_WELL],
+        new_tip=new_tip,
+        trash_location=trash,
+    )
