@@ -3,8 +3,6 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Optional, Union, Literal
 
-# from ..state.update_types import SimulatedType
-
 from pydantic import BaseModel
 
 

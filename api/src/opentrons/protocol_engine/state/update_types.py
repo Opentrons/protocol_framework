@@ -46,13 +46,13 @@ class _ClearEnum(enum.Enum):
     CLEAR = enum.auto()
 
 
+CLEAR: typing.Final = _ClearEnum.CLEAR
 """A sentinel value to indicate that a value should be cleared.
 
 Useful when `None` is semantically unclear or has some other meaning.
 """
 
 
-CLEAR: typing.Final = _ClearEnum.CLEAR
 ClearType: typing.TypeAlias = typing.Literal[_ClearEnum.CLEAR]
 """The type of `CLEAR`, as `NoneType` is to `None`.
 
@@ -65,10 +65,15 @@ class _SimulatedEnum(enum.Enum):
 
 
 SIMULATED: typing.Final = _SimulatedEnum.SIMULATED
-SimulatedType: typing.TypeAlias = typing.Literal["SimulatedProbeResult"]
 """A sentinel value to indicate that a liquid probe return value is simulated.
 
 Useful to avoid throwing unnecessary errors in protocol analysis."""
+
+SimulatedType: typing.TypeAlias = typing.Literal["SimulatedProbeResult"]
+"""The type of `SIMULATED`, as `NoneType` is to `None`.
+
+Unfortunately, mypy doesn't let us write `Literal[SIMULATED]`. Use this instead.
+"""
 
 
 @dataclasses.dataclass(frozen=True)
