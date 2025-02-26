@@ -504,6 +504,7 @@
   "required": [
     "liquidClassName",
     "displayName",
+    "description",
     "schemaVersion",
     "namespace",
     "byPipette"
