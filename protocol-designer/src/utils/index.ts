@@ -21,6 +21,7 @@ import type {
   CutoutFixtureId,
   RobotType,
   SupportedTip,
+  LabwareDefinition2,
 } from '@opentrons/shared-data'
 import type { WellGroup } from '@opentrons/components'
 import type { BoundingRect, GenericRect } from '../collision-types'
@@ -129,10 +130,11 @@ export const getIsAdapter = (
   labwareEntities: LabwareEntities
 ): boolean => {
   if (labwareEntities[labwareId] == null) return false
-  return (
-    labwareEntities[labwareId].def.allowedRoles?.includes('adapter') ?? false
-  )
+  return getIsAdapterFromDef(labwareEntities[labwareId].def)
 }
+
+export const getIsAdapterFromDef = (labwareDef: LabwareDefinition2): boolean =>
+  labwareDef.allowedRoles?.includes('adapter') ?? false
 
 export const getStagingAreaSlots = (
   stagingAreas?: AdditionalEquipmentEntity[]
