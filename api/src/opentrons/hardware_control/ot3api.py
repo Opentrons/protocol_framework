@@ -1956,14 +1956,9 @@ class OT3API(
         )
         if instrument.has_tip_length and plunger_is_below_bottom_pos:
             # using slower aspirate flow-rate, to avoid pulling droplets up
-            # TODO: (sigler) test to find ideal values for each pipette + tip combo
-            # TODO: (sigler) default behavior (and water class) to use these flow-rates
-            # TODO: (sigler) make this configurable (ul/sec) in a liquid-class
-            #       parameter (Eg: "plungerRepositioningFlowRate")
-            # speed_up = self._pipette_handler.plunger_speed(
-            #     instrument, instrument.aspirate_flow_rate, "aspirate"
-            # )
-            speed_up = max_speeds[self.gantry_load][OT3AxisKind.P]
+            speed_up = self._pipette_handler.plunger_speed(
+                instrument, instrument.aspirate_flow_rate, "aspirate"
+            )
         else:
             # either no tip, or plunger just homed, so tip is dry
             speed_up = max_speeds[self.gantry_load][OT3AxisKind.P]
