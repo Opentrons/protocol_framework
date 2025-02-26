@@ -47,6 +47,13 @@
         "calls": []
       }
     ],
+    "absorbancereader": [
+      {
+        "model": "absorbanceReaderV1",
+        "serial_number": "ab-123",
+        "calls": []
+      }
+    ],
     "tempdeck": [
       {
         "model": "temperatureModuleV2",

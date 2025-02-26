@@ -4,7 +4,12 @@ from typing import Type, Union, TYPE_CHECKING
 import pytest
 
 from opentrons.config import robot_configs
-from opentrons.hardware_control.modules import MagDeck, Thermocycler, TempDeck
+from opentrons.hardware_control.modules import (
+    MagDeck,
+    Thermocycler,
+    TempDeck,
+    AbsorbanceReader,
+)
 from opentrons.hardware_control import simulator_setup, API
 from opentrons.types import Mount
 from opentrons_shared_data.robot.types import RobotType
@@ -163,6 +168,39 @@ async def test_with_tempdeck(setup_klass: Type[simulator_setup.SimulatorSetup]) 
     assert simulator.attached_modules[0].live_data == {
         "data": {"currentTemp": 23, "targetTemp": 23},
         "status": "holding at target",
+    }
+    assert simulator.attached_modules[0].device_info["serial"] == "123"
+
+
+async def test_with_absorance(
+    setup_klass: Type[simulator_setup.SimulatorSetup],
+) -> None:
+    """It should work to build a absorbance reader."""
+    setup = setup_klass(
+        attached_modules={
+            "absorbancereader": [
+                simulator_setup.ModuleItem(
+                    model="absorbanceReaderV1",
+                    serial_number="123",
+                )
+            ]
+        }
+    )
+    simulator = await simulator_setup.create_simulator(setup)
+
+    assert isinstance(simulator.attached_modules[0], AbsorbanceReader)
+    assert simulator.attached_modules[0].model() == "absorbanceReaderV1"
+    assert simulator.attached_modules[0].live_data == {
+        "data": {
+            "deviceStatus": "idle",
+            "lidStatus": "on",
+            "measureMode": "",
+            "platePresence": "present",
+            "referenceWavelength": 0,
+            "sampleWavelengths": [],
+            "uptime": 0,
+        },
+        "status": "idle",
     }
     assert simulator.attached_modules[0].device_info["serial"] == "123"
 
