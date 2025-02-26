@@ -28,7 +28,11 @@ export function LPCRobotInMotion(props: RobotMotionLoaderProps): JSX.Element {
   const { t } = useTranslation('labware_position_check')
 
   return (
-    <LPCContentContainer {...props} header={t('labware_position_check_title')}>
+    <LPCContentContainer
+      {...props}
+      header={t('labware_position_check_title')}
+      contentStyle={CHILDREN_CONTAINER_STYLE}
+    >
       <Flex css={CONTAINER_STYLE}>
         <Icon name="ot-spinner" spin size={SIZE_4} color={COLORS.grey50} />
         {header != null ? <LoadingText>{header}</LoadingText> : null}
@@ -57,9 +61,23 @@ const LoadingText = styled.h1`
 `
 
 const CONTAINER_STYLE = css`
+  padding: ${SPACING.spacing40};
+  height: 100%;
+  width: 100%;
   flex-direction: ${DIRECTION_COLUMN};
   justify-content: ${JUSTIFY_CENTER};
   align-items: ${ALIGN_CENTER};
-  min-height: 29.5rem;
   grid-gap: ${SPACING.spacing24};
+`
+
+// The design system makes a padding exception for this view.
+const CHILDREN_CONTAINER_STYLE = css`
+  margin-top: 7.75rem;
+  flex-direction: ${DIRECTION_COLUMN};
+  height: 100%;
+
+  @media ${RESPONSIVENESS.touchscreenMediaQuerySpecs} {
+    padding: 0 ${SPACING.spacing60} ${SPACING.spacing40} ${SPACING.spacing60};
+    gap: ${SPACING.spacing40};
+  }
 `
