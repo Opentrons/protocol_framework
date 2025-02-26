@@ -5,7 +5,7 @@ import { curryCommandCreator } from '../utils'
 import { wasteChuteCommandsUtil } from '../utils/wasteChuteCommandsUtil'
 import type { PipetteEntities } from '../types'
 import {
-  aspirateInPlace,
+  airGapInPlace,
   blowOutInPlace,
   dispenseInPlace,
   dropTipInPlace,
@@ -114,7 +114,7 @@ describe('wasteChuteCommandsUtil', () => {
     expect(curryCommandCreator).toHaveBeenCalledWith(prepareToAspirate, {
       pipetteId: mockId,
     })
-    expect(curryCommandCreator).toHaveBeenCalledWith(aspirateInPlace, {
+    expect(curryCommandCreator).toHaveBeenCalledWith(airGapInPlace, {
       pipetteId: mockId,
       volume: 10,
       flowRate: 10,

@@ -135,7 +135,8 @@ export const substepTimelineSingleChannel = (
         }
       } else if (
         command.commandType === 'dispenseInPlace' ||
-        command.commandType === 'aspirateInPlace'
+        command.commandType === 'aspirateInPlace' ||
+        command.commandType === 'airGapInPlace'
       ) {
         const { volume } = command.params
         const prevMoveToAddressableAreaCommand = getPreviousMoveToAddressableAreaCommand(
@@ -287,7 +288,8 @@ export const substepTimelineMultiChannel = (
         }
       } else if (
         command.commandType === 'dispenseInPlace' ||
-        command.commandType === 'aspirateInPlace'
+        command.commandType === 'aspirateInPlace' ||
+        command.commandType === 'airGapInPlace'
       ) {
         const { volume } = command.params
         const prevMoveToAddressableAreaCommand = getPreviousMoveToAddressableAreaCommand(

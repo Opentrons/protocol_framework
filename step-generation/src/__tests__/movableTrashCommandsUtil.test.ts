@@ -3,7 +3,7 @@ import { getInitialRobotStateStandard, makeContext } from '../fixtures'
 import { curryCommandCreator } from '../utils'
 import { movableTrashCommandsUtil } from '../utils/movableTrashCommandsUtil'
 import {
-  aspirateInPlace,
+  airGapInPlace,
   blowOutInPlace,
   dispenseInPlace,
   dropTipInPlace,
@@ -115,7 +115,7 @@ describe('movableTrashCommandsUtil', () => {
     expect(curryCommandCreator).toHaveBeenCalledWith(prepareToAspirate, {
       pipetteId: mockId,
     })
-    expect(curryCommandCreator).toHaveBeenCalledWith(aspirateInPlace, {
+    expect(curryCommandCreator).toHaveBeenCalledWith(airGapInPlace, {
       pipetteId: mockId,
       volume: 10,
       flowRate: 10,
