@@ -20,7 +20,6 @@ export interface UseProbeCommandsResult {
     onSuccess: () => void
   ) => Promise<void>
   unableToDetect: boolean
-  setShowUnableToDetect: (canDetect: boolean) => void
 }
 
 export function useHandleProbeCommands({
@@ -73,7 +72,6 @@ export function useHandleProbeCommands({
   return {
     handleProbeAttachment,
     unableToDetect: showUnableToDetect,
-    setShowUnableToDetect,
     handleProbeDetachment,
   }
 }
