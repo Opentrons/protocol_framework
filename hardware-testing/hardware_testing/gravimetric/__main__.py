@@ -16,6 +16,7 @@ from hardware_testing.protocols.gravimetric_lpc.gravimetric import (
     gravimetric_ot3_p1000_96,
     gravimetric_ot3_p1000_multi,
     gravimetric_ot3_p1000_single,
+    gravimetric_ot3_p50_single_cavity,
     gravimetric_ot3_p50_single,
     gravimetric_ot3_p1000_multi_50ul_tip_increment,
     gravimetric_ot3_p1000_multi_200ul_tip_increment,
@@ -56,7 +57,7 @@ LABWARE_OFFSETS: List[dict] = []
 # Keyed by pipette volume, channel count, and tip volume in that order
 GRAVIMETRIC_CFG = {
     50: {
-        1: gravimetric_ot3_p50_single,
+        1: gravimetric_ot3_p50_single_cavity,
         8: gravimetric_ot3_p50_multi,
     },
     1000: {

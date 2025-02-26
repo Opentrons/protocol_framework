@@ -559,6 +559,12 @@ def _get_liquid_height(
     resources.pipette.move_to(well.top().move(Point(0, 0, _minimum_z_height(cfg))))
     return _liquid_height
 
+def get_tip_position_by_num(num: int) -> str:
+    col_def = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
+    row_num = num % 8 
+    col_num = int(num /8)
+    return col_def[row_num - 1]+ str(col_num + 1)
+
 
 def run(cfg: config.GravimetricConfig, resources: TestResources) -> None:  # noqa: C901
     """Run."""
@@ -599,297 +605,309 @@ def run(cfg: config.GravimetricConfig, resources: TestResources) -> None:  # noq
     if resources.ctx.is_simulating():
         _PREV_TRIAL_GRAMS = None
         _MEASUREMENTS = list()
-    try:
-        ui.print_title("FIND LIQUID HEIGHT")
-        first_tip = _next_tip_for_channel(cfg, resources, 0, total_tips)
-        setup_channel_offset = _get_channel_offset(cfg, channel=0)
-        first_tip_location = first_tip.top().move(setup_channel_offset)
-        _pick_up_tip(resources.ctx, resources.pipette, cfg, location=first_tip_location)
-        mnt = OT3Mount.LEFT if cfg.pipette_mount == "left" else OT3Mount.RIGHT
-        resources.ctx._core.get_hardware().retract(mnt)
-        ui.print_info("moving to scale")
-        well = labware_on_scale["A1"]
-        _liquid_height = _get_liquid_height(resources, cfg, well)
-        height_below_top = well.depth - _liquid_height
-        ui.print_info(f"liquid is {height_below_top} mm below top of vial")
-        liquid_tracker.set_start_volume_from_liquid_height(
-            well, _liquid_height, name="Water"
-        )
-        vial_volume = liquid_tracker.get_volume(well)
-        ui.print_info(
-            f"software thinks there is {vial_volume} uL of liquid in the vial"
-        )
-        if not cfg.blank:
-            average_aspirate_evaporation_ul = 0.0
-            average_dispense_evaporation_ul = 0.0
-        else:
-            hw_api.set_status_bar_state(StatusBarState.SOFTWARE_ERROR)
-            (
-                average_aspirate_evaporation_ul,
-                average_dispense_evaporation_ul,
-            ) = _calculate_evaporation(
-                cfg,
-                resources,
-                recorder,
-                liquid_tracker,
-                resources.test_report,
-                labware_on_scale,
+    # useing all tipracks and finding liquid height per tiprack.
+    tipracks = resources.tipracks
+    print("Tipracks:")
+    print(tipracks)
+    for _tiprack in tipracks:
+        try:
+            ui.print_title("FIND LIQUID HEIGHT")
+            # first_tip = _next_tip_for_channel(cfg, resources, 0, total_tips)
+            first_tip = _tiprack['A1']
+            setup_channel_offset = _get_channel_offset(cfg, channel=0)
+            first_tip_location = first_tip.top().move(setup_channel_offset)
+            _pick_up_tip(resources.ctx, resources.pipette, cfg, location=first_tip_location)
+            mnt = OT3Mount.LEFT if cfg.pipette_mount == "left" else OT3Mount.RIGHT
+            resources.ctx._core.get_hardware().retract(mnt)
+            ui.print_info("moving to scale")
+            well = labware_on_scale["A1"]
+            _liquid_height = _get_liquid_height(resources, cfg, well)
+            height_below_top = well.depth - _liquid_height
+            ui.print_info(f"liquid is {height_below_top} mm below top of vial")
+            liquid_tracker.set_start_volume_from_liquid_height(
+                well, _liquid_height, name="Water"
             )
-        hw_api.set_status_bar_state(StatusBarState.IDLE)
-        ui.print_info("dropping tip")
-        if not cfg.same_tip:
-            _drop_tip(
+            vial_volume = liquid_tracker.get_volume(well)
+            ui.print_info(
+                f"software thinks there is {vial_volume} uL of liquid in the vial"
+            )
+            if not cfg.blank:
+                average_aspirate_evaporation_ul = 0.0
+                average_dispense_evaporation_ul = 0.0
+            else:
+                hw_api.set_status_bar_state(StatusBarState.SOFTWARE_ERROR)
+                (
+                    average_aspirate_evaporation_ul,
+                    average_dispense_evaporation_ul,
+                ) = _calculate_evaporation(
+                    cfg,
+                    resources,
+                    recorder,
+                    liquid_tracker,
+                    resources.test_report,
+                    labware_on_scale,
+                )
+            hw_api.set_status_bar_state(StatusBarState.IDLE)
+            ui.print_info("dropping tip")
+            if not cfg.same_tip:
+                _drop_tip(
+                    resources.pipette,
+                    return_tip=False,
+                    minimum_z_height=_minimum_z_height(cfg),
+                )  # always trash calibration tips
+            calibration_tip_in_use = False
+            trial_count = 0        
+            
+            trials = build_gravimetric_trials(
+                resources.ctx,
                 resources.pipette,
-                return_tip=False,
-                minimum_z_height=_minimum_z_height(cfg),
-            )  # always trash calibration tips
-        calibration_tip_in_use = False
-        trial_count = 0
-        trials = build_gravimetric_trials(
-            resources.ctx,
-            resources.pipette,
-            cfg,
-            labware_on_scale["A1"],
-            resources.test_volumes,
-            channels_to_test,
-            recorder,
-            resources.test_report,
-            liquid_tracker,
-            False,
-            resources.env_sensor,
-        )
-        for volume in trials.keys():
-            actual_asp_list_all = []
-            actual_disp_list_all = []
-            ui.print_title(f"{volume} uL")
+                cfg,
+                labware_on_scale["A1"],
+                resources.test_volumes,
+                channels_to_test,
+                recorder,
+                resources.test_report,
+                liquid_tracker,
+                False,
+                resources.env_sensor,
+            )
+            
+            for volume in trials.keys():
+                actual_asp_list_all = []
+                actual_disp_list_all = []
+                ui.print_title(f"{volume} uL")
 
-            trial_asp_dict: Dict[int, List[float]] = {
-                trial: [] for trial in range(cfg.trials)
-            }
-            trial_disp_dict: Dict[int, List[float]] = {
-                trial: [] for trial in range(cfg.trials)
-            }
-            for channel in trials[volume].keys():
-                channel_offset = _get_channel_offset(cfg, channel)
-                actual_asp_list_channel = []
-                actual_disp_list_channel = []
-                aspirate_data_list = []
-                dispense_data_list = []
-                for run_trial in trials[volume][channel]:
-                    trial_count += 1
-                    ui.print_header(
-                        f"{volume} uL channel {channel + 1} ({run_trial.trial + 1}/{cfg.trials})"
-                    )
-                    ui.print_info(f"trial total {trial_count}/{trial_total}")
-                    # NOTE: always pick-up new tip for each trial
-                    #       b/c it seems tips heatup
-                    next_tip: Well = _next_tip_for_channel(
-                        cfg, resources, channel, total_tips
-                    )
-                    next_tip_location = next_tip.top().move(channel_offset)
-                    if not cfg.same_tip:
-                        _pick_up_tip(
-                            resources.ctx,
-                            resources.pipette,
-                            cfg,
-                            location=next_tip_location,
+                trial_asp_dict: Dict[int, List[float]] = {
+                    trial: [] for trial in range(cfg.trials)
+                }
+                trial_disp_dict: Dict[int, List[float]] = {
+                    trial: [] for trial in range(cfg.trials)
+                }
+                for channel in trials[volume].keys():
+                    channel_offset = _get_channel_offset(cfg, channel)
+                    actual_asp_list_channel = []
+                    actual_disp_list_channel = []
+                    aspirate_data_list = []
+                    dispense_data_list = []
+                    for run_trial in trials[volume][channel]:
+                        print("run trial:")
+                        print(run_trial)
+                        trial_count += 1
+                        ui.print_header(
+                            f"{volume} uL channel {channel + 1} ({run_trial.trial + 1}/{cfg.trials})"
                         )
-                        mnt = (
-                            OT3Mount.LEFT
-                            if cfg.pipette_mount == "left"
-                            else OT3Mount.RIGHT
+                        ui.print_info(f"trial total {trial_count}/{trial_total}")
+                        # NOTE: always pick-up new tip for each trial
+                        #       b/c it seems tips heatup
+                        next_tip: Well = _next_tip_for_channel(
+                            cfg, resources, channel, total_tips
                         )
-                        resources.ctx._core.get_hardware().retract(mnt)
-                    (
-                        actual_aspirate,
-                        aspirate_data,
-                        actual_dispense,
-                        dispense_data,
-                    ) = _run_trial(run_trial)
-                    ui.print_info(
-                        "measured volumes:\n"
-                        f"\taspirate: {round(actual_aspirate, 2)} uL\n"
-                        f"\tdispense: {round(actual_dispense, 2)} uL"
-                    )
-                    asp_with_evap = actual_aspirate - average_aspirate_evaporation_ul
-                    disp_with_evap = actual_dispense + average_dispense_evaporation_ul
-                    chnl_div = _get_channel_divider(cfg)
-                    disp_with_evap /= chnl_div
-                    asp_with_evap /= chnl_div
-                    ui.print_info(
-                        "per-channel volume, with evaporation:\n"
-                        f"\taspirate: {round(asp_with_evap, 2)} uL\n"
-                        f"\tdispense: {round(disp_with_evap, 2)} uL"
-                    )
-
-                    actual_asp_list_channel.append(asp_with_evap)
-                    actual_disp_list_channel.append(disp_with_evap)
-
-                    trial_asp_dict[run_trial.trial].append(asp_with_evap)
-                    trial_disp_dict[run_trial.trial].append(disp_with_evap)
-
-                    aspirate_data_list.append(aspirate_data)
-                    dispense_data_list.append(dispense_data)
-
-                    report.store_trial(
-                        resources.test_report,
-                        run_trial.trial,
-                        run_trial.volume,
-                        run_trial.channel,
-                        asp_with_evap,
-                        disp_with_evap,
-                        liquid_tracker.get_liquid_height(well),
-                    )
-                    ui.print_info("dropping tip")
-                    if not cfg.same_tip:
-                        mnt = (
-                            OT3Mount.LEFT
-                            if cfg.pipette_mount == "left"
-                            else OT3Mount.RIGHT
+                        next_tip_location = next_tip.top().move(channel_offset)
+                        if not cfg.same_tip:
+                            _pick_up_tip(
+                                resources.ctx,
+                                resources.pipette,
+                                cfg,
+                                location=next_tip_location,
+                            )
+                            mnt = (
+                                OT3Mount.LEFT
+                                if cfg.pipette_mount == "left"
+                                else OT3Mount.RIGHT
+                            )
+                            resources.ctx._core.get_hardware().retract(mnt)
+                        (
+                            actual_aspirate,
+                            aspirate_data,
+                            actual_dispense,
+                            dispense_data,
+                        ) = _run_trial(run_trial)
+                        ui.print_info(
+                            "measured volumes:\n"
+                            f"\taspirate: {round(actual_aspirate, 2)} uL\n"
+                            f"\tdispense: {round(actual_dispense, 2)} uL"
                         )
-                        resources.ctx._core.get_hardware().retract(mnt)
-                        _drop_tip(
-                            resources.pipette, cfg.return_tip, _minimum_z_height(cfg)
+                        asp_with_evap = actual_aspirate - average_aspirate_evaporation_ul
+                        disp_with_evap = actual_dispense + average_dispense_evaporation_ul
+                        chnl_div = _get_channel_divider(cfg)
+                        disp_with_evap /= chnl_div
+                        asp_with_evap /= chnl_div
+                        ui.print_info(
+                            "per-channel volume, with evaporation:\n"
+                            f"\taspirate: {round(asp_with_evap, 2)} uL\n"
+                            f"\tdispense: {round(disp_with_evap, 2)} uL"
                         )
 
-                ui.print_header(f"{volume} uL channel {channel + 1} CALCULATIONS")
+                        actual_asp_list_channel.append(asp_with_evap)
+                        actual_disp_list_channel.append(disp_with_evap)
+
+                        trial_asp_dict[run_trial.trial].append(asp_with_evap)
+                        trial_disp_dict[run_trial.trial].append(disp_with_evap)
+
+                        aspirate_data_list.append(aspirate_data)
+                        dispense_data_list.append(dispense_data)
+
+                        report.store_trial(
+                            resources.test_report,
+                            run_trial.trial,
+                            run_trial.volume,
+                            run_trial.channel,
+                            asp_with_evap,
+                            disp_with_evap,
+                            liquid_tracker.get_liquid_height(well),
+                        )
+                        ui.print_info("dropping tip")
+                        if not cfg.same_tip:
+                            mnt = (
+                                OT3Mount.LEFT
+                                if cfg.pipette_mount == "left"
+                                else OT3Mount.RIGHT
+                            )
+                            resources.ctx._core.get_hardware().retract(mnt)
+                            _drop_tip(
+                                resources.pipette, cfg.return_tip, _minimum_z_height(cfg)
+                            )
+
+                    ui.print_header(f"{volume} uL channel {channel + 1} CALCULATIONS")
+                    aspirate_average, aspirate_cv, aspirate_d = _calculate_stats(
+                        actual_asp_list_channel, volume
+                    )
+                    dispense_average, dispense_cv, dispense_d = _calculate_stats(
+                        actual_disp_list_channel, volume
+                    )
+
+                    # Average Celsius
+                    aspirate_celsius_avg = sum(
+                        a_data.environment.celsius_pipette for a_data in dispense_data_list
+                    ) / len(aspirate_data_list)
+                    dispense_celsius_avg = sum(
+                        d_data.environment.celsius_pipette for d_data in aspirate_data_list
+                    ) / len(dispense_data_list)
+                    # Average humidity
+                    aspirate_humidity_avg = sum(
+                        a_data.environment.humidity_pipette for a_data in dispense_data_list
+                    ) / len(aspirate_data_list)
+                    dispense_humidity_avg = sum(
+                        d_data.environment.humidity_pipette for d_data in aspirate_data_list
+                    ) / len(dispense_data_list)
+
+                    _print_stats("aspirate", aspirate_average, aspirate_cv, aspirate_d)
+                    _print_stats("dispense", dispense_average, dispense_cv, dispense_d)
+
+                    report.store_volume_per_channel(
+                        report=resources.test_report,
+                        mode="aspirate",
+                        volume=volume,
+                        channel=channel,
+                        average=aspirate_average,
+                        cv=aspirate_cv,
+                        d=aspirate_d,
+                        celsius=aspirate_celsius_avg,
+                        humidity=aspirate_humidity_avg,
+                        flag="isolated" if cfg.isolate_volumes else "",
+                    )
+                    report.store_volume_per_channel(
+                        report=resources.test_report,
+                        mode="dispense",
+                        volume=volume,
+                        channel=channel,
+                        average=dispense_average,
+                        cv=dispense_cv,
+                        d=dispense_d,
+                        celsius=dispense_celsius_avg,
+                        humidity=dispense_humidity_avg,
+                        flag="isolated" if cfg.isolate_volumes else "",
+                    )
+                    actual_asp_list_all.extend(actual_asp_list_channel)
+                    actual_disp_list_all.extend(actual_disp_list_channel)
+
+                    acceptable_cv = trials[volume][channel][0].acceptable_cv
+                    acceptable_d = trials[volume][channel][0].acceptable_d
+                    print(f"acceptable cv {acceptable_cv} acceptable_d {acceptable_d}")
+                    print(f"dispense cv {dispense_cv} aspirate_cv {aspirate_cv}")
+                    print(f"dispense d {dispense_cv} aspirate_d {aspirate_d}")
+                    if (
+                        not cfg.ignore_fail
+                        and acceptable_cv is not None
+                        and acceptable_d is not None
+                    ):
+                        acceptable_cv = abs(acceptable_cv / 100)
+                        acceptable_d = abs(acceptable_d / 100)
+                        if (
+                            dispense_cv > acceptable_cv
+                            or aspirate_cv > acceptable_cv
+                            or aspirate_d > acceptable_d
+                            or dispense_d > acceptable_d
+                        ):
+                            raise RuntimeError(
+                                f"Trial with volume {volume} on channel {channel} did not pass spec"
+                            )
+                            
+                ui.print_title("Run Trials")                                   
+                for trial in range(cfg.trials):
+                    trial_asp_list = trial_asp_dict[trial]
+                    trial_disp_list = trial_disp_dict[trial]
+
+                    aspirate_average, aspirate_cv, aspirate_d = _calculate_stats(
+                        trial_asp_list, volume
+                    )
+                    dispense_average, dispense_cv, dispense_d = _calculate_stats(
+                        trial_disp_list, volume
+                    )
+
+                    report.store_volume_per_trial(
+                        report=resources.test_report,
+                        mode="aspirate",
+                        volume=volume,
+                        trial=trial,
+                        average=aspirate_average,
+                        cv=aspirate_cv,
+                        d=aspirate_d,
+                        flag="isolated" if cfg.isolate_volumes else "",
+                    )
+                    report.store_volume_per_trial(
+                        report=resources.test_report,
+                        mode="dispense",
+                        volume=volume,
+                        trial=trial,
+                        average=dispense_average,
+                        cv=dispense_cv,
+                        d=dispense_d,
+                        flag="isolated" if cfg.isolate_volumes else "",
+                    )
+
+                ui.print_header(f"{volume} uL channel all CALCULATIONS")
                 aspirate_average, aspirate_cv, aspirate_d = _calculate_stats(
-                    actual_asp_list_channel, volume
+                    actual_asp_list_all, volume
                 )
                 dispense_average, dispense_cv, dispense_d = _calculate_stats(
-                    actual_disp_list_channel, volume
+                    actual_disp_list_all, volume
                 )
-
-                # Average Celsius
-                aspirate_celsius_avg = sum(
-                    a_data.environment.celsius_pipette for a_data in dispense_data_list
-                ) / len(aspirate_data_list)
-                dispense_celsius_avg = sum(
-                    d_data.environment.celsius_pipette for d_data in aspirate_data_list
-                ) / len(dispense_data_list)
-                # Average humidity
-                aspirate_humidity_avg = sum(
-                    a_data.environment.humidity_pipette for a_data in dispense_data_list
-                ) / len(aspirate_data_list)
-                dispense_humidity_avg = sum(
-                    d_data.environment.humidity_pipette for d_data in aspirate_data_list
-                ) / len(dispense_data_list)
 
                 _print_stats("aspirate", aspirate_average, aspirate_cv, aspirate_d)
                 _print_stats("dispense", dispense_average, dispense_cv, dispense_d)
 
-                report.store_volume_per_channel(
+                report.store_volume_all(
                     report=resources.test_report,
                     mode="aspirate",
                     volume=volume,
-                    channel=channel,
-                    average=aspirate_average,
-                    cv=aspirate_cv,
-                    d=aspirate_d,
-                    celsius=aspirate_celsius_avg,
-                    humidity=aspirate_humidity_avg,
-                    flag="isolated" if cfg.isolate_volumes else "",
-                )
-                report.store_volume_per_channel(
-                    report=resources.test_report,
-                    mode="dispense",
-                    volume=volume,
-                    channel=channel,
-                    average=dispense_average,
-                    cv=dispense_cv,
-                    d=dispense_d,
-                    celsius=dispense_celsius_avg,
-                    humidity=dispense_humidity_avg,
-                    flag="isolated" if cfg.isolate_volumes else "",
-                )
-                actual_asp_list_all.extend(actual_asp_list_channel)
-                actual_disp_list_all.extend(actual_disp_list_channel)
-
-                acceptable_cv = trials[volume][channel][0].acceptable_cv
-                acceptable_d = trials[volume][channel][0].acceptable_d
-                print(f"acceptable cv {acceptable_cv} acceptable_d {acceptable_d}")
-                print(f"dispense cv {dispense_cv} aspirate_cv {aspirate_cv}")
-                print(f"dispense d {dispense_cv} aspirate_d {aspirate_d}")
-                if (
-                    not cfg.ignore_fail
-                    and acceptable_cv is not None
-                    and acceptable_d is not None
-                ):
-                    acceptable_cv = abs(acceptable_cv / 100)
-                    acceptable_d = abs(acceptable_d / 100)
-                    if (
-                        dispense_cv > acceptable_cv
-                        or aspirate_cv > acceptable_cv
-                        or aspirate_d > acceptable_d
-                        or dispense_d > acceptable_d
-                    ):
-                        raise RuntimeError(
-                            f"Trial with volume {volume} on channel {channel} did not pass spec"
-                        )
-            for trial in range(cfg.trials):
-                trial_asp_list = trial_asp_dict[trial]
-                trial_disp_list = trial_disp_dict[trial]
-
-                aspirate_average, aspirate_cv, aspirate_d = _calculate_stats(
-                    trial_asp_list, volume
-                )
-                dispense_average, dispense_cv, dispense_d = _calculate_stats(
-                    trial_disp_list, volume
-                )
-
-                report.store_volume_per_trial(
-                    report=resources.test_report,
-                    mode="aspirate",
-                    volume=volume,
-                    trial=trial,
                     average=aspirate_average,
                     cv=aspirate_cv,
                     d=aspirate_d,
                     flag="isolated" if cfg.isolate_volumes else "",
                 )
-                report.store_volume_per_trial(
+                report.store_volume_all(
                     report=resources.test_report,
                     mode="dispense",
                     volume=volume,
-                    trial=trial,
                     average=dispense_average,
                     cv=dispense_cv,
                     d=dispense_d,
                     flag="isolated" if cfg.isolate_volumes else "",
                 )
-
-            ui.print_header(f"{volume} uL channel all CALCULATIONS")
-            aspirate_average, aspirate_cv, aspirate_d = _calculate_stats(
-                actual_asp_list_all, volume
-            )
-            dispense_average, dispense_cv, dispense_d = _calculate_stats(
-                actual_disp_list_all, volume
-            )
-
-            _print_stats("aspirate", aspirate_average, aspirate_cv, aspirate_d)
-            _print_stats("dispense", dispense_average, dispense_cv, dispense_d)
-
-            report.store_volume_all(
-                report=resources.test_report,
-                mode="aspirate",
-                volume=volume,
-                average=aspirate_average,
-                cv=aspirate_cv,
-                d=aspirate_d,
-                flag="isolated" if cfg.isolate_volumes else "",
-            )
-            report.store_volume_all(
-                report=resources.test_report,
-                mode="dispense",
-                volume=volume,
-                average=dispense_average,
-                cv=dispense_cv,
-                d=dispense_d,
-                flag="isolated" if cfg.isolate_volumes else "",
-            )
-    finally:
-        _return_tip = False if calibration_tip_in_use else cfg.return_tip
-        _finish_test(cfg, resources, _return_tip)
+        finally:
+            _return_tip = False if calibration_tip_in_use else cfg.return_tip
+            _finish_test(cfg, resources, _return_tip)
     ui.print_title("RESULTS")
     _print_final_results(
         volumes=resources.test_volumes,
