@@ -19,7 +19,7 @@ from opentrons.protocol_engine.types import (
     LiquidClassRecord,
     ABSMeasureMode,
 )
-from opentrons.types import MountType
+from opentrons.types import MountType, LiquidTrackingType
 from opentrons_shared_data.labware.labware_definition import LabwareDefinition
 from opentrons_shared_data.pipette.types import PipetteNameType
 
@@ -68,12 +68,6 @@ SIMULATED: typing.Final = _SimulatedEnum.SIMULATED
 """A sentinel value to indicate that a liquid probe return value is simulated.
 
 Useful to avoid throwing unnecessary errors in protocol analysis."""
-
-SimulatedType: typing.TypeAlias = typing.Literal["SimulatedProbeResult"]
-"""The type of `SIMULATED`, as `NoneType` is to `None`.
-
-Unfortunately, mypy doesn't let us write `Literal[SIMULATED]`. Use this instead.
-"""
 
 
 @dataclasses.dataclass(frozen=True)
@@ -276,8 +270,8 @@ class LiquidProbedUpdate:
     labware_id: str
     well_name: str
     last_probed: datetime
-    height: typing.Union[float, ClearType, SimulatedType]
-    volume: typing.Union[float, ClearType, SimulatedType]
+    height: typing.Union[LiquidTrackingType, ClearType]
+    volume: typing.Union[LiquidTrackingType, ClearType]
 
 
 @dataclasses.dataclass
@@ -751,8 +745,8 @@ class StateUpdate:
         labware_id: str,
         well_name: str,
         last_probed: datetime,
-        height: typing.Union[float, ClearType, SimulatedType],
-        volume: typing.Union[float, ClearType, SimulatedType],
+        height: typing.Union[LiquidTrackingType, ClearType],
+        volume: typing.Union[LiquidTrackingType, ClearType],
     ) -> Self:
         """Add a liquid height and volume to well state. See `ProbeLiquidUpdate`."""
         self.liquid_probed = LiquidProbedUpdate(

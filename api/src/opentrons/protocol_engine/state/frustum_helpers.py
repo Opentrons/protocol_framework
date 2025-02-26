@@ -1,10 +1,11 @@
 """Helper functions for liquid-level related calculations inside a given frustum."""
-from typing import List, Tuple, Union, Literal
+from typing import List, Tuple
 from numpy import pi, iscomplex, roots, real
 from math import isclose
 
 from ..errors.exceptions import InvalidLiquidHeightFound
 
+from opentrons.types import LiquidTrackingType, SimulatedProbeResult
 from opentrons_shared_data.labware.labware_definition import (
     InnerWellGeometry,
     WellSegment,
@@ -355,11 +356,12 @@ def _find_volume_in_partial_frustum(
 
 
 def find_volume_at_well_height(
-    target_height: Union[float, Literal["SimulatedProbeResult"]],
+    target_height: LiquidTrackingType,
     well_geometry: InnerWellGeometry,
-) -> Union[Literal["SimulatedProbeResult"], float]:
+) -> LiquidTrackingType:
     """Find the volume within a well, at a known height."""
-    if target_height == "SimulatedProbeResult":
+    # comparisons with SimulatedProbeResult objects aren't meaningful, just return
+    if isinstance(target_height, SimulatedProbeResult):
         return target_height
     volumetric_capacity = get_well_volumetric_capacity(well_geometry)
     max_height = volumetric_capacity[-1][0]
@@ -419,13 +421,19 @@ def _find_height_in_partial_frustum(
 
 
 def find_height_at_well_volume(
-    target_volume: float,
+    target_volume: LiquidTrackingType,
     well_geometry: InnerWellGeometry,
     raise_error_if_result_invalid: bool = True,
-) -> float:
+) -> LiquidTrackingType:
     """Find the height within a well, at a known volume."""
+    # comparisons with SimulatedProbeResult objects aren't meaningful, just
+    # return if we have one of those
+    if isinstance(target_volume, SimulatedProbeResult):
+        return target_volume
+
     volumetric_capacity = get_well_volumetric_capacity(well_geometry)
     max_volume = sum(row[1] for row in volumetric_capacity)
+
     if raise_error_if_result_invalid:
         if target_volume < 0 or target_volume > max_volume:
             raise InvalidLiquidHeightFound("Invalid target volume.")

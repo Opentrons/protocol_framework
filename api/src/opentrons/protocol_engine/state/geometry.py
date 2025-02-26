@@ -4,11 +4,18 @@ from logging import getLogger
 import enum
 from numpy import array, dot, double as npdouble
 from numpy.typing import NDArray
-from typing import Optional, List, Tuple, Union, cast, TypeVar, Dict, Set, Literal
+from typing import Optional, List, Tuple, Union, cast, TypeVar, Dict, Set
 from dataclasses import dataclass
 from functools import cached_property
 
-from opentrons.types import Point, DeckSlotName, StagingSlotName, MountType
+from opentrons.types import (
+    Point,
+    DeckSlotName,
+    StagingSlotName,
+    MountType,
+    SimulatedProbeResult,
+    LiquidTrackingType,
+)
 
 from opentrons_shared_data.errors.exceptions import InvalidStoredData
 from opentrons_shared_data.labware.constants import WELL_NAME_PATTERN
@@ -1742,7 +1749,7 @@ class GeometryView:
         well_location: WellLocations,
         well_depth: float,
         operation_volume: Optional[float] = None,
-    ) -> Union[float, Literal["SimulatedProbeResult"]]:
+    ) -> LiquidTrackingType:
         """Return a z-axis distance that accounts for well handling height and operation volume.
 
         Distance is with reference to the well bottom.
@@ -1755,8 +1762,7 @@ class GeometryView:
             well_location=well_location,
             well_depth=well_depth,
         )
-        if initial_handling_height == "SimulatedProbeResult":
-            return initial_handling_height
+
         # if we're tracking a MENISCUS origin, and targeting either the beginning
         #   position of the liquid or doing dynamic tracking, return the initial height
         if (
@@ -1778,11 +1784,7 @@ class GeometryView:
                 initial_height=initial_handling_height,
                 volume=volume,
             )
-            if liquid_height_after == "SimulatedProbeResult":
-                raise errors.LiquidHeightUnknownError(
-                    "unknown simulated liquid height."
-                )
-            return float(liquid_height_after)
+            return liquid_height_after
         else:
             return initial_handling_height
 
@@ -1790,7 +1792,7 @@ class GeometryView:
         self,
         labware_id: str,
         well_name: str,
-    ) -> Union[float, Literal["SimulatedProbeResult"]]:
+    ) -> LiquidTrackingType:
         """Returns most recently updated volume in specified well."""
         last_updated = self._wells.get_last_liquid_update(labware_id, well_name)
         if last_updated is None:
@@ -1811,10 +1813,6 @@ class GeometryView:
                 well_name=well_name,
                 height=well_liquid.probed_height.height,
             )
-            if volume == "SimulatedProbeResult":
-                raise errors.LiquidHeightUnknownError(
-                    "Unknown simulated liquid height."
-                )
             return volume
         elif (
             well_liquid.loaded_volume is not None
@@ -1838,7 +1836,7 @@ class GeometryView:
         self,
         labware_id: str,
         well_name: str,
-    ) -> Union[float, Literal["SimulatedProbeResult"]]:
+    ) -> LiquidTrackingType:
         """Returns stored meniscus height in specified well."""
         last_updated = self._wells.get_last_liquid_update(labware_id, well_name)
         if last_updated is None:
@@ -1849,16 +1847,6 @@ class GeometryView:
         well_liquid = self._wells.get_well_liquid_info(
             labware_id=labware_id, well_name=well_name
         )
-        if (
-            well_liquid.probed_height is not None
-            and well_liquid.probed_height.height == "SimulatedProbeResult"
-        ):
-            return "SimulatedProbeResult"
-        if (
-            well_liquid.probed_volume is not None
-            and well_liquid.probed_volume.volume == "SimulatedProbeResult"
-        ):
-            return "SimulatedProbeResult"
         if (
             well_liquid.probed_height is not None
             and well_liquid.probed_height.height is not None
@@ -1898,9 +1886,9 @@ class GeometryView:
         well_name: str,
         well_location: WellLocations,
         well_depth: float,
-    ) -> Union[float, Literal["SimulatedProbeResult"]]:
+    ) -> LiquidTrackingType:
         """Return the handling height for a labware well (with reference to the well bottom)."""
-        handling_height: Union[float, Literal["SimulatedProbeResult"]] = 0.0
+        handling_height: LiquidTrackingType = 0.0
         if well_location.origin == WellOrigin.TOP:
             handling_height = float(well_depth)
         elif well_location.origin == WellOrigin.CENTER:
@@ -1915,23 +1903,19 @@ class GeometryView:
         self,
         labware_id: str,
         well_name: str,
-        initial_height: Union[float, Literal["SimulatedProbeResult"]],
+        initial_height: LiquidTrackingType,
         volume: float,
-    ) -> Union[Literal["SimulatedProbeResult"], float]:
+    ) -> LiquidTrackingType:
         """Return the height of liquid in a labware well after a given volume has been handled.
 
         This is given an initial handling height, with reference to the well bottom.
         """
-        if initial_height == "SimulatedProbeResult":
-            return initial_height
         well_geometry = self._labware.get_well_geometry(
             labware_id=labware_id, well_name=well_name
         )
         initial_volume = find_volume_at_well_height(
             target_height=initial_height, well_geometry=well_geometry
         )
-        if not isinstance(initial_volume, float):
-            raise errors.LiquidVolumeUnknownError("Simulated Liquid Volume Unknown.")
         final_volume = initial_volume + volume
         return find_height_at_well_volume(
             target_volume=final_volume, well_geometry=well_geometry
@@ -1941,9 +1925,9 @@ class GeometryView:
         self,
         labware_id: str,
         well_name: str,
-        initial_height: Union[float, Literal["SimulatedProbeResult"]],
+        initial_height: LiquidTrackingType,
         volume: float,
-    ) -> Union[float, Literal["SimulatedProbeResult"]]:
+    ) -> LiquidTrackingType:
         """Return what the height of liquid in a labware well after liquid handling will be.
 
         This raises no error if the value returned is an invalid physical location, so it should never be
@@ -1952,8 +1936,6 @@ class GeometryView:
         well_geometry = self._labware.get_well_geometry(
             labware_id=labware_id, well_name=well_name
         )
-        if initial_height == "SimulatedProbeResult":
-            return initial_height
         initial_volume = find_volume_at_well_height(
             target_height=initial_height, well_geometry=well_geometry
         )
@@ -1968,8 +1950,8 @@ class GeometryView:
         return well_volume
 
     def get_well_height_at_volume(
-        self, labware_id: str, well_name: str, volume: float
-    ) -> float:
+        self, labware_id: str, well_name: str, volume: LiquidTrackingType
+    ) -> LiquidTrackingType:
         """Convert well volume to height."""
         well_geometry = self._labware.get_well_geometry(labware_id, well_name)
         return find_height_at_well_volume(
@@ -1980,12 +1962,10 @@ class GeometryView:
         self,
         labware_id: str,
         well_name: str,
-        height: Union[float, Literal["SimulatedProbeResult"]],
-    ) -> Union[float, Literal["SimulatedProbeResult"]]:
+        height: LiquidTrackingType,
+    ) -> LiquidTrackingType:
         """Convert well height to volume."""
         well_geometry = self._labware.get_well_geometry(labware_id, well_name)
-        if height == "SimulatedProbeResult":
-            return height
         return find_volume_at_well_height(
             target_height=height, well_geometry=well_geometry
         )
@@ -1999,20 +1979,19 @@ class GeometryView:
     ) -> None:
         """Raise InvalidDispenseVolumeError if planned dispense volume will overflow well."""
         well_def = self._labware.get_well_definition(labware_id, well_name)
-        well_volumetric_capacity = well_def.totalLiquidVolume
+        well_volumetric_capacity = float(well_def.totalLiquidVolume)
         if well_location.origin == WellOrigin.MENISCUS:
             # TODO(pbm, 10-23-24): refactor to smartly reduce height/volume conversions
             well_geometry = self._labware.get_well_geometry(labware_id, well_name)
             meniscus_height = self.get_meniscus_height(
                 labware_id=labware_id, well_name=well_name
             )
-            if meniscus_height == "SimulatedProbeResult":
-                return
             meniscus_volume = find_volume_at_well_height(
                 target_height=meniscus_height, well_geometry=well_geometry
             )
-            if not isinstance(meniscus_volume, float):
-                raise errors.LiquidVolumeUnknownError("Simulated Liquid Volume Error.")
+            # if meniscus volume is a simulated value, comparisons aren't meaningful
+            if isinstance(meniscus_volume, SimulatedProbeResult):
+                return
             remaining_volume = well_volumetric_capacity - meniscus_volume
             if volume > remaining_volume:
                 raise errors.InvalidDispenseVolumeError(

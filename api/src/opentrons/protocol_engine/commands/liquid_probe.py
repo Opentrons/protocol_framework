@@ -15,7 +15,7 @@ from opentrons.protocol_engine.errors.exceptions import (
     IncompleteLabwareDefinitionError,
     TipNotAttachedError,
 )
-from opentrons.types import MountType
+from opentrons.types import MountType, LiquidTrackingType
 from opentrons_shared_data.errors.exceptions import (
     PipetteLiquidNotFoundError,
     UnsupportedHardwareCommand,
@@ -80,7 +80,7 @@ class TryLiquidProbeParams(_CommonParams):
 class LiquidProbeResult(DestinationPositionResult):
     """Result data from the execution of a `liquidProbe` command."""
 
-    z_position: Union[float, Literal["SimulatedProbeResult"]] = Field(
+    z_position: LiquidTrackingType = Field(
         ..., description="The Z coordinate, in mm, of the found liquid in deck space."
     )
     # New fields should use camelCase. z_position is snake_case for historical reasons.
@@ -89,9 +89,7 @@ class LiquidProbeResult(DestinationPositionResult):
 class TryLiquidProbeResult(DestinationPositionResult):
     """Result data from the execution of a `tryLiquidProbe` command."""
 
-    z_position: Union[
-        float, SkipJsonSchema[None], Literal["SimulatedProbeResult"]
-    ] = Field(
+    z_position: Union[LiquidTrackingType, SkipJsonSchema[None]] = Field(
         ...,
         description=(
             "The Z coordinate, in mm, of the found liquid in deck space."
@@ -118,9 +116,7 @@ class _ExecuteCommonResult(NamedTuple):
     # If the probe succeeded, the z_pos that it returned.
     # Or, if the probe found no liquid, the error representing that,
     # so calling code can propagate those details up.
-    z_pos_or_error: float | PipetteLiquidNotFoundError | PipetteOverpressureError | Literal[
-        "SimulatedProbeResult"
-    ]
+    z_pos_or_error: LiquidTrackingType | PipetteLiquidNotFoundError | PipetteOverpressureError
     state_update: update_types.StateUpdate
     deck_point: DeckPoint
 
@@ -307,7 +303,8 @@ class LiquidProbeImplementation(
         else:
             try:
                 well_volume: Union[
-                    float, update_types.ClearType, Literal["SimulatedProbeResult"]
+                    LiquidTrackingType,
+                    update_types.ClearType,
                 ] = self._state_view.geometry.get_well_volume_at_height(
                     labware_id=params.labwareId,
                     well_name=params.wellName,
@@ -374,7 +371,8 @@ class TryLiquidProbeImplementation(
         ):
             z_pos = None
             well_volume: Union[
-                float, update_types.ClearType, Literal["SimulatedProbeResult"]
+                LiquidTrackingType,
+                update_types.ClearType,
             ] = update_types.CLEAR
         else:
             z_pos = z_pos_or_error

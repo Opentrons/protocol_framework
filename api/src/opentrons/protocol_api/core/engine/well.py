@@ -1,5 +1,5 @@
 """ProtocolEngine-based Well core implementations."""
-from typing import Optional, Union, Literal
+from typing import Optional, Union
 
 from opentrons_shared_data.labware.constants import WELL_NAME_PATTERN
 
@@ -8,7 +8,7 @@ from opentrons.protocol_engine import commands as cmd
 from opentrons.protocol_engine.clients import SyncClient as EngineClient
 from opentrons.protocols.api_support.util import UnsupportedAPIError
 
-from opentrons.types import Point
+from opentrons.types import Point, SimulatedProbeResult, LiquidTrackingType
 
 from . import point_calculations
 from . import stringify
@@ -136,7 +136,7 @@ class WellCore(AbstractWellCore):
             well_location=WellLocation(origin=WellOrigin.CENTER),
         )
 
-    def get_meniscus(self) -> Union[Point, Literal["SimulatedProbeResult"]]:
+    def get_meniscus(self) -> Union[Point, SimulatedProbeResult]:
         """Get the coordinate of the well's meniscus."""
         current_liquid_height = self.current_liquid_height()
         if isinstance(current_liquid_height, float):
@@ -178,7 +178,7 @@ class WellCore(AbstractWellCore):
     def estimate_liquid_height_after_pipetting(
         self,
         operation_volume: float,
-    ) -> Union[float, Literal["SimulatedProbeResult"]]:
+    ) -> LiquidTrackingType:
         """Return an estimate of liquid height after pipetting without raising an error."""
         labware_id = self.labware_id
         well_name = self._name
@@ -191,7 +191,7 @@ class WellCore(AbstractWellCore):
         )
         return projected_final_height
 
-    def current_liquid_height(self) -> Union[float, Literal["SimulatedProbeResult"]]:
+    def current_liquid_height(self) -> LiquidTrackingType:
         """Return the current liquid height within a well."""
         labware_id = self.labware_id
         well_name = self._name
@@ -199,7 +199,7 @@ class WellCore(AbstractWellCore):
             labware_id=labware_id, well_name=well_name
         )
 
-    def get_liquid_volume(self) -> Union[float, Literal["SimulatedProbeResult"]]:
+    def get_liquid_volume(self) -> LiquidTrackingType:
         """Return the current volume in a well."""
         labware_id = self.labware_id
         well_name = self._name

@@ -1,9 +1,9 @@
 """Abstract interface for Well core implementations."""
 
 from abc import ABC, abstractmethod
-from typing import TypeVar, Optional, Union, Literal
+from typing import TypeVar, Optional, Union
 
-from opentrons.types import Point
+from opentrons.types import Point, LiquidTrackingType
 
 from .._liquid import Liquid
 
@@ -72,7 +72,7 @@ class AbstractWellCore(ABC):
         """Get the coordinate of the well's center."""
 
     @abstractmethod
-    def get_meniscus(self) -> Union[Point, Literal["SimulatedProbeResult"]]:
+    def get_meniscus(self) -> Union[Point, LiquidTrackingType]:
         """Get the coordinate of the well's meniscus."""
 
     @abstractmethod
@@ -91,15 +91,15 @@ class AbstractWellCore(ABC):
     def estimate_liquid_height_after_pipetting(
         self,
         operation_volume: float,
-    ) -> Union[float, Literal["SimulatedProbeResult"]]:
+    ) -> LiquidTrackingType:
         """Estimate what the liquid height will be after pipetting, without raising an error."""
 
     @abstractmethod
-    def current_liquid_height(self) -> Union[float, Literal["SimulatedProbeResult"]]:
+    def current_liquid_height(self) -> LiquidTrackingType:
         """Get the current liquid height."""
 
     @abstractmethod
-    def get_liquid_volume(self) -> Union[float, Literal["SimulatedProbeResult"]]:
+    def get_liquid_volume(self) -> LiquidTrackingType:
         """Get the current volume within a well."""
 
 

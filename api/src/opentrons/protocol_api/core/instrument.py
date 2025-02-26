@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from abc import abstractmethod, ABC
-from typing import Any, Generic, Optional, TypeVar, Union, List, Tuple, Literal
+from typing import Any, Generic, Optional, TypeVar, Union, List, Tuple
 
 from opentrons import types
 from opentrons.hardware_control.dev_types import PipetteDict
@@ -427,7 +427,7 @@ class AbstractInstrument(ABC, Generic[WellCoreType, LabwareCoreType]):
     @abstractmethod
     def liquid_probe_without_recovery(
         self, well_core: WellCoreType, loc: types.Location
-    ) -> Union[float, Literal["SimulatedProbeResult"]]:
+    ) -> types.LiquidTrackingType:
         """Do a liquid probe to find the level of the liquid in the well."""
         ...
 

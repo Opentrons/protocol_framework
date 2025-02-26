@@ -3609,6 +3609,8 @@ def test_get_well_height_at_volume(
     found_height_top = subject.get_well_height_at_volume(
         labware_id=labware_id, well_name=well_name, volume=input_volume_top
     )
+    assert isinstance(found_height_bottom, float)
+    assert isinstance(found_height_top, float)
     assert isclose(found_height_bottom, expected_height_from_bottom_mm, rel_tol=0.01)
     vol_2_expected_height_from_bottom = (
         subject.get_well_height(labware_id=labware_id, well_name=well_name)
