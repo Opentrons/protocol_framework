@@ -270,8 +270,8 @@ class LiquidProbedUpdate:
     labware_id: str
     well_name: str
     last_probed: datetime
-    height: typing.Union[LiquidTrackingType, ClearType]
-    volume: typing.Union[LiquidTrackingType, ClearType]
+    height: LiquidTrackingType | ClearType
+    volume: LiquidTrackingType | ClearType
 
 
 @dataclasses.dataclass
@@ -745,8 +745,8 @@ class StateUpdate:
         labware_id: str,
         well_name: str,
         last_probed: datetime,
-        height: typing.Union[LiquidTrackingType, ClearType],
-        volume: typing.Union[LiquidTrackingType, ClearType],
+        height: LiquidTrackingType | ClearType,
+        volume: LiquidTrackingType | ClearType,
     ) -> Self:
         """Add a liquid height and volume to well state. See `ProbeLiquidUpdate`."""
         self.liquid_probed = LiquidProbedUpdate(
@@ -762,7 +762,7 @@ class StateUpdate:
         self: Self,
         labware_id: str,
         well_names: list[str],
-        volume_added: typing.Union[float, ClearType],
+        volume_added: float | ClearType,
     ) -> Self:
         """Update liquid volumes in well state. See `OperateLiquidUpdate`."""
         self.liquid_operated = LiquidOperatedUpdate(
