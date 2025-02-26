@@ -7,8 +7,6 @@ import {
 } from '@opentrons/components'
 import { InlineNotification } from '/app/atoms/InlineNotification'
 
-import type { ReactNode } from 'react'
-
 interface NotificationProps {
   notificationHeader?: string
   notificationMessage?: string
@@ -16,7 +14,7 @@ interface NotificationProps {
 
 export interface DescriptionContentProps extends NotificationProps {
   headline: string
-  message: string | ReactNode
+  message: string | JSX.Element
 }
 
 export function DescriptionContent(
