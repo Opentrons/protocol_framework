@@ -292,11 +292,6 @@ class RetrieveImpl(AbstractCommandImpl[RetrieveParams, _ExecuteReturn]):
             params.moduleId
         )
 
-        if stacker_state.in_static_mode:
-            raise CannotPerformModuleAction(
-                "Cannot retrieve labware from Flex Stacker while in static mode"
-            )
-
         pool_definitions = stacker_state.get_pool_definition_ordered_list()
         if pool_definitions is None:
             location = self._state_view.modules.get_location(params.moduleId)
@@ -360,9 +355,6 @@ class RetrieveImpl(AbstractCommandImpl[RetrieveParams, _ExecuteReturn]):
         )
         state_update.set_addressable_area_used(stacker_area)
 
-        state_update.retrieve_flex_stacker_labware(
-            module_id=params.moduleId, labware_id=retrieve_result.labwareId
-        )
         return SuccessData(
             public=retrieve_result,
             state_update=state_update,

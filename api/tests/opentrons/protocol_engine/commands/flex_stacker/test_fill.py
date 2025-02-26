@@ -58,8 +58,6 @@ async def test_fill_happypath(
     module_id = "some-module-id"
     stacker_state = FlexStackerSubState(
         module_id=cast(FlexStackerId, module_id),
-        in_static_mode=sentinel.in_static_mode,
-        hopper_labware_ids=[],
         pool_primary_definition=sentinel.pool_primary_definition,
         pool_adapter_definition=None,
         pool_lid_definition=None,
@@ -109,8 +107,6 @@ async def test_fill_requires_constrained_pool(
     module_id = "module-id"
     stacker_state = FlexStackerSubState(
         module_id=cast(FlexStackerId, module_id),
-        in_static_mode=sentinel.in_static_mode,
-        hopper_labware_ids=[],
         pool_primary_definition=None,
         pool_adapter_definition=None,
         pool_lid_definition=None,
@@ -150,8 +146,6 @@ async def test_pause_strategy_pauses(
     module_id = "some-module-id"
     stacker_state = FlexStackerSubState(
         module_id=cast(FlexStackerId, module_id),
-        in_static_mode=sentinel.in_static_mode,
-        hopper_labware_ids=[],
         pool_primary_definition=sentinel.pool_primary_definition,
         pool_adapter_definition=None,
         pool_lid_definition=None,

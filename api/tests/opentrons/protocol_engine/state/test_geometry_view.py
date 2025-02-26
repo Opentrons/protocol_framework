@@ -14,8 +14,6 @@ from decoy import Decoy
 from opentrons.protocol_engine.state.update_types import (
     LoadedLabwareUpdate,
     StateUpdate,
-    FlexStackerLoadHopperLabware,
-    FlexStackerStateUpdate,
     AddressableAreaUsedUpdate,
 )
 
@@ -4021,12 +4019,6 @@ def test_get_location_sequence_stacker_hopper(
                 offset_id=None,
                 new_location=InStackerHopperLocation(moduleId="module-id-1"),
                 display_name=None,
-            ),
-            flex_stacker_state_update=FlexStackerStateUpdate(
-                module_id="module-id-1",
-                hopper_labware_update=FlexStackerLoadHopperLabware(
-                    labware_id="labware-id-1"
-                ),
             ),
         ),
     )
