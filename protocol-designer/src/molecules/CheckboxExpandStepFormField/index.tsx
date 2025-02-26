@@ -56,7 +56,8 @@ export function CheckboxExpandStepFormField(
             <StyledText desktopStyle="bodyDefaultRegular" {...targetProps}>
               {title}
             </StyledText>
-            <Btn data-testid={testId}
+            <Btn
+              data-testid={testId}
               onClick={() => {
                 checkboxUpdateValue(!checkboxValue)
               }}
