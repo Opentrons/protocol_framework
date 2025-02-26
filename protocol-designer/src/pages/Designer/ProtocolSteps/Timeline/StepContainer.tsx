@@ -218,6 +218,7 @@ export function StepContainer(props: StepContainerProps): JSX.Element {
       >
         <Box
           role="button"
+          data-testid={`StepContainer_${stepId}`}
           onDoubleClick={onDoubleClick}
           onClick={onClick}
           padding={`${SPACING.spacing4} ${SPACING.spacing12}`}
