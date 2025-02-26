@@ -372,6 +372,8 @@ def run(ctx: ProtocolContext) -> None:
     n = 0
     if not skip_diluent:
         for (vol, plate) in zip(volume_list, dst_labwares):
+            if vol == 5:
+                push_out = 3.9
             lid_for_plate = plate.parent
             print(tip_counter)
             if tip_counter >= ((4 * 96) - 21):
