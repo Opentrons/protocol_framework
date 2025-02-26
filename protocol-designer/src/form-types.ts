@@ -279,6 +279,7 @@ export interface HydratedMoveLiquidFormData extends AnnotationFields {
   dispense_y_position?: number | null
   disposalVolume_volume?: number | null
   dropTip_wellNames?: string[] | null
+  liquid_classes_setting?: string | null
   pickUpTip_location?: string | null
   pickUpTip_wellNames?: string[] | null
   preWetTip?: boolean | null
