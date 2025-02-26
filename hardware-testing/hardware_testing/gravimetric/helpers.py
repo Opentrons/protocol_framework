@@ -31,7 +31,10 @@ from opentrons.config.types import OT3Config, RobotConfig
 from hardware_testing.opentrons_api import helpers_ot3
 from opentrons.protocol_api import ProtocolContext, InstrumentContext
 from .workarounds import get_sync_hw_api, http_get_all_labware_offsets
-from hardware_testing.opentrons_api.helpers_ot3 import clear_pipette_ul_per_mm, stop_server_ot3
+from hardware_testing.opentrons_api.helpers_ot3 import (
+    clear_pipette_ul_per_mm,
+    stop_server_ot3,
+)
 
 import opentrons.protocol_engine.execution.pipetting as PE_pipetting
 from opentrons.protocol_engine.notes import CommandNoteAdder
