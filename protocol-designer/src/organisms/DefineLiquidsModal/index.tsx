@@ -137,8 +137,11 @@ export function DefineLiquidsModal(
   const liquidClassOptions = [
     { name: 'Choose an option', value: '' },
     ...Object.entries(liquidClassDefs).map(
-      ([liquidClassDefName, { displayName }]) => {
-        return { name: displayName, value: liquidClassDefName }
+      ([liquidClassDefName, { displayName, description }]) => {
+        return {
+          name: t('liquid_displayName', { displayName, description }),
+          value: liquidClassDefName,
+        }
       }
     ),
   ]
