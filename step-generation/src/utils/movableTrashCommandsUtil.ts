@@ -4,12 +4,13 @@ import {
   OT2_ROBOT_TYPE,
 } from '@opentrons/shared-data'
 import {
-  aspirateInPlace,
+  airGapInPlace,
   blowOutInPlace,
   dispenseInPlace,
   dropTipInPlace,
   moveToAddressableArea,
   moveToAddressableAreaForDropTip,
+  prepareToAspirate,
 } from '../commandCreators/atomic'
 import { ZERO_OFFSET } from '../constants'
 import { curryCommandCreator } from './curryCommandCreator'
@@ -93,7 +94,10 @@ export const movableTrashCommandsUtil = (
                   addressableAreaName,
                   offset,
                 }),
-                curryCommandCreator(aspirateInPlace, {
+                curryCommandCreator(prepareToAspirate, {
+                  pipetteId,
+                }),
+                curryCommandCreator(airGapInPlace, {
                   pipetteId,
                   volume,
                   flowRate,

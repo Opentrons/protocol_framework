@@ -247,6 +247,7 @@ export type BlowoutParams = FlowRateParams &
 export type TouchTipParams = PipetteAccessParams & WellLocationParam
 export type DropTipParams = PipetteAccessParams & DropTipWellLocationParam
 export type PickUpTipParams = TouchTipParams
+export type PrepareToAspirateParams = PipetteIdentityParams
 
 interface AddressableOffsetVector {
   x: number

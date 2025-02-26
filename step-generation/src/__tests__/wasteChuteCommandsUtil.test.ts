@@ -10,6 +10,7 @@ import {
   dispenseInPlace,
   dropTipInPlace,
   moveToAddressableArea,
+  prepareToAspirate,
 } from '../commandCreators/atomic'
 
 vi.mock('../getNextRobotStateAndWarnings/dispenseUpdateLiquidState')
@@ -110,6 +111,9 @@ describe('wasteChuteCommandsUtil', () => {
       moveToAddressableArea,
       mockMoveToAddressableAreaParams
     )
+    expect(curryCommandCreator).toHaveBeenCalledWith(prepareToAspirate, {
+      pipetteId: mockId,
+    })
     expect(curryCommandCreator).toHaveBeenCalledWith(aspirateInPlace, {
       pipetteId: mockId,
       volume: 10,
