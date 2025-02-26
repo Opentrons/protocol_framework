@@ -123,6 +123,7 @@ function _getNextRobotStateAndWarningsSingleCommand(
     case 'custom': // fall-back
     case 'comment':
     case 'airGapInPlace':
+    case 'prepareToAspirate':
       break
 
     case 'loadLiquid':
