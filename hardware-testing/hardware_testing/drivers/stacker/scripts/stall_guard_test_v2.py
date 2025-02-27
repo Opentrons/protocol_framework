@@ -1,29 +1,53 @@
 import asyncio
 import csv
+import os
 import time
 import argparse
 import logging
 from typing import Dict, Any
+from logging.config import dictConfig
 
+from serial.tools.list_ports import comports # type: ignore
 from hardware_testing.drivers import mark10
 from opentrons.hardware_control.ot3api import OT3API # type: ignore
 from hardware_testing.opentrons_api import helpers_ot3
 from opentrons.drivers.flex_stacker.types import ( # type: ignore
     StackerAxis,
     Direction,
-    LEDColor,
-    LEDPattern,
 )
+# from opentrons.drivers.asyncio.communication.errors import MotorStall # type: ignore
+from opentrons.drivers.flex_stacker.types import MoveResult # type: ignore
 
 from opentrons.drivers.flex_stacker.driver import ( # type: ignore
     STACKER_MOTION_CONFIG,
     STALLGUARD_CONFIG,
-    FlexStackerDriver,
 )
 
-# Configure logging
-logging.basicConfig(level=logging.INFO)
-log = logging.getlogger(__name__)
+logger = logging.getLogger(__name__)
+
+LOG_CONFIG = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "basic": {"format": "%(asctime)s %(name)s %(levelname)s %(message)s"}
+    },
+    "handlers": {
+        "file_handler": {
+            "class": "logging.handlers.RotatingFileHandler",
+            "formatter": "basic",
+            "filename": "/data/stallguard/stallguard_test.log",
+            "maxBytes": 5000000,
+            "level": logging.INFO,
+            "backupCount": 3,
+        },
+    },
+    "loggers": {
+        "": {
+            "handlers": ["file_handler"],
+            "level": logging.INFO,
+        },
+    },
+}
 
 class TimerError(Exception):
     """A custom exception used to report errors in use of Timer class"""
@@ -49,7 +73,7 @@ class Timer:
             raise TimerError("Timer is not running. Use .start() to start it")
         stop_time = time.perf_counter()
 
-async def force_func(fg_var, sg_value, trial, axis, timer, timeout):
+async def force_func(fg_var, sg_value, trial, axis, timer, timeout, log):
     # Start the timer
     timer.start()
     t = timer.elapsed_time()
@@ -71,31 +95,34 @@ async def force_func(fg_var, sg_value, trial, axis, timer, timeout):
         if trial == 1:
             fields = ["Time(s)", "Force(N)", "SG Value", "Trials"]
             writer.writerow(fields)
-        
+        force_readings = []
         # Collect data until timeout
         while t < timeout:
             t = timer.elapsed_time()
             fg_reading = await fg_var.read_force()
             data = [t, fg_reading, sg_value, trial]
+            force_readings.append(fg_reading)
             writer.writerow(data)
             # print(data)
             # Flush the file to ensure data is written
             file.flush()
-        
+        max_force = max(force_readings)
+        log.debug(f"Trial: {trial}, SG: {sg_value}, Max Force: {max_force}")
         # Close the file
         file.close()
 
-async def move(s, a, d, d_2):
+async def move(s: Any, axis: StackerAxis, direction: Direction, distance: float) -> Any:
+    """Move the stacker axis in the specified direction and distance"""
     try:
         print('Stacker Moving')
         # Move the stacker axis
-        resp = await s.move_axis(axis = a,
-                                direction = d, 
-                                distance = d_2)
+        resp = await s.move_axis(axis = axis,
+                                direction = direction, 
+                                distance = distance)
         print(f'Finished')
         return resp
     except Exception as e:
-        raise(e)
+        return resp
     
 def get_axis_mapping() -> Dict[str, Any]:
     return {
@@ -106,6 +133,7 @@ def get_axis_mapping() -> Dict[str, Any]:
 
 async def main(args) -> None:
     t = Timer()
+    dictConfig(LOG_CONFIG)
     axis_mapping = {
                     'x': {'total_travel': 202, 'axis': StackerAxis.X},
                     'z': {'total_travel': 202, 'axis': StackerAxis.Z},
@@ -118,19 +146,26 @@ async def main(args) -> None:
     else:
         raise ValueError("Axis not recognized from args options")  # More specific exception
     print(f'config: {STACKER_MOTION_CONFIG}')
-    sg_start = 2
-    sg_final = 12
-    timeout = 7
-    print(f'config: {STACKER_MOTION_CONFIG}')
+    logger.info(f'config: {STACKER_MOTION_CONFIG}')
+    sg_start = args.intial_sg_value
+    sg_final = args.final_sg_value
+    timeout = 10
     # api = await helpers_ot3.build_async_ot3_hardware_api(is_simulating = False)
     api = await OT3API.build_hardware_controller(loop=asyncio.get_running_loop())
-    if args.force_gauge:
+    if args.gauge:
         force_gauge = await mark10.Mark10.create('/dev/ttyUSB0', 115200, loop=asyncio.get_running_loop())
-    stacker = api.attached_modules[0]
+    print(f"Stackers: {api.attached_modules} \n")
+    logger.info(f"Stackers: {api.attached_modules} \n")
+    if not api.attached_modules:
+        logger.error("No stackers attached")
+        return
+    stacker_choice = int(input("Enter Stacker Number: "))
+    stacker = api.attached_modules[stacker_choice]
     device_info = api.attached_modules[0].device_info
+    print(f"device_info: {device_info}")
     test_functions = {
-                    "sg_test": lambda: move(stacker, test_axis, Direction.EXTEND, TOTAL_TRAVEL),
-                    "sg_home_test": lambda: stacker.home_axis(test_axis, Direction.EXTEND),
+                    "move_sg_test": lambda: move(stacker, test_axis, Direction.EXTEND, TOTAL_TRAVEL),
+                    "home_sg_test": lambda: stacker.home_axis(test_axis, Direction.EXTEND),
                     }
     await stacker.home_axis(StackerAxis.Z, Direction.RETRACT)
     await stacker.home_axis(StackerAxis.X, Direction.RETRACT)
@@ -147,20 +182,19 @@ async def main(args) -> None:
             else:
                 print(f"Unknown test type: {args.test}")
                 return  # Or handle the unknown test case appropriately
-            print(f"Cycle: {c}")
-            print(f"Sg: {sg_value}")
+            print(f"Cycle: {c}", "SG Value: ", sg_value)
             tasks_to_gather = [move_task]  # Start with move_task always included
-            if args.force_gauge:
-                fg_task = asyncio.create_task(force_func(force_gauge, sg_value, c, test_axis, t, timeout))
+            if args.gauge:
+                fg_task = asyncio.create_task(force_func(force_gauge, sg_value, c, test_axis, t, timeout, logger))
                 tasks_to_gather.append(fg_task)  # Add fg_task if force_gauge is True
             try:
                 results = await asyncio.gather(*tasks_to_gather)
-                # print(results)
+                print(f"StallGuard Results: {results}")
             except Exception as e:
-                print(e)
+                print(f"Motor Stall detected: {e}")
+                sg_results.append((sg_value, e))
                 pass
-            print(results)
-            sg_results.append((sg_value,results[0]))
+            print(f"StallGuard List: {sg_results}")
             await asyncio.sleep(1)
             await stacker._driver.set_stallguard_threshold(test_axis, False, sg_value)
             await stacker.home_axis(test_axis, Direction.RETRACT)
@@ -168,12 +202,13 @@ async def main(args) -> None:
         print(sg_results)
 
 async def repeatablity_test(args) -> None:
+    dictConfig(LOG_CONFIG)
     t = Timer()
-    timeout = 8
+    timeout = 10
     axis_mapping = {
                     'x': {'total_travel': 202, 'axis': StackerAxis.X},
                     'z': {'total_travel': 202, 'axis': StackerAxis.Z},
-                    'l': {'total_travel': 30, 'axis': StackerAxis.L},
+                    'l': {'total_travel': 22, 'axis': StackerAxis.L},
                     }
     if args.axis.lower() in axis_mapping:
         config = axis_mapping[args.axis.lower()]
@@ -184,8 +219,14 @@ async def repeatablity_test(args) -> None:
     print(f'config: {STACKER_MOTION_CONFIG}')
     # api = await helpers_ot3.build_async_ot3_hardware_api(is_simulating = False)
     api = await OT3API.build_hardware_controller(loop=asyncio.get_running_loop())
-    if args.force_gauge:
-        force_gauge = await mark10.Mark10.create('/dev/ttyUSB0', 115200, loop=asyncio.get_running_loop())
+    if args.gauge:
+        ports = comports()
+        for port, desc, hwid in sorted(ports):
+            print(f"{port}: {desc} [{hwid}]")
+            if "Mark-10" in desc:
+                force_gauge = await mark10.Mark10.create(port, 115200, loop=asyncio.get_running_loop())
+        if force_gauge is None:
+            raise ValueError("Force Gauge not found")
     stacker = api.attached_modules[0]
     device_info = api.attached_modules[0].device_info
     # sg_value = 2
@@ -196,8 +237,8 @@ async def repeatablity_test(args) -> None:
     await stacker.close_latch()
     await stacker.open_latch()
     test_functions = {
-                    "sg_test": lambda: move(stacker, test_axis, Direction.EXTEND, TOTAL_TRAVEL),
-                    "sg_home_test": lambda: stacker.home_axis(test_axis, Direction.EXTEND),
+                    "move_sg_test": lambda: move(stacker, test_axis, Direction.EXTEND, TOTAL_TRAVEL),
+                    "home_sg_test": lambda: stacker.home_axis(test_axis, Direction.EXTEND),
                     }
     for c in range(1, args.cycles+1):
         await stacker._driver.set_stallguard_threshold(test_axis, True, sg_value)
@@ -205,17 +246,19 @@ async def repeatablity_test(args) -> None:
             move_task = asyncio.create_task(test_functions[args.test]())
         else:
             print(f"Unknown test type: {args.test}")
+            print(f"Unknown test type: {args.test}")
             return  # Or handle the unknown test case appropriately
-        if args.force_gauge:
-            fg_task = asyncio.create_task(force_func(force_gauge, sg_value, c, test_axis, t, timeout))
+        if args.gauge:
+            fg_task = asyncio.create_task(force_func(force_gauge, sg_value, c, test_axis, t, timeout, logger))
         print(f"Cycle: {c}")
         try:
-            if args.force_gauge:
+            if args.gauge:
                 await asyncio.gather(move_task, fg_task)
             else:
                 await asyncio.gather(move_task)
         except Exception as e:
-            print(e)
+            print(f"Error in test execution: {e}")
+            continue
         await asyncio.sleep(1)
         await stacker._driver.set_stallguard_threshold(test_axis, False, sg_value)
         await stacker.home_axis(test_axis, Direction.RETRACT)
@@ -225,16 +268,21 @@ def build_arg_parser():
     arg_parser = argparse.ArgumentParser(description="Motion Parameter Test Script")
     arg_parser.add_argument("-c", "--cycles", default = 5, type = int, help = "number of cycles to execute")
     arg_parser.add_argument("-a", "--axis", default = 'x', type = str, help = "Choose a Axis")
-    arg_parser.add_argument("-f", "--force_gauge", required=False, action='store_false', help = "Force gauge")
-    arg_parser.add_argument("-t", "--test", default="sg_test", choices=["sg_test","repeatability_test"])
+    arg_parser.add_argument("-g","--gauge", required=False, action='store_false', help = "Force gauge used")
+    arg_parser.add_argument("-t", "--test", default="move_sg_test", type = str, choices=["move_sg_test","home_sg_test", "repeatability_test"])
+    arg_parser.add_argument("-i", "--intial_sg_value", default = -5, type = int, help = "Initial StallGuard Value")
+    arg_parser.add_argument("-f", "--final_sg_value", default = 12, type = int, help = "Final StallGuard Value")
     return arg_parser
 
 if __name__ == '__main__':
     arg_parser = build_arg_parser()
     options = arg_parser.parse_args()
-    if options.test == "sg_test":
+    if options.test == "move_sg_test" or options.test == "home_sg_test":
+        logger.info("Starting StallGuard Test")
         asyncio.run(main(options))
     elif options.test == "repeatability_test":
+        logger.info("Starting Repeatability Test")
         asyncio.run(repeatablity_test(options))
     else:
-        raise("Unknown Test Type")
+        logger.error("Unknown Test Type")
+        raise ValueError("Unknown Test Type")
