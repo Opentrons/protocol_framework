@@ -174,7 +174,7 @@ class FlexStackerInterface:
             return True
 
         assert isinstance(self._driver, FlexStackerDriver)
-        _LS_RE = re.compile(r"^M112 (\d) OK\n")
+        _LS_RE = re.compile(r"^M112 E:(\d) OK\n")
         res = await self._driver._connection.send_data("M112\n")
         match = _LS_RE.match(res)
         assert match, f"Incorrect Response for E-Stop switch: {res}"
