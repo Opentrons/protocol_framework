@@ -2029,6 +2029,9 @@ def test_distribute_liquid_raises_for_non_liquid_handling_locations(
         mock_validation.ensure_valid_flat_wells_list_for_transfer_v2([mock_well])
     ).then_return([mock_well])
     decoy.when(
+        mock_validation.ensure_valid_flat_wells_list_for_transfer_v2(mock_well)
+    ).then_return([mock_well])
+    decoy.when(
         mock_instrument_support.validate_takes_liquid(
             mock_well.top(), reject_module=True, reject_adapter=True
         )
@@ -2053,6 +2056,9 @@ def test_distribute_liquid_raises_for_bad_tip_policy(
     decoy.when(mock_protocol_core.robot_type).then_return(robot_type)
     decoy.when(
         mock_validation.ensure_valid_flat_wells_list_for_transfer_v2([mock_well])
+    ).then_return([mock_well])
+    decoy.when(
+        mock_validation.ensure_valid_flat_wells_list_for_transfer_v2(mock_well)
     ).then_return([mock_well])
     decoy.when(mock_validation.ensure_new_tip_policy("once")).then_raise(
         ValueError("Uh oh")
@@ -2081,6 +2087,9 @@ def test_distribute_liquid_raises_for_no_tip(
     decoy.when(mock_protocol_core.robot_type).then_return(robot_type)
     decoy.when(
         mock_validation.ensure_valid_flat_wells_list_for_transfer_v2([mock_well])
+    ).then_return([mock_well])
+    decoy.when(
+        mock_validation.ensure_valid_flat_wells_list_for_transfer_v2(mock_well)
     ).then_return([mock_well])
     decoy.when(mock_validation.ensure_new_tip_policy("never")).then_return(
         TransferTipPolicyV2.NEVER
@@ -2115,6 +2124,9 @@ def test_distribute_liquid_raises_if_tip_has_liquid(
     decoy.when(mock_protocol_core.robot_type).then_return(robot_type)
     decoy.when(
         mock_validation.ensure_valid_flat_wells_list_for_transfer_v2([mock_well])
+    ).then_return([mock_well])
+    decoy.when(
+        mock_validation.ensure_valid_flat_wells_list_for_transfer_v2(mock_well)
     ).then_return([mock_well])
     decoy.when(mock_validation.ensure_new_tip_policy("never")).then_return(
         TransferTipPolicyV2.ONCE
@@ -2161,6 +2173,9 @@ def test_distribute_liquid_delegates_to_engine_core(
     decoy.when(mock_protocol_core.robot_type).then_return(robot_type)
     decoy.when(
         mock_validation.ensure_valid_flat_wells_list_for_transfer_v2([mock_well])
+    ).then_return([mock_well])
+    decoy.when(
+        mock_validation.ensure_valid_flat_wells_list_for_transfer_v2(mock_well)
     ).then_return([mock_well])
     decoy.when(mock_validation.ensure_new_tip_policy("never")).then_return(
         TransferTipPolicyV2.ONCE
@@ -2264,6 +2279,9 @@ def test_consolidate_liquid_raises_for_non_liquid_handling_locations(
         mock_validation.ensure_valid_flat_wells_list_for_transfer_v2([mock_well])
     ).then_return([mock_well])
     decoy.when(
+        mock_validation.ensure_valid_flat_wells_list_for_transfer_v2(mock_well)
+    ).then_return([mock_well])
+    decoy.when(
         mock_instrument_support.validate_takes_liquid(
             mock_well.top(), reject_module=True, reject_adapter=True
         )
@@ -2288,6 +2306,9 @@ def test_consolidate_liquid_raises_for_bad_tip_policy(
     decoy.when(mock_protocol_core.robot_type).then_return(robot_type)
     decoy.when(
         mock_validation.ensure_valid_flat_wells_list_for_transfer_v2([mock_well])
+    ).then_return([mock_well])
+    decoy.when(
+        mock_validation.ensure_valid_flat_wells_list_for_transfer_v2(mock_well)
     ).then_return([mock_well])
     decoy.when(mock_validation.ensure_new_tip_policy("once")).then_raise(
         ValueError("Uh oh")
@@ -2316,6 +2337,9 @@ def test_consolidate_liquid_raises_for_no_tip(
     decoy.when(mock_protocol_core.robot_type).then_return(robot_type)
     decoy.when(
         mock_validation.ensure_valid_flat_wells_list_for_transfer_v2([mock_well])
+    ).then_return([mock_well])
+    decoy.when(
+        mock_validation.ensure_valid_flat_wells_list_for_transfer_v2(mock_well)
     ).then_return([mock_well])
     decoy.when(mock_validation.ensure_new_tip_policy("never")).then_return(
         TransferTipPolicyV2.NEVER
@@ -2351,6 +2375,9 @@ def test_consolidate_liquid_raises_if_tip_has_liquid(
     decoy.when(
         mock_validation.ensure_valid_flat_wells_list_for_transfer_v2([mock_well])
     ).then_return([mock_well])
+    decoy.when(
+        mock_validation.ensure_valid_flat_wells_list_for_transfer_v2(mock_well)
+    ).then_return([mock_well])
     decoy.when(mock_validation.ensure_new_tip_policy("never")).then_return(
         TransferTipPolicyV2.ONCE
     )
@@ -2380,6 +2407,9 @@ def test_consolidate_liquid_raises_if_tip_policy_per_source(
 
     decoy.when(
         mock_validation.ensure_valid_flat_wells_list_for_transfer_v2([mock_well])
+    ).then_return([mock_well])
+    decoy.when(
+        mock_validation.ensure_valid_flat_wells_list_for_transfer_v2(mock_well)
     ).then_return([mock_well])
     decoy.when(mock_validation.ensure_new_tip_policy("per source")).then_return(
         TransferTipPolicyV2.PER_SOURCE
@@ -2417,6 +2447,9 @@ def test_consolidate_liquid_delegates_to_engine_core(
     decoy.when(mock_protocol_core.robot_type).then_return(robot_type)
     decoy.when(
         mock_validation.ensure_valid_flat_wells_list_for_transfer_v2([mock_well])
+    ).then_return([mock_well])
+    decoy.when(
+        mock_validation.ensure_valid_flat_wells_list_for_transfer_v2(mock_well)
     ).then_return([mock_well])
     decoy.when(mock_validation.ensure_new_tip_policy("never")).then_return(
         TransferTipPolicyV2.ONCE
