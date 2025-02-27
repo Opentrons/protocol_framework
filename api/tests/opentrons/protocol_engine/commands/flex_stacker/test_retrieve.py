@@ -83,6 +83,16 @@ def _stacker_base_loc_seq(stacker_id: str) -> LabwareLocationSequence:
     ]
 
 
+@pytest.fixture
+def subject(
+    state_view: StateView, equipment: EquipmentHandler, model_utils: ModelUtils
+) -> RetrieveImpl:
+    """Get a retrieve command to test."""
+    return RetrieveImpl(
+        state_view=state_view, equipment=equipment, model_utils=model_utils
+    )
+
+
 async def test_retrieve_raises_when_empty(
     decoy: Decoy,
     state_view: StateView,
@@ -547,7 +557,7 @@ async def test_retrieve_primary_adapter_and_lid(
     )
 
 
-async def test_retrive_raises_if_stall(
+async def test_retrieve_raises_if_stall(
     decoy: Decoy,
     equipment: EquipmentHandler,
     state_view: StateView,
@@ -567,12 +577,11 @@ async def test_retrive_raises_if_stall(
 
     fs_module_substate = FlexStackerSubState(
         module_id=stacker_id,
-        in_static_mode=False,
-        hopper_labware_ids=[],
         pool_primary_definition=flex_50uL_tiprack,
         pool_adapter_definition=tiprack_adapter_def,
         pool_lid_definition=tiprack_lid_def,
         pool_count=1,
+        max_pool_count=5,
     )
     decoy.when(
         state_view.modules.get_flex_stacker_substate(module_id=stacker_id)

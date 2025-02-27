@@ -39,11 +39,11 @@ def subject(state_view: StateView, run_control: RunControlHandler) -> EmptyImpl:
     "current_count,count_param,target_count",
     [
         pytest.param(0, 0, 0, id="empty-to-empty"),
-        pytest.param(5, 0, 0, id="full-to-empty"),
-        pytest.param(5, 5, 5, id="full-noop"),
-        pytest.param(4, 5, 4, id="size-capped"),
+        pytest.param(6, 0, 0, id="full-to-empty"),
+        pytest.param(6, 6, 6, id="full-noop"),
+        pytest.param(4, 6, 4, id="size-capped"),
         pytest.param(4, 3, 3, id="not-full-empty"),
-        pytest.param(5, 6, 5, id="overfull"),
+        pytest.param(6, 7, 6, id="overfull"),
         pytest.param(3, None, 0, id="default-count"),
     ],
 )

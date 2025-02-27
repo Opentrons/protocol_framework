@@ -72,8 +72,8 @@ async def test_store_raises_if_full(
         pool_primary_definition=flex_50uL_tiprack,
         pool_adapter_definition=None,
         pool_lid_definition=None,
-        pool_count=5,
-        max_pool_count=5,
+        pool_count=6,
+        max_pool_count=6,
     )
     decoy.when(
         state_view.modules.get_flex_stacker_substate(module_id=stacker_id)
@@ -161,12 +161,11 @@ async def test_store_raises_if_stall(
 
     fs_module_substate = FlexStackerSubState(
         module_id=stacker_id,
-        in_static_mode=False,
-        hopper_labware_ids=["labware-id"],
         pool_primary_definition=flex_50uL_tiprack,
         pool_adapter_definition=None,
         pool_lid_definition=None,
         pool_count=0,
+        max_pool_count=5,
     )
 
     decoy.when(
