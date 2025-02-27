@@ -48,7 +48,7 @@ export function Tag(props: TagProps): JSX.Element {
   const DEFAULT_CONTAINER_STYLE = css`
     padding: ${SPACING.spacing2} ${SPACING.spacing8};
     border-radius: ${BORDERS.borderRadius4};
-    width: ${shrinkToContent ? FLEX_MAX_CONTENT : 'none'};
+    width: ${shrinkToContent ? FLEX_MAX_CONTENT : 'inherit'};
     @media ${RESPONSIVENESS.touchscreenMediaQuerySpecs} {
       border-radius: ${BORDERS.borderRadius8};
       padding: ${SPACING.spacing8} ${SPACING.spacing12};

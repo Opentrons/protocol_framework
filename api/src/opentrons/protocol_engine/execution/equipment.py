@@ -2,8 +2,13 @@
 
 from dataclasses import dataclass
 from typing import Optional, overload, List
+from typing_extensions import assert_type
 
-from opentrons_shared_data.labware.labware_definition import LabwareDefinition
+from opentrons_shared_data.labware.labware_definition import (
+    LabwareDefinition,
+    LabwareDefinition2,
+    LabwareDefinition3,
+)
 from opentrons_shared_data.pipette.types import PipetteNameType
 
 from opentrons.calibration_storage.helpers import uri_from_details
@@ -160,6 +165,43 @@ class EquipmentHandler:
             )
             return definition, definition_uri
 
+    async def load_labware_from_definition(
+        self,
+        definition: LabwareDefinition,
+        location: LabwareLocation,
+        labware_id: Optional[str],
+    ) -> LoadedLabwareData:
+        """Load labware from already-found definition."""
+        definition_uri = uri_from_details(
+            load_name=definition.parameters.loadName,
+            namespace=definition.namespace,
+            version=definition.version,
+        )
+        return await self._load_labware_from_def_and_uri(
+            definition, definition_uri, location, labware_id
+        )
+
+    async def _load_labware_from_def_and_uri(
+        self,
+        definition: LabwareDefinition,
+        definition_uri: str,
+        location: LabwareLocation,
+        labware_id: Optional[str],
+    ) -> LoadedLabwareData:
+        labware_id = (
+            labware_id if labware_id is not None else self._model_utils.generate_id()
+        )
+
+        # Allow propagation of ModuleNotLoadedError.
+        offset_id = self.find_applicable_labware_offset_id(
+            labware_definition_uri=definition_uri,
+            labware_location=location,
+        )
+
+        return LoadedLabwareData(
+            labware_id=labware_id, definition=definition, offsetId=offset_id
+        )
+
     async def load_labware(
         self,
         load_name: str,
@@ -188,19 +230,8 @@ class EquipmentHandler:
         definition, definition_uri = await self.load_definition_for_details(
             load_name, namespace, version
         )
-
-        labware_id = (
-            labware_id if labware_id is not None else self._model_utils.generate_id()
-        )
-
-        # Allow propagation of ModuleNotLoadedError.
-        offset_id = self.find_applicable_labware_offset_id(
-            labware_definition_uri=definition_uri,
-            labware_location=location,
-        )
-
-        return LoadedLabwareData(
-            labware_id=labware_id, definition=definition, offsetId=offset_id
+        return await self._load_labware_from_def_and_uri(
+            definition, definition_uri, location, labware_id
         )
 
     async def reload_labware(self, labware_id: str) -> ReloadedLabwareData:
@@ -406,7 +437,7 @@ class EquipmentHandler:
             definition=attached_module.definition,
         )
 
-    async def load_lids(
+    async def load_lids(  # noqa: C901
         self,
         load_name: str,
         namespace: str,
@@ -454,18 +485,23 @@ class EquipmentHandler:
                 f"Requested quantity {quantity} is greater than the stack limit of {stack_limit} provided by definition for {load_name}."
             )
 
-        # Allow propagation of ModuleNotLoadedError.
-        if (
-            isinstance(location, DeckSlotLocation)
-            and definition.parameters.isDeckSlotCompatible is not None
-            and not definition.parameters.isDeckSlotCompatible
-        ):
+        if isinstance(definition, LabwareDefinition2):
+            is_deck_slot_compatible = True
+        else:
+            assert_type(definition, LabwareDefinition3)
+            is_deck_slot_compatible = (
+                True
+                if definition.parameters.isDeckSlotCompatible is None
+                else definition.parameters.isDeckSlotCompatible
+            )
+
+        if isinstance(location, DeckSlotLocation) and not is_deck_slot_compatible:
             raise ValueError(
                 f"Lid Labware {load_name} cannot be loaded onto a Deck Slot."
             )
 
-        load_labware_data_list = []
-        ids = []
+        load_labware_data_list: list[LoadedLabwareData] = []
+        ids: list[str] = []
         if labware_ids is not None:
             if len(labware_ids) < quantity:
                 raise ValueError(
