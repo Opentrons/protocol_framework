@@ -78,6 +78,7 @@ export enum SetupLocators {
   Button = 'button',
   TempdeckTempInput = 'input[name="targetTemperature"]',
   DoneButtonLabwareSelection = '[data-testid="Toolbox_confirmButton"]',
+
   AspirateWells = 'input[name="aspirate_wells"]',
   div = 'div',
   button = 'button',
@@ -102,6 +103,19 @@ function selectLabwareByDisplayName(displayName: string): void {
   cy.get(SetupLocators.DoneButtonLabwareSelection).click({ force: true })
 }
   */
+
+/**
+=======
+}
+
+/**
+ * Helper function to select a labware by display name.
+ * Clicks "Done" after selecting.
+ */
+function selectLabwareByDisplayName(displayName: string): void {
+  cy.contains(displayName).click({ force: true })
+  cy.get(SetupLocators.DoneButtonLabwareSelection).click({ force: true })
+}
 
 /**
  * chooseDeckSlot is a helper returning a chainable
@@ -199,6 +213,7 @@ export const SetupSteps = {
   SelectLabwareByDisplayName: (displayName: string): StepThunk => ({
     call: () => {
       selectLabwareByDisplayName(displayName)
+
       cy.get(SetupLocators.DoneButtonLabwareSelection).click({ force: true })
     },
   }),
@@ -206,6 +221,7 @@ export const SetupSteps = {
   selectDropdownLabware: (displayName: string): StepThunk => ({
     call: () => {
       selectLabwareByDisplayName(displayName)
+
     },
   }),
 
@@ -314,11 +330,13 @@ export const SetupSteps = {
     },
   }),
 
+
   AddPlateReader: (): StepThunk => ({
     call: () => {
       cy.contains(SetupContent.PlateReader).click()
     },
   }),
+
 
   /**
    * Click "Edit protocol".
@@ -328,6 +346,7 @@ export const SetupSteps = {
       cy.contains(SetupContent.EditProtocol).click()
     },
   }),
+
 
   ChoseDeckSlot: (deckSlot: string): StepThunk => ({
     call: () => {
@@ -357,6 +376,12 @@ export const SetupSteps = {
    * Clicks the "Labware" header.
    */
   ClickDeckslotA1: (): StepThunk => ({
+
+  /**
+   * Choose deck slot A1.
+   */
+  ChoseDeckSlotA1: (): StepThunk => ({
+
     call: () => {
       chooseDeckSlot('A1').click()
     },
@@ -384,13 +409,33 @@ export const SetupSteps = {
    * Choose deck slot.
    */
 
+  ChoseDeckSlot: (deckSlot: string): StepThunk => ({
+    call: () => {
+      chooseDeckSlot(deckSlot).click()
+    },
+  }),
+
+
   /**
    * Adds hardware/labware to a deck slot.
    */
+  AddHardwareLabware: (): StepThunk => ({
+    call: () => {
+      cy.contains(SetupContent.AddLabwareToDeck).click()
+    },
+  }),
+
 
   /**
    * Edits existing labware/hardware on a deck slot.
    */
+
+  EditHardwareLabwareOnDeck: (): StepThunk => ({
+    call: () => {
+      cy.contains(SetupContent.EditHardwareLabwareOnDeck).click()
+    },
+  }),
+
 
   /**
    * Clicks the "Labware" header.
@@ -413,9 +458,14 @@ export const SetupSteps = {
   /**
    * Choose deck slot C2 with a labware-locating approach.
    */
+
   ChoseDeckSlotLabware: (deckslot: string): StepThunk => ({
     call: () => {
       chooseDeckSlot(deckslot)
+
+  ChoseDeckSlotC2Labware: (): StepThunk => ({
+    call: () => {
+      chooseDeckSlot('C2')
         .find('.Box-sc-8ozbhb-0.kIDovv')
         .find('a[role="button"]')
         .contains(SetupContent.EditSlot)
@@ -431,6 +481,7 @@ export const SetupSteps = {
       cy.contains('button', SetupContent.AddLiquid).click()
     },
   }),
+
 
   AddMoveStep: (): StepThunk => ({
     call: () => {
@@ -778,6 +829,7 @@ export const SetupSteps = {
       cy.contains('button', 'Delete step').click()
     },
   }),
+
 }
 
 /**
@@ -942,11 +994,13 @@ export const SetupVerifications = {
     },
   }),
 
+
   AbsorbanceNotSelectable: (): StepThunk => ({
     call: () => {
       cy.contains('button', SetupContent.PlateReader).should('be.disabled')
     },
   }),
+
 
   /**
    * Verify you can open the "Transfer" pop-out panel.

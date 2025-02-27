@@ -56,6 +56,7 @@ describe('The Redesigned Create Protocol Landing Page', () => {
     steps.add(SetupSteps.ClickWellPlatesSection())
     steps.add(SetupSteps.SelectLabwareByDisplayName('Bio-Rad 96 Well Plate'))
     steps.add(SetupSteps.ChoseDeckSlotLabware('C2'))
+    steps.add(SetupSteps.ChoseDeckSlotC2Labware())
     steps.add(SetupSteps.AddLiquid())
     steps.add(SetupSteps.ClickLiquidButton())
     steps.add(SetupSteps.DefineLiquid())

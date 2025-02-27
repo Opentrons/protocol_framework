@@ -194,8 +194,7 @@ export const ABSORBANCE_READER_COLOR_BY_WAVELENGTH: Record<number, string> = {
   650: 'Red',
 }
 
-<<<<<<< HEAD
+
 export const GRIPPER_LOCATION: 'mounted' = 'mounted'
-=======
 export const OFFDECK: 'offDeck' = 'offDeck'
->>>>>>> 8b925f69b8 (fix(protocol-designer): prevent liquid handling steps if no compatible labware (#17587))
+

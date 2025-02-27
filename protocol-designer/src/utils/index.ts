@@ -22,12 +22,9 @@ import type {
   CutoutFixtureId,
   RobotType,
   SupportedTip,
-<<<<<<< HEAD
   ModuleType,
   LabwareDisplayCategory,
-=======
   LabwareDefinition2,
->>>>>>> 8b925f69b8 (fix(protocol-designer): prevent liquid handling steps if no compatible labware (#17587))
 } from '@opentrons/shared-data'
 import type { WellGroup } from '@opentrons/components'
 import type { BoundingRect, GenericRect } from '../collision-types'

@@ -21,10 +21,7 @@ export enum ModContent {
   Temperature = 'Temperature',
   Save = 'Save',
   Temp4CVerification = `Build a pause step to wait until Temperature Module GEN2 reaches 4˚C`,
-<<<<<<< HEAD
   PlateReader = 'Absorbance Plate Reader Module GEN1',
-=======
->>>>>>> 9d461f86ea (chore(pd): move tests and actions changed into chore_release-pd (#17588))
 }
 
 /**
@@ -120,7 +117,6 @@ export const ModuleSteps = {
       cy.contains(ModContent.Save).click({ force: true })
     },
   }),
-<<<<<<< HEAD
   MoveToPlateReader: (): StepThunk => ({
     call: () => {
       cy.contains(ModContent.PlateReader).click()
@@ -153,15 +149,13 @@ export const ModuleSteps = {
         .type('500')
     },
   }),
-=======
->>>>>>> 9d461f86ea (chore(pd): move tests and actions changed into chore_release-pd (#17588))
+
 }
 
 /**
  * These are your "verifications" as StepThunks.
  */
 export const ModuleVerifications = {
-<<<<<<< HEAD
   NoMoveToPlateReaderWhenClosed: (): StepThunk => ({
     call: () => {
       cy.contains('Absorbance Plate Reader Module lid closed')
@@ -171,11 +165,6 @@ export const ModuleVerifications = {
     },
   }),
 
-=======
-  /**
-   * Verify that the tempdeck step form opens correctly.
-   */
->>>>>>> 9d461f86ea (chore(pd): move tests and actions changed into chore_release-pd (#17588))
   TempeDeckInitialForm: (): StepThunk => ({
     call: () => {
       cy.contains(ModContent.ModState)
@@ -184,12 +173,6 @@ export const ModuleVerifications = {
     },
   }),
 
-<<<<<<< HEAD
-=======
-  /**
-   * Verify that the pause step has correct info in step preview (temp set to 4°C).
-   */
->>>>>>> 9d461f86ea (chore(pd): move tests and actions changed into chore_release-pd (#17588))
   Temp4CPauseTextVerification: (): StepThunk => ({
     call: () => {
       cy.contains('div', 'Pausing until')
@@ -199,7 +182,6 @@ export const ModuleVerifications = {
         .should('contain', '4°C')
     },
   }),
-<<<<<<< HEAD
 
   PlateReaderPart1NoInitilization: (): StepThunk => ({
     call: () => {
@@ -217,6 +199,5 @@ export const ModuleVerifications = {
       cy.contains('Add reference wavelength?')
     },
   }),
-=======
->>>>>>> 9d461f86ea (chore(pd): move tests and actions changed into chore_release-pd (#17588))
+
 }
