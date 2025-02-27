@@ -18,6 +18,10 @@ export default {
       description:
         'Number of Tag components to include as example child components.',
     },
+    devNote: {
+      description:
+        'Use SubListTable only when there should a table-esque component in a real table (ListTable), otherwise use ListTable.',
+    },
   },
   parameters: VIEWPORT.touchScreenViewport,
 } as Meta
@@ -33,8 +37,6 @@ const Template: Story<SubListTableStoryProps> = args => {
   // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
   const renderTags = () => {
     return Array.from({ length: tagCount }, (_, i) => {
-      const type =
-        i % 3 === 0 ? 'default' : i % 3 === 1 ? 'interactive' : 'branded'
       const iconName = i % 2 === 0 ? 'alert-circle' : 'check-circle'
       const iconPosition = i % 2 === 0 ? 'left' : 'right'
 
@@ -42,7 +44,7 @@ const Template: Story<SubListTableStoryProps> = args => {
         <Flex key={`tag-${i}`} width="100%">
           <Tag
             text={`Tag ${i + 1}`}
-            type={type}
+            type="default"
             iconName={iconName}
             iconPosition={iconPosition}
           />
@@ -61,5 +63,10 @@ const Template: Story<SubListTableStoryProps> = args => {
 export const SubListTable = Template.bind({})
 SubListTable.args = {
   headers: ['Name', 'Type', 'Description'],
+  tagCount: 3,
+}
+
+export const SubListTableNoHeader = Template.bind({})
+SubListTableNoHeader.args = {
   tagCount: 3,
 }

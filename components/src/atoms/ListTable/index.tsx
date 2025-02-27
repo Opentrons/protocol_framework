@@ -22,7 +22,7 @@ export function ListTable({ headers, children }: ListTableProps): JSX.Element {
   return (
     <table css={TABLE_STYLE}>
       {headers != null && headers.some(header => header !== undefined) && (
-        <thead css={THEAD_STYLE}>
+        <thead>
           <tr css={trStyle(numHeaders)}>
             {headers.map(header => (
               <th key={header + Math.random().toString()} css={TH_STYLE}>
@@ -51,10 +51,6 @@ const TABLE_STYLE = css`
   border-spacing: 0;
 `
 
-const THEAD_STYLE = css`
-  margin-bottom: ${SPACING.spacing8};
-`
-
 const trStyle = (numHeaders: number): FlattenSimpleInterpolation => css`
   display: ${DISPLAY_GRID};
   grid-template-columns: repeat(${numHeaders}, 1fr);
@@ -71,6 +67,7 @@ const TBODY_STYLE = css`
   display: ${DISPLAY_FLEX};
   flex-direction: ${DIRECTION_COLUMN};
   gap: ${SPACING.spacing4};
+  padding-top: ${SPACING.spacing8};
 
   @media ${RESPONSIVENESS.touchscreenMediaQuerySpecs} {
     gap: ${SPACING.spacing8};

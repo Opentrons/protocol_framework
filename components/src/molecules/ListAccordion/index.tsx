@@ -20,8 +20,6 @@ const TRANSITION_STYLE = 'all 150ms ease-in'
 
 export type ListAccordionAlertKind = 'default' | 'warning'
 
-const CONTAINER_GAP = SPACING.spacing24
-
 export interface ListAccordionProps {
   /* The "above the fold" content that is always present regardless of open/close state. */
   headerChild: ReactNode
@@ -84,18 +82,38 @@ const containerStyle = (
     flex-direction: ${DIRECTION_COLUMN};
     padding: ${SPACING.spacing12};
     border-radius: ${SPACING.spacing8};
-    gap: ${CONTAINER_GAP};
+    gap: ${SPACING.spacing8};
     background-color: ${alertKind === 'warning'
       ? COLORS.yellow30
       : COLORS.grey20};
     transition: ${TRANSITION_STYLE};
 
+    &:focus-visible {
+      border-color: ${COLORS.blue50};
+      border-width: 3px;
+    }
+
     @media ${RESPONSIVENESS.touchscreenMediaQuerySpecs} {
       padding: ${SPACING.spacing24};
+      gap: ${SPACING.spacing24};
       border-radius: ${SPACING.spacing16};
       background-color: ${alertKind === 'warning'
         ? COLORS.yellow35
         : COLORS.grey35};
+
+      &:active {
+        background-color: ${alertKind === 'warning'
+          ? COLORS.yellow40
+          : COLORS.grey40};
+      }
+    }
+
+    @media not all and ${RESPONSIVENESS.touchscreenMediaQuerySpecs} {
+      &:hover {
+        background-color: ${alertKind === 'warning'
+          ? COLORS.yellow30
+          : COLORS.grey30};
+      }
     }
   `
 }
@@ -107,8 +125,12 @@ const contentContainerStyle = (isOpen: boolean): FlattenSimpleInterpolation => {
     max-height: ${isOpen ? '10000000px' : '0px'};
     opacity: ${isOpen ? 1 : 0};
     overflow: hidden;
-    margin-top: ${isOpen ? '0px' : `-${CONTAINER_GAP}`};
+    margin-top: ${isOpen ? '0px' : `-${SPACING.spacing8}`};
     transition: ${TRANSITION_STYLE};
+
+    @media ${RESPONSIVENESS.touchscreenMediaQuerySpecs} {
+      margin-top: ${isOpen ? '0px' : `-${SPACING.spacing24}`};
+    }
   `
 }
 
@@ -147,8 +169,8 @@ const ALERT_ICON_STYLE = css`
 `
 
 const CHEVRON_STYLE = css`
-  height: ${SPACING.spacing32};
-  width: ${SPACING.spacing32};
+  height: ${SPACING.spacing24};
+  width: ${SPACING.spacing24};
   flex-shrink: 0;
 
   @media ${RESPONSIVENESS.touchscreenMediaQuerySpecs} {

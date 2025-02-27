@@ -18,6 +18,10 @@ export default {
       description:
         'Number of Tag components to include as example child components.',
     },
+    devNote: {
+      description:
+        'Prefer this component over SubListTable, since it contains the semantic HTML table tags. Include tr tags in the children when applicable. If a table is nested in ListTable, use SubListTable for the nested table.',
+    },
   },
   parameters: VIEWPORT.touchScreenViewport,
 } as Meta
@@ -33,8 +37,6 @@ const Template: Story<ListTableStoryProps> = args => {
   // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
   const renderRows = () => {
     return Array.from({ length: tagCount }, (_, i) => {
-      const type =
-        i % 3 === 0 ? 'default' : i % 3 === 1 ? 'interactive' : 'branded'
       const iconName = i % 2 === 0 ? 'alert-circle' : 'check-circle'
       const iconPosition = i % 2 === 0 ? 'left' : 'right'
 
@@ -42,7 +44,7 @@ const Template: Story<ListTableStoryProps> = args => {
         <Flex key={`tag-${i}`} width="100%">
           <Tag
             text={`Tag ${i + 1}`}
-            type={type}
+            type="default"
             iconName={iconName}
             iconPosition={iconPosition}
           />
@@ -59,5 +61,10 @@ const Template: Story<ListTableStoryProps> = args => {
 export const ListTable = Template.bind({})
 ListTable.args = {
   headers: ['Name', 'Type', 'Description'],
+  tagCount: 3,
+}
+
+export const ListTableNoHeader = Template.bind({})
+ListTableNoHeader.args = {
   tagCount: 3,
 }

@@ -35,7 +35,12 @@ export default {
     },
     headerText: {
       control: 'text',
-      description: 'Text to display in the example Tag component header',
+      description:
+        'Text to display in the example Tag component header. NOTE: This is for Storybook ease-of-use only and overrides the "headerChild" behavior (which is what is used in practice in code).',
+    },
+    headerChild: {
+      control: '',
+      description: 'See header text. Does nothing in Storybook.',
     },
   },
   parameters: VIEWPORT.touchScreenViewport,
@@ -65,13 +70,7 @@ const Template: Story<ListAccordionStoryProps> = args => {
             <Flex css={FLEX_STYLE}>
               <Tag
                 text={`Tag ${i + 1}`}
-                type={
-                  i % 3 === 0
-                    ? 'default'
-                    : i % 3 === 1
-                    ? 'interactive'
-                    : 'branded'
-                }
+                type="default"
                 iconName={i % 2 === 0 ? 'alert-circle' : 'check-circle'}
                 iconPosition={i % 2 === 0 ? 'left' : 'right'}
               />
@@ -98,7 +97,6 @@ const Template: Story<ListAccordionStoryProps> = args => {
 export const ListAccordion = Template.bind({})
 ListAccordion.args = {
   alertKind: 'default',
-  icon: 'check-circle',
   tagCount: 5,
   headerText: 'Example Header',
   tableHeaders: ['Name', 'Status', 'Description'],
