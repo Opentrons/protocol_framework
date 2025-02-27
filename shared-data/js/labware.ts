@@ -112,6 +112,8 @@ let _legacyDefinitions: LegacyLabwareDefByName | null = null
 export function getAllDefinitions(
   blockList: string[] = []
 ): LabwareDefByDefURI {
+  // todo(mm, 2025-02-27): This looks suspicious: if we're called twice with two
+  // different blockList values, we'll return the same results for both.
   if (_definitions == null) {
     _definitions = Object.values(
       getAllLabwareDefs()
