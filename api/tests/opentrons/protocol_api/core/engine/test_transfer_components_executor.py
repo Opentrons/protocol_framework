@@ -1116,7 +1116,11 @@ def test_multi_dispense_retract_after_dispense_without_conditioning_volume_or_bl
     add_final_air_gap: bool,
     expect_air_gap: bool,
 ) -> None:
-    """It should execute steps to retract from well after a dispense."""
+    """It should execute retract steps.
+
+    Should execute steps, including expected air gaps, to retract from well during
+    a multi-dispense when there's no conditioning volume, no disposal volume and no blowout.
+    """
     source_location = Location(Point(1, 2, 3), labware=None)
     source_well = decoy.mock(cls=WellCore)
     dest_well = decoy.mock(cls=WellCore)
@@ -1209,7 +1213,11 @@ def test_multi_dispense_retract_after_dispense_with_blowout_without_conditioning
     expect_air_gap: bool,
     expect_blowout: bool,
 ) -> None:
-    """It should execute steps to retract from well after a dispense."""
+    """It should execute retract steps.
+
+    Should execute steps, including expected air gaps, to retract from well during a
+    multi-dispense when there's no conditioning volume while blowout is enabled.
+    """
     source_location = Location(Point(1, 2, 3), labware=None)
     source_well = decoy.mock(cls=WellCore)
     dest_well = decoy.mock(cls=WellCore)
