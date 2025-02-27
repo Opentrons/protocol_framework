@@ -37,7 +37,11 @@ export function DeckInfoLabelTextTag({
           .slice(0, MAX_SUPPORTED_LABELS)
           .map(label => label)}
       </Flex>
-      <StyledText oddStyle="bodyTextRegular" desktopStyle="bodyDefaultRegular">
+      <StyledText
+        css={TEXT_STLYE}
+        oddStyle="bodyTextRegular"
+        desktopStyle="bodyDefaultRegular"
+      >
         {colTwoText}
       </StyledText>
       <Flex css={TAG_CONTAINER_STYLE}>{colThreeTag}</Flex>
@@ -49,6 +53,7 @@ const CONTAINER_STYLE = css`
   border-radius: ${BORDERS.borderRadius12};
   padding: ${SPACING.spacing12};
   width: 100%;
+  min-width: 26.875rem;
   display: ${DISPLAY_GRID};
   grid-template-columns: 120px 1fr ${FLEX_MAX_CONTENT};
   gap: ${SPACING.spacing40};
@@ -66,4 +71,8 @@ const LABEL_CONTAINER_STYLE = css`
 
 const TAG_CONTAINER_STYLE = css`
   justify-self: ${JUSTIFY_END};
+`
+
+const TEXT_STLYE = css`
+  -webkit-line-clamp: 3;
 `
