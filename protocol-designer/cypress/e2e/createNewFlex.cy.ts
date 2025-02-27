@@ -48,12 +48,19 @@ describe('The Redesigned Create Protocol Landing Page', () => {
     steps.add(SetupSteps.Confirm())
     steps.add(SetupSteps.EditProtocolA())
     steps.add(SetupSteps.ChoseDeckSlot('C2'))
+<<<<<<< HEAD
     steps.add(SetupSteps.ChoseDeckSlotLabware('C2'))
+=======
+>>>>>>> 9d461f86ea (chore(pd): move tests and actions changed into chore_release-pd (#17588))
     steps.add(SetupSteps.AddHardwareLabware())
     steps.add(SetupSteps.ClickLabwareHeader())
     steps.add(SetupSteps.ClickWellPlatesSection())
     steps.add(SetupSteps.SelectLabwareByDisplayName('Bio-Rad 96 Well Plate'))
+<<<<<<< HEAD
     steps.add(SetupSteps.ChoseDeckSlotLabware('C2'))
+=======
+    steps.add(SetupSteps.ChoseDeckSlotC2Labware())
+>>>>>>> 9d461f86ea (chore(pd): move tests and actions changed into chore_release-pd (#17588))
     steps.add(SetupSteps.AddLiquid())
     steps.add(SetupSteps.ClickLiquidButton())
     steps.add(SetupSteps.DefineLiquid())
@@ -65,7 +72,10 @@ describe('The Redesigned Create Protocol Landing Page', () => {
     steps.add(SetupSteps.SelectLiquidWells())
     steps.add(SetupSteps.SetVolumeAndSaveForWells('150'))
     steps.add(SetupSteps.ChoseDeckSlot('C3'))
+<<<<<<< HEAD
     steps.add(SetupSteps.ChoseDeckSlotLabware('C3'))
+=======
+>>>>>>> 9d461f86ea (chore(pd): move tests and actions changed into chore_release-pd (#17588))
     steps.add(SetupSteps.AddHardwareLabware())
     steps.add(SetupSteps.ClickLabwareHeader())
     steps.add(SetupSteps.ClickWellPlatesSection())

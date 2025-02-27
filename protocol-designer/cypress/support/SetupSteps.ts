@@ -43,7 +43,7 @@ export enum SetupContent {
   ModulePageH = 'Add your modules',
   ModulePageB = 'Select modules to use in your protocol.',
   EditProtocol = 'Edit protocol',
-  EditLabware = 'Edit labware',
+  EditSlot = 'Edit slot',
   AddLabwareToDeck = 'Add hardware/labware',
   EditHardwareLabwareOnDeck = 'Edit hardware/labware',
   LabwareH = 'Labware',
@@ -56,10 +56,6 @@ export enum SetupContent {
   AddStep = 'Add Step',
   NestDeepWell = 'NEST 96 Deep Well Plate 2mL',
   Save = 'Save',
-}
-
-export const RegexSetupContent = {
-  slotText: /Edit (slot|labware)/i,
 }
 
 export enum SetupLocators {
@@ -82,6 +78,7 @@ export enum SetupLocators {
   Button = 'button',
   TempdeckTempInput = 'input[name="targetTemperature"]',
   DoneButtonLabwareSelection = '[data-testid="Toolbox_confirmButton"]',
+<<<<<<< HEAD
   AspirateWells = 'input[name="aspirate_wells"]',
   div = 'div',
   button = 'button',
@@ -89,14 +86,24 @@ export enum SetupLocators {
   exist = 'exist',
   StepOptionsTestIDThreeDots = 'button.Btn-sc-o3dtr1-0.OverflowBtn___StyledBtn-sc-1mslfxo-0',
   AspirateCheckbox = 'div.Checkbox___StyledFlex3-sc-1mvp7vt-0.gZwGCw.btdgeU',
+=======
+>>>>>>> 9d461f86ea (chore(pd): move tests and actions changed into chore_release-pd (#17588))
 }
 
 /**
  * Helper function to select a labware by display name.
+<<<<<<< HEAD
  * No longer clicks "Done" after selecting.
  */
 function selectLabwareByDisplayName(displayName: string): void {
   cy.contains(displayName).click({ force: true })
+=======
+ * Clicks "Done" after selecting.
+ */
+function selectLabwareByDisplayName(displayName: string): void {
+  cy.contains(displayName).click({ force: true })
+  cy.get(SetupLocators.DoneButtonLabwareSelection).click({ force: true })
+>>>>>>> 9d461f86ea (chore(pd): move tests and actions changed into chore_release-pd (#17588))
 }
 
 /**
@@ -119,18 +126,29 @@ function chooseDeckSlot(slot: string): Cypress.Chainable<JQuery<HTMLElement>> {
     | 'D3',
     () => Cypress.Chainable<JQuery<HTMLElement>>
   > = {
-    A1: () => cy.contains('[data-testid="A1"]', RegexSetupContent.slotText),
-    A2: () => cy.contains('[data-testid="A2"]', RegexSetupContent.slotText),
-    A3: () => cy.contains('[data-testid="A3"]', RegexSetupContent.slotText),
-    B1: () => cy.contains('[data-testid="B1"]', RegexSetupContent.slotText),
-    B2: () => cy.contains('[data-testid="B2"]', RegexSetupContent.slotText),
-    B3: () => cy.contains('[data-testid="B3"]', RegexSetupContent.slotText),
-    C1: () => cy.contains('[data-testid="C1"]', RegexSetupContent.slotText),
-    C2: () => cy.contains('[data-testid="C2"]', RegexSetupContent.slotText),
-    C3: () => cy.contains('[data-testid="C3"]', RegexSetupContent.slotText),
-    D1: () => cy.contains('[data-testid="D1"]', RegexSetupContent.slotText),
-    D2: () => cy.contains('[data-testid="D2"]', RegexSetupContent.slotText),
-    D3: () => cy.contains('[data-testid="D3"]', RegexSetupContent.slotText),
+    A1: () =>
+      cy.contains('foreignObject[x="0"][y="321"]', SetupContent.EditSlot),
+    A2: () =>
+      cy.contains('foreignObject[x="164"][y="321"]', SetupContent.EditSlot),
+    A3: () =>
+      cy.contains('foreignObject[x="328"][y="321"]', SetupContent.EditSlot),
+    B1: () =>
+      cy.contains('foreignObject[x="0"][y="214"]', SetupContent.EditSlot),
+    B2: () =>
+      cy.contains('foreignObject[x="164"][y="214"]', SetupContent.EditSlot),
+    B3: () =>
+      cy.contains('foreignObject[x="328"][y="214"]', SetupContent.EditSlot),
+    C1: () =>
+      cy.contains('foreignObject[x="0"][y="107"]', SetupContent.EditSlot),
+    C2: () =>
+      cy.contains('foreignObject[x="164"][y="107"]', SetupContent.EditSlot),
+    C3: () =>
+      cy.contains('foreignObject[x="328"][y="107"]', SetupContent.EditSlot),
+    D1: () => cy.contains('foreignObject[x="0"][y="0"]', SetupContent.EditSlot),
+    D2: () =>
+      cy.contains('foreignObject[x="164"][y="0"]', SetupContent.EditSlot),
+    D3: () =>
+      cy.contains('foreignObject[x="328"][y="0"]', SetupContent.EditSlot),
   }
 
   const slotAction = deckSlots[slot as keyof typeof deckSlots]
@@ -184,6 +202,7 @@ export const SetupSteps = {
   SelectLabwareByDisplayName: (displayName: string): StepThunk => ({
     call: () => {
       selectLabwareByDisplayName(displayName)
+<<<<<<< HEAD
       cy.get(SetupLocators.DoneButtonLabwareSelection).click({ force: true })
     },
   }),
@@ -194,6 +213,11 @@ export const SetupSteps = {
     },
   }),
 
+=======
+    },
+  }),
+
+>>>>>>> 9d461f86ea (chore(pd): move tests and actions changed into chore_release-pd (#17588))
   /**
    * Select the Opentrons Flex option.
    */
@@ -299,12 +323,15 @@ export const SetupSteps = {
     },
   }),
 
+<<<<<<< HEAD
   AddPlateReader: (): StepThunk => ({
     call: () => {
       cy.contains(SetupContent.PlateReader).click()
     },
   }),
 
+=======
+>>>>>>> 9d461f86ea (chore(pd): move tests and actions changed into chore_release-pd (#17588))
   /**
    * Click "Edit protocol".
    */
@@ -312,16 +339,20 @@ export const SetupSteps = {
     call: () => {
       cy.contains(SetupContent.EditProtocol).click()
 <<<<<<< HEAD
+<<<<<<< HEAD
     },
   }),
 
   ChoseDeckSlot: (deckSlot: string): StepThunk => ({
     call: () => {
       chooseDeckSlot(deckSlot).click({ force: true })
+=======
+>>>>>>> 9d461f86ea (chore(pd): move tests and actions changed into chore_release-pd (#17588))
     },
   }),
 
   /**
+<<<<<<< HEAD
    * Adds hardware/labware to a deck slot.
    */
   AddHardwareLabware: (): StepThunk => ({
@@ -347,51 +378,75 @@ export const SetupSteps = {
 =======
       break
     case SetupActions.ChoseDeckSlotA1:
+=======
+   * Choose deck slot A1.
+   */
+  ChoseDeckSlotA1: (): StepThunk => ({
+    call: () => {
+>>>>>>> 9d461f86ea (chore(pd): move tests and actions changed into chore_release-pd (#17588))
       chooseDeckSlot('A1').click()
-      break
-    case SetupActions.ChoseDeckSlotA2:
+    },
+  }),
+
+  /**
+   * Choose deck slot A2.
+   */
+  ChoseDeckSlotA2: (): StepThunk => ({
+    call: () => {
       chooseDeckSlot('A2').click()
-      break
-    case SetupActions.ChoseDeckSlotA3:
+    },
+  }),
+
+  /**
+   * Choose deck slot A3.
+   */
+  ChoseDeckSlotA3: (): StepThunk => ({
+    call: () => {
       chooseDeckSlot('A3').click()
-      break
-    case SetupActions.ChoseDeckSlotB1:
-      chooseDeckSlot('B1').click()
-      break
-    case SetupActions.ChoseDeckSlotB2:
-      chooseDeckSlot('B2').click()
-      break
-    case SetupActions.ChoseDeckSlotB3:
-      chooseDeckSlot('B3').click()
-      break
-    case SetupActions.ChoseDeckSlotC1:
-      chooseDeckSlot('C1')
-        .find('a[role="button"]')
-        .contains(RegexSetupContent.slotText)
-        .click({ force: true })
-      break
-    case SetupActions.ChoseDeckSlotC2:
-      chooseDeckSlot('C2').click()
-      break
-    case SetupActions.ChoseDeckSlotC3:
-      chooseDeckSlot('C3').click()
-      break
-    case SetupActions.ChoseDeckSlotD1:
-      break
-    case SetupActions.ChoseDeckSlotD2:
-      chooseDeckSlot('D2').click()
-      break
-    case SetupActions.ChoseDeckSlotD3:
-      chooseDeckSlot('D3').click()
-      break
-    case SetupActions.AddHardwareLabware:
+    },
+  }),
+
+  /**
+   * Choose deck slot.
+   */
+  ChoseDeckSlot: (deckSlot: string): StepThunk => ({
+    call: () => {
+      chooseDeckSlot(deckSlot).click()
+    },
+  }),
+
+  /**
+   * Adds hardware/labware to a deck slot.
+   */
+  AddHardwareLabware: (): StepThunk => ({
+    call: () => {
       cy.contains(SetupContent.AddLabwareToDeck).click()
+<<<<<<< HEAD
       break
     case SetupActions.EditHardwareLabwareOnDeck:
       cy.contains(SetupContent.EditHardwareLabwareOnDeck).click({ force: true })
       break
     case SetupActions.ClickLabwareHeader:
 >>>>>>> e64ae45c37 (feat(protocol-designer): bring back deck setup drag & drop (#17477))
+=======
+    },
+  }),
+
+  /**
+   * Edits existing labware/hardware on a deck slot.
+   */
+  EditHardwareLabwareOnDeck: (): StepThunk => ({
+    call: () => {
+      cy.contains(SetupContent.EditHardwareLabwareOnDeck).click()
+    },
+  }),
+
+  /**
+   * Clicks the "Labware" header.
+   */
+  ClickLabwareHeader: (): StepThunk => ({
+    call: () => {
+>>>>>>> 9d461f86ea (chore(pd): move tests and actions changed into chore_release-pd (#17588))
       cy.contains(SetupContent.LabwareH).click()
     },
   }),
@@ -408,12 +463,18 @@ export const SetupSteps = {
   /**
    * Choose deck slot C2 with a labware-locating approach.
    */
+<<<<<<< HEAD
   ChoseDeckSlotLabware: (deckslot: string): StepThunk => ({
     call: () => {
       chooseDeckSlot(deckslot)
+=======
+  ChoseDeckSlotC2Labware: (): StepThunk => ({
+    call: () => {
+      chooseDeckSlot('C2')
+>>>>>>> 9d461f86ea (chore(pd): move tests and actions changed into chore_release-pd (#17588))
         .find('.Box-sc-8ozbhb-0.kIDovv')
         .find('a[role="button"]')
-        .contains(RegexSetupContent.slotText)
+        .contains(SetupContent.EditSlot)
         .click({ force: true })
     },
   }),
@@ -427,6 +488,7 @@ export const SetupSteps = {
     },
   }),
 
+<<<<<<< HEAD
   AddMoveStep: (): StepThunk => ({
     call: () => {
       cy.contains('button', 'Move').should('be.visible').click()
@@ -445,6 +507,8 @@ export const SetupSteps = {
     },
   }),
 
+=======
+>>>>>>> 9d461f86ea (chore(pd): move tests and actions changed into chore_release-pd (#17588))
   /**
    * Clicks the "Liquid" button.
    */
@@ -580,6 +644,7 @@ export const SetupSteps = {
         .click({ force: true })
     },
   }),
+<<<<<<< HEAD
   /**
    * Chose source labware on a step form
    */
@@ -773,6 +838,8 @@ export const SetupSteps = {
       cy.contains('button', 'Delete step').click()
     },
   }),
+=======
+>>>>>>> 9d461f86ea (chore(pd): move tests and actions changed into chore_release-pd (#17588))
 }
 
 /**
@@ -937,12 +1004,15 @@ export const SetupVerifications = {
     },
   }),
 
+<<<<<<< HEAD
   AbsorbanceNotSelectable: (): StepThunk => ({
     call: () => {
       cy.contains('button', SetupContent.PlateReader).should('be.disabled')
     },
   }),
 
+=======
+>>>>>>> 9d461f86ea (chore(pd): move tests and actions changed into chore_release-pd (#17588))
   /**
    * Verify you can open the "Transfer" pop-out panel.
    */
@@ -958,6 +1028,7 @@ export const SetupVerifications = {
     },
   }),
 
+<<<<<<< HEAD
   Delay: (): StepThunk => ({
     // Verifies that the "Delay" button has an associated SVG icon with proper attributes
     call: () => {
@@ -1012,6 +1083,8 @@ export const SetupVerifications = {
     },
   }),
 
+=======
+>>>>>>> 9d461f86ea (chore(pd): move tests and actions changed into chore_release-pd (#17588))
   /**
    * Verify the Magnetic Block image is visible.
    */
