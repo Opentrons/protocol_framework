@@ -140,8 +140,8 @@ class SetStoredLabwareImpl(
         )
 
         # TODO: propagate the limit on max height of the stacker
-        initial_count = params.initialCount if params.initialCount is not None else 5
-        count = min(initial_count, 5)
+        initial_count = params.initialCount if params.initialCount is not None else 6
+        count = min(initial_count, 6)
 
         state_update = (
             update_types.StateUpdate()

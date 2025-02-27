@@ -130,7 +130,7 @@ class StoreImpl(AbstractCommandImpl[StoreParams, SuccessData[StoreResult]]):
             params.moduleId
         )
 
-        if stacker_state.pool_count == 5:
+        if stacker_state.pool_count == 6:
             raise CannotPerformModuleAction(
                 "Cannot store labware in Flex Stacker while it is full"
             )

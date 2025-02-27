@@ -53,7 +53,7 @@ async def test_store_raises_if_full(
         pool_primary_definition=flex_50uL_tiprack,
         pool_adapter_definition=None,
         pool_lid_definition=None,
-        pool_count=5,
+        pool_count=6,
     )
     decoy.when(
         state_view.modules.get_flex_stacker_substate(module_id=stacker_id)

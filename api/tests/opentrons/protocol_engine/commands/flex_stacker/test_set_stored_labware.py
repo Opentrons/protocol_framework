@@ -197,7 +197,7 @@ async def test_set_stored_labware_requires_empty_hopper(
         )
 
 
-@pytest.mark.parametrize("input_count,output_count", [(None, 5), (2, 2), (6, 5)])
+@pytest.mark.parametrize("input_count,output_count", [(None, 6), (2, 2), (7, 6)])
 async def test_set_stored_labware_limits_count(
     input_count: int | None,
     output_count: int,
