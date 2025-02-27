@@ -1,4 +1,5 @@
 from opentrons.drivers.flex_stacker.types import StackerAxis
+from opentrons_shared_data.errors import EnumeratedError
 
 
 class UpdateError(RuntimeError):
@@ -10,7 +11,7 @@ class AbsorbanceReaderDisconnectedError(RuntimeError):
         self.serial = serial
 
 
-class FlexStackerStallError(RuntimeError):
+class FlexStackerStallError(EnumeratedError):
     def __init__(self, serial: str, axis: StackerAxis):
         self.serial = serial
         self.axis = axis

@@ -115,6 +115,22 @@ class StallOrCollisionError(ErrorOccurrence):
     detail: str = ErrorCodes.STALL_OR_COLLISION_DETECTED.value.detail
 
 
+class FlexStackerStallOrCollisionError(ErrorOccurrence):
+    """Returned when the machine detects that axis encoders are reading a different position than expected.
+
+    All axes are stopped at the point where the error was encountered.
+
+    The next thing to move the machine must account for the robot not having a valid estimate
+    of its position. It should be a `home` or `unsafe/updatePositionEstimators`.
+    """
+
+    isDefined: bool = True
+    errorType: Literal["flexStackerStallOrCollision"] = "flexStackerStallOrCollision"
+
+    errorCode: str = ErrorCodes.STALL_OR_COLLISION_DETECTED.value.code
+    detail: str = ErrorCodes.STALL_OR_COLLISION_DETECTED.value.detail
+
+
 class DestinationPositionResult(BaseModel):
     """Mixin for command results that move a pipette."""
 
