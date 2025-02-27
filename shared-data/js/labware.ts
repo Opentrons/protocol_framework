@@ -96,13 +96,18 @@ function getLatest<T extends LabwareDefinition2 | LabwareDefinition3>(
 //
 // todo(mm, 2025-02-27): "getAllLabwareDefs" is a misnomer if this only exposes the
 // latest of each one. We probably want a separate "getLatestLabwareDefs" function?
-const getAllLabwareDefs = (): Record<string, LabwareDefinition2> =>
-  Object.fromEntries(
-    getLatest(Object.values(schema2DefinitionsByURI)).map(def => [
-      getLabwareDefURI(def),
-      def,
-    ])
-  )
+let _getAllLabwareDefsCache: Record<string, LabwareDefinition2> | null = null
+const getAllLabwareDefs = (): Record<string, LabwareDefinition2> => {
+  if (_getAllLabwareDefsCache === null) {
+    _getAllLabwareDefsCache = Object.fromEntries(
+      getLatest(Object.values(schema2DefinitionsByURI)).map(def => [
+        getLabwareDefURI(def),
+        def,
+      ])
+    )
+  }
+  return _getAllLabwareDefsCache
+}
 
 const getAllLegacyDefs = (): Record<string, LabwareDefinition1> =>
   schema1DefinitionsByName
