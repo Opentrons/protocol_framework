@@ -1,7 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { useDispatch, useSelector } from 'react-redux'
 import {
-  FLEX_MAX_CONTENT,
   Flex,
   Icon,
   PrimaryButton,
@@ -59,7 +58,7 @@ export function SubStepsToolbox(
     substeps.substepType === THERMOCYCLER_PROFILE ? (
     <Toolbox
       height="calc(100vh - 6rem)"
-      width={FLEX_MAX_CONTENT}
+      width="21.875rem"
       closeButton={<Icon size="2rem" name="close" />}
       onCloseClick={handleClose}
       confirmButton={

@@ -148,7 +148,6 @@ export function DefineLiquidsModal(
       }
     ),
   ]
-  console.log(liquidClassOptions)
 
   return (
     <HandleEnter
