@@ -264,6 +264,7 @@ class FlexStackerDriver(AbstractFlexStackerDriver):
             loop=loop,
             error_keyword=FS_ERROR_KEYWORD,
             async_error_ack=FS_ASYNC_ERROR_ACK,
+            reset_buffer_before_write=True,
         )
         return cls(connection)
 
