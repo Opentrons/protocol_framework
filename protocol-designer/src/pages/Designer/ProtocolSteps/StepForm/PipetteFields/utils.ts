@@ -1,6 +1,7 @@
-import { getWellRatio } from '/protocol-designer/steplist/utils'
-import type { PathOption, StepType } from '/protocol-designer/form-types'
-import { getPipetteCapacity } from '/protocol-designer/pipettes/pipetteData'
+import { getWellRatio } from '../../../../../steplist/utils'
+import type { PathOption, StepType } from '../../../../../form-types'
+import { getPipetteCapacity } from '../../../../../pipettes/pipetteData'
+
 import {
   volumeInCapacityForMultiDispense,
   volumeInCapacityForMultiAspirate,

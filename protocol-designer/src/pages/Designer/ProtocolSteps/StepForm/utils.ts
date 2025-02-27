@@ -220,6 +220,8 @@ export function getLabwareFieldForPositioningField(
     dispense_delay_mmFromBottom: 'dispense_labware',
     mix_mmFromBottom: 'labware',
     mix_touchTip_mmFromTop: 'labware',
+    aspirate_retract_mmFromBottom: 'aspirate_labware',
+    dispense_retract_mmFromBottom: 'dispense_labware',
   }
   return fieldMap[name]
 }

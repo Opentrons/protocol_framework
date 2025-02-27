@@ -17,8 +17,9 @@ import {
   InputField,
   TYPOGRAPHY,
 } from '@opentrons/components'
-import { getIsTouchTipField } from '/protocol-designer/form-types'
-import { LINK_BUTTON_STYLE } from '/protocol-designer/atoms'
+import { prefixMap } from '../../resources/utils'
+import { getIsTouchTipField } from '../../form-types'
+import { LINK_BUTTON_STYLE } from '../../atoms'
 import { getMainPagePortalEl } from '../Portal'
 import { TOO_MANY_DECIMALS, PERCENT_RANGE_TO_SHOW_WARNING } from './constants'
 import * as utils from './utils'
@@ -238,7 +239,7 @@ export function TipPositionModal(
       type="info"
       width="37.125rem"
       closeOnOutsideClick
-      title={t('shared:tip_position', { prefix })}
+      title={t('shared:tip_position', { prefix: prefixMap[prefix] })}
       onClose={handleCancel}
       footer={
         <Flex

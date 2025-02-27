@@ -283,6 +283,7 @@ export function MaterialsListModal({
                               <Tag
                                 text={`${totalVolume.toString()} uL`}
                                 type="default"
+                                shrinkToContent
                               />
                             }
                           />
