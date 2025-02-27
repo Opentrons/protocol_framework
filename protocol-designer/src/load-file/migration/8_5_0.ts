@@ -58,6 +58,7 @@ export const migrateFile = (
         dispense_touchTip_mmFromBottom,
         aspirate_labware,
         dispense_labware,
+        liquidClassesSupported,
         ...rest
       } = form
       const matchingAspirateLabwareWellDepth = getMigratedPositionFromTop(
@@ -106,6 +107,7 @@ export const migrateFile = (
           dispense_submerge_speed: null,
           aspirate_touchTip_speed: null,
           dispense_touchTip_speed: null,
+          liquidClassesSupported: liquidClassesSupported ?? false,
         },
       }
     }
@@ -115,7 +117,13 @@ export const migrateFile = (
   const savedStepsWithUpdatedMixFields = Object.values(savedStepForms).reduce(
     (acc, form) => {
       if (form.stepType === 'mix') {
-        const { id, mix_touchTip_mmFromBottom, labware, ...rest } = form
+        const {
+          id,
+          mix_touchTip_mmFromBottom,
+          labware,
+          liquidClassesSupported,
+          ...rest
+        } = form
         const matchingLabwareWellDepth = getMigratedPositionFromTop(
           labwareDefinitions,
           loadLabwareCommands,
@@ -135,6 +143,7 @@ export const migrateFile = (
                     mix_touchTip_mmFromBottom - matchingLabwareWellDepth,
                     1
                   ),
+            liquidClassesSupported: liquidClassesSupported ?? false,
           },
         }
       }
