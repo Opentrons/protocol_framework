@@ -6,6 +6,7 @@ import pytest
 from decoy import Decoy
 
 from opentrons.hardware_control.modules import FlexStacker
+from opentrons.protocol_engine.resources import ModelUtils
 
 from opentrons.protocol_engine.state.update_types import (
     StateUpdate,
@@ -38,15 +39,27 @@ from opentrons.protocol_engine.errors import (
 from opentrons_shared_data.labware.labware_definition import LabwareDefinition
 
 
+@pytest.fixture
+def subject(
+    equipment: EquipmentHandler,
+    state_view: StateView,
+    model_utils: ModelUtils,
+) -> StoreImpl:
+    return StoreImpl(
+        state_view=state_view, equipment=equipment, model_utils=model_utils
+    )
+
+
 async def test_store_raises_in_static_mode(
     decoy: Decoy,
     equipment: EquipmentHandler,
     state_view: StateView,
+    model_utils: ModelUtils,
+    subject: StoreImpl,
     stacker_id: FlexStackerId,
     flex_50uL_tiprack: LabwareDefinition,
 ) -> None:
     """It should raise if called when the stacker is static."""
-    subject = StoreImpl(state_view=state_view, equipment=equipment)
     data = flex_stacker.StoreParams(moduleId=stacker_id)
 
     fs_module_substate = FlexStackerSubState(
@@ -72,11 +85,11 @@ async def test_store_raises_if_full(
     decoy: Decoy,
     equipment: EquipmentHandler,
     state_view: StateView,
+    subject: StoreImpl,
     stacker_id: FlexStackerId,
     flex_50uL_tiprack: LabwareDefinition,
 ) -> None:
     """It should raise if called when the stacker is full."""
-    subject = StoreImpl(state_view=state_view, equipment=equipment)
     data = flex_stacker.StoreParams(moduleId=stacker_id)
 
     fs_module_substate = FlexStackerSubState(
@@ -102,11 +115,11 @@ async def test_store_raises_if_carriage_logically_empty(
     decoy: Decoy,
     equipment: EquipmentHandler,
     state_view: StateView,
+    subject: StoreImpl,
     stacker_id: FlexStackerId,
     flex_50uL_tiprack: LabwareDefinition,
 ) -> None:
     """It should raise if called with a known-empty carriage."""
-    subject = StoreImpl(state_view=state_view, equipment=equipment)
     data = flex_stacker.StoreParams(moduleId=stacker_id)
 
     fs_module_substate = FlexStackerSubState(
@@ -135,10 +148,10 @@ async def test_store_raises_if_not_configured(
     decoy: Decoy,
     equipment: EquipmentHandler,
     state_view: StateView,
+    subject: StoreImpl,
     stacker_id: FlexStackerId,
 ) -> None:
     """It should raise if called before the stacker is configured."""
-    subject = StoreImpl(state_view=state_view, equipment=equipment)
     data = flex_stacker.StoreParams(moduleId=stacker_id)
     fs_module_substate = FlexStackerSubState(
         module_id=stacker_id,
@@ -249,6 +262,7 @@ async def test_store_raises_if_labware_does_not_match(
     decoy: Decoy,
     state_view: StateView,
     equipment: EquipmentHandler,
+    subject: StoreImpl,
     stacker_id: FlexStackerId,
     stacker_hardware: FlexStacker,
     pool_adapter: LabwareDefinition | None,
@@ -257,7 +271,6 @@ async def test_store_raises_if_labware_does_not_match(
     param_lid: LabwareDefinition | None,
 ) -> None:
     """It should raise if the labware to be stored does not match the labware pool parameters."""
-    subject = StoreImpl(state_view=state_view, equipment=equipment)
     data = flex_stacker.StoreParams(moduleId=stacker_id)
 
     fs_module_substate = FlexStackerSubState(
@@ -321,11 +334,10 @@ async def test_store(
     state_view: StateView,
     equipment: EquipmentHandler,
     stacker_id: FlexStackerId,
+    subject: StoreImpl,
     stacker_hardware: FlexStacker,
     flex_50uL_tiprack: LabwareDefinition,
 ) -> None:
-    """It should be able to store a labware."""
-    subject = StoreImpl(state_view=state_view, equipment=equipment)
     data = flex_stacker.StoreParams(moduleId=stacker_id)
 
     fs_module_substate = FlexStackerSubState(
