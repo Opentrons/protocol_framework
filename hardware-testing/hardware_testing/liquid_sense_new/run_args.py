@@ -91,26 +91,34 @@ class RunArgs:
     @classmethod
     def build_run_args(cls, args: argparse.Namespace) -> "RunArgs":
         """Build."""
-        _ctx = RunArgs._get_protocol_context(args)
+        # META DATA
         run_id, start_time = create_run_id_and_start_time()
         git_description = get_git_description()
         protocol_cfg = LIQUID_SENSE_CFG[args.pipette][args.channels]
         name = protocol_cfg.metadata["protocolName"]  # type: ignore[union-attr]
-        ui.print_header("LOAD PIPETTE")
-        pipette = _ctx.load_instrument(
-            f"flex_{args.channels}channel_{args.pipette}", args.mount
-        )
+        trials = args.trials
+        tip_volumes = [args.tip]
+
+        # PROTOCOL CONTEXT
+        _ctx = RunArgs._get_protocol_context(args)
+
+        # LABWARE
         loaded_labwares = _ctx.loaded_labwares
         if 12 in loaded_labwares.keys():
             trash = loaded_labwares[12]
         else:
             trash = _ctx.load_labware("opentrons_1_trash_3200ml_fixed", "A3")
+
+        # PIPETTE
+        ui.print_header("LOAD PIPETTE")
+        pipette = _ctx.load_instrument(
+            f"flex_{args.channels}channel_{args.pipette}", args.mount
+        )
         pipette.trash_container = trash
         pipette_tag = helpers._get_tag_from_pipette(pipette, False, False)
+        ui.print_info(f"pipette_tag {pipette_tag}")
 
-        trials = args.trials
-        tip_volumes = [args.tip]
-
+        # DIAL INDICATOR
         dial: Optional[mitutoyo_digimatic_indicator.Mitutoyo_Digimatic_Indicator] = None
         if not _ctx.is_simulating():
             dial_port = list_ports_and_select("Dial Indicator")
@@ -118,16 +126,15 @@ class RunArgs:
                 port=dial_port
             )
             dial.connect()
-        ui.print_info(f"pipette_tag {pipette_tag}")
+
+        # TEST REPORT
         report = build_ls_report(name, run_id, trials, tip_volumes)
         report.set_tag(name)
-        # go ahead and store the meta data now
         store_serial_numbers(
             report,
             pipette_tag,
             git_description,
         )
-
         store_config(
             report,
             name,

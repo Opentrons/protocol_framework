@@ -224,9 +224,11 @@ def run(
             adj_height = height + tip_length_offset
             results.append(height)
             adjusted_results.append(adj_height)
-            ui.print_info(f"Trial results: "
-                          f"height={round(height, 2)}, "
-                          f"adjusted_height={round(adj_height, 2)}")
+            ui.print_info(
+                f"Trial results: "
+                f"height={round(height, 2)}, "
+                f"adjusted_height={round(adj_height, 2)}"
+            )
             end_pos = hw_api.current_position_ot3(OT3Mount.LEFT)
             ui.print_info("Dropping tip")
             if run_args.return_tip:
@@ -300,7 +302,11 @@ def _run_trial(
     hw_mount = OT3Mount.LEFT if run_args.pipette.mount == "left" else OT3Mount.RIGHT
     try:
         height = hw_api.liquid_probe(
-            hw_mount, max_z_dist=20, probe_settings=None, probe=probe_target, response_queue=data_capture
+            hw_mount,
+            max_z_dist=20,
+            probe_settings=None,
+            probe=probe_target,
+            response_queue=data_capture,
         )
         result: LLDResult = LLDResult.success
     except PipetteLiquidNotFoundError as lnf:
