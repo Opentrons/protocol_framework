@@ -1,18 +1,16 @@
 import { useState } from 'react'
 import { css } from 'styled-components'
 
+import { ListTable } from '../../atoms/ListTable'
+import { Icon } from '../../icons'
 import {
-  COLORS,
   DIRECTION_COLUMN,
-  Flex,
-  Icon,
-  SPACING,
-  RESPONSIVENESS,
   JUSTIFY_SPACE_BETWEEN,
   ALIGN_CENTER,
-} from '@opentrons/components'
-
-import { ListTable } from '../../atoms/ListTable'
+} from '../../styles'
+import { SPACING, RESPONSIVENESS } from '../../ui-style-constants'
+import { COLORS } from '../../helix-design-system'
+import { Flex } from '../../primitives'
 
 import type { ReactNode } from 'react'
 import type { FlattenSimpleInterpolation } from 'styled-components'
@@ -63,7 +61,7 @@ export function ListAccordion({
           ) : (
             icon
           )}
-          {headerChild}
+          <div css={HEADER_CHILD_WRAPPER}>{headerChild}</div>
         </Flex>
         <Icon
           name={isOpen ? 'chevron-up' : 'chevron-down'}
@@ -71,9 +69,9 @@ export function ListAccordion({
           css={CHEVRON_STYLE}
         />
       </Flex>
-      <Flex css={contentContainerStyle(isOpen)}>
+      <div css={contentContainerStyle(isOpen)}>
         <ListTable headers={tableHeaders}>{children}</ListTable>
-      </Flex>
+      </div>
     </Flex>
   )
 }
@@ -82,9 +80,10 @@ const containerStyle = (
   alertKind: ListAccordionAlertKind
 ): FlattenSimpleInterpolation => {
   return css`
+    width: 100%;
     flex-direction: ${DIRECTION_COLUMN};
-    padding: ${SPACING.spacing24};
-    border-radius: ${SPACING.spacing16};
+    padding: ${SPACING.spacing12};
+    border-radius: ${SPACING.spacing8};
     gap: ${CONTAINER_GAP};
     background-color: ${alertKind === 'warning'
       ? COLORS.yellow30
@@ -92,6 +91,8 @@ const containerStyle = (
     transition: ${TRANSITION_STYLE};
 
     @media ${RESPONSIVENESS.touchscreenMediaQuerySpecs} {
+      padding: ${SPACING.spacing24};
+      border-radius: ${SPACING.spacing16};
       background-color: ${alertKind === 'warning'
         ? COLORS.yellow35
         : COLORS.grey35};
@@ -101,7 +102,8 @@ const containerStyle = (
 
 const contentContainerStyle = (isOpen: boolean): FlattenSimpleInterpolation => {
   return css`
-    flex-direction: ${DIRECTION_COLUMN};
+    width: 100%;
+    display: block;
     max-height: ${isOpen ? '10000000px' : '0px'};
     opacity: ${isOpen ? 1 : 0};
     overflow: hidden;
@@ -111,20 +113,32 @@ const contentContainerStyle = (isOpen: boolean): FlattenSimpleInterpolation => {
 }
 
 const HEADER_CONTAINER_STYLE = css`
+  width: 100%;
   justify-content: ${JUSTIFY_SPACE_BETWEEN};
-  gap: ${SPACING.spacing40};
-  cursor: pointer;
+  gap: ${SPACING.spacing24};
+
+  @media ${RESPONSIVENESS.touchscreenMediaQuerySpecs} {
+    gap: ${SPACING.spacing40};
+  }
 `
 
 const HEADER_ICON_CHILD_STYLE = css`
+  display: flex;
+  flex-grow: 1;
   gap: ${SPACING.spacing12};
   align-items: ${ALIGN_CENTER};
+`
+
+const HEADER_CHILD_WRAPPER = css`
+  flex-grow: 1;
+  width: 100%;
 `
 
 const ALERT_ICON_STYLE = css`
   color: ${COLORS.yellow60};
   height: ${SPACING.spacing20};
   width: ${SPACING.spacing20};
+  flex-shrink: 0;
 
   @media ${RESPONSIVENESS.touchscreenMediaQuerySpecs} {
     height: ${SPACING.spacing32};
@@ -133,6 +147,12 @@ const ALERT_ICON_STYLE = css`
 `
 
 const CHEVRON_STYLE = css`
-  height: ${SPACING.spacing48};
-  width: ${SPACING.spacing48};
+  height: ${SPACING.spacing32};
+  width: ${SPACING.spacing32};
+  flex-shrink: 0;
+
+  @media ${RESPONSIVENESS.touchscreenMediaQuerySpecs} {
+    height: ${SPACING.spacing48};
+    width: ${SPACING.spacing48};
+  }
 `

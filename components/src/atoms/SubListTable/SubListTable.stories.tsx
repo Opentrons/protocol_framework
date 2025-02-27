@@ -30,6 +30,7 @@ interface SubListTableStoryProps
 const Template: Story<SubListTableStoryProps> = args => {
   const { tagCount, ...subListTableProps } = args
 
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
   const renderTags = () => {
     const tags = []
     for (let i = 0; i < tagCount; i++) {

@@ -1,43 +1,43 @@
 import { css } from 'styled-components'
 
-import {
-  DIRECTION_COLUMN,
-  RESPONSIVENESS,
-  Flex,
-  SPACING,
-  DISPLAY_GRID,
-  StyledText,
-  COLORS,
-} from '@opentrons/components'
+import { StyledText } from '../StyledText'
+import { DIRECTION_COLUMN, DISPLAY_GRID } from '../../styles'
+import { SPACING, RESPONSIVENESS } from '../../ui-style-constants'
+import { COLORS } from '../../helix-design-system'
+import { Flex } from '../../primitives'
 
 import type { ReactNode } from 'react'
 import type { FlattenSimpleInterpolation } from 'styled-components'
 
 export interface SubListTableProps {
   children: ReactNode
-  headers?: [string?, string?, string?]
+  headers?: [string?, string?, string?, string?] // maximum of 4
 }
 
 // SubListTable does not contain the semantic HTML table identity but is otherwise equivalent to ListTable.
-// Use SubListTable when there should a table-esque component in a real table (ListTable).
+// Use SubListTable only when there should a table-esque component in a real table (ListTable), otherwise use ListTable.
 export function SubListTable({
   headers,
   children,
 }: SubListTableProps): JSX.Element {
+  const numHeaders = headers ? headers.filter(Boolean).length : 0
+
   return (
     <Flex css={CONTAINER_STYLE}>
-      <div css={headerContainerStyle(headers?.length ?? 0)}>
-        {headers?.map(header => (
-          <StyledText
-            key={header + Math.random().toString()}
-            oddStyle="bodyTextSemiBold"
-            desktopStyle="bodyDefaultRegular"
-            css={HEADER_ITEM_STYLE}
-          >
-            {header}
-          </StyledText>
-        ))}
-      </div>
+      {headers != null && headers.some(header => header !== undefined) && (
+        <div css={headerContainerStyle(numHeaders)}>
+          {headers?.map(header => (
+            <StyledText
+              key={header + Math.random().toString()}
+              oddStyle="bodyTextSemiBold"
+              desktopStyle="bodyDefaultRegular"
+              css={HEADER_ITEM_STYLE}
+            >
+              {header}
+            </StyledText>
+          ))}
+        </div>
+      )}
       <Flex css={CONTENT_CONTAINER_STYLE}>{children}</Flex>
     </Flex>
   )

@@ -4,7 +4,7 @@ import { screen, fireEvent } from '@testing-library/react'
 import { renderWithProviders } from '../../../testing/utils'
 import { ListAccordion } from '..'
 import { ListTable } from '../../../atoms/ListTable'
-import { Icon } from '@opentrons/components'
+import { Icon } from '../../../icons'
 
 import type { ComponentProps } from 'react'
 

@@ -1,30 +1,29 @@
 import { css } from 'styled-components'
 
-import {
-  DIRECTION_COLUMN,
-  RESPONSIVENESS,
-  SPACING,
-  StyledText,
-  COLORS,
-} from '@opentrons/components'
+import { StyledText } from '../StyledText'
+import { DIRECTION_COLUMN } from '../../styles'
+import { SPACING, RESPONSIVENESS } from '../../ui-style-constants'
+import { COLORS } from '../../helix-design-system'
 
 import type { ReactNode } from 'react'
 import type { FlattenSimpleInterpolation } from 'styled-components'
 
 export interface ListTableProps {
   children: ReactNode
-  headers?: [string?, string?, string?, string?]
+  headers?: [string?, string?, string?, string?] // maximum of 4
 }
 
 // ListTable contains the semantic HTML table identity.
 // This is a table-focused version of SubListTable, and children should include proper
 // <tr> tags when applicable.
 export function ListTable({ headers, children }: ListTableProps): JSX.Element {
+  const numHeaders = headers ? headers.filter(Boolean).length : 0
+
   return (
     <table css={TABLE_STYLE}>
-      {headers && headers.some(header => header !== undefined) && (
+      {headers != null && headers.some(header => header !== undefined) && (
         <thead css={THEAD_STYLE}>
-          <tr css={trStyle(headers.length)}>
+          <tr css={trStyle(numHeaders)}>
             {headers.map(header => (
               <th key={header + Math.random().toString()} css={TH_STYLE}>
                 {header && (

@@ -30,6 +30,7 @@ interface ListTableStoryProps
 const Template: Story<ListTableStoryProps> = args => {
   const { tagCount, ...listTableProps } = args
 
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
   const renderRows = () => {
     const rows = []
     for (let i = 0; i < tagCount; i++) {
