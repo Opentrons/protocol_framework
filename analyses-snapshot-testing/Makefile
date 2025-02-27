@@ -52,6 +52,10 @@ format:
 test-ci:
 	$(PYTHON) -m pipenv run python -m pytest -m "emulated_alpha"
 
+.PHONY: audit
+audit:
+	pipenv run python tests/audit_snapshots.py
+
 .PHONY: test-protocol-analysis
 test-protocol-analysis:
 	pipenv run python -m pytest -v tests/protocol_analyze_test.py
@@ -78,6 +82,11 @@ snapshot-test:
 	@echo "PROTOCOL_NAMES is $(PROTOCOL_NAMES)"
 	@echo "OVERRIDE_PROTOCOL_NAMES is $(OVERRIDE_PROTOCOL_NAMES)"
 	$(PYTHON) -m pipenv run pytest -k analyses_snapshot_test -vv
+
+.PHONY: snapshot-audit-test
+snapshot-audit-test:
+	@echo "validate that analysis outcome matches the test intention"
+	$(PYTHON) -m pipenv run pytest -k audit_snapshot_test -vv
 
 .PHONY: snapshot-test-update
 snapshot-test-update:
