@@ -60,10 +60,16 @@ async def _main(cfg: TestConfig) -> None:
                 ui.print_error("Platform is still detected, cannot start tests")
                 return
 
+    device_info = await stacker._driver.get_device_info()
+    report.set_tag(device_info.sn if device_info.sn else "UNKNOWN")
+
     # RUN TESTS
-    for section, test_run in cfg.tests.items():
-        ui.print_title(section.value)
-        await test_run(stacker, report, section.value)
+    try:
+        for section, test_run in cfg.tests.items():
+            ui.print_title(section.value)
+            await test_run(stacker, report, section.value)
+    except Exception as e:
+        ui.print_error(f"An error occurred: {e}")
 
     # SAVE REPORT
     ui.print_title("DONE")

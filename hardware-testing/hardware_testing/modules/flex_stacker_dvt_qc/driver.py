@@ -1,4 +1,5 @@
 """FLEX Stacker Driver."""
+import asyncio
 from typing import Union, Optional
 import re
 from serial.tools.list_ports import comports  # type: ignore[import]
@@ -42,7 +43,7 @@ class FlexStackerInterface:
                     port = i.device
                     break
         assert port, "could not find connected FLEX Stacker"
-        driver = await FlexStackerDriver.create(port, loop=None)
+        driver = await FlexStackerDriver.create(port, loop=asyncio.get_running_loop())
         return cls(driver)
 
     @classmethod
@@ -174,7 +175,7 @@ class FlexStackerInterface:
             return True
 
         assert isinstance(self._driver, FlexStackerDriver)
-        _LS_RE = re.compile(r"^M112 E:(\d)\n")
+        _LS_RE = re.compile(r"^M112 E:(\d)$")
         res = await self._driver._connection.send_data("M112\n")
         match = _LS_RE.match(res)
         assert match, f"Incorrect Response for E-Stop switch: {res}"
