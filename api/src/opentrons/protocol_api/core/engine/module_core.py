@@ -639,23 +639,25 @@ class AbsorbanceReaderCore(ModuleCore, AbstractAbsorbanceReaderCore):
             raise CannotPerformModuleAction(
                 "Cannot perform Read action on Absorbance Reader without calling `.initialize(...)` first."
             )
-        if self._initialized_value:
-            self._engine_client.execute_command(
-                cmd.absorbance_reader.ReadAbsorbanceParams(
-                    moduleId=self.module_id, fileName=filename
-                )
-            )
+
+        print(f"self._engine_client.state.config.use_virtual_modules: {self._engine_client.state.config.use_virtual_modules}")
         if not self._engine_client.state.config.use_virtual_modules:
-            read_result = (
-                self._engine_client.state.modules.get_absorbance_reader_substate(
-                    self.module_id
-                ).data
-            )
-            if read_result is not None:
-                return read_result
-            raise CannotPerformModuleAction(
-                "Absorbance Reader failed to return expected read result."
-            )
+            if self._initialized_value:
+                self._engine_client.execute_command(
+                    cmd.absorbance_reader.ReadAbsorbanceParams(
+                        moduleId=self.module_id, fileName=filename
+                    )
+                )
+                read_result = (
+                    self._engine_client.state.modules.get_absorbance_reader_substate(
+                        self.module_id
+                    ).data
+                )
+                if read_result is not None:
+                    return read_result
+                raise CannotPerformModuleAction(
+                    "Absorbance Reader failed to return expected read result."
+                )
 
         # When using virtual modules, return all zeroes
         virtual_asbsorbance_result: Dict[int, Dict[str, float]] = {}
