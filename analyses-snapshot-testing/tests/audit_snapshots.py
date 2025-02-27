@@ -36,7 +36,10 @@ def audit_snapshots() -> AuditResult:  # noqa: C901
                 with open(file_path, "r") as f:
                     data = json.load(f)
 
-                errors_present = data["errors"] != []
+                # which is best to check???
+                # they both give the same result
+                # errors_present = data["errors"] != []
+                errors_present = data["result"] != "ok"
 
                 file_path_str = str(file_path)
                 if "Flex_S" in file_path_str or "OT2_S" in file_path_str or "pl_" in file_path_str:
