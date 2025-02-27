@@ -112,6 +112,7 @@ export function getDefaultsForStepType(
         disposalVolume_volume: null,
         dropTip_location: null,
         dropTip_wellNames: undefined,
+        liquid_classes_setting: null,
         nozzles: null,
         path: 'single',
         pickUpTip_location: undefined,

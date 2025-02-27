@@ -6,8 +6,6 @@ import { LiquidClassesStepMoveLiquidTools } from './LiquidClassesStepMoveLiquidT
 
 import type { StepFormProps } from '../../types'
 
-
-
 export function MoveLiquidTools(props: StepFormProps): JSX.Element {
   const {
     toolboxStep,

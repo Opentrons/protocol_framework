@@ -12,7 +12,7 @@ import { getAllLiquidClassDefs } from '@opentrons/shared-data'
 import { getLiquidEntities } from '../../../../../../step-forms/selectors'
 import { getLiquidClassDisplayName } from '../../../../../../liquid-defs/utils'
 
-import type { Dispatch, SetStateAction } from 'react'
+import type { ChangeEvent, Dispatch, SetStateAction } from 'react'
 import type { FieldPropsByName } from '../../types'
 import type { StepFormErrors } from '../../../../../../steplist'
 import type { FormData } from '../../../../../../form-types'
@@ -74,6 +74,7 @@ export const LiquidClassesStepMoveLiquidTools = ({
             .split('-')[0]
             .toLowerCase()}`
         ),
+        value: liquidClassDefName,
         subButtonLabel:
           liquidClassToLiquidsMap[liquidClassDefName] != null
             ? t('protocol_steps:assigned_liquid', {
@@ -90,6 +91,7 @@ export const LiquidClassesStepMoveLiquidTools = ({
     ),
     {
       name: t('protocol_steps:no_liquid_class'),
+      value: '',
       subButtonLabel: '',
     },
   ]
@@ -119,16 +121,19 @@ export const LiquidClassesStepMoveLiquidTools = ({
         padding={`0 ${SPACING.spacing16}`}
       >
         {liquidClassOptions.map(options => {
-          const { name, subButtonLabel } = options
+          const { name, subButtonLabel, value } = options
           return (
             <RadioButton
               key={name}
-              onChange={() => {
+              onChange={(e: ChangeEvent<any>) => {
+                propsForFields.liquid_classes_setting.updateValue(
+                  e.currentTarget.value
+                )
                 setSelectedLiquidClass(name)
               }}
               buttonLabel={name}
               subButtonLabel={subButtonLabel}
-              buttonValue={name}
+              buttonValue={value}
               isSelected={selectedLiquidClass === name}
               largeDesktopBorderRadius
             />
