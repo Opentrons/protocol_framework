@@ -384,13 +384,13 @@ export const SetupSteps = {
 
   ChoseDeckSlotLabware: (deckslot: string): StepThunk => ({
     call: () => {
-      chooseDeckSlot(deckslot)
+      chooseDeckSlot(deckslot).click()
     },
   }),
 
-  ChoseDeckSlotC2Labware: (): StepThunk => ({
+  ChoseDeckSlotWithLabware: (deckslot: string): StepThunk => ({
     call: () => {
-      chooseDeckSlot('C2')
+      chooseDeckSlot(deckslot)
         .find('.Box-sc-8ozbhb-0.kIDovv')
         .find('a[role="button"]')
         .contains(SetupContent.EditSlot)
