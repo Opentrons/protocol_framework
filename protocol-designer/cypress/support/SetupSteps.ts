@@ -78,7 +78,6 @@ export enum SetupLocators {
   Button = 'button',
   TempdeckTempInput = 'input[name="targetTemperature"]',
   DoneButtonLabwareSelection = '[data-testid="Toolbox_confirmButton"]',
-<<<<<<< HEAD
   AspirateWells = 'input[name="aspirate_wells"]',
   div = 'div',
   button = 'button',
@@ -86,25 +85,22 @@ export enum SetupLocators {
   exist = 'exist',
   StepOptionsTestIDThreeDots = 'button.Btn-sc-o3dtr1-0.OverflowBtn___StyledBtn-sc-1mslfxo-0',
   AspirateCheckbox = 'div.Checkbox___StyledFlex3-sc-1mvp7vt-0.gZwGCw.btdgeU',
-=======
->>>>>>> 9d461f86ea (chore(pd): move tests and actions changed into chore_release-pd (#17588))
 }
 
 /**
  * Helper function to select a labware by display name.
-<<<<<<< HEAD
  * No longer clicks "Done" after selecting.
  */
 function selectLabwareByDisplayName(displayName: string): void {
   cy.contains(displayName).click({ force: true })
-=======
- * Clicks "Done" after selecting.
- */
+ 
+  /* 
+
 function selectLabwareByDisplayName(displayName: string): void {
   cy.contains(displayName).click({ force: true })
   cy.get(SetupLocators.DoneButtonLabwareSelection).click({ force: true })
->>>>>>> 9d461f86ea (chore(pd): move tests and actions changed into chore_release-pd (#17588))
 }
+  */
 
 /**
  * chooseDeckSlot is a helper returning a chainable
@@ -202,7 +198,6 @@ export const SetupSteps = {
   SelectLabwareByDisplayName: (displayName: string): StepThunk => ({
     call: () => {
       selectLabwareByDisplayName(displayName)
-<<<<<<< HEAD
       cy.get(SetupLocators.DoneButtonLabwareSelection).click({ force: true })
     },
   }),
@@ -213,11 +208,6 @@ export const SetupSteps = {
     },
   }),
 
-=======
-    },
-  }),
-
->>>>>>> 9d461f86ea (chore(pd): move tests and actions changed into chore_release-pd (#17588))
   /**
    * Select the Opentrons Flex option.
    */
@@ -323,36 +313,28 @@ export const SetupSteps = {
     },
   }),
 
-<<<<<<< HEAD
   AddPlateReader: (): StepThunk => ({
     call: () => {
       cy.contains(SetupContent.PlateReader).click()
     },
   }),
 
-=======
->>>>>>> 9d461f86ea (chore(pd): move tests and actions changed into chore_release-pd (#17588))
   /**
    * Click "Edit protocol".
    */
   EditProtocolA: (): StepThunk => ({
     call: () => {
       cy.contains(SetupContent.EditProtocol).click()
-<<<<<<< HEAD
-<<<<<<< HEAD
     },
   }),
 
   ChoseDeckSlot: (deckSlot: string): StepThunk => ({
     call: () => {
       chooseDeckSlot(deckSlot).click({ force: true })
-=======
->>>>>>> 9d461f86ea (chore(pd): move tests and actions changed into chore_release-pd (#17588))
     },
   }),
 
   /**
-<<<<<<< HEAD
    * Adds hardware/labware to a deck slot.
    */
   AddHardwareLabware: (): StepThunk => ({
@@ -375,15 +357,6 @@ export const SetupSteps = {
    */
   ClickLabwareHeader: (): StepThunk => ({
     call: () => {
-=======
-      break
-    case SetupActions.ChoseDeckSlotA1:
-=======
-   * Choose deck slot A1.
-   */
-  ChoseDeckSlotA1: (): StepThunk => ({
-    call: () => {
->>>>>>> 9d461f86ea (chore(pd): move tests and actions changed into chore_release-pd (#17588))
       chooseDeckSlot('A1').click()
     },
   }),
@@ -421,15 +394,8 @@ export const SetupSteps = {
   AddHardwareLabware: (): StepThunk => ({
     call: () => {
       cy.contains(SetupContent.AddLabwareToDeck).click()
-<<<<<<< HEAD
       break
-    case SetupActions.EditHardwareLabwareOnDeck:
-      cy.contains(SetupContent.EditHardwareLabwareOnDeck).click({ force: true })
-      break
-    case SetupActions.ClickLabwareHeader:
->>>>>>> e64ae45c37 (feat(protocol-designer): bring back deck setup drag & drop (#17477))
-=======
-    },
+    }
   }),
 
   /**
@@ -446,7 +412,6 @@ export const SetupSteps = {
    */
   ClickLabwareHeader: (): StepThunk => ({
     call: () => {
->>>>>>> 9d461f86ea (chore(pd): move tests and actions changed into chore_release-pd (#17588))
       cy.contains(SetupContent.LabwareH).click()
     },
   }),
@@ -463,15 +428,9 @@ export const SetupSteps = {
   /**
    * Choose deck slot C2 with a labware-locating approach.
    */
-<<<<<<< HEAD
   ChoseDeckSlotLabware: (deckslot: string): StepThunk => ({
     call: () => {
       chooseDeckSlot(deckslot)
-=======
-  ChoseDeckSlotC2Labware: (): StepThunk => ({
-    call: () => {
-      chooseDeckSlot('C2')
->>>>>>> 9d461f86ea (chore(pd): move tests and actions changed into chore_release-pd (#17588))
         .find('.Box-sc-8ozbhb-0.kIDovv')
         .find('a[role="button"]')
         .contains(SetupContent.EditSlot)
@@ -488,7 +447,6 @@ export const SetupSteps = {
     },
   }),
 
-<<<<<<< HEAD
   AddMoveStep: (): StepThunk => ({
     call: () => {
       cy.contains('button', 'Move').should('be.visible').click()
@@ -507,8 +465,6 @@ export const SetupSteps = {
     },
   }),
 
-=======
->>>>>>> 9d461f86ea (chore(pd): move tests and actions changed into chore_release-pd (#17588))
   /**
    * Clicks the "Liquid" button.
    */
@@ -644,7 +600,6 @@ export const SetupSteps = {
         .click({ force: true })
     },
   }),
-<<<<<<< HEAD
   /**
    * Chose source labware on a step form
    */
@@ -838,8 +793,6 @@ export const SetupSteps = {
       cy.contains('button', 'Delete step').click()
     },
   }),
-=======
->>>>>>> 9d461f86ea (chore(pd): move tests and actions changed into chore_release-pd (#17588))
 }
 
 /**
@@ -1004,15 +957,12 @@ export const SetupVerifications = {
     },
   }),
 
-<<<<<<< HEAD
   AbsorbanceNotSelectable: (): StepThunk => ({
     call: () => {
       cy.contains('button', SetupContent.PlateReader).should('be.disabled')
     },
   }),
 
-=======
->>>>>>> 9d461f86ea (chore(pd): move tests and actions changed into chore_release-pd (#17588))
   /**
    * Verify you can open the "Transfer" pop-out panel.
    */
@@ -1028,7 +978,6 @@ export const SetupVerifications = {
     },
   }),
 
-<<<<<<< HEAD
   Delay: (): StepThunk => ({
     // Verifies that the "Delay" button has an associated SVG icon with proper attributes
     call: () => {
@@ -1083,8 +1032,6 @@ export const SetupVerifications = {
     },
   }),
 
-=======
->>>>>>> 9d461f86ea (chore(pd): move tests and actions changed into chore_release-pd (#17588))
   /**
    * Verify the Magnetic Block image is visible.
    */
