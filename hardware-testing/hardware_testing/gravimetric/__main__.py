@@ -4,7 +4,6 @@ import argparse
 from typing import List, Union, Dict, Optional, Any, Tuple
 from dataclasses import dataclass
 from opentrons.protocol_api import ProtocolContext
-from opentrons.protocols.api_support.definitions import MAX_SUPPORTED_VERSION
 from . import report
 import subprocess
 from time import sleep
@@ -49,8 +48,6 @@ from hardware_testing.drivers import asair_sensor
 from opentrons.protocol_api import InstrumentContext, disposal_locations
 from opentrons.protocol_engine.types import LabwareOffset
 
-
-API_LEVEL = str(MAX_SUPPORTED_VERSION)
 
 CUSTOM_LABWARE_URIS = ["radwag_pipette_calibration_vial"]
 
@@ -185,7 +182,9 @@ class RunArgs:
     tune_volume_correction: bool
 
     @classmethod
-    def _get_protocol_context(cls, args: argparse.Namespace) -> ProtocolContext:
+    def _get_protocol_context(
+        cls, api_level: str, args: argparse.Namespace
+    ) -> ProtocolContext:
         include_labware_offsets = bool(
             not args.simulate and not args.skip_labware_offsets
         )
@@ -196,7 +195,7 @@ class RunArgs:
             else None
         )
         _ctx = helpers.get_api_context(
-            api_level=None,  # default to using latest version
+            api_level=api_level,  # default to using latest version
             is_simulating=args.simulate,
             pipette_left=_left_pip,
             pipette_right=_right_pip,
@@ -208,16 +207,39 @@ class RunArgs:
     @classmethod
     def build_run_args(cls, args: argparse.Namespace) -> "RunArgs":  # noqa: C901
         """Build."""
-        _ctx = RunArgs._get_protocol_context(args)
+        # TEST META DATA
         operator_name = helpers._get_operator_name(True)
         robot_serial = helpers._get_robot_serial(True)
         run_id, start_time = create_run_id_and_start_time()
         environment_sensor = asair_sensor.BuildAsairSensor(True)
         git_description = get_git_description()
+
+        # SCALE
         if not args.photometric:
-            scale = Scale.build(simulate=(_ctx.is_simulating() or args.sim_scale))
+            scale = Scale.build(simulate=(args.simulate or args.sim_scale))
         else:
             scale = None
+
+        # TIPS
+        tip_batches: Dict[str, str] = {}
+        if args.tip == 0:
+            tip_volumes: List[int] = get_tip_volumes_for_qc(
+                args.pipette, args.channels, args.extra, args.photometric
+            )
+            for tip in tip_volumes:
+                tip_batches[f"tips_{tip}ul"] = helpers._get_tip_batch(True, tip)
+        else:
+            tip_volumes = [args.tip]
+            tip_batches[f"tips_{args.tip}ul"] = helpers._get_tip_batch(True, args.tip)
+
+        # PROTOCOL CONTEXT
+        _cfg_dict = PHOTOMETRIC_CFG if args.photometric else GRAVIMETRIC_CFG_INCREMENT
+        protocol_cfg = _cfg_dict[args.pipette][args.channels][max(tip_volumes)]
+        _ctx = RunArgs._get_protocol_context(
+            protocol_cfg.requirements["apiLevel"], args
+        )
+
+        # PIPETTE
         ui.print_header("LOAD PIPETTE")
         pipette = helpers._load_pipette(
             _ctx,
@@ -234,16 +256,6 @@ class RunArgs:
 
         recorder: Optional[GravimetricRecorder] = None
         kind = ConfigType.photometric if args.photometric else ConfigType.gravimetric
-        tip_batches: Dict[str, str] = {}
-        if args.tip == 0:
-            tip_volumes: List[int] = get_tip_volumes_for_qc(
-                args.pipette, args.channels, args.extra, args.photometric
-            )
-            for tip in tip_volumes:
-                tip_batches[f"tips_{tip}ul"] = helpers._get_tip_batch(True, tip)
-        else:
-            tip_volumes = [args.tip]
-            tip_batches[f"tips_{args.tip}ul"] = helpers._get_tip_batch(True, args.tip)
 
         volumes: Dict[int, List[float]] = {}
         for tip in tip_volumes:
@@ -304,13 +316,14 @@ class RunArgs:
             trials = args.trials
 
         if args.photometric:
-            _tip_cfg = max(tip_volumes)
             if len(tip_volumes) > 0:
                 ui.print_info(
-                    f"WARNING: using source Protocol for {_tip_cfg} tip, "
+                    f"WARNING: using source Protocol for {max(tip_volumes)} tip, "
                     f"but test includes multiple tips ({tip_volumes})"
                 )
-            protocol_cfg = PHOTOMETRIC_CFG[args.pipette][args.channels][_tip_cfg]
+            protocol_cfg = PHOTOMETRIC_CFG[args.pipette][args.channels][
+                max(tip_volumes)
+            ]
             name = protocol_cfg.metadata["protocolName"]  # type: ignore[attr-defined]
             report = execute_photometric.build_pm_report(
                 test_volumes=volumes_list,
@@ -333,16 +346,11 @@ class RunArgs:
                     f"with {args.channels}ch P{args.pipette}"
                 )
                 protocol_cfg = GRAVIMETRIC_CFG_INCREMENT[args.pipette][args.channels][
-                    tip_volumes[0]
+                    max(tip_volumes)
                 ]
             else:
                 protocol_cfg = GRAVIMETRIC_CFG[args.pipette][args.channels]
             name = protocol_cfg.metadata["protocolName"]  # type: ignore[attr-defined]
-            api_level = protocol_cfg.requirements["apiLevel"]
-            assert api_level == API_LEVEL, (
-                f"Protocol API level ({api_level}) does not match script API level ({API_LEVEL})"
-                f", update Protocol file so that is uses {API_LEVEL}"
-            )
             assert scale
             recorder = execute._load_scale(name, scale, run_id, pipette_tag, start_time)
             assert (
