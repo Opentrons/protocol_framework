@@ -32,22 +32,23 @@ const Template: Story<SubListTableStoryProps> = args => {
 
   // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
   const renderTags = () => {
-    const tags = []
-    for (let i = 0; i < tagCount; i++) {
-      tags.push(
+    return Array.from({ length: tagCount }, (_, i) => {
+      const type =
+        i % 3 === 0 ? 'default' : i % 3 === 1 ? 'interactive' : 'branded'
+      const iconName = i % 2 === 0 ? 'alert-circle' : 'check-circle'
+      const iconPosition = i % 2 === 0 ? 'left' : 'right'
+
+      return (
         <Flex key={`tag-${i}`} width="100%">
           <Tag
             text={`Tag ${i + 1}`}
-            type={
-              i % 3 === 0 ? 'default' : i % 3 === 1 ? 'interactive' : 'branded'
-            }
-            iconName={i % 2 === 0 ? 'alert-circle' : 'check-circle'}
-            iconPosition={i % 2 === 0 ? 'left' : 'right'}
+            type={type}
+            iconName={iconName}
+            iconPosition={iconPosition}
           />
         </Flex>
       )
-    }
-    return tags
+    })
   }
 
   return (

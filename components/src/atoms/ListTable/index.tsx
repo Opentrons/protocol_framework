@@ -1,7 +1,7 @@
 import { css } from 'styled-components'
 
 import { StyledText } from '../StyledText'
-import { DIRECTION_COLUMN } from '../../styles'
+import { DIRECTION_COLUMN, DISPLAY_FLEX, DISPLAY_GRID } from '../../styles'
 import { SPACING, RESPONSIVENESS } from '../../ui-style-constants'
 import { COLORS } from '../../helix-design-system'
 
@@ -56,7 +56,7 @@ const THEAD_STYLE = css`
 `
 
 const trStyle = (numHeaders: number): FlattenSimpleInterpolation => css`
-  display: grid;
+  display: ${DISPLAY_GRID};
   grid-template-columns: repeat(${numHeaders}, 1fr);
   gap: ${SPACING.spacing24};
 `
@@ -68,7 +68,7 @@ const TH_STYLE = css`
 `
 
 const TBODY_STYLE = css`
-  display: flex;
+  display: ${DISPLAY_FLEX};
   flex-direction: ${DIRECTION_COLUMN};
   gap: ${SPACING.spacing4};
 

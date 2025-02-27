@@ -10,7 +10,7 @@ import {
 } from '../../styles'
 import { SPACING, RESPONSIVENESS } from '../../ui-style-constants'
 import { COLORS } from '../../helix-design-system'
-import { Flex } from '../../primitives'
+import { Flex, Box } from '../../primitives'
 
 import type { ReactNode } from 'react'
 import type { FlattenSimpleInterpolation } from 'styled-components'
@@ -61,7 +61,7 @@ export function ListAccordion({
           ) : (
             icon
           )}
-          <div css={HEADER_CHILD_WRAPPER}>{headerChild}</div>
+          <Box css={HEADER_CHILD_WRAPPER}>{headerChild}</Box>
         </Flex>
         <Icon
           name={isOpen ? 'chevron-up' : 'chevron-down'}
@@ -69,9 +69,9 @@ export function ListAccordion({
           css={CHEVRON_STYLE}
         />
       </Flex>
-      <div css={contentContainerStyle(isOpen)}>
+      <Box css={contentContainerStyle(isOpen)}>
         <ListTable headers={tableHeaders}>{children}</ListTable>
-      </div>
+      </Box>
     </Flex>
   )
 }

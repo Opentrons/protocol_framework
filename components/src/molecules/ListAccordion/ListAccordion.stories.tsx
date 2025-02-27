@@ -9,6 +9,7 @@ import {
 } from '@opentrons/components'
 
 import { ListAccordion as ListAccordionComponent } from '.'
+import { DISPLAY_FLEX, DISPLAY_GRID } from '../../styles'
 
 import type { ComponentProps } from 'react'
 import type { Story, Meta } from '@storybook/react'
@@ -105,7 +106,7 @@ ListAccordion.args = {
 
 const TR_STYLE = css`
   width: 100%;
-  display: grid;
+  display: ${DISPLAY_GRID};
   grid-template-columns: 1fr;
 `
 
@@ -115,7 +116,7 @@ const TD_STYLE = css`
 
 const FLEX_STYLE = css`
   width: 100%;
-  display: flex;
+  display: ${DISPLAY_FLEX};
 `
 
 const ICON_STYLE = css`
