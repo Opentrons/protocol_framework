@@ -18,6 +18,7 @@
     "title": "Liquid class",
     "tooltip": "Applies predefined pipetting settings to transfer and mix steps using this liquid"
   },
+  "liquid_class_name_description": "{{displayName}} ({{description}})",
   "liquids_added": "Liquids added",
   "liquids": "Liquids",
   "microliters": "µL",

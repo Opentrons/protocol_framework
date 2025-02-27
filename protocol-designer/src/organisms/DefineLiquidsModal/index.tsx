@@ -137,11 +137,18 @@ export function DefineLiquidsModal(
   const liquidClassOptions = [
     { name: 'Choose an option', value: '' },
     ...Object.entries(liquidClassDefs).map(
-      ([liquidClassDefName, { displayName }]) => {
-        return { name: displayName, value: liquidClassDefName }
+      ([liquidClassDefName, { displayName, description }]) => {
+        return {
+          value: liquidClassDefName,
+          name: t('liquids:liquid_class_name_description', {
+            displayName,
+            description,
+          }),
+        }
       }
     ),
   ]
+  console.log(liquidClassOptions)
 
   return (
     <HandleEnter
