@@ -93,8 +93,9 @@ export enum SetupLocators {
  */
 function selectLabwareByDisplayName(displayName: string): void {
   cy.contains(displayName).click({ force: true })
- 
-  /* 
+}
+
+/* 
 
 function selectLabwareByDisplayName(displayName: string): void {
   cy.contains(displayName).click({ force: true })
@@ -355,7 +356,7 @@ export const SetupSteps = {
   /**
    * Clicks the "Labware" header.
    */
-  ClickLabwareHeader: (): StepThunk => ({
+  ClickDeckslotA1: (): StepThunk => ({
     call: () => {
       chooseDeckSlot('A1').click()
     },
@@ -382,30 +383,14 @@ export const SetupSteps = {
   /**
    * Choose deck slot.
    */
-  ChoseDeckSlot: (deckSlot: string): StepThunk => ({
-    call: () => {
-      chooseDeckSlot(deckSlot).click()
-    },
-  }),
 
   /**
    * Adds hardware/labware to a deck slot.
    */
-  AddHardwareLabware: (): StepThunk => ({
-    call: () => {
-      cy.contains(SetupContent.AddLabwareToDeck).click()
-      break
-    }
-  }),
 
   /**
    * Edits existing labware/hardware on a deck slot.
    */
-  EditHardwareLabwareOnDeck: (): StepThunk => ({
-    call: () => {
-      cy.contains(SetupContent.EditHardwareLabwareOnDeck).click()
-    },
-  }),
 
   /**
    * Clicks the "Labware" header.

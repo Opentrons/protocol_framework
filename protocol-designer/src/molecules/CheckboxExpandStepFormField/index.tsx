@@ -1,11 +1,12 @@
 import {
   ALIGN_CENTER,
+  Btn,
   COLORS,
   Check,
   DIRECTION_COLUMN,
   Flex,
   JUSTIFY_SPACE_BETWEEN,
-  ListButton,
+  ListItem,
   SPACING,
   StyledText,
   Tooltip,
@@ -41,18 +42,9 @@ export function CheckboxExpandStepFormField(
   const [targetProps, tooltipProps] = useHoverTooltip()
   return (
     <>
-      <ListButton
-        type="noActive"
-        padding={SPACING.spacing12}
-        disabled={disabled}
-        onClick={() => {
-          if (!disabled) {
-            checkboxUpdateValue(!checkboxValue)
-          }
-        }}
-        color={disabled ? COLORS.grey40 : COLORS.black90}
-      >
+      <ListItem type={disabled ? 'unavailable' : 'noActive'}>
         <Flex
+          padding={SPACING.spacing12}
           width="100%"
           flexDirection={DIRECTION_COLUMN}
           gridGap={SPACING.spacing8}
@@ -64,23 +56,23 @@ export function CheckboxExpandStepFormField(
             <StyledText desktopStyle="bodyDefaultRegular" {...targetProps}>
               {title}
             </StyledText>
-<<<<<<< HEAD
-            <Check
-              color={COLORS.blue50}
-              isChecked={isChecked}
-=======
             <Btn
               data-testid={testId}
               onClick={() => {
                 checkboxUpdateValue(!checkboxValue)
               }}
->>>>>>> 9d461f86ea (chore(pd): move tests and actions changed into chore_release-pd (#17588))
               disabled={disabled}
-            />
+            >
+              <Check
+                color={COLORS.blue50}
+                isChecked={isChecked}
+                disabled={disabled}
+              />
+            </Btn>
           </Flex>
           {children}
         </Flex>
-      </ListButton>
+      </ListItem>
       {tooltipText != null ? (
         <Tooltip tooltipProps={tooltipProps}>{tooltipText}</Tooltip>
       ) : null}
