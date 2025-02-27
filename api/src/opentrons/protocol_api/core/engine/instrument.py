@@ -51,7 +51,10 @@ from ...disposal_locations import TrashBin, WasteChute
 if TYPE_CHECKING:
     from .protocol import ProtocolCore
     from opentrons.protocol_api._liquid import LiquidClass
-    from opentrons.protocol_api._liquid_properties import TransferProperties
+    from opentrons.protocol_api._liquid_properties import (
+        TransferProperties,
+        MultiDispenseProperties,
+    )
 
 _DISPENSE_VOLUME_VALIDATION_ADDED_IN = APIVersion(2, 17)
 _RESIN_TIP_DEFAULT_VOLUME = 400
@@ -1295,15 +1298,10 @@ class InstrumentCore(AbstractInstrument[WellCore, LabwareCore]):
         min_asp_vol_for_multi_dispense = 2 * volume
         if transfer_props.multi_dispense is None or (
             transfer_props.multi_dispense is not None
-            and (
-                min_asp_vol_for_multi_dispense
-                + transfer_props.multi_dispense.conditioning_by_volume.get_for_volume(
-                    min_asp_vol_for_multi_dispense
-                )
-                + transfer_props.multi_dispense.disposal_by_volume.get_for_volume(
-                    min_asp_vol_for_multi_dispense
-                )
-                > working_volume
+            and not self._tip_can_hold_volume_for_multi_dispensing(
+                transfer_volume=min_asp_vol_for_multi_dispense,
+                multi_dispense_properties=transfer_props.multi_dispense,
+                tip_working_volume=working_volume,
             )
         ):
             self.transfer_liquid(
@@ -1395,16 +1393,10 @@ class InstrumentCore(AbstractInstrument[WellCore, LabwareCore]):
             # This loop looks at the next volumes to dispense and calculates how many
             # dispense volumes plus their conditioning & disposal volumes can fit into
             # the tip. It then collects these volumes and their destinations in a list.
-            while not is_last_step and (
-                total_aspirate_volume
-                + next_step_volume
-                + transfer_props.multi_dispense.disposal_by_volume.get_for_volume(
-                    total_aspirate_volume + next_step_volume
-                )
-                + transfer_props.multi_dispense.conditioning_by_volume.get_for_volume(
-                    total_aspirate_volume + next_step_volume
-                )
-                <= working_volume
+            while not is_last_step and self._tip_can_hold_volume_for_multi_dispensing(
+                transfer_volume=total_aspirate_volume + next_step_volume,
+                multi_dispense_properties=transfer_props.multi_dispense,
+                tip_working_volume=working_volume,
             ):
                 total_aspirate_volume += next_step_volume
                 vol_dest_combo.append((next_step_volume, next_dest))
@@ -1433,8 +1425,8 @@ class InstrumentCore(AbstractInstrument[WellCore, LabwareCore]):
                         air_gap=0,
                     )
                 ]
-            use_single_dispense = False
 
+            use_single_dispense = False
             if total_aspirate_volume == volume and len(vol_dest_combo) == 1:
                 # We are only doing a single transfer. Either because this is the last
                 # remaining volume to dispense or, once this function accepts a list of
@@ -1450,8 +1442,8 @@ class InstrumentCore(AbstractInstrument[WellCore, LabwareCore]):
                 and not transfer_props.multi_dispense.retract.blowout.enabled
             ):
                 raise RuntimeError(
-                    "The distribution uses a disposal volume but location for disposing off"
-                    " the disposal volume is not found since blowout is disabled."
+                    "Distribute liquid uses a disposal volume but location for disposing of"
+                    " the disposal volume cannot be found when blowout is disabled."
                     " Specify a blowout location and enable blowout when using a disposal volume."
                 )
 
@@ -1470,8 +1462,8 @@ class InstrumentCore(AbstractInstrument[WellCore, LabwareCore]):
             # If the tip has a volume corresponding to a single destination, then
             # do a single-dispense into that destination.
             for next_vol, next_dest in vol_dest_combo:
-                tip_contents = (
-                    self.dispense_liquid_class(
+                if use_single_dispense:
+                    tip_contents = self.dispense_liquid_class(
                         volume=next_vol,
                         dest=next_dest,
                         source=source,
@@ -1483,28 +1475,46 @@ class InstrumentCore(AbstractInstrument[WellCore, LabwareCore]):
                         else True,
                         trash_location=trash_location,
                     )
-                    if use_single_dispense
-                    else (
-                        self.dispense_liquid_class_during_multi_dispense(
-                            volume=next_vol,
-                            dest=next_dest,
-                            source=source,
-                            transfer_properties=transfer_props,
-                            transfer_type=tx_comps_executor.TransferType.ONE_TO_MANY,
-                            tip_contents=tip_contents,
-                            add_final_air_gap=False
-                            if is_last_step and new_tip == TransferTipPolicyV2.NEVER
-                            else True,
-                            trash_location=trash_location,
-                            conditioning_volume=conditioning_vol,
-                            disposal_volume=disposal_vol,
-                        )
+                else:
+                    tip_contents = self.dispense_liquid_class_during_multi_dispense(
+                        volume=next_vol,
+                        dest=next_dest,
+                        source=source,
+                        transfer_properties=transfer_props,
+                        transfer_type=tx_comps_executor.TransferType.ONE_TO_MANY,
+                        tip_contents=tip_contents,
+                        add_final_air_gap=False
+                        if is_last_step and new_tip == TransferTipPolicyV2.NEVER
+                        else True,
+                        trash_location=trash_location,
+                        conditioning_volume=conditioning_vol,
+                        disposal_volume=disposal_vol,
                     )
-                )
             tip_used = True
 
         if new_tip != TransferTipPolicyV2.NEVER:
             _drop_tip()
+
+    def _tip_can_hold_volume_for_multi_dispensing(
+        self,
+        transfer_volume: float,
+        multi_dispense_properties: MultiDispenseProperties,
+        tip_working_volume: float,
+    ) -> bool:
+        """
+        Whether the tip can hold the volume plus the conditioning and disposal volumes
+        required for multi-dispensing.
+        """
+        return (
+            transfer_volume
+            + multi_dispense_properties.conditioning_by_volume.get_for_volume(
+                transfer_volume
+            )
+            + multi_dispense_properties.disposal_by_volume.get_for_volume(
+                transfer_volume
+            )
+            <= tip_working_volume
+        )
 
     def consolidate_liquid(  # noqa: C901
         self,
@@ -1757,7 +1767,7 @@ class InstrumentCore(AbstractInstrument[WellCore, LabwareCore]):
         components_executor.aspirate_and_wait(volume=volume)
         if (
             transfer_type == tx_comps_executor.TransferType.ONE_TO_MANY
-            and conditioning_volume not in [None, 0]
+            and not conditioning_volume  # Whether conditioning volume is 0 or None
             and transfer_properties.multi_dispense is not None
         ):
             # Dispense the conditioning volume
