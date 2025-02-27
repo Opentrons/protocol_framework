@@ -1,7 +1,7 @@
 """Command models to configure the stored labware pool of a Flex Stacker.."""
 
 from __future__ import annotations
-from typing import Optional, Literal, TYPE_CHECKING
+from typing import List, Optional, Literal, TYPE_CHECKING
 from typing_extensions import Type
 
 from pydantic import BaseModel, Field
@@ -144,9 +144,17 @@ class SetStoredLabwareImpl(
             labware_def, lid_def, adapter_def
         )
 
-        # TODO: propagate the limit on max height of the stacker
-        initial_count = params.initialCount if params.initialCount is not None else 5
-        count = min(initial_count, 5)
+        pool_height = self._state_view.geometry.get_height_of_labware_stack(
+            [x for x in [lid_def, labware_def, adapter_def] if x is not None]
+        )
+        max_pool_count = self._state_view.modules.stacker_max_pool_count_by_height(
+            params.moduleId, pool_height
+        )
+
+        initial_count = (
+            params.initialCount if params.initialCount is not None else max_pool_count
+        )
+        count = min(initial_count, max_pool_count)
 
         state_update = (
             update_types.StateUpdate()

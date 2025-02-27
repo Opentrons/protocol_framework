@@ -14,6 +14,7 @@ from typing import (
     Union,
     overload,
 )
+import math
 from numpy import array, dot, double as npdouble
 from numpy.typing import NDArray
 
@@ -1416,3 +1417,25 @@ class ModuleView:
             addressableAreaName="absorbanceReaderV1LidDock" + lid_doc_slot.value
         )
         return lid_dock_area
+
+    def get_stacker_max_fill_height(self, module_id: str):
+        """Get the maximum fill height for the Flex Stacker."""
+        definition = self.get_definition(module_id)
+
+        if (
+            definition.moduleType == ModuleType.FLEX_STACKER
+            and hasattr(definition.dimensions, "maxStackerFillHeight")
+            and definition.dimensions.maxStackerFillHeight is not None
+        ):
+            return definition.dimensions.maxStackerFillHeight
+        else:
+            raise errors.WrongModuleTypeError(
+                f"Cannot get max fill height of {definition.moduleType}"
+            )
+
+    def stacker_max_pool_count_by_height(
+        self, module_id: str, pool_height: float
+    ) -> int:
+        """Get the maximum stack count for the Flex Stacker by stack height."""
+        max_fill_height = self.get_stacker_max_fill_height(module_id)
+        return math.floor(max_fill_height / pool_height)
