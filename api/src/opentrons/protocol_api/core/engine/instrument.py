@@ -1767,7 +1767,7 @@ class InstrumentCore(AbstractInstrument[WellCore, LabwareCore]):
         components_executor.aspirate_and_wait(volume=volume)
         if (
             transfer_type == tx_comps_executor.TransferType.ONE_TO_MANY
-            and not conditioning_volume  # Whether conditioning volume is 0 or None
+            and conditioning_volume not in [None, 0.0]
             and transfer_properties.multi_dispense is not None
         ):
             # Dispense the conditioning volume
