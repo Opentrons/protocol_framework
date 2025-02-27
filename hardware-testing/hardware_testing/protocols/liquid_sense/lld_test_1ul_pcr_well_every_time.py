@@ -13,7 +13,7 @@ from hardware_testing.protocols import (
 )
 import math
 
-metadata = {"protocolName": "LLD 1uL PCR-to-MVS-24FEB"}
+metadata = {"protocolName": "LLD 1uL PCR-to-MVS-27FEB"}
 requirements = {"robotType": "Flex", "apiLevel": "2.22"}
 
 SLOTS = {
@@ -34,7 +34,7 @@ SUBMERGE_MM = -3.0
 TIP_VOLUME = 50
 PIP_VOLUME = 50
 DEAD_VOL_DILUENT = 3000
-DEAD_VOL_DYE = 20
+DEAD_VOL_DYE = 30
 
 SRC_LABWARE = "opentrons_96_wellplate_200ul_pcr_full_skirt"
 DST_LABWARE = "corning_96_wellplate_360ul_flat"
