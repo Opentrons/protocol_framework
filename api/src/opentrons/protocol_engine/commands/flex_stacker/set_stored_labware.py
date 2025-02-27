@@ -1,7 +1,7 @@
 """Command models to configure the stored labware pool of a Flex Stacker.."""
 
 from __future__ import annotations
-from typing import List, Optional, Literal, TYPE_CHECKING
+from typing import Optional, Literal, TYPE_CHECKING
 from typing_extensions import Type
 
 from pydantic import BaseModel, Field

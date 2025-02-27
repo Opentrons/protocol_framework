@@ -1418,7 +1418,7 @@ class ModuleView:
         )
         return lid_dock_area
 
-    def get_stacker_max_fill_height(self, module_id: str):
+    def get_stacker_max_fill_height(self, module_id: str) -> float:
         """Get the maximum fill height for the Flex Stacker."""
         definition = self.get_definition(module_id)
 
@@ -1438,4 +1438,5 @@ class ModuleView:
     ) -> int:
         """Get the maximum stack count for the Flex Stacker by stack height."""
         max_fill_height = self.get_stacker_max_fill_height(module_id)
+        assert max_fill_height > 0
         return math.floor(max_fill_height / pool_height)
