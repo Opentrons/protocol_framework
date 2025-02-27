@@ -115,41 +115,6 @@ describe('The Redesigned Create Protocol Landing Page', () => {
     steps.add(SetupSteps.BlowoutTransferDestination())
     steps.add(SetupVerifications.ExtraDispenseTransfer())
     steps.add(SetupSteps.Save())
-
-    /* 
-    SetupSteps.SelectDestinationWells,
-    SetupSteps.WellSelector,
-    SetupSteps.SaveSelectedWells,
-    SetupSteps.InputTransferVolume('30'),
-    SetupSteps.Continue,
-    SetupSteps.PrewetAspirate,
-    Beep
-    SetupSteps.DelayAspirate,
-    SetupSteps.TouchTipAspirate,
-    SetupSteps.MixAspirate,
-    SetupSteps.AspirateMixVolume('20'),
-    SetupSteps.AspirateMixTimes('2'),
-    SetupSteps.AirGapAspirate,
-    SetupSteps.AspirateAirGapVolume('10'),
-    boop 
-    SetupVerifications.Delay,
-    SetupVerifications.PreWet,
-    SetupVerifications.TouchTip,
-    SetupVerifications.MixT,
-    SetupVerifications.AirGap,
-    Bap 
-  
-    SetupSteps.SelectDispense,
-    SetupSteps.Delay,
-    SetupSteps.TouchTipAspirate,
-    SetupSteps.MixAspirate,
-    SetupSteps.AirGapAspirate,
-    SetupSteps.DispenseMixVolume('20'),
-    SetupSteps.DispenseMixTimes,
-    SetupSteps.DispenseAirGapVolume,
-    SetupSteps.BlowoutTransferDestination,
-    SetupVerifications.ExtraDispenseTransfer,
-    */
     steps.execute()
   })
 })
