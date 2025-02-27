@@ -23,6 +23,7 @@ interface CheckboxExpandStepFormFieldProps {
   children?: ReactNode
   tooltipText?: string | null
   disabled?: boolean
+  testId?: string
 }
 export function CheckboxExpandStepFormField(
   props: CheckboxExpandStepFormFieldProps
@@ -35,6 +36,7 @@ export function CheckboxExpandStepFormField(
     title,
     tooltipText,
     disabled = false,
+    testId,
   } = props
 
   const [targetProps, tooltipProps] = useHoverTooltip()
@@ -55,6 +57,7 @@ export function CheckboxExpandStepFormField(
               {title}
             </StyledText>
             <Btn
+              data-testid={testId}
               onClick={() => {
                 checkboxUpdateValue(!checkboxValue)
               }}
