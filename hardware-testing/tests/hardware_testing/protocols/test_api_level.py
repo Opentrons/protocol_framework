@@ -17,7 +17,7 @@ def test_protocol_versions_are_latest() -> None:
     ]
 
     # NOTE: (sigler) it may be the case that for specific protocols we could want to
-    #       leave them tied to specific API level. HOWEVER, we should by DEFAULT by
+    #       leave them tied to specific API level. HOWEVER, we should by DEFAULT be
     #       testing with the latest API level in the absence of any good reason not to.
     expected_version = str(MAX_SUPPORTED_VERSION)
 
@@ -35,4 +35,4 @@ def test_protocol_versions_are_latest() -> None:
             f"{len(failures)} gravimetric protocols do not have expected API level: "
         )
         error_msg += ",".join([f"{f[0]}({f[1]}!={f[2]})" for f in failures])
-        raise AssertionError(error_msg)
+        raise ValueError(error_msg)
