@@ -1,5 +1,11 @@
+from typing import Optional, Dict, Sequence
+
 from opentrons.drivers.flex_stacker.types import StackerAxis
-from opentrons_shared_data.errors import EnumeratedError
+from opentrons_shared_data.errors import (
+    EnumeratedError,
+    RoboticsControlError,
+    ErrorCodes,
+)
 
 
 class UpdateError(RuntimeError):
@@ -11,7 +17,18 @@ class AbsorbanceReaderDisconnectedError(RuntimeError):
         self.serial = serial
 
 
-class FlexStackerStallError(EnumeratedError):
-    def __init__(self, serial: str, axis: StackerAxis):
+class FlexStackerStallError(RoboticsControlError):
+    def __init__(
+        self,
+        serial: str,
+        axis: StackerAxis,
+        message: Optional[str] = None,
+        detail: Optional[Dict[str, str]] = None,
+        wrapping: Optional[Sequence[EnumeratedError]] = None,
+    ) -> None:
+        """Build a StallOrCollisionDetectedError."""
         self.serial = serial
         self.axis = axis
+        super().__init__(
+            ErrorCodes.STALL_OR_COLLISION_DETECTED, message, detail, wrapping
+        )
