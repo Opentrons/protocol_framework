@@ -38,7 +38,7 @@ async def run(stacker: FlexStacker, report: CSVReport, section: str) -> None:
             ui.print_header(f"Check {tag} {color}")
             if not stacker._simulating:
                 await stacker._driver.set_led(1.0, color, external)
-                led_on = ui.get_user_answer(f"Is the {tag} RED LED on?")
+                led_on = ui.get_user_answer(f"Is the {tag} {color} LED on?")
             else:
                 led_on = True
             report(section, f"{tag}-{color}", [CSVResult.from_bool(led_on)])
