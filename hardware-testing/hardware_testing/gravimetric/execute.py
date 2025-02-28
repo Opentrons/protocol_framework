@@ -532,7 +532,6 @@ def _run_trial(
                     print(e)
         # NOTE: required to remove air-gap before calling configure-for-volume
         trial.pipette.dispense(trial.pipette.current_volume, push_out=0)
-        trial.pipette.prepare_to_aspirate()
         # FIXME: this should happen inside the `transfer_liquid` command
         #        so delete this `configure` call once that is added
         if trial.mode == "default":
@@ -542,6 +541,7 @@ def _run_trial(
             trial.pipette.configure_for_volume(volume=trial.pipette.min_volume)
         else:
             trial.pipette.configure_for_volume(volume=trial.volume)
+        trial.pipette.prepare_to_aspirate()
         (
             enable_meniscus_rel,
             disable_meniscus_rel,
