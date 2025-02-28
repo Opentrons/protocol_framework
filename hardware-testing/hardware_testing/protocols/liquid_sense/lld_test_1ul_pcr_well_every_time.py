@@ -89,6 +89,7 @@ def add_parameters(parameters: ParameterContext) -> None:
         minimum = 0.5
     )
 
+
 def get_latest_version(load_name: str) -> int:
     labware_def_location = (
         f"{get_shared_data_root()}/labware/definitions/3/{load_name}/"
@@ -372,8 +373,6 @@ def run(ctx: ProtocolContext) -> None:
     n = 0
     if not skip_diluent:
         for (vol, plate) in zip(volume_list, dst_labwares):
-            if vol == 5:
-                push_out = 3.9
             lid_for_plate = plate.parent
             print(tip_counter)
             if tip_counter >= ((4 * 96) - 21):
@@ -421,6 +420,8 @@ def run(ctx: ProtocolContext) -> None:
             fill_plate_with_diluent(
                 plate=plate, baseline=baseline, initial_fill=False, vol=vol
             )
+            if vol == 5:
+                push_out = 3.9
             if n == 0:
                 # if first plate, move to slot D1
                 ctx.move_labware(plate, "D1", use_gripper=True)
