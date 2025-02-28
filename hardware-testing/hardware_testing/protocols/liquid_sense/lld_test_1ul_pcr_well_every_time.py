@@ -359,6 +359,8 @@ def run(ctx: ProtocolContext) -> None:
         src_well_str = src_well_letter + str(plate_num + 1)
         src_well = src_labware[src_well_str]
         tip_counter += 1
+        if target_ul == 5:
+            push_out = 3.9
         pipette.pick_up_tip()
         if "LLD" in asp_behavior:
             pipette.require_liquid_presence(src_well)
@@ -444,6 +446,7 @@ def run(ctx: ProtocolContext) -> None:
             )
             if vol == 5:
                 push_out = 3.9
+                print(f"push out is {push_out}")
             if n == 0:
                 # if first plate, move to slot D1
                 ctx.move_labware(plate, "D1", use_gripper=True)
