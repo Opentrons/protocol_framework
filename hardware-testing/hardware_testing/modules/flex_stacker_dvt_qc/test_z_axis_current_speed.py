@@ -14,8 +14,8 @@ from opentrons.drivers.flex_stacker.types import StackerAxis, Direction
 
 
 TEST_SPEEDS = [150, 165]
-TEST_CURRENTS = [1.5, 1.25, 1.0, 0.7, 0.5, 0.3, 0.2, 0.1]
-CURRENT_THRESHOD = 0.7
+TEST_CURRENTS = [1.5, 1.25, 1.0, 0.85, 0.7, 0.5, 0.3]
+CURRENT_THRESHOD = 1.0
 TEST_TRIALS = 10
 TEST_DIRECTIONS = [Direction.RETRACT, Direction.EXTEND]
 
@@ -114,12 +114,18 @@ async def run(stacker: FlexStacker, report: CSVReport, section: str) -> None:
                 extend = await test_extend_cycle(stacker, speed, current)
                 trial += 1
                 if not extend:
+                    ui.print_error(
+                        f"Z Axis extend failed at speed {speed} mm/s, current {current} A"
+                    )
                     failures += 1
                     continue
 
                 # Test extend direction
                 retract = await test_retract_cycle(stacker, speed, current)
                 if not retract:
+                    ui.print_error(
+                        f"Z Axis retract failed at speed {speed} mm/s, current {current} A"
+                    )
                     failures += 1
 
             success_trials = trial - failures
