@@ -1,6 +1,6 @@
 """Gravimetric."""
 from time import sleep
-from typing import Optional, Tuple, List, Dict
+from typing import Optional, Tuple, List, Dict, Callable
 
 from opentrons.protocol_api import (
     ProtocolContext,
@@ -418,12 +418,15 @@ def _run_trial(
     # FIXME: Liquid-height tracking in API is not yet implemented in this script
     #        so for now we are still using the custom liquid-height code here, and
     #        tell the API's liquid-class to move the correct submerge depth (relative to well-bottom)
-    def _calculate_meniscus_relative_offsets(is_aspirate: bool) -> None:
+    def _calculate_meniscus_relative_offsets(
+        is_aspirate: bool,
+    ) -> Tuple[Callable, Callable]:
         _attr_name = "aspirate" if is_aspirate else "dispense"
         _asp_or_disp = getattr(transfer_properties, _attr_name)
         _retract_mm = max(
             0.0, _asp_or_disp.submerge.offset.z, _asp_or_disp.retract.offset.z
         )
+        print("here", _retract_mm)
         approach, submerge, retract = _get_approach_submerge_retract_heights(
             trial.well,
             trial.liquid_tracker,
@@ -435,6 +438,15 @@ def _run_trial(
             blank=trial.blank,
             channel_count=trial.channel_count,
         )
+        input(f"{approach},{submerge},{retract}")
+
+        _original_submerge_position_reference = _asp_or_disp.submerge.position_reference
+        _original_position_reference = _asp_or_disp.position_reference
+        _original_retract_position_reference = _asp_or_disp.retract.position_reference
+        _original_submerge_offset_z = _asp_or_disp.submerge.offset.z
+        _original_offset_z = _asp_or_disp.offset.z
+        _original_retract_offset_z = _asp_or_disp.retract.offset.z
+
         # NOTE: setting all position references to BOTTOM
         _asp_or_disp.submerge.position_reference = PositionReference.WELL_BOTTOM
         _asp_or_disp.position_reference = PositionReference.WELL_BOTTOM
@@ -443,6 +455,31 @@ def _run_trial(
         _asp_or_disp.submerge.offset.z = approach
         _asp_or_disp.offset.z = submerge
         _asp_or_disp.retract.offset.z = retract
+
+        def _enable() -> None:
+            # NOTE: setting all position references to BOTTOM
+            _asp_or_disp.submerge.position_reference = PositionReference.WELL_BOTTOM
+            _asp_or_disp.position_reference = PositionReference.WELL_BOTTOM
+            _asp_or_disp.retract.position_reference = PositionReference.WELL_BOTTOM
+            # update liquid-class offsets based on CALCULATED meniscus height
+            _asp_or_disp.submerge.offset.z = approach
+            _asp_or_disp.offset.z = submerge
+            _asp_or_disp.retract.offset.z = retract
+
+        def _disable() -> None:
+            _asp_or_disp.submerge.position_reference = (
+                _original_submerge_position_reference
+            )
+            _asp_or_disp.position_reference = _original_position_reference
+            _asp_or_disp.retract.position_reference = (
+                _original_retract_position_reference
+            )
+            # update liquid-class offsets based on CALCULATED meniscus height
+            _asp_or_disp.submerge.offset.z = _original_submerge_offset_z
+            _asp_or_disp.offset.z = _original_offset_z
+            _asp_or_disp.retract.offset.z = _original_retract_offset_z
+
+        return _enable, _disable
 
     # RUN ASPIRATE
     if not transfer_properties:
@@ -463,21 +500,6 @@ def _run_trial(
         )
         tip_contents = None
     else:
-        # FIXME: this should happen inside the `transfer_liquid` command
-        #        so delete this `configure` call once that is added
-        # NOTE: required to remove air-gap before calling configure-for-volume
-        trial.pipette.dispense(trial.pipette.current_volume, push_out=0)
-        trial.pipette.prepare_to_aspirate()
-        if trial.mode == "default":
-            trial.pipette.configure_for_volume(volume=trial.pipette.max_volume)
-        elif trial.mode == "lowVolumeDefault":
-            assert trial.pipette.max_volume == 50
-            trial.pipette.configure_for_volume(volume=trial.pipette.min_volume)
-        else:
-            trial.pipette.configure_for_volume(volume=trial.volume)
-        _calculate_meniscus_relative_offsets(is_aspirate=True)
-        # FIXME: This assumes whatever is in the pipette from last trial is air (not liquid),
-        #        and so this would break any sort of multi-dispense testing
         if tune_volume_correction:
             _prev_vol_corr_val_asp = (
                 transfer_properties.aspirate.correction_by_volume.get_for_volume(
@@ -510,6 +532,25 @@ def _run_trial(
                     break
                 except ValueError as e:
                     print(e)
+        # NOTE: required to remove air-gap before calling configure-for-volume
+        trial.pipette.dispense(trial.pipette.current_volume, push_out=0)
+        trial.pipette.prepare_to_aspirate()
+        # FIXME: this should happen inside the `transfer_liquid` command
+        #        so delete this `configure` call once that is added
+        if trial.mode == "default":
+            trial.pipette.configure_for_volume(volume=trial.pipette.max_volume)
+        elif trial.mode == "lowVolumeDefault":
+            assert trial.pipette.max_volume == 50
+            trial.pipette.configure_for_volume(volume=trial.pipette.min_volume)
+        else:
+            trial.pipette.configure_for_volume(volume=trial.volume)
+        (
+            enable_meniscus_rel,
+            disable_meniscus_rel,
+        ) = _calculate_meniscus_relative_offsets(is_aspirate=True)
+        enable_meniscus_rel()  # TODO: delete this and use actual liquid-height tracking
+        # FIXME: This assumes whatever is in the pipette from last trial is air (not liquid),
+        #        and so this would break any sort of multi-dispense testing
         assumed_air_gap = trial.pipette.current_volume
         tip_contents = trial.pipette._core.aspirate_liquid_class(
             volume=trial.volume,
@@ -518,6 +559,7 @@ def _run_trial(
             transfer_type=TransferType.ONE_TO_ONE,
             tip_contents=[LiquidAndAirGapPair(liquid=0, air_gap=assumed_air_gap)],
         )
+        disable_meniscus_rel()  # TODO: delete this and use actual liquid-height tracking
         trial.liquid_tracker.update_affected_wells(
             trial.well, aspirate=trial.volume, channels=trial.channel_count
         )
@@ -552,7 +594,11 @@ def _run_trial(
             pose_for_camera=trial.cfg.interactive,
         )
     else:
-        _calculate_meniscus_relative_offsets(is_aspirate=False)
+        (
+            enable_meniscus_rel,
+            disable_meniscus_rel,
+        ) = _calculate_meniscus_relative_offsets(is_aspirate=False)
+        enable_meniscus_rel()  # TODO: delete this and use actual liquid-height tracking
         _ = trial.pipette._core.dispense_liquid_class(
             volume=trial.volume,
             dest=(Location(Point(), trial.well), trial.well._core),
@@ -563,6 +609,7 @@ def _run_trial(
             add_final_air_gap=True,
             trash_location=trial.pipette.trash_container,
         )
+        disable_meniscus_rel()
         trial.liquid_tracker.update_affected_wells(
             trial.well, dispense=trial.volume, channels=trial.channel_count
         )
