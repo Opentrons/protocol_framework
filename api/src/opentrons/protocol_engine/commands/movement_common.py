@@ -116,7 +116,7 @@ class StallOrCollisionError(ErrorOccurrence):
 
 
 class FlexStackerStallOrCollisionError(ErrorOccurrence):
-    """Returned when the machine detects that axis encoders are reading a different position than expected.
+    """Returned when the motor driver detects a stall."""
 
     All axes are stopped at the point where the error was encountered.
 
