@@ -75,7 +75,7 @@ export function ListButton(props: ListButtonProps): JSX.Element {
 
     &:focus-visible {
       outline: 2px solid ${COLORS.blue50};
-      outline-offset: 0.25rem;
+      outline-offset: 0.125rem;
     }
   `
 
