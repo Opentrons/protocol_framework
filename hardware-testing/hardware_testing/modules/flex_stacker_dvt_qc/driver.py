@@ -90,7 +90,7 @@ class FlexStackerInterface:
     ) -> bool:
         """Close the latch, dropping any labware its holding."""
         # Dont move the latch if its already closed.
-        if not await self._driver.get_limit_switch(StackerAxis.L, Direction.RETRACT):
+        if await self._driver.get_limit_switch(StackerAxis.L, Direction.RETRACT):
             return True
 
         motion_params = STACKER_MOTION_CONFIG[StackerAxis.L]["move"]
@@ -103,7 +103,7 @@ class FlexStackerInterface:
             acceleration=accel,
         )
         # Check that the latch is closed.
-        closed = not await self._driver.get_limit_switch(
+        closed = await self._driver.get_limit_switch(
             StackerAxis.L, Direction.RETRACT
         )
         return success and closed
@@ -115,7 +115,7 @@ class FlexStackerInterface:
     ) -> bool:
         """Open the latch."""
         # Dont move the latch if its already opened.
-        if await self._driver.get_limit_switch(StackerAxis.L, Direction.RETRACT):
+        if not await self._driver.get_limit_switch(StackerAxis.L, Direction.RETRACT):
             return True
 
         motion_params = STACKER_MOTION_CONFIG[StackerAxis.L]["move"]
@@ -132,7 +132,7 @@ class FlexStackerInterface:
             acceleration=accel,
         )
         # Check that the latch is opened.
-        open = await self._driver.get_limit_switch(StackerAxis.L, Direction.RETRACT)
+        open = not await self._driver.get_limit_switch(StackerAxis.L, Direction.RETRACT)
         return success and open
 
     async def home_axis(
