@@ -13,7 +13,8 @@ from .pipetting_common import (
     LiquidNotFoundError,
     TipPhysicallyAttachedError,
 )
-from .movement_common import StallOrCollisionError, FlexStackerStallOrCollisionError
+from .movement_common import StallOrCollisionError
+from .flex_stacker.common import FlexStackerStallOrCollisionError
 
 from . import absorbance_reader
 from . import flex_stacker

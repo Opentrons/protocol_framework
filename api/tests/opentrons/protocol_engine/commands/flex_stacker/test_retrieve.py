@@ -7,7 +7,7 @@ from decoy import Decoy, matchers
 from opentrons.drivers.flex_stacker.types import StackerAxis
 from opentrons.hardware_control.modules import FlexStacker
 from opentrons.hardware_control.modules.errors import FlexStackerStallError
-from opentrons.protocol_engine.commands.movement_common import (
+from opentrons.protocol_engine.commands.flex_stacker.common import (
     FlexStackerStallOrCollisionError,
 )
 from opentrons.protocol_engine.resources import ModelUtils

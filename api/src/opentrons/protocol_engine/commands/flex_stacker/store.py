@@ -13,7 +13,7 @@ from ..command import (
     SuccessData,
     DefinedErrorData,
 )
-from ..movement_common import FlexStackerStallOrCollisionError
+from ..flex_stacker.common import FlexStackerStallOrCollisionError
 from ...errors import (
     ErrorOccurrence,
     CannotPerformModuleAction,
