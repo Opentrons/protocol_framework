@@ -1,6 +1,7 @@
 import { describe, it, beforeEach, vi } from 'vitest'
 import { screen } from '@testing-library/react'
 
+import { getEnableLiquidClasses } from '../../../../../../../feature-flags/selectors'
 import { renderWithProviders } from '../../../../../../../__testing-utils__'
 
 import { FirstStepMoveLiquidTools } from '../FirstStepMoveLiquidTools'
@@ -12,7 +13,10 @@ import type { ComponentProps } from 'react'
 import type { FieldPropsByName } from '../../../types'
 import type { FormData } from '../../../../../../../form-types'
 import type { StepFormErrors } from '../../../../../../../steplist'
+import { getLiquidEntities } from '../../../../../../../step-forms/selectors'
 
+vi.mock('../../../../../../../feature-flags/selectors')
+vi.mock('../../../../../../../step-forms/selectors')
 vi.mock('../FirstStepMoveLiquidTools')
 vi.mock('../SecondStepsMoveLiquidTools')
 
@@ -34,6 +38,8 @@ describe('MoveLiquidTools', () => {
       focusHandlers: {} as any,
       showFormErrors: false,
     }
+    vi.mocked(getEnableLiquidClasses).mockReturnValue(false)
+    vi.mocked(getLiquidEntities).mockReturnValue({})
 
     vi.mocked(FirstStepMoveLiquidTools).mockReturnValue(
       <div>mock FirstStepMoveLiquidTools</div>
