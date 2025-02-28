@@ -93,7 +93,7 @@ class FlexStackerInterface:
         if await self._driver.get_limit_switch(StackerAxis.L, Direction.RETRACT):
             return True
 
-        motion_params = STACKER_MOTION_CONFIG[StackerAxis.L]["move"]
+        motion_params = STACKER_MOTION_CONFIG[StackerAxis.L]["home"]
         speed = velocity or motion_params.max_speed
         accel = acceleration or motion_params.acceleration
         success = await self.home_axis(
@@ -101,6 +101,7 @@ class FlexStackerInterface:
             Direction.RETRACT,
             speed=speed,
             acceleration=accel,
+            current=motion_params.current,
         )
         # Check that the latch is closed.
         closed = await self._driver.get_limit_switch(
@@ -130,6 +131,7 @@ class FlexStackerInterface:
             distance=distance,
             speed=speed,
             acceleration=accel,
+            current=motion_params.current,
         )
         # Check that the latch is opened.
         open = not await self._driver.get_limit_switch(StackerAxis.L, Direction.RETRACT)
