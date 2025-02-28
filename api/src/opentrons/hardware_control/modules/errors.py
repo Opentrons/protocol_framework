@@ -30,5 +30,5 @@ class FlexStackerStallError(RoboticsControlError):
         self.serial = serial
         self.axis = axis
         super().__init__(
-            ErrorCodes.STALL_OR_COLLISION_DETECTED, message, detail, wrapping
+            ErrorCodes.FLEX_STACKER_STALL_OR_COLLISION_DETECTED, message, detail, wrapping
         )
