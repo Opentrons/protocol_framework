@@ -15,7 +15,17 @@ const meta: Meta<typeof ListItemComponent> = {
     type: {
       control: {
         type: 'select',
-        options: ['error', 'noActive', 'success', 'warning'],
+        options: [
+          'error',
+          'default',
+          'success',
+          'warning',
+          'unavailable',
+          'defaultOnColor',
+          'successOnColor',
+          'warningOnColor',
+          'errorOnColor',
+        ],
       },
     },
   },
@@ -28,7 +38,7 @@ type Story = StoryObj<typeof ListItemComponent>
 
 export const ListItem: Story = {
   args: {
-    type: 'noActive',
+    type: 'default',
     children: (
       <Flex flexDirection={DIRECTION_COLUMN} gridGap={SPACING.spacing4}>
         <LegacyStyledText as="p">
@@ -47,7 +57,7 @@ export const ListItem: Story = {
 
 export const ListItemDescriptorDefault: Story = {
   args: {
-    type: 'noActive',
+    type: 'default',
     children: (
       <ListItemDescriptor
         type="large"
@@ -60,7 +70,7 @@ export const ListItemDescriptorDefault: Story = {
 
 export const ListItemDescriptorMini: Story = {
   args: {
-    type: 'noActive',
+    type: 'default',
     children: (
       <ListItemDescriptor
         type="default"
@@ -70,6 +80,26 @@ export const ListItemDescriptorMini: Story = {
     ),
   },
 }
+
+export const ListItemOnColorVariants: Story = {
+  render: args => (
+    <Flex flexDirection={DIRECTION_COLUMN} gridGap={SPACING.spacing16}>
+      <ListItemComponent type="defaultOnColor">
+        <LegacyStyledText as="p">Default on Color Variant</LegacyStyledText>
+      </ListItemComponent>
+      <ListItemComponent type="successOnColor">
+        <LegacyStyledText as="p">Success on Color Variant</LegacyStyledText>
+      </ListItemComponent>
+      <ListItemComponent type="warningOnColor">
+        <LegacyStyledText as="p">Warning on Color Variant</LegacyStyledText>
+      </ListItemComponent>
+      <ListItemComponent type="errorOnColor">
+        <LegacyStyledText as="p">Error on Color Variant</LegacyStyledText>
+      </ListItemComponent>
+    </Flex>
+  ),
+}
+
 const dropdownProps: DropdownMenuProps = {
   filterOptions: [
     { name: '1', value: '1' },
@@ -81,7 +111,7 @@ const dropdownProps: DropdownMenuProps = {
 }
 export const ListItemCustomizeImage: Story = {
   args: {
-    type: 'noActive',
+    type: 'default',
     children: (
       <ListItemCustomize
         header="Header"
