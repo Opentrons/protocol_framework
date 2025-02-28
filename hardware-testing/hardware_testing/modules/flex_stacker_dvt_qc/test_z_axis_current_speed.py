@@ -19,6 +19,12 @@ CURRENT_THRESHOD = 0.7
 TEST_TRIALS = 10
 TEST_DIRECTIONS = [Direction.RETRACT, Direction.EXTEND]
 
+AXIS_TRAVEL = 138 #136 for DVT
+BOTTOM_OFFSET = 10
+TOP_OFFSET = 1.75
+LIMIT_SWICH_CHECK = 0.5
+
+
 TEST_AXIS = StackerAxis.Z
 HOME_SPEED = STACKER_MOTION_CONFIG[TEST_AXIS]["home"].max_speed
 HOME_CURRENT = STACKER_MOTION_CONFIG[TEST_AXIS]["home"].current
@@ -44,19 +50,25 @@ async def test_extend_cycle(
     """Test one extend cycle."""
     # first home in the opposite direction
     await stacker.home_axis(TEST_AXIS, Direction.RETRACT)
-    # move at homing speed
+
+    # move at homing speed off of the springs at the bottom
     await stacker.move_axis(
-        TEST_AXIS, Direction.EXTEND, 10, HOME_SPEED, None, HOME_CURRENT
+        TEST_AXIS, Direction.EXTEND, BOTTOM_OFFSET, HOME_SPEED, None, HOME_CURRENT
     )
+
     try:
-        # moving at the testing speed and current
-        await stacker.move_axis(TEST_AXIS, Direction.EXTEND, 126, speed, None, current)
-        # move towards limit switch
+        # moving at the testing speed and current to just under the limit switch
+        extend_distance = AXIS_TRAVEL - BOTTOM_OFFSET
+        await stacker.move_axis(TEST_AXIS, Direction.EXTEND, extend_distance, speed, None, current)
+
+        # move towards slightly past the limit switch
+        check_distance = TOP_OFFSET + LIMIT_SWICH_CHECK
         await stacker.move_axis(
-            TEST_AXIS, Direction.EXTEND, 2.25, HOME_SPEED, None, HOME_CURRENT
+            TEST_AXIS, Direction.EXTEND, check_distance, HOME_SPEED, None, HOME_CURRENT
         )
         # check if limit switch is triggered
         success = await stacker._driver.get_limit_switch(TEST_AXIS, Direction.EXTEND)
+
     except FlexStackerStallError:
         return False
     return success
@@ -69,12 +81,20 @@ async def test_retract_cycle(
 ) -> bool:
     """Test one retract cycle."""
     try:
-        # moving at the testing speed and current
-        await stacker.move_axis(TEST_AXIS, Direction.RETRACT, 126, speed, None, current)
-        # move towards limit switch
+        #rehome the axis at the top
+        await stacker.move_axis(TEST_AXIS, Direction.RETRACT, TOP_OFFSET, HOME_SPEED, None, HOME_CURRENT)
+        await stacker.home_axis(TEST_AXIS, Direction.EXTEND)
+
+        # moving at the testing speed and current to just above the springs
+        retract_distance = (AXIS_TRAVEL + TOP_OFFSET) - BOTTOM_OFFSET
+        await stacker.move_axis(TEST_AXIS, Direction.RETRACT, retract_distance, speed, None, current)
+
+        # move slightly past the limit switch
+        check_distance = BOTTOM_OFFSET + LIMIT_SWICH_CHECK
         await stacker.move_axis(
-            TEST_AXIS, Direction.RETRACT, 10.5, HOME_SPEED, None, HOME_CURRENT
+            TEST_AXIS, Direction.RETRACT, check_distance, HOME_SPEED, None, HOME_CURRENT
         )
+
         # check if limit switch is triggered
         success = await stacker._driver.get_limit_switch(TEST_AXIS, Direction.RETRACT)
     except FlexStackerStallError:
@@ -118,6 +138,6 @@ async def run(stacker: FlexStacker, report: CSVReport, section: str) -> None:
             # Stop the test if any trial fails
             if result == CSVResult.FAIL:
                 ui.print_error(
-                    f"X Axis failed at speed {speed} mm/s, current {current} A"
+                    f"Z Axis failed at speed {speed} mm/s, current {current} A"
                 )
                 return
