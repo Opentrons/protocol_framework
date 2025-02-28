@@ -3,7 +3,7 @@
 from __future__ import annotations
 from pydantic import Field, BaseModel
 from typing import TYPE_CHECKING, Optional, Type, Union
-from opentrons.types import MountType
+from opentrons.types import MountType, Mount
 from opentrons.protocol_engine.types import MotorAxis
 from typing_extensions import Literal
 
@@ -237,19 +237,32 @@ class EvotipSealPipetteImplementation(
         if isinstance(move_result, DefinedErrorData):
             return move_result
 
+        mount = self._state_view.pipettes.get_mount(pipette_id)
+
         # Aspirate to move plunger to a maximum volume position per pipette type
         tip_geometry = self._state_view.geometry.get_nominal_tip_geometry(
             pipette_id, labware_id, well_name
         )
-        if self._state_view.pipettes.get_mount(pipette_id) == MountType.LEFT:
-            await self._hardware_api.home(axes=[Axis.P_L])
-        else:
-            await self._hardware_api.home(axes=[Axis.P_R])
+        # TODO: Make this less awful when there's a little more time to do so
+        if self._state_view.config.use_virtual_pipettes is False:
+            hw_mount = Mount.RIGHT if mount == MountType.RIGHT else Mount.LEFT
+            await self._hardware_api.home(axes=[Axis.of_main_tool_actuator(hw_mount)])
+            pipette_dict = self._hardware_api.get_attached_pipettes()[hw_mount]
+            # the actual ul/mm at 400ul for a 96 channel 1000ul 3.5 is 15.215 implying a plunger
+            # position of 26.29; the shaft nominal value is 15.904 implying a plunger position
+            # of 25.15. Applying a 5% safety factor makes it work.
+            target_position = (
+                pipette_dict["plunger_positions"]["bottom"]
+                - (_SAFE_TOP_VOLUME / pipette_dict["shaft_ul_per_mm"]) * 1.05
+            )
+            await self._hardware_api.move_axes(
+                {Axis.of_main_tool_actuator(hw_mount): target_position}
+            )
 
         # Begin relative pickup steps for the resin tips
 
         channels = self._state_view.tips.get_pipette_active_channels(pipette_id)
-        mount = self._state_view.pipettes.get_mount(pipette_id)
+
         tip_pick_up_params = params.tipPickUpParams
         if tip_pick_up_params is None:
             tip_pick_up_params = TipPickUpParams(
