@@ -1030,7 +1030,6 @@ export function FlexSetup(options: FlexSetupOptions): void {
   const magblock = options.magblock ?? false
   const tempdeck = options.tempdeck ?? false
   const platereader = options.platereader ?? false
-
   SetupVerifications.OnStep1().call()
   SetupVerifications.FlexSelected().call()
   UniversalSteps.Snapshot().call()
@@ -1081,4 +1080,21 @@ export function FlexSetup(options: FlexSetupOptions): void {
   SetupSteps.Confirm().call()
   SetupSteps.Confirm().call()
   SetupSteps.EditProtocolA().call()
+}
+
+interface AddLabwareToDeckSlotCompoundInputs {
+  deckSlot?: string
+  labwareName?: string
+}
+export function AddLabwareToDeckSlotCompound(
+  string: AddLabwareToDeckSlotCompoundInputs
+): void {
+  const deckSlot = string.deckSlot ?? 'C3'
+  const labwareName = string.labwareName ?? 'Bio-Rad 96 Well Plate'
+
+  SetupSteps.ChoseDeckSlotWithLabware(deckSlot).call()
+  SetupSteps.AddHardwareLabware().call()
+  SetupSteps.ClickLabwareHeader().call()
+  SetupSteps.ClickWellPlatesSection().call()
+  SetupSteps.SelectLabwareByDisplayName(labwareName).call()
 }

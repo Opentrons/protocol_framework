@@ -3,6 +3,7 @@ import {
   SetupSteps,
   SetupVerifications,
   FlexSetup,
+  AddLabwareToDeckSlotCompound,
 } from '../support/SetupSteps'
 import { StepBuilder } from '../support/StepBuilder'
 
@@ -23,11 +24,10 @@ describe('The Redesigned Create Protocol Landing Page', () => {
       magblock: true,
       tempdeck: true,
     })
-    steps.add(SetupSteps.ChoseDeckSlotWithLabware('C2'))
-    steps.add(SetupSteps.AddHardwareLabware())
-    steps.add(SetupSteps.ClickLabwareHeader())
-    steps.add(SetupSteps.ClickWellPlatesSection())
-    steps.add(SetupSteps.SelectLabwareByDisplayName('Bio-Rad 96 Well Plate'))
+    AddLabwareToDeckSlotCompound({
+      deckSlot: 'C2',
+      labwareName: 'Bio-Rad 96 Well Plate',
+    })
     steps.add(SetupSteps.ChoseDeckSlotWithLabware('C2'))
     steps.add(SetupSteps.AddLiquid())
     steps.add(SetupSteps.ClickLiquidButton())
@@ -39,11 +39,9 @@ describe('The Redesigned Create Protocol Landing Page', () => {
     steps.add(UniversalSteps.Snapshot())
     steps.add(SetupSteps.SelectLiquidWells())
     steps.add(SetupSteps.SetVolumeAndSaveForWells('150'))
-    steps.add(SetupSteps.ChoseDeckSlotWithLabware('C3'))
-    steps.add(SetupSteps.AddHardwareLabware())
-    steps.add(SetupSteps.ClickLabwareHeader())
-    steps.add(SetupSteps.ClickWellPlatesSection())
-    steps.add(SetupSteps.SelectLabwareByDisplayName('Bio-Rad 96 Well Plate'))
-    steps.execute()
+    AddLabwareToDeckSlotCompound({
+      deckSlot: 'C3',
+      labwareName: 'Armadillo 96 Well Plate 200 µL',
+    })
   })
 })
