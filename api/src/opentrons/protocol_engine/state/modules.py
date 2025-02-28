@@ -390,6 +390,7 @@ class ModuleStore(HasState[ModuleState], HandlesActions):
                 pool_adapter_definition=None,
                 pool_lid_definition=None,
                 pool_count=0,
+                max_pool_count=0,
             )
 
     def _update_additional_slots_occupied_by_thermocycler(
