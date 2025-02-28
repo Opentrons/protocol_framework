@@ -1,5 +1,9 @@
 import { UniversalSteps } from '../support/UniversalSteps'
-import { SetupSteps, SetupVerifications } from '../support/SetupSteps'
+import {
+  SetupSteps,
+  SetupVerifications,
+  FlexSetup,
+} from '../support/SetupSteps'
 import { StepBuilder } from '../support/StepBuilder'
 
 describe('The Redesigned Create Protocol Landing Page', () => {
@@ -13,40 +17,12 @@ describe('The Redesigned Create Protocol Landing Page', () => {
     cy.verifyCreateNewHeader()
 
     const steps = new StepBuilder()
-    steps.add(SetupVerifications.OnStep1())
-    steps.add(SetupVerifications.FlexSelected())
-    steps.add(UniversalSteps.Snapshot())
-    steps.add(SetupSteps.SelectOT2())
-    steps.add(SetupVerifications.OT2Selected())
-    steps.add(UniversalSteps.Snapshot())
-    steps.add(SetupSteps.SelectFlex())
-    steps.add(SetupVerifications.FlexSelected())
-    steps.add(UniversalSteps.Snapshot())
-    steps.add(SetupSteps.Confirm())
-    steps.add(SetupVerifications.OnStep2())
-    steps.add(SetupSteps.SingleChannelPipette50())
-    steps.add(SetupVerifications.StepTwo50uL())
-    steps.add(UniversalSteps.Snapshot())
-    steps.add(SetupSteps.Confirm())
-    steps.add(SetupVerifications.StepTwoPart3())
-    steps.add(UniversalSteps.Snapshot())
-    steps.add(SetupSteps.Confirm())
-    steps.add(SetupVerifications.OnStep3())
-    steps.add(SetupSteps.YesGripper())
-    steps.add(SetupSteps.Confirm())
-    steps.add(SetupVerifications.Step4Verification())
-    steps.add(SetupSteps.AddThermocycler())
-    steps.add(SetupVerifications.ThermocyclerImg())
-    steps.add(SetupSteps.AddHeaterShaker())
-    steps.add(SetupVerifications.HeaterShakerImg())
-    steps.add(SetupSteps.AddMagBlock())
-    steps.add(SetupVerifications.MagBlockImg())
-    steps.add(SetupSteps.AddTempdeck2())
-    steps.add(SetupVerifications.Tempdeck2Img())
-    steps.add(SetupSteps.Confirm())
-    steps.add(SetupSteps.Confirm())
-    steps.add(SetupSteps.Confirm())
-    steps.add(SetupSteps.EditProtocolA())
+    FlexSetup({
+      thermocycler: true,
+      heatershaker: true,
+      magblock: true,
+      tempdeck: true,
+    })
     steps.add(SetupSteps.ChoseDeckSlotWithLabware('C2'))
     steps.add(SetupSteps.AddHardwareLabware())
     steps.add(SetupSteps.ClickLabwareHeader())

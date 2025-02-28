@@ -1,5 +1,7 @@
 // eslint-disable-next-line @typescript-eslint/consistent-type-imports
 import { StepThunk } from './StepBuilder'
+import { UniversalSteps } from './UniversalSteps' // Adjust the path
+
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace Cypress {
@@ -1013,4 +1015,70 @@ export const verifyCreateProtocolPage = (): void => {
   cy.contains(SetupContent.OpentronsFlex).should('exist').should('be.visible')
   cy.contains(SetupContent.OpentronsOT2).should('exist').should('be.visible')
   cy.contains(SetupContent.Confirm).should('exist').should('be.visible')
+}
+
+interface FlexSetupOptions {
+  thermocycler?: boolean
+  heatershaker?: boolean
+  magblock?: boolean
+  tempdeck?: boolean
+  platereader?: boolean
+}
+export function FlexSetup(options: FlexSetupOptions): void {
+  const thermocycler = options.thermocycler ?? false
+  const heatershaker = options.heatershaker ?? false
+  const magblock = options.magblock ?? false
+  const tempdeck = options.tempdeck ?? false
+  const platereader = options.platereader ?? false
+
+  SetupVerifications.OnStep1().call()
+  SetupVerifications.FlexSelected().call()
+  UniversalSteps.Snapshot().call()
+  SetupSteps.SelectOT2().call()
+  SetupVerifications.OT2Selected().call()
+  UniversalSteps.Snapshot().call()
+  SetupSteps.SelectFlex().call()
+  SetupVerifications.FlexSelected().call()
+  UniversalSteps.Snapshot().call()
+  SetupSteps.Confirm().call()
+  SetupVerifications.OnStep2().call()
+  SetupSteps.SingleChannelPipette50().call()
+  SetupVerifications.StepTwo50uL().call()
+  UniversalSteps.Snapshot().call()
+  SetupSteps.Confirm().call()
+  SetupVerifications.StepTwoPart3().call()
+  UniversalSteps.Snapshot().call()
+  SetupSteps.Confirm().call()
+  SetupVerifications.OnStep3().call()
+  SetupSteps.YesGripper().call()
+  SetupSteps.Confirm().call()
+  SetupVerifications.Step4Verification().call()
+
+  if (thermocycler) {
+    SetupSteps.AddThermocycler().call()
+    SetupVerifications.ThermocyclerImg().call()
+  }
+
+  if (heatershaker) {
+    SetupSteps.AddHeaterShaker().call()
+    SetupVerifications.HeaterShakerImg().call()
+  }
+
+  if (magblock) {
+    SetupSteps.AddMagBlock().call()
+    SetupVerifications.MagBlockImg().call()
+  }
+
+  if (tempdeck) {
+    SetupSteps.AddTempdeck2().call()
+    SetupVerifications.Tempdeck2Img().call()
+  }
+  if (platereader) {
+    SetupSteps.AddPlateReader().call()
+  }
+
+  SetupSteps.Confirm().call()
+  SetupSteps.Confirm().call()
+  SetupSteps.Confirm().call()
+  SetupSteps.EditProtocolA().call()
 }
