@@ -243,6 +243,7 @@ def run(protocol: ProtocolContext) -> None:
                 m1000.move_to(m.center())
                 m1000.transfer(vol_per_trans, loc, waste, new_tip="never", air_gap=20)
                 m1000.blow_out(waste)
+                m1000.prepare_to_aspirate()
                 m1000.air_gap(20)
             m1000.drop_tip(tips_sn[8 * i]) if TIP_TRASH else m1000.return_tip()
         m1000.flow_rate.aspirate = 300
@@ -531,6 +532,7 @@ def run(protocol: ProtocolContext) -> None:
                 vol, m.bottom(dot_bottom), e.bottom(5), air_gap=20, new_tip="never"
             )
             m1000.blow_out(e.top(-2))
+            m1000.prepare_to_aspirate()
             m1000.air_gap(20)
             m1000.drop_tip() if TIP_TRASH else m1000.return_tip()
 
@@ -548,6 +550,7 @@ def run(protocol: ProtocolContext) -> None:
             m1000.blow_out(well.top())
             protocol.delay(minutes=0.1)
             m1000.blow_out(well.top())
+            m1000.prepare_to_aspirate()
             total_dispensed += 190 * m1000.active_channels
             if total_dispensed > (water_vol_per_well - reservoir_dead_vol):
                 water_well = reservoir_for_plate_reader["A3"]
@@ -575,6 +578,7 @@ def run(protocol: ProtocolContext) -> None:
             m50.blow_out()
             protocol.delay(minutes=0.1)
             m50.blow_out()
+            m1000.prepare_to_aspirate()
             m50.return_tip()
         # 3. Read plate
         # Move labware to heater shaker to be mixed
