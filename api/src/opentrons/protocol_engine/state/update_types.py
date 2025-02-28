@@ -367,9 +367,11 @@ class FlexStackerStoreLabware:
 class FlexStackerPoolConstraint:
     """The labware definitions that are contained in the pool."""
 
+    max_pool_count: int
     primary_definition: LabwareDefinition
     lid_definition: LabwareDefinition | None
     adapter_definition: LabwareDefinition | None
+    # if the pool is changed we must also update the max pool count
 
 
 @dataclasses.dataclass
@@ -894,6 +896,7 @@ class StateUpdate:
     def update_flex_stacker_labware_pool_definition(
         self,
         module_id: str,
+        max_count: int,
         primary_definition: LabwareDefinition,
         adapter_definition: LabwareDefinition | None,
         lid_definition: LabwareDefinition | None,
@@ -904,6 +907,7 @@ class StateUpdate:
                 self.flex_stacker_state_update, module_id
             ),
             pool_constraint=FlexStackerPoolConstraint(
+                max_pool_count=max_count,
                 primary_definition=primary_definition,
                 lid_definition=lid_definition,
                 adapter_definition=adapter_definition,
