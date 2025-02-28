@@ -1,5 +1,7 @@
 // eslint-disable-next-line @typescript-eslint/consistent-type-imports
 import { StepThunk } from './StepBuilder'
+import { UniversalSteps } from './UniversalSteps' // Adjust the path
+
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace Cypress {
@@ -39,6 +41,7 @@ export enum SetupContent {
   HeaterShaker = 'Heater-Shaker Module GEN1',
   Tempdeck2 = 'Temperature Module GEN2',
   MagBlock = 'Magnetic Block GEN1',
+  PlateReader = 'Absorbance Plate Reader Module GEN1',
   ModulePageH = 'Add your modules',
   ModulePageB = 'Select modules to use in your protocol.',
   EditProtocol = 'Edit protocol',
@@ -77,17 +80,23 @@ export enum SetupLocators {
   Button = 'button',
   TempdeckTempInput = 'input[name="targetTemperature"]',
   DoneButtonLabwareSelection = '[data-testid="Toolbox_confirmButton"]',
+
+  AspirateWells = 'input[name="aspirate_wells"]',
+  div = 'div',
+  button = 'button',
+  svg = 'svg',
+  exist = 'exist',
+  StepOptionsTestIDThreeDots = 'button.Btn-sc-o3dtr1-0.OverflowBtn___StyledBtn-sc-1mslfxo-0',
+  AspirateCheckbox = 'div.Checkbox___StyledFlex3-sc-1mvp7vt-0.gZwGCw.btdgeU',
 }
 
 /**
  * Helper function to select a labware by display name.
- * Clicks "Done" after selecting.
+ * No longer clicks "Done" after selecting.
  */
 function selectLabwareByDisplayName(displayName: string): void {
   cy.contains(displayName).click({ force: true })
-  cy.get(SetupLocators.DoneButtonLabwareSelection).click({ force: true })
 }
-
 /**
  * chooseDeckSlot is a helper returning a chainable
  * that finds the correct deck slot based on x,y coords in your markup.
@@ -182,6 +191,14 @@ export const SetupSteps = {
    * Select a labware by display name, then click "Done".
    */
   SelectLabwareByDisplayName: (displayName: string): StepThunk => ({
+    call: () => {
+      selectLabwareByDisplayName(displayName)
+
+      cy.get(SetupLocators.DoneButtonLabwareSelection).click({ force: true })
+    },
+  }),
+
+  selectDropdownLabware: (displayName: string): StepThunk => ({
     call: () => {
       selectLabwareByDisplayName(displayName)
     },
@@ -292,6 +309,12 @@ export const SetupSteps = {
     },
   }),
 
+  AddPlateReader: (): StepThunk => ({
+    call: () => {
+      cy.contains(SetupContent.PlateReader).click()
+    },
+  }),
+
   /**
    * Click "Edit protocol".
    */
@@ -301,12 +324,27 @@ export const SetupSteps = {
     },
   }),
 
-  /**
-   * Choose deck slot A1.
-   */
-  ChoseDeckSlotA1: (): StepThunk => ({
+  ChoseDeckSlot: (deckSlot: string): StepThunk => ({
     call: () => {
-      chooseDeckSlot('A1').click()
+      chooseDeckSlot(deckSlot).click({ force: true })
+    },
+  }),
+
+  /**
+   * Adds hardware/labware to a deck slot.
+   */
+  AddHardwareLabware: (): StepThunk => ({
+    call: () => {
+      cy.contains(SetupContent.AddLabwareToDeck).click({ force: true })
+    },
+  }),
+
+  /**
+   * Edits existing labware/hardware on a deck slot.
+   */
+  EditHardwareLabwareOnDeck: (): StepThunk => ({
+    call: () => {
+      cy.contains(SetupContent.EditHardwareLabwareOnDeck).click()
     },
   }),
 
@@ -327,37 +365,6 @@ export const SetupSteps = {
       chooseDeckSlot('A3').click()
     },
   }),
-
-  /**
-   * Choose deck slot.
-   */
-  ChoseDeckSlot: (deckSlot: string): StepThunk => ({
-    call: () => {
-      chooseDeckSlot(deckSlot).click()
-    },
-  }),
-
-  /**
-   * Adds hardware/labware to a deck slot.
-   */
-  AddHardwareLabware: (): StepThunk => ({
-    call: () => {
-      cy.contains(SetupContent.AddLabwareToDeck).click()
-    },
-  }),
-
-  /**
-   * Edits existing labware/hardware on a deck slot.
-   */
-  EditHardwareLabwareOnDeck: (): StepThunk => ({
-    call: () => {
-      cy.contains(SetupContent.EditHardwareLabwareOnDeck).click()
-    },
-  }),
-
-  /**
-   * Clicks the "Labware" header.
-   */
   ClickLabwareHeader: (): StepThunk => ({
     call: () => {
       cy.contains(SetupContent.LabwareH).click()
@@ -376,9 +383,16 @@ export const SetupSteps = {
   /**
    * Choose deck slot C2 with a labware-locating approach.
    */
-  ChoseDeckSlotC2Labware: (): StepThunk => ({
+
+  ChoseDeckSlotLabware: (deckslot: string): StepThunk => ({
     call: () => {
-      chooseDeckSlot('C2')
+      chooseDeckSlot(deckslot).click({ force: true })
+    },
+  }),
+
+  ChoseDeckSlotWithLabware: (deckslot: string): StepThunk => ({
+    call: () => {
+      chooseDeckSlot(deckslot)
         .find('.Box-sc-8ozbhb-0.kIDovv')
         .find('a[role="button"]')
         .contains(SetupContent.EditSlot)
@@ -392,6 +406,24 @@ export const SetupSteps = {
   AddLiquid: (): StepThunk => ({
     call: () => {
       cy.contains('button', SetupContent.AddLiquid).click()
+    },
+  }),
+
+  AddMoveStep: (): StepThunk => ({
+    call: () => {
+      cy.contains('button', 'Move').should('be.visible').click()
+    },
+  }),
+
+  UseGripperinMove: (): StepThunk => ({
+    call: () => {
+      cy.contains('button', 'Use gripper').should('be.visible').click()
+    },
+  }),
+
+  MoveToPlateReader: (): StepThunk => ({
+    call: () => {
+      cy.contains('button', 'Use gripper').should('be.visible').click()
     },
   }),
 
@@ -528,6 +560,200 @@ export const SetupSteps = {
       cy.get(SetupLocators.DoneButtonLabwareSelection)
         .contains('Done')
         .click({ force: true })
+    },
+  }),
+  /**
+   * Chose source labware on a step form
+   */
+  ChoseSourceLabware: (): StepThunk => ({
+    call: () => {
+      cy.contains('p', 'Choose option').closest('div[tabindex="0"]').click()
+    },
+  }),
+
+  // Chose source to move labware on a stepform
+  ChoseSourceMoveLabware: (): StepThunk => ({
+    call: () => {
+      cy.contains('Choose option').eq(0).click()
+    },
+  }),
+  // Chose destination to move labware
+  ChoseDestinationMoveLabware: (): StepThunk => ({
+    call: () => {
+      cy.contains('Choose option').click()
+    },
+  }),
+  // Chose labware being moved to
+  ChoseDestinationLabware: (): StepThunk => ({
+    call: () => {
+      cy.contains('Choose option').click()
+    },
+  }),
+  // Add source labware on stepform
+  AddSourceLabwareDropdown: (): StepThunk => ({
+    call: () => {
+      cy.contains('Source labware')
+        .closest('div.Flex-sc-1qhp8l7-0.bsOFGI')
+        .find('div[tabindex="0"].Flex-sc-1qhp8l7-0.sc-bqWxrE')
+        .click()
+    },
+  }),
+
+  // Select destination wells
+  SelectSourceWells: (): StepThunk => ({
+    call: () => {
+      cy.get('input[name="aspirate_wells"]')
+        .should('have.value', 'Choose wells')
+        .click()
+    },
+  }),
+
+  // Select destination wells
+  SelectDestinationWells: (): StepThunk => ({
+    call: () => {
+      cy.get('input[name="dispense_wells"]')
+        .should('have.value', 'Choose wells')
+        .click()
+    },
+  }),
+  // Save selected wells
+  SaveSelectedWells: (): StepThunk => ({
+    call: () => {
+      cy.contains(SetupContent.Save).click({ force: true })
+    },
+  }),
+  // Generic save button
+  Save: (): StepThunk => ({
+    call: () => {
+      cy.contains(SetupContent.Save).click({ force: true })
+    },
+  }),
+  // ToDo Refactor to input any volume
+
+  InputTransferVolume: (TransferVolume: string): StepThunk => ({
+    call: () => {
+      cy.get('input[name="volume"]').type(TransferVolume)
+    },
+  }),
+  // Continue to the next part of the transfer form
+  Continue: (): StepThunk => ({
+    call: () => {
+      cy.contains('Continue').click()
+    },
+  }),
+
+  // ToDo @alexjoel42, please combine into one transfer
+
+  // Step 1 Transfer form prewet checkbox
+  PrewetAspirate: (): StepThunk => ({
+    call: () => {
+      cy.contains('Pre-wet tip')
+        .closest('div.Flex-sc-1qhp8l7-0.fJriNr')
+        .find(SetupLocators.AspirateCheckbox)
+        .click()
+    },
+  }),
+  // Step 1 Transfer form Delay
+
+  Delay: (): StepThunk => ({
+    call: () => {
+      cy.contains('Delay')
+        .closest('div')
+        .find(SetupLocators.AspirateCheckbox)
+        .click()
+    },
+  }),
+  // Step 1 Transfer form touch tip
+  TouchTipAspirate: (): StepThunk => ({
+    call: () => {
+      cy.contains('Touch tip')
+        .closest('div')
+        .find(SetupLocators.AspirateCheckbox)
+        .click()
+    },
+  }),
+  // Step 1 Transfer form mix checkbox
+  MixAspirate: (): StepThunk => ({
+    call: () => {
+      cy.contains('Mix')
+        .closest('div')
+        .find(SetupLocators.AspirateCheckbox)
+        .click()
+    },
+  }),
+  // Step 1 Transfer form airgap checkbox
+  AirGap: (): StepThunk => ({
+    call: () => {
+      cy.contains('Air gap')
+        .closest('div')
+        .find(SetupLocators.AspirateCheckbox)
+        .click()
+    },
+  }),
+  // Step 1 Transfer form mix volume
+  AspirateMixVolume: (MixAspirateVolume: string): StepThunk => ({
+    call: () => {
+      cy.get('input[name = "aspirate_mix_volume"]').type(MixAspirateVolume)
+    },
+  }),
+
+  AspirateMixTimes: (MixTimesAspirate: string): StepThunk => ({
+    call: () => {
+      cy.get('input[name = "aspirate_mix_times"]').type(MixTimesAspirate)
+    },
+  }),
+
+  AspirateAirGapVolume: (AirGapAspirateVolume: string): StepThunk => ({
+    call: () => {
+      cy.get('input[name = "aspirate_airGap_volume"]').type(
+        AirGapAspirateVolume
+      )
+    },
+  }),
+  // Select dispense on the transfer form
+
+  SelectDispense: (): StepThunk => ({
+    call: () => {
+      cy.contains('Dispense').click()
+    },
+  }),
+  // Dispense mix volume
+  DispenseMixVolume: (DispenseMixVolume: string): StepThunk => ({
+    call: () => {
+      cy.get('input[name = "dispense_mix_volume"]').type(DispenseMixVolume)
+    },
+  }),
+
+  DispenseMixTimes: (): StepThunk => ({
+    call: () => {
+      cy.get('input[name = "dispense_mix_times"]').type('2')
+    },
+  }),
+
+  DispenseAirGapVolume: (DispenseAirGapVolume: string): StepThunk => ({
+    call: () => {
+      cy.get('input[name = "dispense_airGap_volume"]').type(
+        DispenseAirGapVolume
+      )
+    },
+  }),
+
+  BlowoutTransferDestination: (): StepThunk => ({
+    call: () => {
+      cy.contains('Blowout')
+        .closest('div.Flex-sc-1qhp8l7-0.ckuVEF')
+        .find('button[type="button"]')
+        .click()
+      cy.contains('Choose option').click()
+      cy.contains('Destination Well').click()
+    },
+  }),
+
+  DeleteSteps: (): StepThunk => ({
+    call: () => {
+      cy.get(SetupLocators.StepOptionsTestIDThreeDots).click()
+      cy.contains('Delete step').click()
+      cy.contains('button', 'Delete step').click()
     },
   }),
 }
@@ -694,6 +920,12 @@ export const SetupVerifications = {
     },
   }),
 
+  AbsorbanceNotSelectable: (): StepThunk => ({
+    call: () => {
+      cy.contains('button', SetupContent.PlateReader).should('be.disabled')
+    },
+  }),
+
   /**
    * Verify you can open the "Transfer" pop-out panel.
    */
@@ -706,6 +938,60 @@ export const SetupVerifications = {
       cy.contains('Volume per well')
       cy.contains('Tip handling')
       cy.contains('Tip drop location')
+    },
+  }),
+
+  Delay: (): StepThunk => ({
+    // Verifies that the "Delay" button has an associated SVG icon with proper attributes
+    call: () => {
+      cy.contains('Delay')
+        .closest('div[data-testid="ListItem_noActive"]')
+        .find('path[aria-roledescription="ot-checkbox"]')
+    },
+  }),
+
+  PreWet: (): StepThunk => ({
+    // Verifies that the "Pre-wet tip" button has an associated SVG icon with proper attributes
+    call: () => {
+      cy.contains('PreWet')
+        .closest('div[data-testid="ListButton_noActive"]')
+        .find('path[aria-roledescription="ot-checkbox"]')
+    },
+  }),
+
+  TouchTip: (): StepThunk => ({
+    // Verifies that the "Touch tip" button has an associated SVG icon with proper attributes
+    call: () => {
+      cy.contains('Touch tip')
+        .closest('div[data-testid="ListItem_noActive"]')
+        .find('path[aria-roledescription="ot-checkbox"]')
+    },
+  }),
+
+  MixT: (): StepThunk => ({
+    // Verifies that the "Mix" button has an associated SVG icon with proper attributes
+    call: () => {
+      cy.contains('Mix')
+        .closest('div[data-testid="ListItem_noActive"]')
+        .find('path[aria-roledescription="ot-checkbox"]')
+    },
+  }),
+
+  AirGap: (): StepThunk => ({
+    // Verifies that the "Air gap" button has an associated SVG icon with proper attributes
+    call: () => {
+      cy.contains('Air gap')
+        .closest('div[data-testid="ListItem_noActive"]')
+        .find('path[aria-roledescription="ot-checkbox"]')
+    },
+  }),
+
+  ExtraDispenseTransfer: (): StepThunk => ({
+    // Verifies that all key elements related to "Blowout" in transfer settings are present
+    call: () => {
+      cy.contains('Blowout location')
+      cy.contains('Blowout flow rate')
+      // cy.contains('Blowout position from top')
     },
   }),
 
@@ -729,4 +1015,86 @@ export const verifyCreateProtocolPage = (): void => {
   cy.contains(SetupContent.OpentronsFlex).should('exist').should('be.visible')
   cy.contains(SetupContent.OpentronsOT2).should('exist').should('be.visible')
   cy.contains(SetupContent.Confirm).should('exist').should('be.visible')
+}
+
+interface FlexSetupOptions {
+  thermocycler?: boolean
+  heatershaker?: boolean
+  magblock?: boolean
+  tempdeck?: boolean
+  platereader?: boolean
+}
+export function FlexSetup(options: FlexSetupOptions): void {
+  const thermocycler = options.thermocycler ?? false
+  const heatershaker = options.heatershaker ?? false
+  const magblock = options.magblock ?? false
+  const tempdeck = options.tempdeck ?? false
+  const platereader = options.platereader ?? false
+  SetupVerifications.OnStep1().call()
+  SetupVerifications.FlexSelected().call()
+  UniversalSteps.Snapshot().call()
+  SetupSteps.SelectOT2().call()
+  SetupVerifications.OT2Selected().call()
+  UniversalSteps.Snapshot().call()
+  SetupSteps.SelectFlex().call()
+  SetupVerifications.FlexSelected().call()
+  UniversalSteps.Snapshot().call()
+  SetupSteps.Confirm().call()
+  SetupVerifications.OnStep2().call()
+  SetupSteps.SingleChannelPipette50().call()
+  SetupVerifications.StepTwo50uL().call()
+  UniversalSteps.Snapshot().call()
+  SetupSteps.Confirm().call()
+  SetupVerifications.StepTwoPart3().call()
+  UniversalSteps.Snapshot().call()
+  SetupSteps.Confirm().call()
+  SetupVerifications.OnStep3().call()
+  SetupSteps.YesGripper().call()
+  SetupSteps.Confirm().call()
+  SetupVerifications.Step4Verification().call()
+
+  if (thermocycler) {
+    SetupSteps.AddThermocycler().call()
+    SetupVerifications.ThermocyclerImg().call()
+  }
+
+  if (heatershaker) {
+    SetupSteps.AddHeaterShaker().call()
+    SetupVerifications.HeaterShakerImg().call()
+  }
+
+  if (magblock) {
+    SetupSteps.AddMagBlock().call()
+    SetupVerifications.MagBlockImg().call()
+  }
+
+  if (tempdeck) {
+    SetupSteps.AddTempdeck2().call()
+    SetupVerifications.Tempdeck2Img().call()
+  }
+  if (platereader) {
+    SetupSteps.AddPlateReader().call()
+  }
+
+  SetupSteps.Confirm().call()
+  SetupSteps.Confirm().call()
+  SetupSteps.Confirm().call()
+  SetupSteps.EditProtocolA().call()
+}
+
+interface AddLabwareToDeckSlotCompoundInputs {
+  deckSlot?: string
+  labwareName?: string
+}
+export function AddLabwareToDeckSlotCompound(
+  string: AddLabwareToDeckSlotCompoundInputs
+): void {
+  const deckSlot = string.deckSlot ?? 'C3'
+  const labwareName = string.labwareName ?? 'Bio-Rad 96 Well Plate'
+
+  SetupSteps.ChoseDeckSlotWithLabware(deckSlot).call()
+  SetupSteps.AddHardwareLabware().call()
+  SetupSteps.ClickLabwareHeader().call()
+  SetupSteps.ClickWellPlatesSection().call()
+  SetupSteps.SelectLabwareByDisplayName(labwareName).call()
 }

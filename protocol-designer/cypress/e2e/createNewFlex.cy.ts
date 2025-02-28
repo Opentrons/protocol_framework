@@ -1,5 +1,10 @@
 import { UniversalSteps } from '../support/UniversalSteps'
-import { SetupSteps, SetupVerifications } from '../support/SetupSteps'
+import {
+  SetupSteps,
+  SetupVerifications,
+  FlexSetup,
+  AddLabwareToDeckSlotCompound,
+} from '../support/SetupSteps'
 import { StepBuilder } from '../support/StepBuilder'
 
 describe('The Redesigned Create Protocol Landing Page', () => {
@@ -13,46 +18,17 @@ describe('The Redesigned Create Protocol Landing Page', () => {
     cy.verifyCreateNewHeader()
 
     const steps = new StepBuilder()
-    steps.add(SetupVerifications.OnStep1())
-    steps.add(SetupVerifications.FlexSelected())
-    steps.add(UniversalSteps.Snapshot())
-    steps.add(SetupSteps.SelectOT2())
-    steps.add(SetupVerifications.OT2Selected())
-    steps.add(UniversalSteps.Snapshot())
-    steps.add(SetupSteps.SelectFlex())
-    steps.add(SetupVerifications.FlexSelected())
-    steps.add(UniversalSteps.Snapshot())
-    steps.add(SetupSteps.Confirm())
-    steps.add(SetupVerifications.OnStep2())
-    steps.add(SetupSteps.SingleChannelPipette50())
-    steps.add(SetupVerifications.StepTwo50uL())
-    steps.add(UniversalSteps.Snapshot())
-    steps.add(SetupSteps.Confirm())
-    steps.add(SetupVerifications.StepTwoPart3())
-    steps.add(UniversalSteps.Snapshot())
-    steps.add(SetupSteps.Confirm())
-    steps.add(SetupVerifications.OnStep3())
-    steps.add(SetupSteps.YesGripper())
-    steps.add(SetupSteps.Confirm())
-    steps.add(SetupVerifications.Step4Verification())
-    steps.add(SetupSteps.AddThermocycler())
-    steps.add(SetupVerifications.ThermocyclerImg())
-    steps.add(SetupSteps.AddHeaterShaker())
-    steps.add(SetupVerifications.HeaterShakerImg())
-    steps.add(SetupSteps.AddMagBlock())
-    steps.add(SetupVerifications.MagBlockImg())
-    steps.add(SetupSteps.AddTempdeck2())
-    steps.add(SetupVerifications.Tempdeck2Img())
-    steps.add(SetupSteps.Confirm())
-    steps.add(SetupSteps.Confirm())
-    steps.add(SetupSteps.Confirm())
-    steps.add(SetupSteps.EditProtocolA())
-    steps.add(SetupSteps.ChoseDeckSlot('C2'))
-    steps.add(SetupSteps.AddHardwareLabware())
-    steps.add(SetupSteps.ClickLabwareHeader())
-    steps.add(SetupSteps.ClickWellPlatesSection())
-    steps.add(SetupSteps.SelectLabwareByDisplayName('Bio-Rad 96 Well Plate'))
-    steps.add(SetupSteps.ChoseDeckSlotC2Labware())
+    FlexSetup({
+      thermocycler: true,
+      heatershaker: true,
+      magblock: true,
+      tempdeck: true,
+    })
+    AddLabwareToDeckSlotCompound({
+      deckSlot: 'C2',
+      labwareName: 'Bio-Rad 96 Well Plate',
+    })
+    steps.add(SetupSteps.ChoseDeckSlotWithLabware('C2'))
     steps.add(SetupSteps.AddLiquid())
     steps.add(SetupSteps.ClickLiquidButton())
     steps.add(SetupSteps.DefineLiquid())
@@ -63,11 +39,9 @@ describe('The Redesigned Create Protocol Landing Page', () => {
     steps.add(UniversalSteps.Snapshot())
     steps.add(SetupSteps.SelectLiquidWells())
     steps.add(SetupSteps.SetVolumeAndSaveForWells('150'))
-    steps.add(SetupSteps.ChoseDeckSlot('C3'))
-    steps.add(SetupSteps.AddHardwareLabware())
-    steps.add(SetupSteps.ClickLabwareHeader())
-    steps.add(SetupSteps.ClickWellPlatesSection())
-    steps.add(SetupSteps.SelectLabwareByDisplayName('Bio-Rad 96 Well Plate'))
-    steps.execute()
+    AddLabwareToDeckSlotCompound({
+      deckSlot: 'C3',
+      labwareName: 'Armadillo 96 Well Plate 200 µL',
+    })
   })
 })
