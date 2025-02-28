@@ -1,9 +1,11 @@
-import { Tag } from '@opentrons/components'
+import { Tag, VIEWPORT } from '@opentrons/components'
+
 import { HeadlineTagBtn as HeadlineTagBtnComponent } from '.'
+
 import type { Story, Meta } from '@storybook/react'
 
 export default {
-  title: 'Library/Molecules/HeadlineTagBtn',
+  title: 'App/Molecules/HeadlineTagBtn',
   component: HeadlineTagBtnComponent,
   argTypes: {
     headline: {
@@ -24,6 +26,7 @@ export default {
       if: { arg: 'hasTag', eq: true },
     },
   },
+  parameters: VIEWPORT.touchScreenViewport,
 } as Meta
 
 interface HeadlineTagBtnStoryProps {
@@ -51,31 +54,6 @@ const Template: Story<HeadlineTagBtnStoryProps> = args => {
       headline={headline}
       buttonText={buttonText}
       tag={tag}
-      isOnDevice={false}
-      onClick={() => null}
-    />
-  )
-}
-
-const OnDeviceTemplate: Story<HeadlineTagBtnStoryProps> = args => {
-  const { headline, buttonText, hasTag, tagText } = args
-
-  const tag = hasTag ? (
-    <Tag
-      text={tagText}
-      type="default"
-      shrinkToContent={true}
-      iconName="alert-circle"
-      iconPosition="left"
-    />
-  ) : undefined
-
-  return (
-    <HeadlineTagBtnComponent
-      headline={headline}
-      buttonText={buttonText}
-      tag={tag}
-      isOnDevice={true}
       onClick={() => null}
     />
   )
@@ -96,28 +74,4 @@ WithoutTag.args = {
   headline: 'Example Headline',
   buttonText: 'Sample Text',
   hasTag: false,
-}
-
-export const OnDeviceDisplay = OnDeviceTemplate.bind({})
-OnDeviceDisplay.args = {
-  headline: 'Example Headline',
-  buttonText: 'Sample Text',
-  hasTag: true,
-  tagText: 'Sample Tag',
-  tagType: 'interactive',
-  tagIcon: true,
-}
-OnDeviceDisplay.parameters = {
-  viewport: {
-    defaultViewport: 'responsive',
-    viewports: {
-      responsive: {
-        name: 'OnDeviceDisplay',
-        styles: {
-          width: '1024px',
-          height: '600px',
-        },
-      },
-    },
-  },
 }

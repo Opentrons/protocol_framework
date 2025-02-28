@@ -23,7 +23,6 @@ describe('HeadlineTagBtn', () => {
     props = {
       headline: 'Test Headline',
       buttonText: 'Test Button',
-      isOnDevice: false,
       onClick: onClickDesktop,
       tag: mockTag,
     }
@@ -41,29 +40,14 @@ describe('HeadlineTagBtn', () => {
     screen.getByTestId('mock-tag')
   })
 
-  it('renders the correct button and provides onClick functionality for desktop', () => {
+  it('renders button and provides onClick functionality', () => {
     render(props)
 
-    const button = screen.getByRole('button', { name: 'Test Button' })
+    const button = screen.getAllByRole('button', { name: 'Test Button' })[0]
 
     fireEvent.click(button)
 
     expect(onClickDesktop).toHaveBeenCalledTimes(1)
     expect(onClickOnDevice).not.toHaveBeenCalled()
-  })
-
-  it('renders the correct button and provides onClick functionality for ODD', () => {
-    render({
-      ...props,
-      isOnDevice: true,
-      onClick: onClickOnDevice,
-    })
-
-    const button = screen.getByRole('button', { name: 'Test Button' })
-
-    fireEvent.click(button)
-
-    expect(onClickOnDevice).toHaveBeenCalledTimes(1)
-    expect(onClickDesktop).not.toHaveBeenCalled()
   })
 })

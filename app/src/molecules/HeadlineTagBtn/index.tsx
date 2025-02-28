@@ -3,10 +3,12 @@ import { css } from 'styled-components'
 import {
   ALIGN_CENTER,
   ALIGN_STRETCH,
+  BORDERS,
   DIRECTION_COLUMN,
   Flex,
   JUSTIFY_SPACE_BETWEEN,
   PrimaryButton,
+  RESPONSIVENESS,
   SPACING,
   StyledText,
 } from '@opentrons/components'
@@ -15,7 +17,6 @@ import { SmallButton } from '/app/atoms/buttons'
 export interface HeadlineTagBtnProps {
   headline: string
   buttonText: string
-  isOnDevice: boolean
   onClick: () => void
   /* An optional Tag component */
   tag?: JSX.Element
@@ -25,7 +26,6 @@ export function HeadlineTagBtn({
   headline,
   buttonText,
   tag,
-  isOnDevice,
   onClick,
 }: HeadlineTagBtnProps): JSX.Element {
   return (
@@ -41,11 +41,14 @@ export function HeadlineTagBtn({
         {tag}
       </Flex>
       <Flex css={BTN_CONTAINER_STYLE}>
-        {isOnDevice ? (
-          <SmallButton onClick={onClick} buttonText={buttonText} />
-        ) : (
-          <PrimaryButton onClick={onClick}>{buttonText}</PrimaryButton>
-        )}
+        <SmallButton
+          onClick={onClick}
+          buttonText={buttonText}
+          css={ODD_ONLY_BUTTON}
+        />
+        <PrimaryButton onClick={onClick} css={DESKTOP_ONLY_BUTTON}>
+          {buttonText}
+        </PrimaryButton>
       </Flex>
     </Flex>
   )
@@ -76,4 +79,20 @@ const BTN_CONTAINER_STYLE = css`
 
 const HEADLINE_STYLE = css`
   -webkit-line-clamp: 1;
+`
+
+const ODD_ONLY_BUTTON = css`
+  border-radius: ${BORDERS.borderRadiusFull};
+
+  @media not (${RESPONSIVENESS.touchscreenMediaQuerySpecs}) {
+    display: none;
+  }
+`
+
+const DESKTOP_ONLY_BUTTON = css`
+  border-radius: ${BORDERS.borderRadiusFull};
+
+  @media ${RESPONSIVENESS.touchscreenMediaQuerySpecs} {
+    display: none;
+  }
 `
