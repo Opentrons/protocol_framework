@@ -1,18 +1,27 @@
 """Command models to retrieve a labware from a Flex Stacker."""
 
 from __future__ import annotations
-from typing import Optional, Literal, TYPE_CHECKING, Any, Dict
+from typing import Optional, Literal, TYPE_CHECKING, Any, Dict, Union
 from typing_extensions import Type
 
 from pydantic import BaseModel, Field
 
-from ..command import AbstractCommandImpl, BaseCommand, BaseCommandCreate, SuccessData
+from opentrons.hardware_control.modules.errors import FlexStackerStallError
+from ..command import (
+    AbstractCommandImpl,
+    BaseCommand,
+    BaseCommandCreate,
+    SuccessData,
+    DefinedErrorData,
+)
+from ..movement_common import FlexStackerStallOrCollisionError
 from ...errors import (
     ErrorOccurrence,
     CannotPerformModuleAction,
     LocationIsOccupiedError,
     FlexStackerLabwarePoolNotYetDefinedError,
 )
+from ...resources import ModelUtils
 from ...state import update_types
 from ...types import (
     ModuleLocation,
@@ -108,17 +117,25 @@ class RetrieveResult(BaseModel):
     )
 
 
-class RetrieveImpl(AbstractCommandImpl[RetrieveParams, SuccessData[RetrieveResult]]):
+_ExecuteReturn = Union[
+    SuccessData[RetrieveResult],
+    DefinedErrorData[FlexStackerStallOrCollisionError],
+]
+
+
+class RetrieveImpl(AbstractCommandImpl[RetrieveParams, _ExecuteReturn]):
     """Implementation of a labware retrieval command."""
 
     def __init__(
         self,
         state_view: StateView,
         equipment: EquipmentHandler,
+        model_utils: ModelUtils,
         **kwargs: object,
     ) -> None:
         self._state_view = state_view
         self._equipment = equipment
+        self._model_utils = model_utils
 
     async def _load_labware_from_pool(
         self, params: RetrieveParams, stacker_state: FlexStackerSubState
@@ -269,7 +286,7 @@ class RetrieveImpl(AbstractCommandImpl[RetrieveParams, SuccessData[RetrieveResul
             state_update,
         )
 
-    async def execute(self, params: RetrieveParams) -> SuccessData[RetrieveResult]:
+    async def execute(self, params: RetrieveParams) -> _ExecuteReturn:
         """Execute the labware retrieval command."""
         stacker_state = self._state_view.modules.get_flex_stacker_substate(
             params.moduleId
@@ -311,8 +328,23 @@ class RetrieveImpl(AbstractCommandImpl[RetrieveParams, SuccessData[RetrieveResul
             definitions=pool_definitions
         )
 
-        if stacker_hw is not None:
-            await stacker_hw.dispense_labware(labware_height=labware_height)
+        try:
+            if stacker_hw is not None:
+                await stacker_hw.dispense_labware(labware_height=labware_height)
+        except FlexStackerStallError as e:
+            return DefinedErrorData(
+                public=FlexStackerStallOrCollisionError(
+                    id=self._model_utils.generate_id(),
+                    createdAt=self._model_utils.get_timestamp(),
+                    wrappedErrors=[
+                        ErrorOccurrence.from_failed(
+                            id=self._model_utils.generate_id(),
+                            createdAt=self._model_utils.get_timestamp(),
+                            error=e,
+                        )
+                    ],
+                ),
+            )
 
         # Update the state to reflect the labware is now in the Flex Stacker slot
         # todo(chb, 2025-02-19): This ModuleLocation piece should probably instead be an AddressableAreaLocation

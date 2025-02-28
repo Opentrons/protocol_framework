@@ -4,6 +4,7 @@ import pytest
 from decoy import Decoy
 
 from opentrons.hardware_control.modules import FlexStacker
+from opentrons.protocol_engine.resources import ModelUtils
 
 from opentrons.protocol_engine.state.state import StateView
 from opentrons.protocol_engine.state.update_types import (
@@ -76,15 +77,25 @@ def _stacker_base_loc_seq(stacker_id: str) -> LabwareLocationSequence:
     ]
 
 
+@pytest.fixture
+def subject(
+    state_view: StateView, equipment: EquipmentHandler, model_utils: ModelUtils
+) -> RetrieveImpl:
+    """Subject under tests."""
+    return RetrieveImpl(
+        state_view=state_view, equipment=equipment, model_utils=model_utils
+    )
+
+
 async def test_retrieve_raises_when_static(
     decoy: Decoy,
     state_view: StateView,
     equipment: EquipmentHandler,
+    subject: RetrieveImpl,
     flex_50uL_tiprack: LabwareDefinition,
     stacker_id: FlexStackerId,
 ) -> None:
     """It should raise an exception when called in static mode."""
-    subject = RetrieveImpl(state_view=state_view, equipment=equipment)
     data = flex_stacker.RetrieveParams(moduleId=stacker_id)
 
     fs_module_substate = FlexStackerSubState(
@@ -111,11 +122,11 @@ async def test_retrieve_raises_when_empty(
     decoy: Decoy,
     state_view: StateView,
     equipment: EquipmentHandler,
+    subject: RetrieveImpl,
     flex_50uL_tiprack: LabwareDefinition,
     stacker_id: FlexStackerId,
 ) -> None:
     """It should raise an exception when called on an empty pool."""
-    subject = RetrieveImpl(state_view=state_view, equipment=equipment)
     data = flex_stacker.RetrieveParams(moduleId=stacker_id)
 
     fs_module_substate = FlexStackerSubState(
@@ -142,12 +153,12 @@ async def test_retrieve_primary_only(
     decoy: Decoy,
     state_view: StateView,
     equipment: EquipmentHandler,
+    subject: RetrieveImpl,
     flex_50uL_tiprack: LabwareDefinition,
     stacker_id: FlexStackerId,
     stacker_hardware: FlexStacker,
 ) -> None:
     """It should be able to retrieve a labware."""
-    subject = RetrieveImpl(state_view=state_view, equipment=equipment)
     data = flex_stacker.RetrieveParams(moduleId=stacker_id)
 
     fs_module_substate = FlexStackerSubState(
@@ -220,13 +231,13 @@ async def test_retrieve_primary_and_lid(
     decoy: Decoy,
     state_view: StateView,
     equipment: EquipmentHandler,
+    subject: RetrieveImpl,
     flex_50uL_tiprack: LabwareDefinition,
     tiprack_lid_def: LabwareDefinition,
     stacker_id: FlexStackerId,
     stacker_hardware: FlexStacker,
 ) -> None:
     """It should be able to retrieve a labware with a lid on it."""
-    subject = RetrieveImpl(state_view=state_view, equipment=equipment)
     data = flex_stacker.RetrieveParams(moduleId=stacker_id)
 
     fs_module_substate = FlexStackerSubState(
@@ -335,13 +346,13 @@ async def test_retrieve_primary_and_adapter(
     decoy: Decoy,
     state_view: StateView,
     equipment: EquipmentHandler,
+    subject: RetrieveImpl,
     flex_50uL_tiprack: LabwareDefinition,
     tiprack_adapter_def: LabwareDefinition,
     stacker_id: FlexStackerId,
     stacker_hardware: FlexStacker,
 ) -> None:
     """It should be able to retrieve a labware on an adapter."""
-    subject = RetrieveImpl(state_view=state_view, equipment=equipment)
     data = flex_stacker.RetrieveParams(moduleId=stacker_id)
 
     fs_module_substate = FlexStackerSubState(
@@ -442,6 +453,7 @@ async def test_retrieve_primary_adapter_and_lid(
     decoy: Decoy,
     state_view: StateView,
     equipment: EquipmentHandler,
+    subject: RetrieveImpl,
     flex_50uL_tiprack: LabwareDefinition,
     tiprack_adapter_def: LabwareDefinition,
     tiprack_lid_def: LabwareDefinition,
@@ -449,7 +461,6 @@ async def test_retrieve_primary_adapter_and_lid(
     stacker_hardware: FlexStacker,
 ) -> None:
     """It should be able to retrieve a labware on an adapter."""
-    subject = RetrieveImpl(state_view=state_view, equipment=equipment)
     data = flex_stacker.RetrieveParams(moduleId=stacker_id)
 
     fs_module_substate = FlexStackerSubState(

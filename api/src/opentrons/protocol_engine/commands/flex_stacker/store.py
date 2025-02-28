@@ -195,7 +195,6 @@ class StoreImpl(AbstractCommandImpl[StoreParams, _ExecuteReturn]):
                         )
                     ],
                 ),
-                # state_update=StateUpdate().set_fluid_unknown(pipette_id=pipette_id),
             )
 
         id_list = [
