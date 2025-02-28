@@ -2,13 +2,13 @@ import { describe, it, beforeEach, vi } from 'vitest'
 import { screen } from '@testing-library/react'
 import { fixture96Plate } from '@opentrons/shared-data'
 
-import { renderWithProviders } from '../../../../../../../__testing-utils__'
-import { i18n } from '../../../../../../../assets/localization'
+import { renderWithProviders } from '/protocol-designer/__testing-utils__'
+import { i18n } from '/protocol-designer/assets/localization'
 import {
   getAdditionalEquipmentEntities,
   getLabwareEntities,
   getPipetteEntities,
-} from '../../../../../../../step-forms/selectors'
+} from '/protocol-designer/step-forms/selectors'
 import {
   PipetteField,
   TiprackField,
@@ -29,9 +29,11 @@ import { FirstStepMoveLiquidTools } from '../FirstStepMoveLiquidTools'
 import type { ComponentProps } from 'react'
 import type { LabwareDefinition2 } from '@opentrons/shared-data'
 
-vi.mock('../../../../../../../step-forms/selectors')
-vi.mock('../../../PipetteFields')
-vi.mock('../../../../../../../feature-flags/selectors')
+vi.mock('/protocol-designer/step-forms/selectors')
+vi.mock(
+  '/protocol-designer/pages/Designer/ProtocolSteps/StepForm/PipetteFields'
+)
+vi.mock('/protocol-designer/feature-flags/selectors')
 
 const labwareId = 'mockLabwareId'
 const pipetteId = 'mockPipetteId'

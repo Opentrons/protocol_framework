@@ -25,8 +25,8 @@ import type {
   TipXOffsetFields,
   TipYOffsetFields,
   TipZOffsetFields,
-} from '../../../../../form-types'
-import type { PositionSpecs } from '../../../../../organisms'
+} from '/protocol-designer/form-types'
+import type { PositionSpecs } from '/protocol-designer/organisms'
 import type { FieldPropsByName } from '../types'
 import type { MoveLiquidPrefixType } from '../../../../../resources/types'
 

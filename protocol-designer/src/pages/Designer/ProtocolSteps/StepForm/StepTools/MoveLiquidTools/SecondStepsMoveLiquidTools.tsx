@@ -17,17 +17,17 @@ import {
   FlowRateField,
   PositionField,
   WellsOrderField,
-} from '../../PipetteFields'
-import { getEnableLiquidClasses } from '../../../../../../feature-flags/selectors'
+} from '/protocol-designer/pages/Designer/ProtocolSteps/StepForm/PipetteFields'
+import { getEnableLiquidClasses } from '/protocol-designer/feature-flags/selectors'
 import {
   CheckboxExpandStepFormField,
   InputStepFormField,
   ToggleStepFormField,
-} from '../../../../../../molecules'
+} from '/protocol-designer/molecules'
 import {
   getAdditionalEquipmentEntities,
   getLabwareEntities,
-} from '../../../../../../step-forms/selectors'
+} from '/protocol-designer/step-forms/selectors'
 import {
   getBlowoutLocationOptionsForForm,
   getFormErrorsMappedToField,
