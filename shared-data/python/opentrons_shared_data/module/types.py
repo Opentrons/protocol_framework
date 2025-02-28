@@ -70,7 +70,7 @@ ModuleDimensions = TypedDict(
         "labwareInterfaceXDimension": float,
         "labwareInterfaceYDimension": float,
         "maxStackerFillHeight": float,
-        "maxStackerRetrievableHeight": float
+        "maxStackerRetrievableHeight": float,
     },
     total=False,
 )
