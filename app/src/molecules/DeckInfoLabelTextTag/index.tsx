@@ -3,11 +3,11 @@ import { css } from 'styled-components'
 import {
   ALIGN_CENTER,
   BORDERS,
-  COLORS,
   DISPLAY_GRID,
   Flex,
   FLEX_MAX_CONTENT,
   JUSTIFY_END,
+  JUSTIFY_FLEX_START,
   RESPONSIVENESS,
   SPACING,
   StyledText,
@@ -58,10 +58,14 @@ const CONTAINER_STYLE = css`
   grid-template-columns: 120px 1fr ${FLEX_MAX_CONTENT};
   gap: ${SPACING.spacing40};
   align-items: ${ALIGN_CENTER};
-  background-color: ${COLORS.grey20};
 
   @media ${RESPONSIVENESS.touchscreenMediaQuerySpecs} {
     grid-template-columns: 1fr 1fr 1fr;
+  }
+
+  @media (max-width: 450px) {
+    grid-template-columns: 1fr;
+    gap: ${SPACING.spacing12};
   }
 `
 
@@ -71,6 +75,10 @@ const LABEL_CONTAINER_STYLE = css`
 
 const TAG_CONTAINER_STYLE = css`
   justify-self: ${JUSTIFY_END};
+
+  @media (max-width: 450px) {
+    justify-self: ${JUSTIFY_FLEX_START};
+  }
 `
 
 const TEXT_STLYE = css`
