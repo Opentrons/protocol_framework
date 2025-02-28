@@ -6,7 +6,6 @@ from decoy import Decoy, matchers
 
 from opentrons.drivers.flex_stacker.types import StackerAxis
 from opentrons.hardware_control.modules import FlexStacker
-from opentrons.hardware_control.modules.errors import FlexStackerStallError
 from opentrons.protocol_engine.commands.flex_stacker.common import (
     FlexStackerStallOrCollisionError,
 )
@@ -48,6 +47,7 @@ from opentrons.protocol_engine.execution import LoadedLabwareData
 from opentrons_shared_data.labware.labware_definition import (
     LabwareDefinition,
 )
+from opentrons_shared_data.errors.exceptions import FlexStackerStallError
 
 
 def _prep_stacker_own_location(

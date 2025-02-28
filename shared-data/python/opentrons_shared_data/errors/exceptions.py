@@ -6,6 +6,7 @@ from traceback import format_exception_only, format_tb
 import inspect
 import sys
 
+from opentrons.drivers.flex_stacker.types import StackerAxis
 from .codes import ErrorCodes
 from .categories import ErrorCategories
 
@@ -380,6 +381,25 @@ class StallOrCollisionDetectedError(RoboticsControlError):
         """Build a StallOrCollisionDetectedError."""
         super().__init__(
             ErrorCodes.STALL_OR_COLLISION_DETECTED, message, detail, wrapping
+        )
+
+
+class FlexStackerStallError(RoboticsControlError):
+    """An error indicating that a stall or collision occurred in the flex stacker."""
+
+    def __init__(
+        self,
+        serial: str,
+        axis: StackerAxis,
+        message: Optional[str] = None,
+        detail: Optional[Dict[str, str]] = None,
+        wrapping: Optional[Sequence[EnumeratedError]] = None,
+    ) -> None:
+        """Build a StallOrCollisionDetectedError."""
+        self.serial = serial
+        self.axis = axis
+        super().__init__(
+            ErrorCodes.FLEX_STACKER_STALL_OR_COLLISION_DETECTED, message, detail, wrapping
         )
 
 

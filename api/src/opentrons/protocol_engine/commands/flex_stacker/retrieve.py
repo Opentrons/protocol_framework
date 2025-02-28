@@ -5,8 +5,8 @@ from typing import Optional, Literal, TYPE_CHECKING, Any, Dict, Union
 from typing_extensions import Type
 
 from pydantic import BaseModel, Field
+from pydantic.json_schema import SkipJsonSchema
 
-from opentrons.hardware_control.modules.errors import FlexStackerStallError
 from ..command import (
     AbstractCommandImpl,
     BaseCommand,
@@ -30,7 +30,7 @@ from ...types import (
     LabwareLocation,
 )
 from opentrons_shared_data.labware.labware_definition import LabwareDefinition
-from pydantic.json_schema import SkipJsonSchema
+from opentrons_shared_data.errors.exceptions import FlexStackerStallError
 from opentrons.calibration_storage.helpers import uri_from_details
 
 if TYPE_CHECKING:

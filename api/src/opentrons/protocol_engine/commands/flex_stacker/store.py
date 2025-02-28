@@ -5,7 +5,6 @@ from typing import Optional, Literal, TYPE_CHECKING, Type, Union
 
 from pydantic import BaseModel, Field
 
-from opentrons.hardware_control.modules.errors import FlexStackerStallError
 from ..command import (
     AbstractCommandImpl,
     BaseCommand,
@@ -26,6 +25,8 @@ from ...types import (
     LabwareLocationSequence,
     InStackerHopperLocation,
 )
+
+from opentrons_shared_data.errors.exceptions import FlexStackerStallError
 
 
 if TYPE_CHECKING:
