@@ -5,7 +5,7 @@ import { DeckInfoLabelTextTag as DeckInfoLabelTextTagComponent } from '.'
 import type { Story, Meta } from '@storybook/react'
 
 export default {
-  title: 'Library/Molecules/DeckInfoLabelTextTag',
+  title: 'App/Molecules/DeckInfoLabelTextTag',
   component: DeckInfoLabelTextTagComponent,
   argTypes: {
     numDeckInfoLabels: {
