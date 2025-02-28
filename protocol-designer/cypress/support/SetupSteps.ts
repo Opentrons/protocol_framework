@@ -739,7 +739,8 @@ export const SetupSteps = {
   BlowoutTransferDestination: (): StepThunk => ({
     call: () => {
       cy.contains('Blowout')
-        .closest('div[data-testid="ListButton_noActive"]')
+        .closest('div.Flex-sc-1qhp8l7-0.ckuVEF')
+        .find('button[type="button"]')
         .click()
       cy.contains('Choose option').click()
       cy.contains('Destination Well').click()
@@ -942,7 +943,7 @@ export const SetupVerifications = {
     // Verifies that the "Delay" button has an associated SVG icon with proper attributes
     call: () => {
       cy.contains('Delay')
-        .closest('div[data-testid="ListButton_noActive"]')
+        .closest('div[data-testid="ListItem_noActive"]')
         .find('path[aria-roledescription="ot-checkbox"]')
     },
   }),
@@ -960,7 +961,7 @@ export const SetupVerifications = {
     // Verifies that the "Touch tip" button has an associated SVG icon with proper attributes
     call: () => {
       cy.contains('Touch tip')
-        .closest('div[data-testid="ListButton_noActive"]')
+        .closest('div[data-testid="ListItem_noActive"]')
         .find('path[aria-roledescription="ot-checkbox"]')
     },
   }),
@@ -969,7 +970,7 @@ export const SetupVerifications = {
     // Verifies that the "Mix" button has an associated SVG icon with proper attributes
     call: () => {
       cy.contains('Mix')
-        .closest('div[data-testid="ListButton_noActive"]')
+        .closest('div[data-testid="ListItem_noActive"]')
         .find('path[aria-roledescription="ot-checkbox"]')
     },
   }),
@@ -978,7 +979,7 @@ export const SetupVerifications = {
     // Verifies that the "Air gap" button has an associated SVG icon with proper attributes
     call: () => {
       cy.contains('Air gap')
-        .closest('div[data-testid="ListButton_noActive"]')
+        .closest('div[data-testid="ListItem_noActive"]')
         .find('path[aria-roledescription="ot-checkbox"]')
     },
   }),
