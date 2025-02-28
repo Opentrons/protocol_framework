@@ -335,12 +335,12 @@ class Well:
         )
 
     @requires_version(2, 21)
-    def current_liquid_height(self) -> float:
+    def current_liquid_height(self) -> Union[float, Literal["SimulatedProbeResult"]]:
         """Get the current liquid height in a well."""
         return self._core.current_liquid_height()
 
     @requires_version(2, 21)
-    def current_liquid_volume(self) -> float:
+    def current_liquid_volume(self) -> Union[float, Literal["SimulatedProbeResult"]]:
         """Get the current liquid volume in a well."""
         return self._core.get_liquid_volume()
 

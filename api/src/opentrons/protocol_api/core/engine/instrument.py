@@ -2,7 +2,16 @@
 
 from __future__ import annotations
 
-from typing import Optional, TYPE_CHECKING, cast, Union, List, Tuple, NamedTuple
+from typing import (
+    Optional,
+    TYPE_CHECKING,
+    cast,
+    Union,
+    List,
+    Tuple,
+    NamedTuple,
+    Literal,
+)
 from opentrons.types import (
     Location,
     Mount,
@@ -2094,7 +2103,7 @@ class InstrumentCore(AbstractInstrument[WellCore, LabwareCore]):
 
     def liquid_probe_without_recovery(
         self, well_core: WellCore, loc: Location
-    ) -> float:
+    ) -> Union[float, Literal["SimulatedProbeResult"]]:
         labware_id = well_core.labware_id
         well_name = well_core.get_name()
         well_location = WellLocation(

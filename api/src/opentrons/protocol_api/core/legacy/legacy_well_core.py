@@ -1,5 +1,5 @@
 """Legacy Well core implementation."""
-from typing import Optional
+from typing import Optional, Union, Literal
 
 from opentrons_shared_data.labware.constants import WELL_NAME_PATTERN
 
@@ -129,11 +129,11 @@ class LegacyWellCore(AbstractWellCore):
         """Estimate what the liquid height will be after pipetting, without raising an error."""
         return 0.0
 
-    def current_liquid_height(self) -> float:
+    def current_liquid_height(self) -> Union[float, Literal["SimulatedProbeResult"]]:
         """Get the current liquid height."""
         return 0.0
 
-    def get_liquid_volume(self) -> float:
+    def get_liquid_volume(self) -> Union[float, Literal["SimulatedProbeResult"]]:
         """Get the current well volume."""
         return 0.0
 

@@ -7,6 +7,7 @@ from opentrons.protocol_engine import WellLocation, WellOrigin, WellOffset
 from opentrons.protocol_engine import commands as cmd
 from opentrons.protocol_engine.clients import SyncClient as EngineClient
 from opentrons.protocols.api_support.util import UnsupportedAPIError
+
 from opentrons.types import Point
 
 from . import point_calculations
@@ -177,7 +178,7 @@ class WellCore(AbstractWellCore):
     def estimate_liquid_height_after_pipetting(
         self,
         operation_volume: float,
-    ) -> float:
+    ) -> Union[float, Literal["SimulatedProbeResult"]]:
         """Return an estimate of liquid height after pipetting without raising an error."""
         labware_id = self.labware_id
         well_name = self._name
@@ -190,7 +191,7 @@ class WellCore(AbstractWellCore):
         )
         return projected_final_height
 
-    def current_liquid_height(self) -> float:
+    def current_liquid_height(self) -> Union[float, Literal["SimulatedProbeResult"]]:
         """Return the current liquid height within a well."""
         labware_id = self.labware_id
         well_name = self._name
@@ -198,7 +199,7 @@ class WellCore(AbstractWellCore):
             labware_id=labware_id, well_name=well_name
         )
 
-    def get_liquid_volume(self) -> float:
+    def get_liquid_volume(self) -> Union[float, Literal["SimulatedProbeResult"]]:
         """Return the current volume in a well."""
         labware_id = self.labware_id
         well_name = self._name

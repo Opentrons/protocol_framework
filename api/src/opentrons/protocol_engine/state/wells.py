@@ -1,7 +1,17 @@
 """Basic well data state and store."""
 
 from dataclasses import dataclass
-from typing import Dict, List, Union, Iterator, Optional, Tuple, overload, TypeVar
+from typing import (
+    Dict,
+    List,
+    Union,
+    Iterator,
+    Optional,
+    Tuple,
+    overload,
+    TypeVar,
+    Literal,
+)
 from datetime import datetime
 
 from opentrons.protocol_engine.types import (
@@ -72,6 +82,7 @@ class WellStore(HasState[WellState], HandlesActions):
             self._state.probed_heights[labware_id] = {}
         if labware_id not in self._state.probed_volumes:
             self._state.probed_volumes[labware_id] = {}
+            # fix none from clear I think
         self._state.probed_heights[labware_id][well_name] = ProbedHeightInfo(
             height=_none_from_clear(state_update.height),
             last_probed=state_update.last_probed,
@@ -94,7 +105,7 @@ class WellStore(HasState[WellState], HandlesActions):
         self,
         labware_id: str,
         well_name: str,
-        volume_added: float | update_types.ClearType,
+        volume_added: Union[float, update_types.ClearType],
     ) -> None:
         if (
             labware_id in self._state.loaded_volumes
@@ -120,13 +131,25 @@ class WellStore(HasState[WellState], HandlesActions):
             labware_id in self._state.probed_volumes
             and well_name in self._state.probed_volumes[labware_id]
         ):
+            prev_probed_vol_info = self._state.probed_volumes[labware_id][well_name]
             if volume_added is update_types.CLEAR:
                 del self._state.probed_volumes[labware_id][well_name]
+            elif (
+                self._state.probed_volumes[labware_id][well_name].volume
+                == "SimulatedProbeResult"
+            ):
+                self._state.probed_volumes[labware_id][well_name] = ProbedVolumeInfo(
+                    volume="SimulatedProbeResult",
+                    last_probed=prev_probed_vol_info.last_probed,
+                    operations_since_probe=prev_probed_vol_info.operations_since_probe
+                    + 1,
+                )
+                return
             else:
-                prev_probed_vol_info = self._state.probed_volumes[labware_id][well_name]
                 if prev_probed_vol_info.volume is None:
                     new_vol_info: float | None = None
                 else:
+                    assert isinstance(prev_probed_vol_info.volume, float)
                     new_vol_info = prev_probed_vol_info.volume + volume_added
                 self._state.probed_volumes[labware_id][well_name] = ProbedVolumeInfo(
                     volume=new_vol_info,
@@ -240,13 +263,15 @@ def _volume_from_info(info: Optional[LoadedVolumeInfo]) -> Optional[float]:
 
 def _volume_from_info(
     info: Union[ProbedVolumeInfo, LoadedVolumeInfo, None],
-) -> Optional[float]:
+) -> Union[float, Literal["SimulatedProbeResult"], None]:
     if info is None:
         return None
     return info.volume
 
 
-def _height_from_info(info: Optional[ProbedHeightInfo]) -> Optional[float]:
+def _height_from_info(
+    info: Optional[ProbedHeightInfo],
+) -> Union[float, Literal["SimulatedProbeResult"], None]:
     if info is None:
         return None
     return info.height
@@ -255,7 +280,9 @@ def _height_from_info(info: Optional[ProbedHeightInfo]) -> Optional[float]:
 MaybeClear = TypeVar("MaybeClear")
 
 
-def _none_from_clear(inval: MaybeClear | update_types.ClearType) -> MaybeClear | None:
+def _none_from_clear(
+    inval: Union[MaybeClear, update_types.ClearType]
+) -> MaybeClear | None:
     if inval == update_types.CLEAR:
         return None
     return inval

@@ -8,7 +8,13 @@ from typing import Optional, List, Tuple, Union, cast, TypeVar, Dict, Set, Liter
 from dataclasses import dataclass
 from functools import cached_property
 
-from opentrons.types import Point, DeckSlotName, StagingSlotName, MountType
+from opentrons.types import (
+    Point,
+    DeckSlotName,
+    StagingSlotName,
+    MountType,
+    MeniscusTrackingTarget,
+)
 
 from opentrons_shared_data.errors.exceptions import InvalidStoredData
 from opentrons_shared_data.labware.constants import WELL_NAME_PATTERN
@@ -568,12 +574,17 @@ class GeometryView:
                 origin=WellOrigin.MENISCUS,
                 offset=WellOffset(x=0, y=0, z=absolute_point.z),
             )
+            if meniscus_tracking == MeniscusTrackingTarget.END:
+                location.volumeOffset = "operationVolume"
+            elif meniscus_tracking == MeniscusTrackingTarget.DYNAMIC_MENISCUS:
+                dynamic_liquid_tracking = True
         else:
             well_absolute_point = self.get_well_position(labware_id, well_name)
             delta = absolute_point - well_absolute_point
-            return LiquidHandlingWellLocation(
+            location = LiquidHandlingWellLocation(
                 offset=WellOffset(x=delta.x, y=delta.y, z=delta.z)
             )
+        return location, dynamic_liquid_tracking
 
     def get_relative_pick_up_tip_well_location(
         self,

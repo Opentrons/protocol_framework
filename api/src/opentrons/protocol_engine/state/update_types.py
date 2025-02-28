@@ -46,18 +46,29 @@ class _ClearEnum(enum.Enum):
     CLEAR = enum.auto()
 
 
-CLEAR: typing.Final = _ClearEnum.CLEAR
 """A sentinel value to indicate that a value should be cleared.
 
 Useful when `None` is semantically unclear or has some other meaning.
 """
 
 
+CLEAR: typing.Final = _ClearEnum.CLEAR
 ClearType: typing.TypeAlias = typing.Literal[_ClearEnum.CLEAR]
 """The type of `CLEAR`, as `NoneType` is to `None`.
 
 Unfortunately, mypy doesn't let us write `Literal[CLEAR]`. Use this instead.
 """
+
+
+class _SimulatedEnum(enum.Enum):
+    SIMULATED = enum.auto()
+
+
+SIMULATED: typing.Final = _SimulatedEnum.SIMULATED
+SimulatedType: typing.TypeAlias = typing.Literal["SimulatedProbeResult"]
+"""A sentinel value to indicate that a liquid probe return value is simulated.
+
+Useful to avoid throwing unnecessary errors in protocol analysis."""
 
 
 @dataclasses.dataclass(frozen=True)
@@ -260,8 +271,8 @@ class LiquidProbedUpdate:
     labware_id: str
     well_name: str
     last_probed: datetime
-    height: float | ClearType
-    volume: float | ClearType
+    height: typing.Union[float, ClearType, SimulatedType]
+    volume: typing.Union[float, ClearType, SimulatedType]
 
 
 @dataclasses.dataclass
@@ -734,8 +745,8 @@ class StateUpdate:
         labware_id: str,
         well_name: str,
         last_probed: datetime,
-        height: float | ClearType,
-        volume: float | ClearType,
+        height: typing.Union[float, ClearType, SimulatedType],
+        volume: typing.Union[float, ClearType, SimulatedType],
     ) -> Self:
         """Add a liquid height and volume to well state. See `ProbeLiquidUpdate`."""
         self.liquid_probed = LiquidProbedUpdate(
@@ -751,7 +762,7 @@ class StateUpdate:
         self: Self,
         labware_id: str,
         well_names: list[str],
-        volume_added: float | ClearType,
+        volume_added: typing.Union[float, ClearType],
     ) -> Self:
         """Update liquid volumes in well state. See `OperateLiquidUpdate`."""
         self.liquid_operated = LiquidOperatedUpdate(
