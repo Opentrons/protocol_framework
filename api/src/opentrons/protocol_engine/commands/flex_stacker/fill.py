@@ -86,15 +86,8 @@ class FillImpl(AbstractCommandImpl[FillParams, SuccessData[FillResult]]):
                 message=f"The Flex Stacker in {location} has not been configured yet and cannot be filled."
             )
 
-        pool_height = self._state_view.geometry.get_height_of_stacker_labware_pool(
-            params.moduleId
-        )
-        max_pool_count = self._state_view.modules.stacker_max_pool_count_by_height(
-            params.moduleId, pool_height
-        )
-
-        count = params.count if params.count is not None else max_pool_count
-        new_count = min(max_pool_count, max(stacker_state.pool_count, count))
+        count = params.count if params.count is not None else stacker_state.max_pool_count
+        new_count = min(stacker_state.max_pool_count, max(stacker_state.pool_count, count))
 
         state_update = (
             update_types.StateUpdate().update_flex_stacker_labware_pool_count(
