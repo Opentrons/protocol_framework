@@ -28,10 +28,10 @@ class TestSection(enum.Enum):
     Z_AXIS_BASIC = "Z_AXIS_BASIC"
     L_AXIS_BASIC = "L_AXIS_BASIC"
     X_AXIS_BASIC = "X_AXIS_BASIC"
-    Z_AXIS_CURRENT_SPEED = "Z_AXIS_CURRENT_SPEED"
-    X_AXIS_CURRENT_SPEED = "X_AXIS_CURRENT_SPEED"
     UI_LEDS = "UI_LEDS"
     UV_LOCKOUT_SWITCH = "UV_LOCKOUT_SWITCH"
+    Z_AXIS_CURRENT_SPEED = "Z_AXIS_CURRENT_SPEED"
+    X_AXIS_CURRENT_SPEED = "X_AXIS_CURRENT_SPEED"
 
 
 @dataclass
@@ -60,14 +60,6 @@ TESTS = [
         test_l_axis_basic.run,
     ),
     (
-        TestSection.Z_AXIS_CURRENT_SPEED,
-        test_z_axis_current_speed.run,
-    ),
-    (
-        TestSection.X_AXIS_CURRENT_SPEED,
-        test_x_axis_current_speed.run,
-    ),
-    (
         TestSection.ESTOP,
         test_estop.run,
     ),
@@ -82,6 +74,14 @@ TESTS = [
     (
         TestSection.UV_LOCKOUT_SWITCH,
         test_uv_lockout_switch.run,
+    ),
+    (
+        TestSection.Z_AXIS_CURRENT_SPEED,
+        test_z_axis_current_speed.run,
+    ),
+    (
+        TestSection.X_AXIS_CURRENT_SPEED,
+        test_x_axis_current_speed.run,
     ),
 ]
 
@@ -115,14 +115,7 @@ def build_report(test_name: str) -> CSVReport:
                 title=TestSection.L_AXIS_BASIC.value,
                 lines=test_l_axis_basic.build_csv_lines(),
             ),
-            CSVSection(
-                title=TestSection.Z_AXIS_CURRENT_SPEED.value,
-                lines=test_z_axis_current_speed.build_csv_lines(),
-            ),
-            CSVSection(
-                title=TestSection.X_AXIS_CURRENT_SPEED.value,
-                lines=test_x_axis_current_speed.build_csv_lines(),
-            ),
+
             CSVSection(
                 title=TestSection.UI_LEDS.value,
                 lines=test_ui_leds.build_csv_lines(),
@@ -130,6 +123,14 @@ def build_report(test_name: str) -> CSVReport:
             CSVSection(
                 title=TestSection.UV_LOCKOUT_SWITCH.value,
                 lines=test_uv_lockout_switch.build_csv_lines(),
+            ),
+            CSVSection(
+                title=TestSection.Z_AXIS_CURRENT_SPEED.value,
+                lines=test_z_axis_current_speed.build_csv_lines(),
+            ),
+            CSVSection(
+                title=TestSection.X_AXIS_CURRENT_SPEED.value,
+                lines=test_x_axis_current_speed.build_csv_lines(),
             ),
         ],
     )
