@@ -10,5 +10,5 @@ class FlexStackerStallOrCollisionError(ErrorOccurrence):
     isDefined: bool = True
     errorType: Literal["flexStackerStallOrCollision"] = "flexStackerStallOrCollision"
 
-    errorCode: str = ErrorCodes.STALL_OR_COLLISION_DETECTED.value.code
-    detail: str = ErrorCodes.STALL_OR_COLLISION_DETECTED.value.detail
+    errorCode: str = ErrorCodes.FLEX_STACKER_STALL_OR_COLLISION_DETECTED.value.code
+    detail: str = ErrorCodes.FLEX_STACKER_STALL_OR_COLLISION_DETECTED.value.detail
