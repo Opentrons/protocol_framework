@@ -311,7 +311,7 @@ def _run_trial(
         old_liquid_class = get_liquid_class(
             trial.cfg.liquid,
             trial.cfg.dilution,
-            int(trial.pipette.max_volume),
+            trial.cfg.pipette_volume,
             trial.pipette.channels,
             trial.tip_volume,
             trial.volume,
@@ -323,19 +323,16 @@ def _run_trial(
                 old_liquid_class,
                 trial.cfg.liquid,
                 trial.cfg.dilution,
-                int(trial.pipette.max_volume),
+                trial.cfg.pipette_volume,
                 trial.pipette.channels,
                 trial.tip_volume,
                 trial.volume,
             )
     else:
-        pip_load_name = (
-            f"flex_{trial.pipette.channels}channel_{int(trial.pipette.max_volume)}"
-        )
         tiprack_load_name = (
             f"opentrons/opentrons_flex_96_tiprack_{trial.cfg.tip_volume}ul/1"
         )
-        transfer_properties = new_liquid_class.get_for(pip_load_name, tiprack_load_name)
+        transfer_properties = new_liquid_class.get_for(trial.pipette, tiprack_load_name)
 
     def _tag(m_type: MeasurementType) -> str:
         tag = create_measurement_tag(
@@ -535,7 +532,7 @@ def _run_trial(
         # FIXME: this should happen inside the `transfer_liquid` command
         #        so delete this `configure` call once that is added
         if trial.mode == "default":
-            trial.pipette.configure_for_volume(volume=trial.pipette.max_volume)
+            trial.pipette.configure_for_volume(volume=trial.cfg.pipette_volume)
         elif trial.mode == "lowVolumeDefault":
             assert trial.pipette.max_volume == 50
             trial.pipette.configure_for_volume(volume=trial.pipette.min_volume)
