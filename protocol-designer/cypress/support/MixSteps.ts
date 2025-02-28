@@ -72,7 +72,7 @@ enum MixContent {
   StepName = 'Step Name',
   StepNotes = 'Step Notes',
   CypressTest = 'Cypress Mix Test',
-  TouchTipFromBottom = 'Touch tip position from bottom',
+  TouchTipFromTop = 'Touch tip position from top',
   MixStepSavedMessage = 'Mix step has been saved',
 }
 
@@ -88,11 +88,11 @@ enum MixLocators {
   Aspirate = 'button:contains("Aspirate")',
   Dispense = 'button:contains("Dispense")',
   AspFlowRateInput = '[name="aspirate_flowRate"]',
-  AspWellOrder = '[data-testid="ListButton_noActive"]',
+  AspWellOrder = '[data-testid="WellsOrderField_ListButton_aspirate"]',
   ResetToDefault = 'button:contains("Reset to default")',
   PrimaryOrderDropdown = 'div[tabindex="0"].sc-bqWxrE jKLbYH iFjNDq',
   CancelAspSettings = '[class="SecondaryButton-sc-1opt1t9-0 kjpcRL"]',
-  MixTipPos = '[data-testid="ListButton_noActive"]',
+  MixTipPos = '[data-testid="PositionField_ListButton_mix"]',
   XpositionInput = '[data-testid="TipPositionModal_x_custom_input"]',
   YpositionInput = '[id="TipPositionModal_y_custom_input"]',
   ZpositionInput = '[id="TipPositionModal_z_custom_input"]',
@@ -108,10 +108,10 @@ enum MixLocators {
   BlowoutFlowRate = '[name="blowout_flowRate"]',
   BlowoutPos = '[id="TipPositionField_blowout_z_offset"]',
   BlowoutZPosition = '[data-testid="TipPositionModal_custom_input"]',
-  PosFromBottom = '[id="TipPositionField_mix_touchTip_mmFromBottom"]',
+  PosFromBottom = '[id="TipPositionField_mix_touchTip_mmFromTop"]',
   RenameBtn = 'button:contains("Rename")',
   StepNameInput = '[class="InputField__StyledInput-sc-1gyyvht-0 cLVzBl"]',
-  StepNotesInput = '[class^="RenameStepModal__DescriptionField"]',
+  StepNotesInput = '[class^="TextAreaField"]',
   // StepNotesInput = '[data-testid="TextAreaField_step_notes"]',
   PosFromTop = '[data-testid="TipPositionField_blowout_z_offset"]',
 }
@@ -638,7 +638,7 @@ export const MixVerifications = {
     call: () => {
       cy.log('Verifying TouchTip ---------------------------')
       cy.contains(MixContent.TouchTip).should('exist').should('be.visible')
-      cy.contains(MixContent.TouchTipFromBottom)
+      cy.contains(MixContent.TouchTipFromTop)
         .should('exist')
         .should('be.visible')
       cy.get(MixLocators.PosFromTop).should('have.prop', 'value')
