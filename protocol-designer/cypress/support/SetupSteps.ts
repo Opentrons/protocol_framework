@@ -384,7 +384,7 @@ export const SetupSteps = {
 
   ChoseDeckSlotLabware: (deckslot: string): StepThunk => ({
     call: () => {
-      chooseDeckSlot(deckslot).click()
+      chooseDeckSlot(deckslot).click({ force: true })
     },
   }),
 

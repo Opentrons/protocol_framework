@@ -47,8 +47,7 @@ describe('The Redesigned Create Protocol Landing Page', () => {
     steps.add(SetupSteps.Confirm())
     steps.add(SetupSteps.Confirm())
     steps.add(SetupSteps.EditProtocolA())
-    steps.add(SetupSteps.ChoseDeckSlot('C2'))
-    steps.add(SetupSteps.ChoseDeckSlotLabware('C2'))
+    steps.add(SetupSteps.ChoseDeckSlotWithLabware('C2'))
     steps.add(SetupSteps.AddHardwareLabware())
     steps.add(SetupSteps.ClickLabwareHeader())
     steps.add(SetupSteps.ClickWellPlatesSection())
@@ -65,20 +64,18 @@ describe('The Redesigned Create Protocol Landing Page', () => {
     steps.add(UniversalSteps.Snapshot())
     steps.add(SetupSteps.SelectLiquidWells())
     steps.add(SetupSteps.SetVolumeAndSaveForWells('150'))
-    steps.add(SetupSteps.ChoseDeckSlot('C3'))
-    steps.add(SetupSteps.ChoseDeckSlotLabware('C3'))
+    steps.add(SetupSteps.ChoseDeckSlotWithLabware('C3'))
     steps.add(SetupSteps.AddHardwareLabware())
     steps.add(SetupSteps.ClickLabwareHeader())
     steps.add(SetupSteps.ClickWellPlatesSection())
+
     steps.add(SetupSteps.SelectLabwareByDisplayName('Armadillo 96 Well Plate'))
-    steps.add(SetupSteps.AddHardwareLabware())
-    steps.add(SetupSteps.ClickLabwareHeader())
-    steps.add(SetupSteps.ClickWellPlatesSection())
-    steps.add(SetupSteps.SelectLabwareByDisplayName('Bio-Rad 96 Well Plate'))
+
     steps.add(SetupSteps.ProtocolStepsH())
     steps.add(SetupSteps.AddStep())
     steps.add(SetupVerifications.TransferPopOut())
     steps.add(UniversalSteps.Snapshot())
+
     // ToDO alexjoel42 organize repeats into a for loop
     // Source
     steps.add(SetupSteps.AddSourceLabwareDropdown())
@@ -120,6 +117,7 @@ describe('The Redesigned Create Protocol Landing Page', () => {
     steps.add(SetupSteps.BlowoutTransferDestination())
     steps.add(SetupVerifications.ExtraDispenseTransfer())
     steps.add(SetupSteps.Save())
+
     steps.execute()
   })
 })
