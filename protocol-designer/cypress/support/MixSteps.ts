@@ -72,7 +72,7 @@ enum MixContent {
   StepName = 'Step Name',
   StepNotes = 'Step Notes',
   CypressTest = 'Cypress Mix Test',
-  TouchTipFromBottom = 'Touch tip position from bottom',
+  TouchTipFromTop = 'Touch tip position from bottom',
   MixStepSavedMessage = 'Mix step has been saved',
 }
 
@@ -111,7 +111,7 @@ enum MixLocators {
   PosFromBottom = '[id="TipPositionField_mix_touchTip_mmFromBottom"]',
   RenameBtn = 'button:contains("Rename")',
   StepNameInput = '[class="InputField__StyledInput-sc-1gyyvht-0 cLVzBl"]',
-  StepNotesInput = '[class^="RenameStepModal__DescriptionField"]',
+  StepNotesInput = '[class^="RenameStepModal__DescriptionField-sc-1k5vjxe-0 lkzOSf"]',
   // StepNotesInput = '[data-testid="TextAreaField_step_notes"]',
   PosFromTop = '[data-testid="TipPositionField_blowout_z_offset"]',
 }
@@ -638,7 +638,7 @@ export const MixVerifications = {
     call: () => {
       cy.log('Verifying TouchTip ---------------------------')
       cy.contains(MixContent.TouchTip).should('exist').should('be.visible')
-      cy.contains(MixContent.TouchTipFromBottom)
+      cy.contains(MixContent.TouchTipFromTop)
         .should('exist')
         .should('be.visible')
       cy.get(MixLocators.PosFromTop).should('have.prop', 'value')
