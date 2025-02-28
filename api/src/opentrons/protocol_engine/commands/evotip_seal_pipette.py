@@ -253,7 +253,7 @@ class EvotipSealPipetteImplementation(
             # of 25.15. Applying a 5% safety factor makes it work.
             target_position = (
                 pipette_dict["plunger_positions"]["bottom"]
-                + _SAFE_TOP_VOLUME * pipette_dict["shaft_ul_per_mm"] * 1.05
+                - (_SAFE_TOP_VOLUME / pipette_dict["shaft_ul_per_mm"]) * 1.05
             )
             await self._hardware_api.move_axes(
                 {Axis.of_main_tool_actuator(hw_mount): target_position}
