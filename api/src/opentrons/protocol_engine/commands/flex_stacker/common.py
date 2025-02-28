@@ -1,6 +1,7 @@
+"""Common flex stacker base models."""
 from typing import Literal
 
-from opentrons.protocol_engine import ErrorOccurrence
+from ...errors import ErrorOccurrence
 from opentrons_shared_data.errors import ErrorCodes
 
 
