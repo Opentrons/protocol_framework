@@ -14,6 +14,7 @@ export const PipetteField = (props: FieldProps): JSX.Element => {
       options={pipetteOptions}
       value={value ? String(value) : null}
       title={t('pipette')}
+      width="100%"
     />
   )
 }

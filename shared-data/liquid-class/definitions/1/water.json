@@ -1,6 +1,7 @@
 {
   "liquidClassName": "water",
-  "displayName": "Water",
+  "displayName": "Aqueous",
+  "description": "Deionized water",
   "schemaVersion": 1,
   "namespace": "opentrons",
   "byPipette": [
