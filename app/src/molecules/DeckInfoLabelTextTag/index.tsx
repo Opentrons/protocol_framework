@@ -53,7 +53,6 @@ const CONTAINER_STYLE = css`
   border-radius: ${BORDERS.borderRadius12};
   padding: ${SPACING.spacing12};
   width: 100%;
-  min-width: 26.875rem;
   display: ${DISPLAY_GRID};
   grid-template-columns: 120px 1fr ${FLEX_MAX_CONTENT};
   gap: ${SPACING.spacing40};
@@ -66,6 +65,7 @@ const CONTAINER_STYLE = css`
   @media (max-width: 450px) {
     grid-template-columns: 1fr;
     gap: ${SPACING.spacing12};
+    min-width: 0;
   }
 `
 
