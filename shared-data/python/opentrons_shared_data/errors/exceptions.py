@@ -395,7 +395,7 @@ class FlexStackerStallError(RoboticsControlError):
         detail: Optional[Dict[str, str]] = None,
         wrapping: Optional[Sequence[EnumeratedError]] = None,
     ) -> None:
-        """Build a StallOrCollisionDetectedError."""
+        """Build a FlexStackerStallError."""
         self.serial = serial
         self.axis = axis
         super().__init__(
