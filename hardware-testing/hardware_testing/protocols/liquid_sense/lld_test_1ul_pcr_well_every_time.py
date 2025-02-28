@@ -13,7 +13,7 @@ from hardware_testing.protocols import (
 )
 import math
 
-metadata = {"protocolName": "LLD 1uL PCR-to-MVS-27FEB"}
+metadata = {"protocolName": "LLD 1uL PCR-to-MVS-28FEB"}
 requirements = {"robotType": "Flex", "apiLevel": "2.22"}
 
 SLOTS = {
@@ -62,7 +62,7 @@ def add_parameters(parameters: ParameterContext) -> None:
         display_name="Number of Plates",
         minimum=1,
         maximum=5,
-        default=5,
+        default=1,
     )
     parameters.add_bool(
         variable_name="skip_diluent", display_name="Skip Diluent", default=False
@@ -88,6 +88,13 @@ def add_parameters(parameters: ParameterContext) -> None:
         maximum = 2,
         minimum = 0.5
     )
+    parameters.add_float(
+        variable_name = "single_plate_vol",
+        display_name="Single Plate Volume",
+        default = 5.0,
+        minimum=1.0, 
+        maximum=5.0
+    )
 
 
 def get_latest_version(load_name: str) -> int:
@@ -107,6 +114,7 @@ def run(ctx: ProtocolContext) -> None:
     push_out = ctx.params.push_out  # type: ignore[attr-defined]
     use_test_matrix = ctx.params.use_test_matrix  # type: ignore[attr-defined]
     test_gripper_only = ctx.params.test_gripper_only  # type: ignore[attr-defined]
+    single_plate_vol = ctx.params.single_plate_vol # type: ignore[attr-defined]
     TRIALS = columns * 8 * num_of_plates
     BOTTOM_MM = ctx.params.dot_bottom_submerge_depth # type: ignore[attr-defined]
     ctx.load_trash_bin("A1")
@@ -213,6 +221,20 @@ def run(ctx: ProtocolContext) -> None:
     total_dye_needed_c = (
         sum([(vol * 24) + 10 for vol in volume_list_c[:num_of_plates]]) * dye_c_plates
     )
+    if num_of_plates == 1:
+        volume_list = [single_plate_vol]
+        if single_plate_vol >= 2.0:
+            dye_c_plates = 1
+            total_dye_needed_c = (
+                sum([(vol * 24) + 10 for vol in volume_list_c[:num_of_plates]]) * dye_c_plates
+            )
+            total_dye_needed_d = 0.0
+        else:
+             total_dye_needed_d = (
+                sum([(vol * 24) + 10 for vol in volume_list_d[:num_of_plates]]) 
+            )
+             total_dye_needed_c = 0
+            
     dye_d = ctx.define_liquid("dye_d", "#FF0000")
     dye_c = ctx.define_liquid("dye_c", "F1C232")
 
@@ -262,7 +284,7 @@ def run(ctx: ProtocolContext) -> None:
                         pipette.aspirate(dye_needed_in_well, src_holder["A1"])
                     else:
                         pipette.aspirate(dye_needed_in_well, src_holder["A2"])
-                    pipette.dispense(dye_needed_in_well, src_well)
+                    pipette.dispense(dye_needed_in_well, src_well.bottom(BOTTOM_MM))
             pipette.drop_tip()
             tip_counter += 1
         ctx.move_labware(
