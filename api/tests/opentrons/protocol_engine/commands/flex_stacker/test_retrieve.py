@@ -1,9 +1,15 @@
 """Test Flex Stacker retrieve command implementation."""
+from datetime import datetime
 
 import pytest
-from decoy import Decoy
+from decoy import Decoy, matchers
 
+from opentrons.drivers.flex_stacker.types import StackerAxis
 from opentrons.hardware_control.modules import FlexStacker
+from opentrons.hardware_control.modules.errors import FlexStackerStallError
+from opentrons.protocol_engine.commands.movement_common import (
+    FlexStackerStallOrCollisionError,
+)
 from opentrons.protocol_engine.resources import ModelUtils
 
 from opentrons.protocol_engine.state.state import StateView
@@ -21,7 +27,7 @@ from opentrons.protocol_engine.state.module_substates import (
 )
 from opentrons.protocol_engine.execution import EquipmentHandler
 from opentrons.protocol_engine.commands import flex_stacker
-from opentrons.protocol_engine.commands.command import SuccessData
+from opentrons.protocol_engine.commands.command import SuccessData, DefinedErrorData
 from opentrons.protocol_engine.commands.flex_stacker.retrieve import RetrieveImpl
 from opentrons.protocol_engine.types import (
     DeckSlotLocation,
@@ -596,4 +602,109 @@ async def test_retrieve_primary_adapter_and_lid(
                 parent_labware_ids=["labware-id"], lid_ids=["lid-id"]
             ),
         ),
+    )
+
+
+async def test_retrive_raises_if_stall(
+    decoy: Decoy,
+    equipment: EquipmentHandler,
+    state_view: StateView,
+    subject: RetrieveImpl,
+    model_utils: ModelUtils,
+    stacker_id: FlexStackerId,
+    flex_50uL_tiprack: LabwareDefinition,
+    tiprack_adapter_def: LabwareDefinition,
+    tiprack_lid_def: LabwareDefinition,
+    stacker_hardware: FlexStacker,
+) -> None:
+    """It should raise a stall error."""
+    error_id = "error-id"
+    error_timestamp = datetime(year=2020, month=1, day=2)
+
+    data = flex_stacker.RetrieveParams(moduleId=stacker_id)
+
+    fs_module_substate = FlexStackerSubState(
+        module_id=stacker_id,
+        in_static_mode=False,
+        hopper_labware_ids=[],
+        pool_primary_definition=flex_50uL_tiprack,
+        pool_adapter_definition=tiprack_adapter_def,
+        pool_lid_definition=tiprack_lid_def,
+        pool_count=1,
+    )
+    decoy.when(
+        state_view.modules.get_flex_stacker_substate(module_id=stacker_id)
+    ).then_return(fs_module_substate)
+    decoy.when(
+        await equipment.load_labware_from_definition(
+            definition=tiprack_adapter_def,
+            location=ModuleLocation(moduleId=stacker_id),
+            labware_id=None,
+        )
+    ).then_return(LoadedLabwareData("adapter-id", tiprack_adapter_def, None))
+    decoy.when(
+        await equipment.load_labware_from_definition(
+            definition=flex_50uL_tiprack,
+            location=OnLabwareLocation(labwareId="adapter-id"),
+            labware_id=None,
+        )
+    ).then_return(LoadedLabwareData("labware-id", flex_50uL_tiprack, None))
+
+    decoy.when(
+        await equipment.load_labware_from_definition(
+            definition=tiprack_lid_def,
+            location=OnLabwareLocation(labwareId="labware-id"),
+            labware_id=None,
+        )
+    ).then_return(LoadedLabwareData("lid-id", tiprack_lid_def, None))
+
+    decoy.when(
+        state_view.geometry.get_predicted_location_sequence(
+            ModuleLocation(moduleId=stacker_id)
+        )
+    ).then_return(_stacker_base_loc_seq(stacker_id))
+    decoy.when(
+        state_view.geometry.get_predicted_location_sequence(
+            OnLabwareLocation(labwareId="adapter-id")
+        )
+    ).then_return(
+        [OnLabwareLocationSequenceComponent(labwareId="adapter-id", lidId=None)]
+        + _stacker_base_loc_seq(stacker_id)
+    )
+    decoy.when(
+        state_view.geometry.get_predicted_location_sequence(
+            OnLabwareLocation(labwareId="labware-id")
+        )
+    ).then_return(
+        [
+            OnLabwareLocationSequenceComponent(labwareId="labware-id", lidId="lid-id"),
+            OnLabwareLocationSequenceComponent(labwareId="adapter-id", lidId=None),
+        ]
+        + _stacker_base_loc_seq(stacker_id)
+    )
+
+    decoy.when(
+        state_view.geometry.get_height_of_labware_stack(
+            definitions=[tiprack_lid_def, flex_50uL_tiprack, tiprack_adapter_def]
+        )
+    ).then_return(16)
+
+    _prep_stacker_own_location(decoy, state_view, stacker_id)
+
+    decoy.when(model_utils.generate_id()).then_return(error_id)
+    decoy.when(model_utils.get_timestamp()).then_return(error_timestamp)
+
+    decoy.when(await stacker_hardware.dispense_labware(labware_height=16)).then_raise(
+        FlexStackerStallError(serial="123", axis=StackerAxis.Z)
+    )
+
+    result = await subject.execute(data)
+
+    assert result == DefinedErrorData(
+        public=FlexStackerStallOrCollisionError.model_construct(
+            id=error_id,
+            createdAt=error_timestamp,
+            wrappedErrors=[matchers.Anything()],
+        ),
+        state_update=StateUpdate(),
     )
