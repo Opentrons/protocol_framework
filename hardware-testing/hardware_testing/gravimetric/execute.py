@@ -426,7 +426,6 @@ def _run_trial(
         _retract_mm = max(
             0.0, _asp_or_disp.submerge.offset.z, _asp_or_disp.retract.offset.z
         )
-        print("here", _retract_mm)
         approach, submerge, retract = _get_approach_submerge_retract_heights(
             trial.well,
             trial.liquid_tracker,
@@ -438,7 +437,6 @@ def _run_trial(
             blank=trial.blank,
             channel_count=trial.channel_count,
         )
-        input(f"{approach},{submerge},{retract}")
 
         _original_submerge_position_reference = _asp_or_disp.submerge.position_reference
         _original_position_reference = _asp_or_disp.position_reference
