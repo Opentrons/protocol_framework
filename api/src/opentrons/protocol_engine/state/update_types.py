@@ -19,7 +19,7 @@ from opentrons.protocol_engine.types import (
     LiquidClassRecord,
     ABSMeasureMode,
 )
-from opentrons.types import MountType
+from opentrons.types import MountType, LiquidTrackingType
 from opentrons_shared_data.labware.labware_definition import LabwareDefinition
 from opentrons_shared_data.pipette.types import PipetteNameType
 
@@ -58,6 +58,16 @@ ClearType: typing.TypeAlias = typing.Literal[_ClearEnum.CLEAR]
 
 Unfortunately, mypy doesn't let us write `Literal[CLEAR]`. Use this instead.
 """
+
+
+class _SimulatedEnum(enum.Enum):
+    SIMULATED = enum.auto()
+
+
+SIMULATED: typing.Final = _SimulatedEnum.SIMULATED
+"""A sentinel value to indicate that a liquid probe return value is simulated.
+
+Useful to avoid throwing unnecessary errors in protocol analysis."""
 
 
 @dataclasses.dataclass(frozen=True)
@@ -260,8 +270,8 @@ class LiquidProbedUpdate:
     labware_id: str
     well_name: str
     last_probed: datetime
-    height: float | ClearType
-    volume: float | ClearType
+    height: LiquidTrackingType | ClearType
+    volume: LiquidTrackingType | ClearType
 
 
 @dataclasses.dataclass
@@ -734,8 +744,8 @@ class StateUpdate:
         labware_id: str,
         well_name: str,
         last_probed: datetime,
-        height: float | ClearType,
-        volume: float | ClearType,
+        height: LiquidTrackingType | ClearType,
+        volume: LiquidTrackingType | ClearType,
     ) -> Self:
         """Add a liquid height and volume to well state. See `ProbeLiquidUpdate`."""
         self.liquid_probed = LiquidProbedUpdate(

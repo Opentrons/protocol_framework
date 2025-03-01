@@ -332,6 +332,44 @@ AxisMapType = Dict[AxisType, float]
 StringAxisMap = Dict[str, float]
 
 
+class SimulatedProbeResult:
+    """A sentinel value to substitute for the resulting volume/height of a liquid probe during simulation."""
+
+    def __init__(self) -> None:
+        """Initialize a SimulatedProbeResult- should only be done by VirtualPipettingHandler::liquid_probe_in_place."""
+        self._operations_after_probe: List[float] = []
+        self._net_liquid_exchanged_after_probe = 0.0
+
+    def __add__(self, other: LiquidTrackingType) -> LiquidTrackingType:
+        """Bypass addition and just return self."""
+        return self
+
+    def __sub__(self, other: LiquidTrackingType) -> LiquidTrackingType:
+        """Bypass subtraction and just return self."""
+        return self
+
+    def __radd__(self, other: LiquidTrackingType) -> LiquidTrackingType:
+        """Bypass addition and just return self."""
+        return self
+
+    def __rsub__(self, other: LiquidTrackingType) -> LiquidTrackingType:
+        """Bypass subtraction and just return self."""
+        return self
+
+    def __eq__(self, other: object) -> bool:
+        """A SimulatedProbeResult should only be equal to the same instance of its class."""
+        if not isinstance(other, SimulatedProbeResult):
+            return False
+        return self is other
+
+    def simulate_probed_aspirate_dispense(self, volume: float) -> None:
+        self._net_liquid_exchanged_after_probe += volume
+        self._operations_after_probe.append(volume)
+
+
+LiquidTrackingType = Union[SimulatedProbeResult, float]
+
+
 # TODO(mc, 2020-11-09): this makes sense in shared-data or other common
 # model library
 # https://github.com/Opentrons/opentrons/pull/6943#discussion_r519029833

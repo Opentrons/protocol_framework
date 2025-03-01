@@ -2577,7 +2577,7 @@ class InstrumentContext(publisher.CommandPublisher):
         self._core.liquid_probe_with_recovery(well._core, loc)
 
     @requires_version(2, 20)
-    def measure_liquid_height(self, well: labware.Well) -> float:
+    def measure_liquid_height(self, well: labware.Well) -> types.LiquidTrackingType:
         """Check the height of the liquid within a well.
 
         :returns: The height, in mm, of the liquid from the deck.
@@ -2588,8 +2588,7 @@ class InstrumentContext(publisher.CommandPublisher):
         """
         self._raise_if_pressure_not_supported_by_pipette()
         loc = well.top()
-        height = self._core.liquid_probe_without_recovery(well._core, loc)
-        return height
+        return self._core.liquid_probe_without_recovery(well._core, loc)
 
     def _raise_if_configuration_not_supported_by_pipette(
         self, style: NozzleLayout

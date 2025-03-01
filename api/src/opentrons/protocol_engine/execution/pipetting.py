@@ -4,6 +4,7 @@ from typing_extensions import Protocol as TypingProtocol
 from contextlib import contextmanager
 
 from opentrons.hardware_control import HardwareControlAPI
+from opentrons.types import SimulatedProbeResult, LiquidTrackingType
 
 from ..state.state import StateView
 from ..state.pipettes import HardwarePipette
@@ -91,7 +92,7 @@ class PipettingHandler(TypingProtocol):
         labware_id: str,
         well_name: str,
         well_location: WellLocation,
-    ) -> float:
+    ) -> LiquidTrackingType:
         """Detect liquid level."""
 
 
@@ -262,7 +263,7 @@ class HardwarePipettingHandler(PipettingHandler):
         labware_id: str,
         well_name: str,
         well_location: WellLocation,
-    ) -> float:
+    ) -> LiquidTrackingType:
         """Detect liquid level."""
         hw_pipette = self._state_view.pipettes.get_hardware_pipette(
             pipette_id=pipette_id,
@@ -378,11 +379,9 @@ class VirtualPipettingHandler(PipettingHandler):
         labware_id: str,
         well_name: str,
         well_location: WellLocation,
-    ) -> float:
+    ) -> LiquidTrackingType:
         """Detect liquid level."""
-        well_def = self._state_view.labware.get_well_definition(labware_id, well_name)
-        # raise ValueError(f"returning liquid height {well_def.depth}")
-        return well_def.depth
+        return SimulatedProbeResult()
 
     def _validate_tip_attached(self, pipette_id: str, command_name: str) -> None:
         """Validate if there is a tip attached."""
