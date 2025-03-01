@@ -57,6 +57,7 @@ async def test_store_raises_in_static_mode(
         pool_adapter_definition=None,
         pool_lid_definition=None,
         pool_count=0,
+        max_pool_count=5,
     )
     decoy.when(
         state_view.modules.get_flex_stacker_substate(module_id=stacker_id)
@@ -87,6 +88,7 @@ async def test_store_raises_if_full(
         pool_adapter_definition=None,
         pool_lid_definition=None,
         pool_count=5,
+        max_pool_count=5,
     )
     decoy.when(
         state_view.modules.get_flex_stacker_substate(module_id=stacker_id)
@@ -117,6 +119,7 @@ async def test_store_raises_if_carriage_logically_empty(
         pool_adapter_definition=None,
         pool_lid_definition=None,
         pool_count=1,
+        max_pool_count=5,
     )
     decoy.when(
         state_view.modules.get_flex_stacker_substate(module_id=stacker_id)
@@ -148,6 +151,7 @@ async def test_store_raises_if_not_configured(
         pool_adapter_definition=None,
         pool_lid_definition=None,
         pool_count=1,
+        max_pool_count=0,
     )
     decoy.when(
         state_view.modules.get_flex_stacker_substate(module_id=stacker_id)
@@ -268,6 +272,7 @@ async def test_store_raises_if_labware_does_not_match(
         pool_adapter_definition=pool_adapter,
         pool_lid_definition=pool_lid,
         pool_count=0,
+        max_pool_count=5,
     )
 
     decoy.when(
@@ -336,6 +341,7 @@ async def test_store(
         pool_adapter_definition=None,
         pool_lid_definition=None,
         pool_count=0,
+        max_pool_count=5,
     )
 
     decoy.when(

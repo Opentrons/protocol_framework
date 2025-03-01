@@ -144,14 +144,22 @@ class SetStoredLabwareImpl(
             labware_def, lid_def, adapter_def
         )
 
-        # TODO: propagate the limit on max height of the stacker
-        initial_count = params.initialCount if params.initialCount is not None else 5
-        count = min(initial_count, 5)
+        pool_height = self._state_view.geometry.get_height_of_labware_stack(
+            [x for x in [lid_def, labware_def, adapter_def] if x is not None]
+        )
+        max_pool_count = self._state_view.modules.stacker_max_pool_count_by_height(
+            params.moduleId, pool_height
+        )
+
+        initial_count = (
+            params.initialCount if params.initialCount is not None else max_pool_count
+        )
+        count = min(initial_count, max_pool_count)
 
         state_update = (
             update_types.StateUpdate()
             .update_flex_stacker_labware_pool_definition(
-                params.moduleId, labware_def, adapter_def, lid_def
+                params.moduleId, max_pool_count, labware_def, adapter_def, lid_def
             )
             .update_flex_stacker_labware_pool_count(params.moduleId, count)
         )

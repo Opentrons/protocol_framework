@@ -134,7 +134,7 @@ class StoreImpl(AbstractCommandImpl[StoreParams, SuccessData[StoreResult]]):
                 "Cannot store labware in Flex Stacker while in static mode"
             )
 
-        if stacker_state.pool_count == 5:
+        if stacker_state.pool_count == stacker_state.max_pool_count:
             raise CannotPerformModuleAction(
                 "Cannot store labware in Flex Stacker while it is full"
             )

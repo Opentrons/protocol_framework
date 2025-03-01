@@ -321,6 +321,7 @@ async def test_load_labware_in_flex_stacker(
             pool_adapter_definition=None,
             pool_lid_definition=None,
             pool_count=0,
+            max_pool_count=0,
         )
     )
     decoy.when(

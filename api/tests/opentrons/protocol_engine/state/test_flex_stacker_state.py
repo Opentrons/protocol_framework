@@ -124,6 +124,7 @@ def test_add_module_action(
         pool_adapter_definition=None,
         pool_lid_definition=None,
         pool_count=0,
+        max_pool_count=0,
     )
 
 
@@ -172,5 +173,6 @@ def test_get_labware_definition_list(
         pool_adapter_definition=adapter_def,
         pool_lid_definition=lid_def,
         pool_count=0,
+        max_pool_count=5,
     )
     assert subject.get_pool_definition_ordered_list() == result
