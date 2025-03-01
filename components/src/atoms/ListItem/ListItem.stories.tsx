@@ -1,7 +1,7 @@
 import { SPACING, VIEWPORT } from '../../ui-style-constants'
 import { DIRECTION_COLUMN } from '../../styles'
 import { Flex } from '../../primitives'
-import { LegacyStyledText } from '../StyledText'
+import { StyledText } from '../StyledText'
 import { ListItemDescriptor } from './ListItemChildren/ListItemDescriptor'
 import { ListItem as ListItemComponent, ListItemCustomize } from '.'
 import exampleImage from '../../images/labware/measurement-guide/images/spacing/spacing-well-rectangular@3x.png'
@@ -41,15 +41,15 @@ export const ListItem: Story = {
     type: 'default',
     children: (
       <Flex flexDirection={DIRECTION_COLUMN} gridGap={SPACING.spacing4}>
-        <LegacyStyledText as="p">
+        <StyledText as="p">
           Slot Component: Replace me using the component panel.
-        </LegacyStyledText>
-        <LegacyStyledText as="p">
+        </StyledText>
+        <StyledText as="p">
           Slot Component: Replace me using the component panel.
-        </LegacyStyledText>
-        <LegacyStyledText as="p">
+        </StyledText>
+        <StyledText as="p">
           Slot Component: Replace me using the component panel.
-        </LegacyStyledText>
+        </StyledText>
       </Flex>
     ),
   },
@@ -85,16 +85,16 @@ export const ListItemOnColorVariants: Story = {
   render: args => (
     <Flex flexDirection={DIRECTION_COLUMN} gridGap={SPACING.spacing16}>
       <ListItemComponent type="defaultOnColor">
-        <LegacyStyledText as="p">Default on Color Variant</LegacyStyledText>
+        <StyledText as="p">Default on Color Variant</StyledText>
       </ListItemComponent>
       <ListItemComponent type="successOnColor">
-        <LegacyStyledText as="p">Success on Color Variant</LegacyStyledText>
+        <StyledText as="p">Success on Color Variant</StyledText>
       </ListItemComponent>
       <ListItemComponent type="warningOnColor">
-        <LegacyStyledText as="p">Warning on Color Variant</LegacyStyledText>
+        <StyledText as="p">Warning on Color Variant</StyledText>
       </ListItemComponent>
       <ListItemComponent type="errorOnColor">
-        <LegacyStyledText as="p">Error on Color Variant</LegacyStyledText>
+        <StyledText as="p">Error on Color Variant</StyledText>
       </ListItemComponent>
     </Flex>
   ),
