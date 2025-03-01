@@ -9,7 +9,6 @@ from opentrons.protocol_engine.state.state import StateView
 from opentrons.protocol_engine.state.update_types import (
     StateUpdate,
     FlexStackerStateUpdate,
-    FlexStackerRetrieveLabware,
     BatchLoadedLabwareUpdate,
     AddressableAreaUsedUpdate,
     LabwareLidUpdate,
@@ -76,37 +75,6 @@ def _stacker_base_loc_seq(stacker_id: str) -> LabwareLocationSequence:
     ]
 
 
-async def test_retrieve_raises_when_static(
-    decoy: Decoy,
-    state_view: StateView,
-    equipment: EquipmentHandler,
-    flex_50uL_tiprack: LabwareDefinition,
-    stacker_id: FlexStackerId,
-) -> None:
-    """It should raise an exception when called in static mode."""
-    subject = RetrieveImpl(state_view=state_view, equipment=equipment)
-    data = flex_stacker.RetrieveParams(moduleId=stacker_id)
-
-    fs_module_substate = FlexStackerSubState(
-        module_id=stacker_id,
-        in_static_mode=True,
-        hopper_labware_ids=[],
-        pool_primary_definition=flex_50uL_tiprack,
-        pool_adapter_definition=None,
-        pool_lid_definition=None,
-        pool_count=1,
-    )
-    decoy.when(
-        state_view.modules.get_flex_stacker_substate(module_id=stacker_id)
-    ).then_return(fs_module_substate)
-
-    with pytest.raises(
-        CannotPerformModuleAction,
-        match="Cannot retrieve labware from Flex Stacker while in static mode",
-    ):
-        await subject.execute(data)
-
-
 async def test_retrieve_raises_when_empty(
     decoy: Decoy,
     state_view: StateView,
@@ -120,8 +88,6 @@ async def test_retrieve_raises_when_empty(
 
     fs_module_substate = FlexStackerSubState(
         module_id=stacker_id,
-        in_static_mode=False,
-        hopper_labware_ids=[],
         pool_primary_definition=flex_50uL_tiprack,
         pool_adapter_definition=None,
         pool_lid_definition=None,
@@ -152,8 +118,6 @@ async def test_retrieve_primary_only(
 
     fs_module_substate = FlexStackerSubState(
         module_id=stacker_id,
-        in_static_mode=False,
-        hopper_labware_ids=[],
         pool_primary_definition=flex_50uL_tiprack,
         pool_adapter_definition=None,
         pool_lid_definition=None,
@@ -204,9 +168,6 @@ async def test_retrieve_primary_only(
             ),
             flex_stacker_state_update=FlexStackerStateUpdate(
                 module_id=stacker_id,
-                hopper_labware_update=FlexStackerRetrieveLabware(
-                    labware_id="labware-id"
-                ),
                 pool_count=0,
             ),
             addressable_area_used=AddressableAreaUsedUpdate(
@@ -231,8 +192,6 @@ async def test_retrieve_primary_and_lid(
 
     fs_module_substate = FlexStackerSubState(
         module_id=stacker_id,
-        in_static_mode=False,
-        hopper_labware_ids=[],
         pool_primary_definition=flex_50uL_tiprack,
         pool_adapter_definition=None,
         pool_lid_definition=tiprack_lid_def,
@@ -316,9 +275,6 @@ async def test_retrieve_primary_and_lid(
             ),
             flex_stacker_state_update=FlexStackerStateUpdate(
                 module_id=stacker_id,
-                hopper_labware_update=FlexStackerRetrieveLabware(
-                    labware_id="labware-id"
-                ),
                 pool_count=0,
             ),
             addressable_area_used=AddressableAreaUsedUpdate(
@@ -346,8 +302,6 @@ async def test_retrieve_primary_and_adapter(
 
     fs_module_substate = FlexStackerSubState(
         module_id=stacker_id,
-        in_static_mode=False,
-        hopper_labware_ids=[],
         pool_primary_definition=flex_50uL_tiprack,
         pool_adapter_definition=tiprack_adapter_def,
         pool_lid_definition=None,
@@ -426,9 +380,6 @@ async def test_retrieve_primary_and_adapter(
             ),
             flex_stacker_state_update=FlexStackerStateUpdate(
                 module_id=stacker_id,
-                hopper_labware_update=FlexStackerRetrieveLabware(
-                    labware_id="labware-id"
-                ),
                 pool_count=0,
             ),
             addressable_area_used=AddressableAreaUsedUpdate(
@@ -454,8 +405,6 @@ async def test_retrieve_primary_adapter_and_lid(
 
     fs_module_substate = FlexStackerSubState(
         module_id=stacker_id,
-        in_static_mode=False,
-        hopper_labware_ids=[],
         pool_primary_definition=flex_50uL_tiprack,
         pool_adapter_definition=tiprack_adapter_def,
         pool_lid_definition=tiprack_lid_def,
@@ -573,9 +522,6 @@ async def test_retrieve_primary_adapter_and_lid(
             ),
             flex_stacker_state_update=FlexStackerStateUpdate(
                 module_id=stacker_id,
-                hopper_labware_update=FlexStackerRetrieveLabware(
-                    labware_id="labware-id"
-                ),
                 pool_count=0,
             ),
             addressable_area_used=AddressableAreaUsedUpdate(

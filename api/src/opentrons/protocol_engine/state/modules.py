@@ -383,8 +383,6 @@ class ModuleStore(HasState[ModuleState], HandlesActions):
         elif ModuleModel.is_flex_stacker(actual_model):
             self._state.substate_by_module_id[module_id] = FlexStackerSubState(
                 module_id=FlexStackerId(module_id),
-                in_static_mode=False,
-                hopper_labware_ids=[],
                 pool_primary_definition=None,
                 pool_adapter_definition=None,
                 pool_lid_definition=None,

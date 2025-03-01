@@ -87,8 +87,8 @@ class FillImpl(AbstractCommandImpl[FillParams, SuccessData[FillResult]]):
             )
 
         # TODO: propagate the limit on max height of the stacker
-        count = params.count if params.count is not None else 5
-        new_count = min(5, max(stacker_state.pool_count, count))
+        count = params.count if params.count is not None else 6
+        new_count = min(6, max(stacker_state.pool_count, count))
 
         state_update = (
             update_types.StateUpdate().update_flex_stacker_labware_pool_count(
