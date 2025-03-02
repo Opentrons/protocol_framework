@@ -138,6 +138,10 @@ snapshot-test-update-local: build-base-image build-local
 generate-protocols:
 	$(PYTHON) -m pipenv run python -m automation.data.protocol_registry
 
+.PHONY: matrix
+matrix:
+	$(PYTHON) -m pipenv run python -m automation.analysis_matrix
+
 # Tools for running the robot server in a container
 
 OPENTRONS_VERSION ?= edge
