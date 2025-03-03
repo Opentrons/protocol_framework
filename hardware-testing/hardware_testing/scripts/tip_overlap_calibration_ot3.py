@@ -339,8 +339,8 @@ async def _run_trial(
         *get_calibration_square_position_in_slot(slot=CALIBRATION_SLOT)
     ) + types.Point(x=Z_PREP_OFFSET.x, y=Z_PREP_OFFSET.y, z=Z_PREP_OFFSET.z)
     await api.retract(pip_mount)
-    await api.move_to(
-        pip_mount, square_pos + types.Point(z=PROBE_START_HEIGHT_ABOVE_EXPECTED_MM)
+    await helpers_ot3.move_to_arched_ot3(
+        api, pip_mount, square_pos + types.Point(z=PROBE_START_HEIGHT_ABOVE_EXPECTED_MM)
     )
     probed_deck_z = await api.liquid_probe(
         pip_mount,
@@ -367,7 +367,9 @@ async def _run_trial(
 
     ui.print_info("returning tip")
     await api.retract(pip_mount)
-    await helpers_ot3.move_to_arched_ot3(api, pip_mount, tip_pos + types.Point(z=-10))
+    trash_pos = helpers_ot3.get_theoretical_a1_position(12, tip_cfg.load_name)
+    trash_pos += types.Point(x=9 * 6, y=-9 * 4.5, z=-120)
+    await helpers_ot3.move_to_arched_ot3(api, pip_mount, trash_pos)
     await api.drop_tip(pip_mount)
 
     ui.print_info("trial complete")
@@ -482,31 +484,41 @@ async def main(
         for slot in slots_to_test
     ]
 
-    for tip_cfg in test_tip_configs:
-        for i in range(num_tips_per_rack):
-            if i > 0:
-                # same tip-rack, so just copy the config but increment to the next well location
-                tip_cfg = TipConfig.create_copy_and_increment_well(tip_cfg)
-            trial_result = await _run_trial(
-                api, pip_mount.name.lower(), tip_cfg, dial, dial_pos
-            )
-            test_data.trials.append(Trial(config=tip_cfg, result=trial_result))
-            if len(test_data.trials) == 1:
-                # FIXME: header cannot be compiled without first having at least 1x trial stored
-                dump_data_to_file(
-                    csv_test_name,
-                    test_data.config.run_id,
-                    csv_file_name,
-                    data=test_data.csv_header + CSV_NEWLINE,
-                )
-            append_data_to_file(
+    async def _test_tip_and_save_results(_cfg: TipConfig) -> None:
+        trial_result = await _run_trial(
+            api, pip_mount.name.lower(), _cfg, dial, dial_pos
+        )
+        test_data.trials.append(Trial(config=_cfg, result=trial_result))
+        if len(test_data.trials) == 1:
+            # FIXME: header cannot be compiled without
+            #        first having at least 1x trial stored
+            dump_data_to_file(
                 csv_test_name,
                 test_data.config.run_id,
                 csv_file_name,
-                data=test_data.csv_data_latest_trial + CSV_NEWLINE,
+                data=test_data.csv_header + CSV_NEWLINE,
             )
-        if simulate:
-            break
+        append_data_to_file(
+            csv_test_name,
+            test_data.config.run_id,
+            csv_file_name,
+            data=test_data.csv_data_latest_trial + CSV_NEWLINE,
+        )
+
+    try:
+        for tip_cfg in test_tip_configs:
+            _cfg = replace(tip_cfg)
+            for i in range(num_tips_per_rack):
+                if i > 0:
+                    # same tip-rack, so just copy the config
+                    # but increment to the next well location
+                    _cfg = TipConfig.create_copy_and_increment_well(_cfg)
+                await _test_tip_and_save_results(_cfg)
+            if simulate:
+                break
+    finally:
+        print(test_data.csv_header)
+        print(test_data.csv_data)
 
 
 if __name__ == "__main__":
@@ -520,9 +532,7 @@ if __name__ == "__main__":
         "--overlap-version", type=str, choices=["v0", "v1"], default="v1"
     )
     _parser.add_argument("--lot", type=str, required=True)
-    _parser.add_argument(
-        "--volume", type=int, choices=[20, 50, 200, 1000], required=True
-    )
+    _parser.add_argument("--tip", type=int, choices=[20, 50, 200, 1000], required=True)
     _parser.add_argument("--filter", action="store_true")
     _parser.add_argument("--dial", nargs="+", type=float, default=[])
     _args = _parser.parse_args()
@@ -538,7 +548,7 @@ if __name__ == "__main__":
             num_tips_per_rack=_args.tips_per_rack,
             overlap_version=_args.overlap_version,
             tip_lot=_args.lot,
-            tip_volume=_args.volume,
+            tip_volume=_args.tip,
             has_filter=_args.filter,
             default_dial_position=types.Point(*_args.dial) if _args.dial else None,
         )
