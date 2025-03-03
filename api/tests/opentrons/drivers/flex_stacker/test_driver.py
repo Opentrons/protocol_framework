@@ -1,5 +1,5 @@
 import base64
-from typing import Generator
+from typing import Generator, Dict, List
 import pytest
 from binascii import Error as BinError
 from decoy import Decoy
@@ -11,7 +11,6 @@ from opentrons.drivers.flex_stacker.driver import (
     DEFAULT_FS_TIMEOUT,
     FS_MOVE_TIMEOUT,
     FS_TOF_TIMEOUT,
-    NUMBER_OF_BINS,
     FlexStackerDriver,
 )
 from opentrons.drivers.flex_stacker import types
@@ -631,7 +630,10 @@ def get_histogram_payload(frames: int) -> Generator[str, None, None]:
 
 
 async def test_get_tof_histogram(
-    subject: FlexStackerDriver, connection: AsyncMock, decoy: Decoy
+    subject: FlexStackerDriver,
+    connection: AsyncMock,
+    decoy: Decoy,
+    histogram_bins: Dict[int, List[int]],
 ) -> None:
     """it should send a start and get tof measurements until full payload is transfered"""
     connection.send_command.side_effect = [
