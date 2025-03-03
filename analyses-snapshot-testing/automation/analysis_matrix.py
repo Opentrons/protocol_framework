@@ -83,7 +83,7 @@ class ProtocolPaths:
     override_protocol_paths: List[Path]
 
 
-def protocols_under_test(protocol_names=List[str]) -> List[Protocol]:
+def protocols_under_test(protocol_names: List[str]) -> List[Protocol]:
     names = ",".join(protocol_names)
     console.print(Panel(f"Protocols under test: {names}", title="Protocols Under Test", subtitle="Analysis Matrix"))
     time.sleep(5)
