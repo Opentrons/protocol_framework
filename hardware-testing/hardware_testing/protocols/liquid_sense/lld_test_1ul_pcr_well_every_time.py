@@ -13,7 +13,7 @@ from hardware_testing.protocols import (
 )
 import math
 
-metadata = {"protocolName": "LLD 1uL PCR-to-MVS-28FEB"}
+metadata = {"protocolName": "LLD 1uL PCR-to-MVS-03MAR"}
 requirements = {"robotType": "Flex", "apiLevel": "2.22"}
 
 SLOTS = {
@@ -62,7 +62,7 @@ def add_parameters(parameters: ParameterContext) -> None:
         display_name="Number of Plates",
         minimum=1,
         maximum=5,
-        default=1,
+        default=5,
     )
     parameters.add_bool(
         variable_name="skip_diluent", display_name="Skip Diluent", default=False
@@ -361,6 +361,8 @@ def run(ctx: ProtocolContext) -> None:
         tip_counter += 1
         if target_ul == 5:
             push_out = 3.9
+        else:
+            push_out = 11.7
         pipette.pick_up_tip()
         if "LLD" in asp_behavior:
             pipette.require_liquid_presence(src_well)
