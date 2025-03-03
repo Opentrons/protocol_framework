@@ -1,5 +1,6 @@
 from typing import List, Optional, Dict
 
+from opentrons.drivers.flex_stacker.driver import NUMBER_OF_BINS
 from opentrons.util.async_helpers import ensure_yield
 
 from .abstract import AbstractFlexStackerDriver
@@ -133,7 +134,7 @@ class SimulatingDriver(AbstractFlexStackerDriver):
         return TOFMeasurementResult(
             sensor=sensor,
             kind=MeasurementKind.HISTOGRAM,
-            channels={c: 123 for c in range(10)},
+            bins={c: [b for b in range(NUMBER_OF_BINS)] for c in range(10)},
         )
 
     async def set_motor_driver_register(

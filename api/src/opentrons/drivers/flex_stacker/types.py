@@ -265,4 +265,4 @@ class TOFMeasurementResult:
 
     sensor: TOFSensor
     kind: MeasurementKind
-    channels: Dict[int, int]
+    bins: Dict[int, List[int]]

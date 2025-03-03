@@ -11,6 +11,7 @@ from opentrons.drivers.flex_stacker.driver import (
     DEFAULT_FS_TIMEOUT,
     FS_MOVE_TIMEOUT,
     FS_TOF_TIMEOUT,
+    NUMBER_OF_BINS,
     FlexStackerDriver,
 )
 from opentrons.drivers.flex_stacker import types
@@ -641,18 +642,7 @@ async def test_get_tof_histogram(
     assert response == types.TOFMeasurementResult(
         sensor=types.TOFSensor.X,
         kind=types.MeasurementKind.HISTOGRAM,
-        channels={
-            0: 67383,
-            1: 585,
-            2: 197677,
-            3: 922,
-            4: 133972,
-            5: 183333,
-            6: 189922,
-            7: 148435,
-            8: 412339,
-            9: 258215,
-        },
+        bins=histogram_bins,
     )
 
     manage_measurement = (

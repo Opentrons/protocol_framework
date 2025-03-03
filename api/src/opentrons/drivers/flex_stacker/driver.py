@@ -50,6 +50,7 @@ MAX_REPS = 10
 
 # TOF Sensor
 TOF_FRAME_RETRIES = 1
+NUMBER_OF_BINS = 128
 
 # Stallguard defaults
 STALLGUARD_CONFIG = {
@@ -450,7 +451,8 @@ class FlexStackerDriver(AbstractFlexStackerDriver):
 
     async def get_tof_histogram(self, sensor: TOFSensor) -> TOFMeasurementResult:
         """Get the full histogram measurement from the TOF sensor."""
-        data = bytearray()
+        data = []
+        data_len = 0
         next_frame_id = 0
         resend = False
         retries = TOF_FRAME_RETRIES
@@ -465,17 +467,19 @@ class FlexStackerDriver(AbstractFlexStackerDriver):
             sensor, MeasurementKind.HISTOGRAM, start=True
         )
         # Request frames until the full histogram is transfered
-        while len(data) < start.total_bytes:
+        while data_len < start.total_bytes:
             try:
                 # Request next histogram frame
                 frame = await self._get_tof_histogram_frame(sensor, resend=resend)
                 # Validate histogram frame
                 validate_histogram_frame(frame.data, next_frame_id)
                 # append frame data
-                data += frame.data[7:]
+                channel = frame.data[7:]
+                data.append(channel)
+                data_len += len(channel)
                 assert (
-                    not len(data) > start.total_bytes
-                ), f"Invalid number of bytes, expected {start.total_bytes} got {len(data)}."
+                    not data_len > start.total_bytes
+                ), f"Invalid number of bytes, expected {start.total_bytes} got {data_len}."
                 retries = TOF_FRAME_RETRIES
                 next_frame_id += 1
                 resend = False
@@ -493,26 +497,32 @@ class FlexStackerDriver(AbstractFlexStackerDriver):
                 await self.manage_tof_measurement(sensor, start.kind, start=False)
                 raise RuntimeError(f"Could not get {sensor} Histogram", e)
 
-        # Parse channel measurements from data
+        # Parse channel bin measurements from data
         #
-        # There are 10 channels (0 - 9), each channel is comprised of 3 bytes.
-        # The data starts with all the LSB bytes, then all the MID bytes, and
-        # finally all the MSB bytes for all the channels as seen below.
+        # There are 10 channels (0 - 9), each channel is comprised of 3 * 128 bytes.
+        # The data starts with all the 128 LSB bytes, then all the 128 MID bytes, and
+        # finally all the 128 MSB bytes for all the channels as seen below.
         #
         # ch0 lsb = data[0], mid = data[10], msb = data[20]
         # ch1 lsb = data[1], mid = data[11], msb = data[21]
         # ch2 lsb = data[2], mid = data[12], msb = data[22]
         # ...
         # ch9 lsb = data[9], mid = data[19], msb = data[29]
-        channels = {
-            ch: int.from_bytes(
-                # msb, mid, lsb
-                [data[ch + 20], data[ch + 10], data[ch]],
-                "little",
-            )
-            for ch in range(10)
-        }
-        return TOFMeasurementResult(start.sensor, start.kind, channels)
+        #
+        # Each channel has 128 bins comprised of the lsb, mid, and msb payload from above.
+        # We can get the bins for each channel by combining the lsb, mid, and msb payload
+        # for that specific channel.
+        bins = {}
+        for ch in range(10):  # 0-9 channels
+            # Get the lsb, mid, and msb payload for the ch
+            lsb = data[ch]
+            mid = data[ch + 10]
+            msb = data[ch + 20]
+            # combine lsb, mid, and msb bytes to generate bin count for the ch
+            bins[ch] = [
+                (msb[b] << 16) | (mid[b] << 8) | lsb[b] for b in range(NUMBER_OF_BINS)
+            ]
+        return TOFMeasurementResult(start.sensor, start.kind, bins)
 
     async def set_motor_driver_register(
         self, axis: StackerAxis, reg: int, value: int
