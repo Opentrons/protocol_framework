@@ -361,6 +361,7 @@ def find_volume_at_well_height(
 ) -> LiquidTrackingType:
     """Find the volume within a well, at a known height."""
     # comparisons with SimulatedProbeResult objects aren't meaningful, just return
+    breakpoint()
     if isinstance(target_height, SimulatedProbeResult):
         return target_height
     volumetric_capacity = get_well_volumetric_capacity(well_geometry)

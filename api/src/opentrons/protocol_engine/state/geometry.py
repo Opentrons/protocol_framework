@@ -1965,6 +1965,7 @@ class GeometryView:
         height: LiquidTrackingType,
     ) -> LiquidTrackingType:
         """Convert well height to volume."""
+        # breakpoint()
         well_geometry = self._labware.get_well_geometry(labware_id, well_name)
         return find_volume_at_well_height(
             target_height=height, well_geometry=well_geometry

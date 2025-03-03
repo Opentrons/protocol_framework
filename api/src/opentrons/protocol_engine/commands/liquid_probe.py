@@ -4,7 +4,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, NamedTuple, Optional, Type, Union, Any
 
 from typing_extensions import Literal
-from pydantic import Field
+from pydantic import Field, field_serializer, field_validator, BaseModel
 from pydantic.json_schema import SkipJsonSchema
 
 from opentrons.protocol_engine.state import update_types
@@ -15,7 +15,7 @@ from opentrons.protocol_engine.errors.exceptions import (
     IncompleteLabwareDefinitionError,
     TipNotAttachedError,
 )
-from opentrons.types import MountType, LiquidTrackingType
+from opentrons.types import MountType, LiquidTrackingType, SimulatedProbeResult
 from opentrons_shared_data.errors.exceptions import (
     PipetteLiquidNotFoundError,
     UnsupportedHardwareCommand,
@@ -77,6 +77,10 @@ class TryLiquidProbeParams(_CommonParams):
     pass
 
 
+# class SimulatedProbeResultModel(BaseModel):
+#     pass
+
+
 class LiquidProbeResult(DestinationPositionResult):
     """Result data from the execution of a `liquidProbe` command."""
 
@@ -84,6 +88,19 @@ class LiquidProbeResult(DestinationPositionResult):
         ..., description="The Z coordinate, in mm, of the found liquid in deck space."
     )
     # New fields should use camelCase. z_position is snake_case for historical reasons.
+
+    # @classmethod
+    # @field_validator("z_position", mode="before")
+    # def serialize_z_position(
+    #     cls, z_position: Union[float, SimulatedProbeResult, None], _info
+    # ) -> Union[str, float, None]:
+    #     breakpoint()
+    #     if not z_position:
+    #         return None
+    #     if isinstance(z_position, float):
+    #         return z_position
+    #     else:
+    #         return "SimulatedProbeResult"
 
 
 class TryLiquidProbeResult(DestinationPositionResult):
@@ -97,6 +114,17 @@ class TryLiquidProbeResult(DestinationPositionResult):
         ),
         json_schema_extra=_remove_default,
     )
+
+    # @field_serializer("z_position")
+    # def serialize_z_position(
+    #         self, z_position: Union[LiquidTrackingType, None], _info
+    # ) -> Union[str, float, None]:
+    #     if not z_position:
+    #         return None
+    #     if isinstance(z_position, float):
+    #         return z_position
+    #     else:
+    #         return "SimulatedProbeResult"
 
 
 _LiquidProbeExecuteReturn = Union[
@@ -116,7 +144,7 @@ class _ExecuteCommonResult(NamedTuple):
     # If the probe succeeded, the z_pos that it returned.
     # Or, if the probe found no liquid, the error representing that,
     # so calling code can propagate those details up.
-    z_pos_or_error: LiquidTrackingType | PipetteLiquidNotFoundError | PipetteOverpressureError
+    z_pos_or_error: float | SimulatedProbeResult | PipetteLiquidNotFoundError | PipetteOverpressureError
     state_update: update_types.StateUpdate
     deck_point: DeckPoint
 
@@ -273,6 +301,8 @@ class LiquidProbeImplementation(
             model_utils=self._model_utils,
             params=params,
         )
+        # convert LiquidProbeResult to Basemodel one
+        # breakpoint()
         if isinstance(result, DefinedErrorData):
             return result
         z_pos_or_error, state_update, deck_point = result
@@ -301,6 +331,12 @@ class LiquidProbeImplementation(
                 state_update=state_update,
             )
         else:
+            v = False
+            checked_z_pos_or_error: Union[float, SimulatedProbeResult]
+            if isinstance(z_pos_or_error, SimulatedProbeResult):
+                checked_z_pos_or_error = SimulatedProbeResult()
+            else:
+                checked_z_pos_or_error = z_pos_or_error
             try:
                 well_volume: Union[
                     LiquidTrackingType,
@@ -312,6 +348,8 @@ class LiquidProbeImplementation(
                 )
             except IncompleteLabwareDefinitionError:
                 well_volume = update_types.CLEAR
+                v = True
+            # breakpoint()
             state_update.set_liquid_probed(
                 labware_id=params.labwareId,
                 well_name=params.wellName,
@@ -319,9 +357,10 @@ class LiquidProbeImplementation(
                 volume=well_volume,
                 last_probed=self._model_utils.get_timestamp(),
             )
+            print(z_pos_or_error)
             return SuccessData(
                 public=LiquidProbeResult(
-                    z_position=z_pos_or_error, position=deck_point
+                    z_position=checked_z_pos_or_error, position=deck_point
                 ),
                 state_update=state_update,
             )
@@ -390,10 +429,14 @@ class TryLiquidProbeImplementation(
             volume=well_volume,
             last_probed=self._model_utils.get_timestamp(),
         )
-
+        checked_z_pos: Union[float, SimulatedProbeResult, None]
+        if isinstance(z_pos, SimulatedProbeResult):
+            checked_z_pos = SimulatedProbeResult()
+        else:
+            checked_z_pos = z_pos
         return SuccessData(
             public=TryLiquidProbeResult(
-                z_position=z_pos,
+                z_position=checked_z_pos,
                 position=deck_point,
             ),
             state_update=state_update,

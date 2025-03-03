@@ -12,6 +12,8 @@ from typing import (
     Protocol,
     Dict,
 )
+from pydantic import GetCoreSchemaHandler, BaseModel, model_serializer
+from pydantic_core import core_schema, CoreSchema
 
 from opentrons_shared_data.robot.types import RobotType
 
@@ -332,13 +334,15 @@ AxisMapType = Dict[AxisType, float]
 StringAxisMap = Dict[str, float]
 
 
-class SimulatedProbeResult:
+class SimulatedProbeResult(BaseModel):
     """A sentinel value to substitute for the resulting volume/height of a liquid probe during simulation."""
 
-    def __init__(self) -> None:
-        """Initialize a SimulatedProbeResult- should only be done by VirtualPipettingHandler::liquid_probe_in_place."""
-        self._operations_after_probe: List[float] = []
-        self._net_liquid_exchanged_after_probe = 0.0
+    operations_after_probe: List[float] = []
+    net_liquid_exchanged_after_probe: float = 0.0
+
+    @model_serializer()
+    def serialize_model(self) -> str:
+        return "SimulatedProbeResult"
 
     def __add__(self, other: LiquidTrackingType) -> LiquidTrackingType:
         """Bypass addition and just return self."""
@@ -362,9 +366,15 @@ class SimulatedProbeResult:
             return False
         return self is other
 
+    @classmethod
+    def __get_pydantic_core_schema__(
+        cls, source_type: Any, handler: GetCoreSchemaHandler
+    ) -> CoreSchema:
+        return core_schema.no_info_after_validator_function(cls, handler(str))
+
     def simulate_probed_aspirate_dispense(self, volume: float) -> None:
-        self._net_liquid_exchanged_after_probe += volume
-        self._operations_after_probe.append(volume)
+        self.net_liquid_exchanged_after_probe += volume
+        self.operations_after_probe.append(volume)
 
 
 LiquidTrackingType = Union[SimulatedProbeResult, float]

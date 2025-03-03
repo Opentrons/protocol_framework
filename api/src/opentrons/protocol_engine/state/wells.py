@@ -83,6 +83,7 @@ class WellStore(HasState[WellState], HandlesActions):
             self._state.probed_volumes[labware_id] = {}
         updated_height = _none_from_clear(state_update.height)
         updated_volume = _none_from_clear(state_update.volume)
+        breakpoint()
         self._state.probed_heights[labware_id][well_name] = ProbedHeightInfo(
             height=updated_height,
             last_probed=state_update.last_probed,
