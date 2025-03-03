@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next'
 
 import { useConditionalConfirm, ModalShell } from '@opentrons/components'
 import {
-  useCreateLegacyLabwareOffsetMutation,
+  useAddLabwareOffsetToRunMutation,
   useCreateMaintenanceCommandMutation,
 } from '@opentrons/react-api-client'
 import { FIXED_TRASH_ID, FLEX_ROBOT_TYPE } from '@opentrons/shared-data'
@@ -193,7 +193,7 @@ export const LabwarePositionCheckComponent = (
     isCommandMutationLoading: isCommandChainLoading,
   } = useChainMaintenanceCommands()
 
-  const { createLabwareOffset } = useCreateLegacyLabwareOffsetMutation()
+  const { createLabwareOffset } = useAddLabwareOffsetToRunMutation()
   const [currentStepIndex, setCurrentStepIndex] = useState<number>(0)
   const handleCleanUpAndClose = (): void => {
     setIsExiting(true)

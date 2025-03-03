@@ -4,17 +4,17 @@ import type { ResponsePromise } from '../request'
 import type { HostConfig } from '../types'
 import type { LabwareOffset, LegacyLabwareOffsetCreateData } from './types'
 
-export function createLegacyLabwareOffset(
+export function addLabwareOffsetToRun(
   config: HostConfig,
   runId: string,
   data: LegacyLabwareOffsetCreateData
 ): ResponsePromise<LabwareOffset>
-export function createLegacyLabwareOffset(
+export function addLabwareOffsetToRun(
   config: HostConfig,
   runId: string,
   data: LegacyLabwareOffsetCreateData[]
 ): ResponsePromise<LabwareOffset[]>
-export function createLegacyLabwareOffset(
+export function addLabwareOffsetToRun(
   config: HostConfig,
   runId: string,
   data: LegacyLabwareOffsetCreateData | LegacyLabwareOffsetCreateData[]

@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from 'react-query'
-import { createLegacyLabwareOffset } from '@opentrons/api-client'
+import { addLabwareOffsetToRun } from '@opentrons/api-client'
 import { useHost } from '../api'
 import type {
   HostConfig,
@@ -8,33 +8,33 @@ import type {
 } from '@opentrons/api-client'
 import type { UseMutationResult, UseMutateAsyncFunction } from 'react-query'
 
-interface CreateLabwareOffsetParams {
+interface AddLabwareOffsetToRunParams {
   runId: string
   data: LegacyLabwareOffsetCreateData
 }
 
-export type UseCreateLabwareOffsetMutationResult = UseMutationResult<
+export type UseAddLabwareOffsetToRun = UseMutationResult<
   LabwareOffset,
   unknown,
-  CreateLabwareOffsetParams
+  AddLabwareOffsetToRunParams
 > & {
   createLabwareOffset: UseMutateAsyncFunction<
     LabwareOffset,
     unknown,
-    CreateLabwareOffsetParams
+    AddLabwareOffsetToRunParams
   >
 }
 
-export function useCreateLegacyLabwareOffsetMutation(): UseCreateLabwareOffsetMutationResult {
+export function useAddLabwareOffsetToRunMutation(): UseAddLabwareOffsetToRun {
   const host = useHost()
   const queryClient = useQueryClient()
 
   const mutation = useMutation<
     LabwareOffset,
     unknown,
-    CreateLabwareOffsetParams
+    AddLabwareOffsetToRunParams
   >(({ runId, data }) =>
-    createLegacyLabwareOffset(host as HostConfig, runId, data)
+    addLabwareOffsetToRun(host as HostConfig, runId, data)
       .then(response => {
         queryClient.invalidateQueries([host, 'runs']).catch((e: Error) => {
           console.error(`error invalidating runs query: ${e.message}`)

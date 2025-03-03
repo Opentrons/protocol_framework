@@ -2,10 +2,10 @@ import type * as React from 'react'
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { QueryClient, QueryClientProvider } from 'react-query'
 import { act, renderHook, waitFor } from '@testing-library/react'
-import { createLegacyLabwareOffset } from '@opentrons/api-client'
+import { addLabwareOffsetToRun } from '@opentrons/api-client'
 import { useHost } from '../../api'
 
-import { useCreateLegacyLabwareOffsetMutation } from '../useCreateLegacyLabwareOffsetMutation'
+import { useAddLabwareOffsetToRunMutation } from '../useAddLabwareOffsetToRunMutation'
 import type {
   HostConfig,
   LegacyLabwareOffsetCreateData,
@@ -41,11 +41,11 @@ describe('useCreateLegacyLabwareOffsetMutation hook', () => {
 
   it('should create labware offsets when callback is called', async () => {
     vi.mocked(useHost).mockReturnValue(HOST_CONFIG)
-    vi.mocked(createLegacyLabwareOffset).mockResolvedValue({
+    vi.mocked(addLabwareOffsetToRun).mockResolvedValue({
       data: 'created offsets!',
     } as any)
 
-    const { result } = renderHook(useCreateLegacyLabwareOffsetMutation, {
+    const { result } = renderHook(useAddLabwareOffsetToRunMutation, {
       wrapper,
     })
 
