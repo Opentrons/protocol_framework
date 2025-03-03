@@ -1,7 +1,7 @@
 """Tip Overlap Calibration OT3."""
 import argparse
 import asyncio
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass, asdict, replace
 from json import load as json_load
 from pathlib import Path
 from time import sleep
@@ -86,6 +86,22 @@ class TipConfig:
     overlap_version: str
     overlap: Optional[float]
 
+    @classmethod
+    def build_from_input(cls, api: OT3API, mount: str, tip_count: int) -> "TipConfig":
+        get_inp = not api.is_simulator
+        tip_cfg = TipConfig(
+            lot=input("Lot #: ").strip() if get_inp else "1",
+            volume=int(input("pipette volume [50 or 1000]: ")) if get_inp else 1000,
+            filter=bool("y" in input("filtered? (y/n): ")) if get_inp else False,
+            slot="C3",  # NOTE: let's just hard-code this for now
+            well=input("starting tip: ").strip() if not api.is_simulator else "A1",
+            count=tip_count,
+            overlap_version="v1",  # NOTE: (sigler) we can configure this later, default to latest
+            overlap=None,  # NOTE: must be calculated after configuring tip
+        )
+        tip_cfg.calculate_tip_overlap(api, mount, tip_cfg._load_labware_def())
+        return tip_cfg
+
     @property
     def csv_header(self) -> str:
         return _dataclass_to_csv(self, is_header=True, prepend="TIP ")
@@ -138,6 +154,20 @@ class TipConfig:
         if self.overlap is None:
             self.calculate_tip_overlap(api, mount, labware_def)
         return tip_pos, tip_length, self.overlap
+
+    def copy_and_increment_well(self) -> "TipConfig":
+        cpy = replace(self)
+        tip_row_idx = "ABCDEFGH".index(self.well[0])
+        tip_col_idx = int(self.well[1:])
+        if tip_row_idx == 7:
+            next_tip_row_idx = 0
+            next_tip_col_idx = tip_col_idx + 1
+        else:
+            next_tip_row_idx = tip_row_idx + 1
+            next_tip_col_idx = tip_col_idx + 0
+        next_col_letter = "ABCDEFGH"[next_tip_row_idx]
+        cpy.well = f"{next_col_letter}{next_tip_col_idx + 1}"
+        return cpy
 
 
 @dataclass
@@ -331,34 +361,45 @@ async def main(
     dial_pos = await api.gantry_position(pip_mount)
 
     while True:
-        tip_cfg = TipConfig(
-            lot="1",  # TODO: get this through user-input
-            volume=1000,  # TODO: get this through user-input
-            filter=False,  # TODO: get this through user-input
-            slot="C3",  # TODO: get this through user-input
-            well="A1",  # TODO: get this through user-input
-            count=test_data.config.pipette_channels,  # NOTE: (sigler) for now not testing partial tip-pickup
-            overlap_version="v1",  # NOTE: (sigler) we can configure this later, default to latest
-            overlap=None,  # NOTE: must be calculated after configuring tip
+        tip_cfg: TipConfig = TipConfig.build_from_input(
+            api,
+            pip_mount.name.lower(),
+            tip_count=test_data.config.pipette_channels,  # NOTE: (sigler) for now not testing partial tip-pickup
         )
-        trial_result = await _run_trial(
-            api, pip_mount.name.lower(), tip_cfg, dial, dial_pos
-        )
-        test_data.trials.append(Trial(config=tip_cfg, result=trial_result))
-        if len(test_data.trials) == 1:
-            # FIXME: header cannot be compiled without first having at least 1x trial stored
-            dump_data_to_file(
+
+        num_trials_to_run = 0
+        while not num_trials_to_run:
+            try:
+                if not simulate:
+                    num_trials_to_run = int(
+                        input("number of trials to run without stopping: ")
+                    )
+                else:
+                    num_trials_to_run = 10
+            except ValueError as e:
+                print(e)
+
+        for i in range(num_trials_to_run):
+            if i > 0:
+                tip_cfg = tip_cfg.copy_and_increment_well()
+            trial_result = await _run_trial(
+                api, pip_mount.name.lower(), tip_cfg, dial, dial_pos
+            )
+            test_data.trials.append(Trial(config=tip_cfg, result=trial_result))
+            if len(test_data.trials) == 1:
+                # FIXME: header cannot be compiled without first having at least 1x trial stored
+                dump_data_to_file(
+                    csv_test_name,
+                    test_data.config.run_id,
+                    csv_file_name,
+                    data=test_data.csv_header + CSV_NEWLINE,
+                )
+            append_data_to_file(
                 csv_test_name,
                 test_data.config.run_id,
                 csv_file_name,
-                data=test_data.csv_header + CSV_NEWLINE,
+                data=test_data.csv_data_latest_trial + CSV_NEWLINE,
             )
-        append_data_to_file(
-            csv_test_name,
-            test_data.config.run_id,
-            csv_file_name,
-            data=test_data.csv_data_latest_trial + CSV_NEWLINE,
-        )
         if simulate:
             break
 
