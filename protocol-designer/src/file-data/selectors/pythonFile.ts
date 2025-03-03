@@ -9,6 +9,7 @@ import {
   formatPyDict,
   formatPyStr,
   indentPyLines,
+  OFF_DECK,
   PROTOCOL_CONTEXT_NAME,
 } from '@opentrons/step-generation'
 import { getFlexNameConversion } from './utils'
@@ -109,7 +110,13 @@ export function getLoadAdapters(
 
       const adapterArgs = [
         `${formatPyStr(parameters.loadName)}`,
-        ...(!onModule ? [`${formatPyStr(adapterSlot)}`] : []),
+        ...(!onModule
+          ? [
+              `${formatPyStr(
+                adapterSlot === 'offDeck' ? OFF_DECK : adapterSlot
+              )}`,
+            ]
+          : []),
         `namespace=${formatPyStr(namespace)}`,
         `version=${version}`,
       ].join(',\n')
@@ -151,7 +158,13 @@ export function getLoadLabware(
 
       const labwareArgs = [
         `${formatPyStr(parameters.loadName)}`,
-        ...(!onModule && !onAdapter ? [`${formatPyStr(labwareSlot)}`] : []),
+        ...(!onModule && !onAdapter
+          ? [
+              `${formatPyStr(
+                labwareSlot === 'offDeck' ? OFF_DECK : labwareSlot
+              )}`,
+            ]
+          : []),
         ...(hasNickname
           ? [`label=${formatPyStr(labwareNicknamesById[id])}`]
           : []),
