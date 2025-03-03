@@ -465,7 +465,7 @@ export const CheckItem = (props: CheckItemProps): JSX.Element | null => {
               }
               values={{
                 tip_type: shouldUseMetalProbe
-                  ? t('calibration_probe')
+                  ? t('legacy_calibration_probe')
                   : t('pipette_nozzle'),
                 item_location: isTiprack
                   ? t('check_tip_location')

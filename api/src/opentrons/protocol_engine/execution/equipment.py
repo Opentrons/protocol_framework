@@ -165,6 +165,43 @@ class EquipmentHandler:
             )
             return definition, definition_uri
 
+    async def load_labware_from_definition(
+        self,
+        definition: LabwareDefinition,
+        location: LabwareLocation,
+        labware_id: Optional[str],
+    ) -> LoadedLabwareData:
+        """Load labware from already-found definition."""
+        definition_uri = uri_from_details(
+            load_name=definition.parameters.loadName,
+            namespace=definition.namespace,
+            version=definition.version,
+        )
+        return await self._load_labware_from_def_and_uri(
+            definition, definition_uri, location, labware_id
+        )
+
+    async def _load_labware_from_def_and_uri(
+        self,
+        definition: LabwareDefinition,
+        definition_uri: str,
+        location: LabwareLocation,
+        labware_id: Optional[str],
+    ) -> LoadedLabwareData:
+        labware_id = (
+            labware_id if labware_id is not None else self._model_utils.generate_id()
+        )
+
+        # Allow propagation of ModuleNotLoadedError.
+        offset_id = self.find_applicable_labware_offset_id(
+            labware_definition_uri=definition_uri,
+            labware_location=location,
+        )
+
+        return LoadedLabwareData(
+            labware_id=labware_id, definition=definition, offsetId=offset_id
+        )
+
     async def load_labware(
         self,
         load_name: str,
@@ -193,19 +230,8 @@ class EquipmentHandler:
         definition, definition_uri = await self.load_definition_for_details(
             load_name, namespace, version
         )
-
-        labware_id = (
-            labware_id if labware_id is not None else self._model_utils.generate_id()
-        )
-
-        # Allow propagation of ModuleNotLoadedError.
-        offset_id = self.find_applicable_labware_offset_id(
-            labware_definition_uri=definition_uri,
-            labware_location=location,
-        )
-
-        return LoadedLabwareData(
-            labware_id=labware_id, definition=definition, offsetId=offset_id
+        return await self._load_labware_from_def_and_uri(
+            definition, definition_uri, location, labware_id
         )
 
     async def reload_labware(self, labware_id: str) -> ReloadedLabwareData:

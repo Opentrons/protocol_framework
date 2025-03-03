@@ -75,3 +75,16 @@ class FlexStackerSubState:
             pool_lid_definition=pool_lid_definition,
             pool_count=pool_count,
         )
+
+    def get_pool_definition_ordered_list(self) -> list[LabwareDefinition] | None:
+        """Get the pool definitions in a list suitable for getting the height."""
+        if not self.pool_primary_definition:
+            return None
+
+        defs: list[LabwareDefinition] = []
+        if self.pool_lid_definition is not None:
+            defs.append(self.pool_lid_definition)
+        defs.append(self.pool_primary_definition)
+        if self.pool_adapter_definition is not None:
+            defs.append(self.pool_adapter_definition)
+        return defs
