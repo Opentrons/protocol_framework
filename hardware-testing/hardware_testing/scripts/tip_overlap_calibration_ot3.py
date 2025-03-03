@@ -412,6 +412,7 @@ def _ask_user_for_number_of_trials(simulate: bool) -> int:
 
 async def main(
     simulate: bool,
+    calibrate: bool,
     pip_mount: types.OT3Mount,
     slots_to_test: List[str],
     starting_tip: str,
@@ -421,15 +422,16 @@ async def main(
     tip_volume: int,
     has_filter: bool,
     default_dial_position: Optional[types.Point] = None,
+    dial_port: str = "",
 ) -> None:
     ui.print_title("TIP-OVERLAP CALIBRATION")
 
     # DIAL-INDICATOR
     dial: Optional[Mitutoyo_Digimatic_Indicator] = None
     if not simulate:
-        dial = Mitutoyo_Digimatic_Indicator(
-            port=list_ports_and_select("Dial Indicator")
-        )
+        if not dial_port:
+            dial_port = list_ports_and_select("Dial Indicator")
+        dial = Mitutoyo_Digimatic_Indicator(port=dial_port)
         dial.connect()
         dial.read()
 
@@ -463,36 +465,41 @@ async def main(
 
     # CALIBRATE PIPETTE
     await api.home()
-    attach_probe_pos = types.Point(
-        *get_calibration_square_position_in_slot(slot=CALIBRATION_SLOT)
-    )
-    attach_probe_pos += types.Point(x=Z_PREP_OFFSET.x, y=Z_PREP_OFFSET.y, z=Z_PREP_OFFSET.z)
-    attach_probe_pos += types.Point(z=100)
-    await helpers_ot3.move_to_arched_ot3(api, pip_mount, attach_probe_pos)
-    if not simulate:
-        ui.get_user_ready("ATTACH calibration probe")
-    api.add_tip(pip_mount, api.config.calibration.probe_length)
-    if not simulate:
-        await calibrate_pipette(api, pip_mount)
-    await api.retract(pip_mount)
-    if not simulate:
-        ui.get_user_ready("REMOVE calibration probe")
-    api.remove_tip(pip_mount)
+    if calibrate:
+        attach_probe_pos = types.Point(
+            *get_calibration_square_position_in_slot(slot=CALIBRATION_SLOT)
+        )
+        attach_probe_pos += types.Point(
+            x=Z_PREP_OFFSET.x, y=Z_PREP_OFFSET.y, z=Z_PREP_OFFSET.z
+        )
+        attach_probe_pos += types.Point(z=100)
+        await helpers_ot3.move_to_arched_ot3(api, pip_mount, attach_probe_pos)
+        if not simulate:
+            ui.get_user_ready("ATTACH calibration probe")
+        api.add_tip(pip_mount, api.config.calibration.probe_length)
+        if not simulate:
+            await calibrate_pipette(api, pip_mount)
+        await api.retract(pip_mount)
+        if not simulate:
+            ui.get_user_ready("REMOVE calibration probe")
+        api.remove_tip(pip_mount)
 
     # CONFIRM DIAL POSITION
     if default_dial_position:
+        dial_pos = default_dial_position
         ui.print_info("moving to the DIAL-INDICATOR")
         await api.retract(pip_mount)
         await helpers_ot3.move_to_arched_ot3(api, pip_mount, default_dial_position)
-    ui.print_info("please jog to the DIAL-INDICATOR")
-    ui.print_info("NOTE: dial should be PRESSED DOWN about 2-4 mm from neutral")
-    await helpers_ot3.jog_mount_ot3(api, pip_mount)
-    dial_pos = await api.gantry_position(pip_mount)
-    ui.print_info(
-        f"--dial {round(dial_pos.x, 2)} {round(dial_pos.y, 2)} {round(dial_pos.z, 2)}"
-    )
-    if not simulate:
-        ui.get_user_ready("copy/paste the dial position (above) for next time")
+    else:
+        ui.print_info("please jog to the DIAL-INDICATOR")
+        ui.print_info("NOTE: dial should be PRESSED DOWN about 2-4 mm from neutral")
+        await helpers_ot3.jog_mount_ot3(api, pip_mount)
+        dial_pos = await api.gantry_position(pip_mount)
+        ui.print_info(
+            f"--dial {round(dial_pos.x, 2)} {round(dial_pos.y, 2)} {round(dial_pos.z, 2)}"
+        )
+        if not simulate:
+            ui.get_user_ready("copy/paste the dial position (above) for next time")
 
     test_tip_configs: List[TipConfig] = [
         TipConfig.build(
@@ -549,6 +556,8 @@ async def main(
 if __name__ == "__main__":
     _parser = argparse.ArgumentParser()
     _parser.add_argument("--simulate", action="store_true")
+    _parser.add_argument("--calibrate", action="store_true")
+    _parser.add_argument("--dial-port", type=str, default="")
     _parser.add_argument("--mount", type=str, choices=["left", "right"], default="left")
     _parser.add_argument("--slots", nargs="+", type=str, default=DEFAULT_SLOTS_TO_TEST)
     _parser.add_argument("--starting-tip", type=str, default="A1")
@@ -567,6 +576,7 @@ if __name__ == "__main__":
     asyncio.run(
         main(
             _args.simulate,
+            _args.calibrate,
             _mnt_hw,
             slots_to_test=_args.slots,
             starting_tip=_args.starting_tip,
@@ -576,5 +586,6 @@ if __name__ == "__main__":
             tip_volume=_args.tip,
             has_filter=_args.filter,
             default_dial_position=types.Point(*_args.dial) if _args.dial else None,
+            dial_port=_args.dial_port,
         )
     )
