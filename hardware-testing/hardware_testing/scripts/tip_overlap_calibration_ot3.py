@@ -429,14 +429,15 @@ async def main(
     # CALIBRATE PIPETTE
     await api.home()
     if calibrate:
-        attach_probe_pos = types.Point(
+        probe_pos = types.Point(
             *get_calibration_square_position_in_slot(slot=CALIBRATION_SLOT)
         )
-        attach_probe_pos += types.Point(
+        probe_pos += types.Point(
             x=Z_PREP_OFFSET.x, y=Z_PREP_OFFSET.y, z=Z_PREP_OFFSET.z
         )
-        attach_probe_pos += types.Point(z=100)
-        await helpers_ot3.move_to_arched_ot3(api, pip_mount, attach_probe_pos)
+        current_pos = await api.gantry_position(pip_mount)
+        attach_pos = types.Point(x=probe_pos.x, y=probe_pos.y, z=current_pos.z)
+        await helpers_ot3.move_to_arched_ot3(api, pip_mount, attach_pos)
         if not simulate:
             ui.get_user_ready("ATTACH calibration probe")
         api.add_tip(pip_mount, api.config.calibration.probe_length)
