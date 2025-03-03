@@ -1331,7 +1331,8 @@ export const additionalEquipmentInvariantProperties = handleActions<NormalizedAd
       action: CreateDeckFixtureAction
     ): NormalizedAdditionalEquipmentById => {
       const { location, id, name } = action.payload
-      const count = Object.values(state).filter(aE => aE.name === name).length
+      const typeCount = Object.values(state).filter(aE => aE.name === name)
+        .length
 
       return {
         ...state,
@@ -1342,7 +1343,7 @@ export const additionalEquipmentInvariantProperties = handleActions<NormalizedAd
           pythonName:
             name === 'stagingArea'
               ? undefined
-              : getAdditionalEquipmentPythonName(name, count),
+              : getAdditionalEquipmentPythonName(name, typeCount + 1),
         },
       }
     },
