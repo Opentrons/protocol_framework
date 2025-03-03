@@ -131,28 +131,6 @@ class TipConfig:
     overlap: float
 
     @classmethod
-    def build_from_input(cls, api: OT3API, mount: str, tip_count: int) -> "TipConfig":
-        get_inp = not api.is_simulator
-        # NOTE: (sigler) we can configure this later, default to latest
-        overlap_version: str = (
-            input("Overlap version [v0 or v1]: ") if get_inp else "v1"
-        )
-        slot: str = input("Tip-Rack Slot (eg: C3): ") if get_inp else "C3"
-        lot: str = input("Tip-Rack Lot #: ").strip() if get_inp else "1"
-        volume: int = (
-            int(input("Tip-Rack Volume [50, 200, or 1000]: ")) if get_inp else 200
-        )
-        has_filter: bool = (
-            bool("y" in input("Tip is filtered? (y/n): ")) if get_inp else False
-        )
-        well: str = (
-            input("Start at tip (eg: A1): ").strip() if not api.is_simulator else "A1"
-        )
-        return cls.build(
-            api, mount, lot, volume, has_filter, slot, well, tip_count, overlap_version
-        )
-
-    @classmethod
     def build(
         cls,
         api: OT3API,
@@ -393,21 +371,6 @@ async def _run_trial(
         tip_z_error_calibrated=tip_z_error_calibrated,
         error_reduction=error_reduction,
     )
-
-
-def _ask_user_for_number_of_trials(simulate: bool) -> int:
-    num_trials_to_run = 0
-    while not num_trials_to_run:
-        try:
-            if not simulate:
-                num_trials_to_run = int(
-                    input("number of trials to run without stopping: ")
-                )
-            else:
-                num_trials_to_run = 10
-        except ValueError as e:
-            print(e)
-    return num_trials_to_run
 
 
 async def main(
