@@ -1,18 +1,16 @@
 import { POST, request } from '../request'
 
 import type { ResponsePromise } from '../request'
-import type { HostConfig } from '../types'
 import type {
+  HostConfig,
   LabwareOffsetLocationSequenceComponent,
-  StoredLabwareOffset,
-} from './types'
+} from '../types'
+import type { StoredLabwareOffset } from './types'
 import type { VectorOffset } from '../runs'
 
 export interface StoredLabwareOffsetCreate {
   definitionUri: string
-  locationSequence: Array<
-    Omit<LabwareOffsetLocationSequenceComponent, 'kind' | 'unknown'>
-  >
+  locationSequence: LabwareOffsetLocationSequenceComponent[]
   vector: VectorOffset
 }
 

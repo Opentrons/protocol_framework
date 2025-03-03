@@ -5,7 +5,7 @@ import type { HostConfig } from '../types'
 import type { StoredLabwareOffset, MultiBodyMeta } from './types'
 import type { ModuleModel } from '@opentrons/shared-data'
 
-export interface LabwareOffsetsParams {
+export interface LabwareOffsetsSearchParams {
   id?: string
   definitionUri?: string
   locationSlotName?: string
@@ -28,7 +28,7 @@ export interface LabwareOffsetsResponse {
  */
 export function getLabwareOffsets(
   config: HostConfig,
-  params: LabwareOffsetsParams = {}
+  params: LabwareOffsetsSearchParams = {}
 ): ResponsePromise<LabwareOffsetsResponse> {
   return request<LabwareOffsetsResponse>(
     GET,
