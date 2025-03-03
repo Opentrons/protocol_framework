@@ -29,7 +29,7 @@ export const LiquidClassesStepMoveLiquidTools = ({
   setShowFormErrors,
   visibleFormErrors,
 }: LiquidClassesStepMoveLiquidToolsProps): JSX.Element => {
-  const { t } = useTranslation(['protocol_steps'])
+  const { t } = useTranslation(['liquids'])
   const liquids = useSelector(getLiquidEntities)
   const liquidClassDefs = getAllLiquidClassDefs()
 
@@ -49,14 +49,8 @@ export const LiquidClassesStepMoveLiquidTools = ({
   const hasAssignedLiquidClasses = assignedLiquidClasses.length > 0
 
   const defaultSelectedLiquidClass = hasAssignedLiquidClasses
-    ? t(
-        `protocol_steps:liquid_classes.${getLiquidClassDisplayName(
-          assignedLiquidClasses[0] ?? null
-        )
-          ?.split('-')[0]
-          .toLowerCase()}`
-      )
-    : t('protocol_steps:no_liquid_class')
+    ? getLiquidClassDisplayName(assignedLiquidClasses[0] ?? null)
+    : t('dont_use_liquid_class')
 
   const [selectedLiquidClass, setSelectedLiquidClass] = useState(
     defaultSelectedLiquidClass
@@ -67,30 +61,29 @@ export const LiquidClassesStepMoveLiquidTools = ({
   }, [defaultSelectedLiquidClass])
 
   const liquidClassOptions = [
-    ...Object.entries(liquidClassDefs).map(
-      ([liquidClassDefName, { displayName }]) => ({
-        name: t(
-          `protocol_steps:liquid_classes.${displayName
-            .split('-')[0]
-            .toLowerCase()}`
-        ),
+    ...Object.entries(liquidClassDefs)
+      .sort(([_0, a], [_1, b]) => {
+        if (a.displayName < b.displayName) {
+          return -1
+        } else if (a.displayName > b.displayName) {
+          return 1
+        }
+        return 0
+      })
+      .map(([liquidClassDefName, { displayName, description }]) => ({
+        name: displayName,
         value: liquidClassDefName,
         subButtonLabel:
           liquidClassToLiquidsMap[liquidClassDefName] != null
-            ? t('protocol_steps:assigned_liquid', {
+            ? t('assigned_liquid', {
                 liquidName: liquidClassToLiquidsMap[liquidClassDefName].join(
                   ', '
                 ),
               })
-            : t(
-                `protocol_steps:liquid_classes.${displayName
-                  .split('-')[0]
-                  .toLowerCase()}_subtext`
-              ),
-      })
-    ),
+            : description,
+      })),
     {
-      name: t('protocol_steps:no_liquid_class'),
+      name: t('dont_use_liquid_class'),
       value: '',
       subButtonLabel: '',
     },
@@ -111,7 +104,7 @@ export const LiquidClassesStepMoveLiquidTools = ({
     >
       <Flex padding={`0 ${SPACING.spacing16}`}>
         <StyledText desktopStyle="bodyDefaultRegular">
-          {t('protocol_steps:apply_liquid_classes')}
+          {t('apply_liquid_classes')}
         </StyledText>
       </Flex>
       <Flex
