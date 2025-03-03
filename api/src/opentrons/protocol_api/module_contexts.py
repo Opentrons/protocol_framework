@@ -1131,7 +1131,15 @@ class FlexStackerContext(ModuleContext):
 
         labware_core = self._protocol_core.get_labware_on_module(self._core)
         if labware_core is not None and labware_core.is_adapter():
-            labware_core = self._protocol_core.get_labware_on_labware(labware_core)
+            adapter_core = labware_core
+            adapter = Labware(
+                core=adapter_core,
+                api_version=self._api_version,
+                protocol_core=self._protocol_core,
+                core_map=self._core_map,
+            )
+            self._core_map.add(adapter_core, adapter)
+            labware_core = self._protocol_core.get_labware_on_labware(adapter_core)
 
         # the core retrieve command should have already raised the error
         # if labware_core is None, this is just to satisfy the type checker
