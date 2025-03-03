@@ -4,7 +4,7 @@ metadata = {
 
 requirements = {"robotType": "Flex", "apiLevel": "2.18"}
 
-# This was the previous test ans did not fail.
+# This was the previous test and did not fail.
 # the character limit is 100 not 30
 # too_long: str = "This is a description that is longer than 30 characters."
 
