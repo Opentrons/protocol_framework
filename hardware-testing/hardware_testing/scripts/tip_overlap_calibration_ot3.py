@@ -2,7 +2,6 @@
 import argparse
 import asyncio
 from dataclasses import dataclass, asdict
-from enum import Enum
 from json import load as json_load
 from pathlib import Path
 from time import sleep
@@ -17,14 +16,23 @@ from opentrons_shared_data.deck import (
     get_calibration_square_position_in_slot,
 )
 
-from hardware_testing.data import ui, create_file_name, create_run_id
+from hardware_testing.data import (
+    ui,
+    create_file_name,
+    create_run_id,
+    dump_data_to_file,
+    append_data_to_file,
+)
 from hardware_testing.opentrons_api import helpers_ot3, types
 from hardware_testing.drivers import list_ports_and_select
 from hardware_testing.drivers.mitutoyo_digimatic_indicator import (
     Mitutoyo_Digimatic_Indicator,
 )
 
-CSV_DIVIDER = ","
+SLOTS = ["D1", "D2", "D3", "C1", "C2", "C3", "B1", "B2", "B3", "A1", "A2", "A3"]
+
+CSV_DIVIDER = "\t"
+CSV_NEWLINE = "\n"
 
 # make sure the numbers aren't changing when we read from it
 DIAL_SETTLING_SECONDS = 2.0
@@ -36,9 +44,14 @@ EXPECTED_PROBE_HEIGHT_MM = 0.0  # the calibration square
 
 
 def _dataclass_to_csv(dc: Any, is_header: bool = False, prepend: str = "") -> str:
-    keys_or_values = [
-        key if is_header else str(value) for key, value in asdict(dc).items()
-    ]
+    keys_or_values = []
+    for key, value in asdict(dc).items():
+        if is_header:
+            keys_or_values.append(key)
+        elif isinstance(value, float):
+            keys_or_values.append(str(round(value, 2)))
+        else:
+            keys_or_values.append(str(value))
     return CSV_DIVIDER.join(
         [prepend + kv.upper().replace("_", " ") for kv in keys_or_values]
     )
@@ -63,22 +76,68 @@ class TestConfig:
 
 
 @dataclass
-class TrialConfig:
+class TipConfig:
     lot: str
     volume: int
     filter: bool
     slot: str
-    overlap: float
     well: str
     count: int
+    overlap_version: str
+    overlap: Optional[float]
 
     @property
     def csv_header(self) -> str:
-        return _dataclass_to_csv(self, is_header=True, prepend="TIP")
+        return _dataclass_to_csv(self, is_header=True, prepend="TIP ")
 
     @property
     def csv_data(self) -> str:
         return _dataclass_to_csv(self)
+
+    @property
+    def load_name(self) -> str:
+        filter_str = "filter" if self.filter else ""
+        return f"opentrons_flex_96_{filter_str}tiprack_{self.volume}ul"
+
+    @property
+    def tip_point(self) -> types.Point:
+        tip_row_idx = "ABCDEFGH".index(self.well[0])
+        tip_col_idx = int(self.well[1:])
+        tip_well_offset = types.Point(x=tip_col_idx * 9.0, y=tip_row_idx * -9.0, z=0)
+        tip_a1_pos = helpers_ot3.get_theoretical_a1_position(
+            SLOTS.index(self.slot) + 1, self.load_name
+        )
+        return tip_a1_pos + tip_well_offset
+
+    def calculate_tip_overlap(
+        self, api: OT3API, mount: str, labware_def: Dict[Any, Any]
+    ) -> None:
+        mnt = types.Mount.LEFT if mount == "left" else types.Mount.RIGHT
+        pip = api.hardware_pipettes[mnt]
+        tip_overlaps_from_pipette_def = pip.tip_overlap[self.overlap_version]
+        default_overlap = tip_overlaps_from_pipette_def.get(
+            "default", labware_def["parameters"]["tipOverlap"]
+        )
+        self.overlap = tip_overlaps_from_pipette_def.get(
+            f"opentrons/{self.load_name}/1", default_overlap
+        )
+
+    def _load_labware_def(self) -> Dict[Any, Any]:
+        labware_def_path = (
+            get_shared_data_root() / "labware/definitions/2" / self.load_name / "1.json"
+        )
+        with open(labware_def_path, "r") as f:
+            return json_load(f)
+
+    def get_point_and_length_and_overlap(
+        self, api: OT3API, mount: str
+    ) -> Tuple[types.Point, float, float]:
+        labware_def = self._load_labware_def()
+        tip_pos = self.tip_point
+        tip_length = labware_def["parameters"]["tipLength"]
+        if self.overlap is None:
+            self.calculate_tip_overlap(api, mount, labware_def)
+        return tip_pos, tip_length, self.overlap
 
 
 @dataclass
@@ -103,7 +162,7 @@ class TrialResult:
 
 @dataclass
 class Trial:
-    config: TrialConfig
+    config: TipConfig
     result: TrialResult
 
     @property
@@ -128,7 +187,7 @@ class TestData:
     @property
     def csv_data(self) -> str:
         assert len(self.trials)
-        return "\n".join(
+        return CSV_NEWLINE.join(
             [
                 CSV_DIVIDER.join([self.config.csv_data, trial.csv_data])
                 for trial in self.trials
@@ -141,37 +200,96 @@ class TestData:
         return CSV_DIVIDER.join([self.config.csv_data, self.trials[-1].csv_data])
 
 
-class DialReading(Enum):
-    NOZZLE = 0
-    TIP = 1
-    TIP_CORRECTED = 2
+async def _run_trial(
+    api: OT3API,
+    pipette_mount: str,
+    tip_cfg: TipConfig,
+    dial: Optional[Mitutoyo_Digimatic_Indicator],
+    dial_pos: types.Point,
+) -> TrialResult:
+    # TIP INFO
+    tip_pos, tip_length, tip_overlap = tip_cfg.get_point_and_length_and_overlap(
+        api, pipette_mount
+    )
 
+    def _read_dial() -> float:
+        if dial is None:
+            return 0.0
+        sleep(DIAL_SETTLING_SECONDS)
+        # NOTE: (sigler) the dial-indicator is upside-down
+        #       which is confusing when comparing the pipette's positions.
+        #       To make the math/logic easier, I've flipped the dial's reading
+        #       to be negative, so that the more it is PRESSED-DOWN, the
+        #       more NEGATIVE it will be (which is more intuitive I think)
+        return dial.read() * -1.0
 
-def get_tip_rack_length_and_overlap(
-    api: OT3API, mnt: types.OT3Mount, load_name: str, tip_overlap_version: str
-) -> Tuple[float, float]:
-    labware_def_path = (
-        get_shared_data_root() / "labware/definitions/2" / load_name / "1.json"
+    pip_mount = types.OT3Mount.LEFT if pipette_mount == "left" else types.OT3Mount.RIGHT
+
+    # NOZZLE POSITION
+    ui.print_info("moving to the DIAL-INDICATOR")
+    await api.retract(pip_mount)
+    await helpers_ot3.move_to_arched_ot3(api, pip_mount, dial_pos)
+    dial_nozzle = _read_dial()
+
+    # TIP NOMINAL POSITION
+    ui.print_info("picking up TIP")
+    await api.retract(pip_mount)
+    await helpers_ot3.move_to_arched_ot3(api, pip_mount, tip_pos)
+    await api.pick_up_tip(pip_mount, tip_length=tip_length - tip_overlap)
+    await api.retract(pip_mount)
+    await helpers_ot3.move_to_arched_ot3(api, pip_mount, dial_pos)
+    dial_tip_nominal = _read_dial()
+    tip_z_error = dial_tip_nominal - dial_nozzle
+
+    ui.print_header("PROBING the CALIBRATION-SQUARE")
+    square_pos = types.Point(
+        *get_calibration_square_position_in_slot(slot=SLOT_CENTER)
+    ) + types.Point(x=Z_PREP_OFFSET.x, y=Z_PREP_OFFSET.y, z=Z_PREP_OFFSET.z)
+    await api.retract(pip_mount)
+    await api.move_to(pip_mount, square_pos + types.Point(z=PROBE_DISTANCE_MM))
+    probed_deck_z = await api.liquid_probe(
+        pip_mount, PROBE_DISTANCE_MM + PROBE_OVERSHOOT_MM
     )
-    with open(labware_def_path, "r") as f:
-        labware_def = json_load(f)
-    tip_length = labware_def["parameters"]["tipLength"]
-    pip = api.hardware_pipettes[mnt.to_mount()]
-    tip_overlaps_from_pipette_def = pip.tip_overlap[tip_overlap_version]
-    default_overlap = tip_overlaps_from_pipette_def.get(
-        "default", labware_def["parameters"]["tipOverlap"]
+    tip_overlap_error_mm = probed_deck_z - EXPECTED_PROBE_HEIGHT_MM
+    overlap_calibrated = tip_overlap - tip_overlap_error_mm
+    ui.print_info(
+        f"tip is {round(tip_overlap_error_mm, 2)} mm "
+        f"(overlap={round(overlap_calibrated, 2)}) "
+        f"from expected overlap ({tip_overlap})"
     )
-    tip_overlap = tip_overlaps_from_pipette_def.get(
-        f"opentrons/{load_name}/1", default_overlap
+    api.remove_tip(pip_mount)
+    api.add_tip(pip_mount, tip_length=tip_length - overlap_calibrated)
+
+    ui.print_header("measure ERROR from EXPECTED (again)")
+    await api.retract(pip_mount)
+    await helpers_ot3.move_to_arched_ot3(api, pip_mount, dial_pos)
+    dial_tip_calibrated = _read_dial()
+    error_from_calibrated = dial_tip_calibrated - dial_nozzle
+    error_reduction = tip_z_error - error_from_calibrated
+
+    ui.print_info("returning tip")
+    await api.retract(pip_mount)
+    await helpers_ot3.move_to_arched_ot3(api, pip_mount, tip_pos + types.Point(z=-10))
+    await api.drop_tip(pip_mount)
+
+    ui.print_info("trial complete")
+    await api.retract(pip_mount)
+
+    return TrialResult(
+        dial_nozzle=dial_nozzle,
+        dial_tip_nominal=dial_tip_nominal,
+        tip_z_error=tip_z_error,
+        probed_deck_z=probed_deck_z,
+        overlap_calibrated=overlap_calibrated,
+        dial_tip_calibrated=dial_tip_calibrated,
+        error_from_calibrated=error_from_calibrated,
+        error_reduction=error_reduction,
     )
-    return tip_length, tip_overlap
 
 
 async def main(
     simulate: bool,
     pip_mount: types.OT3Mount,
-    tip_slot: int,
-    tip_overlap_version: str,
 ) -> None:
     ui.print_title("TIP-OVERLAP CALIBRATION")
     api = await helpers_ot3.build_async_ot3_hardware_api(
@@ -179,24 +297,26 @@ async def main(
         pipette_left="p1000_single_v3.6",
         pipette_right="p1000_single_v3.6",
     )
-    flex_sn = helpers_ot3.get_robot_serial_ot3(api)
     pip_hw = api.hardware_pipettes[pip_mount.to_mount()]
-    pip_sn = helpers_ot3.get_pipette_serial_ot3(pip_hw)
-    pip_ch = int(pip_hw.channels.value)
-    pip_vol = 1000 if "P1K" in pip_sn else 50
+
+    test_data = TestData(
+        config=TestConfig(
+            run_id=create_run_id(),
+            flex_id=helpers_ot3.get_robot_serial_ot3(api),
+            pipette_id=helpers_ot3.get_pipette_serial_ot3(pip_hw),
+            pipette_mount=pip_mount.name.lower(),
+            pipette_channels=int(pip_hw.channels.value),
+            pipette_volume=int(pip_hw.pipette_type.value[1:]),
+        ),
+        trials=[],
+    )
 
     # CSV FILE
-    csv_run_id = create_run_id()
     csv_test_name = Path(__file__).name.replace("_", "-").replace(".py", "")
-    csv_tag = f"{pip_sn}"
-    file_name = create_file_name(csv_test_name, csv_run_id, csv_tag)
+    csv_tag = f"{test_data.config.pipette_id}"
+    csv_file_name = create_file_name(csv_test_name, test_data.config.run_id, csv_tag)
 
     # DIAL-INDICATOR
-    current_dial_readings: Dict[DialReading, Optional[float]] = {
-        DialReading.NOZZLE: None,
-        DialReading.TIP: None,
-        DialReading.TIP_CORRECTED: None,
-    }
     dial: Optional[Mitutoyo_Digimatic_Indicator] = None
     if not simulate:
         dial = Mitutoyo_Digimatic_Indicator(
@@ -205,86 +325,42 @@ async def main(
         dial.connect()
         dial.read()
 
-    def _save_dial_position(reading: DialReading) -> None:
-        ui.print_info(f"saving {reading.name.upper()} position")
-        val = 0.0
-        if not simulate:
-            sleep(DIAL_SETTLING_SECONDS)
-            val = dial.read()
-        current_dial_readings[reading] = val
-
-    def _append_positions_to_csv() -> None:
-        # TODO: save the dial readings to a CSV file
-        return
-
-    def _print_csv_contents() -> None:
-        # TODO: just print the entire file
-        return
-
-    ui.print_header("JOG to DIAL-INDICATOR")
+    ui.print_info("please jog to the DIAL-INDICATOR")
     await api.retract(pip_mount)
     await helpers_ot3.jog_mount_ot3(api, pip_mount)
     dial_pos = await api.gantry_position(pip_mount)
 
-    async def _test_loop(_tip_ul: float, _tip_well: str) -> None:
-        # NOTE: always begin the trial PRESSING the NOZZLE into the dial indicator
-        _save_dial_position(DialReading.NOZZLE)
-        ui.print_header("measure ERROR from EXPECTED")
-        ui.print_info("picking up tip")
-        tip_rack_load_name = f"opentrons_flex_96_tiprack_{_tip_ul}ul"
-        tip_row_idx = "ABCDEFGH".index(_tip_well[0])
-        tip_col_idx = int(_tip_well[1:])
-        tip_well_offset = types.Point(x=tip_col_idx * 9.0, y=tip_row_idx * -9.0, z=0)
-        tip_a1_pos = helpers_ot3.get_theoretical_a1_position(
-            tip_slot, tip_rack_load_name
-        )
-        tip_pos = tip_a1_pos + tip_well_offset
-        tip_length, tip_overlap = get_tip_rack_length_and_overlap(
-            api, pip_mount, tip_rack_load_name, tip_overlap_version
-        )
-        await api.retract(pip_mount)
-        await helpers_ot3.move_to_arched_ot3(api, pip_mount, tip_pos)
-        await api.pick_up_tip(pip_mount, tip_length=tip_length - tip_overlap)
-        await api.retract(pip_mount)
-        await helpers_ot3.move_to_arched_ot3(api, pip_mount, dial_pos)
-        _save_dial_position(DialReading.TIP)
-
-        ui.print_header("PROBE the CALIBRATION-SQUARE")
-        square_pos = types.Point(
-            *get_calibration_square_position_in_slot(slot=SLOT_CENTER) + Z_PREP_OFFSET
-        )
-        await api.retract(pip_mount)
-        await api.move_to(pip_mount, square_pos + types.Point(z=PROBE_DISTANCE_MM))
-        deck_z = await api.liquid_probe(
-            pip_mount, PROBE_DISTANCE_MM + PROBE_OVERSHOOT_MM
-        )
-        tip_overlap_error_mm = deck_z - EXPECTED_PROBE_HEIGHT_MM
-        ui.print_info(
-            f"tip is {round(tip_overlap_error_mm, 2)} mm from expected position"
-        )
-        api.hardware_pipettes[
-            pip_mount.to_mount()
-        ].current_tip_length += tip_overlap_error_mm
-
-        ui.print_header("measure ERROR from EXPECTED (again)")
-        await api.retract(pip_mount)
-        await helpers_ot3.move_to_arched_ot3(api, pip_mount, dial_pos)
-        _save_dial_position(DialReading.TIP_CORRECTED)
-        _append_positions_to_csv()
-        _print_csv_contents()
-        ui.print_info("returning tip")
-        await api.retract(pip_mount)
-        await helpers_ot3.move_to_arched_ot3(
-            api, pip_mount, tip_pos + types.Point(z=-10)
-        )
-        await api.drop_tip(pip_mount)
-
-        ui.print_info("returning to the DIAL-INDICATOR for next trial")
-        await api.retract(pip_mount)
-        await helpers_ot3.move_to_arched_ot3(api, pip_mount, dial_pos)
-
     while True:
-        await _test_loop()
+        tip_cfg = TipConfig(
+            lot="1",  # TODO: get this through user-input
+            volume=1000,  # TODO: get this through user-input
+            filter=False,  # TODO: get this through user-input
+            slot="C3",  # TODO: get this through user-input
+            well="A1",  # TODO: get this through user-input
+            count=test_data.config.pipette_channels,  # NOTE: (sigler) for now not testing partial tip-pickup
+            overlap_version="v1",  # NOTE: (sigler) we can configure this later, default to latest
+            overlap=None,  # NOTE: must be calculated after configuring tip
+        )
+        trial_result = await _run_trial(
+            api, pip_mount.name.lower(), tip_cfg, dial, dial_pos
+        )
+        test_data.trials.append(Trial(config=tip_cfg, result=trial_result))
+        if len(test_data.trials) == 1:
+            # FIXME: header cannot be compiled without first having at least 1x trial stored
+            dump_data_to_file(
+                csv_test_name,
+                test_data.config.run_id,
+                csv_file_name,
+                data=test_data.csv_header + CSV_NEWLINE,
+            )
+        append_data_to_file(
+            csv_test_name,
+            test_data.config.run_id,
+            csv_file_name,
+            data=test_data.csv_data_latest_trial + CSV_NEWLINE,
+        )
+        if simulate:
+            break
 
 
 if __name__ == "__main__":
@@ -294,14 +370,10 @@ if __name__ == "__main__":
     _parser.add_argument(
         "--mount", type=str, choices=list(_mounts.keys()), default="left"
     )
-    _parser.add_argument("--tip-slot", type=int, default=3)
-    _parser.add_argument("--tip-overlap-version", type=str, default="v2")
     _args = _parser.parse_args()
     asyncio.run(
         main(
             _args.simulate,
             _mounts[_args.mount],
-            _args.tip_slot,
-            _args.tip_overlap_version,
         )
     )
