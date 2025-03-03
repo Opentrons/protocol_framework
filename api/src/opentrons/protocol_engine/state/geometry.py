@@ -933,11 +933,17 @@ class GeometryView:
                 offset = LabwareOffsetVector(x=0, y=0, z=0)
         else:
             if isinstance(location, ModuleLocation):
-                location_name = self._modules.get_location(
+                location_name = self._modules.get_provided_addressable_area(
                     location.moduleId
-                ).slotName.id
+                )
             else:  # OnLabwareLocation
-                location_name = self.get_ancestor_slot_name(location.labwareId).id
+                labware_loc = self._labware.get(location.labwareId).location
+                if isinstance(labware_loc, ModuleLocation):
+                    location_name = self._modules.get_provided_addressable_area(
+                        labware_loc.moduleId
+                    )
+                else:
+                    location_name = self.get_ancestor_slot_name(location.labwareId).id
             labware_offset = self._get_offset_from_parent(
                 child_definition=labware_definition, parent=location
             )
