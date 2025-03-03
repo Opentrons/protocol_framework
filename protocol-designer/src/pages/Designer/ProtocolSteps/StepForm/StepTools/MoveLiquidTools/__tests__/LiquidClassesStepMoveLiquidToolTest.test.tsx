@@ -4,7 +4,6 @@ import { i18n } from '../../../../../../../assets/localization'
 import { renderWithProviders } from '../../../../../../../__testing-utils__'
 import { getLiquidEntities } from '../../../../../../../step-forms/selectors'
 
-import formDataForSingleStep from '../../../../../../../__fixtures__/formDataForSingleStep.json'
 import propsForFieldsForSingleStep from '../../../../../../../__fixtures__/propsForFieldsForSingleStep.json'
 
 import { LiquidClassesStepMoveLiquidTools } from '../LiquidClassesStepMoveLiquidTools'
@@ -27,8 +26,6 @@ describe('LiquidClassesStepMoveLiquidTools', () => {
   beforeEach(() => {
     props = {
       propsForFields: propsForFieldsForSingleStep as any,
-      formData: formDataForSingleStep as any,
-      visibleFormErrors: [] as any,
     }
     vi.mocked(getLiquidEntities).mockReturnValue({})
   })
