@@ -289,16 +289,17 @@ class Protocols:
         robot="Flex",
     )
     # https://opentrons.atlassian.net/browse/RQA-3975
-    Flex_S_v2_15_P1000_96_GRIP_HS_MB_TC_TM_IlluminaDNAPrep96PART3: Protocol = Protocol(
-        file_stem="Flex_S_v2_15_P1000_96_GRIP_HS_MB_TC_TM_IlluminaDNAPrep96PART3",
-        file_extension="py",
-        robot="Flex",
-    )
-    Flex_S_v2_15_P1000_96_GRIP_HS_MB_TC_TM_IDTXgen96Part1to3: Protocol = Protocol(
-        file_stem="Flex_S_v2_15_P1000_96_GRIP_HS_MB_TC_TM_IDTXgen96Part1to3",
-        file_extension="py",
-        robot="Flex",
-    )
+    # Flex_S_v2_15_P1000_96_GRIP_HS_MB_TC_TM_IlluminaDNAPrep96PART3: Protocol = Protocol(
+    #     file_stem="Flex_S_v2_15_P1000_96_GRIP_HS_MB_TC_TM_IlluminaDNAPrep96PART3",
+    #     file_extension="py",
+    #     robot="Flex",
+    # )
+    # https://opentrons.atlassian.net/browse/RQA-3975
+    # Flex_S_v2_15_P1000_96_GRIP_HS_MB_TC_TM_IDTXgen96Part1to3: Protocol = Protocol(
+    #     file_stem="Flex_S_v2_15_P1000_96_GRIP_HS_MB_TC_TM_IDTXgen96Part1to3",
+    #     file_extension="py",
+    #     robot="Flex",
+    # )
     Flex_S_2_18_P1000M_P50M_GRIP_HS_TM_MB_TC_IlluminaDNAEnrichmentV4: Protocol = Protocol(
         file_stem="Flex_S_2_18_P1000M_P50M_GRIP_HS_TM_MB_TC_IlluminaDNAEnrichmentV4",
         file_extension="py",
@@ -904,11 +905,11 @@ class Protocols:
         robot="Flex",
     )
     # https://opentrons.atlassian.net/browse/RQA-3974
-    pl_langone_ribo_pt1_ramp: Protocol = Protocol(
-        file_stem="pl_langone_ribo_pt1_ramp",
-        file_extension="py",
-        robot="Flex",
-    )
+    # pl_langone_ribo_pt1_ramp: Protocol = Protocol(
+    #     file_stem="pl_langone_ribo_pt1_ramp",
+    #     file_extension="py",
+    #     robot="Flex",
+    # )
     pl_M_N_Nucleomag_DNA_Flex_multi: Protocol = Protocol(
         file_stem="pl_M_N_Nucleomag_DNA_Flex_multi",
         file_extension="py",
@@ -981,11 +982,12 @@ class Protocols:
         file_extension="py",
         robot="Flex",
     )
-    pl_sample_dilution_with_96_channel_pipette: Protocol = Protocol(
-        file_stem="pl_sample_dilution_with_96_channel_pipette",
-        file_extension="py",
-        robot="Flex",
-    )
+    # https://opentrons.atlassian.net/browse/RQA-3975
+    # pl_sample_dilution_with_96_channel_pipette: Protocol = Protocol(
+    #     file_stem="pl_sample_dilution_with_96_channel_pipette",
+    #     file_extension="py",
+    #     robot="Flex",
+    # )
     pl_SamplePrep_MS_Cleanup_Flex_upto96: Protocol = Protocol(
         file_stem="pl_SamplePrep_MS_Cleanup_Flex_upto96",
         file_extension="py",

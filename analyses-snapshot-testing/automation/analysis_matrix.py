@@ -1,28 +1,3 @@
-#!/usr/bin/env python3
-"""
-Protocol Analyzer using Rich for Interactive Selection.
-
-This script scans the ../protocols directory for .json and .py files,
-builds a ProtocolInfo dataclass for each file, extracts api_level and robot
-fields as follows:
-  - For .py files:
-      * If the file has a 'requirements' variable:
-          - api_level from requirements["apiLevel"]
-          - robot from requirements["robotType"]
-      * Otherwise, if it has a 'metadata' variable:
-          - api_level from metadata["apiLevel"]
-          - robot is set to "OT-2"
-  - For .json files:
-      * pd_version from designerApplication.version
-      * robot from robot.model
-
-Finally, the user is interactively prompted to select protocols for analysis.
-
-Requirements:
-  - Python 3.13
-  - rich
-"""
-
 import ast
 import json
 import time
@@ -472,7 +447,11 @@ def main() -> None:  # noqa: C901
         for p in selected_protocols
     ]
     for tag in tags:
-        compatible_protocols = [p for p in selected_protocols if is_version_compatible(tag[1:], p.min_robot_stack_version)]
+        compatible_protocols = [
+            p
+            for p in selected_protocols
+            if p.min_robot_stack_version is not None and is_version_compatible(tag[1:], p.min_robot_stack_version)
+        ]
         console.print(f"Testing {len(compatible_protocols)} protocols for {tag}")
         if not compatible_protocols:
             console.print(f"[yellow]No protocols compatible with {tag}.[/yellow]")

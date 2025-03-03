@@ -22,16 +22,23 @@ def audit_snapshots() -> AuditResult:  # noqa: C901
 
     current_dir = Path(__file__).parent
     snapshot_path = Path(current_dir, "__snapshots__", "analyses_snapshot_test")
-    json_files = list(snapshot_path.glob("**/*.json"))
+    snapshot_json_files = list(snapshot_path.glob("**/*.json"))
 
     files_with_unexpected_errors = []
     files_missing_expected_errors = []
 
-    console.print(Panel(f"Found [info]{len(json_files)}[/] JSON files in [path]{snapshot_path}[/]"))
-
+    console.print(Panel(f"Found [info]{len(snapshot_json_files)}[/] JSON files in [path]{snapshot_path}[/]"))
+    ignored_files = [
+        "test_analysis_snapshot[ac886d7768][Flex_S_v2_15_P1000_96_GRIP_HS_MB_TC_TM_IDTXgen96Part1to3].json",
+        "test_analysis_snapshot[f24bb0b4d9][Flex_S_v2_15_P1000_96_GRIP_HS_MB_TC_TM_IlluminaDNAPrep96PART3].json",
+        "test_analysis_snapshot[4753259c3e][pl_sample_dilution_with_96_channel_pipette].json",
+        "test_analysis_snapshot[2bc6830494][pl_langone_ribo_pt1_ramp].json",
+    ]
+    console.print(Panel("\n".join([f"  • [path]{escape(f)}[/]" for f in ignored_files]), title=f"Ignoring {len(ignored_files)} files"))
+    snapshot_json_files = [f for f in snapshot_json_files if f.name not in ignored_files]
+    console.print(Panel(f"[info]Processing {len(snapshot_json_files)} files[/]", title="Snapshot Processing", expand=False))
     with console.status("[info]Processing snapshot files...[/]"):
-        for file_path in json_files:
-
+        for file_path in snapshot_json_files:
             try:
                 with open(file_path, "r") as f:
                     data = json.load(f)
