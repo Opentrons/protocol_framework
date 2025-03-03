@@ -288,7 +288,7 @@ export function getLoadWasteChute(
         `${wasteChute.pythonName} = ${PROTOCOL_CONTEXT_NAME}.load_waste_chute()`
     )
 
-  return pythonLoadWasteChute
+  return pythonLoadWasteChute.length > 0
     ? `# Load Waste Chute:\n${pythonLoadWasteChute}`
     : ''
 }
@@ -309,7 +309,6 @@ export function pythonDefRun(
     additionalEquipmentEntities,
   } = invariantContext
   const { modules, labware, pipettes } = robotState
-
   const sections: string[] = [
     getLoadModules(moduleEntities, modules),
     getLoadAdapters(moduleEntities, labwareEntities, labware),
