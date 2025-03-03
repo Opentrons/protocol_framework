@@ -3294,6 +3294,58 @@ def test_get_offset_fails_with_off_deck_labware(
     assert offset_location is None
 
 
+@pytest.mark.parametrize("use_mocks", [False])
+def test_get_projected_offset_location_pending_labware(
+    decoy: Decoy,
+    module_store: ModuleStore,
+    tempdeck_v2_def: ModuleDefinition,
+    subject: GeometryView,
+) -> None:
+    """Test if you can get the projected offset of a labware on a labware not yet loaded."""
+    load_module = SucceedCommandAction(
+        command=LoadModule(
+            params=LoadModuleParams(
+                location=DeckSlotLocation(slotName=DeckSlotName.SLOT_A3),
+                model=ModuleModel.TEMPERATURE_MODULE_V2,
+            ),
+            id="load-module-1",
+            createdAt=datetime.now(),
+            key="load-module-1",
+            status=CommandStatus.SUCCEEDED,
+            result=LoadModuleResult(
+                moduleId="module-id-1",
+                definition=tempdeck_v2_def,
+                model=tempdeck_v2_def.model,
+            ),
+        ),
+    )
+
+    module_store.handle_action(load_module)
+    offset_location = subject.get_projected_offset_location(
+        OnLabwareLocation(labwareId="adapter-id-1"),
+        {
+            "adapter-id-1": LoadedLabware(
+                id="adapter-id-1",
+                loadName="some-adapter-loadname",
+                definitionUri="some-adapter-defuri",
+                lid_id=None,
+                offsetId=None,
+                displayName=None,
+                location=ModuleLocation(moduleId="module-id-1"),
+            ),
+        },
+    )
+    assert offset_location == [
+        OnLabwareOffsetLocationSequenceComponent(labwareUri="some-adapter-defuri"),
+        OnModuleOffsetLocationSequenceComponent(
+            moduleModel=ModuleModel.TEMPERATURE_MODULE_V2
+        ),
+        OnAddressableAreaOffsetLocationSequenceComponent(
+            addressableAreaName="temperatureModuleV2A3"
+        ),
+    ]
+
+
 @pytest.mark.parametrize("frustum", RECTANGULAR_TEST_EXAMPLES)
 def test_rectangular_frustum_math_helpers(
     decoy: Decoy,
@@ -4036,6 +4088,67 @@ def test_get_location_sequence_stacker_hopper(
                 "flexStackerModuleV1WithMagneticBlockV1",
             ],
             cutoutId="cutoutA3",
+        ),
+    ]
+
+
+@pytest.mark.parametrize("use_mocks", [False])
+def test_get_predicted_location_sequence_with_pending_labware(
+    decoy: Decoy,
+    labware_store: LabwareStore,
+    module_store: ModuleStore,
+    addressable_area_store: AddressableAreaStore,
+    tempdeck_v2_def: ModuleDefinition,
+    labware_view: LabwareView,
+    subject: GeometryView,
+) -> None:
+    """Test if you can get the location sequence of a labware directly on a module."""
+    load_module = SucceedCommandAction(
+        command=LoadModule(
+            params=LoadModuleParams(
+                location=DeckSlotLocation(slotName=DeckSlotName.SLOT_A3),
+                model=ModuleModel.TEMPERATURE_MODULE_V2,
+            ),
+            id="load-module-1",
+            createdAt=datetime.now(),
+            key="load-module-1",
+            status=CommandStatus.SUCCEEDED,
+            result=LoadModuleResult(
+                moduleId="module-id-1",
+                definition=tempdeck_v2_def,
+                model=tempdeck_v2_def.model,
+            ),
+        ),
+        state_update=StateUpdate(
+            addressable_area_used=AddressableAreaUsedUpdate(
+                addressable_area_name="temperatureModuleV2A3"
+            )
+        ),
+    )
+    module_store.handle_action(load_module)
+    addressable_area_store.handle_action(load_module)
+    location_sequence = subject.get_predicted_location_sequence(
+        OnLabwareLocation(labwareId="adapter-id-1"),
+        {
+            "adapter-id-1": LoadedLabware(
+                id="adapter-id-1",
+                loadName="some-adapter-loadname",
+                definitionUri="some-adapter-uri",
+                lid_id=None,
+                offsetId=None,
+                displayName=None,
+                location=ModuleLocation(moduleId="module-id-1"),
+            )
+        },
+    )
+    assert location_sequence == [
+        OnLabwareLocationSequenceComponent(labwareId="adapter-id-1", lidId=None),
+        OnAddressableAreaLocationSequenceComponent(
+            addressableAreaName="temperatureModuleV2A3"
+        ),
+        OnModuleLocationSequenceComponent(moduleId="module-id-1"),
+        OnCutoutFixtureLocationSequenceComponent(
+            cutoutId="cutoutA3", possibleCutoutFixtureIds=["temperatureModuleV2"]
         ),
     ]
 
