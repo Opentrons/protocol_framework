@@ -4,6 +4,7 @@ from opentrons.protocol_api._nozzle_layout import NozzleLayout
 requirements = {"robotType": "Flex", "apiLevel": "2.16"}
 
 
+# This protocol only ever analyzed correctly on Robot stack release 7.2.0 and 7.1.0
 def run(ctx):
     tip_rack2 = ctx.load_labware("opentrons_flex_96_tiprack_50ul", "C3")
     instrument = ctx.load_instrument("flex_96channel_1000", mount="left")
