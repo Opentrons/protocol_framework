@@ -637,6 +637,7 @@ async def test_retrive_raises_if_stall(
         pool_adapter_definition=tiprack_adapter_def,
         pool_lid_definition=tiprack_lid_def,
         pool_count=1,
+        max_pool_count=5,
     )
     decoy.when(
         state_view.modules.get_flex_stacker_substate(module_id=stacker_id)
