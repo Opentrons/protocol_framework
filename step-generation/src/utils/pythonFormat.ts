@@ -8,7 +8,7 @@ import type { WellLocation } from '@opentrons/shared-data/command/types/support'
  */
 export const PROTOCOL_CONTEXT_NAME = 'protocol'
 
-/** The variable name for defining a labware of moving a labware to a location off-deck */
+/** The variable name for defining a labware that is off-deck or being moved to off-deck */
 export const OFF_DECK = 'OFF_DECK'
 
 const INDENT = '    '
