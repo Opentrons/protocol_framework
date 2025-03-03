@@ -5,7 +5,12 @@ from opentrons_shared_data.labware.constants import WELL_NAME_PATTERN
 
 from opentrons.protocols.api_support.util import APIVersionError
 
-from opentrons.types import Point, SimulatedProbeResult, LiquidTrackingType
+from opentrons.types import Point
+
+from opentrons.protocol_engine.types.liquid_level_detection import (
+    SimulatedProbeResult,
+    LiquidTrackingType,
+)
 
 from .well_geometry import WellGeometry
 from ..well import AbstractWellCore

@@ -41,6 +41,7 @@ from ..protocols.advanced_control.transfers.common import (
     TransferTipPolicyV2,
     TransferTipPolicyV2Type,
 )
+from ..protocol_engine.types.liquid_level_detection import LiquidTrackingType
 
 _DEFAULT_ASPIRATE_CLEARANCE = 1.0
 _DEFAULT_DISPENSE_CLEARANCE = 1.0
@@ -2577,7 +2578,7 @@ class InstrumentContext(publisher.CommandPublisher):
         self._core.liquid_probe_with_recovery(well._core, loc)
 
     @requires_version(2, 20)
-    def measure_liquid_height(self, well: labware.Well) -> types.LiquidTrackingType:
+    def measure_liquid_height(self, well: labware.Well) -> LiquidTrackingType:
         """Check the height of the liquid within a well.
 
         :returns: The height, in mm, of the liquid from the deck.

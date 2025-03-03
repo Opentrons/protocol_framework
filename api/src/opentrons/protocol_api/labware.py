@@ -33,13 +33,14 @@ from opentrons_shared_data.labware.types import (
     LabwareParameters3,
 )
 
-from opentrons.types import Location, Point, NozzleMapInterface, LiquidTrackingType
+from opentrons.types import Location, Point, NozzleMapInterface
 from opentrons.protocols.api_support.types import APIVersion
 from opentrons.protocols.api_support.util import (
     requires_version,
     APIVersionError,
     UnsupportedAPIError,
 )
+from opentrons.protocol_engine.types.liquid_level_detection import LiquidTrackingType
 
 # TODO(mc, 2022-09-02): re-exports provided for backwards compatibility
 # remove when their usage is no longer needed

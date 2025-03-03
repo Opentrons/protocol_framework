@@ -19,7 +19,8 @@ from opentrons.protocol_engine.types import (
     LiquidClassRecord,
     ABSMeasureMode,
 )
-from opentrons.types import MountType, LiquidTrackingType
+from opentrons.protocol_engine.types.liquid_level_detection import LiquidTrackingType
+from opentrons.types import MountType
 from opentrons_shared_data.labware.labware_definition import LabwareDefinition
 from opentrons_shared_data.pipette.types import PipetteNameType
 
@@ -756,7 +757,6 @@ class StateUpdate:
             volume=volume,
             last_probed=last_probed,
         )
-        # breakpoint()
         return self
 
     def set_liquid_operated(

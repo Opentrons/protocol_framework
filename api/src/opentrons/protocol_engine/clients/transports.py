@@ -138,7 +138,6 @@ class ChildThreadTransport:
                         original_error=error,
                         message=f"{error.errorType}: {error.detail}",
                     )
-                # breakpoint()
 
             elif command.status == CommandStatus.QUEUED:
                 # This can happen with a certain pause timing:

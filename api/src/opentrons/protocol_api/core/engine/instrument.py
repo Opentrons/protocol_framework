@@ -16,7 +16,6 @@ from opentrons.types import (
     Mount,
     NozzleConfigurationType,
     NozzleMapInterface,
-    LiquidTrackingType,
 )
 from opentrons.hardware_control import SyncHardwareAPI
 from opentrons.hardware_control.dev_types import PipetteDict
@@ -45,6 +44,7 @@ from opentrons.protocol_engine.types import (
     LiquidClassRecord,
     NextTipInfo,
 )
+from opentrons.protocol_engine.types.liquid_level_detection import LiquidTrackingType
 from opentrons.protocol_engine.errors.exceptions import TipNotAttachedError
 from opentrons.protocol_engine.clients import SyncClient as EngineClient
 from opentrons.protocols.api_support.definitions import MAX_SUPPORTED_VERSION

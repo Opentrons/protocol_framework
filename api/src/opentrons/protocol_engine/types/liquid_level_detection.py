@@ -1,94 +1,82 @@
 """Protocol Engine types to do with liquid level detection."""
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Optional, Union, Annotated
+from typing import Optional, Union, List
 
-from pydantic import (
-    BaseModel,
-    ConfigDict,
-    field_serializer,
-    PlainSerializer,
-    BeforeValidator,
-)
+from pydantic import BaseModel, model_serializer
 
 
-from opentrons.types import LiquidTrackingType
+class SimulatedProbeResult(BaseModel):
+    """A sentinel value to substitute for the resulting volume/height of a liquid probe during simulation."""
+
+    operations_after_probe: List[float] = []
+    net_liquid_exchanged_after_probe: float = 0.0
+
+    @model_serializer
+    def serialize_model(self) -> str:
+        """Serialize instances of this class as a string."""
+        return "SimulatedProbeResult"
+
+    def __add__(
+        self, other: Union[float, "SimulatedProbeResult"]
+    ) -> Union[float, "SimulatedProbeResult"]:
+        """Bypass addition and just return self."""
+        return self
+
+    def __sub__(
+        self, other: Union[float, "SimulatedProbeResult"]
+    ) -> Union[float, "SimulatedProbeResult"]:
+        """Bypass subtraction and just return self."""
+        return self
+
+    def __radd__(
+        self, other: Union[float, "SimulatedProbeResult"]
+    ) -> Union[float, "SimulatedProbeResult"]:
+        """Bypass addition and just return self."""
+        return self
+
+    def __rsub__(
+        self, other: Union[float, "SimulatedProbeResult"]
+    ) -> Union[float, "SimulatedProbeResult"]:
+        """Bypass subtraction and just return self."""
+        return self
+
+    def __eq__(self, other: object) -> bool:
+        """A SimulatedProbeResult should only be equal to the same instance of its class."""
+        if not isinstance(other, SimulatedProbeResult):
+            return False
+        return self is other
+
+    def simulate_probed_aspirate_dispense(self, volume: float) -> None:
+        """Record the current state of aspirate/dispense calls."""
+        self.net_liquid_exchanged_after_probe += volume
+        self.operations_after_probe.append(volume)
 
 
-def serialize_liquid_tracking_type(
-    tracking_val: Union[LiquidTrackingType, None]
-) -> Union[str, float, None]:
-    if not tracking_val:
-        return None
-    if isinstance(tracking_val, float):
-        return tracking_val
-    else:
-        return "SimulatedProbeType"
-
-
-liquidInfo = Annotated[
-    Union[LiquidTrackingType, None],
-    PlainSerializer(
-        serialize_liquid_tracking_type, return_type=Union[str, float, None]
-    ),
-    BeforeValidator(serialize_liquid_tracking_type, json_schema_input_type=str),
-]
+LiquidTrackingType = Union[SimulatedProbeResult, float]
 
 
 class LoadedVolumeInfo(BaseModel):
     """A well's liquid volume, initialized by a LoadLiquid, updated by Aspirate and Dispense."""
 
-    volume: liquidInfo = None
+    volume: Union[LiquidTrackingType, None] = None
     last_loaded: datetime
     operations_since_load: int
-
-    # @field_serializer("volume")
-    # def serialize_volume(
-    #     self, volume: Union[LiquidTrackingType, None], _info
-    # ) -> Union[str, float, None]:
-    #     if not volume:
-    #         return None  # have to add this to all the serialize functions
-    #     if isinstance(volume, float):
-    #         return volume
-    #     else:
-    #         return "SimulatedProbeResult"
 
 
 class ProbedHeightInfo(BaseModel):
     """A well's liquid height, initialized by a LiquidProbe, cleared by Aspirate and Dispense."""
 
-    height: liquidInfo = None
+    height: Union[LiquidTrackingType, None] = None
     last_probed: datetime
-
-    # @field_serializer("height")
-    # def serialize_height(
-    #     self, height: Union[LiquidTrackingType, None], _info
-    # ) -> Union[str, float, None]:
-    #     if not height:
-    #         return None
-    #     if isinstance(height, float):
-    #         return height
-    #     else:
-    #         return "SimulatedProbeResult"
 
 
 class ProbedVolumeInfo(BaseModel):
     """A well's liquid volume, initialized by a LiquidProbe, updated by Aspirate and Dispense."""
 
-    volume: liquidInfo = None
+    volume: Union[LiquidTrackingType, None] = None
     last_probed: datetime
     operations_since_probe: int
-
-    # @field_serializer("volume")
-    # def serialize_volume(
-    #     self, volume: Union[LiquidTrackingType, None], _info
-    # ) -> Union[str, float, None]:
-    #     if not volume:
-    #         return None
-    #     if isinstance(volume, float):
-    #         return volume
-    #     else:
-    #         return "SimulatedProbeResult"
 
 
 class WellInfoSummary(BaseModel):
@@ -97,30 +85,8 @@ class WellInfoSummary(BaseModel):
     labware_id: str
     well_name: str
     loaded_volume: Optional[float] = None
-    probed_height: liquidInfo = None
-    probed_volume: liquidInfo = None
-
-    # @field_serializer("probed_volume")
-    # def serialize_probed_volume(
-    #     self, probed_volume: Union[LiquidTrackingType, None], _info
-    # ) -> Union[str, float, None]:
-    #     if not probed_volume:
-    #         return None
-    #     if isinstance(probed_volume, float):
-    #         return probed_volume
-    #     else:
-    #         return "SimulatedProbeResult"
-    #
-    # @field_serializer("probed_height")
-    # def serialize_probed_height(
-    #     self, probed_height: Union[LiquidTrackingType, None], _info
-    # ) -> Union[str, float, None]:
-    #     if not probed_height:
-    #         return None
-    #     if isinstance(probed_height, float):
-    #         return probed_height
-    #     else:
-    #         return "SimulatedProbeResult"
+    probed_height: Union[LiquidTrackingType, None] = None
+    probed_volume: Union[LiquidTrackingType, None] = None
 
 
 @dataclass

@@ -12,8 +12,6 @@ from typing import (
     Protocol,
     Dict,
 )
-from pydantic import GetCoreSchemaHandler, BaseModel, model_serializer
-from pydantic_core import core_schema, CoreSchema
 
 from opentrons_shared_data.robot.types import RobotType
 
@@ -332,52 +330,6 @@ class AxisType(enum.Enum):
 
 AxisMapType = Dict[AxisType, float]
 StringAxisMap = Dict[str, float]
-
-
-class SimulatedProbeResult(BaseModel):
-    """A sentinel value to substitute for the resulting volume/height of a liquid probe during simulation."""
-
-    operations_after_probe: List[float] = []
-    net_liquid_exchanged_after_probe: float = 0.0
-
-    @model_serializer()
-    def serialize_model(self) -> str:
-        return "SimulatedProbeResult"
-
-    def __add__(self, other: LiquidTrackingType) -> LiquidTrackingType:
-        """Bypass addition and just return self."""
-        return self
-
-    def __sub__(self, other: LiquidTrackingType) -> LiquidTrackingType:
-        """Bypass subtraction and just return self."""
-        return self
-
-    def __radd__(self, other: LiquidTrackingType) -> LiquidTrackingType:
-        """Bypass addition and just return self."""
-        return self
-
-    def __rsub__(self, other: LiquidTrackingType) -> LiquidTrackingType:
-        """Bypass subtraction and just return self."""
-        return self
-
-    def __eq__(self, other: object) -> bool:
-        """A SimulatedProbeResult should only be equal to the same instance of its class."""
-        if not isinstance(other, SimulatedProbeResult):
-            return False
-        return self is other
-
-    @classmethod
-    def __get_pydantic_core_schema__(
-        cls, source_type: Any, handler: GetCoreSchemaHandler
-    ) -> CoreSchema:
-        return core_schema.no_info_after_validator_function(cls, handler(str))
-
-    def simulate_probed_aspirate_dispense(self, volume: float) -> None:
-        self.net_liquid_exchanged_after_probe += volume
-        self.operations_after_probe.append(volume)
-
-
-LiquidTrackingType = Union[SimulatedProbeResult, float]
 
 
 # TODO(mc, 2020-11-09): this makes sense in shared-data or other common

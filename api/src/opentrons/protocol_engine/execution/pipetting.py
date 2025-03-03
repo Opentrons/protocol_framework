@@ -4,7 +4,6 @@ from typing_extensions import Protocol as TypingProtocol
 from contextlib import contextmanager
 
 from opentrons.hardware_control import HardwareControlAPI
-from opentrons.types import SimulatedProbeResult, LiquidTrackingType
 
 from ..state.state import StateView
 from ..state.pipettes import HardwarePipette
@@ -16,6 +15,10 @@ from ..errors.exceptions import (
     InvalidDispenseVolumeError,
 )
 from opentrons.protocol_engine.types import WellLocation
+from opentrons.protocol_engine.types.liquid_level_detection import (
+    SimulatedProbeResult,
+    LiquidTrackingType,
+)
 
 # 1e-9 µL (1 femtoliter!) is a good value because:
 # * It's large relative to rounding errors that occur in practice in protocols. For

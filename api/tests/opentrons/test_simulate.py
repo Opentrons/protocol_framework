@@ -308,7 +308,6 @@ def test_liquid_probe_get_protocol_api() -> None:
         "opentrons_96_wellplate_200ul_pcr_full_skirt", "A2"
     )
     pipette.pick_up_tip(tip_rack["A1"])
-    # breakpoint()
     pipette.require_liquid_presence(well_plate["A1"])  # Should not raise MustHomeError.
 
 

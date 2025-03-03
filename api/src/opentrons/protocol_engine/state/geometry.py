@@ -13,8 +13,6 @@ from opentrons.types import (
     DeckSlotName,
     StagingSlotName,
     MountType,
-    SimulatedProbeResult,
-    LiquidTrackingType,
 )
 
 from opentrons_shared_data.errors.exceptions import InvalidStoredData
@@ -79,6 +77,7 @@ from ..types import (
     labware_location_is_off_deck,
     labware_location_is_system,
 )
+from ..types.liquid_level_detection import SimulatedProbeResult, LiquidTrackingType
 from .config import Config
 from .labware import LabwareView
 from .wells import WellView
@@ -1965,7 +1964,6 @@ class GeometryView:
         height: LiquidTrackingType,
     ) -> LiquidTrackingType:
         """Convert well height to volume."""
-        # breakpoint()
         well_geometry = self._labware.get_well_geometry(labware_id, well_name)
         return find_volume_at_well_height(
             target_height=height, well_geometry=well_geometry

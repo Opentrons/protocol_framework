@@ -4,7 +4,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, NamedTuple, Optional, Type, Union, Any
 
 from typing_extensions import Literal
-from pydantic import Field, field_serializer, field_validator, BaseModel
+from pydantic import Field
 from pydantic.json_schema import SkipJsonSchema
 
 from opentrons.protocol_engine.state import update_types
@@ -15,7 +15,7 @@ from opentrons.protocol_engine.errors.exceptions import (
     IncompleteLabwareDefinitionError,
     TipNotAttachedError,
 )
-from opentrons.types import MountType, LiquidTrackingType, SimulatedProbeResult
+from opentrons.types import MountType
 from opentrons_shared_data.errors.exceptions import (
     PipetteLiquidNotFoundError,
     UnsupportedHardwareCommand,
@@ -23,6 +23,7 @@ from opentrons_shared_data.errors.exceptions import (
 )
 
 from ..types import DeckPoint
+from ..types.liquid_level_detection import SimulatedProbeResult, LiquidTrackingType
 from .pipetting_common import (
     LiquidNotFoundError,
     PipetteIdMixin,
@@ -77,10 +78,6 @@ class TryLiquidProbeParams(_CommonParams):
     pass
 
 
-# class SimulatedProbeResultModel(BaseModel):
-#     pass
-
-
 class LiquidProbeResult(DestinationPositionResult):
     """Result data from the execution of a `liquidProbe` command."""
 
@@ -88,19 +85,6 @@ class LiquidProbeResult(DestinationPositionResult):
         ..., description="The Z coordinate, in mm, of the found liquid in deck space."
     )
     # New fields should use camelCase. z_position is snake_case for historical reasons.
-
-    # @classmethod
-    # @field_validator("z_position", mode="before")
-    # def serialize_z_position(
-    #     cls, z_position: Union[float, SimulatedProbeResult, None], _info
-    # ) -> Union[str, float, None]:
-    #     breakpoint()
-    #     if not z_position:
-    #         return None
-    #     if isinstance(z_position, float):
-    #         return z_position
-    #     else:
-    #         return "SimulatedProbeResult"
 
 
 class TryLiquidProbeResult(DestinationPositionResult):
@@ -114,17 +98,6 @@ class TryLiquidProbeResult(DestinationPositionResult):
         ),
         json_schema_extra=_remove_default,
     )
-
-    # @field_serializer("z_position")
-    # def serialize_z_position(
-    #         self, z_position: Union[LiquidTrackingType, None], _info
-    # ) -> Union[str, float, None]:
-    #     if not z_position:
-    #         return None
-    #     if isinstance(z_position, float):
-    #         return z_position
-    #     else:
-    #         return "SimulatedProbeResult"
 
 
 _LiquidProbeExecuteReturn = Union[
@@ -301,8 +274,6 @@ class LiquidProbeImplementation(
             model_utils=self._model_utils,
             params=params,
         )
-        # convert LiquidProbeResult to Basemodel one
-        # breakpoint()
         if isinstance(result, DefinedErrorData):
             return result
         z_pos_or_error, state_update, deck_point = result
@@ -331,7 +302,6 @@ class LiquidProbeImplementation(
                 state_update=state_update,
             )
         else:
-            v = False
             checked_z_pos_or_error: Union[float, SimulatedProbeResult]
             if isinstance(z_pos_or_error, SimulatedProbeResult):
                 checked_z_pos_or_error = SimulatedProbeResult()
@@ -348,8 +318,6 @@ class LiquidProbeImplementation(
                 )
             except IncompleteLabwareDefinitionError:
                 well_volume = update_types.CLEAR
-                v = True
-            # breakpoint()
             state_update.set_liquid_probed(
                 labware_id=params.labwareId,
                 well_name=params.wellName,
