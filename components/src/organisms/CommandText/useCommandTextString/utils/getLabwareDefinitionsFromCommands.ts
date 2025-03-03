@@ -1,6 +1,11 @@
 import { getLabwareDefURI } from '@opentrons/shared-data'
 
-import type { LabwareDefinition2, RunTimeCommand } from '@opentrons/shared-data'
+import type {
+  LabwareDefinition2,
+  RunTimeCommand,
+  LoadLabwareRunTimeCommand,
+  LoadLidRunTimeCommand,
+} from '@opentrons/shared-data'
 
 // Note: This is an O(n) operation.
 export function getLabwareDefinitionsFromCommands(
@@ -29,15 +34,15 @@ function getNewLabwareDefinitions(
 }
 
 const isLoadCommand = (
-  commandType: string
-): commandType is 'loadLabware' | 'loadLid' =>
-  ['loadLabware', 'loadLid'].includes(commandType)
+  command: RunTimeCommand
+): command is LoadLabwareRunTimeCommand | LoadLidRunTimeCommand =>
+  ['loadLabware', 'loadLid'].includes(command.commandType)
 
 function getLabwareDefinitionFromCommand(
   command: RunTimeCommand,
   known: LabwareDefinition2[]
 ): LabwareDefinition2[] {
-  if (isLoadCommand(command.commandType)) {
+  if (isLoadCommand(command)) {
     return getNewLabwareDefinitions([command.result?.definition], known)
   }
   if (command.commandType === 'flexStacker/setStoredLabware') {
