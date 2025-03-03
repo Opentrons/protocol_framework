@@ -3,6 +3,7 @@
 import {
   FLEX_ROBOT_TYPE,
   OT2_ROBOT_TYPE,
+  getCutoutDisplayName,
   isFlexPipette,
 } from '@opentrons/shared-data'
 import {
@@ -14,6 +15,7 @@ import {
 } from '@opentrons/step-generation'
 import { getFlexNameConversion } from './utils'
 import type {
+  AdditionalEquipmentEntities,
   InvariantContext,
   LabwareEntities,
   LabwareLiquidState,
@@ -23,7 +25,7 @@ import type {
   Timeline,
   TimelineFrame,
 } from '@opentrons/step-generation'
-import type { RobotType } from '@opentrons/shared-data'
+import type { CutoutId, RobotType } from '@opentrons/shared-data'
 import type { FileMetadataFields } from '../types'
 
 const PAPI_VERSION = '2.23' // latest version from api/src/opentrons/protocols/api_support/definitions.py
@@ -272,21 +274,54 @@ export function getLoadLiquids(
   return pythonLoadLiquids ? `# Load Liquids:\n${pythonLoadLiquids}` : ''
 }
 
+export function getLoadTrashBins(
+  additionalEquipmentEntities: AdditionalEquipmentEntities
+): string {
+  const pythonLoadTrashBins = Object.values(additionalEquipmentEntities)
+    .filter(ae => ae.name === 'trashBin' && ae.location != null)
+    ?.map(trashBin => {
+      const location =
+        trashBin.location != null
+          ? formatPyStr(getCutoutDisplayName(trashBin.location as CutoutId))
+          : 'unknown trash location' // note: should never hit unknown trash location since location is always defined for trashBin entity
+      return `${trashBin.pythonName} = ${PROTOCOL_CONTEXT_NAME}.load_trash_bin(${location})`
+    })
+    .join('\n')
+
+  return pythonLoadTrashBins ? `# Load Trash Bins:\n${pythonLoadTrashBins}` : ''
+}
+
+export function getLoadWasteChute(
+  additionalEquipmentEntities: AdditionalEquipmentEntities
+): string {
+  const pythonLoadWasteChute = Object.values(additionalEquipmentEntities)
+    .filter(ae => ae.name === 'wasteChute')
+    ?.map(
+      wasteChute =>
+        `${wasteChute.pythonName} = ${PROTOCOL_CONTEXT_NAME}.load_waste_chute()`
+    )
+
+  return pythonLoadWasteChute.length > 0
+    ? `# Load Waste Chute:\n${pythonLoadWasteChute}`
+    : ''
+}
+
 export function pythonDefRun(
   invariantContext: InvariantContext,
   robotState: TimelineFrame,
   robotStateTimeline: Timeline,
   liquidsByLabwareId: LabwareLiquidState,
-  labwareNicknamesById: Record<string, string>
+  labwareNicknamesById: Record<string, string>,
+  robotType: RobotType
 ): string {
   const {
     moduleEntities,
     labwareEntities,
     pipetteEntities,
     liquidEntities,
+    additionalEquipmentEntities,
   } = invariantContext
   const { modules, labware, pipettes } = robotState
-
   const sections: string[] = [
     getLoadModules(moduleEntities, modules),
     getLoadAdapters(moduleEntities, labwareEntities, labware),
@@ -297,6 +332,12 @@ export function pythonDefRun(
       labwareNicknamesById
     ),
     getLoadPipettes(pipetteEntities, labwareEntities, pipettes),
+    ...(robotType === FLEX_ROBOT_TYPE
+      ? [
+          getLoadTrashBins(additionalEquipmentEntities),
+          getLoadWasteChute(additionalEquipmentEntities),
+        ]
+      : []),
     getDefineLiquids(liquidEntities),
     getLoadLiquids(liquidsByLabwareId, liquidEntities, labwareEntities),
     stepCommands(robotStateTimeline),

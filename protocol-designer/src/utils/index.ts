@@ -306,3 +306,12 @@ export const getLabwarePythonName = (
 ): string => {
   return `${snakeCase(labwareDisplayCategory)}_${typeCount}`
 }
+
+export const getAdditionalEquipmentPythonName = (
+  fixtureName: 'wasteChute' | 'trashBin',
+  typeCount: number
+): string => {
+  return fixtureName === 'wasteChute'
+    ? snakeCase(fixtureName)
+    : `${snakeCase(fixtureName)}_${typeCount}`
+}
