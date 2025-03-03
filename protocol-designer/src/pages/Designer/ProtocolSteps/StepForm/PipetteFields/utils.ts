@@ -5,7 +5,7 @@ import { getPipetteCapacity } from '../../../../../pipettes/pipetteData'
 import {
   volumeInCapacityForMultiDispense,
   volumeInCapacityForMultiAspirate,
-} from '../../../../../steplist/formLevel/handleFormChange/utils'
+} from '/protocol-designer/steplist/formLevel/handleFormChange/utils'
 import type {
   ChangeTipOptions,
   PipetteEntities,

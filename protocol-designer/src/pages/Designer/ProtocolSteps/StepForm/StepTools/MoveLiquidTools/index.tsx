@@ -1,7 +1,7 @@
 import { FirstStepMoveLiquidTools } from './FirstStepMoveLiquidTools'
 import { SecondStepsMoveLiquidTools } from './SecondStepsMoveLiquidTools'
 
-import type { StepFormProps } from '../../types'
+import type { StepFormProps } from '/protocol-designer/pages/Designer/ProtocolSteps/StepForm/types'
 
 export function MoveLiquidTools(props: StepFormProps): JSX.Element {
   const {

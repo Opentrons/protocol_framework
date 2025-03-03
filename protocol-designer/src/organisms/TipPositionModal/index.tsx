@@ -27,8 +27,8 @@ import { TipPositionTopView } from './TipPositionTopView'
 import { TipPositionSideView } from './TipPositionSideView'
 
 import type { ChangeEvent } from 'react'
-import type { StepFieldName } from '../../form-types'
-import type { MoveLiquidPrefixType } from '../../resources/types'
+import type { StepFieldName } from '/protocol-designer/form-types'
+import type { MoveLiquidPrefixType } from '/protocol-designer/resources/types'
 
 type Offset = 'x' | 'y' | 'z'
 interface PositionSpec {
