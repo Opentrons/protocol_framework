@@ -29,6 +29,7 @@ from hardware_testing.drivers.mitutoyo_digimatic_indicator import (
     Mitutoyo_Digimatic_Indicator,
 )
 
+# FIXME: (sigler) there's probably an API function for converting int slot to str
 SLOTS = ["D1", "D2", "D3", "C1", "C2", "C3", "B1", "B2", "B3", "A1", "A2", "A3"]
 
 CSV_DIVIDER = "\t"
@@ -57,6 +58,29 @@ def _dataclass_to_csv(dc: Any, is_header: bool = False, prepend: str = "") -> st
     )
 
 
+def _get_default_tip_overlap(
+    api: OT3API, mount: str, load_name: str, overlap_version: str
+) -> float:
+    mnt = types.Mount.LEFT if mount == "left" else types.Mount.RIGHT
+    pip = api.hardware_pipettes[mnt]
+    tip_overlaps_from_pipette_def = pip.tip_overlap[overlap_version]
+    labware_def = _load_labware_def(load_name)
+    default_overlap = tip_overlaps_from_pipette_def.get(
+        "default", labware_def["parameters"]["tipOverlap"]
+    )
+    return tip_overlaps_from_pipette_def.get(
+        f"opentrons/{load_name}/1", default_overlap
+    )
+
+
+def _load_labware_def(load_name: str) -> Dict[Any, Any]:
+    labware_def_path = (
+        get_shared_data_root() / "labware/definitions/2" / load_name / "1.json"
+    )
+    with open(labware_def_path, "r") as f:
+        return json_load(f)
+
+
 @dataclass
 class TestConfig:
     run_id: str
@@ -77,6 +101,7 @@ class TestConfig:
 
 @dataclass
 class TipConfig:
+    load_name: str
     lot: str
     volume: int
     filter: bool
@@ -89,17 +114,28 @@ class TipConfig:
     @classmethod
     def build_from_input(cls, api: OT3API, mount: str, tip_count: int) -> "TipConfig":
         get_inp = not api.is_simulator
-        tip_cfg = TipConfig(
-            lot=input("Lot #: ").strip() if get_inp else "1",
-            volume=int(input("pipette volume [50 or 1000]: ")) if get_inp else 1000,
-            filter=bool("y" in input("filtered? (y/n): ")) if get_inp else False,
-            slot="C3",  # NOTE: let's just hard-code this for now
-            well=input("starting tip: ").strip() if not api.is_simulator else "A1",
-            count=tip_count,
-            overlap_version="v1",  # NOTE: (sigler) we can configure this later, default to latest
-            overlap=None,  # NOTE: must be calculated after configuring tip
+        # NOTE: (sigler) we can configure this later, default to latest
+        overlap_version = "v1"
+        slot = "C3"  # NOTE: let's just hard-code this for now
+        lot: str = input("Lot #: ").strip() if get_inp else "1"
+        volume: int = int(input("pipette volume [50 or 1000]: ")) if get_inp else 1000
+        has_filter: bool = bool("y" in input("filtered? (y/n): ")) if get_inp else False
+        well: str = input("starting tip: ").strip() if not api.is_simulator else "A1"
+        load_name = (
+            f"opentrons_flex_96_{'filter' if has_filter else ''}tiprack_{volume}ul"
         )
-        tip_cfg.calculate_tip_overlap(api, mount, tip_cfg._load_labware_def())
+        overlap = _get_default_tip_overlap(api, mount, load_name, overlap_version)
+        tip_cfg = TipConfig(
+            load_name=load_name,
+            lot=lot,
+            volume=volume,
+            filter=has_filter,
+            slot=slot,  # NOTE: let's just hard-code this for now
+            well=well,
+            count=tip_count,
+            overlap_version=overlap_version,
+            overlap=overlap,
+        )
         return tip_cfg
 
     @property
@@ -111,11 +147,6 @@ class TipConfig:
         return _dataclass_to_csv(self)
 
     @property
-    def load_name(self) -> str:
-        filter_str = "filter" if self.filter else ""
-        return f"opentrons_flex_96_{filter_str}tiprack_{self.volume}ul"
-
-    @property
     def tip_point(self) -> types.Point:
         tip_row_idx = "ABCDEFGH".index(self.well[0])
         tip_col_idx = int(self.well[1:])
@@ -125,19 +156,6 @@ class TipConfig:
         )
         return tip_a1_pos + tip_well_offset
 
-    def calculate_tip_overlap(
-        self, api: OT3API, mount: str, labware_def: Dict[Any, Any]
-    ) -> None:
-        mnt = types.Mount.LEFT if mount == "left" else types.Mount.RIGHT
-        pip = api.hardware_pipettes[mnt]
-        tip_overlaps_from_pipette_def = pip.tip_overlap[self.overlap_version]
-        default_overlap = tip_overlaps_from_pipette_def.get(
-            "default", labware_def["parameters"]["tipOverlap"]
-        )
-        self.overlap = tip_overlaps_from_pipette_def.get(
-            f"opentrons/{self.load_name}/1", default_overlap
-        )
-
     def _load_labware_def(self) -> Dict[Any, Any]:
         labware_def_path = (
             get_shared_data_root() / "labware/definitions/2" / self.load_name / "1.json"
@@ -145,20 +163,19 @@ class TipConfig:
         with open(labware_def_path, "r") as f:
             return json_load(f)
 
-    def get_point_and_length_and_overlap(
-        self, api: OT3API, mount: str
-    ) -> Tuple[types.Point, float, float]:
+    def get_point_and_length_and_overlap(self) -> Tuple[types.Point, float, float]:
         labware_def = self._load_labware_def()
         tip_pos = self.tip_point
         tip_length = labware_def["parameters"]["tipLength"]
-        if self.overlap is None:
-            self.calculate_tip_overlap(api, mount, labware_def)
         return tip_pos, tip_length, self.overlap
 
-    def copy_and_increment_well(self) -> "TipConfig":
-        cpy = replace(self)
-        tip_row_idx = "ABCDEFGH".index(self.well[0])
-        tip_col_idx = int(self.well[1:])
+    @classmethod
+    def create_copy_and_increment_well(cls, tc: "TipConfig") -> "TipConfig":
+        if tc.well == "H12":
+            raise RuntimeError("ran out of tips to pickup")
+        cpy = replace(tc)
+        tip_row_idx = "ABCDEFGH".index(tc.well[0])
+        tip_col_idx = int(tc.well[1:])
         if tip_row_idx == 7:
             next_tip_row_idx = 0
             next_tip_col_idx = tip_col_idx + 1
@@ -238,9 +255,7 @@ async def _run_trial(
     dial_pos: types.Point,
 ) -> TrialResult:
     # TIP INFO
-    tip_pos, tip_length, tip_overlap = tip_cfg.get_point_and_length_and_overlap(
-        api, pipette_mount
-    )
+    tip_pos, tip_length, tip_overlap = tip_cfg.get_point_and_length_and_overlap()
 
     def _read_dial() -> float:
         if dial is None:
@@ -317,6 +332,21 @@ async def _run_trial(
     )
 
 
+def _ask_user_for_number_of_trials(simulate: bool) -> int:
+    num_trials_to_run = 0
+    while not num_trials_to_run:
+        try:
+            if not simulate:
+                num_trials_to_run = int(
+                    input("number of trials to run without stopping: ")
+                )
+            else:
+                num_trials_to_run = 10
+        except ValueError as e:
+            print(e)
+    return num_trials_to_run
+
+
 async def main(
     simulate: bool,
     pip_mount: types.OT3Mount,
@@ -367,21 +397,10 @@ async def main(
             tip_count=test_data.config.pipette_channels,  # NOTE: (sigler) for now not testing partial tip-pickup
         )
 
-        num_trials_to_run = 0
-        while not num_trials_to_run:
-            try:
-                if not simulate:
-                    num_trials_to_run = int(
-                        input("number of trials to run without stopping: ")
-                    )
-                else:
-                    num_trials_to_run = 10
-            except ValueError as e:
-                print(e)
-
+        num_trials_to_run = _ask_user_for_number_of_trials(simulate)
         for i in range(num_trials_to_run):
             if i > 0:
-                tip_cfg = tip_cfg.copy_and_increment_well()
+                tip_cfg = TipConfig.create_copy_and_increment_well(tip_cfg)
             trial_result = await _run_trial(
                 api, pip_mount.name.lower(), tip_cfg, dial, dial_pos
             )
