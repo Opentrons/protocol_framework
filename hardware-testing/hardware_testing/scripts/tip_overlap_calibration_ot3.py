@@ -363,7 +363,15 @@ async def _run_trial(
     await helpers_ot3.move_to_arched_ot3(api, pip_mount, dial_pos)
     dial_tip_calibrated = _read_dial()
     tip_z_error_calibrated = dial_tip_calibrated - dial_nozzle
-    error_reduction = tip_z_error - tip_z_error_calibrated
+    error_reduction = tip_z_error_calibrated - tip_z_error
+
+    ui.print_info(
+        f"RESULT: "
+        f"before={round(tip_z_error, 2)} "
+        f"after={round(tip_z_error_calibrated, 2)} "
+        f"improvement={round(error_reduction, 2)} "
+        f"({int(error_reduction / tip_z_error)}%)"
+    )
 
     ui.print_info("dropping tip in trash")
     await api.retract(pip_mount)
@@ -516,26 +524,21 @@ async def main(
             csv_file_name,
             data=test_data.csv_data_latest_trial + CSV_NEWLINE,
         )
-        ui.print_info(test_data.csv_data_latest_trial)
 
-    try:
-        total_tips_to_test = len(test_tip_configs) * num_tips_per_rack
-        total_tips_tested = 0
-        for tip_cfg in test_tip_configs:
-            _cfg = replace(tip_cfg)
-            for i in range(num_tips_per_rack):
-                total_tips_tested += 1
-                ui.print_title(f"TIP {total_tips_tested}/{total_tips_to_test}")
-                if i > 0:
-                    # same tip-rack, so just copy the config
-                    # but increment to the next well location
-                    _cfg = TipConfig.create_copy_and_increment_well(_cfg)
-                await _test_tip_and_save_results(_cfg)
-            if simulate:
-                break
-    finally:
-        print(test_data.csv_header)
-        print(test_data.csv_data)
+    total_tips_to_test = len(test_tip_configs) * num_tips_per_rack
+    total_tips_tested = 0
+    for tip_cfg in test_tip_configs:
+        _cfg = replace(tip_cfg)
+        for i in range(num_tips_per_rack):
+            total_tips_tested += 1
+            ui.print_title(f"TIP {total_tips_tested}/{total_tips_to_test}")
+            if i > 0:
+                # same tip-rack, so just copy the config
+                # but increment to the next well location
+                _cfg = TipConfig.create_copy_and_increment_well(_cfg)
+            await _test_tip_and_save_results(_cfg)
+        if simulate:
+            break
 
 
 if __name__ == "__main__":
