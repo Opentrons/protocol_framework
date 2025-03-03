@@ -520,9 +520,8 @@ class GeometryView:
                 well_depth=well_depth,
                 operation_volume=operation_volume,
             )
-            if not isinstance(offset_adjustment, float):
-                return Point()
-            offset = offset.model_copy(update={"z": offset.z + offset_adjustment})
+            if not isinstance(offset_adjustment, SimulatedProbeResult):
+                offset = offset.model_copy(update={"z": offset.z + offset_adjustment})
             self.validate_well_position(
                 well_location=well_location, z_offset=offset.z, pipette_id=pipette_id
             )
@@ -1867,7 +1866,6 @@ class GeometryView:
             and well_liquid.probed_volume.volume is not None
             and well_liquid.probed_volume.last_probed == last_updated
         ):
-            assert isinstance(well_liquid.probed_volume.volume, float)
             return self.get_well_height_at_volume(
                 labware_id=labware_id,
                 well_name=well_name,
@@ -1938,8 +1936,6 @@ class GeometryView:
         initial_volume = find_volume_at_well_height(
             target_height=initial_height, well_geometry=well_geometry
         )
-        if not isinstance(initial_volume, float):
-            raise errors.LiquidVolumeUnknownError("Unknown Simulated Liquid Volume.")
         final_volume = initial_volume + volume
         well_volume = find_height_at_well_volume(
             target_volume=final_volume,

@@ -23,7 +23,7 @@ from opentrons_shared_data.errors.exceptions import (
 )
 
 from ..types import DeckPoint
-from ..types.liquid_level_detection import SimulatedProbeResult, LiquidTrackingType
+from ..types.liquid_level_detection import LiquidTrackingType
 from .pipetting_common import (
     LiquidNotFoundError,
     PipetteIdMixin,
@@ -117,7 +117,7 @@ class _ExecuteCommonResult(NamedTuple):
     # If the probe succeeded, the z_pos that it returned.
     # Or, if the probe found no liquid, the error representing that,
     # so calling code can propagate those details up.
-    z_pos_or_error: float | SimulatedProbeResult | PipetteLiquidNotFoundError | PipetteOverpressureError
+    z_pos_or_error: LiquidTrackingType | PipetteLiquidNotFoundError | PipetteOverpressureError
     state_update: update_types.StateUpdate
     deck_point: DeckPoint
 
@@ -302,11 +302,6 @@ class LiquidProbeImplementation(
                 state_update=state_update,
             )
         else:
-            checked_z_pos_or_error: Union[float, SimulatedProbeResult]
-            if isinstance(z_pos_or_error, SimulatedProbeResult):
-                checked_z_pos_or_error = SimulatedProbeResult()
-            else:
-                checked_z_pos_or_error = z_pos_or_error
             try:
                 well_volume: Union[
                     LiquidTrackingType,
@@ -325,10 +320,9 @@ class LiquidProbeImplementation(
                 volume=well_volume,
                 last_probed=self._model_utils.get_timestamp(),
             )
-            print(z_pos_or_error)
             return SuccessData(
                 public=LiquidProbeResult(
-                    z_position=checked_z_pos_or_error, position=deck_point
+                    z_position=z_pos_or_error, position=deck_point
                 ),
                 state_update=state_update,
             )
@@ -397,14 +391,9 @@ class TryLiquidProbeImplementation(
             volume=well_volume,
             last_probed=self._model_utils.get_timestamp(),
         )
-        checked_z_pos: Union[float, SimulatedProbeResult, None]
-        if isinstance(z_pos, SimulatedProbeResult):
-            checked_z_pos = SimulatedProbeResult()
-        else:
-            checked_z_pos = z_pos
         return SuccessData(
             public=TryLiquidProbeResult(
-                z_position=checked_z_pos,
+                z_position=z_pos,
                 position=deck_point,
             ),
             state_update=state_update,

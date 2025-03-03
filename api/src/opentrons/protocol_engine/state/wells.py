@@ -84,14 +84,12 @@ class WellStore(HasState[WellState], HandlesActions):
             self._state.probed_heights[labware_id] = {}
         if labware_id not in self._state.probed_volumes:
             self._state.probed_volumes[labware_id] = {}
-        updated_height = _none_from_clear(state_update.height)
-        updated_volume = _none_from_clear(state_update.volume)
         self._state.probed_heights[labware_id][well_name] = ProbedHeightInfo(
-            height=updated_height,
+            height=_none_from_clear(state_update.height),
             last_probed=state_update.last_probed,
         )
         self._state.probed_volumes[labware_id][well_name] = ProbedVolumeInfo(
-            volume=updated_volume,
+            volume=_none_from_clear(state_update.volume),
             last_probed=state_update.last_probed,
             operations_since_probe=0,
         )
@@ -108,7 +106,7 @@ class WellStore(HasState[WellState], HandlesActions):
         self,
         labware_id: str,
         well_name: str,
-        volume_added: Union[float, update_types.ClearType],
+        volume_added: float | update_types.ClearType,
     ) -> None:
         if (
             labware_id in self._state.loaded_volumes
@@ -289,5 +287,5 @@ def _none_from_clear(
     if inval == update_types.CLEAR:
         return None
     else:
-        assert isinstance(inval, float) or isinstance(inval, SimulatedProbeResult)
+        assert isinstance(inval, LiquidTrackingType) or isinstance(inval, int)
         return inval
