@@ -36,12 +36,6 @@ class Protocols:
         robot="OT2",
     )
 
-    OT2_X_v6_P20S_P300M_HS_HSCollision: Protocol = Protocol(
-        file_stem="OT2_X_v6_P20S_P300M_HS_HSCollision",
-        file_extension="json",
-        robot="OT2",
-    )
-
     OT2_X_v6_P300M_P20S_HS_MM_TM_TC_AllMods: Protocol = Protocol(
         file_stem="OT2_X_v6_P300M_P20S_HS_MM_TM_TC_AllMods",
         file_extension="json",
@@ -219,8 +213,8 @@ class Protocols:
         robot="OT2",
     )
 
-    OT2_S_v2_17_P300M_P20S_HS_TC_TM_dispense_changes: Protocol = Protocol(
-        file_stem="OT2_S_v2_17_P300M_P20S_HS_TC_TM_dispense_changes",
+    OT2_X_v2_17_P300M_P20S_HS_TC_TM_dispense_changes: Protocol = Protocol(
+        file_stem="OT2_X_v2_17_P300M_P20S_HS_TC_TM_dispense_changes",
         file_extension="py",
         robot="OT2",
     )
@@ -273,8 +267,8 @@ class Protocols:
         robot="OT2",
     )
 
-    OT2_S_v2_18_P300M_P20S_HS_TC_TM_SmokeTestV3: Protocol = Protocol(
-        file_stem="OT2_S_v2_18_P300M_P20S_HS_TC_TM_SmokeTestV3",
+    OT2_X_v2_18_P300M_P20S_HS_TC_TM_SmokeTestV3: Protocol = Protocol(
+        file_stem="OT2_X_v2_18_P300M_P20S_HS_TC_TM_SmokeTestV3",
         file_extension="py",
         robot="OT2",
     )
@@ -294,6 +288,7 @@ class Protocols:
         file_extension="py",
         robot="Flex",
     )
+    # https://opentrons.atlassian.net/browse/RQA-3975
     Flex_S_v2_15_P1000_96_GRIP_HS_MB_TC_TM_IlluminaDNAPrep96PART3: Protocol = Protocol(
         file_stem="Flex_S_v2_15_P1000_96_GRIP_HS_MB_TC_TM_IlluminaDNAPrep96PART3",
         file_extension="py",
@@ -435,20 +430,20 @@ class Protocols:
         robot="Flex",
     )
 
-    Flex_S_v2_15_NO_PIPETTES_TC_verifyThermocyclerLoadedSlots: Protocol = Protocol(
-        file_stem="Flex_S_v2_15_NO_PIPETTES_TC_verifyThermocyclerLoadedSlots",
+    Flex_X_v2_15_NO_PIPETTES_TC_verifyThermocyclerLoadedSlots: Protocol = Protocol(
+        file_stem="Flex_X_v2_15_NO_PIPETTES_TC_verifyThermocyclerLoadedSlots",
         file_extension="py",
         robot="Flex",
     )
 
-    Flex_S_v2_16_NO_PIPETTES_TC_verifyThermocyclerLoadedSlots: Protocol = Protocol(
-        file_stem="Flex_S_v2_16_NO_PIPETTES_TC_verifyThermocyclerLoadedSlots",
+    Flex_X_v2_16_NO_PIPETTES_TC_verifyThermocyclerLoadedSlots: Protocol = Protocol(
+        file_stem="Flex_X_v2_16_NO_PIPETTES_TC_verifyThermocyclerLoadedSlots",
         file_extension="py",
         robot="Flex",
     )
 
-    Flex_S_v2_17_NO_PIPETTES_TC_verifyThermocyclerLoadedSlots: Protocol = Protocol(
-        file_stem="Flex_S_v2_17_NO_PIPETTES_TC_verifyThermocyclerLoadedSlots",
+    Flex_X_v2_17_NO_PIPETTES_TC_verifyThermocyclerLoadedSlots: Protocol = Protocol(
+        file_stem="Flex_X_v2_17_NO_PIPETTES_TC_verifyThermocyclerLoadedSlots",
         file_extension="py",
         robot="Flex",
     )
@@ -471,8 +466,8 @@ class Protocols:
         robot="Flex",
     )
 
-    Flex_S_v2_16_P1000_96_TC_PartialTipPickupSingle: Protocol = Protocol(
-        file_stem="Flex_S_v2_16_P1000_96_TC_PartialTipPickupSingle",
+    Flex_X_v2_16_P1000_96_TC_PartialTipPickupSingle: Protocol = Protocol(
+        file_stem="Flex_X_v2_16_P1000_96_TC_PartialTipPickupSingle",
         file_extension="py",
         robot="Flex",
     )
@@ -561,15 +556,15 @@ class Protocols:
         robot="Flex",
     )
 
-    Flex_S_v2_18_Illumina_Stranded_total_RNA_Ribo_Zero: Protocol = Protocol(
-        file_stem="Flex_S_v2_18_Illumina_Stranded_total_RNA_Ribo_Zero",
+    Flex_X_v2_18_Illumina_Stranded_total_RNA_Ribo_Zero: Protocol = Protocol(
+        file_stem="Flex_X_v2_18_Illumina_Stranded_total_RNA_Ribo_Zero",
         file_extension="py",
         robot="Flex",
         custom_labware=["eppendorf_96_well_plate_150_µl"],
     )
 
-    Flex_S_v2_19_Illumina_Stranded_total_RNA_Ribo_Zero: Protocol = Protocol(
-        file_stem="Flex_S_v2_19_Illumina_Stranded_total_RNA_Ribo_Zero",
+    Flex_X_v2_19_Illumina_Stranded_total_RNA_Ribo_Zero: Protocol = Protocol(
+        file_stem="Flex_X_v2_19_Illumina_Stranded_total_RNA_Ribo_Zero",
         file_extension="py",
         robot="Flex",
         custom_labware=["eppendorf_96_well_plate_150_µl"],
@@ -788,8 +783,8 @@ class Protocols:
         robot="OT2",
     )
 
-    OT2_S_v2_19_P300M_P20S_HS_TC_TM_SmokeTestV3: Protocol = Protocol(
-        file_stem="OT2_S_v2_19_P300M_P20S_HS_TC_TM_SmokeTestV3",
+    OT2_X_v2_19_P300M_P20S_HS_TC_TM_SmokeTestV3: Protocol = Protocol(
+        file_stem="OT2_X_v2_19_P300M_P20S_HS_TC_TM_SmokeTestV3",
         file_extension="py",
         robot="OT2",
     )
@@ -898,12 +893,6 @@ class Protocols:
         file_extension="py",
         robot="Flex",
     )
-    pl_Illumina_Stranded_total_RNA_Ribo_Zero_protocol: Protocol = Protocol(
-        file_stem="pl_Illumina_Stranded_total_RNA_Ribo_Zero_protocol",
-        file_extension="py",
-        robot="Flex",
-        custom_labware=["Eppendorf_96_Well_Plate_150_uL"],
-    )
     pl_KAPA_Library_Quant_48_v8: Protocol = Protocol(
         file_stem="pl_KAPA_Library_Quant_48_v8",
         file_extension="py",
@@ -914,6 +903,7 @@ class Protocols:
         file_extension="py",
         robot="Flex",
     )
+    # https://opentrons.atlassian.net/browse/RQA-3974
     pl_langone_ribo_pt1_ramp: Protocol = Protocol(
         file_stem="pl_langone_ribo_pt1_ramp",
         file_extension="py",
@@ -1014,12 +1004,6 @@ class Protocols:
     )
     pl_cherrypicking_flex_v3: Protocol = Protocol(
         file_stem="pl_cherrypicking_flex_v3",
-        file_extension="py",
-        robot="Flex",
-    )
-
-    pl_normalization_with_csv: Protocol = Protocol(
-        file_stem="pl_normalization_with_csv",
         file_extension="py",
         robot="Flex",
     )

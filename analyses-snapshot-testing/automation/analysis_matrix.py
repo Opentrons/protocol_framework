@@ -24,22 +24,21 @@ Requirements:
 """
 
 import ast
-from enum import Enum, auto
 import json
+import time
 from dataclasses import dataclass
 from pathlib import Path
-import time
 from typing import Any, Dict, List, Optional, Tuple
 
+from citools.generate_analyses import TargetProtocol, generate_analyses_from_test
+from packaging import version
 from rich.console import Console
+from rich.panel import Panel
 from rich.prompt import Prompt
 from rich.table import Table
-from rich.panel import Panel
 
 from automation.data.protocol import Protocol
 from automation.data.protocol_registry import ProtocolRegistry
-from citools.generate_analyses import ANALYSIS_SUFFIX, TargetProtocol, generate_analyses_from_test
-from packaging import version
 
 console = Console()
 
@@ -132,7 +131,7 @@ def determine_expect_no_errors(filename: str) -> bool:
     return filename.startswith("Flex_S") or filename.startswith("OT2_S") or filename.startswith("pl_")
 
 
-def extract_py_fields(filepath: Path) -> Tuple[Optional[Any], Optional[str]]:
+def extract_py_fields(filepath: Path) -> Tuple[Optional[Any], Optional[str]]:  # noqa: C901
     """
     Extract api_level and robot from a Python file.
 
@@ -286,8 +285,6 @@ def display_protocols_table(protocols: List[ProtocolInfo]) -> None:
         protocols: List of ProtocolInfo objects.
     """
 
-
-    
     table = Table(title="Protocols Analysis")
     table.add_column("Key", justify="right", style="cyan", no_wrap=True)
     table.add_column("Filename", style="magenta")
@@ -344,13 +341,13 @@ class AnalysisOutcome:
     NO_ERRORS = "✅"
     ERRORS = "❌"
     NA = "—"
-    
+
     def __init__(self, value: str):
         self.value = value
-    
+
     def __str__(self) -> str:
         return self.value
-    
+
     def __repr__(self) -> str:
         return self.value
 
@@ -376,7 +373,7 @@ class AnalysisMatrix:
         else:
             console.print(f"[red]Errors found in {self.filename}[/red]")
             result = AnalysisOutcome.ERRORS
-        
+
         tag_version = tag.lower()
         if tag_version == "v8.3.0":
             self.v8_3_0 = result
@@ -392,7 +389,7 @@ class AnalysisMatrix:
             self.v7_2_0 = result
 
 
-def main() -> None:
+def main() -> None:  # noqa: C901
     """
     Main function to gather protocols and interactively select files for analysis.
     """
@@ -431,10 +428,10 @@ def main() -> None:
                 min_robot_stack_version=map_api_version_to_robot_version(api_level),
             )
         )
-    
+
     # Sort protocols
     protocols = sorted(protocols, key=lambda p: (p.expect_no_errors, p.robot or "", p.api_level or "", p.pd_version or ""))
-    
+
     # Assign keys after sorting
     for i, protocol in enumerate(protocols):
         protocol.key = str(i)
@@ -461,7 +458,6 @@ def main() -> None:
     # now we are going to generate an analysis for each of the selected protocols
     # and we will do so for each of the robot versions that are supported by the protocol
 
-    test_tag = ["v8.3.0"]
     result_matrix = [
         AnalysisMatrix(
             filename=p.filename,
@@ -483,7 +479,10 @@ def main() -> None:
             continue
         names = [p.filename.rsplit(".", 1)[0] for p in compatible_protocols]
         protocols_to_test = protocols_under_test(names)
-        processed_protocols = generate_analyses_from_test(tag, protocols_to_test,)
+        processed_protocols = generate_analyses_from_test(
+            tag,
+            protocols_to_test,
+        )
         for p in processed_protocols:
             for matrix in result_matrix:
                 if matrix.filename in str(p.host_protocol_file):
@@ -511,6 +510,7 @@ def main() -> None:
             str(matrix.expect_no_errors),
         )
     console.print(table)
+
 
 if __name__ == "__main__":
     main()

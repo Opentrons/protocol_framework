@@ -11,6 +11,7 @@ requirements = {"robotType": "Flex", "apiLevel": "2.18"}
 # a string with characters
 too_long = "a" * 101
 
+
 def add_parameters(parameters):
     parameters.add_int(
         display_name="display name",
