@@ -1,7 +1,7 @@
 """Command models to retrieve a labware from a Flex Stacker."""
 
 from __future__ import annotations
-from typing import Optional, Literal, TYPE_CHECKING, Any, Union
+from typing import Literal, TYPE_CHECKING, Any, Union
 from typing_extensions import Type
 
 from pydantic import BaseModel, Field
@@ -162,9 +162,9 @@ class RetrieveImpl(AbstractCommandImpl[RetrieveParams, _ExecuteReturn]):
             )
             definitions_by_id[adapter_lw.labware_id] = adapter_lw.definition
             offset_ids_by_id[adapter_lw.labware_id] = adapter_lw.offsetId
-            display_names_by_id[adapter_lw.labware_id] = (
-                adapter_lw.definition.metadata.displayName
-            )
+            display_names_by_id[
+                adapter_lw.labware_id
+            ] = adapter_lw.definition.metadata.displayName
             new_locations_by_id[adapter_lw.labware_id] = adapter_location
             adapter_uri = str(
                 uri_from_details(
@@ -198,9 +198,9 @@ class RetrieveImpl(AbstractCommandImpl[RetrieveParams, _ExecuteReturn]):
         )
         definitions_by_id[loaded_labware.labware_id] = loaded_labware.definition
         offset_ids_by_id[loaded_labware.labware_id] = loaded_labware.offsetId
-        display_names_by_id[loaded_labware.labware_id] = (
-            loaded_labware.definition.metadata.displayName
-        )
+        display_names_by_id[
+            loaded_labware.labware_id
+        ] = loaded_labware.definition.metadata.displayName
         new_locations_by_id[loaded_labware.labware_id] = primary_location
         primary_uri = str(
             uri_from_details(
@@ -235,9 +235,9 @@ class RetrieveImpl(AbstractCommandImpl[RetrieveParams, _ExecuteReturn]):
             )
             definitions_by_id[lid_lw.labware_id] = lid_lw.definition
             offset_ids_by_id[lid_lw.labware_id] = lid_lw.offsetId
-            display_names_by_id[lid_lw.labware_id] = (
-                lid_lw.definition.metadata.displayName
-            )
+            display_names_by_id[
+                lid_lw.labware_id
+            ] = lid_lw.definition.metadata.displayName
             new_locations_by_id[lid_lw.labware_id] = lid_location
             labware_by_id[lid_lw.labware_id] = LoadedLabware.model_construct(
                 id=lid_lw.labware_id,
