@@ -1020,7 +1020,7 @@ export const verifyCreateProtocolPage = (): void => {
 /**
  * Composite, multi-step operations bundled as individual StepThunks
  */
-export const CompositeSteps = {
+export const CompositeSetupSteps = {
   /**
    * Sets up a Flex protocol with optional modules
    */

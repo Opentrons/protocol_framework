@@ -2,7 +2,7 @@ import { UniversalSteps } from '../support/UniversalSteps'
 import {
   SetupSteps,
   SetupVerifications,
-  CompositeSteps,
+  CompositeSetupSteps,
 } from '../support/SetupSteps'
 import { StepBuilder } from '../support/StepBuilder'
 
@@ -18,7 +18,7 @@ describe('The Redesigned Create Protocol Landing Page', () => {
 
     const steps = new StepBuilder()
     steps.add(
-      CompositeSteps.FlexSetup({
+      CompositeSetupSteps.FlexSetup({
         thermocycler: true,
         heatershaker: true,
         magblock: true,
@@ -26,7 +26,7 @@ describe('The Redesigned Create Protocol Landing Page', () => {
       })
     )
     steps.add(
-      CompositeSteps.AddLabwareToDeckSlot('C2', 'Bio-Rad 96 Well Plate')
+      CompositeSetupSteps.AddLabwareToDeckSlot('C2', 'Bio-Rad 96 Well Plate')
     )
     steps.add(SetupSteps.ChoseDeckSlotWithLabware('C2'))
     steps.add(SetupSteps.AddLiquid())
@@ -40,7 +40,7 @@ describe('The Redesigned Create Protocol Landing Page', () => {
     steps.add(SetupSteps.SelectLiquidWells())
     steps.add(SetupSteps.SetVolumeAndSaveForWells('150'))
     steps.add(
-      CompositeSteps.AddLabwareToDeckSlot(
+      CompositeSetupSteps.AddLabwareToDeckSlot(
         'C3',
         'Armadillo 96 Well Plate 200 µL'
       )
