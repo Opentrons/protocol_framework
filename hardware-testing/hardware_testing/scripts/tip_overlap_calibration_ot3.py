@@ -10,6 +10,7 @@ from typing import Dict, Optional, Tuple, List, Any
 
 from opentrons.hardware_control.ot3api import OT3API
 from opentrons.hardware_control.ot3_calibration import SLOT_CENTER
+from opentrons.types import DeckSlotName
 
 from opentrons_shared_data.load import get_shared_data_root
 from opentrons_shared_data.deck import (
@@ -30,19 +31,34 @@ from hardware_testing.drivers.mitutoyo_digimatic_indicator import (
     Mitutoyo_Digimatic_Indicator,
 )
 
-# FIXME: (sigler) there's probably an API function for converting int slot to str
-SLOTS = ["D1", "D2", "D3", "C1", "C2", "C3", "B1", "B2", "B3", "A1", "A2", "A3"]
+DEFAULT_SLOTS_TO_TEST: List[str] = [
+    "D1",
+    "D2",
+    "D3",
+    "C1",
+    "C3",
+    "B1",
+    "B3",
+    "A1",
+    "A2",
+]
 
 CSV_DIVIDER = "\t"
 CSV_NEWLINE = "\n"
+
+# use same calibration square as is used during pipette calibration
+# NOTE: leave this slot EMPTY!!!
+CALIBRATION_SLOT = SLOT_CENTER
+
+DIAL_SLOT = "B2"
 
 # make sure the numbers aren't changing when we read from it
 DIAL_SETTLING_SECONDS = 2.0
 
 # hardcoded distances for when pressure-probing the calibration square
-PROBE_DISTANCE_MM = 10.0
-PROBE_OVERSHOOT_MM = 2.0
-EXPECTED_PROBE_HEIGHT_MM = 0.0  # the calibration square
+PROBE_START_HEIGHT_ABOVE_EXPECTED_MM = 10.0
+PROBE_OVERSHOOT_BELOW_EXPECTED_MM = 5.0
+EXPECTED_PROBE_Z_POSITION_MM = 0.0  # NOTE: the calibration square in slot C2
 
 
 def _dataclass_to_csv(dc: Any, is_header: bool = False, prepend: str = "") -> str:
@@ -112,34 +128,58 @@ class TipConfig:
     well: str
     count: int
     overlap_version: str
-    overlap: Optional[float]
+    overlap: float
 
     @classmethod
     def build_from_input(cls, api: OT3API, mount: str, tip_count: int) -> "TipConfig":
         get_inp = not api.is_simulator
         # NOTE: (sigler) we can configure this later, default to latest
-        overlap_version = "v1"
-        slot = "C3"  # NOTE: let's just hard-code this for now
-        lot: str = input("Lot #: ").strip() if get_inp else "1"
-        volume: int = int(input("pipette volume [50 or 1000]: ")) if get_inp else 1000
-        has_filter: bool = bool("y" in input("filtered? (y/n): ")) if get_inp else False
-        well: str = input("starting tip: ").strip() if not api.is_simulator else "A1"
+        overlap_version: str = (
+            input("Overlap version [v0 or v1]: ") if get_inp else "v1"
+        )
+        slot: str = input("Tip-Rack Slot (eg: C3): ") if get_inp else "C3"
+        lot: str = input("Tip-Rack Lot #: ").strip() if get_inp else "1"
+        volume: int = (
+            int(input("Tip-Rack Volume [50, 200, or 1000]: ")) if get_inp else 200
+        )
+        has_filter: bool = (
+            bool("y" in input("Tip is filtered? (y/n): ")) if get_inp else False
+        )
+        well: str = (
+            input("Start at tip (eg: A1): ").strip() if not api.is_simulator else "A1"
+        )
+        return cls.build(
+            api, mount, lot, volume, has_filter, slot, well, tip_count, overlap_version
+        )
+
+    @classmethod
+    def build(
+        cls,
+        api: OT3API,
+        mount: str,
+        lot: str,
+        volume: int,
+        has_filter: bool,
+        slot: str,
+        well: str,
+        tip_count: int,
+        overlap_version: str,
+    ) -> "TipConfig":
         load_name = (
             f"opentrons_flex_96_{'filter' if has_filter else ''}tiprack_{volume}ul"
         )
         overlap = _get_default_tip_overlap(api, mount, load_name, overlap_version)
-        tip_cfg = TipConfig(
+        return TipConfig(
             load_name=load_name,
             lot=lot,
             volume=volume,
             filter=has_filter,
-            slot=slot,  # NOTE: let's just hard-code this for now
+            slot=slot,
             well=well,
             count=tip_count,
             overlap_version=overlap_version,
             overlap=overlap,
         )
-        return tip_cfg
 
     @property
     def csv_header(self) -> str:
@@ -154,8 +194,13 @@ class TipConfig:
         tip_row_idx = "ABCDEFGH".index(self.well[0])
         tip_col_idx = int(self.well[1:])
         tip_well_offset = types.Point(x=tip_col_idx * 9.0, y=tip_row_idx * -9.0, z=0)
+        # NOTE: the ot3 helpers were made back when all slots were numbered (slots 1-12)
+        #       so here we convert the new slot name (eg: "C3") to an integer
+        numbered_deck_slot = int(
+            DeckSlotName.from_primitive(self.slot).to_ot2_equivalent().value
+        )
         tip_a1_pos = helpers_ot3.get_theoretical_a1_position(
-            SLOTS.index(self.slot) + 1, self.load_name
+            numbered_deck_slot, self.load_name
         )
         return tip_a1_pos + tip_well_offset
 
@@ -291,16 +336,19 @@ async def _run_trial(
 
     ui.print_header("PROBING the CALIBRATION-SQUARE")
     square_pos = types.Point(
-        *get_calibration_square_position_in_slot(slot=SLOT_CENTER)
+        *get_calibration_square_position_in_slot(slot=CALIBRATION_SLOT)
     ) + types.Point(x=Z_PREP_OFFSET.x, y=Z_PREP_OFFSET.y, z=Z_PREP_OFFSET.z)
     await api.retract(pip_mount)
-    await api.move_to(pip_mount, square_pos + types.Point(z=PROBE_DISTANCE_MM))
+    await api.move_to(
+        pip_mount, square_pos + types.Point(z=PROBE_START_HEIGHT_ABOVE_EXPECTED_MM)
+    )
     probed_deck_z = await api.liquid_probe(
-        pip_mount, PROBE_DISTANCE_MM + PROBE_OVERSHOOT_MM
+        pip_mount,
+        PROBE_START_HEIGHT_ABOVE_EXPECTED_MM + PROBE_OVERSHOOT_BELOW_EXPECTED_MM,
     )
     if api.is_simulator:
         probed_deck_z = uniform(-0.5, 0.5)
-    tip_overlap_error_mm = probed_deck_z - EXPECTED_PROBE_HEIGHT_MM
+    tip_overlap_error_mm = probed_deck_z - EXPECTED_PROBE_Z_POSITION_MM
     overlap_calibrated = tip_overlap - tip_overlap_error_mm
     ui.print_info(
         f"tip is {round(tip_overlap_error_mm, 2)} mm "
@@ -355,6 +403,13 @@ def _ask_user_for_number_of_trials(simulate: bool) -> int:
 async def main(
     simulate: bool,
     pip_mount: types.OT3Mount,
+    slots_to_test: List[str],
+    starting_tip: str,
+    num_tips_per_rack: int,
+    overlap_version: str,
+    tip_lot: str,
+    tip_volume: int,
+    has_filter: bool,
 ) -> None:
     ui.print_title("TIP-OVERLAP CALIBRATION")
     api = await helpers_ot3.build_async_ot3_hardware_api(
@@ -363,6 +418,8 @@ async def main(
         pipette_right="p1000_single_v3.6",
     )
     pip_hw = api.hardware_pipettes[pip_mount.to_mount()]
+    mnt = pip_mount.name.lower()
+    pip_ch = int(pip_hw.channels.value)
 
     test_data = TestData(
         config=TestConfig(
@@ -395,16 +452,25 @@ async def main(
     await helpers_ot3.jog_mount_ot3(api, pip_mount)
     dial_pos = await api.gantry_position(pip_mount)
 
-    while True:
-        tip_cfg: TipConfig = TipConfig.build_from_input(
+    test_tip_configs: List[TipConfig] = [
+        TipConfig.build(
             api,
-            pip_mount.name.lower(),
-            tip_count=test_data.config.pipette_channels,  # NOTE: (sigler) for now not testing partial tip-pickup
+            mnt,
+            lot=tip_lot,
+            volume=tip_volume,
+            has_filter=has_filter,
+            slot=slot,
+            well=starting_tip,
+            tip_count=pip_ch,
+            overlap_version=overlap_version,
         )
+        for slot in slots_to_test
+    ]
 
-        num_trials_to_run = _ask_user_for_number_of_trials(simulate)
-        for i in range(num_trials_to_run):
+    for tip_cfg in test_tip_configs:
+        for i in range(num_tips_per_rack):
             if i > 0:
+                # same tip-rack, so just copy the config but increment to the next well location
                 tip_cfg = TipConfig.create_copy_and_increment_well(tip_cfg)
             trial_result = await _run_trial(
                 api, pip_mount.name.lower(), tip_cfg, dial, dial_pos
@@ -429,16 +495,32 @@ async def main(
 
 
 if __name__ == "__main__":
-    _mounts = {"left": types.OT3Mount.LEFT, "right": types.OT3Mount.RIGHT}
     _parser = argparse.ArgumentParser()
     _parser.add_argument("--simulate", action="store_true")
+    _parser.add_argument("--mount", type=str, choices=["left", "right"], default="left")
+    _parser.add_argument("--slots", nargs="+", type=str, default=DEFAULT_SLOTS_TO_TEST)
+    _parser.add_argument("--starting-tip", type=str, default="A1")
+    _parser.add_argument("--tips-per-rack", type=int, default=96)
     _parser.add_argument(
-        "--mount", type=str, choices=list(_mounts.keys()), default="left"
+        "--overlap-version", type=str, choices=["v0", "v1"], default="v1"
     )
+    _parser.add_argument("--lot", type=str, required=True)
+    _parser.add_argument(
+        "--volume", type=int, choices=[20, 50, 200, 1000], required=True
+    )
+    _parser.add_argument("--filter", action="store_true")
     _args = _parser.parse_args()
+    mnt = {"left": types.OT3Mount.LEFT, "right": types.OT3Mount.RIGHT}[_args.mount]
     asyncio.run(
         main(
             _args.simulate,
-            _mounts[_args.mount],
+            mnt,
+            slots_to_test=_args.slots,
+            starting_tip=_args.starting_tip,
+            num_tips_per_rack=_args.tips_per_rack,
+            overlap_version=_args.overlap_version,
+            tip_lot=_args.lot,
+            tip_volume=_args.volume,
+            has_filter=_args.filter,
         )
     )
