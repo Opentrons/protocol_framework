@@ -3,6 +3,7 @@ import argparse
 import asyncio
 from dataclasses import dataclass, asdict, replace
 from json import load as json_load
+from random import uniform
 from pathlib import Path
 from time import sleep
 from typing import Dict, Optional, Tuple, List, Any
@@ -53,9 +54,11 @@ def _dataclass_to_csv(dc: Any, is_header: bool = False, prepend: str = "") -> st
             keys_or_values.append(str(round(value, 2)))
         else:
             keys_or_values.append(str(value))
-    return CSV_DIVIDER.join(
-        [prepend + kv.upper().replace("_", " ") for kv in keys_or_values]
-    )
+    if is_header:
+        keys_or_values = [
+            prepend + kv.upper().replace("_", " ") for kv in keys_or_values
+        ]
+    return CSV_DIVIDER.join([str(kv) for kv in keys_or_values])
 
 
 def _get_default_tip_overlap(
@@ -175,7 +178,7 @@ class TipConfig:
             raise RuntimeError("ran out of tips to pickup")
         cpy = replace(tc)
         tip_row_idx = "ABCDEFGH".index(tc.well[0])
-        tip_col_idx = int(tc.well[1:])
+        tip_col_idx = int(tc.well[1:]) - 1
         if tip_row_idx == 7:
             next_tip_row_idx = 0
             next_tip_col_idx = tip_col_idx + 1
@@ -195,7 +198,7 @@ class TrialResult:
     probed_deck_z: float
     overlap_calibrated: float
     dial_tip_calibrated: float
-    error_from_calibrated: float
+    tip_z_error_calibrated: float
     error_reduction: float
 
     @property
@@ -259,7 +262,7 @@ async def _run_trial(
 
     def _read_dial() -> float:
         if dial is None:
-            return 0.0
+            return uniform(-3, -2)
         sleep(DIAL_SETTLING_SECONDS)
         # NOTE: (sigler) the dial-indicator is upside-down
         #       which is confusing when comparing the pipette's positions.
@@ -295,6 +298,8 @@ async def _run_trial(
     probed_deck_z = await api.liquid_probe(
         pip_mount, PROBE_DISTANCE_MM + PROBE_OVERSHOOT_MM
     )
+    if api.is_simulator:
+        probed_deck_z = uniform(-0.5, 0.5)
     tip_overlap_error_mm = probed_deck_z - EXPECTED_PROBE_HEIGHT_MM
     overlap_calibrated = tip_overlap - tip_overlap_error_mm
     ui.print_info(
@@ -309,8 +314,8 @@ async def _run_trial(
     await api.retract(pip_mount)
     await helpers_ot3.move_to_arched_ot3(api, pip_mount, dial_pos)
     dial_tip_calibrated = _read_dial()
-    error_from_calibrated = dial_tip_calibrated - dial_nozzle
-    error_reduction = tip_z_error - error_from_calibrated
+    tip_z_error_calibrated = dial_tip_calibrated - dial_nozzle
+    error_reduction = tip_z_error - tip_z_error_calibrated
 
     ui.print_info("returning tip")
     await api.retract(pip_mount)
@@ -327,7 +332,7 @@ async def _run_trial(
         probed_deck_z=probed_deck_z,
         overlap_calibrated=overlap_calibrated,
         dial_tip_calibrated=dial_tip_calibrated,
-        error_from_calibrated=error_from_calibrated,
+        tip_z_error_calibrated=tip_z_error_calibrated,
         error_reduction=error_reduction,
     )
 
