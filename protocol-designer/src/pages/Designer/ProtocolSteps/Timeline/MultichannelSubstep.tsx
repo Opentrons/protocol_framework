@@ -1,16 +1,15 @@
 import { useState } from 'react'
-import { Trans, useTranslation } from 'react-i18next'
+import { useTranslation } from 'react-i18next'
 import {
   ALIGN_CENTER,
   DIRECTION_COLUMN,
   DeckInfoLabel,
   Flex,
+  JUSTIFY_SPACE_BETWEEN,
   ListButton,
-  NO_WRAP,
   SPACING,
   StyledText,
   Tag,
-  WRAP,
 } from '@opentrons/components'
 import { Substep } from './Substep'
 import { formatVolume } from './utils'
@@ -19,7 +18,6 @@ import type {
   StepItemSourceDestRow,
   SubstepIdentifier,
 } from '../../../../steplist'
-import { values } from 'lodash'
 
 interface MultichannelSubstepProps {
   trashName: AdditionalEquipmentName | null
@@ -59,43 +57,6 @@ export function MultichannelSubstep(
     firstChannelDest ? firstChannelDest.well ?? 'Trash' : ''
   }:${lastChannelDest ? lastChannelDest.well : ''}`
 
-  interface MultiChannelSubstepButtonProps {
-    tagText: string
-    sources: JSX.Element | null
-    destinations: JSX.Element | null
-  }
-
-  function MultiChannelSubstepButton(
-    props: MultiChannelSubstepButtonProps
-  ): JSX.Element {
-    const { tagText, sources, destinations } = props
-    const { t } = useTranslation('protocol_steps')
-    return (
-      <Flex
-        gridGap={SPACING.spacing4}
-        alignItems={ALIGN_CENTER}
-        flexWrap={WRAP}
-      >
-        <Trans
-          t={t}
-          i18nKey="move_liquid.substeps.multi"
-          components={{
-            text: (
-              <StyledText
-                desktopStyle="bodyDefaultRegular"
-                style={{ whiteSpace: NO_WRAP }}
-              />
-            ),
-            tag: <Tag type="default" text={tagText} />,
-            label1: sources ?? <></>,
-            label2: destinations ?? <></>,
-          }}
-          values={values}
-        />
-      </Flex>
-    )
-  }
-
   return (
     <Flex
       flexDirection={DIRECTION_COLUMN}
@@ -109,35 +70,36 @@ export function MultichannelSubstep(
       }}
     >
       {/* TODO: need to update this to match designs! */}
-      <ListButton
-        type="noActive"
-        onClick={handleToggleCollapsed}
-        padding={SPACING.spacing16}
-      >
+      <ListButton type="noActive" onClick={handleToggleCollapsed}>
         <Flex
           flexDirection={DIRECTION_COLUMN}
           gridGap={SPACING.spacing4}
           width="100%"
         >
-          {/* replace below Flex with custom component */}
-          <MultiChannelSubstepButton
-            tagText={`${formatVolume(rowGroup[0].volume)} ${t(
-              'units.microliter'
-            )}`}
-            sources={
-              firstChannelSource != null ? (
-                <DeckInfoLabel deckLabel={sourceWellRange} />
-              ) : null
-            }
-            destinations={
-              firstChannelDest != null ? (
-                <DeckInfoLabel deckLabel={destWellRange} />
-              ) : null
-            }
-          />
-          {!collapsed ? (
-            <Flex flexDirection={DIRECTION_COLUMN} gridGap={SPACING.spacing4}>
-              {rowGroup.map((row, rowKey) => {
+          <Flex
+            padding={SPACING.spacing12}
+            justifyContent={JUSTIFY_SPACE_BETWEEN}
+            width="100%"
+            alignItems={ALIGN_CENTER}
+          >
+            <StyledText desktopStyle="bodyDefaultRegular">Multi</StyledText>
+            {firstChannelSource != null ? (
+              <DeckInfoLabel deckLabel={sourceWellRange} />
+            ) : null}
+            <Tag
+              text={`${formatVolume(rowGroup[0].volume)} ${t(
+                'units.microliter'
+              )}`}
+              type="default"
+              shrinkToContent
+            />
+            {firstChannelDest != null ? (
+              <DeckInfoLabel deckLabel={destWellRange} />
+            ) : null}
+          </Flex>
+          <Flex flexDirection={DIRECTION_COLUMN} gridGap={SPACING.spacing4}>
+            {!collapsed &&
+              rowGroup.map((row, rowKey) => {
                 return (
                   <Substep
                     trashName={trashName}
@@ -151,8 +113,7 @@ export function MultichannelSubstep(
                   />
                 )
               })}
-            </Flex>
-          ) : null}
+          </Flex>
         </Flex>
       </ListButton>
     </Flex>
