@@ -801,8 +801,6 @@ async def test_retrieve_raises_if_stall(
     model_utils: ModelUtils,
     stacker_id: FlexStackerId,
     flex_50uL_tiprack: LabwareDefinition,
-    tiprack_adapter_def: LabwareDefinition,
-    tiprack_lid_def: LabwareDefinition,
     stacker_hardware: FlexStacker,
 ) -> None:
     """It should raise a stall error."""
@@ -814,8 +812,8 @@ async def test_retrieve_raises_if_stall(
     fs_module_substate = FlexStackerSubState(
         module_id=stacker_id,
         pool_primary_definition=flex_50uL_tiprack,
-        pool_adapter_definition=tiprack_adapter_def,
-        pool_lid_definition=tiprack_lid_def,
+        pool_adapter_definition=None,
+        pool_lid_definition=None,
         pool_count=1,
         max_pool_count=5,
     )
@@ -824,56 +822,32 @@ async def test_retrieve_raises_if_stall(
     ).then_return(fs_module_substate)
     decoy.when(
         await equipment.load_labware_from_definition(
-            definition=tiprack_adapter_def,
+            definition=flex_50uL_tiprack,
             location=ModuleLocation(moduleId=stacker_id),
             labware_id=None,
-        )
-    ).then_return(LoadedLabwareData("adapter-id", tiprack_adapter_def, None))
-    decoy.when(
-        await equipment.load_labware_from_definition(
-            definition=flex_50uL_tiprack,
-            location=OnLabwareLocation(labwareId="adapter-id"),
-            labware_id=None,
+            labware_pending_load={},
         )
     ).then_return(LoadedLabwareData("labware-id", flex_50uL_tiprack, None))
 
     decoy.when(
-        await equipment.load_labware_from_definition(
-            definition=tiprack_lid_def,
-            location=OnLabwareLocation(labwareId="labware-id"),
-            labware_id=None,
-        )
-    ).then_return(LoadedLabwareData("lid-id", tiprack_lid_def, None))
-
-    decoy.when(
         state_view.geometry.get_predicted_location_sequence(
-            ModuleLocation(moduleId=stacker_id)
+            ModuleLocation(moduleId=stacker_id),
+            labware_pending_load={
+                "labware-id": LoadedLabware(
+                    id="labware-id",
+                    loadName="opentrons_flex_96_filtertiprack_50ul",
+                    definitionUri="opentrons/opentrons_flex_96_filtertiprack_50ul/1",
+                    lid_id=None,
+                    offsetId=None,
+                    displayName=None,
+                    location=ModuleLocation(moduleId=stacker_id),
+                )
+            },
         )
     ).then_return(_stacker_base_loc_seq(stacker_id))
-    decoy.when(
-        state_view.geometry.get_predicted_location_sequence(
-            OnLabwareLocation(labwareId="adapter-id")
-        )
-    ).then_return(
-        [OnLabwareLocationSequenceComponent(labwareId="adapter-id", lidId=None)]
-        + _stacker_base_loc_seq(stacker_id)
-    )
-    decoy.when(
-        state_view.geometry.get_predicted_location_sequence(
-            OnLabwareLocation(labwareId="labware-id")
-        )
-    ).then_return(
-        [
-            OnLabwareLocationSequenceComponent(labwareId="labware-id", lidId="lid-id"),
-            OnLabwareLocationSequenceComponent(labwareId="adapter-id", lidId=None),
-        ]
-        + _stacker_base_loc_seq(stacker_id)
-    )
 
     decoy.when(
-        state_view.geometry.get_height_of_labware_stack(
-            definitions=[tiprack_lid_def, flex_50uL_tiprack, tiprack_adapter_def]
-        )
+        state_view.geometry.get_height_of_labware_stack(definitions=[flex_50uL_tiprack])
     ).then_return(16)
 
     _prep_stacker_own_location(decoy, state_view, stacker_id)
