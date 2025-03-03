@@ -36,6 +36,7 @@ import { LiquidClassDropdown } from './LiquidClassDropdown'
 import type { Ingredient } from '@opentrons/step-generation'
 import type { ThunkDispatch } from 'redux-thunk'
 import type { BaseState } from '../../types'
+import { getSortedLiquidClassDefs } from '../../liquid-defs/utils'
 
 const liquidEditFormSchema: any = Yup.object().shape({
   displayName: Yup.string().required('liquid name is required'),
@@ -70,7 +71,7 @@ export function DefineLiquidsModal(
     labwareIngredSelectors.allIngredientGroupFields
   )
   const enableLiquidClasses = useSelector(getEnableLiquidClasses)
-  const liquidClassDefs = getAllLiquidClassDefs()
+  const sortedLiquidClassDefs = getSortedLiquidClassDefs()
 
   const liquidGroupId = selectedLiquidGroupState.liquidGroupId
   const deleteLiquidGroup = (): void => {
@@ -136,24 +137,16 @@ export function DefineLiquidsModal(
 
   const liquidClassOptions = [
     { name: t('liquids:dont_use_liquid_class'), value: '' },
-    ...Object.entries(liquidClassDefs)
-      .sort(([_0, a], [_1, b]) => {
-        if (a.displayName < b.displayName) {
-          return -1
-        } else if (a.displayName > b.displayName) {
-          return 1
-        }
-        return 0
-      })
-      .map(([liquidClassDefName, { displayName, description }]) => {
-        return {
-          value: liquidClassDefName,
-          name: t('liquids:liquid_class_name_description', {
-            displayName,
-            description,
-          }),
-        }
-      }),
+    ...Object.entries(sortedLiquidClassDefs)
+    .map(([liquidClassDefName, { displayName, description }]) => {
+      return {
+        value: liquidClassDefName,
+        name: t('liquids:liquid_class_name_description', {
+          displayName,
+          description,
+        }),
+      }
+    }),
   ]
 
   return (
