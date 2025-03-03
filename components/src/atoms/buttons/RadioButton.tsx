@@ -146,10 +146,8 @@ export function RadioButton(props: RadioButtonProps): JSX.Element {
             {buttonSubLabel && (
               <StyledText
                 color={COLORS.grey60}
-                oddStyle={isLarge ? 'level4HeaderSemiBold' : 'bodyTextRegular'}
-                desktopStyle={
-                  isLarge ? 'bodyDefaultSemiBold' : 'bodyDefaultRegular'
-                }
+                oddStyle="bodyTextRegular"
+                desktopStyle="bodyDefaultRegular"
               >
                 {buttonSubLabel.label}
               </StyledText>

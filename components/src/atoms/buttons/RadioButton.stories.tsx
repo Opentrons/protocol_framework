@@ -53,6 +53,7 @@ export const RadioButtonWithHorizontalSubLabel: Story = {
     buttonValue: 2,
     disabled: false,
     isSelected: false,
+    radioButtonType: 'large',
     buttonSubLabel: {
       label: 'Horizontal subtext',
       align: 'horizontal',
@@ -67,6 +68,7 @@ export const RadioButtonWithVerticalSubLabel: Story = {
     buttonValue: 3,
     disabled: false,
     isSelected: false,
+    radioButtonType: 'large',
     buttonSubLabel: {
       label: 'Vertical subtext',
       align: 'vertical',
