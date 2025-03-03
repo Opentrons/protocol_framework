@@ -271,7 +271,7 @@ export function getLoadTrashBins(
         trashBin.location != null
           ? formatPyStr(getCutoutDisplayName(trashBin.location as CutoutId))
           : 'unknown trash location' // note: should never hit unknown trash location since location is always defined for trashBin entity
-      return `${trashBin.pythonName} = ${PROTOCOL_CONTEXT_NAME}.load_trash_bin(location = ${location})`
+      return `${trashBin.pythonName} = ${PROTOCOL_CONTEXT_NAME}.load_trash_bin(${location})`
     })
     .join('\n')
 
@@ -319,14 +319,14 @@ export function pythonDefRun(
       labwareNicknamesById
     ),
     getLoadPipettes(pipetteEntities, labwareEntities, pipettes),
-    getDefineLiquids(liquidEntities),
-    getLoadLiquids(liquidsByLabwareId, liquidEntities, labwareEntities),
     ...(robotType === FLEX_ROBOT_TYPE
       ? [
           getLoadTrashBins(additionalEquipmentEntities),
           getLoadWasteChute(additionalEquipmentEntities),
         ]
       : []),
+    getDefineLiquids(liquidEntities),
+    getLoadLiquids(liquidsByLabwareId, liquidEntities, labwareEntities),
     stepCommands(robotStateTimeline),
   ]
   const functionBody =

@@ -422,8 +422,8 @@ describe('getTrashBins', () => {
     expect(getLoadTrashBins(mockAdditionalEquipmentEntities)).toBe(
       `
 # Load Trash Bins:
-trash_bin_1 = protocol.load_trash_bin(location = "A3")
-trash_bin_2 = protocol.load_trash_bin(location = "C3")`.trimStart()
+trash_bin_1 = protocol.load_trash_bin("A3")
+trash_bin_2 = protocol.load_trash_bin("C3")`.trimStart()
     )
   })
 })
