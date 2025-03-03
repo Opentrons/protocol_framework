@@ -1,5 +1,5 @@
 """Test X Axis."""
-from typing import List, Union
+from typing import List, Union, Tuple
 from hardware_testing.data import ui
 from hardware_testing.data.csv_report import (
     CSVReport,
@@ -31,14 +31,16 @@ HOME_CURRENT = STACKER_MOTION_CONFIG[TEST_AXIS]["home"].current
 
 def build_csv_lines() -> List[Union[CSVLine, CSVLineRepeating]]:
     """Build CSV Lines."""
-    return [
-        CSVLine(
-            f"speed-{speed}-current-{current}-success-failed-pass%",
-            [int, int, float, CSVResult],
-        )
-        for speed in TEST_SPEEDS
-        for current in TEST_CURRENTS
-    ]
+    lines: List[Union[CSVLine, CSVLineRepeating]] = []
+    for speed in TEST_SPEEDS:
+        for current in TEST_CURRENTS:
+            tag = f"speed-{speed}-current-{current}"
+            lines.append(
+                CSVLine(f"{tag}-success-failed-pass%", [int, int, float, CSVResult])
+            )
+            lines.append(CSVLine(f"{tag}-extend-distance", [float] * TEST_TRIALS))
+            lines.append(CSVLine(f"{tag}-retract-distance", [float] * TEST_TRIALS))
+    return lines
 
 
 async def test_cycle_per_direction(
@@ -46,7 +48,7 @@ async def test_cycle_per_direction(
     direction: Direction,
     speed: int,
     current: float,
-) -> bool:
+) -> Tuple[bool, float]:
     """Test one cycle."""
     # first home in the opposite direction
     await stacker.home_axis(TEST_AXIS, direction.opposite())
@@ -55,41 +57,40 @@ async def test_cycle_per_direction(
         TEST_AXIS, direction, OFFSET, HOME_SPEED, None, HOME_CURRENT
     )
     try:
+        dist = 0.0
         # moving at the testing speed and current
         await stacker.move_axis(
             TEST_AXIS, direction, AXIS_TRAVEL - OFFSET, speed, None, current
         )
-        # # move towards limit switch
-        # await stacker.move_axis(TEST_AXIS, direction, OFFSET+LIMIT_SWICH_CHECK, HOME_SPEED, None, HOME_CURRENT)
-        dist = 0.0
-        while dist < ERROR_THRESHOLD + OFFSET:
+        # move towards limit switch at small increments
+        while dist <= (ERROR_THRESHOLD + OFFSET):
             await stacker.move_axis(
                 TEST_AXIS, direction, LIMIT_SWICH_CHECK, HOME_SPEED, None, HOME_CURRENT
             )
-            dist = dist + LIMIT_SWICH_CHECK
-            lsw = await stacker._driver.get_limit_switch(TEST_AXIS, direction)
-            if lsw:
-                break
-
-        # check if limit switch is triggered
-        success = await stacker._driver.get_limit_switch(TEST_AXIS, direction)
+            dist += LIMIT_SWICH_CHECK
+            if await stacker._driver.get_limit_switch(TEST_AXIS, direction):
+                return True, dist
     except FlexStackerStallError:
-        return False
-    return success
+        ui.print_error("axis stalled!")
+    return False, dist
 
 
 async def run(stacker: FlexStacker, report: CSVReport, section: str) -> None:
     """Run."""
     for speed in TEST_SPEEDS:
         for current in TEST_CURRENTS:
+            tag = f"speed-{speed}-current-{current}"
             ui.print_header(f"X Speed: {speed} mm/s, Current: {current} A")
             trial = 0
             failures = 0
+            extend_data: List[float] = []
+            retract_data: List[float] = []
             while trial < TEST_TRIALS:
                 # Test extend direction first
-                extend = await test_cycle_per_direction(
+                extend, dist = await test_cycle_per_direction(
                     stacker, Direction.EXTEND, speed, current
                 )
+                extend_data.append(dist)
                 trial += 1
                 if not extend:
                     ui.print_error(
@@ -99,9 +100,10 @@ async def run(stacker: FlexStacker, report: CSVReport, section: str) -> None:
                     continue
 
                 # Test extend direction
-                retract = await test_cycle_per_direction(
+                retract, dist = await test_cycle_per_direction(
                     stacker, Direction.RETRACT, speed, current
                 )
+                retract_data.append(dist)
                 if not retract:
                     ui.print_error(
                         f"X Axis retract failed at speed {speed} mm/s, current {current} A"
@@ -117,9 +119,11 @@ async def run(stacker: FlexStacker, report: CSVReport, section: str) -> None:
                 result = CSVResult.PASS
             report(
                 section,
-                f"speed-{speed}-current-{current}-success-failed-pass%",
+                f"{tag}-success-failed-pass%",
                 [success_trials, failures, success_rate, result],
             )
+            report(section, f"{tag}-extend-distance", extend_data)
+            report(section, f"{tag}-retract-distance", retract_data)
 
             # Stop the test if any trial fails
             if result == CSVResult.FAIL:
