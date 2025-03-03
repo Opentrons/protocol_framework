@@ -158,6 +158,7 @@ class RetrieveImpl(AbstractCommandImpl[RetrieveParams, _ExecuteReturn]):
                 definition=stacker_state.pool_adapter_definition,
                 location=adapter_location,
                 labware_id=params.adapterId,
+                labware_pending_load=labware_by_id,
             )
             definitions_by_id[adapter_lw.labware_id] = adapter_lw.definition
             offset_ids_by_id[adapter_lw.labware_id] = adapter_lw.offsetId
@@ -193,7 +194,7 @@ class RetrieveImpl(AbstractCommandImpl[RetrieveParams, _ExecuteReturn]):
             definition=stacker_state.pool_primary_definition,
             location=primary_location,
             labware_id=params.labwareId,
-            labware_pending_load=labware_by_id,
+            labware_pending_load={lw_id: lw for lw_id, lw in labware_by_id.items()},
         )
         definitions_by_id[loaded_labware.labware_id] = loaded_labware.definition
         offset_ids_by_id[loaded_labware.labware_id] = loaded_labware.offsetId
@@ -223,7 +224,7 @@ class RetrieveImpl(AbstractCommandImpl[RetrieveParams, _ExecuteReturn]):
                 definition=stacker_state.pool_lid_definition,
                 location=lid_location,
                 labware_id=params.lidId,
-                labware_pending_load=labware_by_id,
+                labware_pending_load={lw_id: lw for lw_id, lw in labware_by_id.items()},
             )
             lid_uri = str(
                 uri_from_details(
