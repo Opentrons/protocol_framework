@@ -1017,84 +1017,98 @@ export const verifyCreateProtocolPage = (): void => {
   cy.contains(SetupContent.Confirm).should('exist').should('be.visible')
 }
 
-interface FlexSetupOptions {
-  thermocycler?: boolean
-  heatershaker?: boolean
-  magblock?: boolean
-  tempdeck?: boolean
-  platereader?: boolean
-}
-export function FlexSetup(options: FlexSetupOptions): void {
-  const thermocycler = options.thermocycler ?? false
-  const heatershaker = options.heatershaker ?? false
-  const magblock = options.magblock ?? false
-  const tempdeck = options.tempdeck ?? false
-  const platereader = options.platereader ?? false
-  SetupVerifications.OnStep1().call()
-  SetupVerifications.FlexSelected().call()
-  UniversalSteps.Snapshot().call()
-  SetupSteps.SelectOT2().call()
-  SetupVerifications.OT2Selected().call()
-  UniversalSteps.Snapshot().call()
-  SetupSteps.SelectFlex().call()
-  SetupVerifications.FlexSelected().call()
-  UniversalSteps.Snapshot().call()
-  SetupSteps.Confirm().call()
-  SetupVerifications.OnStep2().call()
-  SetupSteps.SingleChannelPipette50().call()
-  SetupVerifications.StepTwo50uL().call()
-  UniversalSteps.Snapshot().call()
-  SetupSteps.Confirm().call()
-  SetupVerifications.StepTwoPart3().call()
-  UniversalSteps.Snapshot().call()
-  SetupSteps.Confirm().call()
-  SetupVerifications.OnStep3().call()
-  SetupSteps.YesGripper().call()
-  SetupSteps.Confirm().call()
-  SetupVerifications.Step4Verification().call()
+/**
+ * Composite, multi-step operations bundled as individual StepThunks
+ */
+export const CompositeSetupSteps = {
+  /**
+   * Sets up a Flex protocol with optional modules
+   */
+  FlexSetup: (options: {
+    thermocycler?: boolean
+    heatershaker?: boolean
+    magblock?: boolean
+    tempdeck?: boolean
+    platereader?: boolean
+  }): StepThunk => ({
+    call: () => {
+      const thermocycler = options.thermocycler ?? false
+      const heatershaker = options.heatershaker ?? false
+      const magblock = options.magblock ?? false
+      const tempdeck = options.tempdeck ?? false
+      const platereader = options.platereader ?? false
+      cy.log(`Running FlexSetup with options: ${JSON.stringify(options)}`)
+      SetupVerifications.OnStep1().call()
+      SetupVerifications.FlexSelected().call()
+      UniversalSteps.Snapshot().call()
+      SetupSteps.SelectOT2().call()
+      SetupVerifications.OT2Selected().call()
+      UniversalSteps.Snapshot().call()
+      SetupSteps.SelectFlex().call()
+      SetupVerifications.FlexSelected().call()
+      UniversalSteps.Snapshot().call()
+      SetupSteps.Confirm().call()
+      SetupVerifications.OnStep2().call()
+      SetupSteps.SingleChannelPipette50().call()
+      SetupVerifications.StepTwo50uL().call()
+      UniversalSteps.Snapshot().call()
+      SetupSteps.Confirm().call()
+      SetupVerifications.StepTwoPart3().call()
+      UniversalSteps.Snapshot().call()
+      SetupSteps.Confirm().call()
+      SetupVerifications.OnStep3().call()
+      SetupSteps.YesGripper().call()
+      SetupSteps.Confirm().call()
+      SetupVerifications.Step4Verification().call()
 
-  if (thermocycler) {
-    SetupSteps.AddThermocycler().call()
-    SetupVerifications.ThermocyclerImg().call()
-  }
+      if (thermocycler) {
+        SetupSteps.AddThermocycler().call()
+        SetupVerifications.ThermocyclerImg().call()
+      }
 
-  if (heatershaker) {
-    SetupSteps.AddHeaterShaker().call()
-    SetupVerifications.HeaterShakerImg().call()
-  }
+      if (heatershaker) {
+        SetupSteps.AddHeaterShaker().call()
+        SetupVerifications.HeaterShakerImg().call()
+      }
 
-  if (magblock) {
-    SetupSteps.AddMagBlock().call()
-    SetupVerifications.MagBlockImg().call()
-  }
+      if (magblock) {
+        SetupSteps.AddMagBlock().call()
+        SetupVerifications.MagBlockImg().call()
+      }
 
-  if (tempdeck) {
-    SetupSteps.AddTempdeck2().call()
-    SetupVerifications.Tempdeck2Img().call()
-  }
-  if (platereader) {
-    SetupSteps.AddPlateReader().call()
-  }
+      if (tempdeck) {
+        SetupSteps.AddTempdeck2().call()
+        SetupVerifications.Tempdeck2Img().call()
+      }
 
-  SetupSteps.Confirm().call()
-  SetupSteps.Confirm().call()
-  SetupSteps.Confirm().call()
-  SetupSteps.EditProtocolA().call()
-}
+      if (platereader) {
+        SetupSteps.AddPlateReader().call()
+      }
 
-interface AddLabwareToDeckSlotCompoundInputs {
-  deckSlot?: string
-  labwareName?: string
-}
-export function AddLabwareToDeckSlotCompound(
-  string: AddLabwareToDeckSlotCompoundInputs
-): void {
-  const deckSlot = string.deckSlot ?? 'C3'
-  const labwareName = string.labwareName ?? 'Bio-Rad 96 Well Plate'
-
-  SetupSteps.ChoseDeckSlotWithLabware(deckSlot).call()
-  SetupSteps.AddHardwareLabware().call()
-  SetupSteps.ClickLabwareHeader().call()
-  SetupSteps.ClickWellPlatesSection().call()
-  SetupSteps.SelectLabwareByDisplayName(labwareName).call()
+      SetupSteps.Confirm().call()
+      SetupSteps.Confirm().call()
+      SetupSteps.Confirm().call()
+      SetupSteps.EditProtocolA().call()
+    },
+  }),
+  /**
+   * Adds labware to a specific deck slot
+   */
+  AddLabwareToDeckSlot: (
+    deckSlot?: string | undefined,
+    labwareName?: string | undefined
+  ): StepThunk => ({
+    call: () => {
+      const slotToUse = deckSlot ?? 'C3'
+      const labwareToUse = labwareName ?? 'Bio-Rad 96 Well Plate'
+      cy.log(
+        `Running AddLabwareToDeckSlot with slot ${deckSlot} and labware ${labwareName}`
+      )
+      SetupSteps.ChoseDeckSlotWithLabware(slotToUse).call()
+      SetupSteps.AddHardwareLabware().call()
+      SetupSteps.ClickLabwareHeader().call()
+      SetupSteps.ClickWellPlatesSection().call()
+      SetupSteps.SelectLabwareByDisplayName(labwareToUse).call()
+    },
+  }),
 }
