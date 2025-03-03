@@ -21,12 +21,9 @@ export enum ModContent {
   Temperature = 'Temperature',
   Save = 'Save',
   Temp4CVerification = `Build a pause step to wait until Temperature Module GEN2 reaches 4˚C`,
+  PlateReader = 'Absorbance Plate Reader Module GEN1',
 }
 
-/**
- * Each function returns a StepThunk
- * Add a comment to all records
- */
 export const ModuleSteps = {
   /**
    * Select "Done" on a step form.
@@ -116,15 +113,53 @@ export const ModuleSteps = {
       cy.contains(ModContent.Save).click({ force: true })
     },
   }),
+  MoveToPlateReader: (): StepThunk => ({
+    call: () => {
+      cy.contains(ModContent.PlateReader).click()
+    },
+  }),
+  StartPlateReaderStep: (): StepThunk => ({
+    call: () => {
+      cy.contains('Absorbance Plate Reader').click()
+    },
+  }),
+  DefineInitilizationSingle: (): StepThunk => ({
+    call: () => {
+      // Goes through all the wavelengths
+      cy.contains('450 nm (blue)').click()
+      cy.contains('562 nm (green)').click()
+      cy.contains('562 nm (green)').click()
+      cy.contains('600 nm (orange)').click()
+      cy.contains('600 nm (orange)').click()
+      cy.contains('650 nm (red)').click()
+      cy.contains('650 nm (red)').click()
+      cy.contains('Other').click()
+    },
+  }),
+  DefineCustomWavelegthSingle: (wavelength: string): StepThunk => ({
+    call: () => {
+      // Goes through all the wavelengths
+      cy.contains('Custom wavelength')
+        .closest('div.Flex-sc-1qhp8l7-0.ivRgZg')
+        .find('input.InputField__StyledInput-sc-1gyyvht-0.cLVzBl')
+        .type('500')
+    },
+  }),
 }
 
 /**
  * These are your "verifications" as StepThunks.
  */
 export const ModuleVerifications = {
-  /**
-   * Verify that the tempdeck step form opens correctly.
-   */
+  NoMoveToPlateReaderWhenClosed: (): StepThunk => ({
+    call: () => {
+      cy.contains('Absorbance Plate Reader Module lid closed')
+      cy.contains(
+        'This step tries to use labware in the Absorbance Plate Reader. Open the lid before this step.'
+      )
+    },
+  }),
+
   TempeDeckInitialForm: (): StepThunk => ({
     call: () => {
       cy.contains(ModContent.ModState)
@@ -133,9 +168,6 @@ export const ModuleVerifications = {
     },
   }),
 
-  /**
-   * Verify that the pause step has correct info in step preview (temp set to 4°C).
-   */
   Temp4CPauseTextVerification: (): StepThunk => ({
     call: () => {
       cy.contains('div', 'Pausing until')
@@ -143,6 +175,23 @@ export const ModuleVerifications = {
         .and('contain', 'reaches')
         .find('[data-testid="Tag_default"]')
         .should('contain', '4°C')
+    },
+  }),
+
+  PlateReaderPart1NoInitilization: (): StepThunk => ({
+    call: () => {
+      cy.contains('Define initialization settings')
+      cy.contains('Change lid position')
+      cy.contains('Current initialization settings')
+      cy.contains('No settings defined')
+    },
+  }),
+  PlateReaderPart2NoInitilization: (): StepThunk => ({
+    call: () => {
+      cy.contains('Select mode type')
+      cy.contains('Single')
+      cy.contains('Multi')
+      cy.contains('Add reference wavelength?')
     },
   }),
 }
