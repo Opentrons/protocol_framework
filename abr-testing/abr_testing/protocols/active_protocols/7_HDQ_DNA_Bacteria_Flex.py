@@ -241,6 +241,7 @@ def run(protocol: ProtocolContext) -> None:
                     # void air gap if necessary
                     m1000.dispense(m1000.current_volume, m.top())
                 m1000.move_to(m.center())
+                m1000.prepare_to_aspirate()
                 m1000.transfer(vol_per_trans, loc, waste, new_tip="never", air_gap=20)
                 m1000.blow_out(waste)
                 m1000.prepare_to_aspirate()
@@ -342,6 +343,7 @@ def run(protocol: ProtocolContext) -> None:
         protocol.comment("-----Mixing then transferring AL buffer-----")
         num_transfers = math.ceil(vol / 980)
         tiptrack(tips)
+        m1000.prepare_to_aspirate()
         for i in range(num_cols):
             if num_cols >= 5:
                 if i == 0:
@@ -361,14 +363,18 @@ def run(protocol: ProtocolContext) -> None:
                 m1000.aspirate(tvol, src.bottom(height))
                 m1000.air_gap(10)
                 m1000.dispense(m1000.current_volume, samples_m[i].top())
+                m1000.prepare_to_aspirate()
                 m1000.air_gap(20)
 
         for i in range(num_cols):
             if i != 0:
                 tiptrack(tips)
+                m1000.prepare_to_aspirate()
             mixing(
                 samples_m[i], m1000, tvol - 40, reps=10 if not dry_run else 1
             )  # vol is 250 AL + 180 sample
+            m1000.dispense(m1000.current_volume, waste)
+            m1000.prepare_to_aspirate()
             m1000.air_gap(20)
             m1000.drop_tip() if TIP_TRASH else m1000.return_tip()
 
@@ -422,6 +428,7 @@ def run(protocol: ProtocolContext) -> None:
                     vol_per_trans, source, well.top(), air_gap=20, new_tip="never"
                 )
                 if t < num_trans - 1:
+                    m1000.prepare_to_aspirate()
                     m1000.air_gap(20)
 
         protocol.comment("-----Mixing Beads in Plate-----")
@@ -543,6 +550,7 @@ def run(protocol: ProtocolContext) -> None:
         total_dispensed = 0
         for well in plate_for_plate_reader.rows()[0]:
             m1000.pick_up_tip()
+            m1000.prepare_to_aspirate()
             m1000.aspirate(190, water_well)
             m1000.air_gap(10)
             m1000.dispense(10, well.top())
@@ -566,6 +574,7 @@ def run(protocol: ProtocolContext) -> None:
         for well in plate_for_plate_reader.rows()[0]:
             m50.pick_up_tip()
             height = helpers.find_liquid_height(m50, tartrazine_well)
+            m50.prepare_to_aspirate()
             if height <= 0.0:
                 # If a negative tartrazine height is found,
                 # the protocol will pause, prompt a refill, and reprobe.
