@@ -410,17 +410,31 @@ async def main(
     tip_lot: str,
     tip_volume: int,
     has_filter: bool,
+    default_dial_position: Optional[types.Point] = None,
 ) -> None:
     ui.print_title("TIP-OVERLAP CALIBRATION")
+
+    # DIAL-INDICATOR
+    dial: Optional[Mitutoyo_Digimatic_Indicator] = None
+    if not simulate:
+        dial = Mitutoyo_Digimatic_Indicator(
+            port=list_ports_and_select("Dial Indicator")
+        )
+        dial.connect()
+        dial.read()
+
+    # GET HARDWARE CONTROLLER
     api = await helpers_ot3.build_async_ot3_hardware_api(
         is_simulating=simulate,
         pipette_left="p1000_single_v3.6",
         pipette_right="p1000_single_v3.6",
     )
-    pip_hw = api.hardware_pipettes[pip_mount.to_mount()]
-    mnt = pip_mount.name.lower()
-    pip_ch = int(pip_hw.channels.value)
+    await api.home()
 
+    # STORE TEST CONFIGURATIONS
+    pip_hw = api.hardware_pipettes[pip_mount.to_mount()]
+    mnt_str = pip_mount.name.lower()
+    pip_ch = int(pip_hw.channels.value)
     test_data = TestData(
         config=TestConfig(
             run_id=create_run_id(),
@@ -438,24 +452,25 @@ async def main(
     csv_tag = f"{test_data.config.pipette_id}"
     csv_file_name = create_file_name(csv_test_name, test_data.config.run_id, csv_tag)
 
-    # DIAL-INDICATOR
-    dial: Optional[Mitutoyo_Digimatic_Indicator] = None
-    if not simulate:
-        dial = Mitutoyo_Digimatic_Indicator(
-            port=list_ports_and_select("Dial Indicator")
-        )
-        dial.connect()
-        dial.read()
-
+    # CONFIRM DIAL POSITION
+    if default_dial_position:
+        ui.print_info("moving to the DIAL-INDICATOR")
+        await api.retract(pip_mount)
+        await helpers_ot3.move_to_arched_ot3(api, pip_mount, default_dial_position)
     ui.print_info("please jog to the DIAL-INDICATOR")
-    await api.retract(pip_mount)
+    ui.print_info("NOTE: dial should be PRESSED DOWN about 2-4 mm from neutral")
     await helpers_ot3.jog_mount_ot3(api, pip_mount)
     dial_pos = await api.gantry_position(pip_mount)
+    ui.print_info(
+        f"--dial {round(dial_pos.x, 2)} {round(dial_pos.y, 2)} {round(dial_pos.z, 2)}"
+    )
+    if not simulate:
+        ui.get_user_ready("copy/paste the dial position (above) for next time")
 
     test_tip_configs: List[TipConfig] = [
         TipConfig.build(
             api,
-            mnt,
+            mnt_str,
             lot=tip_lot,
             volume=tip_volume,
             has_filter=has_filter,
@@ -509,12 +524,15 @@ if __name__ == "__main__":
         "--volume", type=int, choices=[20, 50, 200, 1000], required=True
     )
     _parser.add_argument("--filter", action="store_true")
+    _parser.add_argument("--dial", nargs="+", type=float, default=[])
     _args = _parser.parse_args()
-    mnt = {"left": types.OT3Mount.LEFT, "right": types.OT3Mount.RIGHT}[_args.mount]
+    _mnt_hw = {"left": types.OT3Mount.LEFT, "right": types.OT3Mount.RIGHT}[_args.mount]
+    if _args.dial:
+        assert len(_args.dial) == 3
     asyncio.run(
         main(
             _args.simulate,
-            mnt,
+            _mnt_hw,
             slots_to_test=_args.slots,
             starting_tip=_args.starting_tip,
             num_tips_per_rack=_args.tips_per_rack,
@@ -522,5 +540,6 @@ if __name__ == "__main__":
             tip_lot=_args.lot,
             tip_volume=_args.volume,
             has_filter=_args.filter,
+            default_dial_position=types.Point(*_args.dial) if _args.dial else None,
         )
     )
