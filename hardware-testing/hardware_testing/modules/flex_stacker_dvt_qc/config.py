@@ -115,7 +115,6 @@ def build_report(test_name: str) -> CSVReport:
                 title=TestSection.L_AXIS_BASIC.value,
                 lines=test_l_axis_basic.build_csv_lines(),
             ),
-
             CSVSection(
                 title=TestSection.UI_LEDS.value,
                 lines=test_ui_leds.build_csv_lines(),

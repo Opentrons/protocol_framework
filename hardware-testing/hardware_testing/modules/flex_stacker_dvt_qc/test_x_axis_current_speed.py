@@ -51,15 +51,21 @@ async def test_cycle_per_direction(
     # first home in the opposite direction
     await stacker.home_axis(TEST_AXIS, direction.opposite())
     # move at homing speed
-    await stacker.move_axis(TEST_AXIS, direction, OFFSET, HOME_SPEED, None, HOME_CURRENT)
+    await stacker.move_axis(
+        TEST_AXIS, direction, OFFSET, HOME_SPEED, None, HOME_CURRENT
+    )
     try:
         # moving at the testing speed and current
-        await stacker.move_axis(TEST_AXIS, direction, AXIS_TRAVEL-OFFSET, speed, None, current)
+        await stacker.move_axis(
+            TEST_AXIS, direction, AXIS_TRAVEL - OFFSET, speed, None, current
+        )
         # # move towards limit switch
         # await stacker.move_axis(TEST_AXIS, direction, OFFSET+LIMIT_SWICH_CHECK, HOME_SPEED, None, HOME_CURRENT)
         dist = 0.0
-        while dist < ERROR_THRESHOLD+OFFSET:
-            await stacker.move_axis(TEST_AXIS, direction, LIMIT_SWICH_CHECK, HOME_SPEED, None, HOME_CURRENT)
+        while dist < ERROR_THRESHOLD + OFFSET:
+            await stacker.move_axis(
+                TEST_AXIS, direction, LIMIT_SWICH_CHECK, HOME_SPEED, None, HOME_CURRENT
+            )
             dist = dist + LIMIT_SWICH_CHECK
             lsw = await stacker._driver.get_limit_switch(TEST_AXIS, direction)
             if lsw:

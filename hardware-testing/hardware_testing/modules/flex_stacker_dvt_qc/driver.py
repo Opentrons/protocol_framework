@@ -104,9 +104,7 @@ class FlexStackerInterface:
             current=motion_params.current,
         )
         # Check that the latch is closed.
-        closed = await self._driver.get_limit_switch(
-            StackerAxis.L, Direction.RETRACT
-        )
+        closed = await self._driver.get_limit_switch(StackerAxis.L, Direction.RETRACT)
         return success and closed
 
     async def open_latch(

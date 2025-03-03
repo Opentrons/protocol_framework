@@ -19,7 +19,7 @@ CURRENT_THRESHOD = 1.0
 TEST_TRIALS = 10
 TEST_DIRECTIONS = [Direction.RETRACT, Direction.EXTEND]
 
-AXIS_TRAVEL = 138 #136 for DVT
+AXIS_TRAVEL = 138  # 136 for DVT
 BOTTOM_OFFSET = 10
 TOP_OFFSET = 1.75
 LIMIT_SWICH_CHECK = 0.5
@@ -59,7 +59,9 @@ async def test_extend_cycle(
     try:
         # moving at the testing speed and current to just under the limit switch
         extend_distance = AXIS_TRAVEL - BOTTOM_OFFSET
-        await stacker.move_axis(TEST_AXIS, Direction.EXTEND, extend_distance, speed, None, current)
+        await stacker.move_axis(
+            TEST_AXIS, Direction.EXTEND, extend_distance, speed, None, current
+        )
 
         # move towards slightly past the limit switch
         check_distance = TOP_OFFSET + LIMIT_SWICH_CHECK
@@ -81,13 +83,17 @@ async def test_retract_cycle(
 ) -> bool:
     """Test one retract cycle."""
     try:
-        #rehome the axis at the top
-        await stacker.move_axis(TEST_AXIS, Direction.RETRACT, TOP_OFFSET, HOME_SPEED, None, HOME_CURRENT)
+        # rehome the axis at the top
+        await stacker.move_axis(
+            TEST_AXIS, Direction.RETRACT, TOP_OFFSET, HOME_SPEED, None, HOME_CURRENT
+        )
         await stacker.home_axis(TEST_AXIS, Direction.EXTEND)
 
         # moving at the testing speed and current to just above the springs
         retract_distance = (AXIS_TRAVEL + TOP_OFFSET) - BOTTOM_OFFSET
-        await stacker.move_axis(TEST_AXIS, Direction.RETRACT, retract_distance, speed, None, current)
+        await stacker.move_axis(
+            TEST_AXIS, Direction.RETRACT, retract_distance, speed, None, current
+        )
 
         # move slightly past the limit switch
         check_distance = BOTTOM_OFFSET + LIMIT_SWICH_CHECK
