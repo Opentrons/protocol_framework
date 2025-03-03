@@ -50,5 +50,5 @@ function getLabwareDefinitionFromCommand(
       known
     )
   }
-  return known
+  return []
 }
