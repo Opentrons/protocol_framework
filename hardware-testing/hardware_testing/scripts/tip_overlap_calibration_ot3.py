@@ -370,7 +370,7 @@ async def _run_trial(
         f"before={round(tip_z_error, 2)} "
         f"after={round(tip_z_error_calibrated, 2)} "
         f"improvement={round(error_reduction, 2)} "
-        f"({int(error_reduction / tip_z_error)}%)"
+        f"({int((error_reduction / tip_z_error) * 100.0)}%)"
     )
 
     ui.print_info("dropping tip in trash")
