@@ -30,6 +30,7 @@ class FlexStackerSubState:
     pool_adapter_definition: LabwareDefinition | None
     pool_lid_definition: LabwareDefinition | None
     pool_count: int
+    max_pool_count: int
 
     def new_from_state_change(
         self, update: FlexStackerStateUpdate
@@ -42,7 +43,9 @@ class FlexStackerSubState:
         pool_primary_definition = self.pool_primary_definition
         pool_adapter_definition = self.pool_adapter_definition
         pool_lid_definition = self.pool_lid_definition
+        max_pool_count = self.max_pool_count
         if update.pool_constraint != NO_CHANGE:
+            max_pool_count = update.pool_constraint.max_pool_count
             pool_primary_definition = update.pool_constraint.primary_definition
             pool_adapter_definition = update.pool_constraint.adapter_definition
             pool_lid_definition = update.pool_constraint.lid_definition
@@ -74,4 +77,18 @@ class FlexStackerSubState:
             pool_adapter_definition=pool_adapter_definition,
             pool_lid_definition=pool_lid_definition,
             pool_count=pool_count,
+            max_pool_count=max_pool_count,
         )
+
+    def get_pool_definition_ordered_list(self) -> list[LabwareDefinition] | None:
+        """Get the pool definitions in a list suitable for getting the height."""
+        if not self.pool_primary_definition:
+            return None
+
+        defs: list[LabwareDefinition] = []
+        if self.pool_lid_definition is not None:
+            defs.append(self.pool_lid_definition)
+        defs.append(self.pool_primary_definition)
+        if self.pool_adapter_definition is not None:
+            defs.append(self.pool_adapter_definition)
+        return defs

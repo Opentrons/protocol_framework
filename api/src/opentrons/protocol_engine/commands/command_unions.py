@@ -14,6 +14,7 @@ from .pipetting_common import (
     TipPhysicallyAttachedError,
 )
 from .movement_common import StallOrCollisionError
+from .flex_stacker.common import FlexStackerStallOrCollisionError
 
 from . import absorbance_reader
 from . import flex_stacker
@@ -908,6 +909,7 @@ CommandDefinedErrorData = Union[
     DefinedErrorData[LiquidNotFoundError],
     DefinedErrorData[GripperMovementError],
     DefinedErrorData[StallOrCollisionError],
+    DefinedErrorData[FlexStackerStallOrCollisionError],
 ]
 
 

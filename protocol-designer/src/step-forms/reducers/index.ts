@@ -22,7 +22,11 @@ import {
 import { PRESAVED_STEP_ID } from '../../steplist/types'
 import { getLabwareIsCompatible } from '../../utils/labwareModuleCompatibility'
 import { getLabwareOnModule } from '../../ui/modules/utils'
-import { getLabwarePythonName, getModulePythonName } from '../../utils'
+import {
+  getAdditionalEquipmentPythonName,
+  getLabwarePythonName,
+  getModulePythonName,
+} from '../../utils'
 import { nestedCombineReducers } from './nestedCombineReducers'
 import {
   _getPipetteEntitiesRootState,
@@ -1246,14 +1250,21 @@ export const additionalEquipmentInvariantProperties = handleActions<NormalizedAd
       }
       let trashBin
       if (Object.keys(trashBinLocationUpdate).length > 0) {
-        const id = Object.keys(trashBinLocationUpdate)[0]
-        trashBin = {
-          [id]: {
-            name: 'trashBin' as const,
-            id,
-            location: Object.values(trashBinLocationUpdate)[0],
-          },
-        }
+        trashBin = Object.entries(trashBinLocationUpdate).reduce(
+          (acc, [id, location], index) => ({
+            ...acc,
+            [id]: {
+              name: 'trashBin' as const,
+              id,
+              location,
+              pythonName: getAdditionalEquipmentPythonName(
+                'trashBin',
+                index + 1
+              ),
+            },
+          }),
+          {}
+        )
       }
       let wasteChute
       if (Object.keys(wasteChuteLocationUpdate).length > 0) {
@@ -1263,6 +1274,7 @@ export const additionalEquipmentInvariantProperties = handleActions<NormalizedAd
             name: 'wasteChute' as const,
             id,
             location: Object.values(wasteChuteLocationUpdate)[0],
+            pythonName: getAdditionalEquipmentPythonName('wasteChute', 1),
           },
         }
       }
@@ -1319,12 +1331,19 @@ export const additionalEquipmentInvariantProperties = handleActions<NormalizedAd
       action: CreateDeckFixtureAction
     ): NormalizedAdditionalEquipmentById => {
       const { location, id, name } = action.payload
+      const typeCount = Object.values(state).filter(aE => aE.name === name)
+        .length
+
       return {
         ...state,
         [id]: {
           name,
           id,
           location,
+          pythonName:
+            name === 'stagingArea'
+              ? undefined
+              : getAdditionalEquipmentPythonName(name, typeCount + 1),
         },
       }
     },
