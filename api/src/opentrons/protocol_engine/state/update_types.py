@@ -371,7 +371,6 @@ class FlexStackerPoolConstraint:
     primary_definition: LabwareDefinition
     lid_definition: LabwareDefinition | None
     adapter_definition: LabwareDefinition | None
-    # if the pool is changed we must also update the max pool count
 
 
 @dataclasses.dataclass
