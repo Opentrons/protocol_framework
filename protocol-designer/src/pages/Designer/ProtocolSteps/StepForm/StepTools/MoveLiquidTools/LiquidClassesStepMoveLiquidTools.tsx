@@ -119,7 +119,7 @@ export const LiquidClassesStepMoveLiquidTools = ({
             <RadioButton
               key={name}
               onChange={(e: ChangeEvent<any>) => {
-                propsForFields.liquid_classes_setting.updateValue(
+                propsForFields.transfer_liquid_classes_setting.updateValue(
                   e.currentTarget.value
                 )
                 setSelectedLiquidClass(name)

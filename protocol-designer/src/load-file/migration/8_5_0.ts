@@ -108,7 +108,7 @@ export const migrateFile = (
           aspirate_touchTip_speed: null,
           dispense_touchTip_speed: null,
           liquidClassesSupported: liquidClassesSupported ?? false,
-          liquid_classes_setting: null,
+          transfer_liquid_classes_setting: null,
         },
       }
     }
