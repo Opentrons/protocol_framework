@@ -6,13 +6,13 @@ import {
 } from '../support/SetupSteps'
 import { StepBuilder } from '../support/StepBuilder'
 
-describe('The Redesigned Create Protocol Landing Page', () => {
+describe('Create new Flex', () => {
   beforeEach(() => {
     cy.visit('/')
     cy.closeAnalyticsModal()
   })
 
-  it('content and step 1 flow works', () => {
+  it('Goes through onboarding workflow for Flex', () => {
     cy.clickCreateNew()
     cy.verifyCreateNewHeader()
 

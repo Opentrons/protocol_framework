@@ -3,14 +3,14 @@ import { UniversalSteps } from '../support/UniversalSteps'
 import { ModuleSteps, ModuleVerifications } from '../support/ModuleSteps'
 import { StepBuilder } from '../support/StepBuilder'
 
-describe('The Redesigned Create Protocol Landing Page', () => {
+describe('Modules happy path - will load modules to this over time', () => {
   beforeEach(() => {
     cy.visit('/')
     cy.verifyHomePage()
     cy.closeAnalyticsModal()
   })
 
-  it('content and step 1 flow works', () => {
+  it('Selects modules on the onboarding flow and then uses Temperatuer Module', () => {
     cy.clickCreateNew()
     cy.verifyCreateNewHeader()
 

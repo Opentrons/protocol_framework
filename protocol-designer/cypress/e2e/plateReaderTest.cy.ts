@@ -3,14 +3,14 @@ import { ModuleSteps, ModuleVerifications } from '../support/ModuleSteps'
 import { UniversalSteps } from '../support/UniversalSteps'
 import { StepBuilder } from '../support/StepBuilder'
 
-describe('The Redesigned Create Protocol Landing Page', () => {
+describe('Plate Reader Happy Path Single-Wavelength', () => {
   beforeEach(() => {
     cy.visit('/')
     cy.verifyHomePage()
     cy.closeAnalyticsModal()
   })
 
-  it('Plate Reader test', () => {
+  it('Scans one wavelegth for plate reader and checks erros', () => {
     cy.clickCreateNew()
     cy.verifyCreateNewHeader()
     const steps = new StepBuilder()
