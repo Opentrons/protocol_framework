@@ -249,7 +249,6 @@ export function LiquidToolbox(props: LiquidToolboxProps): JSX.Element {
       }
     })
     .filter(Boolean)
-
   return (
     <>
       {showDefineLiquidModal ? (

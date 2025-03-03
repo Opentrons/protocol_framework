@@ -8,30 +8,26 @@ import {
   SPACING,
   StyledText,
 } from '@opentrons/components'
-import { getAllLiquidClassDefs } from '@opentrons/shared-data'
 import { getLiquidEntities } from '../../../../../../step-forms/selectors'
-import { getLiquidClassDisplayName } from '../../../../../../liquid-defs/utils'
+import {
+  getLiquidClassDisplayName,
+  getSortedLiquidClassDefs,
+} from '../../../../../../liquid-defs/utils'
 
 import type { ChangeEvent, Dispatch, SetStateAction } from 'react'
 import type { FieldPropsByName } from '../../types'
-import type { StepFormErrors } from '../../../../../../steplist'
-import type { FormData } from '../../../../../../form-types'
 
 interface LiquidClassesStepMoveLiquidToolsProps {
   propsForFields: FieldPropsByName
-  formData: FormData
   setShowFormErrors?: Dispatch<SetStateAction<boolean>>
-  visibleFormErrors: StepFormErrors
 }
 export const LiquidClassesStepMoveLiquidTools = ({
   propsForFields,
-  formData,
   setShowFormErrors,
-  visibleFormErrors,
 }: LiquidClassesStepMoveLiquidToolsProps): JSX.Element => {
   const { t } = useTranslation(['liquids'])
   const liquids = useSelector(getLiquidEntities)
-  const liquidClassDefs = getAllLiquidClassDefs()
+  const sortedLiquidClassDefs = getSortedLiquidClassDefs()
 
   const liquidClassToLiquidsMap: Record<string, string[]> = {}
   Object.values(liquids).forEach(({ displayName, liquidClass }) => {
@@ -61,16 +57,8 @@ export const LiquidClassesStepMoveLiquidTools = ({
   }, [defaultSelectedLiquidClass])
 
   const liquidClassOptions = [
-    ...Object.entries(liquidClassDefs)
-      .sort(([_0, a], [_1, b]) => {
-        if (a.displayName < b.displayName) {
-          return -1
-        } else if (a.displayName > b.displayName) {
-          return 1
-        }
-        return 0
-      })
-      .map(([liquidClassDefName, { displayName, description }]) => ({
+    ...Object.entries(sortedLiquidClassDefs).map(
+      ([liquidClassDefName, { displayName, description }]) => ({
         name: displayName,
         value: liquidClassDefName,
         subButtonLabel:
@@ -81,7 +69,8 @@ export const LiquidClassesStepMoveLiquidTools = ({
                 ),
               })
             : description,
-      })),
+      })
+    ),
     {
       name: t('dont_use_liquid_class'),
       value: '',
@@ -123,6 +112,7 @@ export const LiquidClassesStepMoveLiquidTools = ({
                   e.currentTarget.value
                 )
                 setSelectedLiquidClass(name)
+                setShowFormErrors?.(false)
               }}
               buttonLabel={name}
               subButtonLabel={subButtonLabel}
