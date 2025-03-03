@@ -22,7 +22,11 @@ import {
 import { PRESAVED_STEP_ID } from '../../steplist/types'
 import { getLabwareIsCompatible } from '../../utils/labwareModuleCompatibility'
 import { getLabwareOnModule } from '../../ui/modules/utils'
-import { getLabwarePythonName, getModulePythonName } from '../../utils'
+import {
+  getAdditionalEquipmentPythonName,
+  getLabwarePythonName,
+  getModulePythonName,
+} from '../../utils'
 import { nestedCombineReducers } from './nestedCombineReducers'
 import {
   _getPipetteEntitiesRootState,
@@ -1319,12 +1323,18 @@ export const additionalEquipmentInvariantProperties = handleActions<NormalizedAd
       action: CreateDeckFixtureAction
     ): NormalizedAdditionalEquipmentById => {
       const { location, id, name } = action.payload
+      const count = Object.values(state).filter(aE => aE.name === name).length
+
       return {
         ...state,
         [id]: {
           name,
           id,
           location,
+          pythonName:
+            name === 'stagingArea'
+              ? undefined
+              : getAdditionalEquipmentPythonName(name, count),
         },
       }
     },

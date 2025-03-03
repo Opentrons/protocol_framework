@@ -19,11 +19,14 @@ import {
   getLoadLiquids,
   getLoadModules,
   getLoadPipettes,
+  getLoadTrashBins,
+  getLoadWasteChute,
   pythonMetadata,
   pythonRequirements,
 } from '../selectors/pythonFile'
 import type { LabwareDefinition2 } from '@opentrons/shared-data'
 import type {
+  AdditionalEquipmentEntities,
   LabwareEntities,
   LabwareLiquidState,
   LiquidEntities,
@@ -386,6 +389,51 @@ well_plate_1["A1"].load_liquid(liquid_1, 10)
 well_plate_1["A2"].load_liquid(liquid_1, 10)
 well_plate_1["A3"].load_liquid(liquid_2, 50)
 well_plate_2["D1"].load_liquid(liquid_2, 180)`.trimStart()
+    )
+  })
+})
+
+const trash1 = 'trash1'
+const trash2 = 'trash2'
+const wasteChute = 'wasteChute'
+const mockAdditionalEquipmentEntities: AdditionalEquipmentEntities = {
+  [trash1]: {
+    name: 'trashBin',
+    pythonName: 'trash_bin_1',
+    location: 'A3',
+    id: trash1,
+  },
+  [trash2]: {
+    name: 'trashBin',
+    pythonName: 'trash_bin_2',
+    location: 'C3',
+    id: trash2,
+  },
+  [wasteChute]: {
+    name: 'wasteChute',
+    pythonName: 'waste_chute',
+    location: 'D3',
+    id: wasteChute,
+  },
+}
+
+describe('getTrashBins', () => {
+  it('should generate 2 trash bins', () => {
+    expect(getLoadTrashBins(mockAdditionalEquipmentEntities)).toBe(
+      `
+# Load Trash Bins:
+trash_bin_1 = protocol.load_trash_bin(location = "A3")
+trash_bin_2 = protocol.load_trash_bin(location = "C3")`.trimStart()
+    )
+  })
+})
+
+describe('getLoadWasteChute', () => {
+  it('should generate a waste chute', () => {
+    expect(getLoadWasteChute(mockAdditionalEquipmentEntities)).toBe(
+      `
+# Load Waste Chute:
+waste_chute = protocol.load_waste_chute()`.trimStart()
     )
   })
 })

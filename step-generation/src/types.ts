@@ -150,6 +150,9 @@ export interface NormalizedAdditionalEquipmentById {
     name: AdditionalEquipmentName
     id: string
     location?: string
+    //  Note: leaving as optional since gripper and stagingArea
+    //  will never need a pythonName
+    pythonName?: string
   }
 }
 
