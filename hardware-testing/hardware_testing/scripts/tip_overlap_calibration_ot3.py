@@ -9,7 +9,7 @@ from time import sleep
 from typing import Dict, Optional, Tuple, List, Any
 
 from opentrons.hardware_control.ot3api import OT3API
-from opentrons.hardware_control.ot3_calibration import SLOT_CENTER
+from opentrons.hardware_control.ot3_calibration import SLOT_CENTER, calibrate_pipette
 from opentrons.types import DeckSlotName
 
 from opentrons_shared_data.load import get_shared_data_root
@@ -192,7 +192,7 @@ class TipConfig:
     @property
     def tip_point(self) -> types.Point:
         tip_row_idx = "ABCDEFGH".index(self.well[0])
-        tip_col_idx = int(self.well[1:])
+        tip_col_idx = int(self.well[1:]) - 1
         tip_well_offset = types.Point(x=tip_col_idx * 9.0, y=tip_row_idx * -9.0, z=0)
         # NOTE: the ot3 helpers were made back when all slots were numbered (slots 1-12)
         #       so here we convert the new slot name (eg: "C3") to an integer
@@ -365,10 +365,10 @@ async def _run_trial(
     tip_z_error_calibrated = dial_tip_calibrated - dial_nozzle
     error_reduction = tip_z_error - tip_z_error_calibrated
 
-    ui.print_info("returning tip")
+    ui.print_info("dropping tip in trash")
     await api.retract(pip_mount)
     trash_pos = helpers_ot3.get_theoretical_a1_position(12, tip_cfg.load_name)
-    trash_pos += types.Point(x=9 * 6, y=-9 * 4.5, z=-120)
+    trash_pos += types.Point(x=0, y=-9 * 4.5, z=-20)
     await helpers_ot3.move_to_arched_ot3(api, pip_mount, trash_pos)
     await api.drop_tip(pip_mount)
 
@@ -431,7 +431,6 @@ async def main(
         pipette_left="p1000_single_v3.6",
         pipette_right="p1000_single_v3.6",
     )
-    await api.home()
 
     # STORE TEST CONFIGURATIONS
     pip_hw = api.hardware_pipettes[pip_mount.to_mount()]
@@ -453,6 +452,19 @@ async def main(
     csv_test_name = Path(__file__).name.replace("_", "-").replace(".py", "")
     csv_tag = f"{test_data.config.pipette_id}"
     csv_file_name = create_file_name(csv_test_name, test_data.config.run_id, csv_tag)
+
+    # CALIBRATE PIPETTE
+    await api.home()
+    await api.move_rel(pip_mount, types.Point(x=-200, y=-200))
+    if not simulate:
+        ui.get_user_ready("ATTACH calibration probe")
+    api.add_tip(pip_mount, api.config.calibration.probe_length)
+    if not simulate:
+        await calibrate_pipette(api, pip_mount)
+    await api.retract(pip_mount)
+    if not simulate:
+        ui.get_user_ready("REMOVE calibration probe")
+    api.remove_tip(pip_mount)
 
     # CONFIRM DIAL POSITION
     if default_dial_position:
@@ -504,11 +516,16 @@ async def main(
             csv_file_name,
             data=test_data.csv_data_latest_trial + CSV_NEWLINE,
         )
+        ui.print_info(test_data.csv_data_latest_trial)
 
     try:
+        total_tips_to_test = len(test_tip_configs) * num_tips_per_rack
+        total_tips_tested = 0
         for tip_cfg in test_tip_configs:
             _cfg = replace(tip_cfg)
             for i in range(num_tips_per_rack):
+                total_tips_tested += 1
+                ui.print_title(f"TIP {total_tips_tested}/{total_tips_to_test}")
                 if i > 0:
                     # same tip-rack, so just copy the config
                     # but increment to the next well location
