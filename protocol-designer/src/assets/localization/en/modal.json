@@ -78,7 +78,7 @@
       "body6": "Removing option to touch tip when dispensing into a trash bin",
       "body7": "Removing ability to dispense to off-deck labware or move off-deck labware with a gripper",
       "body8": "Removing quantity dropdown from all modules during the Flex setup flow to reduce deck setup conflicts",
-      "body9": "All protocols now require Opentrons App version 8.2.0+ to run.",
+      "body9": "All protocols now require Opentrons App version 8.3.0+ to run.",
       "body10": "For more information, see the <link1>Protocol Designer Instruction Manual</link1>."
     }
   },
