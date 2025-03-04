@@ -38,9 +38,8 @@ def run(protocol: ProtocolContext) -> None:
         lid="opentrons_flex_tiprack_lid",
     )
 
-    protocol.comment(
-        f"Stacker serial number {'matches' if BARCODE == stacker.serial_number else 'does not match'} {BARCODE}"
-    )
+    match_str = "matches" if BARCODE == stacker.serial_number else "does not match"
+    protocol.comment(f"Stacker serial number {match_str} {BARCODE}")
 
     SLOTS = ["C1", "C2", "C3", "D1", "D2", "D3"]
 
