@@ -4,8 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { yupResolver } from '@hookform/resolvers/yup'
 import * as Yup from 'yup'
 import { Controller, useForm } from 'react-hook-form'
-
-import { getAllLiquidClassDefs } from '@opentrons/shared-data'
+import { getSortedLiquidClassDefs } from '../../liquid-defs/utils'
 import {
   Btn,
   COLORS,
@@ -36,7 +35,6 @@ import { LiquidClassDropdown } from './LiquidClassDropdown'
 import type { Ingredient } from '@opentrons/step-generation'
 import type { ThunkDispatch } from 'redux-thunk'
 import type { BaseState } from '../../types'
-import { getSortedLiquidClassDefs } from '../../liquid-defs/utils'
 
 const liquidEditFormSchema: any = Yup.object().shape({
   displayName: Yup.string().required('liquid name is required'),
@@ -137,16 +135,17 @@ export function DefineLiquidsModal(
 
   const liquidClassOptions = [
     { name: t('liquids:dont_use_liquid_class'), value: '' },
-    ...Object.entries(sortedLiquidClassDefs)
-    .map(([liquidClassDefName, { displayName, description }]) => {
-      return {
-        value: liquidClassDefName,
-        name: t('liquids:liquid_class_name_description', {
-          displayName,
-          description,
-        }),
+    ...Object.entries(sortedLiquidClassDefs).map(
+      ([liquidClassDefName, { displayName, description }]) => {
+        return {
+          value: liquidClassDefName,
+          name: t('liquids:liquid_class_name_description', {
+            displayName,
+            description,
+          }),
+        }
       }
-    }),
+    ),
   ]
 
   return (
