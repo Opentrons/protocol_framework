@@ -26,6 +26,12 @@ function getLabwareInfoRecords(
   const labwareDetails: LPCLabwareInfo['labware'] = {}
 
   params.lwURIs.forEach(uri => {
+    if (!labwareUriKnown({ ...params, uri })) {
+      console.warn(
+        `getLPCLabwareInfoFrom: No information about labware uri ${uri}, is there a command that loads labware that we're not handling?`
+      )
+      return
+    }
     if (!(uri in labwareDetails)) {
       labwareDetails[uri] = {
         id: getALabwareIdFromUri({ ...params, uri }),
@@ -49,6 +55,13 @@ function getALabwareIdFromUri({
   return (
     lwLocationCombos.find(combo => combo.definitionUri === uri)?.labwareId ?? ''
   )
+}
+
+function labwareUriKnown({
+  uri,
+  labwareDefs,
+}: GetLPCLabwareInfoForURI): boolean {
+  return labwareDefs?.find(def => getLabwareDefURI(def) === uri) != null
 }
 
 function getDisplayNameFromUri({

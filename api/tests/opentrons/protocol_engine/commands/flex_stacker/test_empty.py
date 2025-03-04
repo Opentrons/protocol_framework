@@ -65,6 +65,7 @@ async def test_empty_happypath(
         pool_adapter_definition=None,
         pool_lid_definition=None,
         pool_count=current_count,
+        max_pool_count=5,
     )
     decoy.when(state_view.modules.get_flex_stacker_substate(module_id)).then_return(
         stacker_state
@@ -115,6 +116,7 @@ async def test_empty_requires_constrained_pool(
         pool_lid_definition=None,
         pool_adapter_definition=None,
         pool_count=3,
+        max_pool_count=5,
     )
     decoy.when(state_view.modules.get_flex_stacker_substate(module_id)).then_return(
         stacker_state
@@ -155,6 +157,7 @@ async def test_pause_strategy_pauses(
         pool_adapter_definition=None,
         pool_lid_definition=None,
         pool_count=current_count,
+        max_pool_count=5,
     )
     decoy.when(state_view.modules.get_flex_stacker_substate(module_id)).then_return(
         stacker_state
