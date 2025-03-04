@@ -1,4 +1,5 @@
 import type { CommonCommandRunTimeInfo, CommonCommandCreateInfo } from '.'
+import type { LabwareLocationSequence } from './setup'
 import type { LabwareDefinition2 } from '../../js'
 
 export type ModuleRunTimeCommand =
@@ -30,6 +31,7 @@ export type ModuleRunTimeCommand =
   | AbsorbanceReaderInitializeRunTimeCommand
   | AbsorbanceReaderReadRunTimeCommand
   | FlexStackerSetStoredLabwareRunTimeCommand
+  | FlexStackerRetrieveRunTimeCommand
 
 export type ModuleCreateCommand =
   | MagneticModuleEngageMagnetCreateCommand
@@ -60,6 +62,7 @@ export type ModuleCreateCommand =
   | AbsorbanceReaderInitializeCreateCommand
   | AbsorbanceReaderReadCreateCommand
   | FlexStackerSetStoredLabwareCreateCommand
+  | FlexStackerRetrieveCreateCommand
 
 export interface MagneticModuleEngageMagnetCreateCommand
   extends CommonCommandCreateInfo {
@@ -411,4 +414,52 @@ export interface FlexStackerSetStoredLabwareRunTimeCommand
     adapterLabwareDefinition?: LabwareDefinition2 | null
     count: number
   }
+}
+
+export interface FlexStackerRetrieveCreateCommand
+  extends CommonCommandCreateInfo {
+  commandType: 'flexStacker/retrieve'
+  params: {
+    moduleId: string
+  }
+}
+
+interface RetrieveResultPrimary {
+  labwareId: string
+  primaryLocationSequence: LabwareLocationSequence
+  primaryLabwareURI: string
+}
+
+interface RetrieveResultNoLid {
+  lidId?: null
+  lidLocationSequence?: null
+  lidLabwareURI?: null
+}
+
+interface RetrieveResultLid {
+  lidId: string
+  lidLocationSequence: LabwareLocationSequence
+  lidLabwareURI: string
+}
+
+interface RetrieveResultAdapter {
+  adapterId: string
+  adapterLocationSequence: LabwareLocationSequence
+  adapterLabwareURI: string
+}
+
+interface RetrieveResultNoAdapter {
+  adapterId?: null
+  adapterLocationSequence?: null
+  adapterLabwareURI?: null
+}
+
+export interface FlexStackerRetrieveRunTimeCommand
+  extends FlexStackerRetrieveCreateCommand,
+    CommonCommandRunTimeInfo {
+  result?:
+    | (RetrieveResultPrimary & RetrieveResultNoLid & RetrieveResultNoAdapter)
+    | (RetrieveResultPrimary & RetrieveResultLid & RetrieveResultNoAdapter)
+    | (RetrieveResultPrimary & RetrieveResultNoLid & RetrieveResultAdapter)
+    | (RetrieveResultPrimary & RetrieveResultAdapter & RetrieveResultLid)
 }
