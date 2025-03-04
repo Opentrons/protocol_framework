@@ -382,8 +382,10 @@ def run(ctx: ProtocolContext) -> None:
             #       this can be avoided by adding extra starting liquid in the SRC labware
             SUBMERGE_MM = -2
             pipette.aspirate(target_ul, src_well.meniscus(SUBMERGE_MM))
+            pipette.touch_tip(speed = 30)
         else:
             pipette.aspirate(target_ul, src_well.bottom(BOTTOM_MM))
+            pipette.touch_tip(speed = 30)
         # DISPENSE
         if "M" in dsp_behavior:
             SUBMERGE_MM = -1.5
