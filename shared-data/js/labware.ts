@@ -60,6 +60,8 @@ const schema2DefinitionsByURI = Object.fromEntries(
     def,
   ])
 )
+// todo(mm, 2025-02-27): getAllDefinitions() should include this.
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const schema3DefinitionsByURI = Object.fromEntries(
   Object.values(schema3DefinitionsByPath).map(def => [
     getLabwareDefURI(def),
