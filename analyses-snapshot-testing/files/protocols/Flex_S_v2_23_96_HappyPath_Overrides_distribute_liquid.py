@@ -19,12 +19,12 @@ class Test:
 
 
 Tests = [
-    Test(key="50", tiprack_loadname="opentrons_flex_96_tiprack_50ul", transfer_volume=22),
-    Test(key="50_filter", tiprack_loadname="opentrons_flex_96_filtertiprack_50ul", transfer_volume=22),
-    Test(key="200", tiprack_loadname="opentrons_flex_96_tiprack_200ul", transfer_volume=111),
-    Test(key="200_filter", tiprack_loadname="opentrons_flex_96_filtertiprack_200ul", transfer_volume=89),
-    Test(key="1000", tiprack_loadname="opentrons_flex_96_tiprack_1000ul", transfer_volume=175),
-    Test(key="1000_filter", tiprack_loadname="opentrons_flex_96_filtertiprack_1000ul", transfer_volume=633),
+    Test(key="50", tiprack_loadname="opentrons_flex_96_tiprack_50ul", transfer_volume=101),
+    Test(key="50_filter", tiprack_loadname="opentrons_flex_96_filtertiprack_50ul", transfer_volume=101),
+    Test(key="200", tiprack_loadname="opentrons_flex_96_tiprack_200ul", transfer_volume=401),
+    Test(key="200_filter", tiprack_loadname="opentrons_flex_96_filtertiprack_200ul", transfer_volume=601),
+    Test(key="1000", tiprack_loadname="opentrons_flex_96_tiprack_1000ul", transfer_volume=2003),
+    Test(key="1000_filter", tiprack_loadname="opentrons_flex_96_filtertiprack_1000ul", transfer_volume=2003),
 ]
 
 
@@ -38,7 +38,30 @@ def get_test(key):
 
 
 requirements = {"robotType": "Flex", "apiLevel": "2.23"}
-metadata = {"protocolName": "96 Channel transfer_liquid all tiprack types with all liquid classes"}
+metadata = {"protocolName": "96 Channel distribute_liquid all tiprack types with all liquid classes"}
+
+
+def comment_tip_rack_status(ctx, tip_rack):
+    """
+    Print out the tip status for each row in a tip rack.
+    Each row (A-H) will print the well statuses for columns 1-12 in a single comment,
+    with a '🟢' for present tips and a '❌' for missing tips.
+    """
+    range_A_to_H = [chr(i) for i in range(ord("A"), ord("H") + 1)]
+    range_1_to_12 = range(1, 13)
+
+    ctx.comment(f"Tip rack in {tip_rack.parent}")
+
+    for row in range_A_to_H:
+        status_line = f"{row}: "
+        for col in range_1_to_12:
+            well = f"{row}{col}"
+            has_tip = tip_rack.wells_by_name()[well].has_tip
+            status_emoji = "🟢" if has_tip else "❌"
+            status_line += f"{well} {status_emoji}  "
+
+        # Print the full status line for the row
+        ctx.comment(status_line)
 
 
 def run(protocol_context):
@@ -54,8 +77,12 @@ def run(protocol_context):
     tiprack_1 = protocol_context.load_labware(test.tiprack_loadname, "A1", adapter="opentrons_flex_96_tiprack_adapter")
     tiprack_2 = protocol_context.load_labware(test.tiprack_loadname, "A2", adapter="opentrons_flex_96_tiprack_adapter")
     tiprack_3 = protocol_context.load_labware(test.tiprack_loadname, "B2", adapter="opentrons_flex_96_tiprack_adapter")
+    tiprack_4 = protocol_context.load_labware(test.tiprack_loadname, "C2", adapter="opentrons_flex_96_tiprack_adapter")
+    tiprack_5 = protocol_context.load_labware(test.tiprack_loadname, "B3", adapter="opentrons_flex_96_tiprack_adapter")
+    tiprack_6 = protocol_context.load_labware(test.tiprack_loadname, "C3", adapter="opentrons_flex_96_tiprack_adapter")
+    tiprack_7 = protocol_context.load_labware(test.tiprack_loadname, "D3", adapter="opentrons_flex_96_tiprack_adapter")
 
-    tip_racks = [tiprack_1, tiprack_2, tiprack_3]
+    tip_racks = [tiprack_1, tiprack_2, tiprack_3, tiprack_4, tiprack_5, tiprack_6, tiprack_7]
     trash = protocol_context.load_trash_bin("A3")
     pipette_96 = protocol_context.load_instrument("flex_96channel_1000", "right", tip_racks=tip_racks)
 
@@ -82,10 +109,10 @@ def run(protocol_context):
     # Transfer
 
     volume = test.transfer_volume
-    # new_tip = "once"
-    new_tip = "always"
+    new_tip = "once"
+    # new_tip = "always"
 
-    pipette_96.transfer_liquid(
+    pipette_96.distribute_liquid(
         liquid_class=water_class,
         volume=volume,
         source=water_source.wells_by_name()[SOURCE_WELL],
@@ -94,7 +121,7 @@ def run(protocol_context):
         trash_location=trash,
     )
 
-    pipette_96.transfer_liquid(
+    pipette_96.distribute_liquid(
         liquid_class=ethanol_class,
         volume=volume,
         source=ethanol_source.wells_by_name()[SOURCE_WELL],
@@ -103,7 +130,7 @@ def run(protocol_context):
         trash_location=trash,
     )
 
-    pipette_96.transfer_liquid(
+    pipette_96.distribute_liquid(
         liquid_class=glycerol_class,
         volume=volume,
         source=ethanol_source.wells_by_name()[SOURCE_WELL],
@@ -111,3 +138,6 @@ def run(protocol_context):
         new_tip=new_tip,
         trash_location=trash,
     )
+
+    for tiprack in tip_racks:
+        comment_tip_rack_status(protocol_context, tiprack)
