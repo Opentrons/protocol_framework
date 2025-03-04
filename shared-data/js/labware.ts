@@ -69,14 +69,13 @@ const schema3DefinitionsByURI = Object.fromEntries(
 
 // todo(mm, 2025-02-27): When calling code is ready, this should probably include
 // schema 3 definitions, not just schema 2 definitions.
-const getAllLabwareDefs = (): Record<string, LabwareDefinition2> =>
+export const getAllLabwareDefs = (): Record<string, LabwareDefinition2> =>
   schema2DefinitionsByURI
 
 const getAllLegacyDefs = (): Record<string, LabwareDefinition1> =>
   schema1DefinitionsByName
 
 let _definitions: LabwareDefByDefURI | null = null
-let _legacyDefinitions: LegacyLabwareDefByName | null = null
 export function getAllDefinitions(
   blockList: string[] = []
 ): LabwareDefByDefURI {
@@ -96,6 +95,7 @@ export function getAllDefinitions(
   return _definitions
 }
 
+let _legacyDefinitions: LegacyLabwareDefByName | null = null
 export function getAllLegacyDefinitions(): LegacyLabwareDefByName {
   if (_legacyDefinitions == null) {
     _legacyDefinitions = Object.values(
@@ -130,5 +130,3 @@ export const opentrons1Trash3200MlFixedV1 =
   schema2DefinitionsByURI['opentrons/opentrons_1_trash_3200ml_fixed/1']
 export const opentrons96Tiprack10UlV1Uncasted =
   schema2DefinitionsByURI['opentrons/opentrons_96_tiprack_10ul/1']
-
-export { getAllLabwareDefs }
