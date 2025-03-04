@@ -68,7 +68,7 @@
       "body6": "All protocols now require Opentrons App version 8.2.0+ to run.",
       "body7": "For more information, see the <link1>Protocol Designer Instruction Manual</link1>."
     },
-    "absorbancePlateReaderSupportHotFix": {
+    "dragDropAndHotFix": {
       "heading": "{{version}} Release Notes",
       "body1": "Welcome to Protocol Designer {{version}}!",
       "body2": "This release includes the following improvements:",
