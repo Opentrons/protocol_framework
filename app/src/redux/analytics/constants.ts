@@ -101,7 +101,6 @@ export const ANALYTICS_QUICK_TRANSFER_RERUN = 'quickTransferReRunFromSummary'
 /**
  * Module Actions Analytics
  */
-export const ANALYTICS_MODULE_COMMAND_STARTED = 'moduleEventStarted'
 export const ANALYTICS_MODULE_COMMAND_COMPLETED = 'moduleEventCompleted'
 export const ANALYTICS_MODULE_COMMAND_ERROR = 'moduleCommandError'
 

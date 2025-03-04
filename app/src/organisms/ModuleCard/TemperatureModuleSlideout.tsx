@@ -41,9 +41,7 @@ export const TemperatureModuleSlideout = (
   const name = getModuleDisplayName(module.moduleModel)
   const [temperatureValue, setTemperatureValue] = useState<number | null>(null)
   const handleSubmitTemperature = (): void => {
-  const {
-      reportModuleCommandCompleted,
-      reportModuleCommandError} = useModuleCommandAnalytics()
+  const { reportModuleCommand } = useModuleCommandAnalytics();
   const serialNumber = module.serialNumber
 
     if (temperatureValue != null) {
@@ -56,18 +54,33 @@ export const TemperatureModuleSlideout = (
       }
       createLiveCommand({
         command: saveTempCommand,
-      }).then(result=>reportModuleCommandCompleted('temperatureModule', 'set-temperature-module-temperature', {status:'succeeded', data: result}, serialNumber, temperatureValue)
-      ).catch((e: Error) => {
-        reportModuleCommandError('temperatureModule', 'set-temperature-module-temperature', e.message, serialNumber, temperatureValue)
-        console.error(
-          `error setting module status with command type ${saveTempCommand.commandType}: ${e.message}`
-        )
-      })
-    }
+        })
+        .then((result) => {
+          reportModuleCommand({
+              moduleType: module.moduleModel,
+              action: 'set-temperature-module-temperature',
+              result: {status: 'succeeded', data: result},
+              serialNumber: serialNumber ?? module.serialNumber,
+              temperature: temperatureValue
+            });
+        })
+        .catch((e: Error) => {
+          reportModuleCommand({
+            moduleType: module.moduleModel,
+            action: 'set-temperature-module-temperature', 
+            errorDetails: e.message, 
+            serialNumber: serialNumber ?? module.serialNumber,
+            temperature: temperatureValue
+          });
+
+          console.error(
+            `error setting module status with command type ${saveTempCommand.commandType}: ${e.message}`
+          );
+        });
     setTemperatureValue(null)
     onCloseClick()
-  }
-
+      }
+    }
   const valueOutOfRange =
     temperatureValue != null &&
     (temperatureValue < TEMP_MIN || temperatureValue > TEMP_MAX)

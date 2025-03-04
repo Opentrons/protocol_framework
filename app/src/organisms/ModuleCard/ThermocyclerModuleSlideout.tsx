@@ -21,7 +21,6 @@ import {
 
 import { Slideout } from '/app/atoms/Slideout'
 import { SubmitPrimaryButton } from '/app/atoms/buttons'
-
 import type {
   TCSetTargetBlockTemperatureCreateCommand,
   TCSetTargetLidTemperatureCreateCommand,
@@ -46,10 +45,9 @@ export const ThermocyclerModuleSlideout = (
   const moduleName = getModuleDisplayName(module.moduleModel)
   const modulePart = isSecondaryTemp ? 'Lid' : 'Block'
   const tempRanges = getTCTempRange(isSecondaryTemp)
-  const {
-    reportModuleCommandCompleted,
-    reportModuleCommandError} = useModuleCommandAnalytics()
   const serialNumber = module.serialNumber
+  const { reportModuleCommand } = useModuleCommandAnalytics();
+
   let errorMessage
   if (isSecondaryTemp) {
     errorMessage =
@@ -85,61 +83,44 @@ export const ThermocyclerModuleSlideout = (
         command: isSecondaryTemp ? saveLidCommand : saveBlockCommand,
         })
         .then((result) => {
-            if (modulePart === 'Lid') {
-                reportModuleCommandCompleted(
-                    {moduleType: module.moduleModel,
-                    action: 'set-thermocycler-lid-temperature',
-                    result: { status: 'succeeded', data: result },
-                    serialNumber: serialNumber,
-                    temperature: tempValue}
-                );
-            } else if (modulePart === 'Block') {
-                reportModuleCommandCompleted(
-                    {moduleType: module.moduleModel,
-                    action:'set-thermocycler-block-temperature',
-                    result: { status: 'succeeded', data: result },
-                    serialNumber: serialNumber,
-                    temperature: tempValue}
-                );
-            }
-        })
-        .catch((e: Error) => {
-            if (modulePart === 'Lid') {
-                reportModuleCommandError(
-                    {moduleType: module.moduleModel,
-                    action: 'set-thermocycler-lid-temperature',
-                    errorDetails: e.message,
-                    serialNumber: serialNumber,
-                    temperature: tempValue}
-                );
-            } else if (modulePart === 'Block') {
-                reportModuleCommandError(
-                    {module.moduleModel,
-                    'set-thermocycler-block-temperature',
-                    e.message,
-                    serialNumber,
-                    tempValue}
-                );
-            }
+          reportModuleCommand({
+              moduleType: module.moduleModel,
+              action: modulePart === 'Lid'
+                  ? 'set-thermocycler-lid-temperature'
+                  : 'set-thermocycler-block-temperature',
+              result: { status: 'succeeded', data: result },
+              serialNumber: serialNumber ?? module.serialNumber, // Fallback applied
+              temperature: tempValue,
+          });
+      })
+      .catch((e: Error) => {
+          reportModuleCommand({
+              moduleType: module.moduleModel,
+              action: modulePart === 'Lid'
+                  ? 'set-thermocycler-lid-temperature'
+                  : 'set-thermocycler-block-temperature',
+              errorDetails: e.message, // Indicates an error
+              serialNumber: serialNumber ?? module.serialNumber, // Fallback applied
+              temperature: tempValue,
+          });
+  
+          console.error(
+              `Error setting module status with command type ${
+                  isSecondaryTemp ? saveLidCommand.commandType : saveBlockCommand.commandType
+              }: ${e.message}`
+          );
+      });
 
-            console.error(
-                `error setting module status with command type ${
-                    isSecondaryTemp ? saveLidCommand.commandType : saveBlockCommand.commandType
-                }: ${e.message}`
-            );
-        });
-    }
-    };
     setTempValue(null)
     onCloseClick()
   }
-
+  }
   const handleCloseSlideout = (): void => {
     setTempValue(null)
     onCloseClick()
   }
 
-  return (
+return (
     <Slideout
       title={t('tc_set_temperature', { part: modulePart, name: moduleName })}
       onCloseClick={handleCloseSlideout}

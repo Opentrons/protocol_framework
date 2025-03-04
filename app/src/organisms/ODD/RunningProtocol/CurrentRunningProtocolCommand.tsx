@@ -27,6 +27,7 @@ import { StopButton } from './StopButton'
 import { ANALYTICS_PROTOCOL_RUN_ACTION } from '/app/redux/analytics'
 import { useRunningStepCounts } from '/app/resources/protocols/hooks'
 import { useNotifyAllCommandsQuery } from '/app/resources/runs'
+import { useModuleCommandAnalytics } from '/app/redux-resources/analytics/hooks/useModuleAnalytics'
 
 import type {
   CompletedProtocolAnalysis,
@@ -155,12 +156,25 @@ export function CurrentRunningProtocolCommand({
     robotSideAnalysis?.commands.find(
       (c: RunTimeCommand, index: number) => index === currentRunCommandIndex
     ) ?? lastRunCommand
+  const { reportModuleCommand} = useModuleCommandAnalytics()
 
   let shouldAnimate = true
   if (currentCommand?.key != null) {
     if (lastAnimatedCommand == null) {
       updateLastAnimatedCommand(currentCommand.key)
-      shouldAnimate = true
+      const module_strings = ['heaterShaker', 'thermocycler', 'temperatureModule']
+      for (const word in module_strings) {
+        if (currentCommand.commandType.includes(word)){
+          reportModuleCommand({
+            moduleType: currentCommand.params.moduleId,
+            action: currentCommand.commandType,
+            result: {status: currentCommand.status, data: currentCommand.notes},
+            errorDetails: currentCommand.error,
+            serialNumber: currentCommand.params.moduleId,
+            temperature: currentCommand.params.celsius
+          });
+        };
+      }shouldAnimate = true
     } else if (lastAnimatedCommand === currentCommand.key) {
       shouldAnimate = false
     } else {

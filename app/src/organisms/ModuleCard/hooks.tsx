@@ -65,19 +65,33 @@ export function useLatchControls(module: AttachedModule): LatchControls {
       moduleId: module.id,
     },
   }
-  const {reportModuleCommandCompleted, reportModuleCommandError} = useModuleCommandAnalytics()
+  const {reportModuleCommand} = useModuleCommandAnalytics()
   const serialNumber = module.serialNumber
   const toggleLatch = (): void => {
     createLiveCommand({
       command: latchCommand,
-    }).then(result=>reportModuleCommandCompleted(module.moduleModel, 'toggle-hs-latch', {status: "succeeded", data: result},serialNumber, null)).catch((e: Error) => {
-      reportModuleCommandError(module.moduleModel, 'toggle-hs-latch', serialNumber, e.message, null)
+    }).then((result)=> {
+      reportModuleCommand({
+        moduleType: module.moduleModel, 
+        action: 'toggle-hs-latch', 
+        result: {status: "succeeded", data: result},
+        serialNumber: serialNumber ?? module.serialNumber, 
+        temperature: null,
+      });
+    })
+    .catch((e: Error) => {
+      reportModuleCommand({
+        moduleType: module.moduleModel, 
+        action: 'toggle-hs-latch', 
+        errorDetails: e.message,
+        serialNumber: serialNumber ?? module.serialNumber,
+        temperature: null,
+      });
       console.error(
         `error setting module status with command type ${latchCommand.commandType}: ${e.message}`
-      )
-    })
+      );
+    });
   }
-
   return { toggleLatch, isLatchClosed }
 }
 export type MenuItemsByModuleType = {
@@ -210,19 +224,32 @@ export function useModuleOverflowMenu(
         moduleId: module.id,
       },
     }
-    const {reportModuleCommandCompleted, reportModuleCommandError} = useModuleCommandAnalytics()
+    const {reportModuleCommand} = useModuleCommandAnalytics()
     const serialNumber = module.serialNumber
     createLiveCommand({
       command: deactivateCommand,
-    }).then(result=>reportModuleCommandCompleted(module.moduleModel, 'deactivate', {status: 'succeeded', data: result}, serialNumber, null)
-    ).catch((e: Error) => {
-      reportModuleCommandError(module.moduleModel, 'deactivate', e.message, serialNumber,null)
+    }).then((result)=>{
+      reportModuleCommand({
+        moduleType: module.moduleType,
+        action: 'deactivate',
+        result: {status: 'succeeded', data: result},
+        serialNumber: serialNumber ?? module.serialNumber,
+        temperature: null
+      });
+    })
+    .catch((e: Error) => {
+      reportModuleCommand({
+        moduleType: module.moduleModel, 
+        action: 'deactivate',
+        errorDetails: e.message, 
+        serialNumber:  serialNumber ?? module.serialNumber,
+        temperature: null
+      });
       console.error(
         `error setting module status with command type ${deactivateCommand.commandType}: ${e.message}`
-      )
-    })
+      );
+    });
   }
-
   const lidCommand: TCOpenLidCreateCommand | TCCloseLidCreateCommand = {
     commandType:
       module.moduleType === THERMOCYCLER_MODULE_TYPE &&
@@ -233,13 +260,28 @@ export function useModuleOverflowMenu(
       moduleId: module.id,
     },
   }
-  const {reportModuleCommandCompleted, reportModuleCommandError} = useModuleCommandAnalytics()
+  const {reportModuleCommand} = useModuleCommandAnalytics()
   const serialNumber = module.serialNumber
   const controlTCLid = (): void => {
     createLiveCommand({
       command: lidCommand,
-    }).then(result=> reportModuleCommandCompleted(module.moduleModel, 'toggle-tc-lid', {status: "succeeded", data:result}, serialNumber, null)).catch((e: Error) => {
-      reportModuleCommandError(module.moduleModel, 'toggle-tc-lid', serialNumber, e.message, null)
+    }).then((result)=> {
+      reportModuleCommand({
+        moduleType: module.moduleModel,
+        action: 'toggle-tc-lid',
+        result: {status: 'suceeded', data: result},
+        serialNumber: serialNumber ?? module.serialNumber,
+        temperature: null
+      });
+    })
+    .catch((e: Error) => {
+      reportModuleCommand({
+        moduleType: module.moduleModel,
+        action: 'toggle-tc-lid',
+        errorDetails: e.message,
+        serialNumber: serialNumber ?? module.serialNumber,
+        temperature: null,
+      });
       console.error(
         `error setting thermocycler module status with command type ${lidCommand.commandType}: ${e.message}`
       )

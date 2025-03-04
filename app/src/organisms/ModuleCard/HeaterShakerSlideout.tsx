@@ -41,9 +41,7 @@ export const HeaterShakerSlideout = (
   const { createLiveCommand } = useCreateLiveCommandMutation()
   const moduleName = getModuleDisplayName(module.moduleModel)
   const modulePart = t('temperature')
-  const {
-    reportModuleCommandCompleted,
-    reportModuleCommandError} = useModuleCommandAnalytics()
+  const { reportModuleCommand} = useModuleCommandAnalytics()
   const serialNumber = module.serialNumber
 
   const sendSetTemperatureCommand: MouseEventHandler<HTMLInputElement> = e => {
@@ -60,17 +58,33 @@ export const HeaterShakerSlideout = (
       }
       createLiveCommand({
         command: setTempCommand,
-      }).then((result)=> {reportModuleCommandCompleted('heaterShaker', 'set-heatershaker-temperature', {status: 'succeeded', data: result}, serialNumber, hsValue)}).catch((e: Error) => {
-        reportModuleCommandError('heatershaker', 'set-heatershaker-temperature', serialNumber, e.message, hsValue)
-        console.error(
-          `error setting module status with command type ${setTempCommand.commandType}: ${e.message}`
-        )
+      }).then((result)=> {
+        reportModuleCommand({
+          moduleType: module.moduleModel,
+          action:'set-heatershaker-temperature',
+          result: {status: 'succeeded', data: result},
+          serialNumber: serialNumber ?? module.serialNumber,
+          temperature: hsValue,
+        });
       })
-    }
+      .catch((e: Error) => {
+        reportModuleCommand({
+          moduleType: module.moduleModel,
+          action: 'set-heatershaker-temperature', 
+          errorDetails: e.message,
+          serialNumber: serialNumber ?? module.serialNumber,
+          temperature: hsValue,
+      });
+
+      console.error(
+        `error setting module status with command type ${setTempCommand.commandType}: ${e.message}`
+      );
+    });
+
     setHsValue(null)
     onCloseClick()
   }
-
+  }
   const errorMessage =
     hsValue != null && (hsValue < HS_TEMP_MIN || hsValue > HS_TEMP_MAX)
       ? t('input_out_of_range')
