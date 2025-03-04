@@ -13,7 +13,7 @@ from hardware_testing.protocols import (
 )
 import math
 
-metadata = {"protocolName": "LLD 1uL PCR-to-MVS-03MAR"}
+metadata = {"protocolName": "LLD 1uL PCR-to-MVS-04MAR"}
 requirements = {"robotType": "Flex", "apiLevel": "2.22"}
 
 SLOTS = {
@@ -267,7 +267,9 @@ def run(ctx: ProtocolContext) -> None:
             pick_up_offset={"x": 0, "y": 0, "z": -3},
         )  # move lid off of source plate
         if not test_gripper_only:
-            dye_needed_in_well = (vol * columns) + DEAD_VOL_DYE
+            dye_needed_in_well = (vol * columns) + (DEAD_VOL_DYE)
+            if dye_needed_in_well < 50:
+                dye_needed_in_well = 50
             src_wells = [
                 src_labware[f"{well_letter}{plate_num+1}"]
                 for well_letter in test_matrix.keys()
@@ -285,6 +287,7 @@ def run(ctx: ProtocolContext) -> None:
                     else:
                         pipette.aspirate(dye_needed_in_well, src_holder["A2"])
                     pipette.dispense(dye_needed_in_well, src_well.bottom(BOTTOM_MM))
+                    pipette.touch_tip(speed = 30)
             pipette.drop_tip()
             tip_counter += 1
         ctx.move_labware(
@@ -301,7 +304,7 @@ def run(ctx: ProtocolContext) -> None:
         """Fill plate with diluent."""
         # fill with diluent
         if initial_fill:
-            print(f"--------------plate in loop {n}")
+            print(f"--------------plate in loop {n} vol is {vol}")
         ctx.move_labware(
             diluent_lid,
             src_lid,
