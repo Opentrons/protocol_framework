@@ -112,9 +112,9 @@ function LPCWizardContent(props: LPCWizardContentProps): JSX.Element {
   if (errorMessage != null) {
     return <LPCErrorModal {...props} />
   }
-  if (unableToDetect) {
-    return <LPCProbeNotAttached {...props} />
-  }
+  // if (unableToDetect) {
+  //   return <LPCProbeNotAttached {...props} />
+  // }
   if (currentStep == null) {
     console.error('LPC store not properly initialized.')
     return <></>
