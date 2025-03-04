@@ -139,9 +139,9 @@ export const useAnnouncements = (): Announcement[] => {
       announcementKey: 'batchEditTransfer',
       image: (
         <Flex css={batchEditStyles}>
-          <img src={multiSelect} />
+          <img src={multiSelect} alt="Timeline multi select" />
 
-          <img src={batchEdit} />
+          <img src={batchEdit} alt="Batch edit" />
         </Flex>
       ),
       heading: t('announcements.header', { pd: PD }),
