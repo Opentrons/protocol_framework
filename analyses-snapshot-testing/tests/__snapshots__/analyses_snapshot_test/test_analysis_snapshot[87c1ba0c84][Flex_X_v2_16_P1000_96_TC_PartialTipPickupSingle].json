@@ -3577,7 +3577,7 @@
   "errors": [
     {
       "createdAt": "TIMESTAMP",
-      "detail": "APIVersionError [line 16]: Error 4011 INCORRECT_API_VERSION (APIVersionError): Nozzle layout configuration of style SINGLE is not available until API version 2.20. You are currently using API version 2.16.",
+      "detail": "APIVersionError [line 17]: Error 4011 INCORRECT_API_VERSION (APIVersionError): Nozzle layout configuration of style SINGLE is not available until API version 2.20. You are currently using API version 2.16.",
       "errorCode": "4000",
       "errorInfo": {},
       "errorType": "ExceptionInProtocolError",
@@ -3603,7 +3603,7 @@
   ],
   "files": [
     {
-      "name": "Flex_S_v2_16_P1000_96_TC_PartialTipPickupSingle.py",
+      "name": "Flex_X_v2_16_P1000_96_TC_PartialTipPickupSingle.py",
       "role": "main"
     }
   ],
