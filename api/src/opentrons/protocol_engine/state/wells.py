@@ -286,6 +286,5 @@ def _none_from_clear(
 ) -> LiquidTrackingType | None:
     if inval == update_types.CLEAR:
         return None
-    else:
-        assert isinstance(inval, LiquidTrackingType) or isinstance(inval, int)
-        return inval
+    assert isinstance(inval, (SimulatedProbeResult, float, int))
+    return inval

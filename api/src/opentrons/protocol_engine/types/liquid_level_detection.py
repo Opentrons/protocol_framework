@@ -1,8 +1,8 @@
 """Protocol Engine types to do with liquid level detection."""
+from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Optional, Union, List
-
+from typing import Optional, List
 from pydantic import BaseModel, model_serializer
 
 
@@ -18,26 +18,26 @@ class SimulatedProbeResult(BaseModel):
         return "SimulatedProbeResult"
 
     def __add__(
-        self, other: Union[float, "SimulatedProbeResult"]
-    ) -> Union[float, "SimulatedProbeResult"]:
+        self, other: float | SimulatedProbeResult
+    ) -> float | SimulatedProbeResult:
         """Bypass addition and just return self."""
         return self
 
     def __sub__(
-        self, other: Union[float, "SimulatedProbeResult"]
-    ) -> Union[float, "SimulatedProbeResult"]:
+        self, other: float | SimulatedProbeResult
+    ) -> float | SimulatedProbeResult:
         """Bypass subtraction and just return self."""
         return self
 
     def __radd__(
-        self, other: Union[float, "SimulatedProbeResult"]
-    ) -> Union[float, "SimulatedProbeResult"]:
+        self, other: float | SimulatedProbeResult
+    ) -> float | SimulatedProbeResult:
         """Bypass addition and just return self."""
         return self
 
     def __rsub__(
-        self, other: Union[float, "SimulatedProbeResult"]
-    ) -> Union[float, "SimulatedProbeResult"]:
+        self, other: float | SimulatedProbeResult
+    ) -> float | SimulatedProbeResult:
         """Bypass subtraction and just return self."""
         return self
 
@@ -53,13 +53,13 @@ class SimulatedProbeResult(BaseModel):
         self.operations_after_probe.append(volume)
 
 
-LiquidTrackingType = Union[SimulatedProbeResult, float]
+LiquidTrackingType = SimulatedProbeResult | float
 
 
 class LoadedVolumeInfo(BaseModel):
     """A well's liquid volume, initialized by a LoadLiquid, updated by Aspirate and Dispense."""
 
-    volume: Union[LiquidTrackingType, None] = None
+    volume: LiquidTrackingType | None = None
     last_loaded: datetime
     operations_since_load: int
 
@@ -67,14 +67,14 @@ class LoadedVolumeInfo(BaseModel):
 class ProbedHeightInfo(BaseModel):
     """A well's liquid height, initialized by a LiquidProbe, cleared by Aspirate and Dispense."""
 
-    height: Union[LiquidTrackingType, None] = None
+    height: LiquidTrackingType | None = None
     last_probed: datetime
 
 
 class ProbedVolumeInfo(BaseModel):
     """A well's liquid volume, initialized by a LiquidProbe, updated by Aspirate and Dispense."""
 
-    volume: Union[LiquidTrackingType, None] = None
+    volume: LiquidTrackingType | None = None
     last_probed: datetime
     operations_since_probe: int
 
@@ -85,8 +85,8 @@ class WellInfoSummary(BaseModel):
     labware_id: str
     well_name: str
     loaded_volume: Optional[float] = None
-    probed_height: Union[LiquidTrackingType, None] = None
-    probed_volume: Union[LiquidTrackingType, None] = None
+    probed_height: LiquidTrackingType | None = None
+    probed_volume: LiquidTrackingType | None = None
 
 
 @dataclass
