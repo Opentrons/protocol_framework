@@ -196,18 +196,24 @@ class TipConfig:
         return tip_pos, tip_length, self.overlap
 
     @classmethod
-    def create_copy_and_increment_well(cls, tc: "TipConfig") -> "TipConfig":
-        if tc.well == "H12":
-            raise RuntimeError("ran out of tips to pickup")
+    def create_copy_and_increment_well(
+        cls, tc: "TipConfig", channels: int
+    ) -> "TipConfig":
+        num_rows_in_rack = 8
+        num_cols_in_rack = 12
         cpy = replace(tc)
         tip_row_idx = "ABCDEFGH".index(tc.well[0])
         tip_col_idx = int(tc.well[1:]) - 1
-        if tip_row_idx == 7:
-            next_tip_row_idx = 0
+        next_tip_row_idx = tip_row_idx + channels
+        next_tip_col_idx = tip_col_idx
+        while (
+            next_tip_row_idx > (num_rows_in_rack - 1)
+            and next_tip_col_idx < num_cols_in_rack
+        ):
+            next_tip_row_idx -= num_rows_in_rack
             next_tip_col_idx = tip_col_idx + 1
-        else:
-            next_tip_row_idx = tip_row_idx + 1
-            next_tip_col_idx = tip_col_idx + 0
+        if next_tip_row_idx >= num_rows_in_rack or next_tip_col_idx >= num_cols_in_rack:
+            raise RuntimeError("ran out of tips to pickup")
         next_col_letter = "ABCDEFGH"[next_tip_row_idx]
         cpy.well = f"{next_col_letter}{next_tip_col_idx + 1}"
         return cpy
@@ -355,6 +361,9 @@ async def _run_trial(
     await api.retract(pip_mount)
     trash_pos = helpers_ot3.get_theoretical_a1_position(12, tip_cfg.load_name)
     trash_pos += types.Point(x=0, y=-9 * 4.5, z=-20)
+    if int(tip_cfg.well[1:]) % 2:
+        trash_pos += types.Point(x=100, y=0, z=0)
+
     await helpers_ot3.move_to_arched_ot3(api, pip_mount, trash_pos)
     await api.drop_tip(pip_mount)
 
@@ -379,7 +388,7 @@ async def main(
     pip_mount: types.OT3Mount,
     slots_to_test: List[str],
     starting_tip: str,
-    num_tips_per_rack: int,
+    num_pick_ups_per_rack: int,
     overlap_version: str,
     tip_lot: str,
     tip_volume: int,
@@ -402,7 +411,7 @@ async def main(
     api = await helpers_ot3.build_async_ot3_hardware_api(
         is_simulating=simulate,
         pipette_left="p1000_single_v3.6",
-        pipette_right="p1000_single_v3.6",
+        pipette_right="p1000_multi_v3.5",
     )
 
     # STORE TEST CONFIGURATIONS
@@ -501,17 +510,18 @@ async def main(
             data=test_data.csv_data_latest_trial + CSV_NEWLINE,
         )
 
-    total_tips_to_test = len(test_tip_configs) * num_tips_per_rack
+    total_tips_to_test = len(test_tip_configs) * num_pick_ups_per_rack
     total_tips_tested = 0
     for tip_cfg in test_tip_configs:
         _cfg = replace(tip_cfg)
-        for i in range(num_tips_per_rack):
+        for i in range(num_pick_ups_per_rack):
             total_tips_tested += 1
             ui.print_title(f"TIP {total_tips_tested}/{total_tips_to_test}")
+            ui.print_info(_cfg.well)
             if i > 0:
                 # same tip-rack, so just copy the config
                 # but increment to the next well location
-                _cfg = TipConfig.create_copy_and_increment_well(_cfg)
+                _cfg = TipConfig.create_copy_and_increment_well(_cfg, pip_ch)
             await _test_tip_and_save_results(_cfg)
         if simulate:
             break
@@ -525,7 +535,7 @@ if __name__ == "__main__":
     _parser.add_argument("--mount", type=str, choices=["left", "right"], default="left")
     _parser.add_argument("--slots", nargs="+", type=str, default=DEFAULT_SLOTS_TO_TEST)
     _parser.add_argument("--starting-tip", type=str, default="A1")
-    _parser.add_argument("--tips-per-rack", type=int, default=96)
+    _parser.add_argument("--pick-ups-per-rack", type=int, default=96)
     _parser.add_argument(
         "--overlap-version", type=str, choices=["v0", "v1"], default="v1"
     )
@@ -544,7 +554,7 @@ if __name__ == "__main__":
             _mnt_hw,
             slots_to_test=_args.slots,
             starting_tip=_args.starting_tip,
-            num_tips_per_rack=_args.tips_per_rack,
+            num_pick_ups_per_rack=_args.pick_ups_per_rack,
             overlap_version=_args.overlap_version,
             tip_lot=_args.lot,
             tip_volume=_args.tip,
