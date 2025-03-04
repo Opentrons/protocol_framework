@@ -70,6 +70,7 @@ describe('waitForTemperature', () => {
           message: expect.any(String),
         },
       ],
+      python: 'mock_temperature_module_1.wait_for_temperature(20)',
     }
     const result = waitForTemperature(
       args,
@@ -117,6 +118,7 @@ describe('waitForTemperature', () => {
           },
         },
       ],
+      python: 'mock_temperature_module_1.wait_for_temperature(42)',
     }
     const result = waitForTemperature(
       args,

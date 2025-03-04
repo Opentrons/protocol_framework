@@ -66,8 +66,9 @@ export const waitForTemperature: CommandCreator<TemperatureParams> = (
   if (potentiallyUnreachableTemp) {
     warnings.push(warningCreators.potentiallyUnreachableTemp())
   }
-
-  const moduleType = invariantContext.moduleEntities[moduleId]?.type
+  const module = invariantContext.moduleEntities[moduleId]
+  const moduleType = module?.type
+  const pythonCommand = `${module?.pythonName}.wait_for_temperature(${celsius})`
 
   switch (moduleType) {
     case TEMPERATURE_MODULE_TYPE:
@@ -83,6 +84,7 @@ export const waitForTemperature: CommandCreator<TemperatureParams> = (
           },
         ],
         warnings: warnings.length > 0 ? warnings : undefined,
+        python: pythonCommand,
       }
 
     case HEATERSHAKER_MODULE_TYPE:
@@ -98,6 +100,7 @@ export const waitForTemperature: CommandCreator<TemperatureParams> = (
           },
         ],
         warnings: warnings.length > 0 ? warnings : undefined,
+        python: pythonCommand,
       }
 
     default:

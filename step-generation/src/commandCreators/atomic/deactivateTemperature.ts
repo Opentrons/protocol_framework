@@ -21,8 +21,9 @@ export const deactivateTemperature: CommandCreator<ModuleOnlyParams> = (
       errors: [errorCreators.missingModuleError()],
     }
   }
-
-  const moduleType = invariantContext.moduleEntities[moduleId]?.type
+  const module = invariantContext.moduleEntities[moduleId]
+  const moduleType = module?.type
+  const modulePythonName = module?.pythonName
   const params = {
     moduleId,
   }
@@ -36,6 +37,7 @@ export const deactivateTemperature: CommandCreator<ModuleOnlyParams> = (
           params,
         },
       ],
+      python: `${modulePythonName}.deactivate()`,
     }
   } else if (moduleType === THERMOCYCLER_MODULE_TYPE) {
     return {
@@ -51,6 +53,7 @@ export const deactivateTemperature: CommandCreator<ModuleOnlyParams> = (
           params,
         },
       ],
+      python: `${modulePythonName}.deactivate_lid()\n${modulePythonName}.deactivate_block()`,
     }
   } else if (moduleType === HEATERSHAKER_MODULE_TYPE) {
     return {
@@ -61,6 +64,7 @@ export const deactivateTemperature: CommandCreator<ModuleOnlyParams> = (
           params,
         },
       ],
+      python: `${modulePythonName}.deactivate_heater()`,
     }
   } else {
     console.error(
