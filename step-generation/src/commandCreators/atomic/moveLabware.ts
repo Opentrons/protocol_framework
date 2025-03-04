@@ -254,11 +254,13 @@ export const moveLabware: CommandCreator<MoveLabwareParams> = (
           ?.map(trash => trash.location as CutoutId)
       : []
 
-    const cutoutIdFromAddressableAreaName = getCutoutIdByAddressableArea(
-      newLocation.addressableAreaName as AddressableAreaName,
-      isOt2TrashLocation ? 'fixedTrashSlot' : 'trashBinAdapter',
-      isOt2TrashLocation ? OT2_ROBOT_TYPE : FLEX_ROBOT_TYPE
-    )
+    const cutoutIdFromAddressableAreaName = !isWasteChuteLocation
+      ? getCutoutIdByAddressableArea(
+          newLocation.addressableAreaName as AddressableAreaName,
+          isOt2TrashLocation ? 'fixedTrashSlot' : 'trashBinAdapter',
+          isOt2TrashLocation ? OT2_ROBOT_TYPE : FLEX_ROBOT_TYPE
+        )
+      : null
 
     const matchingTrashCutoutId = trashCutoutIds.find(
       cutoutId => cutoutId === cutoutIdFromAddressableAreaName

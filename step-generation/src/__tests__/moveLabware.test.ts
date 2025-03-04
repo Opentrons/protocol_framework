@@ -50,7 +50,42 @@ describe('moveLabware', () => {
   afterEach(() => {
     vi.resetAllMocks()
   })
-  it.only('should return a moveLabware command moving to a trash bin for flex', () => {
+  it('should return a moveLabware command moving to a trash bin for an ot-2', () => {
+    invariantContext = {
+      ...invariantContext,
+      additionalEquipmentEntities: {
+        mockTrashBinId: {
+          name: 'trashBin',
+          id: mockTrashBinId,
+          pythonName: 'mock_trash_bin_1',
+          location: 'cutout12',
+        },
+      },
+    }
+
+    const params = {
+      labwareId: SOURCE_LABWARE,
+      strategy: 'manualMoveWithPause',
+      newLocation: { addressableAreaName: 'fixedTrash' },
+    } as MoveLabwareParams
+
+    const result = moveLabware(params, invariantContext, robotState)
+    expect(getSuccessResult(result).commands).toEqual([
+      {
+        commandType: 'moveLabware',
+        key: expect.any(String),
+        params: {
+          labwareId: SOURCE_LABWARE,
+          strategy: 'manualMoveWithPause',
+          newLocation: { addressableAreaName: 'fixedTrash' },
+        },
+      },
+    ])
+    expect(getSuccessResult(result).python).toBe(
+      `protocol.move_labware(mockPythonName, mock_trash_bin_1, use_gripper=False)`
+    )
+  })
+  it('should return a moveLabware command moving to a trash bin for flex', () => {
     const params = {
       labwareId: SOURCE_LABWARE,
       strategy: 'manualMoveWithPause',
