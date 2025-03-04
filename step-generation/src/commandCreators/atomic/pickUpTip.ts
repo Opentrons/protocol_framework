@@ -53,6 +53,15 @@ export const pickUpTip: CommandCreator<PickUpTipAtomicParams> = (
     }
   }
 
+  const pipettePythonName =
+    invariantContext.pipetteEntities[pipetteId].pythonName
+  const tiprackPythonName =
+    invariantContext.labwareEntities[labwareId].pythonName
+  // We don't specify the tip well because it would make it hard for users to modify
+  // the Python protocol. We do specify the tip rack because multiple tip racks could be
+  // assigned to the pipette, and the UI makes the user choose which tip rack to use.
+  const python = `${pipettePythonName}.pick_up_tip(location=${tiprackPythonName})`
+
   if (errors.length > 0) {
     return { errors }
   }
@@ -68,5 +77,6 @@ export const pickUpTip: CommandCreator<PickUpTipAtomicParams> = (
         },
       },
     ],
+    python,
   }
 }
