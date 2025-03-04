@@ -67,47 +67,10 @@ const schema3DefinitionsByURI = Object.fromEntries(
   ])
 )
 
-/** Filter through definitions, keeping only the latest version of each one. */
-function getLatest<T extends LabwareDefinition2 | LabwareDefinition3>(
-  definitions: T[]
-): T[] {
-  function getKey(definition: T): string {
-    // The labware URI, sans version.
-    return `${definition.namespace}/${definition.parameters.loadName}`
-  }
-
-  const latestSeen = new Map<string, T>()
-  for (const definition of definitions) {
-    const key = getKey(definition)
-    const previousLatest = latestSeen.get(key)
-    if (
-      previousLatest === undefined ||
-      previousLatest.version < definition.version
-    ) {
-      latestSeen.set(key, definition)
-    }
-  }
-
-  return [...latestSeen.values()]
-}
-
 // todo(mm, 2025-02-27): When calling code is ready, this should probably include
 // schema 3 definitions, not just schema 2 definitions.
-//
-// todo(mm, 2025-02-27): "getAllLabwareDefs" is a misnomer if this only exposes the
-// latest of each one. We probably want a separate "getLatestLabwareDefs" function?
-let _getAllLabwareDefsCache: Record<string, LabwareDefinition2> | null = null
-const getAllLabwareDefs = (): Record<string, LabwareDefinition2> => {
-  if (_getAllLabwareDefsCache === null) {
-    _getAllLabwareDefsCache = Object.fromEntries(
-      getLatest(Object.values(schema2DefinitionsByURI)).map(def => [
-        getLabwareDefURI(def),
-        def,
-      ])
-    )
-  }
-  return _getAllLabwareDefsCache
-}
+const getAllLabwareDefs = (): Record<string, LabwareDefinition2> =>
+  schema2DefinitionsByURI
 
 const getAllLegacyDefs = (): Record<string, LabwareDefinition1> =>
   schema1DefinitionsByName
