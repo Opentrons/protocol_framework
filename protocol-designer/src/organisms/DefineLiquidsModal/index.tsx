@@ -135,12 +135,25 @@ export function DefineLiquidsModal(
   }
 
   const liquidClassOptions = [
-    { name: 'Choose an option', value: '' },
-    ...Object.entries(liquidClassDefs).map(
-      ([liquidClassDefName, { displayName }]) => {
-        return { name: displayName, value: liquidClassDefName }
-      }
-    ),
+    { name: t('liquids:dont_use_liquid_class'), value: '' },
+    ...Object.entries(liquidClassDefs)
+      .sort(([_0, a], [_1, b]) => {
+        if (a.displayName < b.displayName) {
+          return -1
+        } else if (a.displayName > b.displayName) {
+          return 1
+        }
+        return 0
+      })
+      .map(([liquidClassDefName, { displayName, description }]) => {
+        return {
+          value: liquidClassDefName,
+          name: t('liquids:liquid_class_name_description', {
+            displayName,
+            description,
+          }),
+        }
+      }),
   ]
 
   return (

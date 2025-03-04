@@ -224,7 +224,11 @@ function WellContents(props: WellContentsProps): JSX.Element {
         {wellName}
       </StyledText>
       <Flex width="50%">
-        <Tag text={`${volume} ${t('microliters')}`} type="default" />
+        <Tag
+          text={`${volume} ${t('microliters')}`}
+          type="default"
+          shrinkToContent
+        />
       </Flex>
     </Flex>
   )
