@@ -127,7 +127,7 @@ export const getAdditionalEquipmentLocationUpdate = (
   ]
 
   const unoccupiedSlotForTrash = hasWasteChuteCommands
-    ? null
+    ? ''
     : getUnoccupiedSlotForTrash(
         commands,
         hasWasteChuteCommands,
