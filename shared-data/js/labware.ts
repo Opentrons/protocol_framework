@@ -72,9 +72,6 @@ const schema3DefinitionsByURI = Object.fromEntries(
 export const getAllLabwareDefs = (): Record<string, LabwareDefinition2> =>
   schema2DefinitionsByURI
 
-const getAllLegacyDefs = (): Record<string, LabwareDefinition1> =>
-  schema1DefinitionsByName
-
 let _definitions: LabwareDefByDefURI | null = null
 export function getAllDefinitions(
   blockList: string[] = []
@@ -95,16 +92,8 @@ export function getAllDefinitions(
   return _definitions
 }
 
-let _legacyDefinitions: LegacyLabwareDefByName | null = null
 export function getAllLegacyDefinitions(): LegacyLabwareDefByName {
-  if (_legacyDefinitions == null) {
-    _legacyDefinitions = Object.values(
-      getAllLegacyDefs()
-    ).reduce<LegacyLabwareDefByName>((acc, labwareDef: LabwareDefinition1) => {
-      return { ...acc, [labwareDef.metadata.name]: labwareDef }
-    }, {})
-  }
-  return _legacyDefinitions
+  return schema1DefinitionsByName
 }
 
 export {
