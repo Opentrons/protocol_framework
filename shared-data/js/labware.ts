@@ -11,8 +11,6 @@ import fixtureCalibrationBlock from '../labware/fixtures/2/fixture_calibration_b
 import fixture384Plate from '../labware/fixtures/2/fixture_384_plate.json'
 import fixtureTrash from '../labware/fixtures/2/fixture_trash.json'
 
-import { getLabwareDefURI } from './helpers/index'
-
 import type {
   LabwareDefByDefURI,
   LabwareDefinition1,
@@ -20,6 +18,16 @@ import type {
   LabwareDefinition3,
   LegacyLabwareDefByName,
 } from './types'
+
+// todo(mm, 2025-03-04): This duplicates getLabwareDefUri() in ./helpers. We should use
+// that instead, but using it gives me obscure "TypeError: getLabwareDefURI is not a function"
+// errors in certain test files. Some kind of circular dependency problem? Some kind of
+// mocking problem?
+function getLabwareDefURI(
+  def: LabwareDefinition2 | LabwareDefinition3
+): string {
+  return `${def.namespace}/${def.parameters.loadName}/${def.version}`
+}
 
 const schema1DefinitionsByPath: Record<
   string,
