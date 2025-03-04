@@ -2065,6 +2065,7 @@ class InstrumentCore(AbstractInstrument[WellCore, LabwareCore]):
 
         self._protocol_core.set_last_location(location=loc, mount=self.get_mount())
 
+    # TODO(cm, 3.4.25): decide whether to allow users to try and do math on a potential SimulatedProbeResult
     def liquid_probe_without_recovery(
         self, well_core: WellCore, loc: Location
     ) -> LiquidTrackingType:
