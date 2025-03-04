@@ -15,14 +15,14 @@ export const setTemperature: CommandCreator<TemperatureParams> = (
   prevRobotState
 ) => {
   const { moduleId, celsius } = args
-
   if (moduleId === null) {
     return {
       errors: [errorCreators.missingModuleError()],
     }
   }
-
-  const moduleType = invariantContext.moduleEntities[moduleId]?.type
+  const module = invariantContext.moduleEntities[moduleId]
+  const moduleType = module?.type
+  const pythonCommand = `${module?.pythonName}.set_target_temperature(${celsius})`
 
   if (moduleType === TEMPERATURE_MODULE_TYPE) {
     return {
@@ -36,6 +36,7 @@ export const setTemperature: CommandCreator<TemperatureParams> = (
           },
         },
       ],
+      python: pythonCommand,
     }
   } else if (moduleType === THERMOCYCLER_MODULE_TYPE) {
     // TODO: Ian 2019-01-24 implement setting thermocycler temp: block vs lid
@@ -55,6 +56,7 @@ export const setTemperature: CommandCreator<TemperatureParams> = (
           },
         },
       ],
+      python: pythonCommand,
     }
   } else {
     console.error(
