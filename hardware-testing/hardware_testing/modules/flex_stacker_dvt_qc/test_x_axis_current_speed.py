@@ -14,15 +14,15 @@ from opentrons.drivers.flex_stacker.types import StackerAxis, Direction
 
 
 TEST_SPEEDS = [200, 220]
-TEST_CURRENTS = [1.5, 1.25, 1.0, 0.7, 0.5, 0.4, 0.3]
+TEST_CURRENTS = [1.5, 1.0, 0.7, 0.5, 0.4]
 CURRENT_THRESHOD = 0.7
 TEST_TRIALS = 10
 
-AXIS_TRAVEL = 192.5
+AXIS_TRAVEL = 193.5
+AXIS_TOLERANCE = 1
 OFFSET = 2
 LIMIT_SWICH_CHECK = 0.1
 ERROR_THRESHOLD = 0.5
-
 
 TEST_AXIS = StackerAxis.X
 HOME_SPEED = STACKER_MOTION_CONFIG[TEST_AXIS]["home"].max_speed
@@ -52,24 +52,45 @@ async def test_cycle_per_direction(
     """Test one cycle."""
     # first home in the opposite direction
     await stacker.home_axis(TEST_AXIS, direction.opposite())
+
     # move at homing speed
     await stacker.move_axis(
         TEST_AXIS, direction, OFFSET, HOME_SPEED, None, HOME_CURRENT
     )
+
     try:
         dist = 0.0
-        # moving at the testing speed and current
+        # moving at the testing speed and current to just before the spring
         await stacker.move_axis(
-            TEST_AXIS, direction, AXIS_TRAVEL - OFFSET, speed, None, current
+            TEST_AXIS,
+            direction,
+            AXIS_TRAVEL - (2*OFFSET) - AXIS_TOLERANCE,
+            speed,
+            None,
+            current
         )
+
+        # compress the spring at the homing speed/current
+        await stacker.move_axis(
+            TEST_AXIS, direction, OFFSET, HOME_SPEED, None, HOME_CURRENT
+        )
+
         # move towards limit switch at small increments
-        while dist <= (ERROR_THRESHOLD + OFFSET):
+        while dist <= (ERROR_THRESHOLD + AXIS_TOLERANCE):
             await stacker.move_axis(
                 TEST_AXIS, direction, LIMIT_SWICH_CHECK, HOME_SPEED, None, HOME_CURRENT
             )
             dist += LIMIT_SWICH_CHECK
             if await stacker._driver.get_limit_switch(TEST_AXIS, direction):
+                # Translate dist to total movement
+                dist = round(AXIS_TRAVEL + dist - AXIS_TOLERANCE, 1)
+                ui.print_info(
+                    f"X Axis, {direction}, PASS, {speed}mm/s, {current}A, {dist}mm"
+                )
                 return True, dist
+
+        # Translate dist to total movement
+        dist = round(AXIS_TRAVEL + dist - AXIS_TOLERANCE, 1)
     except FlexStackerStallError:
         ui.print_error("axis stalled!")
     return False, dist
@@ -83,32 +104,33 @@ async def run(stacker: FlexStacker, report: CSVReport, section: str) -> None:
             ui.print_header(f"X Speed: {speed} mm/s, Current: {current} A")
             trial = 0
             failures = 0
-            extend_data: List[float] = []
-            retract_data: List[float] = []
+            extend_data: List[float] = [None] * TEST_TRIALS
+            retract_data: List[float] = [None] * TEST_TRIALS
             while trial < TEST_TRIALS:
                 # Test extend direction first
                 extend, dist = await test_cycle_per_direction(
                     stacker, Direction.EXTEND, speed, current
                 )
-                extend_data.append(dist)
-                trial += 1
+                extend_data[trial] = dist
                 if not extend:
                     ui.print_error(
-                        f"X Axis extend failed at speed {speed} mm/s, current {current} A"
+                        f"X Axis extend failed at speed {speed} mm/s, current {current} A, Distance {dist} mm"
                     )
                     failures += 1
+                    trial += 1
                     continue
 
                 # Test extend direction
                 retract, dist = await test_cycle_per_direction(
                     stacker, Direction.RETRACT, speed, current
                 )
-                retract_data.append(dist)
+                retract_data[trial] = dist
                 if not retract:
                     ui.print_error(
-                        f"X Axis retract failed at speed {speed} mm/s, current {current} A"
+                        f"X Axis retract failed at speed {speed} mm/s, current {current} A, Distance {dist} mm"
                     )
                     failures += 1
+                trial += 1
 
             success_trials = trial - failures
             success_rate = (1 - failures / trial) * 100
@@ -131,3 +153,6 @@ async def run(stacker: FlexStacker, report: CSVReport, section: str) -> None:
                     f"X Axis failed at speed {speed} mm/s, current {current} A"
                 )
                 return
+
+    # End test in gripper position
+    await stacker.home_axis(TEST_AXIS, Direction.EXTEND)
