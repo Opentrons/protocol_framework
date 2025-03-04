@@ -24,6 +24,7 @@ import type { InvariantContext, RobotState } from '../types'
 const mockWasteChuteId = 'mockWasteChuteId'
 const mockGripperId = 'mockGripperId'
 const mockTrashBinId = 'mockTrashBinId'
+const mockStagingAreaId = 'mockStagingAreaId'
 describe('moveLabware', () => {
   let robotState: RobotState
   let invariantContext: InvariantContext
@@ -44,11 +45,39 @@ describe('moveLabware', () => {
           pythonName: 'mock_trash_bin_1',
           location: 'cutoutA3',
         },
+        mockStagingAreaId: {
+          name: 'stagingArea',
+          id: mockStagingAreaId,
+          location: 'A4',
+        },
       },
     }
   })
   afterEach(() => {
     vi.resetAllMocks()
+  })
+  it('should return a moveLabware command moving to a 4th column slot', () => {
+    const params = {
+      labwareId: SOURCE_LABWARE,
+      strategy: 'manualMoveWithPause',
+      newLocation: { addressableAreaName: 'A4' },
+    } as MoveLabwareParams
+
+    const result = moveLabware(params, invariantContext, robotState)
+    expect(getSuccessResult(result).commands).toEqual([
+      {
+        commandType: 'moveLabware',
+        key: expect.any(String),
+        params: {
+          labwareId: SOURCE_LABWARE,
+          strategy: 'manualMoveWithPause',
+          newLocation: { addressableAreaName: 'A4' },
+        },
+      },
+    ])
+    expect(getSuccessResult(result).python).toBe(
+      `protocol.move_labware(mockPythonName, A4, use_gripper=False)`
+    )
   })
   it('should return a moveLabware command moving to a trash bin for an ot-2', () => {
     invariantContext = {

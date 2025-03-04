@@ -7,6 +7,7 @@ import {
   THERMOCYCLER_MODULE_TYPE,
   WASTE_CHUTE_ADDRESSABLE_AREAS,
 } from '@opentrons/shared-data'
+import { COLUMN_4_SLOTS } from '../../constants'
 import * as errorCreators from '../../errorCreators'
 import * as warningCreators from '../../warningCreators'
 import {
@@ -240,6 +241,10 @@ export const moveLabware: CommandCreator<MoveLabwareParams> = (
   } else if ('slotName' in newLocation) {
     location = newLocation.slotName
   } else if ('addressableAreaName' in newLocation) {
+    const is4thColumnSlot = COLUMN_4_SLOTS.includes(
+      newLocation.addressableAreaName
+    )
+
     const isWasteChuteLocation = WASTE_CHUTE_ADDRESSABLE_AREAS.includes(
       newLocation.addressableAreaName
     )
@@ -254,13 +259,14 @@ export const moveLabware: CommandCreator<MoveLabwareParams> = (
           ?.map(trash => trash.location as CutoutId)
       : []
 
-    const cutoutIdFromAddressableAreaName = !isWasteChuteLocation
-      ? getCutoutIdByAddressableArea(
-          newLocation.addressableAreaName as AddressableAreaName,
-          isOt2TrashLocation ? 'fixedTrashSlot' : 'trashBinAdapter',
-          isOt2TrashLocation ? OT2_ROBOT_TYPE : FLEX_ROBOT_TYPE
-        )
-      : null
+    const cutoutIdFromAddressableAreaName =
+      !isWasteChuteLocation && !is4thColumnSlot
+        ? getCutoutIdByAddressableArea(
+            newLocation.addressableAreaName as AddressableAreaName,
+            isOt2TrashLocation ? 'fixedTrashSlot' : 'trashBinAdapter',
+            isOt2TrashLocation ? OT2_ROBOT_TYPE : FLEX_ROBOT_TYPE
+          )
+        : null
 
     const matchingTrashCutoutId = trashCutoutIds.find(
       cutoutId => cutoutId === cutoutIdFromAddressableAreaName
@@ -272,7 +278,9 @@ export const moveLabware: CommandCreator<MoveLabwareParams> = (
           )?.id
         : null
 
-    if (matchingTrashId != null && !isWasteChuteLocation) {
+    if (is4thColumnSlot) {
+      location = newLocation.addressableAreaName
+    } else if (matchingTrashId != null && !isWasteChuteLocation) {
       location = additionalEquipmentEntities[matchingTrashId]?.pythonName ?? ''
     } else if (matchingTrashId == null && isWasteChuteLocation) {
       location =
