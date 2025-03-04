@@ -28,6 +28,7 @@ export function SelectRecoveryOption(props: RecoveryContentProps): JSX.Element {
   const { recoveryMap } = props
   const { step } = recoveryMap
   const { OPTION_SELECTION } = RECOVERY_MAP
+  console.log("recoveryMap: ", recoveryMap)
 
   const buildContent = (): JSX.Element => {
     switch (step) {
@@ -170,8 +171,16 @@ export function getRecoveryOptions(errorKind: ErrorKind): RecoveryRoute[] {
       return GENERAL_ERROR_OPTIONS
     case ERROR_KINDS.STALL_OR_COLLISION:
       return STALL_OR_COLLISION_OPTIONS
+    case ERROR_KINDS.STALL_WHILE_STACKING:
+      return STALL_WHILE_STACKING_OPTIONS
   }
 }
+
+export const STALL_WHILE_STACKING_OPTIONS: RecoveryRoute[] = [
+  RECOVERY_MAP.MANUAL_REPLACE_AND_RETRY.ROUTE,
+  RECOVERY_MAP.MANUAL_FILL_AND_SKIP.ROUTE,
+  RECOVERY_MAP.CANCEL_RUN.ROUTE,
+]
 
 export const STALL_OR_COLLISION_OPTIONS: RecoveryRoute[] = [
   RECOVERY_MAP.HOME_AND_RETRY.ROUTE,
