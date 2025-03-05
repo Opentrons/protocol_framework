@@ -171,6 +171,7 @@ class InstrumentCore(AbstractInstrument[WellCore, LabwareCore]):
         flow_rate: float,
         in_place: bool,
         meniscus_tracking: Optional[MeniscusTrackingTarget] = None,
+        correction_volume: Optional[float] = None,
     ) -> None:
         """Aspirate a given volume of liquid from the specified location.
         Args:
@@ -262,6 +263,7 @@ class InstrumentCore(AbstractInstrument[WellCore, LabwareCore]):
         in_place: bool,
         push_out: Optional[float],
         meniscus_tracking: Optional[MeniscusTrackingTarget] = None,
+        correction_volume: Optional[float] = None,
     ) -> None:
         """Dispense a given volume of liquid into the specified location.
         Args:
@@ -845,11 +847,13 @@ class InstrumentCore(AbstractInstrument[WellCore, LabwareCore]):
         if flow_rate is None:
             flow_rate = _RESIN_TIP_DEFAULT_FLOW_RATE
 
-        well_location = self._engine_client.state.geometry.get_relative_liquid_handling_well_location(
+        (
+            well_location,
+            dynamic_tracking,
+        ) = self._engine_client.state.geometry.get_relative_liquid_handling_well_location(
             labware_id=labware_id,
             well_name=well_name,
             absolute_point=location.point,
-            is_meniscus=None,
         )
         pipette_movement_conflict.check_safe_for_pipette_movement(
             engine_state=self._engine_client.state,

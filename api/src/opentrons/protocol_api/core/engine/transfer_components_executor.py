@@ -164,9 +164,6 @@ class TransferComponentsExecutor:
         # TODO: handle volume correction
         aspirate_props = self._transfer_properties.aspirate
         correction_volume = aspirate_props.correction_by_volume.get_for_volume(volume)
-        is_meniscus = bool(
-            aspirate_props.position_reference == PositionReference.LIQUID_MENISCUS
-        )
         self._instrument.aspirate(
             location=self._target_location,
             well_core=None,
@@ -192,9 +189,6 @@ class TransferComponentsExecutor:
         """Dispense according to dispense properties and wait if enabled."""
         correction_volume = dispense_properties.correction_by_volume.get_for_volume(
             volume
-        )
-        is_meniscus = bool(
-            dispense_properties.position_reference == PositionReference.LIQUID_MENISCUS
         )
         self._instrument.dispense(
             location=self._target_location,
