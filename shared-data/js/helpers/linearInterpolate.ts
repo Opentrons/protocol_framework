@@ -36,7 +36,7 @@ export const linearInterpolate = (
     }
   })
   const lastPointIndex = sortedInterpolationPoints.length - 1
-  if (sortedInterpolationPoints.length === 0) {
+  if (sortedInterpolationPoints.length === 1) {
     return sortedInterpolationPoints[0][1]
   }
   if (target < sortedInterpolationPoints[0][0]) {
