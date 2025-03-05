@@ -1346,7 +1346,7 @@ class ModuleView:
                 col = (i % 12) + 1  # Convert index to column (1-12)
                 well_key = f"{row}{col}"
                 truncated_value = float(
-                    "{:.5}".format(str(value))
+                    "%.3f" % value
                 )  # Truncate the returned value to the third decimal place
                 well_map[well_key] = truncated_value
             return well_map
