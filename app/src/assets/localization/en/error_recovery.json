@@ -22,6 +22,7 @@
   "continue_to_drop_tip": "Continue to drop tip",
   "do_you_need_to_blowout": "First, do you need to blow out aspirated liquid?",
   "door_open_robot_home": "The robot needs to safely move to its home location before you manually move the labware.",
+  "close_robot_and_stacker_door": "The robot needs to safely move to its home location before you manually move the labware.",
   "ensure_lw_is_accurately_placed": "Ensure labware is accurately placed in the slot to prevent further errors.",
   "error": "Error",
   "error_details": "Error details",
