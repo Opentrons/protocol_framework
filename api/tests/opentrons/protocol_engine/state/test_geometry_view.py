@@ -82,6 +82,9 @@ from opentrons.protocol_engine.types import (
     NotOnDeckLocationSequenceComponent,
     OnCutoutFixtureLocationSequenceComponent,
     InStackerHopperLocation,
+    AddressableArea,
+    AreaType,
+    AddressableOffsetVector,
 )
 from opentrons.protocol_engine.commands import (
     CommandStatus,
@@ -2416,7 +2419,7 @@ def test_get_labware_grip_point_for_labware_on_module(
     mock_labware_view: LabwareView,
     mock_module_view: ModuleView,
     mock_addressable_area_view: AddressableAreaView,
-    ot2_standard_deck_def: DeckDefinitionV5,
+    ot3_standard_deck_def: DeckDefinitionV5,
     subject: GeometryView,
 ) -> None:
     """It should return the grip point for labware directly on a module."""
@@ -2425,11 +2428,14 @@ def test_get_labware_grip_point_for_labware_on_module(
             sentinel.labware_definition
         )
     ).then_return(500)
+    decoy.when(mock_module_view.get_provided_addressable_area("module-id")).then_return(
+        "magneticBlockModuleV1C3"
+    )
     decoy.when(mock_module_view.get_location("module-id")).then_return(
-        DeckSlotLocation(slotName=DeckSlotName.SLOT_4)
+        DeckSlotLocation(slotName=DeckSlotName.SLOT_C3)
     )
     decoy.when(mock_labware_view.get_deck_definition()).then_return(
-        ot2_standard_deck_def
+        ot3_standard_deck_def
     )
     decoy.when(
         mock_module_view.get_nominal_offset_to_child(
@@ -2438,22 +2444,32 @@ def test_get_labware_grip_point_for_labware_on_module(
         )
     ).then_return(LabwareOffsetVector(x=1, y=2, z=3))
     decoy.when(mock_module_view.get_connected_model("module-id")).then_return(
-        ModuleModel.MAGNETIC_MODULE_V2
+        ModuleModel.MAGNETIC_BLOCK_V1
     )
     decoy.when(
         mock_labware_view.get_module_overlap_offsets(
-            sentinel.labware_definition, ModuleModel.MAGNETIC_MODULE_V2
+            sentinel.labware_definition, ModuleModel.MAGNETIC_BLOCK_V1
         )
     ).then_return(OverlapOffset(x=10, y=20, z=30))
     decoy.when(mock_module_view.get_module_calibration_offset("module-id")).then_return(
         ModuleOffsetData(
-            moduleOffsetVector=ModuleOffsetVector(x=100, y=200, z=300),
-            location=DeckSlotLocation(slotName=DeckSlotName.SLOT_4),
+            moduleOffsetVector=ModuleOffsetVector(x=100, y=200, z=600),
+            location=DeckSlotLocation(slotName=DeckSlotName.SLOT_C3),
         )
     )
     decoy.when(
-        mock_addressable_area_view.get_addressable_area_center(DeckSlotName.SLOT_4.id)
-    ).then_return(Point(100, 200, 300))
+        mock_addressable_area_view.get_addressable_area("magneticBlockModuleV1C3")
+    ).then_return(
+        AddressableArea(
+            area_name="magneticBlockModuleV1C3",
+            area_type=AreaType.MAGNETICBLOCK,
+            base_slot=DeckSlotName.SLOT_C3,
+            display_name="fancy name",
+            bounding_box=Dimensions(x=200, y=400, z=0),
+            position=AddressableOffsetVector(x=0, y=0, z=0),
+            compatible_module_types=[],
+        )
+    )
     result_grip_point = subject.get_labware_grip_point(
         labware_definition=sentinel.labware_definition,
         location=ModuleLocation(moduleId="module-id"),

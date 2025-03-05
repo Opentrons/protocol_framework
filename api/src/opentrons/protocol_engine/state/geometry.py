@@ -328,12 +328,12 @@ class GeometryView:
             return LabwareOffsetVector(x=0, y=0, z=0)
         elif isinstance(parent, ModuleLocation):
             module_id = parent.moduleId
-            module_to_child = self._modules.get_nominal_offset_to_child(
-                module_id=module_id, addressable_areas=self._addressable_areas
-            )
             module_model = self._modules.get_connected_model(module_id)
             stacking_overlap = self._labware.get_module_overlap_offsets(
                 child_definition, module_model
+            )
+            module_to_child = self._modules.get_nominal_offset_to_child(
+                module_id=module_id, addressable_areas=self._addressable_areas
             )
             return LabwareOffsetVector(
                 x=module_to_child.x - stacking_overlap.x,
@@ -955,9 +955,25 @@ class GeometryView:
                 z=labware_offset.z + cal_offset.z,
             )
 
-        location_center = self._addressable_areas.get_addressable_area_center(
-            location_name
-        )
+        if isinstance(location, ModuleLocation) or (
+            isinstance(location, OnLabwareLocation)
+            and isinstance(
+                self._labware.get(location.labwareId).location, ModuleLocation
+            )
+        ):
+            bounding_box = self._addressable_areas.get_addressable_area(
+                location_name
+            ).bounding_box
+            location_center = Point(
+                bounding_box.x / 2,
+                bounding_box.y / 2,
+                z=0,
+            )
+        else:
+            location_center = self._addressable_areas.get_addressable_area_center(
+                location_name
+            )
+
         return Point(
             location_center.x + offset.x,
             location_center.y + offset.y,
