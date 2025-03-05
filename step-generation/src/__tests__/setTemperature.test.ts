@@ -40,6 +40,7 @@ describe('setTemperature', () => {
             },
           },
         ],
+        python: 'mock_temperature_module_1.set_target_temperature(42)',
       },
     },
     {
