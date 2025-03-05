@@ -33,6 +33,7 @@ import {
   getFormLevelErrorsForUnsavedForm,
   getDynamicFieldFormErrorsForUnsavedForm,
 } from '../../../../step-forms/selectors'
+import { getEnableLiquidClasses } from '../../../../feature-flags/selectors'
 import {
   FORM_ERRORS_EVENT,
   FORM_WARNINGS_EVENT,
@@ -73,7 +74,6 @@ import {
   hoverSelection,
   selectDropdownItem,
 } from '../../../../ui/steps/actions/actions'
-import { getEnableLiquidClasses } from '../../../../feature-flags/selectors'
 
 type StepFormMap = {
   [K in StepType]?: ComponentType<StepFormProps> | null

@@ -305,7 +305,7 @@ export interface HydratedMoveLiquidFormData extends AnnotationFields {
   pickUpTip_location?: string | null
   pickUpTip_wellNames?: string[] | null
   preWetTip?: boolean | null
-  transfer_liquid_classes_setting?: string | null
+  liquidClass?: string | null
 }
 
 export interface HydratedMoveLabwareFormData extends AnnotationFields {

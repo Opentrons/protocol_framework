@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { yupResolver } from '@hookform/resolvers/yup'
 import * as Yup from 'yup'
 import { Controller, useForm } from 'react-hook-form'
-import { getSortedLiquidClassDefs } from '../../liquid-defs/utils'
+import { getSortedLiquidClassDefs } from '@opentrons/shared-data'
 import {
   Btn,
   COLORS,

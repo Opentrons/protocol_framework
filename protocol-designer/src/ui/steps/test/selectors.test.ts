@@ -701,7 +701,7 @@ describe('_getSavedMultiSelectFieldValues', () => {
           isIndeterminate: false,
           value: undefined,
         },
-        transfer_liquid_classes_setting: {
+        liquidClass: {
           isIndeterminate: false,
           value: undefined,
         },
@@ -1018,7 +1018,7 @@ describe('_getSavedMultiSelectFieldValues', () => {
           isIndeterminate: false,
         },
         liquidClassesSupported: { isIndeterminate: false },
-        transfer_liquid_classes_setting: {
+        liquidClass: {
           isIndeterminate: false,
           value: undefined,
         },

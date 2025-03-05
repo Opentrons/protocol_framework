@@ -2,11 +2,12 @@ import { describe, it, beforeEach, vi } from 'vitest'
 import { screen } from '@testing-library/react'
 
 import { getEnableLiquidClasses } from '../../../../../../../feature-flags/selectors'
+import { getLiquidEntities } from '../../../../../../../step-forms/selectors'
 import { renderWithProviders } from '../../../../../../../__testing-utils__'
 
 import { FirstStepMoveLiquidTools } from '../FirstStepMoveLiquidTools'
 import { SecondStepsMoveLiquidTools } from '../SecondStepsMoveLiquidTools'
-import { LiquidClassesStepMoveLiquidTools } from '../LiquidClassesStepMoveLiquidTools'
+import { LiquidClassesStepTools } from '../LiquidClassesStepTools'
 
 import { MoveLiquidTools } from '../'
 
@@ -14,13 +15,12 @@ import type { ComponentProps } from 'react'
 import type { FieldPropsByName } from '../../../types'
 import type { FormData } from '../../../../../../../form-types'
 import type { StepFormErrors } from '../../../../../../../steplist'
-import { getLiquidEntities } from '../../../../../../../step-forms/selectors'
 
 vi.mock('../../../../../../../feature-flags/selectors')
 vi.mock('../../../../../../../step-forms/selectors')
 vi.mock('../FirstStepMoveLiquidTools')
 vi.mock('../SecondStepsMoveLiquidTools')
-vi.mock('../LiquidClassesStepMoveLiquidTools')
+vi.mock('../LiquidClassesStepTools')
 
 const render = (props: ComponentProps<typeof MoveLiquidTools>) => {
   return renderWithProviders(<MoveLiquidTools {...props} />)
@@ -46,7 +46,7 @@ describe('MoveLiquidTools', () => {
     vi.mocked(FirstStepMoveLiquidTools).mockReturnValue(
       <div>mock FirstStepMoveLiquidTools</div>
     )
-    vi.mocked(LiquidClassesStepMoveLiquidTools).mockReturnValue(
+    vi.mocked(LiquidClassesStepTools).mockReturnValue(
       <div>mock LiquidClassesStepMoveLiquidTools</div>
     )
     vi.mocked(SecondStepsMoveLiquidTools).mockReturnValue(

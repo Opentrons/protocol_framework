@@ -1,5 +1,4 @@
 import { getAllLiquidClassDefs } from '@opentrons/shared-data'
-import type { LiquidClass } from '@opentrons/shared-data'
 
 const liquidClassDefs = getAllLiquidClassDefs()
 export const getLiquidClassDisplayName = (
@@ -13,12 +12,4 @@ export const getLiquidClassDisplayName = (
     return null
   }
   return liquidClassDefs[liquidClass].displayName
-}
-
-export const getSortedLiquidClassDefs = (): Record<string, LiquidClass> => {
-  return Object.fromEntries(
-    Object.entries(liquidClassDefs).sort(([, valueA], [, valueB]) =>
-      valueA.displayName.localeCompare(valueB.displayName)
-    )
-  )
 }

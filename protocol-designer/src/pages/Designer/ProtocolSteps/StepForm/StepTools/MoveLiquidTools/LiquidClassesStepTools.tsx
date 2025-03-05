@@ -8,23 +8,21 @@ import {
   SPACING,
   StyledText,
 } from '@opentrons/components'
+import { getSortedLiquidClassDefs } from '@opentrons/shared-data'
 import { getLiquidEntities } from '../../../../../../step-forms/selectors'
-import {
-  getLiquidClassDisplayName,
-  getSortedLiquidClassDefs,
-} from '../../../../../../liquid-defs/utils'
+import { getLiquidClassDisplayName } from '../../../../../../liquid-defs/utils'
 
 import type { ChangeEvent, Dispatch, SetStateAction } from 'react'
 import type { FieldPropsByName } from '../../types'
 
-interface LiquidClassesStepMoveLiquidToolsProps {
+interface LiquidClassesStepToolsProps {
   propsForFields: FieldPropsByName
   setShowFormErrors?: Dispatch<SetStateAction<boolean>>
 }
-export const LiquidClassesStepMoveLiquidTools = ({
+export const LiquidClassesStepTools = ({
   propsForFields,
   setShowFormErrors,
-}: LiquidClassesStepMoveLiquidToolsProps): JSX.Element => {
+}: LiquidClassesStepToolsProps): JSX.Element => {
   const { t } = useTranslation(['liquids'])
   const liquids = useSelector(getLiquidEntities)
   const sortedLiquidClassDefs = getSortedLiquidClassDefs()
@@ -108,9 +106,7 @@ export const LiquidClassesStepMoveLiquidTools = ({
             <RadioButton
               key={name}
               onChange={(e: ChangeEvent<any>) => {
-                propsForFields.transfer_liquid_classes_setting.updateValue(
-                  e.currentTarget.value
-                )
+                propsForFields.liquidClass.updateValue(e.currentTarget.value)
                 setSelectedLiquidClass(name)
                 setShowFormErrors?.(false)
               }}

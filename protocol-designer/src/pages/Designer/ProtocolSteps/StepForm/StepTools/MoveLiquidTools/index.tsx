@@ -2,7 +2,7 @@ import { useSelector } from 'react-redux'
 import { getEnableLiquidClasses } from '../../../../../../feature-flags/selectors'
 import { FirstStepMoveLiquidTools } from './FirstStepMoveLiquidTools'
 import { SecondStepsMoveLiquidTools } from './SecondStepsMoveLiquidTools'
-import { LiquidClassesStepMoveLiquidTools } from './LiquidClassesStepMoveLiquidTools'
+import { LiquidClassesStepTools } from './LiquidClassesStepTools'
 
 import type { StepFormProps } from '../../types'
 
@@ -30,7 +30,7 @@ export function MoveLiquidTools(props: StepFormProps): JSX.Element {
     1: () => (
       <>
         {enableLiquidClasses ? (
-          <LiquidClassesStepMoveLiquidTools
+          <LiquidClassesStepTools
             propsForFields={propsForFields}
             setShowFormErrors={setShowFormErrors}
           />

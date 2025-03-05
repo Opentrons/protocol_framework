@@ -6,22 +6,20 @@ import { getLiquidEntities } from '../../../../../../../step-forms/selectors'
 
 import propsForFieldsForSingleStep from '../../../../../../../__fixtures__/propsForFieldsForSingleStep.json'
 
-import { LiquidClassesStepMoveLiquidTools } from '../LiquidClassesStepMoveLiquidTools'
+import { LiquidClassesStepTools } from '../LiquidClassesStepTools'
 
 import type { ComponentProps } from 'react'
 
 vi.mock('../../../../../../../step-forms/selectors')
 
-const render = (
-  props: ComponentProps<typeof LiquidClassesStepMoveLiquidTools>
-) => {
-  return renderWithProviders(<LiquidClassesStepMoveLiquidTools {...props} />, {
+const render = (props: ComponentProps<typeof LiquidClassesStepTools>) => {
+  return renderWithProviders(<LiquidClassesStepTools {...props} />, {
     i18nInstance: i18n,
   })
 }
 
 describe('LiquidClassesStepMoveLiquidTools', () => {
-  let props: ComponentProps<typeof LiquidClassesStepMoveLiquidTools>
+  let props: ComponentProps<typeof LiquidClassesStepTools>
 
   beforeEach(() => {
     props = {
