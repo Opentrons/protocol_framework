@@ -76,7 +76,7 @@ class FlexStackerInterface:
             motion_params = await self._driver.get_motion_params(axis)
             motion_params.current = current or motion_params.current
             motion_params.max_speed = speed or motion_params.max_speed
-            motion_params.acceleration = acceleration or motion_params.acceleration
+            motion_params.acceleration = acceleration if acceleration is not None else motion_params.acceleration
             motion_params.max_speed_discont = motion_params.max_speed_discont
         distance = direction.distance(distance)
         res = await self._driver.move_in_mm(axis, distance, params=motion_params)
@@ -152,7 +152,7 @@ class FlexStackerInterface:
             await self._driver.set_ihold_current(axis, 1.8)
         if any([speed, acceleration]):
             motion_params.max_speed = speed or motion_params.max_speed
-            motion_params.acceleration = acceleration or motion_params.acceleration
+            motion_params.acceleration = acceleration if acceleration is not None else motion_params.acceleration
             motion_params.max_speed_discont = motion_params.max_speed_discont
         success = await self._driver.move_to_limit_switch(
             axis=axis, direction=direction, params=motion_params
