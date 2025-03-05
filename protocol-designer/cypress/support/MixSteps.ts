@@ -72,7 +72,7 @@ enum MixContent {
   StepName = 'Step Name',
   StepNotes = 'Step Notes',
   CypressTest = 'Cypress Mix Test',
-  TouchTipFromTop = 'Touch tip position from bottom',
+  TouchTipFromBottom = 'Touch tip position from bottom',
   MixStepSavedMessage = 'Mix step has been saved',
 }
 
@@ -638,7 +638,7 @@ export const MixVerifications = {
     call: () => {
       cy.log('Verifying TouchTip ---------------------------')
       cy.contains(MixContent.TouchTip).should('exist').should('be.visible')
-      cy.contains(MixContent.TouchTipFromTop)
+      cy.contains(MixContent.TouchTipFromBottom)
         .should('exist')
         .should('be.visible')
       cy.get(MixLocators.PosFromTop).should('have.prop', 'value')

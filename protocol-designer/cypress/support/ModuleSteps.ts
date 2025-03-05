@@ -24,6 +24,11 @@ export enum ModContent {
   PlateReader = 'Absorbance Plate Reader Module GEN1',
 }
 
+/**
+ * Each function returns a StepThunk
+ * Add a comment to all records
+ */
+
 export const ModuleSteps = {
   /**
    * Select "Done" on a step form.
@@ -123,7 +128,7 @@ export const ModuleSteps = {
       cy.contains('Absorbance Plate Reader').click()
     },
   }),
-  DefineInitilizationSingle: (): StepThunk => ({
+  DefineInitilizationSingleCheckAll: (): StepThunk => ({
     call: () => {
       // Goes through all the wavelengths
       cy.contains('450 nm (blue)').click()

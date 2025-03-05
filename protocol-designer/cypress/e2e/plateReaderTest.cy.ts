@@ -88,7 +88,7 @@ describe('Plate Reader Happy Path Single-Wavelength', () => {
     steps.add(SetupSteps.Continue())
     // Define a plate read
     steps.add(ModuleVerifications.PlateReaderPart2NoInitilization())
-    steps.add(ModuleSteps.DefineInitilizationSingle())
+    steps.add(ModuleSteps.DefineInitilizationSingleCheckAll())
     steps.add(ModuleSteps.DefineCustomWavelegthSingle('300'))
     steps.add(SetupSteps.Save())
 
