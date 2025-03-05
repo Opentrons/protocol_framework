@@ -1609,6 +1609,10 @@ class InstrumentContext(publisher.CommandPublisher):
             if trash_location is not None
             else self.trash_container,
         )
+        if transfer_args.tip_policy == TransferTipPolicyV2.PER_SOURCE:
+            raise RuntimeError(
+                'Tip transfer policy "per source" incompatible with distribute.'
+            )
 
         self._core.distribute_liquid(
             liquid_class=liquid_class,
