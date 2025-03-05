@@ -21,6 +21,7 @@ describe('thermocyclerProfileStep', () => {
     initialThermocyclerModuleState?: ThermocyclerModuleState
     args: ThermocyclerProfileStepArgs
     expected: CreateCommand[]
+    expectedPython: string
   }> = [
     {
       testName: 'should generate expected commands',
@@ -96,6 +97,7 @@ describe('thermocyclerProfileStep', () => {
           },
         },
       ],
+      expectedPython: '',
     },
     {
       testName:
@@ -156,6 +158,7 @@ describe('thermocyclerProfileStep', () => {
           },
         },
       ],
+      expectedPython: '',
     },
     {
       testName:
@@ -223,6 +226,7 @@ describe('thermocyclerProfileStep', () => {
           },
         },
       ],
+      expectedPython: '',
     },
     {
       testName:
@@ -283,11 +287,18 @@ describe('thermocyclerProfileStep', () => {
           },
         },
       ],
+      expectedPython: '',
     },
   ]
 
   testCases.forEach(
-    ({ testName, args, expected, initialThermocyclerModuleState }) => {
+    ({
+      testName,
+      args,
+      expected,
+      initialThermocyclerModuleState,
+      expectedPython,
+    }) => {
       it(testName, () => {
         const {
           robotState,
@@ -308,8 +319,9 @@ describe('thermocyclerProfileStep', () => {
           invariantContext,
           robotState
         )
-        const { commands } = getSuccessResult(result)
+        const { commands, python } = getSuccessResult(result)
         expect(commands).toEqual(expected)
+        expect(python).toEqual(expectedPython)
       })
     }
   )

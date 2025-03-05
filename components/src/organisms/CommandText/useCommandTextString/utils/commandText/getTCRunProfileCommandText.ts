@@ -18,9 +18,8 @@ export function getTCRunProfileCommandText({
   )
 
   const startingProfileText = t('tc_starting_profile', {
-    stepCount: Object.keys(stepTexts).length,
+    stepCount: Object.keys(stepTexts).length + 1,
   })
-
   return {
     kind: 'thermocycler/runProfile',
     commandText: startingProfileText,

@@ -1,7 +1,7 @@
 import type { AtomicProfileStep } from '@opentrons/shared-data'
 
 interface hermocyclerProfileRepititions {
-  repeatingProfileSteps: AtomicProfileStep[] | null
+  repeatingProfileSteps: AtomicProfileStep[]
   numRepetitions: number
 }
 
@@ -39,7 +39,7 @@ export function findThermocyclerProfileRepetitions(
   }
 
   return {
-    repeatingProfileSteps: null,
+    repeatingProfileSteps: profile,
     numRepetitions: 1,
   }
 }
