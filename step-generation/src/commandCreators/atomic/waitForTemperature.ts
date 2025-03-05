@@ -68,7 +68,6 @@ export const waitForTemperature: CommandCreator<TemperatureParams> = (
   }
   const module = invariantContext.moduleEntities[moduleId]
   const moduleType = module?.type
-  const pythonCommand = `${module?.pythonName}.wait_for_temperature(${celsius})`
 
   switch (moduleType) {
     case TEMPERATURE_MODULE_TYPE:
@@ -84,7 +83,7 @@ export const waitForTemperature: CommandCreator<TemperatureParams> = (
           },
         ],
         warnings: warnings.length > 0 ? warnings : undefined,
-        python: pythonCommand,
+        python: `${module?.pythonName}.await_temperature(${celsius})`,
       }
 
     case HEATERSHAKER_MODULE_TYPE:
@@ -100,7 +99,7 @@ export const waitForTemperature: CommandCreator<TemperatureParams> = (
           },
         ],
         warnings: warnings.length > 0 ? warnings : undefined,
-        python: pythonCommand,
+        python: `${module?.pythonName}.wait_for_temperature()`,
       }
 
     default:
