@@ -9,7 +9,7 @@ export const absorbanceReaderInitialize: CommandCreator<
   const pythonName = invariantContext.moduleEntities[moduleId].pythonName
   const referenceWavelengthPython =
     referenceWavelength != null
-      ? `reference_wavelength=${referenceWavelength}`
+      ? `, reference_wavelength=${referenceWavelength}`
       : ''
   return {
     commands: [
@@ -26,6 +26,6 @@ export const absorbanceReaderInitialize: CommandCreator<
     ],
     python: `${pythonName}.initialize(${formatPyStr(
       measureMode
-    )}, ${formatPyList(sampleWavelengths)}, ${referenceWavelengthPython})`,
+    )}, ${formatPyList(sampleWavelengths)}${referenceWavelengthPython})`,
   }
 }
