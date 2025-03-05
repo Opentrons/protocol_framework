@@ -11,9 +11,8 @@ import type {
   LabwareDetails,
   LocationSpecificOffsetDetails,
   LPCLabwareInfo,
-  LPCLabwareOffsetAppliedLocationDetails,
+  LPCLabwareOffsetLocationSpecificDetails,
   LPCLabwareOffsetDefaultDetails,
-  OffsetDetails,
 } from '/app/redux/protocol-runs'
 
 export interface GetLabwareDefsForLPCParams {
@@ -39,10 +38,10 @@ export const getItemLabwareDef = ({
   )
 }
 
-export const getSelectedLabwareOffsetDetails = (
+export const getSelectedLabwareLocationSpecificOffsetDetails = (
   runId: string,
   state: State
-): OffsetDetails | null => {
+): LocationSpecificOffsetDetails | null => {
   const selectedLabware =
     state.protocolRuns[runId]?.lpc?.labwareInfo.selectedLabware
   const offsetDetails =
@@ -95,7 +94,7 @@ export interface MisingDefaultOffsets {
   [uri: LabwareURI]: LPCLabwareOffsetDefaultDetails
 }
 export interface MissingLocationSpecificOffsets {
-  [uri: LabwareURI]: LPCLabwareOffsetAppliedLocationDetails[]
+  [uri: LabwareURI]: LPCLabwareOffsetLocationSpecificDetails[]
 }
 
 export interface MissingOffsets {

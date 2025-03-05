@@ -4,7 +4,7 @@ import { getIsTiprack, getLabwareDisplayName } from '@opentrons/shared-data'
 
 import {
   getItemLabwareDef,
-  getSelectedLabwareOffsetDetails,
+  getSelectedLabwareLocationSpecificOffsetDetails,
   getSelectedLabwareDefFrom,
 } from '../transforms'
 
@@ -42,7 +42,8 @@ export const selectSelectedLwInitialPosition = (
   runId: string
 ): Selector<State, VectorOffset | null> =>
   createSelector(
-    (state: State) => getSelectedLabwareOffsetDetails(runId, state),
+    (state: State) =>
+      getSelectedLabwareLocationSpecificOffsetDetails(runId, state),
     details => {
       const workingOffset = details?.workingOffset
 

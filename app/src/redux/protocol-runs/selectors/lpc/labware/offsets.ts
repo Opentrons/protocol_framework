@@ -7,7 +7,7 @@ import {
 } from '@opentrons/shared-data'
 
 import {
-  getSelectedLabwareOffsetDetails,
+  getSelectedLabwareLocationSpecificOffsetDetails,
   getLocationSpecificOffsetDetailsForAllLabware,
   getMissingOffsets,
 } from '../transforms'
@@ -42,7 +42,8 @@ export const selectSelectedLwExistingOffset = (
   runId: string
 ): Selector<State, VectorOffset> =>
   createSelector(
-    (state: State) => getSelectedLabwareOffsetDetails(runId, state),
+    (state: State) =>
+      getSelectedLabwareLocationSpecificOffsetDetails(runId, state),
     details => {
       const existingVector = details?.existingOffset?.vector
 
