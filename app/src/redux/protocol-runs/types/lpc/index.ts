@@ -36,7 +36,7 @@ export interface WorkingOffset {
 
 export type OffsetLocationDetails =
   | LPCLabwareOffsetDefaultDetails
-  | LPCLabwareOffsetAppliedLocationDetails
+  | LPCLabwareOffsetLocationSpecificDetails
 
 interface LPCLabwareOffsetDetails {
   kind: LPCOffsetKind
@@ -53,7 +53,7 @@ export interface LPCLabwareOffsetDefaultDetails
   kind: 'default'
 }
 
-export interface LPCLabwareOffsetAppliedLocationDetails
+export interface LPCLabwareOffsetLocationSpecificDetails
   extends LPCLabwareOffsetDetails {
   slotName: string
   kind: 'location-specific'
@@ -67,7 +67,7 @@ interface BaseOffsetDetails {
 }
 
 export interface LocationSpecificOffsetDetails extends BaseOffsetDetails {
-  locationDetails: LPCLabwareOffsetAppliedLocationDetails
+  locationDetails: LPCLabwareOffsetLocationSpecificDetails
 }
 
 export interface DefaultOffsetDetails extends BaseOffsetDetails {
