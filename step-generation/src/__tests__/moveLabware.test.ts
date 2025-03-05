@@ -76,7 +76,7 @@ describe('moveLabware', () => {
       },
     ])
     expect(getSuccessResult(result).python).toBe(
-      `protocol.move_labware(mockPythonName, A4, use_gripper=False)`
+      `protocol.move_labware(mockPythonName, "A4")`
     )
   })
   it('should return a moveLabware command moving to a trash bin for an ot-2', () => {
@@ -111,7 +111,7 @@ describe('moveLabware', () => {
       },
     ])
     expect(getSuccessResult(result).python).toBe(
-      `protocol.move_labware(mockPythonName, mock_trash_bin_1, use_gripper=False)`
+      `protocol.move_labware(mockPythonName, mock_trash_bin_1)`
     )
   })
   it('should return a moveLabware command moving to a trash bin for flex', () => {
@@ -134,7 +134,7 @@ describe('moveLabware', () => {
       },
     ])
     expect(getSuccessResult(result).python).toBe(
-      `protocol.move_labware(mockPythonName, mock_trash_bin_1, use_gripper=False)`
+      `protocol.move_labware(mockPythonName, mock_trash_bin_1)`
     )
   })
   it('should return a moveLabware command moving to a module', () => {
@@ -207,7 +207,7 @@ describe('moveLabware', () => {
       },
     ])
     expect(getSuccessResult(result).python).toBe(
-      `protocol.move_labware(mockPythonName, mockPythonName, use_gripper=False)`
+      `protocol.move_labware(mockPythonName, mockPythonName)`
     )
   })
   it('should return a moveLabware command moving manually off-deck', () => {
@@ -230,7 +230,7 @@ describe('moveLabware', () => {
       },
     ])
     expect(getSuccessResult(result).python).toBe(
-      `protocol.move_labware(mockPythonName, ${OFF_DECK}, use_gripper=False)`
+      `protocol.move_labware(mockPythonName, protocol_api.OFF_DECK)`
     )
   })
   it('should return a moveLabware command for manualMoveWithPause given only the required params', () => {
@@ -253,7 +253,7 @@ describe('moveLabware', () => {
       },
     ])
     expect(getSuccessResult(result).python).toBe(
-      `protocol.move_labware(mockPythonName, A1, use_gripper=False)`
+      `protocol.move_labware(mockPythonName, "A1")`
     )
   })
   it('should return a moveLabware command for moving with a gripper given only the required params', () => {
@@ -276,7 +276,7 @@ describe('moveLabware', () => {
       },
     ])
     expect(getSuccessResult(result).python).toBe(
-      `protocol.move_labware(mockPythonName, A1, use_gripper=True)`
+      `protocol.move_labware(mockPythonName, "A1", use_gripper=True)`
     )
   })
   it('should return an error for labware does not exist with bad labwareid', () => {

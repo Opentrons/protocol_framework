@@ -11,6 +11,7 @@ import { COLUMN_4_SLOTS } from '../../constants'
 import * as errorCreators from '../../errorCreators'
 import * as warningCreators from '../../warningCreators'
 import {
+  formatPyStr,
   getCutoutIdByAddressableArea,
   getHasWasteChute,
   getLabwareHasLiquid,
@@ -239,7 +240,7 @@ export const moveLabware: CommandCreator<MoveLabwareParams> = (
   } else if ('moduleId' in newLocation) {
     location = moduleEntities[newLocation.moduleId].pythonName
   } else if ('slotName' in newLocation) {
-    location = newLocation.slotName
+    location = formatPyStr(newLocation.slotName)
   } else if ('addressableAreaName' in newLocation) {
     const is4thColumnSlot = COLUMN_4_SLOTS.includes(
       newLocation.addressableAreaName
@@ -279,7 +280,7 @@ export const moveLabware: CommandCreator<MoveLabwareParams> = (
         : null
 
     if (is4thColumnSlot) {
-      location = newLocation.addressableAreaName
+      location = formatPyStr(newLocation.addressableAreaName)
     } else if (matchingTrashId != null && !isWasteChuteLocation) {
       location = additionalEquipmentEntities[matchingTrashId]?.pythonName ?? ''
     } else if (matchingTrashId == null && isWasteChuteLocation) {
@@ -296,8 +297,8 @@ export const moveLabware: CommandCreator<MoveLabwareParams> = (
     console.error('expected to find a python new location but could not')
   }
 
-  const pythonUseGripper = useGripper ? 'True' : 'False'
-  const python = `${PROTOCOL_CONTEXT_NAME}.move_labware(${labwarePythonName}, ${location}, use_gripper=${pythonUseGripper})`
+  const pythonUseGripper = useGripper ? ', use_gripper=True' : ''
+  const python = `${PROTOCOL_CONTEXT_NAME}.move_labware(${labwarePythonName}, ${location}${pythonUseGripper})`
 
   return {
     commands,
