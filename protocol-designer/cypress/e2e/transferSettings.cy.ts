@@ -73,7 +73,6 @@ describe('Transfer stepform testing Single Channel - Happy Path', () => {
     steps.add(SetupSteps.AddStep())
     steps.add(SetupVerifications.TransferPopOut())
     steps.add(UniversalSteps.Snapshot())
-    // ToDO alexjoel42 organize repeats into a for loop
     // Source
     steps.add(SetupSteps.AddSourceLabwareDropdown())
     steps.add(SetupSteps.selectDropdownLabware('Bio-Rad 96 Well Plate'))
@@ -98,7 +97,6 @@ describe('Transfer stepform testing Single Channel - Happy Path', () => {
     steps.add(SetupSteps.AirGap())
     steps.add(SetupSteps.AspirateAirGapVolume('10'))
     steps.add(SetupVerifications.Delay())
-    // steps.add(SetupVerifications.PreWet())
     steps.add(SetupVerifications.TouchTip())
     steps.add(SetupVerifications.MixT())
     steps.add(SetupVerifications.AirGap())
