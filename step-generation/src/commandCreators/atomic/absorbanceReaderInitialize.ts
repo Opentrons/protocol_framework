@@ -1,4 +1,4 @@
-import { formatPyStr, uuid } from '../../utils'
+import { formatPyList, formatPyStr, uuid } from '../../utils'
 import type { CommandCreator } from '../../types'
 import type { AbsorbanceReaderInitializeCreateCommand } from '@opentrons/shared-data'
 
@@ -26,6 +26,6 @@ export const absorbanceReaderInitialize: CommandCreator<
     ],
     python: `${pythonName}.initialize(${formatPyStr(
       measureMode
-    )}, [${sampleWavelengths}], ${referenceWavelengthPython})`,
+    )}, ${formatPyList(sampleWavelengths)}, ${referenceWavelengthPython})`,
   }
 }

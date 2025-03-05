@@ -155,7 +155,7 @@ describe('absorbanceReaderCloseInitialize compound command creator', () => {
       },
     ])
     expect(getSuccessResult(result).python).toBe(
-      `mock_absorbance_plate_reader_1.close_lid()\nmock_absorbance_plate_reader_1.initialize("multi", [450,600], reference_wavelength=450)`
+      `mock_absorbance_plate_reader_1.close_lid()\nmock_absorbance_plate_reader_1.initialize("multi", [450, 600], reference_wavelength=450)`
     )
   })
 })
