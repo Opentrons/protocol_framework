@@ -17,30 +17,32 @@ import { FLEX_ROBOT_TYPE } from '@opentrons/shared-data'
 import {
   selectSelectedLabwareInfo,
   selectSelectedLwInitialPosition,
-  selectSelectedOffsetDetails,
+  selectSelectedLwLocationSpecificOffsetDetails,
   setSelectedLabware,
 } from '/app/redux/protocol-runs'
 
 import type { State } from '/app/redux/types'
 import type { LPCWizardContentProps } from '/app/organisms/LabwarePositionCheck/types'
 import type {
+  LocationSpecificOffsetDetails,
   LPCWizardState,
-  OffsetDetails,
   SelectedLabwareInfo,
 } from '/app/redux/protocol-runs'
 
 export function AppliedLocationOffsetsContainer(
   props: LPCWizardContentProps
 ): JSX.Element {
-  const offsetDetails = useSelector(selectSelectedOffsetDetails(props.runId))
+  const locationSpecificOffsetDetails = useSelector(
+    selectSelectedLwLocationSpecificOffsetDetails(props.runId)
+  )
 
   return (
     <Flex css={APPLIED_LOCATION_CONTAINER_STYLE}>
-      {offsetDetails.map(offset => (
+      {locationSpecificOffsetDetails.map(offset => (
         <LabwareLocationItemContainer
           key={`${offset.locationDetails.slotName}${offset.locationDetails.moduleId}${offset.locationDetails.adapterId}`}
           {...props}
-          offsetDetail={offset}
+          locationSpecificOffsetDetails={offset}
         />
       ))}
       {/* Gives extra scrollable space. */}
@@ -50,7 +52,7 @@ export function AppliedLocationOffsetsContainer(
 }
 
 interface LabwareLocationItemProps extends LPCWizardContentProps {
-  offsetDetail: OffsetDetails
+  locationSpecificOffsetDetails: LocationSpecificOffsetDetails
 }
 
 function LabwareLocationItemContainer(
@@ -73,7 +75,7 @@ function LabwareLocationItemContainer(
 
 function LabwareLocationItem({
   runId,
-  offsetDetail,
+  locationSpecificOffsetDetails,
   commandUtils,
 }: LabwareLocationItemProps): JSX.Element {
   const { t: commandTextT } = useTranslation('protocol_command_text')
@@ -93,7 +95,10 @@ function LabwareLocationItem({
     loadedModules: protocolData.modules,
     loadedLabwares: protocolData.labware,
     robotType: FLEX_ROBOT_TYPE,
-    location: { slotName: offsetDetail.locationDetails.slotName as string },
+    location: {
+      slotName: locationSpecificOffsetDetails.locationDetails
+        .slotName as string,
+    },
     detailLevel: 'slot-only',
   })
 
@@ -104,13 +109,13 @@ function LabwareLocationItem({
           setSelectedLabware(
             runId,
             selectedLw.uri,
-            offsetDetail.locationDetails
+            locationSpecificOffsetDetails.locationDetails
           )
         )
       })
       .then(() =>
         handleCheckItemsPrepModules(
-          offsetDetail.locationDetails,
+          locationSpecificOffsetDetails.locationDetails,
           initialPosition
         )
       )

@@ -8,21 +8,22 @@ import {
 
 import {
   getSelectedLabwareOffsetDetails,
-  getOffsetDetailsForAllLabware,
+  getLocationSpecificOffsetDetailsForAllLabware,
+  getMissingOffsets,
 } from '../transforms'
 
 import type { Selector } from 'reselect'
-import type { VectorOffset, LabwareOffset } from '@opentrons/api-client'
+import type { VectorOffset } from '@opentrons/api-client'
 import type { State } from '/app/redux/types'
 import type {
-  LabwareDetails,
-  OffsetDetails,
+  LocationSpecificOffsetDetails,
   SelectOffsetsToApplyResult,
 } from '/app/redux/protocol-runs'
+import type { MissingOffsets } from '../transforms'
 
-export const selectSelectedOffsetDetails = (
+export const selectSelectedLwLocationSpecificOffsetDetails = (
   runId: string
-): Selector<State, OffsetDetails[]> =>
+): Selector<State, LocationSpecificOffsetDetails[]> =>
   createSelector(
     (state: State) =>
       state.protocolRuns[runId]?.lpc?.labwareInfo.selectedLabware?.uri,
@@ -32,7 +33,7 @@ export const selectSelectedOffsetDetails = (
         console.warn('Failed to access labware details.')
         return []
       } else {
-        return lw[uri].offsetDetails ?? []
+        return lw[uri].locationSpecificOffsetDetails ?? []
       }
     }
   )
@@ -54,11 +55,46 @@ export const selectSelectedLwExistingOffset = (
     }
   )
 
+// NOTE: This count is analogous to the number of locations a labware geometry is utilized
+// in a run.
+export const selectCountLocationSpecificOffsetsForLw = (
+  runId: string,
+  uri: string
+): Selector<State, number> =>
+  createSelector(
+    (state: State) =>
+      state.protocolRuns[runId]?.lpc?.labwareInfo.labware[uri]
+        .locationSpecificOffsetDetails,
+    locationSpecificDetails =>
+      locationSpecificDetails != null ? locationSpecificDetails.length : 0
+  )
+
+export const selectIsMissingDefaultOffsetForLw = (
+  runId: string,
+  uri: string
+): Selector<State, boolean> =>
+  createSelector(
+    (state: State) =>
+      state.protocolRuns[runId]?.lpc?.labwareInfo.labware[uri]
+        .defaultOffsetDetails,
+    details => details?.existingOffset == null
+  )
+
+// Returns the offset details for missing offsets, keyed by the labware URI.
+export const selectMissingOffsets = (
+  runId: string
+): Selector<State, MissingOffsets> =>
+  createSelector(
+    (state: State) => state.protocolRuns[runId]?.lpc?.labwareInfo.labware,
+    labware => getMissingOffsets(labware)
+  )
+
 export const selectOffsetsToApply = (
   runId: string
 ): Selector<State, SelectOffsetsToApplyResult[]> =>
   createSelector(
-    (state: State) => getOffsetDetailsForAllLabware(runId, state),
+    (state: State) =>
+      getLocationSpecificOffsetDetailsForAllLabware(runId, state),
     (state: State) => state.protocolRuns[runId]?.lpc?.protocolData,
     (allDetails, protocolData): SelectOffsetsToApplyResult[] => {
       if (protocolData == null) {
@@ -100,35 +136,6 @@ export const selectOffsetsToApply = (
             },
           ]
         }
-      )
-    }
-  )
-
-// TODO(jh, 01-29-25): Revisit this once "View Offsets" is refactored out of LPC.
-export const selectLabwareOffsetsForAllLw = (
-  runId: string
-): Selector<State, LabwareOffset[]> =>
-  createSelector(
-    (state: State) => state.protocolRuns[runId]?.lpc?.labwareInfo.labware,
-    (labware): LabwareOffset[] => {
-      if (labware == null) {
-        console.warn('Labware info not initialized in state')
-        return []
-      }
-
-      return Object.values(labware).flatMap((details: LabwareDetails) =>
-        details.offsetDetails.map(offsetDetail => ({
-          id: details.id,
-          createdAt: offsetDetail?.existingOffset?.createdAt ?? '',
-          definitionUri: offsetDetail.locationDetails.definitionUri,
-          location: {
-            slotName:
-              offsetDetail.locationDetails.slotName ?? 'DEFAULT_OFFSET_STUB',
-            moduleModel: offsetDetail.locationDetails.moduleModel,
-            definitionUri: offsetDetail.locationDetails.definitionUri,
-          },
-          vector: offsetDetail?.existingOffset?.vector ?? IDENTITY_VECTOR,
-        }))
       )
     }
   )

@@ -7,9 +7,16 @@ import type {
   LabwareDefinition2,
 } from '@opentrons/shared-data'
 import type { State } from '/app/redux/types'
-import type { LabwareDetails, OffsetDetails } from '/app/redux/protocol-runs'
+import type {
+  LabwareDetails,
+  LocationSpecificOffsetDetails,
+  LPCLabwareInfo,
+  LPCLabwareOffsetAppliedLocationDetails,
+  LPCLabwareOffsetDefaultDetails,
+  OffsetDetails,
+} from '/app/redux/protocol-runs'
 
-interface GetLabwareDefsForLPCParams {
+export interface GetLabwareDefsForLPCParams {
   labwareId: string
   loadedLabware: CompletedProtocolAnalysis['labware']
   labwareDefs: LabwareDefinition2[]
@@ -41,7 +48,7 @@ export const getSelectedLabwareOffsetDetails = (
   const offsetDetails =
     state.protocolRuns[runId]?.lpc?.labwareInfo.labware[
       selectedLabware?.uri ?? ''
-    ].offsetDetails
+    ].locationSpecificOffsetDetails
 
   return (
     offsetDetails?.find(offset =>
@@ -71,13 +78,65 @@ export const getSelectedLabwareDefFrom = (
   }
 }
 
-export const getOffsetDetailsForAllLabware = (
+export const getLocationSpecificOffsetDetailsForAllLabware = (
   runId: string,
   state: State
-): OffsetDetails[] => {
+): LocationSpecificOffsetDetails[] => {
   const labware = state?.protocolRuns[runId]?.lpc?.labwareInfo.labware ?? {}
 
   return Object(labware).values(
-    (details: LabwareDetails) => details.offsetDetails
+    (details: LabwareDetails) => details.locationSpecificOffsetDetails
   )
+}
+
+type LabwareURI = string
+
+export interface MisingDefaultOffsets {
+  [uri: LabwareURI]: LPCLabwareOffsetDefaultDetails
+}
+export interface MissingLocationSpecificOffsets {
+  [uri: LabwareURI]: LPCLabwareOffsetAppliedLocationDetails[]
+}
+
+export interface MissingOffsets {
+  defaultOffsets: MisingDefaultOffsets
+  locationSpecificOffsets: MissingLocationSpecificOffsets
+}
+
+// Derive missing offsets for every labware by checking to see if an "existing offset" value
+// does not exist.
+export const getMissingOffsets = (
+  labware: LPCLabwareInfo['labware'] | undefined
+): MissingOffsets => {
+  const missingOffsets: MissingOffsets = {
+    defaultOffsets: {},
+    locationSpecificOffsets: {},
+  }
+
+  if (labware != null) {
+    // Location specific missing offsets.
+    Object.entries(labware).forEach(([uri, lwDetails]) => {
+      lwDetails.locationSpecificOffsetDetails.forEach(detail => {
+        const locationDetails = detail.locationDetails
+
+        if (detail.existingOffset == null) {
+          missingOffsets.locationSpecificOffsets[uri] =
+            missingOffsets.locationSpecificOffsets[uri] != null
+              ? [
+                  ...missingOffsets.locationSpecificOffsets[uri],
+                  locationDetails,
+                ]
+              : [locationDetails]
+        }
+      })
+
+      // Default missing offsets.
+      if (lwDetails.defaultOffsetDetails.existingOffset == null) {
+        missingOffsets.defaultOffsets[uri] =
+          lwDetails.defaultOffsetDetails.locationDetails
+      }
+    })
+  }
+
+  return missingOffsets
 }
