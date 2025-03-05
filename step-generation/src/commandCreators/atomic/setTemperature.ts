@@ -21,7 +21,7 @@ export const setTemperature: CommandCreator<TemperatureParams> = (
     }
   }
   const module = invariantContext.moduleEntities[moduleId]
-  const moduleType = module.type
+  const moduleType = module?.type
 
   if (moduleType === TEMPERATURE_MODULE_TYPE) {
     return {

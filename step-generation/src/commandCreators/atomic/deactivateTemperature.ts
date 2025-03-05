@@ -22,7 +22,8 @@ export const deactivateTemperature: CommandCreator<ModuleOnlyParams> = (
     }
   }
   const module = invariantContext.moduleEntities[moduleId]
-  const { type, pythonName } = module
+  const type = module?.type
+  const pythonName = module?.pythonName
 
   const params = {
     moduleId,
