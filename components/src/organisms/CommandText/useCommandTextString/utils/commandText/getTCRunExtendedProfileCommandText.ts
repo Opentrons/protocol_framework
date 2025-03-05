@@ -60,7 +60,7 @@ export function getTCRunExtendedProfileCommandText({
   return {
     kind: 'thermocycler/runExtendedProfile',
     commandText: t('tc_starting_extended_profile', {
-      elementCount: profileElements.length + 1,
+      elementCount: profileElements.length,
     }),
     profileElementTexts: profileElementTexts(profileElements),
   }

@@ -1,13 +1,13 @@
 import type { AtomicProfileStep } from '@opentrons/shared-data'
 
-interface hermocyclerProfileRepititions {
+interface thermocyclerProfileRepititions {
   repeatingProfileSteps: AtomicProfileStep[]
   numRepetitions: number
 }
 
 export function findThermocyclerProfileRepetitions(
   profile: AtomicProfileStep[]
-): hermocyclerProfileRepititions {
+): thermocyclerProfileRepititions {
   // Convert each object into a string to easily compare
   const patternStrings = profile.map(
     step => `${step.holdSeconds}-${step.celsius}`
