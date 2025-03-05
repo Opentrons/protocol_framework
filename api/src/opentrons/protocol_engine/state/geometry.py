@@ -570,10 +570,7 @@ class GeometryView:
         absolute_point: Point,
         meniscus_tracking: Optional[MeniscusTrackingTarget] = None,
     ) -> Tuple[LiquidHandlingWellLocation, bool]:
-        """Given absolute position, get relative location of a well in a labware.
-
-        If is_meniscus is True, absolute_point will hold the z-offset in its z field.
-        """
+        """Given absolute position, get relative location of a well in a labware."""
         dynamic_liquid_tracking = False
         if meniscus_tracking:
             location = LiquidHandlingWellLocation(
@@ -1795,6 +1792,24 @@ class GeometryView:
 
         else:  # Off deck
             return None
+
+    def get_liquid_handling_z_change(
+        self,
+        labware_id: str,
+        well_name: str,
+        operation_volume: float,
+    ) -> LiquidTrackingType:
+        """Get the change in height from a liquid handling operation."""
+        initial_handling_height = self.get_meniscus_height(
+            labware_id=labware_id, well_name=well_name
+        )
+        final_height = self.get_well_height_after_liquid_handling(
+            labware_id=labware_id,
+            well_name=well_name,
+            initial_height=initial_handling_height,
+            volume=operation_volume,
+        )
+        return final_height - initial_handling_height
 
     def get_well_offset_adjustment(
         self,
