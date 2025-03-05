@@ -13,7 +13,7 @@ import {
   SOURCE_LABWARE,
   TIPRACK_1,
 } from '../fixtures'
-import { DEST_LABWARE, OFF_DECK, moveLabware } from '..'
+import { DEST_LABWARE, moveLabware } from '..'
 
 import type {
   LabwareDefinition2,
