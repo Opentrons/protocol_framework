@@ -522,9 +522,11 @@ class GeometryView:
             )
             if not isinstance(offset_adjustment, SimulatedProbeResult):
                 offset = offset.model_copy(update={"z": offset.z + offset_adjustment})
-            self.validate_well_position(
-                well_location=well_location, z_offset=offset.z, pipette_id=pipette_id
-            )
+                self.validate_well_position(
+                    well_location=well_location,
+                    z_offset=offset.z,
+                    pipette_id=pipette_id,
+                )
 
         return Point(
             x=labware_pos.x + offset.x + well_def.x,
