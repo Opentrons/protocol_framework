@@ -7,6 +7,7 @@ import { modulePipetteCollision } from './modulePipetteCollision'
 import { thermocyclerPipetteCollision } from './thermocyclerPipetteCollision'
 import { getLabwareSlot } from './getLabwareSlot'
 import { movableTrashCommandsUtil } from './movableTrashCommandsUtil'
+import { findThermocyclerProfileRepetitions } from './findThermocyclerProfileRepetitions'
 
 export {
   absorbanceReaderCollision,
@@ -17,6 +18,7 @@ export {
   thermocyclerPipetteCollision,
   getLabwareSlot,
   movableTrashCommandsUtil,
+  findThermocyclerProfileRepetitions,
 }
 export * from './commandCreatorArgsGetters'
 export * from './heaterShakerCollision'
