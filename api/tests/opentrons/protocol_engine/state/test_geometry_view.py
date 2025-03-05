@@ -2460,7 +2460,7 @@ def test_get_labware_grip_point_for_labware_on_module(
             location=DeckSlotLocation(slotName=DeckSlotName.SLOT_C3),
         )
     )
-    
+
     decoy.when(
         mock_addressable_area_view.get_addressable_area_center(
             "magneticBlockModuleV1C3"
