@@ -165,7 +165,7 @@ async def test_store_raises_if_stall(
         pool_adapter_definition=None,
         pool_lid_definition=None,
         pool_count=0,
-        max_pool_count=5,
+        max_pool_count=999,
     )
 
     decoy.when(
