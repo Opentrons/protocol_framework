@@ -6,10 +6,12 @@ import standardFlexDeckDef from '../../deck/definitions/5/ot3_standard.json'
 import type {
   DeckDefinition,
   LabwareDefinition2,
+  LiquidClass,
   ModuleModel,
   RobotType,
   ThermalAdapterName,
 } from '../types'
+import { getAllLiquidClassDefs } from '../liquidClasses'
 import type { AddressableAreaName, CutoutId } from '../../deck/types/schemaV5'
 
 export { getWellNamePerMultiTip } from './getWellNamePerMultiTip'
@@ -398,4 +400,13 @@ export const getCutoutIdFromAddressableArea = (
   )
 
   return null
+}
+
+export const getSortedLiquidClassDefs = (): Record<string, LiquidClass> => {
+  const liquidClassDefs = getAllLiquidClassDefs()
+  return Object.fromEntries(
+    Object.entries(liquidClassDefs).sort(([, valueA], [, valueB]) =>
+      valueA.displayName.localeCompare(valueB.displayName)
+    )
+  )
 }
