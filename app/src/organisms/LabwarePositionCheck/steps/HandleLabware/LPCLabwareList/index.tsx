@@ -33,6 +33,8 @@ export function LPCLabwareList(props: LPCWizardContentProps): JSX.Element {
       {Object.entries(labwareInfo).map(([uri, info]) => (
         <LabwareItem key={`labware_${uri}`} uri={uri} info={info} {...props} />
       ))}
+      {/* Accommodate scrolling. */}
+      <Flex height={SPACING.spacing40} />
     </TextListTableContent>
   )
 }
