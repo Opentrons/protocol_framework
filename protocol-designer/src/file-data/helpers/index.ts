@@ -44,7 +44,6 @@ export const commandCreatorFromStepArgs = (
       )
 
     case 'setTemperature':
-      console.log('hit set temperature', args)
       return StepGeneration.curryCommandCreator(
         StepGeneration.setTemperature,
         args
