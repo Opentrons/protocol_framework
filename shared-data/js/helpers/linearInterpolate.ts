@@ -1,6 +1,8 @@
 /**
  * This function performs linear interpolation given a target x-value and an array of [x, y] known interpolation points.
- * linearInterpolate will pre-sort interpolationPoints by x-value. If a value
+ * linearInterpolate will pre-sort interpolationPoints by x-value. If a value lies left or right of all passed
+ * interpolation points, the caller can optionally set a default to return. If no default left or right value is passed,
+ * linearInterpolate will return the left- or right-most point, depending on where the target falls.
  *
  * @param {number} target Target x-value for which to interpolate y-value.
  * @param {Array<number, number>} interpolationPoints Array of [x, y] to use for interpolation.
