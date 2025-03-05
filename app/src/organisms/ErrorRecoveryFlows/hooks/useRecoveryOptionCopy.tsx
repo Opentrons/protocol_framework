@@ -48,12 +48,9 @@ export function useRecoveryOptionCopy(): (
       case RECOVERY_MAP.MANUAL_MOVE_AND_SKIP.ROUTE:
         return t('manually_move_lw_and_skip')
       case RECOVERY_MAP.MANUAL_REPLACE_AND_RETRY.ROUTE:
-        if (errorKind === ERROR_KINDS.STALL_WHILE_STACKING) {
-          return t('replace_labware_in_stacker_and_step')
-        }
-        else{
           return t('manually_replace_lw_and_retry')
-        }
+      case RECOVERY_MAP.MANUAL_REPLACE_STACKER_AND_RETRY.ROUTE:
+        return t('replace_labware_in_stacker_and_step')
       default:
         return 'Unknown action'
     }

@@ -3,6 +3,7 @@ import {
   GripperIsHoldingLabware,
   GripperReleaseLabware,
   TwoColLwInfoAndDeck,
+  TwoColTextAndFailedStepNextStep,
   RetryStepInfo,
   RecoveryDoorOpenSpecial,
 } from '../shared'
@@ -15,7 +16,7 @@ export function ManualReplaceLwAndRetry(
 ): JSX.Element {
   const { recoveryMap } = props
   const { step, route } = recoveryMap
-  const { MANUAL_REPLACE_AND_RETRY } = RECOVERY_MAP
+  const { MANUAL_REPLACE_AND_RETRY, MANUAL_REPLACE_STACKER_AND_RETRY } = RECOVERY_MAP
 
   const buildContent = (): JSX.Element => {
     switch (step) {
@@ -27,6 +28,8 @@ export function ManualReplaceLwAndRetry(
         return <RecoveryDoorOpenSpecial {...props} />
       case MANUAL_REPLACE_AND_RETRY.STEPS.MANUAL_REPLACE:
         return <TwoColLwInfoAndDeck {...props} />
+      case MANUAL_REPLACE_STACKER_AND_RETRY.STEPS.PREPARE_TRACK_FOR_HOMING:
+        return <TwoColTextAndFailedStepNextStep {...props} />
       case MANUAL_REPLACE_AND_RETRY.STEPS.RETRY:
         return <RetryStepInfo {...props} />
       default:
