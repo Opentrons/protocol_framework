@@ -142,6 +142,10 @@ generate-protocols:
 matrix:
 	$(PYTHON) -m pipenv run python -m automation.analysis_matrix
 
+.PHONY: gen-lc
+gen-lc:
+	$(PYTHON) -m pipenv run python -m automation.gen_lc
+
 # Tools for running the robot server in a container
 
 OPENTRONS_VERSION ?= edge
