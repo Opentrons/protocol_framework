@@ -97,7 +97,19 @@ describe('thermocyclerProfileStep', () => {
           },
         },
       ],
-      expectedPython: '',
+      expectedPython: `
+mock_thermocycler.close_lid()
+mock_thermocycler.set_lid_temperature(55)
+mock_thermocycler.execute_profile(
+    [
+
+    ],
+    1,
+    block_max_volume=42,
+)
+mock_thermocycler.open_lid()
+mock_thermocycler.set_block_temperature(4)
+mock_thermocycler.deactivate_lid()`.trimStart(),
     },
     {
       testName:
@@ -158,7 +170,17 @@ describe('thermocyclerProfileStep', () => {
           },
         },
       ],
-      expectedPython: '',
+      expectedPython: `
+mock_thermocycler.execute_profile(
+    [
+        {"temperature": 61, "hold_time_seconds": 99},
+    ],
+    1,
+    block_max_volume=42,
+)
+mock_thermocycler.open_lid()
+mock_thermocycler.set_block_temperature(4)
+mock_thermocycler.deactivate_lid()`.trimStart(),
     },
     {
       testName:
@@ -226,7 +248,18 @@ describe('thermocyclerProfileStep', () => {
           },
         },
       ],
-      expectedPython: '',
+      expectedPython: `
+mock_thermocycler.close_lid()
+mock_thermocycler.execute_profile(
+    [
+        {"temperature": 61, "hold_time_seconds": 99},
+    ],
+    1,
+    block_max_volume=42,
+)
+mock_thermocycler.open_lid()
+mock_thermocycler.set_block_temperature(4)
+mock_thermocycler.deactivate_lid()`.trimStart(),
     },
     {
       testName:
@@ -287,7 +320,17 @@ describe('thermocyclerProfileStep', () => {
           },
         },
       ],
-      expectedPython: '',
+      expectedPython: `
+mock_thermocycler.execute_profile(
+    [
+        {"temperature": 61, "hold_time_seconds": 99},
+    ],
+    1,
+    block_max_volume=42,
+)
+mock_thermocycler.open_lid()
+mock_thermocycler.set_block_temperature(4)
+mock_thermocycler.deactivate_lid()`.trimStart(),
     },
   ]
 
