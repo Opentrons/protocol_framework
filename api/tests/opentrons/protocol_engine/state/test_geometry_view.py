@@ -82,9 +82,6 @@ from opentrons.protocol_engine.types import (
     NotOnDeckLocationSequenceComponent,
     OnCutoutFixtureLocationSequenceComponent,
     InStackerHopperLocation,
-    AddressableArea,
-    AreaType,
-    AddressableOffsetVector,
 )
 from opentrons.protocol_engine.commands import (
     CommandStatus,
@@ -2457,19 +2454,12 @@ def test_get_labware_grip_point_for_labware_on_module(
             location=DeckSlotLocation(slotName=DeckSlotName.SLOT_C3),
         )
     )
+    
     decoy.when(
-        mock_addressable_area_view.get_addressable_area("magneticBlockModuleV1C3")
-    ).then_return(
-        AddressableArea(
-            area_name="magneticBlockModuleV1C3",
-            area_type=AreaType.MAGNETICBLOCK,
-            base_slot=DeckSlotName.SLOT_C3,
-            display_name="fancy name",
-            bounding_box=Dimensions(x=200, y=400, z=0),
-            position=AddressableOffsetVector(x=0, y=0, z=0),
-            compatible_module_types=[],
+        mock_addressable_area_view.get_addressable_area_center(
+            "magneticBlockModuleV1C3"
         )
-    )
+    ).then_return(Point(100, 200, 300))
     result_grip_point = subject.get_labware_grip_point(
         labware_definition=sentinel.labware_definition,
         location=ModuleLocation(moduleId="module-id"),

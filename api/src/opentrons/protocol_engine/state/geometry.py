@@ -955,23 +955,19 @@ class GeometryView:
                 z=labware_offset.z + cal_offset.z,
             )
 
+        location_center = self._addressable_areas.get_addressable_area_center(
+            location_name
+        )
         if isinstance(location, ModuleLocation) or (
             isinstance(location, OnLabwareLocation)
             and isinstance(
                 self._labware.get(location.labwareId).location, ModuleLocation
             )
         ):
-            bounding_box = self._addressable_areas.get_addressable_area(
-                location_name
-            ).bounding_box
             location_center = Point(
-                bounding_box.x / 2,
-                bounding_box.y / 2,
+                x=location_center.x,
+                y=location_center.y,
                 z=0,
-            )
-        else:
-            location_center = self._addressable_areas.get_addressable_area_center(
-                location_name
             )
 
         return Point(
