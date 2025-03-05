@@ -165,6 +165,16 @@ export const RECOVERY_MAP = {
       RETRY: 'retry',
     },
   },
+  MANUAL_REPLACE_STACKER_AND_RETRY: {
+    ROUTE: 'manual-replace-in-stacker-and-retry',
+    STEPS: {
+      PREPARE_TRACK_FOR_HOMING: 'prepare-track-for-homing',
+      CLOSE_DOOR_GRIPPER_Z_HOME: 'close-robot-door',
+      CONFIRM_RETRY: 'confirm-position',
+      MANUAL_REPLACE: 'manual-retry',
+      RETRY: 'retry',
+    },
+  },
   REFILL_AND_RESUME: { ROUTE: 'refill-and-resume', STEPS: {} },
   RETRY_STEP: {
     ROUTE: 'retry-step',
