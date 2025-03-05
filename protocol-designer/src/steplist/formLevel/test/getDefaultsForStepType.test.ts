@@ -87,6 +87,7 @@ describe('getDefaultsForStepType', () => {
         dispense_x_position: 0,
         dispense_y_position: 0,
         blowout_z_offset: 0,
+        liquidClassesSupported: true,
       })
     })
   })
@@ -122,6 +123,7 @@ describe('getDefaultsForStepType', () => {
         mix_x_position: 0,
         mix_y_position: 0,
         blowout_z_offset: 0,
+        liquidClassesSupported: true,
       })
     })
   })

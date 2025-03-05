@@ -333,7 +333,8 @@ export const createPythonFile: Selector<string> = createSelector(
           robotState,
           robotStateTimeline,
           liquidsByLabwareId,
-          labwareNicknamesById
+          labwareNicknamesById,
+          robotType
         ),
       ]
         .filter(section => section) // skip any blank sections

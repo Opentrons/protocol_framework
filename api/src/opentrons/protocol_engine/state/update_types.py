@@ -19,6 +19,7 @@ from opentrons.protocol_engine.types import (
     LiquidClassRecord,
     ABSMeasureMode,
 )
+from opentrons.protocol_engine.types.liquid_level_detection import LiquidTrackingType
 from opentrons.types import MountType
 from opentrons_shared_data.labware.labware_definition import LabwareDefinition
 from opentrons_shared_data.pipette.types import PipetteNameType
@@ -58,6 +59,16 @@ ClearType: typing.TypeAlias = typing.Literal[_ClearEnum.CLEAR]
 
 Unfortunately, mypy doesn't let us write `Literal[CLEAR]`. Use this instead.
 """
+
+
+class _SimulatedEnum(enum.Enum):
+    SIMULATED = enum.auto()
+
+
+SIMULATED: typing.Final = _SimulatedEnum.SIMULATED
+"""A sentinel value to indicate that a liquid probe return value is simulated.
+
+Useful to avoid throwing unnecessary errors in protocol analysis."""
 
 
 @dataclasses.dataclass(frozen=True)
@@ -260,8 +271,8 @@ class LiquidProbedUpdate:
     labware_id: str
     well_name: str
     last_probed: datetime
-    height: float | ClearType
-    volume: float | ClearType
+    height: LiquidTrackingType | ClearType
+    volume: LiquidTrackingType | ClearType
 
 
 @dataclasses.dataclass
@@ -367,6 +378,7 @@ class FlexStackerStoreLabware:
 class FlexStackerPoolConstraint:
     """The labware definitions that are contained in the pool."""
 
+    max_pool_count: int
     primary_definition: LabwareDefinition
     lid_definition: LabwareDefinition | None
     adapter_definition: LabwareDefinition | None
@@ -734,8 +746,8 @@ class StateUpdate:
         labware_id: str,
         well_name: str,
         last_probed: datetime,
-        height: float | ClearType,
-        volume: float | ClearType,
+        height: LiquidTrackingType | ClearType,
+        volume: LiquidTrackingType | ClearType,
     ) -> Self:
         """Add a liquid height and volume to well state. See `ProbeLiquidUpdate`."""
         self.liquid_probed = LiquidProbedUpdate(
@@ -894,6 +906,7 @@ class StateUpdate:
     def update_flex_stacker_labware_pool_definition(
         self,
         module_id: str,
+        max_count: int,
         primary_definition: LabwareDefinition,
         adapter_definition: LabwareDefinition | None,
         lid_definition: LabwareDefinition | None,
@@ -904,6 +917,7 @@ class StateUpdate:
                 self.flex_stacker_state_update, module_id
             ),
             pool_constraint=FlexStackerPoolConstraint(
+                max_pool_count=max_count,
                 primary_definition=primary_definition,
                 lid_definition=lid_definition,
                 adapter_definition=adapter_definition,
