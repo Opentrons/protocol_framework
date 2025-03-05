@@ -2027,3 +2027,11 @@ class GeometryView:
             total_height += upper_def.dimensions.zDimension - overlap
             upper_def = lower_def
         return total_height + upper_def.dimensions.zDimension
+
+    def get_height_of_stacker_labware_pool(self, module_id: str) -> float:
+        """Get the overall height of a stack of labware in a Stacker module."""
+        stacker = self._modules.get_flex_stacker_substate(module_id)
+        pool_list = stacker.get_pool_definition_ordered_list()
+        if not pool_list:
+            return 0.0
+        return self.get_height_of_labware_stack(pool_list)
