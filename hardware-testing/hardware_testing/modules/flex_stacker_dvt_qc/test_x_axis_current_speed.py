@@ -14,7 +14,7 @@ from opentrons.drivers.flex_stacker.types import StackerAxis, Direction
 
 
 TEST_SPEEDS = [200, 220]
-TEST_CURRENTS = [1.5, 1.0, 0.7, 0.5, 0.4]
+TEST_CURRENTS = [1.5, 0.7, 0.5, 0.4]
 CURRENT_THRESHOD = 0.7
 TEST_TRIALS = 10
 
@@ -88,9 +88,6 @@ async def test_cycle_per_direction(
                     f"X Axis, {direction}, PASS, {speed}mm/s, {current}A, {dist}mm"
                 )
                 return True, dist
-
-        # Translate dist to total movement
-        dist = round(AXIS_TRAVEL + dist - AXIS_TOLERANCE, 1)
     except FlexStackerStallError:
         ui.print_error("axis stalled!")
     return False, dist
