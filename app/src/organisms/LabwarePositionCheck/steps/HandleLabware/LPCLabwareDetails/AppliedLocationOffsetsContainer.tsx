@@ -45,8 +45,6 @@ export function AppliedLocationOffsetsContainer(
           locationSpecificOffsetDetails={offset}
         />
       ))}
-      {/* Gives extra scrollable space. */}
-      <Flex css={BOX_STYLE} />
     </Flex>
   )
 }
@@ -149,8 +147,4 @@ const LOCATION_ITEM_CONTAINER_STYLE = css`
 
 const BUTTON_TEXT_STYLE = css`
   justify-content: ${JUSTIFY_SPACE_BETWEEN};
-`
-
-const BOX_STYLE = css`
-  height: ${SPACING.spacing40};
 `

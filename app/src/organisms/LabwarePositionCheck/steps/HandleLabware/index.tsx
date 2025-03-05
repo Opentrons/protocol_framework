@@ -1,7 +1,8 @@
-import { useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
 
 import {
+  clearSelectedLabware,
   selectSelectedLabwareFlowType,
   selectSelectedLabwareInfo,
 } from '/app/redux/protocol-runs'
@@ -13,43 +14,68 @@ import { LPCContentContainer } from '/app/organisms/LabwarePositionCheck/LPCCont
 import type { LPCWizardContentProps } from '/app/organisms/LabwarePositionCheck/types'
 
 export function HandleLabware(props: LPCWizardContentProps): JSX.Element {
-  const { t } = useTranslation('labware_position_check')
-
-  // TODO(jh, 02-05-25): EXEC-1119. Use header overrides for the substeps.
-  return (
-    <LPCContentContainer
-      {...props}
-      header={t('labware_position_check_title')}
-      buttonText={t('exit')}
-      onClickButton={props.commandUtils.headerCommands.handleNavToDetachProbe}
-    >
-      <HandleLabwareContent {...props} />
-    </LPCContentContainer>
-  )
+  return <HandleLabwareContent {...props} />
 }
 
 function HandleLabwareContent(props: LPCWizardContentProps): JSX.Element {
+  const { t } = useTranslation('labware_position_check')
+  const { runId } = props
+  const dispatch = useDispatch()
+
   const selectedLw = useSelector(selectSelectedLabwareInfo(props.runId))
   const offsetFlowType = useSelector(selectSelectedLabwareFlowType(props.runId))
 
   // These routes are one step, since the progress bar remains static during the core LPC flow.
   if (selectedLw == null) {
     // The general labware list view.
-    return <LPCLabwareList {...props} />
+    return (
+      <LPCContentContainer
+        {...props}
+        header={t('labware_position_check_title')}
+        buttonText={t('exit')}
+        onClickButton={props.commandUtils.headerCommands.handleNavToDetachProbe}
+      >
+        <LPCLabwareList {...props} />
+      </LPCContentContainer>
+    )
   } else if (selectedLw.offsetLocationDetails == null) {
+    const onHeaderGoBack = (): void => {
+      dispatch(clearSelectedLabware(runId))
+    }
+
     // The offset view for a singular labware geometry.
-    return <LPCLabwareDetails {...props} />
+    return (
+      <LPCContentContainer
+        {...props}
+        header={t('labware_position_check_title')}
+        buttonText={t('exit')}
+        onClickButton={props.commandUtils.headerCommands.handleNavToDetachProbe}
+        onClickBack={onHeaderGoBack}
+      >
+        <LPCLabwareDetails {...props} />
+      </LPCContentContainer>
+    )
   } else {
     // The core flow for updating an offset for a singular labware geometry.
-    switch (offsetFlowType) {
-      case 'default':
-        return <CheckItem {...props} />
-      case 'location-specific':
-        return <CheckItem {...props} />
-      default: {
-        console.error(`Unexpected offsetFlowType: ${offsetFlowType}`)
-        return <CheckItem {...props} />
+    const getHeader = (): string => {
+      switch (offsetFlowType) {
+        case 'default':
+        case 'location-specific':
+        default: {
+          console.error(`Unexpected offsetFlowType: ${offsetFlowType}`)
+        }
       }
     }
+
+    return (
+      <LPCContentContainer
+        {...props}
+        header={t('labware_position_check_title')}
+        buttonText={t('exit')}
+        onClickButton={props.commandUtils.headerCommands.handleNavToDetachProbe}
+      >
+        <CheckItem {...props} />
+      </LPCContentContainer>
+    )
   }
 }

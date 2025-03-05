@@ -1,4 +1,6 @@
-import { Flex } from '@opentrons/components'
+import { css } from 'styled-components'
+
+import { Flex, SPACING } from '@opentrons/components'
 
 import { AppliedLocationOffsetsContainer } from './AppliedLocationOffsetsContainer'
 import { DefaultLocationOffset } from './DefaultLocationOffset'
@@ -11,6 +13,12 @@ export function LPCLabwareDetails(props: LPCWizardContentProps): JSX.Element {
     <Flex css={LIST_CONTAINER_STYLE}>
       <DefaultLocationOffset {...props} />
       <AppliedLocationOffsetsContainer {...props} />
+      {/* Gives extra scrollable space. */}
+      <Flex css={BOX_STYLE} />
     </Flex>
   )
 }
+
+const BOX_STYLE = css`
+  height: ${SPACING.spacing40};
+`

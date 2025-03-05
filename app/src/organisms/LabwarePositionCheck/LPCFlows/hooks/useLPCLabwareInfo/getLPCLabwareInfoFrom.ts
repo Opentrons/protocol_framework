@@ -36,7 +36,10 @@ function getLabwareInfoRecords(
       labwareDetails[uri] = {
         id: getALabwareIdFromUri({ ...params, uri }),
         displayName: getDisplayNameFromUri({ ...params, uri }),
-        offsetDetails: getOffsetDetailsForLabware({ ...params, uri }),
+        locationSpecificOffsetDetails: getOffsetDetailsForLabware({
+          ...params,
+          uri,
+        }),
       }
     }
   })
