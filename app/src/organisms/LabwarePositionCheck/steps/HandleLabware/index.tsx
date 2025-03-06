@@ -12,6 +12,7 @@ import { CheckItem } from './CheckItem'
 import { LPCLabwareList } from './LPCLabwareList'
 import { LPCLabwareDetails } from './LPCLabwareDetails'
 import { LPCContentContainer } from '/app/organisms/LabwarePositionCheck/LPCContentContainer'
+import { handleUnsavedOffsetsModal } from '/app/organisms/LabwarePositionCheck/steps/HandleLabware/UnsavedOffsetsModal'
 
 import type { LPCWizardContentProps } from '/app/organisms/LabwarePositionCheck/types'
 
@@ -28,6 +29,7 @@ function HandleLabwareContent(props: LPCWizardContentProps): JSX.Element {
   const offsetFlowType = useSelector(selectSelectedLabwareFlowType(runId))
   const selectedLwName = useSelector(selectSelectedLabwareDisplayName(runId))
   const workingOffsetsByUri = useSelector(selectWorkingOffsetsByUri(runId))
+  const doWorkingOffsetsExit = Object.keys(workingOffsetsByUri).length > 0
 
   // These routes are one step, since the progress bar remains static during the core LPC flow.
   if (selectedLw == null) {
@@ -44,7 +46,11 @@ function HandleLabwareContent(props: LPCWizardContentProps): JSX.Element {
     )
   } else if (selectedLw.offsetLocationDetails == null) {
     const onHeaderGoBack = (): void => {
-      dispatch(clearSelectedLabware(runId))
+      if (doWorkingOffsetsExit) {
+        void handleUnsavedOffsetsModal(props)
+      } else {
+        dispatch(clearSelectedLabware(runId))
+      }
     }
 
     // TODO(jh, 03-05-25): Add the "save" btn functionality when the API changes are introduced.
@@ -57,13 +63,13 @@ function HandleLabwareContent(props: LPCWizardContentProps): JSX.Element {
         buttonText={t('save')}
         onClickButton={() => null}
         onClickBack={onHeaderGoBack}
-        buttonIsDisabled={Object.keys(workingOffsetsByUri).length === 0}
+        buttonIsDisabled={!doWorkingOffsetsExit}
       >
         <LPCLabwareDetails {...props} />
       </LPCContentContainer>
     )
   } else {
-    // The core flow for updating an offset for a singular labware geometry.
+    // The core edit flow for updating an offset for a singular labware geometry.
     const getHeader = (): string => {
       switch (offsetFlowType) {
         case 'default':
