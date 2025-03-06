@@ -136,6 +136,7 @@ class SearchFilter(BaseModel):
         Field(
             description=(
                 "If `true`, this filter returns only the most recent matching result."
+                " Otherwise, all matches are returned."
             )
         ),
     ] = False
