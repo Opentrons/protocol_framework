@@ -235,6 +235,7 @@ def _search(
         result: list[StoredLabwareOffset] = []
         for filter in filters:
             result.extend(_search_single_filter(store, filter))
+        result.sort(key=lambda element: element.createdAt)
         return result
 
 
