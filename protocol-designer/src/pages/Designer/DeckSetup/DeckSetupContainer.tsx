@@ -62,7 +62,6 @@ const DETAILS_HOVER_SPACE = 60
 // Note (02/02/25:kk) the size is different from the design but the product team requested keep the current size
 const STARTING_DECK_VIEW_MIN_WIDTH = '75%'
 const DECK_VIEW_CONTAINER_MAX_HEIGHT = '35rem' // for Protocol Steps
-const OT2_PROTOCOL_STEPS_VIEW_BOX = '-45.65 -12.03 486.0 444.0'
 
 const OT2_STANDARD_DECK_VIEW_LAYER_BLOCK_LIST: string[] = [
   'calibrationMarkings',
@@ -256,13 +255,11 @@ export function DeckSetupContainer(props: DeckSetupTabType): JSX.Element {
                 tab === 'protocolSteps' ? 'auto' : STARTING_DECK_VIEW_MIN_WIDTH
               }
               deckDef={deckDef}
-              viewBox={
+              viewBox={viewBoxAdjusted}
+              transform={
                 tab === 'protocolSteps' && robotType === OT2_ROBOT_TYPE
-                  ? OT2_PROTOCOL_STEPS_VIEW_BOX
-                  : viewBoxAdjusted
-              }
-              ot2ProtocolSteps={
-                tab === 'protocolSteps' && robotType === OT2_ROBOT_TYPE
+                  ? 'scale(1.3, -1.3)'
+                  : 'scale(1, -1)'
               }
               outline="auto"
               zoomed={zoomIn.slot != null}
