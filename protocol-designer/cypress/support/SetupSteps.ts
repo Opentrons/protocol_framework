@@ -408,18 +408,27 @@ export const SetupSteps = {
       cy.contains('button', SetupContent.AddLiquid).click()
     },
   }),
+  /**
+   * Start making a move step
+   */
 
   AddMoveStep: (): StepThunk => ({
     call: () => {
       cy.contains('button', 'Move').should('be.visible').click()
     },
   }),
+  /**
+   * Select gripper to move with
+   */
 
   UseGripperinMove: (): StepThunk => ({
     call: () => {
       cy.contains('button', 'Use gripper').should('be.visible').click()
     },
   }),
+  /**
+   * Select gripper to move labware
+   */
 
   MoveToPlateReader: (): StepThunk => ({
     call: () => {
