@@ -14,7 +14,7 @@ import {
   getModuleType,
 } from '@opentrons/shared-data'
 
-import { getStagingAreaAddressableAreas } from '../../../utils'
+import { getIsAdapter, getStagingAreaAddressableAreas } from '../../../utils'
 import {
   getLabwareIsCompatible,
   getLabwareIsCustom,
@@ -43,7 +43,9 @@ import type {
   AllTemporalPropertiesForTimelineFrame,
   InitialDeckSetup,
   LabwareOnDeck,
+  ModuleOnDeck,
 } from '../../../step-forms'
+import type { Selection } from '../../../ui/steps'
 import type { Fixture } from './constants'
 
 const OT2_TC_SLOTS = ['7', '8', '10', '11']
@@ -504,4 +506,100 @@ export const getSVGContainerWidth = (
     return '70%'
   }
   return '100%'
+}
+
+interface HighlightItemsByType {
+  highlightModuleItems: Array<{
+    selection: Selection
+    module: ModuleOnDeck
+    isSelected?: boolean
+  }>
+  highlightLabwareItems: Array<{
+    selection: Selection
+    labware: LabwareOnDeck
+    isSelected?: boolean
+  }>
+}
+
+export function getHighlightLabwareAndModules(
+  hoveredItem: Selection,
+  selectedDropdownItems: Selection[],
+  labware: Record<string, LabwareOnDeck>,
+  modules: Record<string, ModuleOnDeck>
+): HighlightItemsByType {
+  const _getReducedHighlightItemsById = (
+    items: Selection[],
+    isSelected: boolean
+  ): Record<string, { item: Selection; isSelected: boolean }> => {
+    return items.reduce((acc, item) => {
+      if (item.id != null) {
+        const moduleIdUnderLabwareToUse =
+          item.id != null &&
+          labware[item.id] != null &&
+          getIsAdapter(item.id, labware)
+            ? modules[labware[item.id].slot]?.id
+            : null
+
+        const updatedItem =
+          moduleIdUnderLabwareToUse != null
+            ? { ...item, id: moduleIdUnderLabwareToUse }
+            : item
+
+        return updatedItem.id != null
+          ? { ...acc, [updatedItem.id]: { item: updatedItem, isSelected } }
+          : acc
+      }
+      return acc
+    }, {})
+  }
+
+  const reducedHoveredItemsById = _getReducedHighlightItemsById(
+    [hoveredItem],
+    false
+  )
+  const reducedSelectedItemsById = _getReducedHighlightItemsById(
+    selectedDropdownItems,
+    true
+  )
+  const dropdownModulesAndLabwareItemsById = {
+    ...reducedHoveredItemsById,
+    ...reducedSelectedItemsById,
+  }
+
+  const highlightItems = Object.values(
+    dropdownModulesAndLabwareItemsById
+  ).reduce<HighlightItemsByType>(
+    (acc, { item, isSelected }) => {
+      const { id } = item
+      if (id == null) {
+        return acc
+      }
+      if (id in modules) {
+        const moduleOnDeck = modules[id]
+        return {
+          ...acc,
+          highlightModuleItems: [
+            ...acc.highlightModuleItems,
+            { module: moduleOnDeck, selection: item, isSelected },
+          ],
+        }
+      }
+      if (id in labware) {
+        const labwareOnDeck = labware[id]
+        return {
+          ...acc,
+          highlightLabwareItems: [
+            ...acc.highlightLabwareItems,
+            { labware: labwareOnDeck, selection: item, isSelected },
+          ],
+        }
+      }
+      return acc
+    },
+    {
+      highlightModuleItems: [],
+      highlightLabwareItems: [],
+    }
+  )
+  return highlightItems
 }

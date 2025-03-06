@@ -494,6 +494,11 @@ export function MoveLiquidTools(props: StepFormProps): JSX.Element {
           tooltipText={
             propsForFields[`${tab}_touchTip_checkbox`].tooltipContent
           }
+          disabled={
+            (destinationLabwareType === 'trashBin' ||
+              destinationLabwareType === 'wasteChute') &&
+            tab === 'dispense'
+          }
         >
           {formData[`${tab}_touchTip_checkbox`] === true ? (
             <PositionField
