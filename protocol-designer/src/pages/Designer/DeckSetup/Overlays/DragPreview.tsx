@@ -7,9 +7,10 @@ import {
   POSITION_ABSOLUTE,
   RobotCoordsForeignDiv,
 } from '@opentrons/components'
+
+import previewImage from '../../../../assets/images/preview.svg'
 import { DND_TYPES } from '../../../../constants'
 import { DECK_CONTROLS_STYLE } from '../constants'
-import previewImage from '../../../../assets/images/preview.svg'
 
 import type { RobotCoordinateSpaceWithRefRenderProps } from '@opentrons/components'
 import type { DroppedItem } from '../types'
