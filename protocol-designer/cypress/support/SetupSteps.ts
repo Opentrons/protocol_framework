@@ -593,8 +593,9 @@ export const SetupSteps = {
   AddSourceLabwareDropdown: (): StepThunk => ({
     call: () => {
       cy.contains('Source labware')
-        .closest('div.Flex-sc-1qhp8l7-0.bsOFGI')
-        .find('div[tabindex="0"].Flex-sc-1qhp8l7-0.sc-bqWxrE')
+        .parents()
+        .contains('Choose option')
+        .should('be.visible')
         .click()
     },
   }),
