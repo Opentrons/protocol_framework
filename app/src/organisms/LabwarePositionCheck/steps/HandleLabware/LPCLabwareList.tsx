@@ -16,7 +16,7 @@ import {
 
 import {
   selectAllLabwareInfo,
-  setSelectedLabwareName,
+  setSelectedLabwareUri,
   selectIsMissingDefaultOffsetForLw,
   selectCountLocationSpecificOffsetsForLw,
 } from '/app/redux/protocol-runs'
@@ -55,7 +55,7 @@ function LabwareItem({ uri, info, runId }: LabwareItemProps): JSX.Element {
   )
 
   const handleOnClick = (): void => {
-    dispatch(setSelectedLabwareName(runId, uri))
+    dispatch(setSelectedLabwareUri(runId, uri))
   }
 
   const getOffsetCopy = (): string => {

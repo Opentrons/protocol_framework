@@ -38,29 +38,6 @@ export const selectSelectedLabwareInfo = (
     selectedLabware => selectedLabware ?? null
   )
 
-export const selectSelectedLwInitialPosition = (
-  runId: string
-): Selector<State, VectorOffset | null> =>
-  createSelector(
-    (state: State) =>
-      getSelectedLabwareLocationSpecificOffsetDetails(runId, state),
-    details => {
-      const workingOffset = details?.workingOffset
-
-      if (workingOffset == null) {
-        return null
-      } else {
-        return workingOffset.initialPosition
-      }
-    }
-  )
-
-export interface SelectOffsetsToApplyResult {
-  definitionUri: string
-  location: LegacyLabwareOffsetLocation
-  vector: Coordinates
-}
-
 export const selectSelectedLabwareFlowType = (
   runId: string
 ): Selector<State, LPCFlowType | null> =>

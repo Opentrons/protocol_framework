@@ -7,7 +7,7 @@ import {
   GO_BACK_LAST_STEP,
   SET_SELECTED_LABWARE,
   CLEAR_SELECTED_LABWARE,
-  SET_SELECTED_LABWARE_NAME,
+  SET_SELECTED_LABWARE_URI,
   APPLY_OFFSET,
 } from '../constants'
 
@@ -41,11 +41,11 @@ export const goBackLastStep = (runId: string): GoBackStepAction => ({
   payload: { runId },
 })
 
-export const setSelectedLabwareName = (
+export const setSelectedLabwareUri = (
   runId: string,
   labwareUri: string
 ): SelectedLabwareNameAction => ({
-  type: SET_SELECTED_LABWARE_NAME,
+  type: SET_SELECTED_LABWARE_URI,
   payload: {
     runId,
     labwareUri,

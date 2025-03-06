@@ -35,8 +35,8 @@ import { NeedHelpLink } from '/app/molecules/OT2CalibrationNeedHelpLink'
 import { JogControls } from '/app/molecules/JogControls'
 import { LiveOffsetValue } from './LiveOffsetValue'
 import {
-  selectSelectedLwExistingOffset,
-  selectSelectedLwInitialPosition,
+  selectSelectedLwExistingLocationSpecificOffset,
+  selectSelectedLwLocationSpecificOffsetInitialPosition,
   selectActivePipette,
   selectIsSelectedLwTipRack,
   selectSelectedLabwareDef,
@@ -77,7 +77,8 @@ export function EditOffset(props: JogToWellProps): JSX.Element {
 
   const isOnDevice = useSelector(getIsOnDevice)
   const initialPosition =
-    useSelector(selectSelectedLwInitialPosition(runId)) ?? IDENTITY_VECTOR
+    useSelector(selectSelectedLwLocationSpecificOffsetInitialPosition(runId)) ??
+    IDENTITY_VECTOR
   const pipetteName =
     useSelector(selectActivePipette(runId))?.pipetteName ?? 'p1000_single'
   const itemLwDef = useSelector(
@@ -85,7 +86,7 @@ export function EditOffset(props: JogToWellProps): JSX.Element {
   ) as LabwareDefinition2
   const isTipRack = useSelector(selectIsSelectedLwTipRack(runId))
   const activeLwExistingOffset = useSelector(
-    selectSelectedLwExistingOffset(runId)
+    selectSelectedLwExistingLocationSpecificOffset(runId)
   )
 
   const [joggedPosition, setJoggedPosition] = useState<VectorOffset>(

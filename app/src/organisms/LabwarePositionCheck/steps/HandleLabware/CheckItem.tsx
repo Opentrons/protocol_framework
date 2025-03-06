@@ -20,7 +20,7 @@ import { EditOffset } from './EditOffset'
 import { PrepareLabware } from './PrepareLabware'
 import { PlaceItemInstruction } from './PlaceItemInstruction'
 import {
-  selectSelectedLwInitialPosition,
+  selectSelectedLwLocationSpecificOffsetInitialPosition,
   selectActivePipette,
   selectIsSelectedLwTipRack,
   selectSelectedLabwareInfo,
@@ -57,7 +57,9 @@ export function CheckItem(props: LPCWizardContentProps): JSX.Element {
 
   const pipette = useSelector(selectActivePipette(runId)) as LoadedPipette
   const pipetteId = pipette.id
-  const initialPosition = useSelector(selectSelectedLwInitialPosition(runId))
+  const initialPosition = useSelector(
+    selectSelectedLwLocationSpecificOffsetInitialPosition(runId)
+  )
   const isLwTiprack = useSelector(selectIsSelectedLwTipRack(runId))
   const selectedLwInfo = useSelector(
     selectSelectedLabwareInfo(runId)
