@@ -924,6 +924,7 @@ class GeometryView:
             self._labware.get_grip_height_from_labware_bottom(labware_definition)
         )
         location_name: str
+        module_location: ModuleLocation | None = None
 
         if isinstance(location, DeckSlotLocation):
             location_name = location.slotName.id
@@ -945,12 +946,14 @@ class GeometryView:
                 location_name = self._modules.get_provided_addressable_area(
                     location.moduleId
                 )
+                module_location = location
             else:  # OnLabwareLocation
                 labware_loc = self._labware.get(location.labwareId).location
                 if isinstance(labware_loc, ModuleLocation):
                     location_name = self._modules.get_provided_addressable_area(
                         labware_loc.moduleId
                     )
+                    module_location = labware_loc
                 else:
                     location_name = self.get_ancestor_slot_name(location.labwareId).id
             labware_offset = self._get_offset_from_parent(
@@ -964,19 +967,26 @@ class GeometryView:
                 z=labware_offset.z + cal_offset.z,
             )
 
-        location_center = self._addressable_areas.get_addressable_area_center(
-            location_name
-        )
-        if isinstance(location, ModuleLocation) or (
-            isinstance(location, OnLabwareLocation)
-            and isinstance(
-                self._labware.get(location.labwareId).location, ModuleLocation
+        if module_location is not None:
+            # Location center must be determined from the cutout the Module is loaded in
+            position = deck_configuration_provider.get_cutout_position(
+                cutout_id=self._addressable_areas.get_cutout_id_by_deck_slot_name(
+                    self._modules.get_location(module_location.moduleId).slotName
+                ),
+                deck_definition=self._addressable_areas.deck_definition,
             )
-        ):
+            bounding_box = self._addressable_areas.get_addressable_area(
+                location_name
+            ).bounding_box
             location_center = Point(
-                x=location_center.x,
-                y=location_center.y,
-                z=0,
+                position.x + bounding_box.x / 2,
+                position.y + bounding_box.y / 2,
+                position.z,
+            )
+
+        else:
+            location_center = self._addressable_areas.get_addressable_area_center(
+                location_name
             )
 
         return Point(
