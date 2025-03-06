@@ -121,7 +121,6 @@ export const addAndSelectStep: (arg: {
       abosrbanceReaderModules.length === 1
         ? abosrbanceReaderModules[0][0]
         : null
-    console.log({ absorbanceReaderId, abosrbanceReaderModules })
     if (abosrbanceReaderModules != null) {
       dispatch(
         selectDropdownItem({
