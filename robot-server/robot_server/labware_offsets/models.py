@@ -12,6 +12,7 @@ from opentrons.protocol_engine import (
 from opentrons.protocol_engine.types.labware_offset_location import (
     LabwareOffsetLocationSequenceComponentsUnion,
 )
+from pydantic.json_schema import SkipJsonSchema
 
 from robot_server.errors.error_responses import ErrorDetails
 
@@ -63,7 +64,7 @@ class StoredLabwareOffsetCreate(BaseModel):
 
     locationSequence: Sequence[StoredLabwareOffsetLocationSequenceComponents] = Field(
         ...,
-        description="Where the labware is located on the robot. Can represent all locations, but may not be present for older runs.",
+        description="Where the labware is located on the robot.",
         min_length=1,
     )
     vector: LabwareOffsetVector = Field(
@@ -80,17 +81,64 @@ class StoredLabwareOffset(BaseModel):
     # contents, but I'm not sure what it is.
     id: str = Field(..., description="Unique labware offset record identifier.")
     createdAt: datetime = Field(..., description="When this labware offset was added.")
-    definitionUri: str = Field(..., description="The URI for the labware's definition.")
 
+    definitionUri: str = Field(..., description="The URI for the labware's definition.")
     locationSequence: Sequence[ReturnedLabwareOffsetLocationSequenceComponents] = Field(
         ...,
         description="Where the labware is located on the robot. Can represent all locations, but may not be present for older runs.",
         min_length=1,
     )
+
     vector: LabwareOffsetVector = Field(
         ...,
         description="The offset applied to matching labware.",
     )
+
+
+class SearchFilter(BaseModel):
+    """A filter for searching for labware offsets.
+
+    An offset passes this filter if it passes all of these fields.
+    (In other words, the fields are logically ANDed together).
+    """
+
+    id: Annotated[
+        str | SkipJsonSchema[DoNotFilterType],
+        Field(
+            description=(
+                "Filter for exact matches on the result's `id` field."
+                " Omit to accept any `id`."
+            )
+        ),
+    ] = DO_NOT_FILTER
+    definitionUri: Annotated[
+        str | SkipJsonSchema[DoNotFilterType],
+        Field(
+            description=(
+                "Filter for exact matches on the result's `definitionUri` field."
+                " Omit to accept any `definitionUri`."
+            )
+        ),
+    ] = DO_NOT_FILTER
+    locationSequence: Annotated[
+        Sequence[StoredLabwareOffsetLocationSequenceComponents]
+        | SkipJsonSchema[DoNotFilterType],
+        Field(
+            description=(
+                "Filter for exact matches on the result's `locationSequence` field."
+                " Omit to accept any `locationSequence`."
+            )
+        ),
+    ] = DO_NOT_FILTER
+
+    mostRecentOnly: Annotated[
+        bool,
+        Field(
+            description=(
+                "If `true`, this filter returns only the most recent matching result."
+            )
+        ),
+    ] = False
 
 
 class LabwareOffsetNotFound(ErrorDetails):
