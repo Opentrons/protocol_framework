@@ -101,16 +101,16 @@ stages:
           totalLength: 3
 
   # Just a basic test here. More complicated tests for the filters belong in the unit tests.
-  - name: Test getting labware offsets with a filter
+  - name: Test searching for labware offsets with a filter
     request:
-      url: '{ot3_server_base_url}/labwareOffsets'
-      method: GET
-      params:
-        # JSON turducken:
-        # - The query parameter value is a string containing JSON.
-        # - Putting single-quotes around that keeps the YAML parser from parsing the JSON.
-        # - Putting !raw before that prevents Tavern from trying to do {substitution}.
-        filters: !raw '[{"locationSequence":[{"kind":"onAddressableArea","addressableAreaName":"A2"}]}]'
+      url: '{ot3_server_base_url}/labwareOffsets/searches'
+      method: POST
+      json:
+        data:
+          filters:
+            - locationSequence:
+                - kind: onAddressableArea
+                  addressableAreaName: A2
     response:
       json:
         data:

@@ -5,7 +5,6 @@ import textwrap
 from typing import Annotated, Literal, Sequence
 
 import fastapi
-from pydantic import TypeAdapter
 from pydantic.json_schema import SkipJsonSchema
 from server_utils.fastapi_utils.light_router import LightRouter
 
@@ -32,6 +31,7 @@ from .store import (
 )
 from .fastapi_dependencies import get_labware_offset_store
 from .models import (
+    SearchCreate,
     SearchFilter,
     StoredLabwareOffset,
     StoredLabwareOffsetCreate,
@@ -42,9 +42,6 @@ from .models import (
 
 
 router = LightRouter()
-
-
-_list_of_filters_adapter = TypeAdapter(list[SearchFilter])
 
 
 @PydanticResponse.wrap_route(
@@ -117,33 +114,14 @@ async def post_labware_offsets(  # noqa: D103
 @PydanticResponse.wrap_route(
     router.get,
     path="/labwareOffsets",
-    summary="Search for labware offsets",
+    summary="Get all labware offsets",
     description=(
-        "Get a filtered list of all the labware offsets currently stored on the robot."
+        "Get all the labware offsets currently stored on the robot."
         " Results are returned in order from oldest to newest."
     ),
 )
 async def get_labware_offsets(  # noqa: D103
     store: Annotated[LabwareOffsetStore, fastapi.Depends(get_labware_offset_store)],
-    filters: Annotated[
-        str,
-        fastapi.Query(
-            description=textwrap.dedent(
-                """\
-                A list of filters to narrow down results.
-
-                The value should be a string containing a JSON array of filter objects.
-                Because of OpenAPI limitations, the shape of a filter object is not
-                documented here, but see robot_server/labware_offsets/models.py.
-
-                The results from all of these filters are combined
-                (logically OR'd together).
-
-                If this is omitted or empty, all results are returned.
-                """
-            ),
-        ),
-    ] = "[]",
     cursor: Annotated[
         int | SkipJsonSchema[None],
         fastapi.Query(
@@ -169,15 +147,47 @@ async def get_labware_offsets(  # noqa: D103
             "Pagination not currently supported on this endpoint."
         )
 
-    # todo(mm, 2025-03-06): If this validation fails, it currently returns an HTTP 500
-    # to the client. See if there's some FastAPI+Pydantic incantation to get FastAPI
-    # to do the validation so it returns its normal nice HTTP 422 response.
-    validated_filters = _list_of_filters_adapter.validate_json(filters)
-
-    result_data = _search(store, validated_filters)
+    result_data = store.search()
 
     meta = MultiBodyMeta.model_construct(
         # todo(mm, 2024-12-06): Update this when cursor+page_length are supported.
+        cursor=0,
+        totalLength=len(result_data),
+    )
+
+    return await PydanticResponse.create(
+        SimpleMultiBody[StoredLabwareOffset].model_construct(
+            data=result_data,
+            meta=meta,
+        )
+    )
+
+
+@PydanticResponse.wrap_route(
+    router.post,
+    path="/labwareOffsets/searches",
+    summary="Search for labware offsets",
+    description=textwrap.dedent(
+        """\
+        Search for labware offsets matching some given criteria.
+
+        Nothing is modified. The HTTP method here is `POST` only to allow putting the
+        search query, which is potentially large and complicated, in the request body
+        instead of in a query parameter.
+        """
+    ),
+)
+async def search_labware_offsets(  # noqa: D103
+    store: Annotated[LabwareOffsetStore, fastapi.Depends(get_labware_offset_store)],
+    request_body: Annotated[
+        RequestModel[SearchCreate],
+        fastapi.Body(),
+    ],
+) -> PydanticResponse[SimpleMultiBody[StoredLabwareOffset]]:
+    result_data = _search(store, request_body.data.filters)
+
+    meta = MultiBodyMeta.model_construct(
+        # This needs to be updated if this endpoint ever supports cursor+pageLength.
         cursor=0,
         totalLength=len(result_data),
     )

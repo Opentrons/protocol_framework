@@ -2,9 +2,11 @@
 
 from datetime import datetime
 import enum
+from textwrap import dedent
 from typing import Literal, Annotated, Final, TypeAlias, Sequence
 
 from pydantic import BaseModel, Field
+from pydantic.json_schema import SkipJsonSchema
 
 from opentrons.protocol_engine import (
     LabwareOffsetVector,
@@ -12,7 +14,6 @@ from opentrons.protocol_engine import (
 from opentrons.protocol_engine.types.labware_offset_location import (
     LabwareOffsetLocationSequenceComponentsUnion,
 )
-from pydantic.json_schema import SkipJsonSchema
 
 from robot_server.errors.error_responses import ErrorDetails
 
@@ -95,19 +96,12 @@ class StoredLabwareOffset(BaseModel):
     )
 
 
-class SearchFilter(BaseModel):
-    """A filter for searching for labware offsets.
-
-    An offset passes this filter if it passes all of these fields.
-    (In other words, the fields are logically ANDed together).
-    """
-
+class SearchFilter(BaseModel):  # noqa: D101 - more docs are in SearchCreate.
     id: Annotated[
         str | SkipJsonSchema[DoNotFilterType],
         Field(
             description=(
-                "Filter for exact matches on the result's `id` field."
-                " Omit to accept any `id`."
+                "Return only results having this exact `id`. Omit to accept any `id`."
             )
         ),
     ] = DO_NOT_FILTER
@@ -115,7 +109,7 @@ class SearchFilter(BaseModel):
         str | SkipJsonSchema[DoNotFilterType],
         Field(
             description=(
-                "Filter for exact matches on the result's `definitionUri` field."
+                "Return only results having this exact `definitionUri`."
                 " Omit to accept any `definitionUri`."
             )
         ),
@@ -125,7 +119,7 @@ class SearchFilter(BaseModel):
         | SkipJsonSchema[DoNotFilterType],
         Field(
             description=(
-                "Filter for exact matches on the result's `locationSequence` field."
+                "Return only results having this exact `locationSequence`."
                 " Omit to accept any `locationSequence`."
             )
         ),
@@ -135,11 +129,30 @@ class SearchFilter(BaseModel):
         bool,
         Field(
             description=(
-                "If `true`, this filter returns only the most recent matching result."
-                " Otherwise, all matches are returned."
+                "If `true`, this filter returns only the most recently-added result"
+                " of all that matched it. Otherwise, it returns all of them."
             )
         ),
     ] = False
+
+
+class SearchCreate(BaseModel):
+    """A search query for labware offsets."""
+
+    filters: Annotated[
+        list[SearchFilter],
+        Field(
+            description=dedent(
+                """\
+                A list of filters to search by.
+
+                A result is returned if it passes any of these filters
+                (in other words, these filters are OR'd together).
+                If no filters are provided, all results are returned.
+                """
+            )
+        ),
+    ]
 
 
 class LabwareOffsetNotFound(ErrorDetails):
