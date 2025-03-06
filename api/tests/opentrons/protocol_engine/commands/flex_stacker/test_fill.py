@@ -36,14 +36,14 @@ def subject(state_view: StateView, run_control: RunControlHandler) -> FillImpl:
 
 
 @pytest.mark.parametrize(
-    "current_count,count_param,target_count",
+    "current_count,count_param,max_pool_count",
     [
-        pytest.param(0, 5, 5, id="empty-to-full"),
-        pytest.param(5, 5, 5, id="full-noop"),
-        pytest.param(5, 4, 5, id="size-minimum"),
+        pytest.param(0, 6, 6, id="empty-to-full"),
+        pytest.param(6, 6, 6, id="full-noop"),
+        pytest.param(6, 4, 6, id="size-minimum"),
         pytest.param(3, 4, 4, id="fill-not-to-full"),
-        pytest.param(4, 6, 5, id="capped-by-max"),
-        pytest.param(3, None, 5, id="default-count"),
+        pytest.param(4, 7, 6, id="capped-by-max"),
+        pytest.param(3, None, 6, id="default-count"),
     ],
 )
 async def test_fill_happypath(
@@ -52,18 +52,17 @@ async def test_fill_happypath(
     subject: FillImpl,
     current_count: int,
     count_param: int | None,
-    target_count: int,
+    max_pool_count: int,
 ) -> None:
     """It should fill a valid stacker's labware pool."""
     module_id = "some-module-id"
     stacker_state = FlexStackerSubState(
         module_id=cast(FlexStackerId, module_id),
-        in_static_mode=sentinel.in_static_mode,
-        hopper_labware_ids=[],
         pool_primary_definition=sentinel.pool_primary_definition,
         pool_adapter_definition=None,
         pool_lid_definition=None,
         pool_count=current_count,
+        max_pool_count=max_pool_count,
     )
     decoy.when(state_view.modules.get_flex_stacker_substate(module_id)).then_return(
         stacker_state
@@ -77,10 +76,10 @@ async def test_fill_happypath(
     result = await subject.execute(params)
     assert result.state_update == StateUpdate(
         flex_stacker_state_update=FlexStackerStateUpdate(
-            module_id=module_id, pool_count=target_count
+            module_id=module_id, pool_count=max_pool_count
         )
     )
-    assert result.public == FillResult(count=target_count)
+    assert result.public == FillResult(count=max_pool_count)
 
 
 async def test_fill_requires_stacker(
@@ -108,12 +107,11 @@ async def test_fill_requires_constrained_pool(
     module_id = "module-id"
     stacker_state = FlexStackerSubState(
         module_id=cast(FlexStackerId, module_id),
-        in_static_mode=sentinel.in_static_mode,
-        hopper_labware_ids=[],
         pool_primary_definition=None,
         pool_adapter_definition=None,
         pool_lid_definition=None,
         pool_count=3,
+        max_pool_count=0,
     )
     decoy.when(state_view.modules.get_flex_stacker_substate(module_id)).then_return(
         stacker_state
@@ -143,17 +141,16 @@ async def test_pause_strategy_pauses(
 ) -> None:
     """It should pause the system when the pause strategy is used."""
     current_count = 3
-    count_param = 5
-    target_count = 5
+    count_param = 6
+    max_pool_count = 6
     module_id = "some-module-id"
     stacker_state = FlexStackerSubState(
         module_id=cast(FlexStackerId, module_id),
-        in_static_mode=sentinel.in_static_mode,
-        hopper_labware_ids=[],
         pool_primary_definition=sentinel.pool_primary_definition,
         pool_adapter_definition=None,
         pool_lid_definition=None,
         pool_count=current_count,
+        max_pool_count=max_pool_count,
     )
     decoy.when(state_view.modules.get_flex_stacker_substate(module_id)).then_return(
         stacker_state
@@ -167,8 +164,8 @@ async def test_pause_strategy_pauses(
     result = await subject.execute(params)
     assert result.state_update == StateUpdate(
         flex_stacker_state_update=FlexStackerStateUpdate(
-            module_id=module_id, pool_count=target_count
+            module_id=module_id, pool_count=max_pool_count
         )
     )
-    assert result.public == FillResult(count=target_count)
+    assert result.public == FillResult(count=max_pool_count)
     decoy.verify(await run_control.wait_for_resume())

@@ -6,6 +6,7 @@ import standardFlexDeckDef from '../../deck/definitions/5/ot3_standard.json'
 import type {
   DeckDefinition,
   LabwareDefinition2,
+  LabwareDefinition3,
   LiquidClass,
   ModuleModel,
   RobotType,
@@ -34,6 +35,7 @@ export * from './getLoadedLabwareDefinitionsByUri'
 export * from './getFixedTrashLabwareDefinition'
 export * from './getOccludedSlotCountForModule'
 export * from './labwareInference'
+export * from './linearInterpolate'
 export * from './getAddressableAreasInProtocol'
 export * from './getFlexSurroundingSlots'
 export * from './getSimplestFlexDeckConfig'
@@ -46,7 +48,9 @@ export * from './sortRunTimeParameters'
 export const getLabwareDefIsStandard = (def: LabwareDefinition2): boolean =>
   def?.namespace === OPENTRONS_LABWARE_NAMESPACE
 
-export const getLabwareDefURI = (def: LabwareDefinition2): string =>
+export const getLabwareDefURI = (
+  def: LabwareDefinition2 | LabwareDefinition3
+): string =>
   constructLabwareDefURI(
     def.namespace,
     def.parameters.loadName,

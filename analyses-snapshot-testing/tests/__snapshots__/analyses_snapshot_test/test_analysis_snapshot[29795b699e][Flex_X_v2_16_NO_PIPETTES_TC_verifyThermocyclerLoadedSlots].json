@@ -155,7 +155,7 @@
           "errorInfo": {
             "args": "()",
             "class": "AssertionError",
-            "traceback": "  File \"/usr/local/lib/python3.10/site-packages/opentrons/protocols/execution/execute_python.py\", line N, in exec_run\n    exec(\"run(__context)\", new_globs)\n\n  File \"<string>\", line N, in <module>\n\n  File \"Flex_S_v2_16_NO_PIPETTES_TC_verifyThermocyclerLoadedSlots.py\", line N, in run\n"
+            "traceback": "  File \"/usr/local/lib/python3.10/site-packages/opentrons/protocols/execution/execute_python.py\", line N, in exec_run\n    exec(\"run(__context)\", new_globs)\n\n  File \"<string>\", line N, in <module>\n\n  File \"Flex_X_v2_16_NO_PIPETTES_TC_verifyThermocyclerLoadedSlots.py\", line N, in run\n"
           },
           "errorType": "PythonException",
           "id": "UUID",
@@ -167,7 +167,7 @@
   ],
   "files": [
     {
-      "name": "Flex_S_v2_16_NO_PIPETTES_TC_verifyThermocyclerLoadedSlots.py",
+      "name": "Flex_X_v2_16_NO_PIPETTES_TC_verifyThermocyclerLoadedSlots.py",
       "role": "main"
     }
   ],

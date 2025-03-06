@@ -1,27 +1,37 @@
 """Command models to retrieve a labware from a Flex Stacker."""
 
 from __future__ import annotations
-from typing import Optional, Literal, TYPE_CHECKING, Any, Dict
+from typing import Literal, TYPE_CHECKING, Any, Union
 from typing_extensions import Type
 
 from pydantic import BaseModel, Field
+from pydantic.json_schema import SkipJsonSchema
 
-from ..command import AbstractCommandImpl, BaseCommand, BaseCommandCreate, SuccessData
+from ..command import (
+    AbstractCommandImpl,
+    BaseCommand,
+    BaseCommandCreate,
+    SuccessData,
+    DefinedErrorData,
+)
+from ..flex_stacker.common import FlexStackerStallOrCollisionError
 from ...errors import (
     ErrorOccurrence,
     CannotPerformModuleAction,
     LocationIsOccupiedError,
     FlexStackerLabwarePoolNotYetDefinedError,
 )
+from ...resources import ModelUtils
 from ...state import update_types
 from ...types import (
     ModuleLocation,
     OnLabwareLocation,
     LabwareLocationSequence,
     LabwareLocation,
+    LoadedLabware,
 )
 from opentrons_shared_data.labware.labware_definition import LabwareDefinition
-from pydantic.json_schema import SkipJsonSchema
+from opentrons_shared_data.errors.exceptions import FlexStackerStallError
 from opentrons.calibration_storage.helpers import uri_from_details
 
 if TYPE_CHECKING:
@@ -108,17 +118,25 @@ class RetrieveResult(BaseModel):
     )
 
 
-class RetrieveImpl(AbstractCommandImpl[RetrieveParams, SuccessData[RetrieveResult]]):
+_ExecuteReturn = Union[
+    SuccessData[RetrieveResult],
+    DefinedErrorData[FlexStackerStallOrCollisionError],
+]
+
+
+class RetrieveImpl(AbstractCommandImpl[RetrieveParams, _ExecuteReturn]):
     """Implementation of a labware retrieval command."""
 
     def __init__(
         self,
         state_view: StateView,
         equipment: EquipmentHandler,
+        model_utils: ModelUtils,
         **kwargs: object,
     ) -> None:
         self._state_view = state_view
         self._equipment = equipment
+        self._model_utils = model_utils
 
     async def _load_labware_from_pool(
         self, params: RetrieveParams, stacker_state: FlexStackerSubState
@@ -128,87 +146,62 @@ class RetrieveImpl(AbstractCommandImpl[RetrieveParams, SuccessData[RetrieveResul
         # If there is an adapter load it
         adapter_lw = None
         lid_lw = None
-        definitions_by_id: Dict[str, LabwareDefinition] = {}
-        offset_ids_by_id: Dict[str, str | None] = {}
-        display_names_by_id: Dict[str, str | None] = {}
-        new_locations_by_id: Dict[str, LabwareLocation] = {}
+        definitions_by_id: dict[str, LabwareDefinition] = {}
+        offset_ids_by_id: dict[str, str | None] = {}
+        display_names_by_id: dict[str, str | None] = {}
+        new_locations_by_id: dict[str, LabwareLocation] = {}
+        labware_by_id: dict[str, LoadedLabware] = {}
+        adapter_uri: str | None = None
         if stacker_state.pool_adapter_definition is not None:
+            adapter_location = ModuleLocation(moduleId=params.moduleId)
             adapter_lw = await self._equipment.load_labware_from_definition(
                 definition=stacker_state.pool_adapter_definition,
-                location=ModuleLocation(moduleId=params.moduleId),
+                location=adapter_location,
                 labware_id=params.adapterId,
+                labware_pending_load=labware_by_id,
             )
             definitions_by_id[adapter_lw.labware_id] = adapter_lw.definition
             offset_ids_by_id[adapter_lw.labware_id] = adapter_lw.offsetId
             display_names_by_id[
                 adapter_lw.labware_id
             ] = adapter_lw.definition.metadata.displayName
-            new_locations_by_id[adapter_lw.labware_id] = ModuleLocation(
-                moduleId=params.moduleId
+            new_locations_by_id[adapter_lw.labware_id] = adapter_location
+            adapter_uri = str(
+                uri_from_details(
+                    namespace=adapter_lw.definition.namespace,
+                    load_name=adapter_lw.definition.parameters.loadName,
+                    version=adapter_lw.definition.version,
+                )
+            )
+            labware_by_id[adapter_lw.labware_id] = LoadedLabware.model_construct(
+                id=adapter_lw.labware_id,
+                location=adapter_location,
+                loadName=adapter_lw.definition.parameters.loadName,
+                definitionUri=adapter_uri,
+                offsetId=None,
             )
         # Always load the primary labware
         if stacker_state.pool_primary_definition is None:
             raise CannotPerformModuleAction(
                 f"Flex Stacker {params.moduleId} has no labware to retrieve"
             )
+        primary_location: ModuleLocation | OnLabwareLocation = (
+            ModuleLocation(moduleId=params.moduleId)
+            if adapter_lw is None
+            else OnLabwareLocation(labwareId=adapter_lw.labware_id)
+        )
         loaded_labware = await self._equipment.load_labware_from_definition(
             definition=stacker_state.pool_primary_definition,
-            location=(
-                ModuleLocation(moduleId=params.moduleId)
-                if adapter_lw is None
-                else OnLabwareLocation(labwareId=adapter_lw.labware_id)
-            ),
+            location=primary_location,
             labware_id=params.labwareId,
+            labware_pending_load={lw_id: lw for lw_id, lw in labware_by_id.items()},
         )
         definitions_by_id[loaded_labware.labware_id] = loaded_labware.definition
         offset_ids_by_id[loaded_labware.labware_id] = loaded_labware.offsetId
         display_names_by_id[
             loaded_labware.labware_id
         ] = loaded_labware.definition.metadata.displayName
-        new_locations_by_id[loaded_labware.labware_id] = (
-            ModuleLocation(moduleId=params.moduleId)
-            if adapter_lw is None
-            else OnLabwareLocation(labwareId=adapter_lw.labware_id)
-        )
-        # If there is a lid load it
-        if stacker_state.pool_lid_definition is not None:
-            lid_lw = await self._equipment.load_labware_from_definition(
-                definition=stacker_state.pool_lid_definition,
-                location=OnLabwareLocation(labwareId=loaded_labware.labware_id),
-                labware_id=params.lidId,
-            )
-            definitions_by_id[lid_lw.labware_id] = lid_lw.definition
-            offset_ids_by_id[lid_lw.labware_id] = lid_lw.offsetId
-            display_names_by_id[
-                lid_lw.labware_id
-            ] = lid_lw.definition.metadata.displayName
-            new_locations_by_id[lid_lw.labware_id] = OnLabwareLocation(
-                labwareId=loaded_labware.labware_id
-            )
-
-        # Get the labware dimensions for the labware being retrieved,
-        # which is the first one in the hopper labware id list
-        primary_location_sequence = (
-            self._state_view.geometry.get_predicted_location_sequence(
-                new_locations_by_id[loaded_labware.labware_id]
-            )
-        )
-        adapter_location_sequence = (
-            self._state_view.geometry.get_predicted_location_sequence(
-                new_locations_by_id[adapter_lw.labware_id]
-            )
-            if adapter_lw is not None
-            else None
-        )
-        lid_location_sequence = (
-            self._state_view.geometry.get_predicted_location_sequence(
-                new_locations_by_id[lid_lw.labware_id]
-            )
-            if lid_lw is not None
-            else None
-        )
-
-        # Get the Labware URIs where relevant
+        new_locations_by_id[loaded_labware.labware_id] = primary_location
         primary_uri = str(
             uri_from_details(
                 namespace=loaded_labware.definition.namespace,
@@ -216,28 +209,66 @@ class RetrieveImpl(AbstractCommandImpl[RetrieveParams, SuccessData[RetrieveResul
                 version=loaded_labware.definition.version,
             )
         )
-        adapter_uri = (
-            str(
-                uri_from_details(
-                    namespace=adapter_lw.definition.namespace,
-                    load_name=adapter_lw.definition.parameters.loadName,
-                    version=adapter_lw.definition.version,
-                )
-            )
-            if adapter_lw is not None
-            else None
+        labware_by_id[loaded_labware.labware_id] = LoadedLabware.model_construct(
+            id=loaded_labware.labware_id,
+            location=primary_location,
+            loadName=loaded_labware.definition.parameters.loadName,
+            definitionUri=primary_uri,
         )
-        lid_uri = (
-            str(
+
+        lid_uri: str | None = None
+        # If there is a lid load it
+        if stacker_state.pool_lid_definition is not None:
+            lid_location = OnLabwareLocation(labwareId=loaded_labware.labware_id)
+            lid_lw = await self._equipment.load_labware_from_definition(
+                definition=stacker_state.pool_lid_definition,
+                location=lid_location,
+                labware_id=params.lidId,
+                labware_pending_load={lw_id: lw for lw_id, lw in labware_by_id.items()},
+            )
+            lid_uri = str(
                 uri_from_details(
                     namespace=lid_lw.definition.namespace,
                     load_name=lid_lw.definition.parameters.loadName,
                     version=lid_lw.definition.version,
                 )
             )
+            definitions_by_id[lid_lw.labware_id] = lid_lw.definition
+            offset_ids_by_id[lid_lw.labware_id] = lid_lw.offsetId
+            display_names_by_id[
+                lid_lw.labware_id
+            ] = lid_lw.definition.metadata.displayName
+            new_locations_by_id[lid_lw.labware_id] = lid_location
+            labware_by_id[lid_lw.labware_id] = LoadedLabware.model_construct(
+                id=lid_lw.labware_id,
+                location=lid_location,
+                loadName=lid_lw.definition.parameters.loadName,
+                definitionUri=lid_uri,
+                offsetId=None,
+            )
+
+        # Get the labware dimensions for the labware being retrieved,
+        # which is the first one in the hopper labware id list
+        primary_location_sequence = (
+            self._state_view.geometry.get_predicted_location_sequence(
+                new_locations_by_id[loaded_labware.labware_id], labware_by_id
+            )
+        )
+        adapter_location_sequence = (
+            self._state_view.geometry.get_predicted_location_sequence(
+                new_locations_by_id[adapter_lw.labware_id], labware_by_id
+            )
+            if adapter_lw is not None
+            else None
+        )
+        lid_location_sequence = (
+            self._state_view.geometry.get_predicted_location_sequence(
+                new_locations_by_id[lid_lw.labware_id], labware_by_id
+            )
             if lid_lw is not None
             else None
         )
+
         state_update.set_batch_loaded_labware(
             definitions_by_id=definitions_by_id,
             display_names_by_id=display_names_by_id,
@@ -269,16 +300,11 @@ class RetrieveImpl(AbstractCommandImpl[RetrieveParams, SuccessData[RetrieveResul
             state_update,
         )
 
-    async def execute(self, params: RetrieveParams) -> SuccessData[RetrieveResult]:
+    async def execute(self, params: RetrieveParams) -> _ExecuteReturn:
         """Execute the labware retrieval command."""
         stacker_state = self._state_view.modules.get_flex_stacker_substate(
             params.moduleId
         )
-
-        if stacker_state.in_static_mode:
-            raise CannotPerformModuleAction(
-                "Cannot retrieve labware from Flex Stacker while in static mode"
-            )
 
         pool_definitions = stacker_state.get_pool_definition_ordered_list()
         if pool_definitions is None:
@@ -311,8 +337,23 @@ class RetrieveImpl(AbstractCommandImpl[RetrieveParams, SuccessData[RetrieveResul
             definitions=pool_definitions
         )
 
-        if stacker_hw is not None:
-            await stacker_hw.dispense_labware(labware_height=labware_height)
+        try:
+            if stacker_hw is not None:
+                await stacker_hw.dispense_labware(labware_height=labware_height)
+        except FlexStackerStallError as e:
+            return DefinedErrorData(
+                public=FlexStackerStallOrCollisionError(
+                    id=self._model_utils.generate_id(),
+                    createdAt=self._model_utils.get_timestamp(),
+                    wrappedErrors=[
+                        ErrorOccurrence.from_failed(
+                            id=self._model_utils.generate_id(),
+                            createdAt=self._model_utils.get_timestamp(),
+                            error=e,
+                        )
+                    ],
+                ),
+            )
 
         # Update the state to reflect the labware is now in the Flex Stacker slot
         # todo(chb, 2025-02-19): This ModuleLocation piece should probably instead be an AddressableAreaLocation
@@ -328,9 +369,6 @@ class RetrieveImpl(AbstractCommandImpl[RetrieveParams, SuccessData[RetrieveResul
         )
         state_update.set_addressable_area_used(stacker_area)
 
-        state_update.retrieve_flex_stacker_labware(
-            module_id=params.moduleId, labware_id=retrieve_result.labwareId
-        )
         return SuccessData(
             public=retrieve_result,
             state_update=state_update,
@@ -342,7 +380,7 @@ class Retrieve(BaseCommand[RetrieveParams, RetrieveResult, ErrorOccurrence]):
 
     commandType: RetrieveCommandType = "flexStacker/retrieve"
     params: RetrieveParams
-    result: Optional[RetrieveResult] = None
+    result: RetrieveResult | None = None
 
     _ImplementationCls: Type[RetrieveImpl] = RetrieveImpl
 

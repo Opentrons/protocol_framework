@@ -118,12 +118,11 @@ def test_add_module_action(
 
     assert result == FlexStackerSubState(
         module_id=FlexStackerId("someModuleId"),
-        in_static_mode=False,
-        hopper_labware_ids=[],
         pool_primary_definition=None,
         pool_adapter_definition=None,
         pool_lid_definition=None,
         pool_count=0,
+        max_pool_count=0,
     )
 
 
@@ -166,11 +165,10 @@ def test_get_labware_definition_list(
     """It should return definitions in proper order."""
     subject = FlexStackerSubState(
         module_id=FlexStackerId("someModuleId"),
-        in_static_mode=False,
-        hopper_labware_ids=[],
         pool_primary_definition=primary_def,
         pool_adapter_definition=adapter_def,
         pool_lid_definition=lid_def,
         pool_count=0,
+        max_pool_count=5,
     )
     assert subject.get_pool_definition_ordered_list() == result

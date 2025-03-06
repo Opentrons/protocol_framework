@@ -1,8 +1,6 @@
 """Command models to engage a user to empty a Flex Stacker."""
 
 from __future__ import annotations
-
-from __future__ import annotations
 from typing import Optional, Literal, TYPE_CHECKING
 from typing_extensions import Type
 
@@ -86,9 +84,12 @@ class FillImpl(AbstractCommandImpl[FillParams, SuccessData[FillResult]]):
                 message=f"The Flex Stacker in {location} has not been configured yet and cannot be filled."
             )
 
-        # TODO: propagate the limit on max height of the stacker
-        count = params.count if params.count is not None else 5
-        new_count = min(5, max(stacker_state.pool_count, count))
+        count = (
+            params.count if params.count is not None else stacker_state.max_pool_count
+        )
+        new_count = min(
+            stacker_state.max_pool_count, max(stacker_state.pool_count, count)
+        )
 
         state_update = (
             update_types.StateUpdate().update_flex_stacker_labware_pool_count(

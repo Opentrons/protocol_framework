@@ -39,11 +39,11 @@ def subject(state_view: StateView, run_control: RunControlHandler) -> EmptyImpl:
     "current_count,count_param,target_count",
     [
         pytest.param(0, 0, 0, id="empty-to-empty"),
-        pytest.param(5, 0, 0, id="full-to-empty"),
-        pytest.param(5, 5, 5, id="full-noop"),
-        pytest.param(4, 5, 4, id="size-capped"),
+        pytest.param(6, 0, 0, id="full-to-empty"),
+        pytest.param(6, 6, 6, id="full-noop"),
+        pytest.param(4, 6, 4, id="size-capped"),
         pytest.param(4, 3, 3, id="not-full-empty"),
-        pytest.param(5, 6, 5, id="overfull"),
+        pytest.param(6, 7, 6, id="overfull"),
         pytest.param(3, None, 0, id="default-count"),
     ],
 )
@@ -59,12 +59,11 @@ async def test_empty_happypath(
     module_id = "some-module-id"
     stacker_state = FlexStackerSubState(
         module_id=cast(FlexStackerId, module_id),
-        in_static_mode=sentinel.in_static_mode,
-        hopper_labware_ids=[],
         pool_primary_definition=sentinel.pool_primary_definition,
         pool_adapter_definition=None,
         pool_lid_definition=None,
         pool_count=current_count,
+        max_pool_count=5,
     )
     decoy.when(state_view.modules.get_flex_stacker_substate(module_id)).then_return(
         stacker_state
@@ -109,12 +108,11 @@ async def test_empty_requires_constrained_pool(
     module_id = "module-id"
     stacker_state = FlexStackerSubState(
         module_id=cast(FlexStackerId, module_id),
-        in_static_mode=sentinel.in_static_mode,
-        hopper_labware_ids=[],
         pool_primary_definition=None,
         pool_lid_definition=None,
         pool_adapter_definition=None,
         pool_count=3,
+        max_pool_count=5,
     )
     decoy.when(state_view.modules.get_flex_stacker_substate(module_id)).then_return(
         stacker_state
@@ -149,12 +147,11 @@ async def test_pause_strategy_pauses(
     target_count = 1
     stacker_state = FlexStackerSubState(
         module_id=cast(FlexStackerId, module_id),
-        in_static_mode=sentinel.in_static_mode,
-        hopper_labware_ids=[],
         pool_primary_definition=sentinel.pool_primary_definition,
         pool_adapter_definition=None,
         pool_lid_definition=None,
         pool_count=current_count,
+        max_pool_count=5,
     )
     decoy.when(state_view.modules.get_flex_stacker_substate(module_id)).then_return(
         stacker_state

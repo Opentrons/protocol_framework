@@ -1,22 +1,32 @@
 """Command models to retrieve a labware from a Flex Stacker."""
 
 from __future__ import annotations
-from typing import Optional, Literal, TYPE_CHECKING, Type
+from typing import Optional, Literal, TYPE_CHECKING, Type, Union
 
 from pydantic import BaseModel, Field
 
-from ..command import AbstractCommandImpl, BaseCommand, BaseCommandCreate, SuccessData
+from ..command import (
+    AbstractCommandImpl,
+    BaseCommand,
+    BaseCommandCreate,
+    SuccessData,
+    DefinedErrorData,
+)
+from ..flex_stacker.common import FlexStackerStallOrCollisionError
 from ...errors import (
     ErrorOccurrence,
     CannotPerformModuleAction,
     LabwareNotLoadedOnModuleError,
     FlexStackerLabwarePoolNotYetDefinedError,
 )
+from ...resources import ModelUtils
 from ...state import update_types
 from ...types import (
     LabwareLocationSequence,
     InStackerHopperLocation,
 )
+
+from opentrons_shared_data.errors.exceptions import FlexStackerStallError
 
 
 if TYPE_CHECKING:
@@ -66,17 +76,25 @@ class StoreResult(BaseModel):
     )
 
 
-class StoreImpl(AbstractCommandImpl[StoreParams, SuccessData[StoreResult]]):
+_ExecuteReturn = Union[
+    SuccessData[StoreResult],
+    DefinedErrorData[FlexStackerStallOrCollisionError],
+]
+
+
+class StoreImpl(AbstractCommandImpl[StoreParams, _ExecuteReturn]):
     """Implementation of a labware storage command."""
 
     def __init__(
         self,
         state_view: StateView,
         equipment: EquipmentHandler,
+        model_utils: ModelUtils,
         **kwargs: object,
     ) -> None:
         self._state_view = state_view
         self._equipment = equipment
+        self._model_utils = model_utils
 
     def _verify_labware_to_store(
         self, params: StoreParams, stacker_state: FlexStackerSubState
@@ -124,17 +142,13 @@ class StoreImpl(AbstractCommandImpl[StoreParams, SuccessData[StoreResult]]):
                 )
             return labware_ids[0], None, lid_id
 
-    async def execute(self, params: StoreParams) -> SuccessData[StoreResult]:
+    async def execute(self, params: StoreParams) -> _ExecuteReturn:
         """Execute the labware storage command."""
         stacker_state = self._state_view.modules.get_flex_stacker_substate(
             params.moduleId
         )
-        if stacker_state.in_static_mode:
-            raise CannotPerformModuleAction(
-                "Cannot store labware in Flex Stacker while in static mode"
-            )
 
-        if stacker_state.pool_count == 5:
+        if stacker_state.pool_count == stacker_state.max_pool_count:
             raise CannotPerformModuleAction(
                 "Cannot store labware in Flex Stacker while it is full"
             )
@@ -162,9 +176,23 @@ class StoreImpl(AbstractCommandImpl[StoreParams, SuccessData[StoreResult]]):
         )
 
         state_update = update_types.StateUpdate()
-
-        if stacker_hw is not None:
-            await stacker_hw.store_labware(labware_height=stack_height)
+        try:
+            if stacker_hw is not None:
+                await stacker_hw.store_labware(labware_height=stack_height)
+        except FlexStackerStallError as e:
+            return DefinedErrorData(
+                public=FlexStackerStallOrCollisionError(
+                    id=self._model_utils.generate_id(),
+                    createdAt=self._model_utils.get_timestamp(),
+                    wrappedErrors=[
+                        ErrorOccurrence.from_failed(
+                            id=self._model_utils.generate_id(),
+                            createdAt=self._model_utils.get_timestamp(),
+                            error=e,
+                        )
+                    ],
+                ),
+            )
 
         id_list = [
             id for id in (primary_id, maybe_adapter_id, maybe_lid_id) if id is not None
@@ -177,9 +205,6 @@ class StoreImpl(AbstractCommandImpl[StoreParams, SuccessData[StoreResult]]):
             new_offset_ids_by_id={id: None for id in id_list},
         )
 
-        state_update.store_flex_stacker_labware(
-            module_id=params.moduleId, labware_id=primary_id
-        )
         state_update.update_flex_stacker_labware_pool_count(
             module_id=params.moduleId, count=stacker_state.pool_count + 1
         )
