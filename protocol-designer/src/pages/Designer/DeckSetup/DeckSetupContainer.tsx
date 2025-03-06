@@ -116,16 +116,39 @@ export function DeckSetupContainer(props: DeckSetupTabType): JSX.Element {
     2
   )
 
-  const viewBoxX = deckDef.cornerOffsetFromOrigin[0]
-  const viewBoxY = hasWasteChute
+  // const viewBoxX = deckDef.cornerOffsetFromOrigin[0]
+  // const viewBoxY = hasWasteChute
+  //   ? deckDef.cornerOffsetFromOrigin[1] -
+  //     WASTE_CHUTE_SPACE -
+  //     DETAILS_HOVER_SPACE
+  //   : deckDef.cornerOffsetFromOrigin[1]
+  // const viewBoxWidth = deckDef.dimensions[0] / deckMapRatio
+  // const viewBoxHeight = deckDef.dimensions[1] + DETAILS_HOVER_SPACE
+
+  const scale = 1 // Tune this value (e.g., 0.9 to 1) based on desired zoom
+  const originalViewBoxX = deckDef.cornerOffsetFromOrigin[0]
+  const originalViewBoxY = hasWasteChute
     ? deckDef.cornerOffsetFromOrigin[1] -
       WASTE_CHUTE_SPACE -
       DETAILS_HOVER_SPACE
     : deckDef.cornerOffsetFromOrigin[1]
-  const viewBoxWidth = deckDef.dimensions[0] / deckMapRatio
-  const viewBoxHeight = deckDef.dimensions[1] + DETAILS_HOVER_SPACE
+  const originalViewBoxWidth = deckDef.dimensions[0]
+  const originalViewBoxHeight = hasWasteChute
+    ? deckDef.dimensions[1] + WASTE_CHUTE_SPACE + DETAILS_HOVER_SPACE
+    : deckDef.dimensions[1] + DETAILS_HOVER_SPACE
+
+  const centerX = originalViewBoxX + originalViewBoxWidth / 2
+  const centerY = originalViewBoxY + originalViewBoxHeight / 2
+
+  const viewBoxWidth = originalViewBoxWidth * scale
+  const viewBoxHeight = originalViewBoxHeight * scale
+  const viewBoxX = centerX - viewBoxWidth / 2
+  const viewBoxY = centerY - viewBoxHeight / 2
 
   const initialViewBox = `${viewBoxX} ${viewBoxY} ${viewBoxWidth} ${viewBoxHeight}`
+  // Use initialViewBox as the viewBox prop for your SVG element
+
+  // const initialViewBox = `${viewBoxX} ${viewBoxY} ${viewBoxWidth} ${viewBoxHeight}`
 
   const [viewBox, setViewBox] = useState<string>(initialViewBox)
 
@@ -234,7 +257,6 @@ export function DeckSetupContainer(props: DeckSetupTabType): JSX.Element {
           gridGap={SPACING.spacing12}
         >
           <Flex
-            id="svg-container"
             width={svgContainerWidth}
             height="100%"
             alignItems={ALIGN_CENTER}
@@ -262,6 +284,9 @@ export function DeckSetupContainer(props: DeckSetupTabType): JSX.Element {
                 tab === 'protocolSteps' && robotType === OT2_ROBOT_TYPE
                   ? OT2_PROTOCOL_STEPS_VIEW_BOX
                   : viewBoxAdjusted
+              }
+              ot2ProtocolSteps={
+                tab === 'protocolSteps' && robotType === OT2_ROBOT_TYPE
               }
               outline="auto"
               zoomed={zoomIn.slot != null}

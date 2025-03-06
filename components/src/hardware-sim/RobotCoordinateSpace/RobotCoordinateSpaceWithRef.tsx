@@ -17,13 +17,21 @@ interface RobotCoordinateSpaceWithRefProps extends ComponentProps<typeof Svg> {
   viewBox?: string | null
   deckDef?: DeckDefinition
   zoomed?: boolean
+  ot2ProtocolSteps: boolean
   children?: (props: RobotCoordinateSpaceWithRefRenderProps) => ReactNode
 }
 
 export function RobotCoordinateSpaceWithRef(
   props: RobotCoordinateSpaceWithRefProps
 ): JSX.Element | null {
-  const { children, deckDef, viewBox, zoomed = false, ...restProps } = props
+  const {
+    children,
+    deckDef,
+    viewBox,
+    zoomed = false,
+    ot2ProtocolSteps,
+    ...restProps
+  } = props
   const wrapperRef = useRef<SVGSVGElement>(null)
   const getRobotCoordsFromDOMCoords: RobotCoordinateSpaceWithRefRenderProps['getRobotCoordsFromDOMCoords'] = (
     x,
@@ -58,7 +66,7 @@ export function RobotCoordinateSpaceWithRef(
 
   return (
     <Svg
-      viewBox={zoomed ? viewBox : wholeDeckViewBox}
+      viewBox={zoomed || ot2ProtocolSteps ? viewBox : wholeDeckViewBox}
       ref={wrapperRef}
       transform="scale(1, -1)"
       width="100%"
