@@ -107,10 +107,10 @@ stages:
       method: GET
       params:
         # JSON turducken:
-        # - The query parameter value is a string containing JSON
-        # - Putting single quotes around it keeps it as a string and keeps YAML from interpreting it as an object
-        # - Putting !raw before it prevents Tavern from trying to do {substitution}
-        filter: !raw '{"locationSequence":[{"kind":"onAddressableArea","addressableAreaName":"A2"}]}'
+        # - The query parameter value is a string containing JSON.
+        # - Putting single-quotes around that keeps the YAML parser from parsing the JSON.
+        # - Putting !raw before that prevents Tavern from trying to do {substitution}.
+        filters: !raw '[{"locationSequence":[{"kind":"onAddressableArea","addressableAreaName":"A2"}]}]'
     response:
       json:
         data:

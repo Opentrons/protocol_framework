@@ -5,6 +5,7 @@ import textwrap
 from typing import Annotated, Literal, Sequence
 
 import fastapi
+from pydantic import TypeAdapter
 from pydantic.json_schema import SkipJsonSchema
 from server_utils.fastapi_utils.light_router import LightRouter
 
@@ -41,6 +42,9 @@ from .models import (
 
 
 router = LightRouter()
+
+
+_list_of_filters_adapter = TypeAdapter(list[SearchFilter])
 
 
 @PydanticResponse.wrap_route(
@@ -122,23 +126,24 @@ async def post_labware_offsets(  # noqa: D103
 async def get_labware_offsets(  # noqa: D103
     store: Annotated[LabwareOffsetStore, fastapi.Depends(get_labware_offset_store)],
     filters: Annotated[
-        list[str] | None,
+        str,
         fastapi.Query(
-            alias="filter",
             description=textwrap.dedent(
                 """\
-                A filter to narrow down results.
-                If this is omitted, all results are returned.
-                If this is specified multiple times, the results from all filters are
-                combined (logically OR'd together).
+                A list of filters to narrow down results.
 
-                The value of this query parameter should be a string containing a JSON object.
-                Because of OpenAPI limitations, the JSON shape cannot be documented here.
-                See robot_server/labware_offsets/models.py.
+                The value should be a string containing a JSON array of filter objects.
+                Because of OpenAPI limitations, the shape of a filter object is not
+                documented here, but see robot_server/labware_offsets/models.py.
+
+                The results from all of these filters are combined
+                (logically OR'd together).
+
+                If this is omitted or empty, all results are returned.
                 """
             ),
         ),
-    ] = None,
+    ] = "[]",
     cursor: Annotated[
         int | SkipJsonSchema[None],
         fastapi.Query(
@@ -167,11 +172,7 @@ async def get_labware_offsets(  # noqa: D103
     # todo(mm, 2025-03-06): If this validation fails, it currently returns an HTTP 500
     # to the client. See if there's some FastAPI+Pydantic incantation to get FastAPI
     # to do the validation so it returns its normal nice HTTP 422 response.
-    if filters is None:
-        filters = []
-    validated_filters = [
-        SearchFilter.model_validate_json(element) for element in filters
-    ]
+    validated_filters = _list_of_filters_adapter.validate_json(filters)
 
     result_data = _search(store, validated_filters)
 
