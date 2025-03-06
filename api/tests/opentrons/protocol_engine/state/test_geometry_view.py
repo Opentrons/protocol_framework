@@ -4,7 +4,7 @@ import inspect
 import json
 from datetime import datetime
 from math import isclose
-from typing import cast, List, Tuple, Optional, NamedTuple, Dict, FrozenSet, Set
+from typing import cast, List, Tuple, Optional, NamedTuple, Dict
 from unittest.mock import sentinel
 from os import listdir, path
 
@@ -39,7 +39,6 @@ from opentrons_shared_data.labware.labware_definition import (
     labware_definition_type_adapter,
 )
 from opentrons_shared_data.labware import load_definition as load_labware_definition
-from opentrons.protocol_engine.resources import deck_configuration_provider
 
 from opentrons.protocol_engine import errors
 from opentrons.protocol_engine.types import (
@@ -83,10 +82,6 @@ from opentrons.protocol_engine.types import (
     NotOnDeckLocationSequenceComponent,
     OnCutoutFixtureLocationSequenceComponent,
     InStackerHopperLocation,
-    AddressableArea,
-    AreaType,
-    AddressableOffsetVector,
-    DeckPoint,
     PotentialCutoutFixture,
 )
 from opentrons.protocol_engine.commands import (
@@ -129,7 +124,11 @@ from opentrons.protocol_engine.types.liquid_level_detection import (
     SimulatedProbeResult,
     LiquidTrackingType,
 )
-from opentrons_shared_data.robot.types import RobotDefinition
+from opentrons_shared_data.robot.types import (
+    RobotDefinition,
+    paddingOffset,
+    mountOffset,
+)
 from .inner_geometry_test_params import INNER_WELL_GEOMETRY_TEST_PARAMS
 from ..pipette_fixtures import get_default_nozzle_map
 from ..mock_circular_frusta import TEST_EXAMPLES as CIRCULAR_TEST_EXAMPLES
@@ -2452,8 +2451,8 @@ def test_get_labware_grip_point_for_labware_on_module(
                 robotType="OT-3 Standard",
                 models=[],
                 extents=[5000, 5000, 5000],
-                paddingOffsets=[0, 0, 0],
-                mountOffsets=[0, 0, 0],
+                paddingOffsets=paddingOffset(rear=0, front=0, leftSide=0, rightSide=0),
+                mountOffsets=mountOffset(left=[0], right=[0], gripper=[0]),
             ),
         )
     )
