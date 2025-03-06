@@ -13,6 +13,8 @@ import type {
   LPCLabwareInfo,
   LPCLabwareOffsetLocationSpecificDetails,
   LPCLabwareOffsetDefaultDetails,
+  WorkingOffset,
+  LPCOffsetKind,
 } from '/app/redux/protocol-runs'
 
 export interface GetLabwareDefsForLPCParams {
@@ -138,4 +140,56 @@ export const getMissingOffsets = (
   }
 
   return missingOffsets
+}
+
+interface WorkingOffsetDetails {
+  kind: Omit<LPCOffsetKind, 'hardcoded'>
+  offset: WorkingOffset
+}
+
+export interface WorkingOffsetsByUri {
+  [uri: string]: WorkingOffsetDetails[]
+}
+
+// Returns a list of working offsets by uri. An offset is "working" if the user
+// has adjusted the offset, and the new vector has not yet been reported to the robot-server.
+export function getWorkingOffsetsByUri(
+  labware: LPCLabwareInfo['labware'] | undefined
+): WorkingOffsetsByUri {
+  const workingOffsetsByUri: WorkingOffsetsByUri = {}
+
+  if (labware != null) {
+    Object.entries(labware).forEach(([uri, lwDetails]) => {
+      const defaultOffset = lwDetails.defaultOffsetDetails.workingOffset
+
+      // Add the default offset if it is a "working" case.
+      if (defaultOffset != null) {
+        const workingOffsetDetail: WorkingOffsetDetails = {
+          kind: 'default',
+          offset: defaultOffset,
+        }
+
+        workingOffsetsByUri[uri] =
+          workingOffsetsByUri[uri] != null
+            ? [...workingOffsetsByUri[uri], workingOffsetDetail]
+            : [workingOffsetDetail]
+      }
+
+      // Handle all location-specific offsets, adding any "working" offset cases.
+      lwDetails.locationSpecificOffsetDetails.forEach(offsetDetail => {
+        if (offsetDetail.workingOffset != null) {
+          const workingOffsetDetail: WorkingOffsetDetails = {
+            kind: 'location-specific',
+            offset: offsetDetail.workingOffset,
+          }
+          workingOffsetsByUri[uri] =
+            workingOffsetsByUri[uri] != null
+              ? [...workingOffsetsByUri[uri], workingOffsetDetail]
+              : [workingOffsetDetail]
+        }
+      })
+    })
+  }
+
+  return workingOffsetsByUri
 }

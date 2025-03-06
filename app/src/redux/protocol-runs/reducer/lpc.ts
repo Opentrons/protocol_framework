@@ -6,7 +6,7 @@ import {
   FINISH_LPC,
   START_LPC,
   GO_BACK_LAST_STEP,
-  SET_SELECTED_LABWARE_NAME,
+  SET_SELECTED_LABWARE_URI,
   CLEAR_SELECTED_LABWARE,
   APPLY_OFFSET,
   LPC_STEPS,
@@ -81,7 +81,7 @@ export function LPCReducer(
         }
       }
 
-      case SET_SELECTED_LABWARE_NAME: {
+      case SET_SELECTED_LABWARE_URI: {
         const lwUri = action.payload.labwareUri
         const thisLwInfo = state.labwareInfo.labware[lwUri]
 
@@ -132,6 +132,7 @@ export function LPCReducer(
       case SET_INITIAL_POSITION:
       case SET_FINAL_POSITION: {
         const lwUri = action.payload.labwareUri
+        const updatedLwDetails = updateOffsetsForURI(state, action)
 
         return {
           ...state,
@@ -141,7 +142,7 @@ export function LPCReducer(
               ...state.labwareInfo.labware,
               [lwUri]: {
                 ...state.labwareInfo.labware[lwUri],
-                offsetDetails: updateOffsetsForURI(state, action),
+                ...updatedLwDetails,
               },
             },
           },

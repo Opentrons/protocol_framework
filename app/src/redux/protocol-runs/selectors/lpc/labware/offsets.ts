@@ -10,17 +10,23 @@ import {
   getSelectedLabwareLocationSpecificOffsetDetails,
   getLocationSpecificOffsetDetailsForAllLabware,
   getMissingOffsets,
+  getWorkingOffsetsByUri,
 } from '../transforms'
 
 import type { Selector } from 'reselect'
-import type { VectorOffset } from '@opentrons/api-client'
+import type {
+  LegacyLabwareOffsetLocation,
+  VectorOffset,
+} from '@opentrons/api-client'
+import type { Coordinates } from '@opentrons/shared-data'
 import type { State } from '/app/redux/types'
 import type {
+  DefaultOffsetDetails,
   LocationSpecificOffsetDetails,
-  SelectOffsetsToApplyResult,
 } from '/app/redux/protocol-runs'
-import type { MissingOffsets } from '../transforms'
+import type { MissingOffsets, WorkingOffsetsByUri } from '../transforms'
 
+// Get the location specific details for the currently user-selected labware geometry.
 export const selectSelectedLwLocationSpecificOffsetDetails = (
   runId: string
 ): Selector<State, LocationSpecificOffsetDetails[]> =>
@@ -38,7 +44,24 @@ export const selectSelectedLwLocationSpecificOffsetDetails = (
     }
   )
 
-export const selectSelectedLwExistingOffset = (
+export const selectSelectedLwDefaultOffsetDetails = (
+  runId: string
+): Selector<State, DefaultOffsetDetails | null> =>
+  createSelector(
+    (state: State) =>
+      state.protocolRuns[runId]?.lpc?.labwareInfo.selectedLabware?.uri,
+    (state: State) => state.protocolRuns[runId]?.lpc?.labwareInfo.labware,
+    (uri, lw) => {
+      if (uri == null || lw == null) {
+        console.warn('Failed to access labware details.')
+        return null
+      } else {
+        return lw[uri].defaultOffsetDetails ?? null
+      }
+    }
+  )
+
+export const selectSelectedLwExistingLocationSpecificOffset = (
   runId: string
 ): Selector<State, VectorOffset> =>
   createSelector(
@@ -56,6 +79,22 @@ export const selectSelectedLwExistingOffset = (
     }
   )
 
+export const selectSelectedLwLocationSpecificOffsetInitialPosition = (
+  runId: string
+): Selector<State, VectorOffset | null> =>
+  createSelector(
+    (state: State) =>
+      getSelectedLabwareLocationSpecificOffsetDetails(runId, state),
+    details => {
+      const workingOffset = details?.workingOffset
+
+      if (workingOffset == null) {
+        return null
+      } else {
+        return workingOffset.initialPosition
+      }
+    }
+  )
 // NOTE: This count is analogous to the number of locations a labware geometry is utilized
 // in a run.
 export const selectCountLocationSpecificOffsetsForLw = (
@@ -70,6 +109,7 @@ export const selectCountLocationSpecificOffsetsForLw = (
       locationSpecificDetails != null ? locationSpecificDetails.length : 0
   )
 
+// Whether the default offset is missing for the given labware geometry.
 export const selectIsMissingDefaultOffsetForLw = (
   runId: string,
   uri: string
@@ -81,6 +121,14 @@ export const selectIsMissingDefaultOffsetForLw = (
     details => details?.existingOffset == null
   )
 
+export const selectWorkingOffsetsByUri = (
+  runId: string
+): Selector<State, WorkingOffsetsByUri> =>
+  createSelector(
+    (state: State) => state.protocolRuns[runId]?.lpc?.labwareInfo.labware,
+    labware => getWorkingOffsetsByUri(labware)
+  )
+
 // Returns the offset details for missing offsets, keyed by the labware URI.
 export const selectMissingOffsets = (
   runId: string
@@ -89,6 +137,12 @@ export const selectMissingOffsets = (
     (state: State) => state.protocolRuns[runId]?.lpc?.labwareInfo.labware,
     labware => getMissingOffsets(labware)
   )
+
+export interface SelectOffsetsToApplyResult {
+  definitionUri: string
+  location: LegacyLabwareOffsetLocation
+  vector: Coordinates
+}
 
 export const selectOffsetsToApply = (
   runId: string

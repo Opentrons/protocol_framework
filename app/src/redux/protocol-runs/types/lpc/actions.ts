@@ -3,7 +3,7 @@ import type {
   LPCWizardState,
   OffsetLocationDetails,
   PositionParams,
-} from '/app/redux/protocol-runs/types/lpc/lpc'
+} from '/app/redux/protocol-runs/types/lpc'
 
 type LabwareURI = string
 
@@ -28,7 +28,7 @@ export interface GoBackStepAction {
 }
 
 export interface SelectedLabwareNameAction {
-  type: 'SET_SELECTED_LABWARE_NAME'
+  type: 'SET_SELECTED_LABWARE_URI'
   payload: {
     runId: string
     labwareUri: LabwareURI

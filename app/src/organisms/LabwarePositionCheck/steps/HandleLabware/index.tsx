@@ -3,8 +3,10 @@ import { useTranslation } from 'react-i18next'
 
 import {
   clearSelectedLabware,
+  selectSelectedLabwareDisplayName,
   selectSelectedLabwareFlowType,
   selectSelectedLabwareInfo,
+  selectWorkingOffsetsByUri,
 } from '/app/redux/protocol-runs'
 import { CheckItem } from './CheckItem'
 import { LPCLabwareList } from './LPCLabwareList'
@@ -22,8 +24,10 @@ function HandleLabwareContent(props: LPCWizardContentProps): JSX.Element {
   const { runId } = props
   const dispatch = useDispatch()
 
-  const selectedLw = useSelector(selectSelectedLabwareInfo(props.runId))
-  const offsetFlowType = useSelector(selectSelectedLabwareFlowType(props.runId))
+  const selectedLw = useSelector(selectSelectedLabwareInfo(runId))
+  const offsetFlowType = useSelector(selectSelectedLabwareFlowType(runId))
+  const selectedLwName = useSelector(selectSelectedLabwareDisplayName(runId))
+  const workingOffsetsByUri = useSelector(selectWorkingOffsetsByUri(runId))
 
   // These routes are one step, since the progress bar remains static during the core LPC flow.
   if (selectedLw == null) {
@@ -43,14 +47,17 @@ function HandleLabwareContent(props: LPCWizardContentProps): JSX.Element {
       dispatch(clearSelectedLabware(runId))
     }
 
+    // TODO(jh, 03-05-25): Add the "save" btn functionality when the API changes are introduced.
+
     // The offset view for a singular labware geometry.
     return (
       <LPCContentContainer
         {...props}
-        header={t('labware_position_check_title')}
-        buttonText={t('exit')}
-        onClickButton={props.commandUtils.headerCommands.handleNavToDetachProbe}
+        header={selectedLwName}
+        buttonText={t('save')}
+        onClickButton={() => null}
         onClickBack={onHeaderGoBack}
+        buttonIsDisabled={Object.keys(workingOffsetsByUri).length === 0}
       >
         <LPCLabwareDetails {...props} />
       </LPCContentContainer>
