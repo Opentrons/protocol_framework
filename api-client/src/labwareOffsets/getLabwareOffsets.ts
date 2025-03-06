@@ -41,12 +41,18 @@ export function getLabwareOffsets(
   // We don't want that. We want:
   //   ?ourArray=[1,2]
   // So, serialize it to a string ourselves before giving it to axios.
-  params.filters satisfies unknown[] | undefined;
-  const stringifiedFilters = params.filters === undefined ? undefined : JSON.stringify(params.filters)
+  const stringifiedFilters =
+    params.filters === undefined ? undefined : JSON.stringify(params.filters)
   const fixedParams = {
     ...params,
-    filters: stringifiedFilters
+    filters: stringifiedFilters,
   }
 
-  return request<LabwareOffsetsResponse>(GET, '/labwareOffsets', null, config, fixedParams)
+  return request<LabwareOffsetsResponse>(
+    GET,
+    '/labwareOffsets',
+    null,
+    config,
+    fixedParams
+  )
 }
