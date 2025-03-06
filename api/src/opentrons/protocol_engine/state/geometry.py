@@ -1798,7 +1798,7 @@ class GeometryView:
         labware_id: str,
         well_name: str,
         operation_volume: float,
-    ) -> LiquidTrackingType:
+    ) -> float:
         """Get the change in height from a liquid handling operation."""
         initial_handling_height = self.get_meniscus_height(
             labware_id=labware_id, well_name=well_name
@@ -1809,6 +1809,13 @@ class GeometryView:
             initial_height=initial_handling_height,
             volume=operation_volume,
         )
+        if isinstance(initial_handling_height, SimulatedProbeResult) or isinstance(
+            final_height, SimulatedProbeResult
+        ):
+            raise errors.LiquidHeightUnknownError(
+                "liquid handling z change can only be found using real height and volume inputs."
+            )
+        # raise ValueError(f"liquid handling height = {initial_handling_height, final_height}")
         return final_height - initial_handling_height
 
     def get_well_offset_adjustment(

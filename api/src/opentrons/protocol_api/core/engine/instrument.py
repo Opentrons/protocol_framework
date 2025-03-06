@@ -330,6 +330,7 @@ class InstrumentCore(AbstractInstrument[WellCore, LabwareCore]):
                 absolute_point=location.point,
                 meniscus_tracking=meniscus_tracking,
             )
+            # raise ValueError(f"well location = {well_location}")
             pipette_movement_conflict.check_safe_for_pipette_movement(
                 engine_state=self._engine_client.state,
                 pipette_id=self._pipette_id,
@@ -338,6 +339,23 @@ class InstrumentCore(AbstractInstrument[WellCore, LabwareCore]):
                 well_location=well_location,
             )
             if dynamic_liquid_tracking:
+                # have to move to the starting
+                # well location before executing DispenseWhileTrackingCommand
+                self._engine_client.execute_command(
+                    cmd.MoveToWellParams(
+                        pipetteId=self._pipette_id,
+                        labwareId=labware_id,
+                        wellName=well_name,
+                        wellLocation=WellLocation(
+                            origin=well_location.origin,
+                            offset=well_location.offset,
+                            volumeOffset=0,
+                        ),
+                        minimumZHeight=None,
+                        forceDirect=False,
+                        speed=None,
+                    )
+                )
                 self._engine_client.execute_command(
                     cmd.DispenseWhileTrackingParams(
                         pipetteId=self._pipette_id,
