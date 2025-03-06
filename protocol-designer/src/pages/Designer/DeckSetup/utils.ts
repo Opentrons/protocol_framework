@@ -45,7 +45,6 @@ import type {
   LabwareOnDeck,
 } from '../../../step-forms'
 import type { Fixture } from './constants'
-import { ro } from 'date-fns/locale'
 
 const OT2_TC_SLOTS = ['7', '8', '10', '11']
 const FLEX_TC_SLOTS = ['A1', 'B1']
