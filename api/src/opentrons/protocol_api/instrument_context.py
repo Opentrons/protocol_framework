@@ -446,7 +446,7 @@ class InstrumentContext(publisher.CommandPublisher):
                     flow_rate=flow_rate,
                     in_place=False,
                     push_out=push_out,
-                    meniscus_tracking=None,
+                    meniscus_tracking=meniscus_tracking,
                 )
             return self
 
@@ -2613,6 +2613,7 @@ class InstrumentContext(publisher.CommandPublisher):
             well = target.well
             if target.location:
                 move_to_location = target.location
+                # raise ValueError(f"location = {target.location}")
                 meniscus_tracking = target.location.meniscus_tracking
 
             else:
