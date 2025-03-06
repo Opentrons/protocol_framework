@@ -258,12 +258,11 @@ export function DeckSetupContainer(props: DeckSetupTabType): JSX.Element {
                 tab === 'protocolSteps' ? 'auto' : STARTING_DECK_VIEW_MIN_WIDTH
               }
               deckDef={deckDef}
-              viewBox={viewBoxAdjusted}
-              // viewBox={
-              //   tab === 'protocolSteps' && robotType === OT2_ROBOT_TYPE
-              //     ? OT2_PROTOCOL_STEPS_VIEW_BOX
-              //     : viewBoxAdjusted
-              // }
+              viewBox={
+                tab === 'protocolSteps' && robotType === OT2_ROBOT_TYPE
+                  ? OT2_PROTOCOL_STEPS_VIEW_BOX
+                  : viewBoxAdjusted
+              }
               outline="auto"
               zoomed={zoomIn.slot != null}
               borderRadius={BORDERS.borderRadius12}
