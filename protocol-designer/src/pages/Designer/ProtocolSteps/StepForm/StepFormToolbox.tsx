@@ -270,10 +270,9 @@ export function StepFormToolbox(props: StepFormToolboxProps): JSX.Element {
     }
   }
 
-  const isThreePageFlow =
-    formData.stepType === 'moveLiquid' && enableLiquidClasses
+  const step = formData.stepType === 'moveLiquid' && enableLiquidClasses
   const handleContinue = (): void => {
-    if (isMultiStepToolbox && toolboxStep < (isThreePageFlow ? 2 : 1)) {
+    if (isMultiStepToolbox && toolboxStep < (step ? 2 : 1)) {
       if (!isErrorOnCurrentPage) {
         setToolboxStep(prevStep => prevStep + 1)
         setShowFormErrors(false)
@@ -305,7 +304,7 @@ export function StepFormToolbox(props: StepFormToolboxProps): JSX.Element {
             <StyledText desktopStyle="bodyDefaultRegular" color={COLORS.grey60}>
               {t('shared:part', {
                 current: toolboxStep + 1,
-                max: isThreePageFlow ? 3 : 2,
+                max: step ? 3 : 2,
               })}
             </StyledText>
           ) : null
@@ -350,7 +349,7 @@ export function StepFormToolbox(props: StepFormToolboxProps): JSX.Element {
               </SecondaryButton>
             ) : null}
             <PrimaryButton onClick={handleContinue} width="100%">
-              {isMultiStepToolbox && toolboxStep < (isThreePageFlow ? 2 : 1)
+              {isMultiStepToolbox && toolboxStep < (step ? 2 : 1)
                 ? i18n.format(t('shared:continue'), 'capitalize')
                 : t('shared:save')}
             </PrimaryButton>

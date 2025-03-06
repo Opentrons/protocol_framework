@@ -29,6 +29,7 @@ interface RadioButtonProps extends StyleProps {
   subButtonLabel?: string
   id?: string
   maxLines?: number
+  subtextLines?: number
   //  used for mouseEnter and mouseLeave
   setNoHover?: () => void
   setHovered?: () => void
@@ -52,6 +53,7 @@ export function RadioButton(props: RadioButtonProps): JSX.Element {
       ? buttonLabel
       : `RadioButtonId_${buttonValue}`,
     maxLines = 1,
+    subtextLines = 1,
     setHovered,
     setNoHover,
   } = props
@@ -83,7 +85,7 @@ export function RadioButton(props: RadioButtonProps): JSX.Element {
       : COLORS.grey60};
     display: -webkit-box;
     -webkit-box-orient: vertical;
-    -webkit-line-clamp: 2;
+    -webkit-line-clamp: ${subtextLines};
     overflow: hidden;
   `
 

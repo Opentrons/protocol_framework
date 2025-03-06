@@ -29,7 +29,7 @@ export const LiquidClassesStepTools = ({
 
   const liquidClassToLiquidsMap: Record<string, string[]> = {}
   Object.values(liquids).forEach(({ displayName, liquidClass }) => {
-    if (liquidClass) {
+    if (liquidClass !== undefined) {
       if (!liquidClassToLiquidsMap[liquidClass]) {
         liquidClassToLiquidsMap[liquidClass] = []
       }
@@ -114,6 +114,7 @@ export const LiquidClassesStepTools = ({
               subButtonLabel={subButtonLabel}
               buttonValue={value}
               isSelected={selectedLiquidClass === name}
+              subtextLines={2}
               largeDesktopBorderRadius
             />
           )

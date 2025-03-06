@@ -1,11 +1,8 @@
-import { describe, it, vi, beforeEach } from 'vitest'
-import { screen } from '@testing-library/react'
+import { describe, it, vi, beforeEach, expect } from 'vitest'
+import { fireEvent, screen } from '@testing-library/react'
 import { i18n } from '../../../../../../../assets/localization'
 import { renderWithProviders } from '../../../../../../../__testing-utils__'
 import { getLiquidEntities } from '../../../../../../../step-forms/selectors'
-
-import propsForFieldsForSingleStep from '../../../../../../../__fixtures__/propsForFieldsForSingleStep.json'
-
 import { LiquidClassesStepTools } from '../LiquidClassesStepTools'
 
 import type { ComponentProps } from 'react'
@@ -23,12 +20,22 @@ describe('LiquidClassesStepMoveLiquidTools', () => {
 
   beforeEach(() => {
     props = {
-      propsForFields: propsForFieldsForSingleStep as any,
+      propsForFields: {
+        liquidClass: {
+          onFieldFocus: vi.fn(),
+          onFieldBlur: vi.fn(),
+          errorToShow: null,
+          disabled: false,
+          name: 'liquidClass',
+          updateValue: vi.fn(),
+          value: null,
+        },
+      },
     }
     vi.mocked(getLiquidEntities).mockReturnValue({})
   })
 
-  it('renders fields', () => {
+  it('renders fields and buttons', () => {
     render(props)
     screen.getByText('Apply liquid class settings for this transfer')
     screen.getByText("Don't use a liquid class")
@@ -38,5 +45,10 @@ describe('LiquidClassesStepMoveLiquidTools', () => {
     screen.getByText('50% glycerol')
     screen.getByText('Volatile')
     screen.getByText('80% ethanol')
+
+    fireEvent.click(
+      screen.getByRole('label', { name: 'Aqueous Deionized water' })
+    )
+    expect(props.propsForFields.liquidClass.updateValue).toHaveBeenCalled()
   })
 })
