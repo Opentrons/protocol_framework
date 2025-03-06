@@ -49,6 +49,7 @@ import { useRunningStepCounts } from '/app/resources/protocols/hooks'
 import { useRunProgressCopy } from './hooks'
 
 import type { MouseEventHandler } from 'react'
+import { useModuleCommandAnalytics } from '/app/redux-resources/analytics/hooks/useModuleAnalytics'
 
 interface RunProgressMeterProps {
   runId: string
@@ -115,6 +116,7 @@ export function RunProgressMeter(props: RunProgressMeterProps): JSX.Element {
     progressPercentage,
     stepCountStr,
     currentStepContents,
+    commandTextString
   } = useRunProgressCopy({
     runStatus,
     robotType,
@@ -125,6 +127,8 @@ export function RunProgressMeter(props: RunProgressMeterProps): JSX.Element {
     runCommandDetails: runCommandDetails ?? null,
     hasRunDiverged,
   })
+  // figure out how to get all the params
+  useModuleCommandAnalytics()
 
   return (
     <>

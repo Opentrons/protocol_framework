@@ -12,7 +12,7 @@ import {
   getLabwareDefinitionsFromCommands,
 } from '@opentrons/components'
 import { TERMINAL_RUN_STATUSES } from '../constants'
-
+import { useCommandTextString } from '@opentrons/components'
 import type { ReactNode } from 'react'
 import type { CommandDetail, RunStatus } from '@opentrons/api-client'
 import type {
@@ -25,6 +25,7 @@ interface UseRunProgressResult {
   currentStepContents: ReactNode
   stepCountStr: string | null
   progressPercentage: number
+  commandTextString: string
 }
 
 interface UseRunProgressProps {
@@ -127,10 +128,14 @@ export function useRunProgressCopy({
       }
     }
   })()
-
+  const commandTextString = useCommandTextString({commandTextData:getCommandTextData(analysis as CompletedProtocolAnalysis),
+                                command:analysisCommands[(currentStepNumber as number) - 1],
+                                robotType:robotType,
+                                allRunDefs: allRunDefs})
   return {
     currentStepContents,
     stepCountStr,
     progressPercentage,
+    commandTextString
   }
 }

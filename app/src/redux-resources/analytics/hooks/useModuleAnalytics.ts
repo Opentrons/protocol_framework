@@ -12,12 +12,13 @@ import { CompletedProtocolAnalysis } from '@opentrons/shared-data'
 import { getCommandTextData } from '@opentrons/components'
 
 
-type commandType =  |'thermocycler/closeLid'|'thermocycler/openLid'| 'temperatureModule/setTargetTemperature' | 'thermocycler/setTargetLidTemperature' | 'thermocycler/setTargetBlockTemperature' | 'heaterShaker/setTargetTemperature' | 'thermocycler/deactivateLid'
+// convert this to an array
+const commandType =  ['thermocycler/closeLid'|'thermocycler/openLid'| 'temperatureModule/setTargetTemperature' | 'thermocycler/setTargetLidTemperature' | 'thermocycler/setTargetBlockTemperature' | 'heaterShaker/setTargetTemperature' | 'thermocycler/deactivateLid'
 | 'thermocycler/deactivateBlock'
 | 'temperatureModule/deactivate'
 | 'magneticModule/disengage'
 | 'heaterShaker/deactivateShaker'
-| 'heaterShaker/deactivateHeater'| 'heaterShaker/openLabwareLatch' | 'heatershaker/closeLabwareLatch'
+| 'heaterShaker/deactivateHeater'| 'heaterShaker/openLabwareLatch' | 'heatershaker/closeLabwareLatch']
 
 type CommandResult = 'succeeded' | 'failed'
 const { data: modulesData } = useModulesQuery()
@@ -25,7 +26,7 @@ const { data: modulesData } = useModulesQuery()
 export interface ReportModuleActionParams {
     moduleType: string;
     action: string;
-    result?: { status: string; data: any }; // Optional for success case
+    result?: { status: string; data: any }; // Optional fo r success case
     errorDetails?: string; // Optional for error case
     serialNumber: string;
     temperature: number | null;
@@ -38,8 +39,9 @@ export interface UseModuleCommandAnalyticsResult {
 
 export function useModuleCommandAnalytics(modules?: AttachedModule[]): UseModuleCommandAnalyticsResult {
     const doTrackEvent = useTrackEvent();
+    // to do: figure out how to get serial form useModulesQuery end point, figure out how to relate current step module to correct serial
     useModulesQuery({ enabled: modules !== undefined });
-
+    // add if statement to only report actions in module command array
     const reportModuleCommand = ({
         moduleType,
         action,
