@@ -111,10 +111,12 @@ export const LiquidClassesStepTools = ({
                 setShowFormErrors?.(false)
               }}
               buttonLabel={name}
-              subButtonLabel={subButtonLabel}
               buttonValue={value}
               isSelected={selectedLiquidClass === name}
-              subtextLines={2}
+              buttonSubLabel={{
+                label: subButtonLabel ?? undefined,
+                align: 'vertical'
+              }}
               largeDesktopBorderRadius
             />
           )
