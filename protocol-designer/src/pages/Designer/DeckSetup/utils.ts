@@ -45,6 +45,7 @@ import type {
   LabwareOnDeck,
 } from '../../../step-forms'
 import type { Fixture } from './constants'
+import { ro } from 'date-fns/locale'
 
 const OT2_TC_SLOTS = ['7', '8', '10', '11']
 const FLEX_TC_SLOTS = ['A1', 'B1']
@@ -490,4 +491,18 @@ export const getOT2HoverDimensions = (
     x,
     y: hasTCOnSlot ? y - 72 : y,
   }
+}
+
+export const getSVGContainerWidth = (
+  robotType: RobotType,
+  tab: string,
+  isZoomed: boolean
+): string => {
+  if (robotType === OT2_ROBOT_TYPE && tab === 'startingDeck' && !isZoomed) {
+    return '78.5%'
+  }
+  if (robotType !== OT2_ROBOT_TYPE && !isZoomed && tab !== 'protocolSteps') {
+    return '70%'
+  }
+  return '100%'
 }

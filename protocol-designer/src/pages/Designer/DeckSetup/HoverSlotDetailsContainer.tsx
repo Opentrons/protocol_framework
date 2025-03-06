@@ -31,7 +31,7 @@ export function HoverSlotDetailsContainer({
   hoverSlot,
   robotType,
 }: HoverSlotDetailsContainerProps): JSX.Element {
-  const leftRightPosition = robotType === OT2_ROBOT_TYPE ? '-15%' : '-25%'
+  const leftRightPosition = robotType === OT2_ROBOT_TYPE ? '-15%' : '-20%'
   return (
     <Box
       position="absolute"

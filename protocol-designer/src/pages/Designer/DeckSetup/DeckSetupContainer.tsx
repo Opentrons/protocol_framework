@@ -38,6 +38,7 @@ import { DECK_SETUP_TOOLS_WIDTH_REM, DeckSetupTools } from './DeckSetupTools'
 import {
   animateZoom,
   getCutoutIdForAddressableArea,
+  getSVGContainerWidth,
   useDeckSetupWindowBreakPoint,
   zoomInOnCoordinate,
 } from './utils'
@@ -60,6 +61,8 @@ const WASTE_CHUTE_SPACE = 30
 const DETAILS_HOVER_SPACE = 60
 // Note (02/02/25:kk) the size is different from the design but the product team requested keep the current size
 const STARTING_DECK_VIEW_MIN_WIDTH = '75%'
+const DECK_VIEW_CONTAINER_MAX_HEIGHT = '35rem' // for Protocol Steps
+const OT2_PROTOCOL_STEPS_VIEW_BOX = '-45.65 -12.03 486.0 444.0'
 
 const OT2_STANDARD_DECK_VIEW_LAYER_BLOCK_LIST: string[] = [
   'calibrationMarkings',
@@ -206,6 +209,8 @@ export function DeckSetupContainer(props: DeckSetupTabType): JSX.Element {
     }
   }
 
+  const svgContainerWidth = getSVGContainerWidth(robotType, tab, isZoomed)
+
   return (
     <>
       <Flex
@@ -217,6 +222,9 @@ export function DeckSetupContainer(props: DeckSetupTabType): JSX.Element {
         padding={containerPadding}
         justifyContent={JUSTIFY_CENTER}
         position="relative"
+        maxHeight={
+          tab === 'protocolSteps' ? DECK_VIEW_CONTAINER_MAX_HEIGHT : 'auto'
+        }
       >
         <Flex
           width="100%"
@@ -226,7 +234,8 @@ export function DeckSetupContainer(props: DeckSetupTabType): JSX.Element {
           gridGap={SPACING.spacing12}
         >
           <Flex
-            width={robotType === OT2_ROBOT_TYPE ? '78.5%' : '65%'}
+            id="svg-container"
+            width={svgContainerWidth}
             height="100%"
             alignItems={ALIGN_CENTER}
             justifyContent={JUSTIFY_CENTER}
@@ -250,6 +259,11 @@ export function DeckSetupContainer(props: DeckSetupTabType): JSX.Element {
               }
               deckDef={deckDef}
               viewBox={viewBoxAdjusted}
+              // viewBox={
+              //   tab === 'protocolSteps' && robotType === OT2_ROBOT_TYPE
+              //     ? OT2_PROTOCOL_STEPS_VIEW_BOX
+              //     : viewBoxAdjusted
+              // }
               outline="auto"
               zoomed={zoomIn.slot != null}
               borderRadius={BORDERS.borderRadius12}
