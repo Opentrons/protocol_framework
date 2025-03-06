@@ -61,7 +61,7 @@ export const HeaterShakerSlideout = (
       }).then((result)=> {
         reportModuleCommand({
           moduleType: module.moduleModel,
-          action:'set-heatershaker-temperature',
+          action: setTempCommand.commandType,
           result: {status: 'succeeded', data: result},
           serialNumber: serialNumber ?? module.serialNumber,
           temperature: hsValue,
@@ -70,7 +70,7 @@ export const HeaterShakerSlideout = (
       .catch((e: Error) => {
         reportModuleCommand({
           moduleType: module.moduleModel,
-          action: 'set-heatershaker-temperature', 
+          action: setTempCommand.commandType, 
           errorDetails: e.message,
           serialNumber: serialNumber ?? module.serialNumber,
           temperature: hsValue,

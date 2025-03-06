@@ -231,7 +231,7 @@ export function useModuleOverflowMenu(
     }).then((result)=>{
       reportModuleCommand({
         moduleType: module.moduleType,
-        action: 'deactivate',
+        action: deactivateCommand.commandType,
         result: {status: 'succeeded', data: result},
         serialNumber: serialNumber ?? module.serialNumber,
         temperature: null
@@ -240,7 +240,7 @@ export function useModuleOverflowMenu(
     .catch((e: Error) => {
       reportModuleCommand({
         moduleType: module.moduleModel, 
-        action: 'deactivate',
+        action: deactivateCommand.commandType,
         errorDetails: e.message, 
         serialNumber:  serialNumber ?? module.serialNumber,
         temperature: null
@@ -268,7 +268,7 @@ export function useModuleOverflowMenu(
     }).then((result)=> {
       reportModuleCommand({
         moduleType: module.moduleModel,
-        action: 'toggle-tc-lid',
+        action: lidCommand.commandType,
         result: {status: 'suceeded', data: result},
         serialNumber: serialNumber ?? module.serialNumber,
         temperature: null
@@ -277,7 +277,7 @@ export function useModuleOverflowMenu(
     .catch((e: Error) => {
       reportModuleCommand({
         moduleType: module.moduleModel,
-        action: 'toggle-tc-lid',
+        action: lidCommand.commandType,
         errorDetails: e.message,
         serialNumber: serialNumber ?? module.serialNumber,
         temperature: null,

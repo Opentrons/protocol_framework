@@ -325,7 +325,7 @@ function LabwareLatch({
       .then((result) => {
         reportModuleCommand({
           moduleType: matchedHeaterShaker.moduleModel, 
-          action:'toggle-hs-latch',
+          action:latchCommand.commandType,
           result:{status:'succeeded', data: result}, 
           serialNumber: serialNumber ?? matchedHeaterShaker.serialNumber,
           temperature: null

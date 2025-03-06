@@ -86,8 +86,8 @@ export const ThermocyclerModuleSlideout = (
           reportModuleCommand({
               moduleType: module.moduleModel,
               action: modulePart === 'Lid'
-                  ? 'set-thermocycler-lid-temperature'
-                  : 'set-thermocycler-block-temperature',
+                  ? saveLidCommand.commandType
+                  : saveBlockCommand.commandType,
               result: { status: 'succeeded', data: result },
               serialNumber: serialNumber ?? module.serialNumber, // Fallback applied
               temperature: tempValue,
@@ -97,8 +97,8 @@ export const ThermocyclerModuleSlideout = (
           reportModuleCommand({
               moduleType: module.moduleModel,
               action: modulePart === 'Lid'
-                  ? 'set-thermocycler-lid-temperature'
-                  : 'set-thermocycler-block-temperature',
+              ? saveLidCommand.commandType
+              : saveBlockCommand.commandType,
               errorDetails: e.message, // Indicates an error
               serialNumber: serialNumber ?? module.serialNumber, // Fallback applied
               temperature: tempValue,

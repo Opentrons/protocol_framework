@@ -58,7 +58,7 @@ export const TemperatureModuleSlideout = (
         .then((result) => {
           reportModuleCommand({
               moduleType: module.moduleModel,
-              action: 'set-temperature-module-temperature',
+              action: saveTempCommand.commandType,
               result: {status: 'succeeded', data: result},
               serialNumber: serialNumber ?? module.serialNumber,
               temperature: temperatureValue
@@ -67,7 +67,7 @@ export const TemperatureModuleSlideout = (
         .catch((e: Error) => {
           reportModuleCommand({
             moduleType: module.moduleModel,
-            action: 'set-temperature-module-temperature', 
+            action: saveTempCommand.commandType, 
             errorDetails: e.message, 
             serialNumber: serialNumber ?? module.serialNumber,
             temperature: temperatureValue

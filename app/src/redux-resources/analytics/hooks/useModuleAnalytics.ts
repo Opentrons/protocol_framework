@@ -12,7 +12,13 @@ import { CompletedProtocolAnalysis } from '@opentrons/shared-data'
 import { getCommandTextData } from '@opentrons/components'
 
 
-type commandType = 'toggle-hs-latch' |'toggle-tc-lid'| 'set-temperature-module-temperature' | 'set-thermocycler-lid-temperature' | 'set-thermocycler-block-temperature' | 'set-heatershaker-temperature' | 'deactivate'
+type commandType =  |'thermocycler/closeLid'|'thermocycler/openLid'| 'temperatureModule/setTargetTemperature' | 'thermocycler/setTargetLidTemperature' | 'thermocycler/setTargetBlockTemperature' | 'heaterShaker/setTargetTemperature' | 'thermocycler/deactivateLid'
+| 'thermocycler/deactivateBlock'
+| 'temperatureModule/deactivate'
+| 'magneticModule/disengage'
+| 'heaterShaker/deactivateShaker'
+| 'heaterShaker/deactivateHeater'| 'heaterShaker/openLabwareLatch' | 'heatershaker/closeLabwareLatch'
+
 type CommandResult = 'succeeded' | 'failed'
 const { data: modulesData } = useModulesQuery()
 
