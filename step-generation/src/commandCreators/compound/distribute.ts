@@ -29,6 +29,7 @@ import {
   dispense,
   dropTip,
   moveToWell,
+  prepareToAspirate,
   touchTip,
 } from '../atomic'
 import { mixUtil } from './mix'
@@ -229,6 +230,9 @@ export const distribute: CommandCreator<DistributeArgs> = (
                 },
               },
             }),
+            curryCommandCreator(prepareToAspirate, {
+              pipetteId: args.pipette,
+            }),
             curryCommandCreator(airGapInPlace, {
               pipetteId: args.pipette,
               volume: aspirateAirGapVolume,
@@ -375,10 +379,13 @@ export const distribute: CommandCreator<DistributeArgs> = (
                   },
                 },
               }),
+              curryCommandCreator(prepareToAspirate, {
+                pipetteId: args.pipette,
+              }),
               curryCommandCreator(airGapInPlace, {
                 pipetteId: args.pipette,
                 volume: dispenseAirGapVolume,
-                flowRate: aspirateFlowRateUlSec,
+                flowRate: dispenseFlowRateUlSec,
               }),
               ...(aspirateDelay != null
                 ? [
@@ -387,6 +394,24 @@ export const distribute: CommandCreator<DistributeArgs> = (
                     }),
                   ]
                 : []),
+              curryCommandCreator(dispense, {
+                pipetteId: args.pipette,
+                volume: dispenseAirGapVolume,
+                labwareId: dispenseAirGapLabware,
+                wellName: dispenseAirGapWell,
+                flowRate: dispenseFlowRateUlSec,
+                wellLocation: {
+                  origin: 'bottom',
+                  offset: {
+                    z: airGapOffsetDestWell,
+                    x: 0,
+                    y: 0,
+                  },
+                },
+                tipRack: args.tipRack,
+                nozzles: args.nozzles,
+                isAirGap: true,
+              }),
             ]
           : []
 

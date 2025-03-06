@@ -11,7 +11,6 @@ import {
   OT2_ROBOT_TYPE,
 } from '@opentrons/shared-data'
 import { getCutoutIdByAddressableArea } from '../utils'
-import { getPreviousMoveToAddressableAreaCommand } from './utils/getPreviousMoveToAddressableAreaCommand'
 
 import type { Channels } from '@opentrons/components'
 import type {
@@ -109,7 +108,7 @@ export const substepTimelineSingleChannel = (
         command.commandType === 'aspirate' ||
         command.commandType === 'dispense'
       ) {
-        const { wellName, volume, labwareId } = command.params
+        const { volume, wellName, labwareId } = command.params
 
         const wellInfo = {
           labwareId,
@@ -118,49 +117,57 @@ export const substepTimelineSingleChannel = (
             acc.prevRobotState.liquidState.labware[labwareId][wellName],
           postIngreds: nextRobotState.liquidState.labware[labwareId][wellName],
         }
-        return {
-          ...acc,
-          timeline: [
-            ...acc.timeline,
-            _createNextTimelineFrame({
-              volume,
-              index,
-              // @ts-expect-error(sa, 2021-6-14): after type narrowing (see comment above) this expect error should not be necessary
-              nextFrame,
-              command,
-              wellInfo,
-            }),
-          ],
-          prevRobotState: nextRobotState,
+        if ('meta' in command && command?.meta?.isAirGap) {
+          //  skip showing dispense air gaps into the timeline
+          return
+        } else {
+          return {
+            ...acc,
+            timeline: [
+              ...acc.timeline,
+              _createNextTimelineFrame({
+                volume,
+                index,
+                // @ts-expect-error(sa, 2021-6-14): after type narrowing (see comment above) this expect error should not be necessary
+                nextFrame,
+                command,
+                wellInfo,
+              }),
+            ],
+            prevRobotState: nextRobotState,
+          }
         }
       } else if (
         command.commandType === 'dispenseInPlace' ||
-        command.commandType === 'aspirateInPlace' ||
-        command.commandType === 'airGapInPlace'
+        command.commandType === 'aspirateInPlace'
       ) {
         const { volume } = command.params
-        const prevMoveToAddressableAreaCommand = getPreviousMoveToAddressableAreaCommand(
-          nextFrame
-        )
-        if (prevMoveToAddressableAreaCommand == null) {
+        const prevCommand =
+          'commands' in nextFrame ? nextFrame.commands[index - 1] : null
+
+        const moveToAddressableAreaCommand =
+          prevCommand?.commandType === 'moveToAddressableArea'
+            ? prevCommand
+            : null
+        if (moveToAddressableAreaCommand == null) {
           console.error(
             `expected to find moveToAddressableArea command assosciated with the ${command.commandType} but could not`
           )
         }
         const trashCutoutFixture =
-          prevMoveToAddressableAreaCommand?.params.addressableAreaName ===
+          moveToAddressableAreaCommand?.params.addressableAreaName ===
           'fixedTrash'
             ? 'fixedTrashSlot'
             : 'trashBinAdapter'
 
         const cutoutFixture = wasteChuteddressableAreaNamesPipette.includes(
-          prevMoveToAddressableAreaCommand?.params.addressableAreaName ?? ''
+          moveToAddressableAreaCommand?.params.addressableAreaName ?? ''
         )
           ? 'wasteChuteRightAdapterNoCover'
           : trashCutoutFixture
 
         const cutoutId = getCutoutIdByAddressableArea(
-          prevMoveToAddressableAreaCommand?.params
+          moveToAddressableAreaCommand?.params
             .addressableAreaName as AddressableAreaName,
           cutoutFixture,
           trashCutoutFixture === 'fixedTrashSlot'
@@ -189,21 +196,25 @@ export const substepTimelineSingleChannel = (
               additionalEquipmentId ?? ''
             ],
         }
-
-        return {
-          ...acc,
-          timeline: [
-            ...acc.timeline,
-            _createNextTimelineFrame({
-              volume,
-              index,
-              // @ts-expect-error(sa, 2021-6-14): after type narrowing (see comment above) this expect error should not be necessary
-              nextFrame,
-              command,
-              wellInfo,
-            }),
-          ],
-          prevRobotState: nextRobotState,
+        if ('meta' in command && command?.meta?.isAirGap) {
+          //  skip showing dispense air gaps into the timeline
+          return
+        } else {
+          return {
+            ...acc,
+            timeline: [
+              ...acc.timeline,
+              _createNextTimelineFrame({
+                volume,
+                index,
+                // @ts-expect-error(sa, 2021-6-14): after type narrowing (see comment above) this expect error should not be necessary
+                nextFrame,
+                command,
+                wellInfo,
+              }),
+            ],
+            prevRobotState: nextRobotState,
+          }
         }
       } else {
         return { ...acc, prevRobotState: nextRobotState }
@@ -241,7 +252,7 @@ export const substepTimelineMultiChannel = (
         command.commandType === 'aspirate' ||
         command.commandType === 'dispense'
       ) {
-        const { wellName, volume, labwareId } = command.params
+        const { volume, wellName, labwareId } = command.params
         const labwareDef =
           invariantContext.labwareEntities[labwareId] != null
             ? invariantContext.labwareEntities[labwareId].def
@@ -271,52 +282,60 @@ export const substepTimelineMultiChannel = (
             ? pick(nextRobotState.liquidState.labware[labwareId], wellsForTips)
             : {},
         }
-        return {
-          ...acc,
-          timeline: [
-            ...acc.timeline,
-            _createNextTimelineFrame({
-              volume,
-              index,
-              // @ts-expect-error(sa, 2021-6-14): after type narrowing (see comment above) this expect error should not be necessary
-              nextFrame,
-              command,
-              wellInfo,
-            }),
-          ],
-          prevRobotState: nextRobotState,
+        if ('meta' in command && command?.meta?.isAirGap) {
+          //  skip showing dispense air gaps into the timeline
+          return
+        } else {
+          return {
+            ...acc,
+            timeline: [
+              ...acc.timeline,
+              _createNextTimelineFrame({
+                volume,
+                index,
+                // @ts-expect-error(sa, 2021-6-14): after type narrowing (see comment above) this expect error should not be necessary
+                nextFrame,
+                command,
+                wellInfo,
+              }),
+            ],
+            prevRobotState: nextRobotState,
+          }
         }
       } else if (
         command.commandType === 'dispenseInPlace' ||
-        command.commandType === 'aspirateInPlace' ||
-        command.commandType === 'airGapInPlace'
+        command.commandType === 'aspirateInPlace'
       ) {
         const { volume } = command.params
-        const prevMoveToAddressableAreaCommand = getPreviousMoveToAddressableAreaCommand(
-          nextFrame
-        )
-        if (prevMoveToAddressableAreaCommand == null) {
+        const prevCommand =
+          'commands' in nextFrame ? nextFrame.commands[index - 1] : null
+
+        const moveToAddressableAreaCommand =
+          prevCommand?.commandType === 'moveToAddressableArea'
+            ? prevCommand
+            : null
+        if (moveToAddressableAreaCommand == null) {
           console.error(
             `expected to find moveToAddressableArea command assosciated with the ${command.commandType} but could not`
           )
         }
         const trashCutoutFixture =
-          prevMoveToAddressableAreaCommand?.params.addressableAreaName ===
+          moveToAddressableAreaCommand?.params.addressableAreaName ===
           'fixedTrash'
             ? 'fixedTrashSlot'
             : 'trashBinAdapter'
 
         const cutoutFixture =
           wasteChuteddressableAreaNamesPipette.includes(
-            prevMoveToAddressableAreaCommand?.params.addressableAreaName ?? ''
+            moveToAddressableAreaCommand?.params.addressableAreaName ?? ''
           ) ||
-          prevMoveToAddressableAreaCommand?.params.addressableAreaName ===
+          moveToAddressableAreaCommand?.params.addressableAreaName ===
             '96ChannelWasteChute'
             ? 'wasteChuteRightAdapterNoCover'
             : trashCutoutFixture
 
         const cutoutId = getCutoutIdByAddressableArea(
-          prevMoveToAddressableAreaCommand?.params
+          moveToAddressableAreaCommand?.params
             .addressableAreaName as AddressableAreaName,
           cutoutFixture,
           trashCutoutFixture === 'fixedTrashSlot'
@@ -345,21 +364,25 @@ export const substepTimelineMultiChannel = (
               additionalEquipmentId ?? ''
             ],
         }
-
-        return {
-          ...acc,
-          timeline: [
-            ...acc.timeline,
-            _createNextTimelineFrame({
-              volume,
-              index,
-              // @ts-expect-error(sa, 2021-6-14): after type narrowing (see comment above) this expect error should not be necessary
-              nextFrame,
-              command,
-              wellInfo,
-            }),
-          ],
-          prevRobotState: nextRobotState,
+        if ('meta' in command && command?.meta?.isAirGap) {
+          //  skip showing dispense air gaps into the timeline
+          return
+        } else {
+          return {
+            ...acc,
+            timeline: [
+              ...acc.timeline,
+              _createNextTimelineFrame({
+                volume,
+                index,
+                // @ts-expect-error(sa, 2021-6-14): after type narrowing (see comment above) this expect error should not be necessary
+                nextFrame,
+                command,
+                wellInfo,
+              }),
+            ],
+            prevRobotState: nextRobotState,
+          }
         }
       } else {
         return { ...acc, prevRobotState: nextRobotState }

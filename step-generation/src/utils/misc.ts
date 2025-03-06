@@ -17,6 +17,7 @@ import {
   dispense,
   moveToAddressableArea,
   moveToWell,
+  prepareToAspirate,
 } from '../commandCreators/atomic'
 import { blowout } from '../commandCreators/atomic/blowout'
 import { curryCommandCreator } from './curryCommandCreator'
@@ -627,6 +628,8 @@ interface AirGapArgs {
   offsetFromBottomMm: number
   pipetteId: string
   volume: number
+  tipRack: string
+  nozzles: NozzleConfigurationStyle | null
   blowOutLocation?: string | null
   sourceId?: string
   sourceWell?: string
@@ -646,6 +649,8 @@ export const airGapHelper: CommandCreator<AirGapArgs> = (
     sourceId,
     sourceWell,
     volume,
+    tipRack,
+    nozzles,
   } = args
 
   const trashOrLabware = getTrashOrLabware(
@@ -683,10 +688,31 @@ export const airGapHelper: CommandCreator<AirGapArgs> = (
             },
           },
         }),
+        curryCommandCreator(prepareToAspirate, {
+          pipetteId,
+        }),
         curryCommandCreator(airGapInPlace, {
           pipetteId,
           volume,
           flowRate,
+        }),
+        curryCommandCreator(dispense, {
+          pipetteId,
+          volume,
+          labwareId: dispenseAirGapLabware,
+          wellName: dispenseAirGapWell,
+          flowRate,
+          wellLocation: {
+            origin: 'bottom',
+            offset: {
+              z: offsetFromBottomMm,
+              x: 0,
+              y: 0,
+            },
+          },
+          tipRack,
+          nozzles,
+          isAirGap: true,
         }),
       ]
       //  when aspirating out of multi wells for consolidate
@@ -705,10 +731,31 @@ export const airGapHelper: CommandCreator<AirGapArgs> = (
             },
           },
         }),
+        curryCommandCreator(prepareToAspirate, {
+          pipetteId,
+        }),
         curryCommandCreator(airGapInPlace, {
           pipetteId,
           volume,
           flowRate,
+        }),
+        curryCommandCreator(dispense, {
+          pipetteId,
+          volume,
+          labwareId: destinationId,
+          wellName: destWell,
+          flowRate,
+          wellLocation: {
+            origin: 'bottom',
+            offset: {
+              z: offsetFromBottomMm,
+              x: 0,
+              y: 0,
+            },
+          },
+          tipRack,
+          nozzles,
+          isAirGap: true,
         }),
       ]
     }

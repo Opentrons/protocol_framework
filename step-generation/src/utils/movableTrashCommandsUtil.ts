@@ -102,6 +102,12 @@ export const movableTrashCommandsUtil = (
                   volume,
                   flowRate,
                 }),
+                curryCommandCreator(dispenseInPlace, {
+                  pipetteId,
+                  volume,
+                  flowRate,
+                  isAirGap: true,
+                }),
               ]
             : []
 
