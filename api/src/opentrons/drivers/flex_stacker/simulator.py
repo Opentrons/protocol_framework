@@ -1,11 +1,13 @@
 from typing import List, Optional, Dict
 
+from opentrons.drivers.flex_stacker.driver import NUMBER_OF_BINS
 from opentrons.util.async_helpers import ensure_yield
 
 from .abstract import AbstractFlexStackerDriver
 from .types import (
     LEDColor,
     LEDPattern,
+    MeasurementKind,
     MoveResult,
     StackerAxis,
     PlatformStatus,
@@ -15,6 +17,8 @@ from .types import (
     MoveParams,
     LimitSwitchStatus,
     StallGuardParams,
+    TOFMeasurement,
+    TOFMeasurementResult,
     TOFSensor,
     TOFSensorMode,
     TOFSensorState,
@@ -112,6 +116,33 @@ class SimulatingDriver(AbstractFlexStackerDriver):
     async def enable_tof_sensor(self, sensor: TOFSensor, enable: bool) -> bool:
         """Enable or disable the TOF sensor."""
         return True
+
+    @ensure_yield
+    async def manage_tof_measurement(
+        self,
+        sensor: TOFSensor,
+        kind: MeasurementKind = MeasurementKind.HISTOGRAM,
+        start: bool = True,
+    ) -> TOFMeasurement:
+        """Start or stop Measurements from the TOF sensor."""
+        return TOFMeasurement(
+            sensor=sensor,
+            kind=kind,
+            cancelled=not start,
+            # Each histogram frame is 135 bytes and there are 30 frames.
+            # (3b header + 4b sub-header + 128 data) * 30 frames = 3840b.
+            # The firmware sends 0 when the measurement is cancelled.
+            total_bytes=3840 if start else 0,
+        )
+
+    @ensure_yield
+    async def get_tof_histogram(self, sensor: TOFSensor) -> TOFMeasurementResult:
+        """Get the full histogram measurement from the TOF sensor."""
+        return TOFMeasurementResult(
+            sensor=sensor,
+            kind=MeasurementKind.HISTOGRAM,
+            bins={c: [b for b in range(NUMBER_OF_BINS)] for c in range(10)},
+        )
 
     @ensure_yield
     async def set_motor_driver_register(

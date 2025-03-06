@@ -1,8 +1,9 @@
 import asyncio
 import re
+import base64
 from typing import List, Optional
 
-from opentrons.drivers.asyncio.communication.errors import MotorStall
+from opentrons.drivers.asyncio.communication.errors import MotorStall, NoResponse
 from opentrons.drivers.command_builder import CommandBuilder
 from opentrons.drivers.asyncio.communication import AsyncResponseSerialConnection
 
@@ -10,6 +11,7 @@ from .abstract import AbstractFlexStackerDriver
 from .types import (
     GCODE,
     LEDPattern,
+    MeasurementKind,
     MoveResult,
     StackerAxis,
     PlatformStatus,
@@ -20,11 +22,15 @@ from .types import (
     LimitSwitchStatus,
     LEDColor,
     StallGuardParams,
+    TOFMeasurement,
+    TOFMeasurementFrame,
+    TOFMeasurementResult,
     TOFSensor,
     TOFSensorMode,
     TOFSensorState,
     TOFSensorStatus,
 )
+from .utils import validate_histogram_frame
 
 
 FS_BAUDRATE = 115200
@@ -41,6 +47,10 @@ GCODE_ROUNDING_PRECISION = 2
 MIN_DURATION_MS = 25  # 25ms
 MAX_DURATION_MS = 10000  # 10s
 MAX_REPS = 10
+
+# TOF Sensor
+TOF_FRAME_RETRIES = 1
+NUMBER_OF_BINS = 128
 
 # Stallguard defaults
 STALLGUARD_CONFIG = {
@@ -107,7 +117,6 @@ class FlexStackerDriver(AbstractFlexStackerDriver):
     @classmethod
     def parse_device_info(cls, response: str) -> StackerInfo:
         """Parse stacker info."""
-        # TODO: Validate serial number format once established
         _RE = re.compile(
             f"^{GCODE.DEVICE_INFO} FW:(?P<fw>\\S+) HW:Opentrons-flex-stacker-(?P<hw>\\S+) SerialNo:(?P<sn>\\S+)$"
         )
@@ -232,6 +241,39 @@ class FlexStackerDriver(AbstractFlexStackerDriver):
             state=TOFSensorState(int(m.group("T"))),
             mode=TOFSensorMode(int(m.group("M"))),
             ok=bool(int(m.group("O"))),
+        )
+
+    @classmethod
+    def parse_manage_tof_measurement(cls, response: str) -> TOFMeasurement:
+        """Parse manage tof measurement response."""
+        pattern = r"(?P<S>[XZ]) K:(?P<K>\d+) C:(?P<C>\d) L:(?P<L>\d+)"
+        _RE = re.compile(f"^{GCODE.MANAGE_TOF_MEASUREMENT} {pattern}$")
+        m = _RE.match(response)
+        if not m:
+            raise ValueError(
+                f"Incorrect Response for manage tof measurements: {response}"
+            )
+        return TOFMeasurement(
+            sensor=TOFSensor(m.group("S")),
+            kind=MeasurementKind(int(m.group("K"))),
+            cancelled=bool(int(m.group("C"))),
+            total_bytes=int(m.group("L")),
+        )
+
+    @classmethod
+    def parse_get_tof_measurement(cls, response: str) -> TOFMeasurementFrame:
+        """Parse get tof measurement response frame."""
+        pattern = r"(?P<S>[XZ]) I:(?P<I>\d+) D:(?P<D>.+)"
+        _RE = re.compile(f"^{GCODE.GET_TOF_MEASUREMENT} {pattern}$")
+        m = _RE.match(response)
+        if not m:
+            raise ValueError(
+                f"Incorrect Response for get tof measurement frame: {response}"
+            )
+        return TOFMeasurementFrame(
+            sensor=TOFSensor(m.group("S")),
+            frame_id=int(m.group("I")),
+            data=base64.b64decode(m.group("D")),
         )
 
     @classmethod
@@ -380,6 +422,108 @@ class FlexStackerDriver(AbstractFlexStackerDriver):
         if not re.match(rf"^{GCODE.ENABLE_TOF_SENSOR}$", resp):
             raise ValueError(f"Incorrect Response for enable TOF sensor: {resp}")
         return True
+
+    async def manage_tof_measurement(
+        self,
+        sensor: TOFSensor,
+        kind: MeasurementKind = MeasurementKind.HISTOGRAM,
+        start: bool = True,
+    ) -> TOFMeasurement:
+        """Start or stop Measurements from the TOF sensor."""
+        command = (
+            GCODE.MANAGE_TOF_MEASUREMENT.build_command()
+            .add_element(sensor.name)
+            .add_int("K", kind.value)
+        )
+        if not start:
+            command.add_element("C")
+        resp = await self._connection.send_command(command)
+        return self.parse_manage_tof_measurement(resp)
+
+    async def _get_tof_histogram_frame(
+        self, sensor: TOFSensor, resend: bool = False
+    ) -> TOFMeasurementFrame:
+        """Get the next measurement frame from TOF sensor or resend previous."""
+        command = GCODE.GET_TOF_MEASUREMENT.build_command().add_element(sensor.name)
+        if resend:
+            command.add_element("R")
+        resp = await self._connection.send_command(command)
+        return self.parse_get_tof_measurement(resp)
+
+    async def get_tof_histogram(self, sensor: TOFSensor) -> TOFMeasurementResult:
+        """Get the full histogram measurement from the TOF sensor."""
+        data = []
+        data_len = 0
+        next_frame_id = 0
+        resend = False
+        retries = TOF_FRAME_RETRIES
+
+        # Cancel any ongoing measurements
+        status = await self.get_tof_sensor_status(sensor)
+        if status.state == TOFSensorState.MEASURING:
+            await self.manage_tof_measurement(sensor, start=False)
+
+        # Put the TOF sensor into histogram measurement mode
+        start = await self.manage_tof_measurement(
+            sensor, MeasurementKind.HISTOGRAM, start=True
+        )
+        # Request frames until the full histogram is transfered
+        while data_len < start.total_bytes:
+            try:
+                # Request next histogram frame
+                frame = await self._get_tof_histogram_frame(sensor, resend=resend)
+                # Validate histogram frame
+                validate_histogram_frame(frame.data, next_frame_id)
+                # append frame data
+                channel = frame.data[7:]
+                data.append(channel)
+                data_len += len(channel)
+                assert (
+                    not data_len > start.total_bytes
+                ), f"Invalid number of bytes, expected {start.total_bytes} got {data_len}."
+                retries = TOF_FRAME_RETRIES
+                next_frame_id += 1
+                resend = False
+            except (ValueError, NoResponse):
+                # There was a timeout or timing error, request previous frame.
+                if retries <= 0:
+                    # Cancel the measurement
+                    await self.manage_tof_measurement(sensor, start.kind, start=False)
+                    raise RuntimeError(f"Exceded frame {next_frame_id} retries")
+                retries -= 1
+                resend = True
+                continue
+            except Exception as e:
+                # Cancel the histogram request
+                await self.manage_tof_measurement(sensor, start.kind, start=False)
+                raise RuntimeError(f"Could not get {sensor} Histogram", e)
+
+        # Parse channel bin measurements from data
+        #
+        # There are 10 channels (0 - 9), each channel is comprised of 3 * 128 bytes.
+        # The data starts with all the 128 LSB bytes, then all the 128 MID bytes, and
+        # finally all the 128 MSB bytes for all the channels as seen below.
+        #
+        # ch0 lsb = data[0], mid = data[10], msb = data[20]
+        # ch1 lsb = data[1], mid = data[11], msb = data[21]
+        # ch2 lsb = data[2], mid = data[12], msb = data[22]
+        # ...
+        # ch9 lsb = data[9], mid = data[19], msb = data[29]
+        #
+        # Each channel has 128 bins comprised of the lsb, mid, and msb payload from above.
+        # We can get the bins for each channel by combining the lsb, mid, and msb payload
+        # for that specific channel.
+        bins = {}
+        for ch in range(10):  # 0-9 channels
+            # Get the lsb, mid, and msb payload for the ch
+            lsb = data[ch]
+            mid = data[ch + 10]
+            msb = data[ch + 20]
+            # combine lsb, mid, and msb bytes to generate bin count for the ch
+            bins[ch] = [
+                (msb[b] << 16) | (mid[b] << 8) | lsb[b] for b in range(NUMBER_OF_BINS)
+            ]
+        return TOFMeasurementResult(start.sensor, start.kind, bins)
 
     async def set_motor_driver_register(
         self, axis: StackerAxis, reg: int, value: int
