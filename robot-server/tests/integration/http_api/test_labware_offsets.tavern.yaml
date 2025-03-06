@@ -119,6 +119,23 @@ stages:
           cursor: 0
           totalLength: 1
 
+  # This behavior, as opposed to returning all results, is beneficial for edge cases
+  # like protocols without any labware. The client can naively search for all the
+  # labware in the protocol (an empty list) without accidentally blowing up the server.
+  - name: Test that an empty search query returns no results
+    request:
+      url: '{ot3_server_base_url}/labwareOffsets/searches'
+      method: POST
+      json:
+        data:
+          filters: []
+    response:
+      json:
+        data: []
+        meta:
+          cursor: 0
+          totalLength: 0
+
   - name: Delete a labware offset
     request:
       url: '{ot3_server_base_url}/labwareOffsets/{offset_1_id}'

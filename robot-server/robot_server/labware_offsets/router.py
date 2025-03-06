@@ -238,15 +238,12 @@ async def delete_all_labware_offsets(  # noqa: D103
 def _search(
     store: LabwareOffsetStore, filters: Sequence[SearchFilter]
 ) -> list[StoredLabwareOffset]:
-    if len(filters) == 0:
-        return store.search()
-    else:
-        # todo(mm, 2025-03-06): This would probably be more efficient in SQL.
-        result: list[StoredLabwareOffset] = []
-        for filter in filters:
-            result.extend(_search_single_filter(store, filter))
-        result.sort(key=lambda element: element.createdAt)
-        return result
+    # todo(mm, 2025-03-06): This would probably be more efficient in SQL.
+    result: list[StoredLabwareOffset] = []
+    for filter in filters:
+        result.extend(_search_single_filter(store, filter))
+    result.sort(key=lambda element: element.createdAt)
+    return result
 
 
 def _search_single_filter(

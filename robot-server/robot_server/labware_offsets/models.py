@@ -148,7 +148,7 @@ class SearchCreate(BaseModel):
 
                 A result is returned if it passes any of these filters
                 (in other words, these filters are OR'd together).
-                If no filters are provided, all results are returned.
+                If this list is empty, no results are returned.
                 """
             )
         ),
