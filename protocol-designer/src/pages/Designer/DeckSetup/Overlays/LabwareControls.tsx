@@ -1,7 +1,7 @@
-import { useDispatch, useSelector } from 'react-redux'
+import { useDispatch } from 'react-redux'
 import { useTranslation } from 'react-i18next'
 import { useDrag, useDrop } from 'react-dnd'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 import {
   ALIGN_CENTER,
   COLORS,
@@ -13,7 +13,6 @@ import {
   StyledText,
   TYPOGRAPHY,
 } from '@opentrons/components'
-import { getDeckSetupForActiveItem } from '../../../../top-selectors/labware-locations'
 import { DND_TYPES } from '../../../../constants'
 import { moveDeckItem } from '../../../../labware-ingred/actions'
 import { DECK_CONTROLS_STYLE } from '../constants'
@@ -51,9 +50,6 @@ export const LabwareControls = (
   const dispatch = useDispatch<ThunkDispatch<any>>()
   const ref = useRef(null)
   const canDropRef = useRef(false)
-  const activeDeckSetup = useSelector(getDeckSetupForActiveItem)
-  const labware = activeDeckSetup.labware
-  const [newSlot, setSlot] = useState<string | null>(null)
   const { t } = useTranslation(['starting_deck_state', 'deck'])
 
   const [{ isDragging }, drag] = useDrag(
@@ -78,9 +74,7 @@ export const LabwareControls = (
       },
       drop: (item: DroppedItem) => {
         const draggedLabware = item?.labwareOnDeck
-        if (newSlot != null) {
-          dispatch(moveDeckItem(newSlot, labwareOnDeck.slot))
-        } else if (draggedLabware != null) {
+        if (draggedLabware != null) {
           dispatch(moveDeckItem(draggedLabware.slot, labwareOnDeck.slot))
         }
       },
@@ -93,26 +87,21 @@ export const LabwareControls = (
         canDrop: monitor.canDrop(),
       }),
     }),
-    [labwareOnDeck, swapBlocked, newSlot]
+    [labwareOnDeck, swapBlocked]
   )
 
   useEffect(() => {
     canDropRef.current = canDrop
   }, [canDrop])
 
-  const draggedItem = Object.values(labware).find(
-    l => l.id === draggedLabware?.labwareOnDeck?.id
-  )
-
   useEffect(() => {
-    if (draggedItem != null) {
-      setSlot(draggedItem.slot)
-      setDraggedLabware(draggedItem)
+    if (draggedLabware != null) {
+      setDraggedLabware(draggedLabware?.labwareOnDeck)
     } else {
       setHoveredLabware(null)
       setDraggedLabware(null)
     }
-  }, [draggedItem])
+  }, [draggedLabware])
 
   const isBeingDragged =
     draggedLabware?.labwareOnDeck?.slot === labwareOnDeck.slot

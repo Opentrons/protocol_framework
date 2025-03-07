@@ -1,6 +1,6 @@
 import { useDispatch, useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
-import { useEffect, useRef, useState } from 'react'
+import { useRef } from 'react'
 import { useDrop } from 'react-dnd'
 import {
   ALIGN_CENTER,
@@ -15,7 +15,6 @@ import {
 import { getLabwareIsCustom } from '../../../../utils/labwareModuleCompatibility'
 import { getLabwareEntities } from '../../../../step-forms/selectors'
 import { moveDeckItem } from '../../../../labware-ingred/actions'
-import { getDeckSetupForActiveItem } from '../../../../top-selectors/labware-locations'
 import { selectors as labwareDefSelectors } from '../../../../labware-defs'
 import { DND_TYPES } from '../../../../constants'
 import { DECK_CONTROLS_STYLE } from '../constants'
@@ -56,9 +55,6 @@ export const AdapterControls = (
   const customLabwareDefs = useSelector(
     labwareDefSelectors.getCustomLabwareDefsByURI
   )
-  const activeDeckSetup = useSelector(getDeckSetupForActiveItem)
-  const labware = activeDeckSetup.labware
-  const [newSlot, setSlot] = useState<string | null>(null)
   const labwareEntities = useSelector(getLabwareEntities)
   const adapterLoadName = labwareEntities[labwareId]?.def.parameters.loadName
 
@@ -95,9 +91,7 @@ export const AdapterControls = (
       },
       drop: (item: DroppedItem) => {
         const droppedLabware = item
-        if (newSlot != null) {
-          dispatch(moveDeckItem(newSlot, labwareId))
-        } else if (droppedLabware.labwareOnDeck != null) {
+        if (droppedLabware.labwareOnDeck != null) {
           const droppedSlot = droppedLabware.labwareOnDeck.slot
           dispatch(moveDeckItem(droppedSlot, labwareId))
         }
@@ -113,17 +107,8 @@ export const AdapterControls = (
         draggedItem: monitor.getItem() as DroppedItem,
       }),
     }),
-    [swapBlocked, newSlot, customLabwareDefs]
+    [swapBlocked, customLabwareDefs]
   )
-  const draggedLabware = Object.values(labware).find(
-    l => l.id === draggedItem?.labwareOnDeck?.id
-  )
-
-  useEffect(() => {
-    if (draggedLabware != null) {
-      setSlot(draggedLabware.slot)
-    }
-  }, [draggedLabware])
 
   if (
     (itemType !== DND_TYPES.LABWARE && itemType !== null) ||

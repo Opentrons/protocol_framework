@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import { useEffect, useRef, useState } from 'react'
+import { useRef } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { useDrop, useDrag } from 'react-dnd'
 import {
@@ -20,7 +20,6 @@ import {
 } from '../../../../utils/labwareModuleCompatibility'
 import { getAdditionalEquipmentEntities } from '../../../../step-forms/selectors'
 import { moveDeckItem } from '../../../../labware-ingred/actions'
-import { getDeckSetupForActiveItem } from '../../../../top-selectors/labware-locations'
 import { selectors as labwareDefSelectors } from '../../../../labware-defs'
 import { DND_TYPES } from '../../../../constants'
 import { DECK_CONTROLS_STYLE } from '../constants'
@@ -66,9 +65,6 @@ export const SlotControls = (props: SlotControlsProps): JSX.Element | null => {
   const customLabwareDefs = useSelector(
     labwareDefSelectors.getCustomLabwareDefsByURI
   )
-  const activeDeckSetup = useSelector(getDeckSetupForActiveItem)
-  const labware = activeDeckSetup.labware
-  const [newSlot, setSlot] = useState<string | null>(null)
   const additionalEquipment = useSelector(getAdditionalEquipmentEntities)
   const cutoutId = getCutoutIdFromAddressableArea(itemId, deckDef)
   const trashSlots = Object.values(additionalEquipment)
@@ -114,9 +110,7 @@ export const SlotControls = (props: SlotControlsProps): JSX.Element | null => {
       },
       drop: (item: DroppedItem) => {
         const droppedLabware = item
-        if (newSlot != null) {
-          dispatch(moveDeckItem(newSlot, slotId))
-        } else if (droppedLabware.labwareOnDeck != null) {
+        if (droppedLabware.labwareOnDeck != null) {
           const droppedSlot = droppedLabware.labwareOnDeck.slot
           dispatch(moveDeckItem(droppedSlot, slotId))
         }
@@ -132,17 +126,8 @@ export const SlotControls = (props: SlotControlsProps): JSX.Element | null => {
         draggedItem: monitor.getItem() as DroppedItem,
       }),
     }),
-    [moduleType, hasTrashAndNotD4, customLabwareDefs, newSlot]
+    [moduleType, hasTrashAndNotD4, customLabwareDefs]
   )
-  const draggedLabware = Object.values(labware).find(
-    l => l.id === draggedItem?.labwareOnDeck?.id
-  )
-
-  useEffect(() => {
-    if (draggedLabware != null) {
-      setSlot(draggedLabware.slot)
-    }
-  }, [draggedLabware])
 
   if (
     (itemType !== DND_TYPES.LABWARE && itemType !== null) ||
