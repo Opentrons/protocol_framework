@@ -6,7 +6,6 @@ from opentrons.protocol_api import (
     Well,
     InstrumentContext,
 )
-from opentrons import types
 from abr_testing.protocols import helpers
 from opentrons.protocol_api.module_contexts import (
     HeaterShakerContext,
@@ -321,6 +320,7 @@ def run(protocol: ProtocolContext) -> None:
                 )  # original = ()
                 p1000.move_to(sample_plate_1[X].bottom(z=dot_bottom))  # original = ()
                 p1000.mix(EHB2MixRep, EHB2MixVol)
+                # checked
                 p1000.return_tip() if TIP_TRASH is False else p1000.drop_tip()
                 p50_tips += 1
                 tipcheck()
@@ -405,6 +405,7 @@ def run(protocol: ProtocolContext) -> None:
                 p1000.dispense(
                     TransferSup + 1, sample_plate_2[column_2_list[loop]].bottom(z=1)
                 )
+                # checked
                 p1000.return_tip() if TIP_TRASH is False else p1000.drop_tip()
                 p200_tips += 1
                 tipcheck()
@@ -488,7 +489,6 @@ def run(protocol: ProtocolContext) -> None:
                 p1000.move_to(sample_plate_2[X].bottom(0.5))
                 p1000.aspirate(200, rate=0.25)
                 trash_liquid(protocol, p1000, 200.0, liquid_trash_list)
-                p1000.aspirate(20)
                 p1000.return_tip() if TIP_TRASH is False else p1000.drop_tip()
                 p200_tips += 1
                 tipcheck()
@@ -608,7 +608,6 @@ def run(protocol: ProtocolContext) -> None:
                 p1000.aspirate(100, rate=0.25)
                 p1000.move_to(sample_plate_2[X].top(z=0.5))
                 trash_liquid(protocol, p1000, 100, liquid_trash_list)
-                p1000.aspirate(20)
                 p1000.return_tip() if TIP_TRASH is False else p1000.drop_tip()
                 p200_tips += 1
                 tipcheck()
@@ -928,45 +927,24 @@ def run(protocol: ProtocolContext) -> None:
             for loop, X in enumerate(column_5_list):
                 p1000.pick_up_tip()
                 p1000.aspirate(RSBVol, RSB.bottom(z=1))
-
-                p1000.move_to(
-                    (
-                        sample_plate_2.wells_by_name()[X]
-                        .center()
-                        .move(types.Point(x=1.3 * 0.8, y=0, z=-4))
-                    )
+                p1000.dispense(
+                    RSBVol, sample_plate_2.wells_by_name()[X].center(), rate=1
                 )
-                p1000.dispense(RSBVol, rate=1)
                 p1000.move_to(sample_plate_2.wells_by_name()[X].bottom(z=1))
                 p1000.aspirate(RSBVol, rate=1)
-                p1000.move_to(
-                    (
-                        sample_plate_2.wells_by_name()[X]
-                        .center()
-                        .move(types.Point(x=0, y=1.3 * 0.8, z=-4))
-                    )
+                p1000.dispense(
+                    RSBVol, sample_plate_2.wells_by_name()[X].center(), rate=1
                 )
-                p1000.dispense(RSBVol, rate=1)
                 p1000.move_to(sample_plate_2.wells_by_name()[X].bottom(z=1))
                 p1000.aspirate(RSBVol, rate=1)
-                p1000.move_to(
-                    (
-                        sample_plate_2.wells_by_name()[X]
-                        .center()
-                        .move(types.Point(x=1.3 * -0.8, y=0, z=-4))
-                    )
+                p1000.dispense(
+                    RSBVol, sample_plate_2.wells_by_name()[X].center(), rate=1
                 )
-                p1000.dispense(RSBVol, rate=1)
                 p1000.move_to(sample_plate_2.wells_by_name()[X].bottom(z=1))
                 p1000.aspirate(RSBVol, rate=1)
-                p1000.move_to(
-                    (
-                        sample_plate_2.wells_by_name()[X]
-                        .center()
-                        .move(types.Point(x=0, y=1.3 * -0.8, z=-4))
-                    )
+                p1000.dispense(
+                    RSBVol, sample_plate_2.wells_by_name()[X].center(), rate=1
                 )
-                p1000.dispense(RSBVol, rate=1)
                 p1000.move_to(sample_plate_2.wells_by_name()[X].bottom(z=1))
                 p1000.aspirate(RSBVol, rate=1)
                 p1000.dispense(RSBVol, rate=1)

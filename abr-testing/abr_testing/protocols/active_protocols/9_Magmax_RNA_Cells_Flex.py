@@ -81,7 +81,7 @@ def run(protocol: ProtocolContext) -> None:
     dot_bottom = protocol.params.dot_bottom  # type: ignore[attr-defined]
     pipette_mount = protocol.params.pipette_mount  # type: ignore[attr-defined]
     deactivate_modules_bool = protocol.params.deactivate_modules  # type: ignore[attr-defined]
-    helpers.comment_protocol_version(protocol, "01")
+    helpers.comment_protocol_version(protocol, "02")
 
     # Protocol Parameters
     deepwell_type = "nest_96_wellplate_2ml_deep"
@@ -223,6 +223,7 @@ def run(protocol: ProtocolContext) -> None:
                 m1000.transfer(vol_per_trans, loc, waste, new_tip="never", air_gap=20)
                 m1000.blow_out(waste)
                 m1000.air_gap(20)
+            # checked
             m1000.drop_tip(tips_sn[8 * i]) if TIP_TRASH else m1000.return_tip()
         m1000.flow_rate.aspirate = 300
         # Move Plate From Magnet to H-S
@@ -346,6 +347,7 @@ def run(protocol: ProtocolContext) -> None:
                 if x == 3:
                     protocol.delay(minutes=0.0167)
                     m1000.blow_out(cells_m[i].bottom(1))
+            # checked
             m1000.drop_tip() if TIP_TRASH else m1000.return_tip()
 
         helpers.set_hs_speed(protocol, h_s, heater_shaker_speed, lysis_time, True)
@@ -375,6 +377,7 @@ def run(protocol: ProtocolContext) -> None:
             m1000.dispense(m1000.current_volume, well.bottom(8))
             # Mix after transfer
             bead_mixing(well, m1000, 130, reps=5 if not dry_run else 1)
+            # checked
             m1000.air_gap(10)
             m1000.drop_tip() if TIP_TRASH else m1000.return_tip()
         helpers.set_hs_speed(protocol, h_s, heater_shaker_speed, bind_time, True)
@@ -417,6 +420,7 @@ def run(protocol: ProtocolContext) -> None:
                     src = source[whichwash]
                     protocol.comment(f"new wash source {whichwash}")
                     wash_volume_tracker = 0.0
+            # checked
             m1000.air_gap(10)
         m1000.drop_tip() if TIP_TRASH else m1000.return_tip()
 
@@ -467,6 +471,8 @@ def run(protocol: ProtocolContext) -> None:
             if i != 0:
                 tiptrack(m1000)
             mixing(samples_m[i], m1000, 45, reps=5 if not dry_run else 1)
+            if m1000.current_volume > 0:
+                m1000.dispense(m1000.current_volume, waste_reservoir["A1"])
             m1000.drop_tip() if TIP_TRASH else m1000.return_tip()
 
         # Shake for 10 minutes to mix DNAseI
@@ -486,6 +492,7 @@ def run(protocol: ProtocolContext) -> None:
                 m1000.transfer(vol_per_trans, src, m.top(), air_gap=20, new_tip="never")
             m1000.blow_out(m.top(-3))
             m1000.air_gap(20)
+            # checked
 
         m1000.drop_tip() if TIP_TRASH else m1000.return_tip()
 
@@ -532,6 +539,8 @@ def run(protocol: ProtocolContext) -> None:
                     m1000.aspirate(elution_vol - 10, samples_m[i])
                     m1000.dispense(elution_vol - 10, samples_m[i].bottom(10))
                     m1000.flow_rate.dispense = 300
+            if m1000.current_volume > 0:
+                m1000.dispense(m1000.current_volume, waste_reservoir["A1"])
             m1000.drop_tip() if TIP_TRASH else m1000.return_tip()
 
         # Shake for 3 minutes to mix wash with beads
