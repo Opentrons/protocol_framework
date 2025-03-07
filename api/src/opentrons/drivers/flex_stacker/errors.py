@@ -5,7 +5,6 @@ from opentrons.drivers.asyncio.communication.errors import (
     ErrorResponse,
     UnhandledGcode,
 )
-from opentrons.drivers.flex_stacker.types import StackerAxis
 
 
 class MotorStallDetected(ErrorResponse):
