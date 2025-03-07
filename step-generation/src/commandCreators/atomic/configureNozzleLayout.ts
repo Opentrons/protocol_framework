@@ -25,6 +25,6 @@ export const configureNozzleLayout: CommandCreator<ConfigureNozzleLayoutParams> 
 
   return {
     commands,
-    python: `${pythonName}.configure_nozzle_layout(${style}${startArg})`,
+    python: `${pythonName}.configure_nozzle_layout(protocol_api.${style}${startArg})`,
   }
 }

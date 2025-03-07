@@ -43,7 +43,9 @@ describe('configureNozzleLayout', () => {
         },
       },
     ])
-    expect(res.python).toBe('mock_pipette.configure_nozzle_layout(ALL)')
+    expect(res.python).toBe(
+      'mock_pipette.configure_nozzle_layout(protocol_api.ALL)'
+    )
   })
   it('should call configureNozzleLayout with correct params for column tip', () => {
     const result = configureNozzleLayout(
@@ -69,7 +71,7 @@ describe('configureNozzleLayout', () => {
       },
     ])
     expect(res.python).toBe(
-      'mock_pipette.configure_nozzle_layout(COLUMN, start="A12")'
+      'mock_pipette.configure_nozzle_layout(protocol_api.COLUMN, start="A12")'
     )
   })
 })
