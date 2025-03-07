@@ -61,14 +61,8 @@ class BaseErrorCode(Enum):
         return exc
 
     def raise_exception(self, port: str, response: str, command: str) -> None:
-        """
-        Raise the appropriate exception for this error code.
-
-        Since ErrorResponse now accepts an optional command parameter,
-        we can simply pass it to all exception classes.
-        """
-        exception_cls = self.exception
-        raise exception_cls(port=port, response=response, command=command)
+        """Raise the appropriate exception for this error code."""
+        raise self.exception(port=port, response=response, command=command)
 
     @classmethod
     def get_error_codes(cls) -> Dict[str, "BaseErrorCode"]:
