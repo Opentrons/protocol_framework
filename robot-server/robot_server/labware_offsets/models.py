@@ -2,9 +2,11 @@
 
 from datetime import datetime
 import enum
+from textwrap import dedent
 from typing import Literal, Annotated, Final, TypeAlias, Sequence
 
 from pydantic import BaseModel, Field
+from pydantic.json_schema import SkipJsonSchema
 
 from opentrons.protocol_engine import (
     LabwareOffsetVector,
@@ -63,7 +65,7 @@ class StoredLabwareOffsetCreate(BaseModel):
 
     locationSequence: Sequence[StoredLabwareOffsetLocationSequenceComponents] = Field(
         ...,
-        description="Where the labware is located on the robot. Can represent all locations, but may not be present for older runs.",
+        description="Where the labware is located on the robot.",
         min_length=1,
     )
     vector: LabwareOffsetVector = Field(
@@ -80,17 +82,77 @@ class StoredLabwareOffset(BaseModel):
     # contents, but I'm not sure what it is.
     id: str = Field(..., description="Unique labware offset record identifier.")
     createdAt: datetime = Field(..., description="When this labware offset was added.")
-    definitionUri: str = Field(..., description="The URI for the labware's definition.")
 
+    definitionUri: str = Field(..., description="The URI for the labware's definition.")
     locationSequence: Sequence[ReturnedLabwareOffsetLocationSequenceComponents] = Field(
         ...,
         description="Where the labware is located on the robot. Can represent all locations, but may not be present for older runs.",
         min_length=1,
     )
+
     vector: LabwareOffsetVector = Field(
         ...,
         description="The offset applied to matching labware.",
     )
+
+
+class SearchFilter(BaseModel):  # noqa: D101 - more docs are in SearchCreate.
+    id: Annotated[
+        str | SkipJsonSchema[DoNotFilterType],
+        Field(
+            description=(
+                "Return only results having this exact `id`. Omit to accept any `id`."
+            )
+        ),
+    ] = DO_NOT_FILTER
+    definitionUri: Annotated[
+        str | SkipJsonSchema[DoNotFilterType],
+        Field(
+            description=(
+                "Return only results having this exact `definitionUri`."
+                " Omit to accept any `definitionUri`."
+            )
+        ),
+    ] = DO_NOT_FILTER
+    locationSequence: Annotated[
+        Sequence[StoredLabwareOffsetLocationSequenceComponents]
+        | SkipJsonSchema[DoNotFilterType],
+        Field(
+            description=(
+                "Return only results having this exact `locationSequence`."
+                " Omit to accept any `locationSequence`."
+            )
+        ),
+    ] = DO_NOT_FILTER
+
+    mostRecentOnly: Annotated[
+        bool,
+        Field(
+            description=(
+                "If `true`, this filter returns only the most recently-added result"
+                " of all that matched it. Otherwise, it returns all of them."
+            )
+        ),
+    ] = False
+
+
+class SearchCreate(BaseModel):
+    """A search query for labware offsets."""
+
+    filters: Annotated[
+        list[SearchFilter],
+        Field(
+            description=dedent(
+                """\
+                A list of filters to search by.
+
+                A result is returned if it passes any of these filters
+                (in other words, these filters are OR'd together).
+                If this list is empty, no results are returned.
+                """
+            )
+        ),
+    ]
 
 
 class LabwareOffsetNotFound(ErrorDetails):
