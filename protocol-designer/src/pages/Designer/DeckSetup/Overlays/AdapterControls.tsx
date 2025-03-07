@@ -147,7 +147,6 @@ export const AdapterControls = (
   drop(ref)
 
   const hoverOpacity = (hover != null && hover === itemId) || isOver ? '1' : '0'
-  console.log('isSlotBlocked', isSlotBlocked)
 
   let body = (
     <RobotCoordsForeignDiv

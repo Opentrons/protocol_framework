@@ -84,10 +84,8 @@ export const LabwareControls = (
           dispatch(moveDeckItem(draggedLabware.slot, labwareOnDeck.slot))
         }
       },
-      hover: (item: DroppedItem, monitor: DropTargetMonitor) => {
-        if (monitor.canDrop()) {
-          setHoveredLabware(labwareOnDeck)
-        }
+      hover: () => {
+        setHoveredLabware(labwareOnDeck)
       },
       collect: (monitor: DropTargetMonitor) => ({
         isOver: monitor.isOver({ shallow: true }),

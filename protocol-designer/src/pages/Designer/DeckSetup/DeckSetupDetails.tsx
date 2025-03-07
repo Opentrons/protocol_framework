@@ -320,10 +320,9 @@ export function DeckSetupDetails(props: DeckSetupDetailsProps): JSX.Element {
                       setHoveredLabware={setHoveredLabware}
                       setDraggedLabware={setDraggedLabware}
                       swapBlocked={
-                        (swapBlockedModule &&
-                          (labwareLoadedOnModule.id === hoveredLabware?.id ||
-                            labwareLoadedOnModule.id === draggedLabware?.id)) ||
-                        swapBlockedAdapter
+                        (swapBlockedModule || swapBlockedAdapter) &&
+                        (labwareLoadedOnModule.id === hoveredLabware?.id ||
+                          labwareLoadedOnModule.id === draggedLabware?.id)
                       }
                       labwareOnDeck={labwareLoadedOnModule}
                       isSelected={selectedZoomInSlot != null}
@@ -473,10 +472,9 @@ export function DeckSetupDetails(props: DeckSetupDetailsProps): JSX.Element {
                 setHover={setHover}
                 setShowMenuListForId={setShowMenuListForId}
                 swapBlocked={
-                  (swapBlockedModule &&
-                    (labware.id === hoveredLabware?.id ||
-                      labware.id === draggedLabware?.id)) ||
-                  swapBlockedAdapter
+                  (swapBlockedModule || swapBlockedAdapter) &&
+                  (labware.id === hoveredLabware?.id ||
+                    labware.id === draggedLabware?.id)
                 }
                 labwareOnDeck={labware}
                 isSelected={selectedZoomInSlot != null}
@@ -540,10 +538,9 @@ export function DeckSetupDetails(props: DeckSetupDetailsProps): JSX.Element {
               setHover={setHover}
               setShowMenuListForId={setShowMenuListForId}
               swapBlocked={
-                (swapBlockedModule &&
-                  (labware.id === hoveredLabware?.id ||
-                    labware.id === draggedLabware?.id)) ||
-                swapBlockedAdapter
+                (swapBlockedModule || swapBlockedAdapter) &&
+                (labware.id === hoveredLabware?.id ||
+                  labware.id === draggedLabware?.id)
               }
               labwareOnDeck={labware}
               isSelected={selectedZoomInSlot != null}

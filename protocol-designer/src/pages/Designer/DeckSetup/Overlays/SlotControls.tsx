@@ -66,7 +66,6 @@ export const SlotControls = (props: SlotControlsProps): JSX.Element | null => {
   const customLabwareDefs = useSelector(
     labwareDefSelectors.getCustomLabwareDefsByURI
   )
-  console.log('slot controls', slotId)
   const activeDeckSetup = useSelector(getDeckSetupForActiveItem)
   const labware = activeDeckSetup.labware
   const [newSlot, setSlot] = useState<string | null>(null)
@@ -76,7 +75,6 @@ export const SlotControls = (props: SlotControlsProps): JSX.Element | null => {
     .filter(ae => ae.name === 'trashBin' || ae.name === 'wasteChute')
     ?.map(ae => ae.location as CutoutId)
 
-  console.log('test', trashSlots, cutoutId)
   const hasTrash = cutoutId != null ? trashSlots.includes(cutoutId) : false
   const hasTrashAndNotD4 =
     hasTrash &&
@@ -161,7 +159,6 @@ export const SlotControls = (props: SlotControlsProps): JSX.Element | null => {
       ? getLabwareIsCustom(customLabwareDefs, draggedItem.labwareOnDeck)
       : false
 
-  console.log('testing', isOver, moduleType, draggedDef)
   const isSlotBlocked =
     (isOver &&
       moduleType != null &&
@@ -213,7 +210,6 @@ export const SlotControls = (props: SlotControlsProps): JSX.Element | null => {
       </Flex>
     </RobotCoordsForeignDiv>
   )
-  console.log('isSlotBlocked', isSlotBlocked)
   if (isSlotBlocked) {
     body = <BlockedSlot slotPosition={slotPosition} slotId={itemId} />
   } else if (isOver) {
