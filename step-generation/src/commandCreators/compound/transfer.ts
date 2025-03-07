@@ -8,7 +8,7 @@ import {
 import { AIR_GAP_OFFSET_FROM_TOP } from '../../constants'
 import * as errorCreators from '../../errorCreators'
 import { getPipetteWithTipMaxVol } from '../../robotStateSelectors'
-import { movableTrashCommandsUtil } from '../../utils/movableTrashCommandsUtil'
+import { dropTipInMovableTrash } from '../../utils/movableTrashCommandsUtil'
 import {
   blowoutUtil,
   curryCommandCreator,
@@ -572,8 +572,7 @@ export const transfer: CommandCreator<TransferArgs> = (
             })
           }
           if (isTrashBin) {
-            dropTipCommand = movableTrashCommandsUtil({
-              type: 'dropTip',
+            dropTipCommand = dropTipInMovableTrash({
               pipetteId: args.pipette,
               invariantContext,
               prevRobotState,
