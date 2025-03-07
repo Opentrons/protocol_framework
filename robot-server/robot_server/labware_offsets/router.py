@@ -2,10 +2,9 @@
 
 from datetime import datetime
 import textwrap
-from typing import Annotated, Literal
+from typing import Annotated, Literal, Sequence
 
 import fastapi
-from pydantic import Json
 from pydantic.json_schema import SkipJsonSchema
 from server_utils.fastapi_utils.light_router import LightRouter
 
@@ -32,8 +31,11 @@ from .store import (
 )
 from .fastapi_dependencies import get_labware_offset_store
 from .models import (
+    SearchCreate,
+    SearchFilter,
     StoredLabwareOffset,
     StoredLabwareOffsetCreate,
+    StoredLabwareOffsetLocationSequenceComponents,
     DO_NOT_FILTER,
     DoNotFilterType,
 )
@@ -112,53 +114,14 @@ async def post_labware_offsets(  # noqa: D103
 @PydanticResponse.wrap_route(
     router.get,
     path="/labwareOffsets",
-    summary="Search for labware offsets",
+    summary="Get all labware offsets",
     description=(
-        "Get a filtered list of all the labware offsets currently stored on the robot."
-        " Filters are ANDed together."
+        "Get all the labware offsets currently stored on the robot."
         " Results are returned in order from oldest to newest."
     ),
 )
 async def get_labware_offsets(  # noqa: D103
     store: Annotated[LabwareOffsetStore, fastapi.Depends(get_labware_offset_store)],
-    id: Annotated[
-        Json[str] | SkipJsonSchema[DoNotFilterType],
-        fastapi.Query(description="Filter for exact matches on the `id` field."),
-    ] = DO_NOT_FILTER,
-    definition_uri: Annotated[
-        Json[str] | SkipJsonSchema[DoNotFilterType],
-        fastapi.Query(
-            alias="definitionUri",
-            description=(
-                "Filter for exact matches on the `definitionUri` field."
-                " (Not to be confused with `location.definitionUri`.)"
-            ),
-        ),
-    ] = DO_NOT_FILTER,
-    location_addressable_area_name: Annotated[
-        Json[str] | SkipJsonSchema[DoNotFilterType],
-        fastapi.Query(
-            alias="locationSlotName",
-            description="Filter for exact matches on the `location.slotName` field.",
-        ),
-    ] = DO_NOT_FILTER,
-    location_module_model: Annotated[
-        Json[ModuleModel | None] | SkipJsonSchema[DoNotFilterType],
-        fastapi.Query(
-            alias="locationModuleModel",
-            description="Filter for exact matches on the `location.moduleModel` field.",
-        ),
-    ] = DO_NOT_FILTER,
-    location_definition_uri: Annotated[
-        Json[str | None] | SkipJsonSchema[DoNotFilterType],
-        fastapi.Query(
-            alias="locationDefinitionUri",
-            description=(
-                "Filter for exact matches on the `location.definitionUri` field."
-                " (Not to be confused with just `definitionUri`.)"
-            ),
-        ),
-    ] = DO_NOT_FILTER,
     cursor: Annotated[
         int | SkipJsonSchema[None],
         fastapi.Query(
@@ -177,21 +140,54 @@ async def get_labware_offsets(  # noqa: D103
     ] = "unlimited",
 ) -> PydanticResponse[SimpleMultiBody[StoredLabwareOffset]]:
     if cursor not in (0, None) or page_length != "unlimited":
-        # todo(mm, 2024-12-06): Support this when LabwareOffsetStore supports it.
+        # todo(mm, 2024-12-06): We effectively have two result-set-limiting mechanisms
+        # on this endpoint: (1) cursor+page_length, and (2) filter.mostRecentOnly.
+        # Is it worthwhile to have both?
         raise NotImplementedError(
             "Pagination not currently supported on this endpoint."
         )
 
-    result_data = store.search(
-        id_filter=id,
-        definition_uri_filter=definition_uri,
-        location_addressable_area_filter=location_addressable_area_name,
-        location_definition_uri_filter=location_definition_uri,
-        location_module_model_filter=location_module_model,
-    )
+    result_data = store.search()
 
     meta = MultiBodyMeta.model_construct(
-        # todo(mm, 2024-12-06): Update this when pagination is supported.
+        # todo(mm, 2024-12-06): Update this when cursor+page_length are supported.
+        cursor=0,
+        totalLength=len(result_data),
+    )
+
+    return await PydanticResponse.create(
+        SimpleMultiBody[StoredLabwareOffset].model_construct(
+            data=result_data,
+            meta=meta,
+        )
+    )
+
+
+@PydanticResponse.wrap_route(
+    router.post,
+    path="/labwareOffsets/searches",
+    summary="Search for labware offsets",
+    description=textwrap.dedent(
+        """\
+        Search for labware offsets matching some given criteria.
+
+        Nothing is modified. The HTTP method here is `POST` only to allow putting the
+        search query, which is potentially large and complicated, in the request body
+        instead of in a query parameter.
+        """
+    ),
+)
+async def search_labware_offsets(  # noqa: D103
+    store: Annotated[LabwareOffsetStore, fastapi.Depends(get_labware_offset_store)],
+    request_body: Annotated[
+        RequestModel[SearchCreate],
+        fastapi.Body(),
+    ],
+) -> PydanticResponse[SimpleMultiBody[StoredLabwareOffset]]:
+    result_data = _search(store, request_body.data.filters)
+
+    meta = MultiBodyMeta.model_construct(
+        # This needs to be updated if this endpoint ever supports cursor+pageLength.
         cursor=0,
         totalLength=len(result_data),
     )
@@ -237,3 +233,55 @@ async def delete_all_labware_offsets(  # noqa: D103
 ) -> PydanticResponse[SimpleEmptyBody]:
     store.delete_all()
     return await PydanticResponse.create(SimpleEmptyBody.model_construct())
+
+
+def _search(
+    store: LabwareOffsetStore, filters: Sequence[SearchFilter]
+) -> list[StoredLabwareOffset]:
+    # todo(mm, 2025-03-06): This would probably be more efficient in SQL.
+    result: list[StoredLabwareOffset] = []
+    for filter in filters:
+        result.extend(_search_single_filter(store, filter))
+    result.sort(key=lambda element: element.createdAt)
+    return result
+
+
+def _search_single_filter(
+    store: LabwareOffsetStore, filter: SearchFilter
+) -> list[StoredLabwareOffset]:
+    # todo(mm, 2025-03-06): This lossily converts a location sequence, used in the HTTP
+    # API, to a triad of location fields, used in the LabwareOffsetStore.search() API.
+    # In the underlying SQL, locations are represented as sequences. We should change
+    # the LabwareOffsetStore.search() API to use sequences so we can avoid this lossy
+    # conversion.
+    loc_components: Sequence[StoredLabwareOffsetLocationSequenceComponents] = (
+        filter.locationSequence if filter.locationSequence != DO_NOT_FILTER else []
+    )
+    location_definition_uri_filter: str | DoNotFilterType = next(
+        (c.labwareUri for c in loc_components if c.kind == "onLabware"), DO_NOT_FILTER
+    )
+    location_module_model_filter: ModuleModel | DoNotFilterType = next(
+        (c.moduleModel for c in loc_components if c.kind == "onModule"), DO_NOT_FILTER
+    )
+    location_addressable_area_filter: str | DoNotFilterType = next(
+        (
+            c.addressableAreaName
+            for c in loc_components
+            if c.kind == "onAddressableArea"
+        ),
+        DO_NOT_FILTER,
+    )
+
+    result = store.search(
+        id_filter=filter.id,
+        definition_uri_filter=filter.definitionUri,
+        location_definition_uri_filter=location_definition_uri_filter,
+        location_module_model_filter=location_module_model_filter,
+        location_addressable_area_filter=location_addressable_area_filter,
+    )
+
+    # todo(mm, 2025-03-06): This is inefficient to do in Python. Move to SQL.
+    if filter.mostRecentOnly:
+        result = result[-1:]
+
+    return result

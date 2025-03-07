@@ -19,6 +19,7 @@ from opentrons.protocol_engine.types import (
     LiquidClassRecord,
     ABSMeasureMode,
 )
+from opentrons.protocol_engine.types.liquid_level_detection import LiquidTrackingType
 from opentrons.types import MountType
 from opentrons_shared_data.labware.labware_definition import LabwareDefinition
 from opentrons_shared_data.pipette.types import PipetteNameType
@@ -58,6 +59,16 @@ ClearType: typing.TypeAlias = typing.Literal[_ClearEnum.CLEAR]
 
 Unfortunately, mypy doesn't let us write `Literal[CLEAR]`. Use this instead.
 """
+
+
+class _SimulatedEnum(enum.Enum):
+    SIMULATED = enum.auto()
+
+
+SIMULATED: typing.Final = _SimulatedEnum.SIMULATED
+"""A sentinel value to indicate that a liquid probe return value is simulated.
+
+Useful to avoid throwing unnecessary errors in protocol analysis."""
 
 
 @dataclasses.dataclass(frozen=True)
@@ -260,8 +271,8 @@ class LiquidProbedUpdate:
     labware_id: str
     well_name: str
     last_probed: datetime
-    height: float | ClearType
-    volume: float | ClearType
+    height: LiquidTrackingType | ClearType
+    volume: LiquidTrackingType | ClearType
 
 
 @dataclasses.dataclass
@@ -343,27 +354,6 @@ class AbsorbanceReaderStateUpdate:
 
 
 @dataclasses.dataclass
-class FlexStackerLoadHopperLabware:
-    """An update to the Flex Stacker module static state."""
-
-    labware_id: str
-
-
-@dataclasses.dataclass
-class FlexStackerRetrieveLabware:
-    """An update to the Flex Stacker module static state."""
-
-    labware_id: str
-
-
-@dataclasses.dataclass
-class FlexStackerStoreLabware:
-    """An update to the Flex Stacker module static state."""
-
-    labware_id: str
-
-
-@dataclasses.dataclass
 class FlexStackerPoolConstraint:
     """The labware definitions that are contained in the pool."""
 
@@ -378,13 +368,6 @@ class FlexStackerStateUpdate:
     """An update to the Flex Stacker module state."""
 
     module_id: str
-    in_static_mode: bool | NoChangeType = NO_CHANGE
-    hopper_labware_update: (
-        FlexStackerLoadHopperLabware
-        | FlexStackerRetrieveLabware
-        | FlexStackerStoreLabware
-        | NoChangeType
-    ) = NO_CHANGE
     pool_constraint: FlexStackerPoolConstraint | NoChangeType = NO_CHANGE
     pool_count: int | NoChangeType = NO_CHANGE
 
@@ -735,8 +718,8 @@ class StateUpdate:
         labware_id: str,
         well_name: str,
         last_probed: datetime,
-        height: float | ClearType,
-        volume: float | ClearType,
+        height: LiquidTrackingType | ClearType,
+        volume: LiquidTrackingType | ClearType,
     ) -> Self:
         """Add a liquid height and volume to well state. See `ProbeLiquidUpdate`."""
         self.liquid_probed = LiquidProbedUpdate(
@@ -833,62 +816,6 @@ class StateUpdate:
         """Mark that an addressable area has been used. See `AddressableAreaUsedUpdate`."""
         self.addressable_area_used = AddressableAreaUsedUpdate(
             addressable_area_name=addressable_area_name
-        )
-        return self
-
-    def load_flex_stacker_hopper_labware(
-        self,
-        module_id: str,
-        labware_id: str,
-    ) -> Self:
-        """Add a labware definition to the engine."""
-        self.flex_stacker_state_update = dataclasses.replace(
-            FlexStackerStateUpdate.create_or_override(
-                self.flex_stacker_state_update, module_id
-            ),
-            hopper_labware_update=FlexStackerLoadHopperLabware(labware_id=labware_id),
-        )
-        return self
-
-    def retrieve_flex_stacker_labware(
-        self,
-        module_id: str,
-        labware_id: str,
-    ) -> Self:
-        """Add a labware definition to the engine."""
-        self.flex_stacker_state_update = dataclasses.replace(
-            FlexStackerStateUpdate.create_or_override(
-                self.flex_stacker_state_update, module_id
-            ),
-            hopper_labware_update=FlexStackerRetrieveLabware(labware_id=labware_id),
-        )
-        return self
-
-    def store_flex_stacker_labware(
-        self,
-        module_id: str,
-        labware_id: str,
-    ) -> Self:
-        """Add a labware definition to the engine."""
-        self.flex_stacker_state_update = dataclasses.replace(
-            FlexStackerStateUpdate.create_or_override(
-                self.flex_stacker_state_update, module_id
-            ),
-            hopper_labware_update=FlexStackerStoreLabware(labware_id=labware_id),
-        )
-        return self
-
-    def update_flex_stacker_mode(
-        self,
-        module_id: str,
-        static_mode: bool,
-    ) -> Self:
-        """Update the mode of the Flex Stacker."""
-        self.flex_stacker_state_update = dataclasses.replace(
-            FlexStackerStateUpdate.create_or_override(
-                self.flex_stacker_state_update, module_id
-            ),
-            in_static_mode=static_mode,
         )
         return self
 

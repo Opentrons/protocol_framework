@@ -36,11 +36,13 @@ from .config import Clearances
 from .disposal_locations import TrashBin, WasteChute
 from ._nozzle_layout import NozzleLayout
 from ._liquid import LiquidClass
+from ._transfer_liquid_validation import verify_and_normalize_transfer_args
 from . import labware, validation
 from ..protocols.advanced_control.transfers.common import (
     TransferTipPolicyV2,
     TransferTipPolicyV2Type,
 )
+from ..protocol_engine.types.liquid_level_detection import LiquidTrackingType
 
 _DEFAULT_ASPIRATE_CLEARANCE = 1.0
 _DEFAULT_DISPENSE_CLEARANCE = 1.0
@@ -1534,72 +1536,41 @@ class InstrumentContext(publisher.CommandPublisher):
 
         TODO: Add args description.
         """
-        flat_sources_list = validation.ensure_valid_flat_wells_list_for_transfer_v2(
-            source
+        transfer_args = verify_and_normalize_transfer_args(
+            source=source,
+            dest=dest,
+            tip_policy=new_tip,
+            last_tip_picked_up_from=self._last_tip_picked_up_from,
+            tip_racks=self._tip_racks,
+            current_volume=self.current_volume,
+            trash_location=trash_location
+            if trash_location is not None
+            else self.trash_container,
         )
-        flat_dests_list = validation.ensure_valid_flat_wells_list_for_transfer_v2(dest)
-        for well in flat_sources_list + flat_dests_list:
-            instrument.validate_takes_liquid(
-                location=well.top(),
-                reject_module=True,
-                reject_adapter=True,
-            )
-        if len(flat_sources_list) != len(flat_dests_list):
+        if len(transfer_args.sources_list) != len(transfer_args.destinations_list):
             raise ValueError(
                 "Sources and destinations should be of the same length in order to perform a transfer."
                 " To transfer liquid from one source to many destinations, use 'distribute_liquid',"
                 " to transfer liquid onto one destinations from many sources, use 'consolidate_liquid'."
             )
 
-        valid_new_tip = validation.ensure_new_tip_policy(new_tip)
-        if valid_new_tip == TransferTipPolicyV2.NEVER:
-            if self._last_tip_picked_up_from is None:
-                raise RuntimeError(
-                    "Pipette has no tip attached to perform transfer."
-                    " Either do a pick_up_tip beforehand or specify a new_tip parameter"
-                    " of 'once' or 'always'."
-                )
-            else:
-                tip_racks = [self._last_tip_picked_up_from.parent]
-        else:
-            tip_racks = self._tip_racks
-        if self.current_volume != 0:
-            raise RuntimeError(
-                "A transfer on a liquid class cannot start with liquid already in the tip."
-                " Ensure that all previously aspirated liquid is dispensed before starting"
-                " a new transfer."
-            )
-
-        _trash_location: Union[types.Location, labware.Well, TrashBin, WasteChute]
-        if trash_location is None:
-            saved_trash = self.trash_container
-            if isinstance(saved_trash, labware.Labware):
-                _trash_location = saved_trash.wells()[0]
-            else:
-                _trash_location = saved_trash
-        else:
-            _trash_location = trash_location
-
-        checked_trash_location = validation.ensure_valid_trash_location_for_transfer_v2(
-            trash_location=_trash_location
-        )
         self._core.transfer_liquid(
             liquid_class=liquid_class,
             volume=volume,
             source=[
                 (types.Location(types.Point(), labware=well), well._core)
-                for well in flat_sources_list
+                for well in transfer_args.sources_list
             ],
             dest=[
                 (types.Location(types.Point(), labware=well), well._core)
-                for well in flat_dests_list
+                for well in transfer_args.destinations_list
             ],
-            new_tip=valid_new_tip,
+            new_tip=transfer_args.tip_policy,
             tip_racks=[
                 (types.Location(types.Point(), labware=rack), rack._core)
-                for rack in tip_racks
+                for rack in transfer_args.tip_racks
             ],
-            trash_location=checked_trash_location,
+            trash_location=transfer_args.trash_location,
             return_tip=return_tip,
         )
         return self
@@ -1627,60 +1598,37 @@ class InstrumentContext(publisher.CommandPublisher):
         """
         if not isinstance(source, labware.Well):
             raise ValueError(f"Source should be a single Well but received {source}.")
-        flat_dests_list = validation.ensure_valid_flat_wells_list_for_transfer_v2(dest)
-        for well in [source] + flat_dests_list:
-            instrument.validate_takes_liquid(
-                location=well.top(),
-                reject_module=True,
-                reject_adapter=True,
-            )
 
-        valid_new_tip = validation.ensure_new_tip_policy(new_tip)
-        if valid_new_tip == TransferTipPolicyV2.NEVER:
-            if self._last_tip_picked_up_from is None:
-                raise RuntimeError(
-                    "Pipette has no tip attached to perform transfer."
-                    " Either do a pick_up_tip beforehand or specify a new_tip parameter"
-                    " of 'once' or 'always'."
-                )
-            else:
-                tip_racks = [self._last_tip_picked_up_from.parent]
-        else:
-            tip_racks = self._tip_racks
-        if self.current_volume != 0:
-            raise RuntimeError(
-                "A transfer on a liquid class cannot start with liquid already in the tip."
-                " Ensure that all previously aspirated liquid is dispensed before starting"
-                " a new transfer."
-            )
-
-        _trash_location: Union[types.Location, labware.Well, TrashBin, WasteChute]
-        if trash_location is None:
-            saved_trash = self.trash_container
-            if isinstance(saved_trash, labware.Labware):
-                _trash_location = saved_trash.wells()[0]
-            else:
-                _trash_location = saved_trash
-        else:
-            _trash_location = trash_location
-
-        checked_trash_location = validation.ensure_valid_trash_location_for_transfer_v2(
-            trash_location=_trash_location
+        transfer_args = verify_and_normalize_transfer_args(
+            source=source,
+            dest=dest,
+            tip_policy=new_tip,
+            last_tip_picked_up_from=self._last_tip_picked_up_from,
+            tip_racks=self._tip_racks,
+            current_volume=self.current_volume,
+            trash_location=trash_location
+            if trash_location is not None
+            else self.trash_container,
         )
+        if transfer_args.tip_policy == TransferTipPolicyV2.PER_SOURCE:
+            raise RuntimeError(
+                'Tip transfer policy "per source" incompatible with distribute.'
+            )
+
         self._core.distribute_liquid(
             liquid_class=liquid_class,
             volume=volume,
             source=(types.Location(types.Point(), labware=source), source._core),
             dest=[
                 (types.Location(types.Point(), labware=well), well._core)
-                for well in flat_dests_list
+                for well in transfer_args.destinations_list
             ],
-            new_tip=valid_new_tip,
+            new_tip=transfer_args.tip_policy,
             tip_racks=[
                 (types.Location(types.Point(), labware=rack), rack._core)
-                for rack in tip_racks
+                for rack in transfer_args.tip_racks
             ],
-            trash_location=checked_trash_location,
+            trash_location=transfer_args.trash_location,
             return_tip=return_tip,
         )
         return self
@@ -1710,66 +1658,36 @@ class InstrumentContext(publisher.CommandPublisher):
             raise ValueError(
                 f"Destination should be a single Well but received {dest}."
             )
-        flat_sources_list = validation.ensure_valid_flat_wells_list_for_transfer_v2(
-            source
+        transfer_args = verify_and_normalize_transfer_args(
+            source=source,
+            dest=dest,
+            tip_policy=new_tip,
+            last_tip_picked_up_from=self._last_tip_picked_up_from,
+            tip_racks=self._tip_racks,
+            current_volume=self.current_volume,
+            trash_location=trash_location
+            if trash_location is not None
+            else self.trash_container,
         )
-        for well in flat_sources_list + [dest]:
-            instrument.validate_takes_liquid(
-                location=well.top(),
-                reject_module=True,
-                reject_adapter=True,
-            )
-
-        valid_new_tip = validation.ensure_new_tip_policy(new_tip)
-        if valid_new_tip == TransferTipPolicyV2.NEVER:
-            if self._last_tip_picked_up_from is None:
-                raise RuntimeError(
-                    "Pipette has no tip attached to perform transfer."
-                    " Either do a pick_up_tip beforehand or specify a new_tip parameter"
-                    " of 'once' or 'always'."
-                )
-            else:
-                tip_racks = [self._last_tip_picked_up_from.parent]
-        elif valid_new_tip == TransferTipPolicyV2.PER_SOURCE:
+        if transfer_args.tip_policy == TransferTipPolicyV2.PER_SOURCE:
             raise RuntimeError(
                 'Tip transfer policy "per source" incompatible with consolidate.'
             )
-        else:
-            tip_racks = self._tip_racks
-        if self.current_volume != 0:
-            raise RuntimeError(
-                "A transfer on a liquid class cannot start with liquid already in the tip."
-                " Ensure that all previously aspirated liquid is dispensed before starting"
-                " a new transfer."
-            )
 
-        _trash_location: Union[types.Location, labware.Well, TrashBin, WasteChute]
-        if trash_location is None:
-            saved_trash = self.trash_container
-            if isinstance(saved_trash, labware.Labware):
-                _trash_location = saved_trash.wells()[0]
-            else:
-                _trash_location = saved_trash
-        else:
-            _trash_location = trash_location
-
-        checked_trash_location = validation.ensure_valid_trash_location_for_transfer_v2(
-            trash_location=_trash_location
-        )
         self._core.consolidate_liquid(
             liquid_class=liquid_class,
             volume=volume,
             source=[
                 (types.Location(types.Point(), labware=well), well._core)
-                for well in flat_sources_list
+                for well in transfer_args.sources_list
             ],
             dest=(types.Location(types.Point(), labware=dest), dest._core),
-            new_tip=valid_new_tip,
+            new_tip=transfer_args.tip_policy,
             tip_racks=[
                 (types.Location(types.Point(), labware=rack), rack._core)
-                for rack in tip_racks
+                for rack in transfer_args.tip_racks
             ],
-            trash_location=checked_trash_location,
+            trash_location=transfer_args.trash_location,
             return_tip=return_tip,
         )
         return self
@@ -2577,7 +2495,7 @@ class InstrumentContext(publisher.CommandPublisher):
         self._core.liquid_probe_with_recovery(well._core, loc)
 
     @requires_version(2, 20)
-    def measure_liquid_height(self, well: labware.Well) -> float:
+    def measure_liquid_height(self, well: labware.Well) -> LiquidTrackingType:
         """Check the height of the liquid within a well.
 
         :returns: The height, in mm, of the liquid from the deck.
@@ -2588,8 +2506,7 @@ class InstrumentContext(publisher.CommandPublisher):
         """
         self._raise_if_pressure_not_supported_by_pipette()
         loc = well.top()
-        height = self._core.liquid_probe_without_recovery(well._core, loc)
-        return height
+        return self._core.liquid_probe_without_recovery(well._core, loc)
 
     def _raise_if_configuration_not_supported_by_pipette(
         self, style: NozzleLayout
