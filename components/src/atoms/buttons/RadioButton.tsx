@@ -95,6 +95,8 @@ export function RadioButton(props: RadioButtonProps): JSX.Element {
     -webkit-box-orient: vertical;
     -webkit-line-clamp: ${buttonSubLabel?.align === 'vertical' ? 2 : 1};
     overflow: hidden;
+    word-break: break-all;
+    text-overflow: ellipsis;
   `
 
   const getButtonStyle = (

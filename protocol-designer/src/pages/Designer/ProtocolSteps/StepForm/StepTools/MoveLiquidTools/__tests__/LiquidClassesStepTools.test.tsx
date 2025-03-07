@@ -51,4 +51,19 @@ describe('LiquidClassesStepMoveLiquidTools', () => {
     )
     expect(props.propsForFields.liquidClass.updateValue).toHaveBeenCalled()
   })
+
+  it('renders associated liquid in the subtext', () => {
+    vi.mocked(getLiquidEntities).mockReturnValue({
+      '0': {
+        displayColor: 'mockColor',
+        displayName: 'mockname',
+        liquidClass: 'waterV1',
+        description: null,
+        pythonName: 'liquid_1',
+        liquidGroupId: '0',
+      },
+    })
+    render(props)
+    screen.getByText('Assigned to mockname')
+  })
 })
