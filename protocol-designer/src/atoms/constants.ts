@@ -24,6 +24,20 @@ export const LINK_BUTTON_STYLE = css`
   }
 `
 
+/**
+ * Generates a CSS style for clamping text to a specified number of lines,
+ * with optional word-breaking behavior.
+ *
+ * @param {number} lineClamp - The number of lines to clamp the text to.
+ * @param {boolean} [wordBase] - Optional flag to determine word-breaking behavior.
+ * If true, words will break normally; if false or undefined, words will break at any character.
+ *
+ * @returns {FlattenSimpleInterpolation} - The generated CSS style.
+ *
+ * @example
+ * const style = LINE_CLAMP_TEXT_STYLE(2, true);
+ * // style will clamp text to 2 lines and break words normally
+ */
 export const LINE_CLAMP_TEXT_STYLE = (
   lineClamp: number,
   wordBase?: boolean
