@@ -26,7 +26,7 @@ export const LINK_BUTTON_STYLE = css`
 
 export const LINE_CLAMP_TEXT_STYLE = (
   lineClamp: number,
-  title?: boolean
+  wordBase?: boolean
 ): FlattenSimpleInterpolation => css`
   display: -webkit-box;
   -webkit-box-orient: vertical;
@@ -34,7 +34,7 @@ export const LINE_CLAMP_TEXT_STYLE = (
   text-overflow: ellipsis;
   word-wrap: break-word;
   -webkit-line-clamp: ${lineClamp};
-  word-break: ${title === true
+  word-break: ${wordBase === true
     ? 'normal'
     : 'break-all'}; // normal for tile and break-all for a non word case like aaaaaaaa
 `
