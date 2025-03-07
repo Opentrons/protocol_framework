@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import { useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { useDrop, useDrag } from 'react-dnd'
 import {
@@ -20,6 +20,7 @@ import {
 } from '../../../../utils/labwareModuleCompatibility'
 import { getAdditionalEquipmentEntities } from '../../../../step-forms/selectors'
 import { moveDeckItem } from '../../../../labware-ingred/actions'
+import { getDeckSetupForActiveItem } from '../../../../top-selectors/labware-locations'
 import { selectors as labwareDefSelectors } from '../../../../labware-defs'
 import { DND_TYPES } from '../../../../constants'
 import { DECK_CONTROLS_STYLE } from '../constants'
@@ -65,12 +66,17 @@ export const SlotControls = (props: SlotControlsProps): JSX.Element | null => {
   const customLabwareDefs = useSelector(
     labwareDefSelectors.getCustomLabwareDefsByURI
   )
+  console.log('slot controls', slotId)
+  const activeDeckSetup = useSelector(getDeckSetupForActiveItem)
+  const labware = activeDeckSetup.labware
+  const [newSlot, setSlot] = useState<string | null>(null)
   const additionalEquipment = useSelector(getAdditionalEquipmentEntities)
   const cutoutId = getCutoutIdFromAddressableArea(itemId, deckDef)
   const trashSlots = Object.values(additionalEquipment)
     .filter(ae => ae.name === 'trashBin' || ae.name === 'wasteChute')
     ?.map(ae => ae.location as CutoutId)
 
+  console.log('test', trashSlots, cutoutId)
   const hasTrash = cutoutId != null ? trashSlots.includes(cutoutId) : false
   const hasTrashAndNotD4 =
     hasTrash &&
@@ -90,12 +96,12 @@ export const SlotControls = (props: SlotControlsProps): JSX.Element | null => {
     () => ({
       accept: DND_TYPES.LABWARE,
       canDrop: (item: DroppedItem) => {
-        const draggedLabware = item?.labwareOnDeck
+        const draggedDef = item?.labwareOnDeck?.def
         console.assert(
-          draggedLabware,
-          'no labware def of dragged item, expected it on drop'
+          draggedDef,
+          'no labware def of dragged def, expected it on drop'
         )
-        if (moduleType != null && draggedLabware.def != null) {
+        if (moduleType != null && draggedDef != null) {
           // this is a module slot, prevent drop if the dragged labware is not compatible
           const isCustomLabware = getLabwareIsCustom(
             customLabwareDefs,
@@ -103,16 +109,16 @@ export const SlotControls = (props: SlotControlsProps): JSX.Element | null => {
           )
 
           return (
-            getLabwareIsCompatible(draggedLabware.def, moduleType) ||
-            isCustomLabware
+            getLabwareIsCompatible(draggedDef, moduleType) || isCustomLabware
           )
         }
-
         return !hasTrashAndNotD4
       },
       drop: (item: DroppedItem) => {
         const droppedLabware = item
-        if (droppedLabware.labwareOnDeck != null) {
+        if (newSlot != null) {
+          dispatch(moveDeckItem(newSlot, slotId))
+        } else if (droppedLabware.labwareOnDeck != null) {
           const droppedSlot = droppedLabware.labwareOnDeck.slot
           dispatch(moveDeckItem(droppedSlot, slotId))
         }
@@ -128,8 +134,17 @@ export const SlotControls = (props: SlotControlsProps): JSX.Element | null => {
         draggedItem: monitor.getItem() as DroppedItem,
       }),
     }),
-    []
+    [moduleType, hasTrashAndNotD4, customLabwareDefs, newSlot]
   )
+  const draggedLabware = Object.values(labware).find(
+    l => l.id === draggedItem?.labwareOnDeck?.id
+  )
+
+  useEffect(() => {
+    if (draggedLabware != null) {
+      setSlot(draggedLabware.slot)
+    }
+  }, [draggedLabware])
 
   if (
     (itemType !== DND_TYPES.LABWARE && itemType !== null) ||
@@ -146,13 +161,14 @@ export const SlotControls = (props: SlotControlsProps): JSX.Element | null => {
       ? getLabwareIsCustom(customLabwareDefs, draggedItem.labwareOnDeck)
       : false
 
+  console.log('testing', isOver, moduleType, draggedDef)
   const isSlotBlocked =
-    isOver &&
-    ((moduleType != null &&
+    (isOver &&
+      moduleType != null &&
       draggedDef != null &&
       !getLabwareIsCompatible(draggedDef, moduleType) &&
       !isCustomLabware) ||
-      hasTrashAndNotD4)
+    (isOver && hasTrashAndNotD4)
 
   drag(drop(ref))
 
@@ -197,7 +213,7 @@ export const SlotControls = (props: SlotControlsProps): JSX.Element | null => {
       </Flex>
     </RobotCoordsForeignDiv>
   )
-
+  console.log('isSlotBlocked', isSlotBlocked)
   if (isSlotBlocked) {
     body = <BlockedSlot slotPosition={slotPosition} slotId={itemId} />
   } else if (isOver) {
