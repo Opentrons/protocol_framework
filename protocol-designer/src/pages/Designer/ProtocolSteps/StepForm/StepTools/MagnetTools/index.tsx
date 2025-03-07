@@ -28,7 +28,7 @@ export function MagnetTools(props: StepFormProps): JSX.Element {
   const moduleEntities = useSelector(getModuleEntities)
   const defaultEngageHeight = useSelector(getMagnetLabwareEngageHeight)
 
-  const moduleModel = moduleEntities[formData.moduleId].model
+  const moduleModel = moduleEntities[formData.moduleId]?.model
 
   const mmUnits = t('units.millimeter')
   const isGen1 = moduleModel === MAGNETIC_MODULE_V1

@@ -405,6 +405,13 @@ const ABSORBANCE_READER_MODULE_ID_REQUIRED: FormError = {
   showAtField: true,
   page: 0,
 }
+const MAGNETIC_MODULE_ID_REQUIRED: FormError = {
+  title: 'Module required',
+  dependentFields: ['moduleId'],
+  showAtForm: false,
+  showAtField: true,
+  page: 0,
+}
 
 export interface HydratedFormData {
   [key: string]: any
@@ -676,6 +683,12 @@ export const newLabwareLocationRequired = (
     ? NEW_LABWARE_LOCATION_REQUIRED
     : null
 }
+export const magneticModuleIdRequired = (
+  fields: HydratedFormData
+): FormError | null => {
+  const { moduleId } = fields
+  return moduleId == null ? MAGNETIC_MODULE_ID_REQUIRED : null
+}
 export const engageHeightRangeExceeded = (
   fields: HydratedFormData,
   moduleEntities?: ModuleEntities
@@ -684,7 +697,7 @@ export const engageHeightRangeExceeded = (
   if (moduleEntities == null) {
     return null
   }
-  const moduleModel = moduleEntities[moduleId].model
+  const moduleModel = moduleEntities[moduleId]?.model
   const engageHeightCast = Number(engageHeight)
   if (magnetAction === 'engage') {
     if (moduleModel === MAGNETIC_MODULE_V1) {
