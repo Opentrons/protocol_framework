@@ -108,6 +108,9 @@ export const substepTimelineSingleChannel = (
         command.commandType === 'aspirate' ||
         command.commandType === 'dispense'
       ) {
+        if ('meta' in command && command?.meta?.isAirGap) {
+          return acc
+        }
         const { volume, wellName, labwareId } = command.params
 
         const wellInfo = {
@@ -117,27 +120,29 @@ export const substepTimelineSingleChannel = (
             acc.prevRobotState.liquidState.labware[labwareId][wellName],
           postIngreds: nextRobotState.liquidState.labware[labwareId][wellName],
         }
-        if (!('meta' in command)) {
-          return {
-            ...acc,
-            timeline: [
-              ...acc.timeline,
-              _createNextTimelineFrame({
-                volume,
-                index,
-                // @ts-expect-error(sa, 2021-6-14): after type narrowing (see comment above) this expect error should not be necessary
-                nextFrame,
-                command,
-                wellInfo,
-              }),
-            ],
-            prevRobotState: nextRobotState,
-          }
+
+        return {
+          ...acc,
+          timeline: [
+            ...acc.timeline,
+            _createNextTimelineFrame({
+              volume,
+              index,
+              // @ts-expect-error(sa, 2021-6-14): after type narrowing (see comment above) this expect error should not be necessary
+              nextFrame,
+              command,
+              wellInfo,
+            }),
+          ],
+          prevRobotState: nextRobotState,
         }
       } else if (
         command.commandType === 'dispenseInPlace' ||
         command.commandType === 'aspirateInPlace'
       ) {
+        if ('meta' in command && command?.meta?.isAirGap) {
+          return acc
+        }
         const { volume } = command.params
         const prevCommand =
           'commands' in nextFrame ? nextFrame.commands[index - 1] : null
@@ -193,22 +198,21 @@ export const substepTimelineSingleChannel = (
               additionalEquipmentId ?? ''
             ],
         }
-        if (!('meta' in command)) {
-          return {
-            ...acc,
-            timeline: [
-              ...acc.timeline,
-              _createNextTimelineFrame({
-                volume,
-                index,
-                // @ts-expect-error(sa, 2021-6-14): after type narrowing (see comment above) this expect error should not be necessary
-                nextFrame,
-                command,
-                wellInfo,
-              }),
-            ],
-            prevRobotState: nextRobotState,
-          }
+
+        return {
+          ...acc,
+          timeline: [
+            ...acc.timeline,
+            _createNextTimelineFrame({
+              volume,
+              index,
+              // @ts-expect-error(sa, 2021-6-14): after type narrowing (see comment above) this expect error should not be necessary
+              nextFrame,
+              command,
+              wellInfo,
+            }),
+          ],
+          prevRobotState: nextRobotState,
         }
       } else {
         return { ...acc, prevRobotState: nextRobotState }
@@ -246,6 +250,9 @@ export const substepTimelineMultiChannel = (
         command.commandType === 'aspirate' ||
         command.commandType === 'dispense'
       ) {
+        if ('meta' in command && command?.meta?.isAirGap) {
+          return acc
+        }
         const { volume, wellName, labwareId } = command.params
         const labwareDef =
           invariantContext.labwareEntities[labwareId] != null
@@ -276,27 +283,29 @@ export const substepTimelineMultiChannel = (
             ? pick(nextRobotState.liquidState.labware[labwareId], wellsForTips)
             : {},
         }
-        if (!('meta' in command)) {
-          return {
-            ...acc,
-            timeline: [
-              ...acc.timeline,
-              _createNextTimelineFrame({
-                volume,
-                index,
-                // @ts-expect-error(sa, 2021-6-14): after type narrowing (see comment above) this expect error should not be necessary
-                nextFrame,
-                command,
-                wellInfo,
-              }),
-            ],
-            prevRobotState: nextRobotState,
-          }
+
+        return {
+          ...acc,
+          timeline: [
+            ...acc.timeline,
+            _createNextTimelineFrame({
+              volume,
+              index,
+              // @ts-expect-error(sa, 2021-6-14): after type narrowing (see comment above) this expect error should not be necessary
+              nextFrame,
+              command,
+              wellInfo,
+            }),
+          ],
+          prevRobotState: nextRobotState,
         }
       } else if (
         command.commandType === 'dispenseInPlace' ||
         command.commandType === 'aspirateInPlace'
       ) {
+        if ('meta' in command && command?.meta?.isAirGap) {
+          return acc
+        }
         const { volume } = command.params
         const prevCommand =
           'commands' in nextFrame ? nextFrame.commands[index - 1] : null
@@ -355,22 +364,21 @@ export const substepTimelineMultiChannel = (
               additionalEquipmentId ?? ''
             ],
         }
-        if (!('meta' in command)) {
-          return {
-            ...acc,
-            timeline: [
-              ...acc.timeline,
-              _createNextTimelineFrame({
-                volume,
-                index,
-                // @ts-expect-error(sa, 2021-6-14): after type narrowing (see comment above) this expect error should not be necessary
-                nextFrame,
-                command,
-                wellInfo,
-              }),
-            ],
-            prevRobotState: nextRobotState,
-          }
+
+        return {
+          ...acc,
+          timeline: [
+            ...acc.timeline,
+            _createNextTimelineFrame({
+              volume,
+              index,
+              // @ts-expect-error(sa, 2021-6-14): after type narrowing (see comment above) this expect error should not be necessary
+              nextFrame,
+              command,
+              wellInfo,
+            }),
+          ],
+          prevRobotState: nextRobotState,
         }
       } else {
         return { ...acc, prevRobotState: nextRobotState }
