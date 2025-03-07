@@ -108,12 +108,6 @@ export const wasteChuteCommandsUtil = (
                 flowRate,
                 volume,
               }),
-              curryCommandCreator(dispenseInPlace, {
-                pipetteId,
-                volume,
-                flowRate,
-                isAirGap: true,
-              }),
             ]
           : []
       break

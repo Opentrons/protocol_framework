@@ -394,24 +394,6 @@ export const distribute: CommandCreator<DistributeArgs> = (
                     }),
                   ]
                 : []),
-              curryCommandCreator(dispense, {
-                pipetteId: args.pipette,
-                volume: dispenseAirGapVolume,
-                labwareId: dispenseAirGapLabware,
-                wellName: dispenseAirGapWell,
-                flowRate: dispenseFlowRateUlSec,
-                wellLocation: {
-                  origin: 'bottom',
-                  offset: {
-                    z: airGapOffsetDestWell,
-                    x: 0,
-                    y: 0,
-                  },
-                },
-                tipRack: args.tipRack,
-                nozzles: args.nozzles,
-                isAirGap: true,
-              }),
             ]
           : []
 

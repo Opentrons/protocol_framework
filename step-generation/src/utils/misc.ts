@@ -696,24 +696,6 @@ export const airGapHelper: CommandCreator<AirGapArgs> = (
           volume,
           flowRate,
         }),
-        curryCommandCreator(dispense, {
-          pipetteId,
-          volume,
-          labwareId: dispenseAirGapLabware,
-          wellName: dispenseAirGapWell,
-          flowRate,
-          wellLocation: {
-            origin: 'bottom',
-            offset: {
-              z: offsetFromBottomMm,
-              x: 0,
-              y: 0,
-            },
-          },
-          tipRack,
-          nozzles,
-          isAirGap: true,
-        }),
       ]
       //  when aspirating out of multi wells for consolidate
     } else {
@@ -738,24 +720,6 @@ export const airGapHelper: CommandCreator<AirGapArgs> = (
           pipetteId,
           volume,
           flowRate,
-        }),
-        curryCommandCreator(dispense, {
-          pipetteId,
-          volume,
-          labwareId: destinationId,
-          wellName: destWell,
-          flowRate,
-          wellLocation: {
-            origin: 'bottom',
-            offset: {
-              z: offsetFromBottomMm,
-              x: 0,
-              y: 0,
-            },
-          },
-          tipRack,
-          nozzles,
-          isAirGap: true,
         }),
       ]
     }

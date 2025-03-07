@@ -156,7 +156,7 @@ export const makeMoveToWellHelper = (wellName: string, labwareId?: string) => ({
     },
   },
 })
-export const makeAirGapHelper = (volume: number) => [
+export const makeAirGapHelper = (volume: number, flowRate?: number) => [
   {
     commandType: 'prepareToAspirate',
     key: expect.any(String),
@@ -170,7 +170,7 @@ export const makeAirGapHelper = (volume: number) => [
     params: {
       pipetteId: DEFAULT_PIPETTE,
       volume,
-      flowRate: ASPIRATE_FLOW_RATE,
+      flowRate: flowRate ?? ASPIRATE_FLOW_RATE,
     },
   },
 ]

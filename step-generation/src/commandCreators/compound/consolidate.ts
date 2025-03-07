@@ -27,7 +27,6 @@ import {
   aspirate,
   configureForVolume,
   delay,
-  dispense,
   dropTip,
   moveToWell,
   prepareToAspirate,
@@ -244,24 +243,7 @@ export const consolidate: CommandCreator<ConsolidateArgs> = (
                   volume: aspirateAirGapVolume,
                   flowRate: aspirateFlowRateUlSec,
                 }),
-                curryCommandCreator(dispense, {
-                  pipetteId: args.pipette,
-                  volume: aspirateAirGapVolume,
-                  labwareId: args.sourceLabware,
-                  wellName: sourceWell,
-                  flowRate: aspirateFlowRateUlSec,
-                  wellLocation: {
-                    origin: 'bottom',
-                    offset: {
-                      z: airGapOffsetDestWell,
-                      x: 0,
-                      y: 0,
-                    },
-                  },
-                  tipRack: args.tipRack,
-                  nozzles: args.nozzles,
-                  isAirGap: true,
-                }),
+
                 ...(aspirateDelay != null
                   ? [
                       curryCommandCreator(delay, {
