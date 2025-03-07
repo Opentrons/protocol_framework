@@ -108,6 +108,7 @@ export function useCommandTextString(
     case 'loadPipette':
     case 'loadModule':
     case 'loadLiquid':
+    case 'loadLiquidClass':
       return {
         kind: 'generic',
         commandText: utils.getLoadCommandText(fullParams),
