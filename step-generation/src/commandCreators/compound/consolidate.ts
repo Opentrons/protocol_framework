@@ -8,7 +8,7 @@ import {
 } from '@opentrons/shared-data'
 import * as errorCreators from '../../errorCreators'
 import { getPipetteWithTipMaxVol } from '../../robotStateSelectors'
-import { movableTrashCommandsUtil } from '../../utils/movableTrashCommandsUtil'
+import { dropTipInMovableTrash } from '../../utils/movableTrashCommandsUtil'
 import {
   blowoutUtil,
   curryCommandCreator,
@@ -494,8 +494,7 @@ export const consolidate: CommandCreator<ConsolidateArgs> = (
         })
       }
       if (isTrashBin) {
-        dropTipCommand = movableTrashCommandsUtil({
-          type: 'dropTip',
+        dropTipCommand = dropTipInMovableTrash({
           pipetteId: args.pipette,
           prevRobotState,
           invariantContext,
