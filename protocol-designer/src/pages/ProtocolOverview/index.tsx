@@ -191,13 +191,13 @@ export function ProtocolOverview(): JSX.Element {
 
   const warning = hasWarning
     ? getWarningContent({
-      noCommands,
-      pipettesWithoutStep,
-      modulesWithoutStep,
-      gripperWithoutStep,
-      fixtureWithoutStep,
-      t,
-    })
+        noCommands,
+        pipettesWithoutStep,
+        modulesWithoutStep,
+        gripperWithoutStep,
+        fixtureWithoutStep,
+        t,
+      })
     : null
 
   const exportWarningModal = useBlockingHint({
