@@ -111,8 +111,6 @@ enum MixLocators {
   PosFromBottom = '[id="TipPositionField_mix_touchTip_mmFromBottom"]',
   RenameBtn = 'button:contains("Rename")',
   StepNameInput = '[class="InputField__StyledInput-sc-1gyyvht-0 cLVzBl"]',
-  StepNotesInput = '[class^="RenameStepModal__DescriptionField"]',
-  // StepNotesInput = '[data-testid="TextAreaField_step_notes"]',
   PosFromTop = '[data-testid="TipPositionField_blowout_z_offset"]',
 }
 
@@ -411,9 +409,9 @@ export const MixSteps = {
       cy.get(MixLocators.StepNameInput)
         .first()
         .type('{selectAll}{backspace}Cypress Mix Test')
-      cy.get(MixLocators.StepNotesInput).type(
-        'This is testing cypress automation in PD'
-      )
+      cy.contains('Step Notes')
+        .next('textarea') // Find the textarea that is the next sibling
+        .type('This is testing cypress automation in PD')
       cy.contains(MixContent.Cancel).should('exist').should('be.visible')
     },
   }),
