@@ -3,7 +3,7 @@ import re
 import base64
 from typing import List, Optional
 
-from opentrons.drivers.asyncio.communication.errors import MotorStall, NoResponse
+from opentrons.drivers.asyncio.communication.errors import NoResponse
 from opentrons.drivers.command_builder import CommandBuilder
 from opentrons.drivers.asyncio.communication import AsyncResponseSerialConnection
 
@@ -109,6 +109,14 @@ STACKER_MOTION_CONFIG = {
         ),
     },
 }
+
+
+class MotorStall(Exception):
+    """Motor stall exception."""
+
+    def __init__(self, axis: StackerAxis) -> None:
+        """Constructor."""
+        super().__init__(f"Motor stall detected on axis {axis}")
 
 
 class FlexStackerDriver(AbstractFlexStackerDriver):
