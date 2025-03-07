@@ -63,6 +63,7 @@ export function MagnetTools(props: StepFormProps): JSX.Element {
         {...propsForFields.moduleId}
         options={moduleLabwareOptions}
         title={t('protocol_steps:module')}
+        errorToShow={getFormLevelError('moduleId', mappedErrorsToField)}
       />
       <Divider marginY="0" />
       <Flex flexDirection={DIRECTION_COLUMN} paddingX={SPACING.spacing16}>
