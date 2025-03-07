@@ -54,12 +54,12 @@ const darkFill = COLORS.grey60
 interface DeckThumbnailProps {
   hoverSlot: DeckSlotId | null
   setHoverSlot: Dispatch<SetStateAction<string | null>>
+  robotType: RobotType
 }
 export function DeckThumbnail(props: DeckThumbnailProps): JSX.Element {
-  const { hoverSlot, setHoverSlot } = props
+  const { hoverSlot, setHoverSlot, robotType } = props
   const initialDeckSetup = useSelector(getInitialDeckSetup)
-  const robotType = useSelector(getRobotType)
-  const deckDef = useMemo(() => getDeckDefFromRobotType(robotType), [])
+  const deckDef = useMemo(() => getDeckDefFromRobotType(robotType), [robotType])
   const trash = Object.values(initialDeckSetup.additionalEquipmentOnDeck).find(
     ae => ae.name === 'trashBin'
   )
@@ -117,15 +117,13 @@ export function DeckThumbnail(props: DeckThumbnailProps): JSX.Element {
         height="100%"
         width="100%"
         deckDef={deckDef}
-        viewBox={`${deckDef.cornerOffsetFromOrigin[0]} ${
-          hasWasteChute
-            ? deckDef.cornerOffsetFromOrigin[1] - WASTE_CHUTE_SPACE
-            : deckDef.cornerOffsetFromOrigin[1]
-        } ${
-          hasRightColumnFixtures
+        viewBox={`${deckDef.cornerOffsetFromOrigin[0]} ${hasWasteChute
+          ? deckDef.cornerOffsetFromOrigin[1] - WASTE_CHUTE_SPACE
+          : deckDef.cornerOffsetFromOrigin[1]
+          } ${hasRightColumnFixtures
             ? deckDef.dimensions[0] + RIGHT_COLUMN_FIXTURE_PADDING
             : deckDef.dimensions[0]
-        } ${deckDef.dimensions[1]}`}
+          } ${deckDef.dimensions[1]}`}
         zoomed
       >
         {() => (
@@ -164,23 +162,23 @@ export function DeckThumbnail(props: DeckThumbnailProps): JSX.Element {
                 ))}
                 {trash != null
                   ? trashBinFixtures.map(({ cutoutId }) =>
-                      cutoutId != null ? (
-                        <Fragment key={cutoutId}>
-                          <SingleSlotFixture
-                            cutoutId={cutoutId}
-                            deckDefinition={deckDef}
-                            slotClipColor={COLORS.transparent}
-                            fixtureBaseColor={lightFill}
-                          />
-                          <FlexTrash
-                            robotType={robotType}
-                            trashIconColor={lightFill}
-                            trashCutoutId={cutoutId as TrashCutoutId}
-                            backgroundColor={COLORS.grey50}
-                          />
-                        </Fragment>
-                      ) : null
-                    )
+                    cutoutId != null ? (
+                      <Fragment key={cutoutId}>
+                        <SingleSlotFixture
+                          cutoutId={cutoutId}
+                          deckDefinition={deckDef}
+                          slotClipColor={COLORS.transparent}
+                          fixtureBaseColor={lightFill}
+                        />
+                        <FlexTrash
+                          robotType={robotType}
+                          trashIconColor={lightFill}
+                          trashCutoutId={cutoutId as TrashCutoutId}
+                          backgroundColor={COLORS.grey50}
+                        />
+                      </Fragment>
+                    ) : null
+                  )
                   : null}
                 {wasteChuteFixtures.map(fixture => (
                   <WasteChuteFixture
