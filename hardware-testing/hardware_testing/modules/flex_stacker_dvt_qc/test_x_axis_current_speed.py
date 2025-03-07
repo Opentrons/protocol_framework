@@ -12,21 +12,23 @@ from .driver import FlexStackerInterface as FlexStacker, FlexStackerStallError
 from opentrons.drivers.flex_stacker.driver import STACKER_MOTION_CONFIG
 from opentrons.drivers.flex_stacker.types import StackerAxis, Direction
 
-
-TEST_SPEEDS = [200, 220]
-TEST_CURRENTS = [1.5, 0.7, 0.5, 0.4]
-CURRENT_THRESHOD = 0.7
-TEST_TRIALS = 10
-
-AXIS_TRAVEL = 193.5
-AXIS_TOLERANCE = 1
-OFFSET = 2
-LIMIT_SWICH_CHECK = 0.1
-ERROR_THRESHOLD = 0.5
-
 TEST_AXIS = StackerAxis.X
 HOME_SPEED = STACKER_MOTION_CONFIG[TEST_AXIS]["home"].max_speed
 HOME_CURRENT = STACKER_MOTION_CONFIG[TEST_AXIS]["home"].current
+
+TEST_SPEEDS = [200, 220] # mm/s
+TEST_CURRENTS = [1.5, 0.7, 0.5, 0.4, 0.3] # A rms
+TEST_ACCELERATION = STACKER_MOTION_CONFIG[TEST_AXIS]["move"].acceleration
+CURRENT_THRESHOD = 0.5 # A rms
+TEST_TRIALS = 10
+
+# All units in mm
+AXIS_TRAVEL = 193.5 # The distance from limit switch to limit switch
+OFFSET = 2 # The distance to be off the springs from the limit switch
+AXIS_TOLERANCE = 0.5 # Distance tolerance of AXIS_TRAVEL in ONE direction
+LIMIT_SWICH_CHECK = 0.1
+MOVEMENT_TOLERANCE = 0.5 # Maximum allowed movement error in ONE direction
+
 
 
 def build_csv_lines() -> List[Union[CSVLine, CSVLineRepeating]]:
@@ -50,51 +52,61 @@ async def test_cycle_per_direction(
     current: float,
 ) -> Tuple[bool, float]:
     """Test one cycle."""
-    # first home in the opposite direction
-    await stacker.home_axis(TEST_AXIS, direction.opposite())
+    # Home to opposite position if we are not already on the switch
+    if not await stacker._driver.get_limit_switch(TEST_AXIS, direction.opposite()):
+        await stacker.home_axis(TEST_AXIS, direction.opposite())
 
-    # move at homing speed
+    # Move at homing speed off the springs
     await stacker.move_axis(
         TEST_AXIS, direction, OFFSET, HOME_SPEED, None, HOME_CURRENT
     )
 
     try:
-        dist = 0.0
-        # moving at the testing speed and current to just before the spring
+        # moving at the testing speed and current to just before the springs
+        # minus the tolerances
+        test_distance = AXIS_TRAVEL - (2*OFFSET) - AXIS_TOLERANCE - MOVEMENT_TOLERANCE
         await stacker.move_axis(
             TEST_AXIS,
             direction,
-            AXIS_TRAVEL - (2*OFFSET) - AXIS_TOLERANCE,
+            test_distance,
             speed,
-            None,
+            TEST_ACCELERATION,
             current
         )
 
-        # compress the spring at the homing speed/current
-        await stacker.move_axis(
-            TEST_AXIS, direction, OFFSET, HOME_SPEED, None, HOME_CURRENT
-        )
-
-        # move towards limit switch at small increments
-        while dist <= (ERROR_THRESHOLD + AXIS_TOLERANCE):
+        # Move to the farthest position the limit switch could be
+        check_distance = OFFSET + 2*AXIS_TOLERANCE + 2*MOVEMENT_TOLERANCE
+        try:
             await stacker.move_axis(
-                TEST_AXIS, direction, LIMIT_SWICH_CHECK, HOME_SPEED, None, HOME_CURRENT
+                TEST_AXIS,
+                direction,
+                check_distance,
+                HOME_SPEED,
+                0,
+                HOME_CURRENT,
             )
-            dist += LIMIT_SWICH_CHECK
-            if await stacker._driver.get_limit_switch(TEST_AXIS, direction):
-                # Translate dist to total movement
-                dist = round(AXIS_TRAVEL + dist - AXIS_TOLERANCE, 1)
-                ui.print_info(
-                    f"X Axis, {direction}, PASS, {speed}mm/s, {current}A, {dist}mm"
-                )
-                return True, dist
+        except Exception as e:
+            pass
+
+        if await stacker._driver.get_limit_switch(TEST_AXIS, direction):
+            # The limit switch was triggered within this amount of distance
+            movement_distance = round((AXIS_TRAVEL + OFFSET + AXIS_TOLERANCE + MOVEMENT_TOLERANCE), 1)
+            ui.print_info(
+                f"X Axis, {direction}, PASS, {speed}mm/s, {current}A, {movement_distance}mm"
+            )
+            return True, movement_distance
     except FlexStackerStallError:
-        ui.print_error("axis stalled!")
-    return False, dist
+        ui.print_error("unexpected axis stall!")
+    # If we reach this point, limit switch did not trigger in expected distance
+    # Probable stall, Movement distance is unknown, return 0
+    return False, 0
 
 
 async def run(stacker: FlexStacker, report: CSVReport, section: str) -> None:
     """Run."""
+    # Home to retract position if we are not already on the switch
+    if not await stacker._driver.get_limit_switch(TEST_AXIS, Direction.RETRACT):
+        await stacker.home_axis(TEST_AXIS, Direction.RETRACT)
     for speed in TEST_SPEEDS:
         for current in TEST_CURRENTS:
             tag = f"speed-{speed}-current-{current}"
