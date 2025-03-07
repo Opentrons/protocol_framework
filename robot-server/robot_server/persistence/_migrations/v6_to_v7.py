@@ -83,7 +83,9 @@ def _migrate_command_table_with_new_command_intent_col(
         )
 
         dest_transaction.execute(
-            f"UPDATE run_command SET command_intent='{new_command_intent}' WHERE row_id={row.row_id}"
+            sqlalchemy.update(schema_7.run_command_table)
+            .where(schema_7.run_command_table.c.row_id == row.row_id)
+            .values(command_intent=new_command_intent),
         )
 
 
