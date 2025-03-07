@@ -16,7 +16,9 @@ import { getPreviousMoveToAddressableAreaCommand } from './utils/getPreviousMove
 import type { Channels } from '@opentrons/components'
 import type {
   AddressableAreaName,
+  AspDispAirgapParams,
   CreateCommand,
+  MoveToWellParams,
   NozzleConfigurationStyle,
 } from '@opentrons/shared-data'
 import type {
@@ -105,11 +107,23 @@ export const substepTimelineSingleChannel = (
         acc.prevRobotState
       ).robotState
 
+      const prevCommand =
+        'commands' in nextFrame ? nextFrame.commands[index - 1] : null
+
       if (
         command.commandType === 'aspirate' ||
-        command.commandType === 'dispense'
+        command.commandType === 'dispense' ||
+        (command.commandType === 'airGapInPlace' &&
+          prevCommand?.commandType === 'moveToWell')
       ) {
-        const { wellName, volume, labwareId } = command.params
+        const commandLocationParams =
+          command.commandType === 'airGapInPlace' &&
+          prevCommand?.commandType === 'moveToWell'
+            ? (prevCommand.params as MoveToWellParams)
+            : (command.params as AspDispAirgapParams)
+
+        const { wellName, labwareId } = commandLocationParams
+        const { volume } = command.params
 
         const wellInfo = {
           labwareId,
@@ -136,7 +150,8 @@ export const substepTimelineSingleChannel = (
       } else if (
         command.commandType === 'dispenseInPlace' ||
         command.commandType === 'aspirateInPlace' ||
-        command.commandType === 'airGapInPlace'
+        (command.commandType === 'airGapInPlace' &&
+          prevCommand?.commandType === 'prepareToAspirate')
       ) {
         const { volume } = command.params
         const prevMoveToAddressableAreaCommand = getPreviousMoveToAddressableAreaCommand(

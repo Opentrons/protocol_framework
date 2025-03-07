@@ -2,13 +2,13 @@ import { UniversalSteps } from '../support/UniversalSteps'
 import { SetupSteps, SetupVerifications } from '../support/SetupSteps'
 import { StepBuilder } from '../support/StepBuilder'
 
-describe('The Redesigned Create Protocol Landing Page', () => {
+describe('Create New OT-2 and Flex onboarding flow WIP', () => {
   beforeEach(() => {
     cy.visit('/')
     cy.closeAnalyticsModal()
   })
 
-  it('content and step 1 flow works', () => {
+  it('Checks onboarding flow for OT-2', () => {
     cy.verifyCreateNewHeader()
     cy.clickCreateNew()
     const steps: StepBuilder = new StepBuilder()
