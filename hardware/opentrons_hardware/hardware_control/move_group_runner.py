@@ -5,6 +5,7 @@ import logging
 from typing import List, Set, Tuple, Iterator, Union, Optional
 import numpy as np
 import time
+import os
 
 from opentrons_shared_data.errors.exceptions import (
     GeneralError,
@@ -660,6 +661,8 @@ class MoveScheduler:
 
         log.debug(f"Executing move group {group_id}.")
         self._current_group = group_id - self._start_at_index
+
+        move_start_timestamp = time.perf_counter()
         error = await can_messenger.ensure_send(
             node_id=NodeId.broadcast,
             message=ExecuteMoveGroupRequest(
@@ -676,8 +679,16 @@ class MoveScheduler:
         if error != ErrorCode.ok:
             log.error(f"received error trying to execute move group: {str(error)}")
 
-        expected_time = max(3.0, self._durations[group_id - self._start_at_index] * 1.1)
-        full_timeout = max(5.0, self._durations[group_id - self._start_at_index] * 2)
+        # TODO: log the start timestamp and theoretical duration here
+        theoretical_time = self._durations[group_id - self._start_at_index]
+        fd = os.open("/data/testing_data/fun_logs.csv", os.O_WRONLY | os.O_APPEND | os.O_CREAT)
+        try:
+            os.write(fd, f"{move_start_timestamp},{theoretical_time}\n".encode("utf-8"))
+        finally:
+            os.close(fd)  # Must be closed manually!
+
+        expected_time = max(3.0, theoretical_time * 1.1)
+        full_timeout = max(5.0, theoretical_time * 2)
         start_time = time.time()
 
         try:
