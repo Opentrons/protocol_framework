@@ -382,7 +382,7 @@ export const distribute: CommandCreator<DistributeArgs> = (
               curryCommandCreator(airGapInPlace, {
                 pipetteId: args.pipette,
                 volume: dispenseAirGapVolume,
-                flowRate: dispenseFlowRateUlSec,
+                flowRate: aspirateFlowRateUlSec,
               }),
               ...(aspirateDelay != null
                 ? [

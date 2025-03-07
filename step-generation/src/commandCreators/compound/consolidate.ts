@@ -239,7 +239,6 @@ export const consolidate: CommandCreator<ConsolidateArgs> = (
                   volume: aspirateAirGapVolume,
                   flowRate: aspirateFlowRateUlSec,
                 }),
-
                 ...(aspirateDelay != null
                   ? [
                       curryCommandCreator(delay, {
