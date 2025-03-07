@@ -36,7 +36,7 @@ from .config import Clearances
 from .disposal_locations import TrashBin, WasteChute
 from ._nozzle_layout import NozzleLayout
 from ._liquid import LiquidClass
-from ._transfer_helper import verify_and_normalize_transfer_args
+from ._transfer_liquid_validation import verify_and_normalize_transfer_args
 from . import labware, validation
 from ..protocols.advanced_control.transfers.common import (
     TransferTipPolicyV2,
