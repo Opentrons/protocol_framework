@@ -1,9 +1,12 @@
 import operator
+from collections import defaultdict
 from functools import reduce
 from pathlib import Path
-from typing import Dict, List
+from typing import Any, Dict, List
 
 from citools.generate_analyses import generate_analyses_from_test
+from rich.console import Console
+from rich.table import Table
 
 from automation.data.protocol import Protocol
 from automation.gen_lc import LiquidClassConfig, generate_all_configs
@@ -24,22 +27,15 @@ discrete_field_cardinalities: Dict[str, int] = {
 }
 THEORETICAL_COMBINATIONS: int = reduce(operator.mul, discrete_field_cardinalities.values(), 1)
 
-# Optionally, you could choose to generate only a random sample of the configurations
-# SAMPLE_SIZE: int = 20
-
 # ---- END CONFIGURATION VARIABLES ----
 
 
-def main() -> None:
+def main() -> None:  # noqa: C901
     # Ensure the destination directory exists
     DESTINATION.mkdir(parents=True, exist_ok=True)
 
     # Generate all configurations reproducibly (from gen_lc)
     all_configs: List[LiquidClassConfig] = generate_all_configs(THEORETICAL_COMBINATIONS)
-
-    # Optionally, if you want to use a sample (uncomment the following two lines):
-    # SAMPLE_SIZE = 20
-    # all_configs = random.sample(all_configs, SAMPLE_SIZE)
 
     # Read the template file
     with open(TEMPLATE_PATH, "r") as f:
@@ -50,9 +46,9 @@ def main() -> None:
 
     # For each configuration, generate a new protocol file.
     for idx, config in enumerate(all_configs):
-        # Create an insertion block that includes a ctx.comment statement.
+        # Create an insertion block that includes the generated code mapping.
         insertion: str = marker + "\n"
-        insertion += f'    ctx.comment("Generated LiquidClassConfig: {config}")\n'
+        insertion += config.to_code("pipette_1000") + "\n"
 
         # Replace the marker in the template with our insertion block.
         new_file_content: str = template.replace(marker, insertion)
@@ -86,21 +82,70 @@ def main() -> None:
     # Generate analyses for all protocols with the "edge" tag
     analyzed_protocols = generate_analyses_from_test("edge", protocols_to_analyze)
 
-    # Check for errors in the analyses
+    # Check for errors in the analyses and aggregate them by deepest error type
+
     protocols_with_errors = []
+    error_aggregation = defaultdict(list)
+
+    def get_deepest_error(error: Dict[str, Any]) -> Dict[str, Any]:
+        if error.get("wrappedErrors", []):
+            return get_deepest_error(error["wrappedErrors"][0])
+        return error
+
     for protocol in analyzed_protocols:
         if protocol.analysis and protocol.analysis.get("errors"):
             protocols_with_errors.append(protocol)
 
-    # Report results
-    print("\nAnalysis Results:")
-    print(f"- Total protocols analyzed: {len(analyzed_protocols)}")
+            # Process each error in the protocol
+            for error in protocol.analysis["errors"]:
+                deepest_error = get_deepest_error(error)
+                error_type = deepest_error.get("errorType", "UnknownError")
+                error_detail = deepest_error.get("detail", "No details available")
+                error_aggregation[error_type].append((protocol, error_detail))
+
+    # Create a rich table for reporting
+    console = Console()
+
     if protocols_with_errors:
-        print(f"- Found {len(protocols_with_errors)} protocols with errors:")
-        for protocol in protocols_with_errors:
-            print(f"  - {protocol.host_protocol_file}")
+        error_table = Table(title=f"Error Summary ({len(protocols_with_errors)} protocols with errors)")
+        error_table.add_column("Error Type", style="cyan")
+        error_table.add_column("Count", style="magenta")
+        error_table.add_column("Example Detail", style="green")
+
+        for error_type, occurrences in sorted(error_aggregation.items(), key=lambda x: len(x[1]), reverse=True):
+            # Include only first example to keep the table manageable
+            example_detail = occurrences[0][1]
+            if len(example_detail) > 80:
+                example_detail = example_detail[:77] + "..."
+            error_table.add_row(error_type, str(len(occurrences)), example_detail)
+
+        console.print(error_table)
+
+        # Detailed error list as a table
+        console.print("\n[bold]Detailed Error List:[/bold]")
+        for error_type, occurrences in sorted(error_aggregation.items(), key=lambda x: len(x[1]), reverse=True):
+            detail_table = Table(title=f"{error_type} ({len(occurrences)} occurrences)", show_header=True)
+            detail_table.add_column("Index", style="dim", width=5)
+            detail_table.add_column("Protocol", style="yellow")
+            detail_table.add_column("Error Detail", style="green")
+
+            for i, (protocol, detail) in enumerate(occurrences[:5]):  # Limit to first 5 examples
+                # Extract just the filename without path
+                filename = Path(protocol.host_protocol_file).name
+                detail_table.add_row(str(i + 1), filename, detail)
+
+            if len(occurrences) > 5:
+                detail_table.add_row("...", "...", f"... and {len(occurrences) - 5} more")
+
+            console.print(detail_table)
+
+    # Report results with rich
+    console.print("\n[bold]Analysis Results:[/bold]")
+    console.print(f"- Total protocols analyzed: {len(analyzed_protocols)}")
+    if protocols_with_errors:
+        console.print(f"- [red]Found {len(protocols_with_errors)} protocols with errors[/red]")
     else:
-        print("- No errors found in any protocol.")
+        console.print("- [green]No errors found in any protocol.[/green]")
 
 
 if __name__ == "__main__":

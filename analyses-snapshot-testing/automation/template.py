@@ -11,34 +11,25 @@ def run(ctx):  # type: ignore
         "flex_1channel_1000", "right", tip_racks=[filter_tiprack_200_1, filter_tiprack_200_2, filter_tiprack_200_3, filter_tiprack_200_4]
     )
     trash = ctx.load_trash_bin("A3")
-    source_reservoir = ctx.load_labware("nest_12_reservoir_15ml", "B2", "source")
-    destination_plate = ctx.load_labware("nest_96_wellplate_100ul_pcr_full_skirt", "B3", "target")
-    # water_class = ctx.define_liquid_class("water")
+    source_reservoir = ctx.load_labware("nest_96_wellplate_2ml_deep", "B2", "source")
+    # what is the list of labware to use for source and destination?
+    # exclude labware that does not allow touchtip for now
+    destination_plate = ctx.load_labware("opentrons_96_wellplate_200ul_pcr_full_skirt", "B3", "target")
 
-    ########## GENERATED LIQUID CLASS ##########
     generated_class = ctx.define_liquid_class("water")
     # WARNING: this function signature will be changing
-    # props = water_class.get_for(pipette_1000, filter_tiprack_200_1)
-    ##########
-    # generated_class.aspirate.mix.enabled = True
-    # generated_class.aspirate.pre_wet = True
-    # generated_class.aspirate.retract.touch_tip.enabled = False
-    # generated_class.aspirate.position_reference = "well-top"
-    # generated_class.aspirate.offset = (0, 0, -40)
-    # generated_class.multi_dispense.retract.touch_tip.enabled = True
-    # generated_class.multi_dispense.retract.blowout.location = "destination"
-    # generated_class.multi_dispense.retract.blowout.flow_rate = pipette_1000.flow_rate.blow_out
-    # generated_class.multi_dispense.retract.blowout.enabled = True
+    liquid_class_config = generated_class.get_for(pipette_1000, filter_tiprack_200_1)  # noqa: F841
+    ########## GENERATED LIQUID CLASS ##########
     ######## END GENERATED LIQUID CLASS ##########
-
     # distribute_liquid variables
-    volume = 49
-    new_tip = "once"
-    # new_tip = "always"
-    source = source_reservoir.wells_by_name()["A1"]
-    destination = [destination_plate.wells_by_name()[well] for well in ["A1", "A2", "A3", "A4"]]
-
-    pipette_1000.transfer_liquid(
+    volume = 273
+    # new_tip = "once"
+    new_tip = "always"
+    # source = source_reservoir.wells_by_name()["A1"]
+    source = [source_reservoir.wells_by_name()[well] for well in ["A1", "A2", "A3", "A4"]]
+    # destination = [destination_plate.wells_by_name()[well] for well in ["A1", "A2", "A3", "A4"]]
+    destination = destination_plate.wells_by_name()["A1"]
+    pipette_1000.consolidate_liquid(
         liquid_class=generated_class,
         volume=volume,
         source=source,
