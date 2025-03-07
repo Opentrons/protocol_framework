@@ -15,7 +15,9 @@ import { getCutoutIdByAddressableArea } from '../utils'
 import type { Channels } from '@opentrons/components'
 import type {
   AddressableAreaName,
+  AspDispAirgapParams,
   CreateCommand,
+  MoveToWellParams,
   NozzleConfigurationStyle,
 } from '@opentrons/shared-data'
 import type {
@@ -103,7 +105,6 @@ export const substepTimelineSingleChannel = (
         invariantContext,
         acc.prevRobotState
       ).robotState
-
       if (
         command.commandType === 'aspirate' ||
         command.commandType === 'dispense'

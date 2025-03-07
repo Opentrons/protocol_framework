@@ -494,6 +494,20 @@ export const getOT2HoverDimensions = (
   }
 }
 
+export const getSVGContainerWidth = (
+  robotType: RobotType,
+  tab: string,
+  isZoomed: boolean
+): string => {
+  if (robotType === OT2_ROBOT_TYPE && tab === 'startingDeck' && !isZoomed) {
+    return '78.5%'
+  }
+  if (robotType !== OT2_ROBOT_TYPE && !isZoomed && tab !== 'protocolSteps') {
+    return '70%'
+  }
+  return '100%'
+}
+
 interface HighlightItemsByType {
   highlightModuleItems: Array<{
     selection: Selection
