@@ -8,6 +8,12 @@ By installing and using Opentrons software, you agree to the Opentrons End-User 
 
 ---
 
+## Opentrons Robot Software Changes in 8.3.1
+
+The 8.3.1 hotfix release fixes a robot software bug:   
+
+- Exported data from the Absorbance Plate Reader no longer contains invalid values.  
+
 ## Opentrons Robot Software Changes in 8.3.0
 
 Welcome to the v8.3.0 release of the Opentrons robot software! This release includes improvements to error recovery on the Flex, as well as beta features for our commercial partners. 
