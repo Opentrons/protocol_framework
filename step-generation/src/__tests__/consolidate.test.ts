@@ -24,6 +24,7 @@ import {
   SOURCE_LABWARE,
   blowoutInPlaceHelper,
   makeMoveToWellHelper,
+  makeAirGapAfterAspirateHelper,
 } from '../fixtures'
 import { DEST_WELL_BLOWOUT_DESTINATION } from '../utils'
 import type {
@@ -152,7 +153,7 @@ describe('consolidate single-channel', () => {
       aspirateHelper('A2', 50),
       dispenseHelper('B1', 100),
       makeMoveToWellHelper('B1', DEST_LABWARE),
-      makeAirGapHelper(5),
+      ...makeAirGapHelper(5),
     ])
   })
 
@@ -844,13 +845,13 @@ describe('consolidate single-channel', () => {
       aspirateHelper('A1', 100),
       ...delayWithOffset('A1', SOURCE_LABWARE),
       makeMoveToWellHelper('A1'),
-      makeAirGapHelper(5),
+      makeAirGapAfterAspirateHelper(5),
       delayCommand(12),
 
       aspirateHelper('A2', 100),
       ...delayWithOffset('A2', SOURCE_LABWARE),
       makeMoveToWellHelper('A2'),
-      makeAirGapHelper(5),
+      makeAirGapAfterAspirateHelper(5),
       delayCommand(12),
 
       dispenseHelper('B1', 210),
@@ -858,13 +859,13 @@ describe('consolidate single-channel', () => {
       aspirateHelper('A3', 100),
       ...delayWithOffset('A3', SOURCE_LABWARE),
       makeMoveToWellHelper('A3'),
-      makeAirGapHelper(5),
+      makeAirGapAfterAspirateHelper(5),
       delayCommand(12),
 
       aspirateHelper('A4', 100),
       ...delayWithOffset('A4', SOURCE_LABWARE),
       makeMoveToWellHelper('A4'),
-      makeAirGapHelper(5),
+      makeAirGapAfterAspirateHelper(5),
       delayCommand(12),
 
       dispenseHelper('B1', 210),
@@ -1006,21 +1007,21 @@ describe('consolidate single-channel', () => {
 
       aspirateHelper('A1', 100),
       makeMoveToWellHelper('A1'),
-      makeAirGapHelper(5),
+      makeAirGapAfterAspirateHelper(5),
 
       aspirateHelper('A2', 100),
       makeMoveToWellHelper('A2'),
-      makeAirGapHelper(5),
+      makeAirGapAfterAspirateHelper(5),
 
       dispenseHelper('B1', 210),
 
       aspirateHelper('A3', 100),
       makeMoveToWellHelper('A3'),
-      makeAirGapHelper(5),
+      makeAirGapAfterAspirateHelper(5),
 
       aspirateHelper('A4', 100),
       makeMoveToWellHelper('A4'),
-      makeAirGapHelper(5),
+      makeAirGapAfterAspirateHelper(5),
 
       dispenseHelper('B1', 210),
     ])
@@ -1044,25 +1045,25 @@ describe('consolidate single-channel', () => {
 
       aspirateHelper('A1', 150),
       makeMoveToWellHelper('A1'),
-      makeAirGapHelper(5),
+      makeAirGapAfterAspirateHelper(5),
 
       dispenseHelper('B1', 155),
 
       aspirateHelper('A2', 150),
       makeMoveToWellHelper('A2'),
-      makeAirGapHelper(5),
+      makeAirGapAfterAspirateHelper(5),
 
       dispenseHelper('B1', 155),
 
       aspirateHelper('A3', 150),
       makeMoveToWellHelper('A3'),
-      makeAirGapHelper(5),
+      makeAirGapAfterAspirateHelper(5),
 
       dispenseHelper('B1', 155),
 
       aspirateHelper('A4', 150),
       makeMoveToWellHelper('A4'),
-      makeAirGapHelper(5),
+      makeAirGapAfterAspirateHelper(5),
 
       dispenseHelper('B1', 155),
     ])
@@ -1738,6 +1739,13 @@ describe('consolidate single-channel', () => {
                 z: 11.54,
               },
             },
+          },
+        },
+        {
+          commandType: 'prepareToAspirate',
+          key: expect.any(String),
+          params: {
+            pipetteId: 'p300SingleId',
           },
         },
         {
@@ -2470,6 +2478,13 @@ describe('consolidate single-channel', () => {
           },
         },
         {
+          commandType: 'prepareToAspirate',
+          key: expect.any(String),
+          params: {
+            pipetteId: 'p300SingleId',
+          },
+        },
+        {
           commandType: 'airGapInPlace',
           key: expect.any(String),
           params: {
@@ -2916,6 +2931,13 @@ describe('consolidate single-channel', () => {
           },
         },
         {
+          commandType: 'prepareToAspirate',
+          key: expect.any(String),
+          params: {
+            pipetteId: 'p300SingleId',
+          },
+        },
+        {
           commandType: 'airGapInPlace',
           key: expect.any(String),
           params: {
@@ -3236,6 +3258,13 @@ describe('consolidate single-channel', () => {
                 z: 11.54,
               },
             },
+          },
+        },
+        {
+          commandType: 'prepareToAspirate',
+          key: expect.any(String),
+          params: {
+            pipetteId: 'p300SingleId',
           },
         },
         {
