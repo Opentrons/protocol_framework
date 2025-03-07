@@ -117,10 +117,7 @@ export const substepTimelineSingleChannel = (
             acc.prevRobotState.liquidState.labware[labwareId][wellName],
           postIngreds: nextRobotState.liquidState.labware[labwareId][wellName],
         }
-        if ('meta' in command && command?.meta?.isAirGap) {
-          //  skip showing dispense air gaps into the timeline
-          return
-        } else {
+        if (!('meta' in command)) {
           return {
             ...acc,
             timeline: [
@@ -196,10 +193,7 @@ export const substepTimelineSingleChannel = (
               additionalEquipmentId ?? ''
             ],
         }
-        if ('meta' in command && command?.meta?.isAirGap) {
-          //  skip showing dispense air gaps into the timeline
-          return
-        } else {
+        if (!('meta' in command)) {
           return {
             ...acc,
             timeline: [
@@ -282,10 +276,7 @@ export const substepTimelineMultiChannel = (
             ? pick(nextRobotState.liquidState.labware[labwareId], wellsForTips)
             : {},
         }
-        if ('meta' in command && command?.meta?.isAirGap) {
-          //  skip showing dispense air gaps into the timeline
-          return
-        } else {
+        if (!('meta' in command)) {
           return {
             ...acc,
             timeline: [
@@ -364,10 +355,7 @@ export const substepTimelineMultiChannel = (
               additionalEquipmentId ?? ''
             ],
         }
-        if ('meta' in command && command?.meta?.isAirGap) {
-          //  skip showing dispense air gaps into the timeline
-          return
-        } else {
+        if (!('meta' in command)) {
           return {
             ...acc,
             timeline: [

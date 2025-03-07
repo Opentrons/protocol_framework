@@ -472,8 +472,6 @@ export const consolidate: CommandCreator<ConsolidateArgs> = (
                 destWell: destinationWell,
                 flowRate: aspirateFlowRateUlSec,
                 offsetFromBottomMm: airGapOffsetDestWell,
-                tipRack: args.tipRack,
-                nozzles: args.nozzles,
               }),
               ...(aspirateDelay != null
                 ? [

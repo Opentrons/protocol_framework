@@ -628,8 +628,6 @@ interface AirGapArgs {
   offsetFromBottomMm: number
   pipetteId: string
   volume: number
-  tipRack: string
-  nozzles: NozzleConfigurationStyle | null
   blowOutLocation?: string | null
   sourceId?: string
   sourceWell?: string
@@ -649,8 +647,6 @@ export const airGapHelper: CommandCreator<AirGapArgs> = (
     sourceId,
     sourceWell,
     volume,
-    tipRack,
-    nozzles,
   } = args
 
   const trashOrLabware = getTrashOrLabware(

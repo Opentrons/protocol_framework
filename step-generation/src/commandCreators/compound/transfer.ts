@@ -544,8 +544,6 @@ export const transfer: CommandCreator<TransferArgs> = (
                     destWell: destinationWell,
                     flowRate: aspirateFlowRateUlSec,
                     offsetFromBottomMm: airGapOffsetDestWell,
-                    tipRack: args.tipRack,
-                    nozzles: args.nozzles,
                   }),
                   ...(aspirateDelay != null
                     ? [
