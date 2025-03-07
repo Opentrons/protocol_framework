@@ -48,6 +48,7 @@ import {
   wavelengthOutOfRange,
   referenceWavelengthOutOfRange,
   absorbanceReaderModuleIdRequired,
+  magneticModuleIdRequired,
 } from './errors'
 
 import {
@@ -165,7 +166,8 @@ const stepFormHelperMap: Partial<Record<StepType, FormHelpers>> = {
       magnetActionRequired,
       engageHeightRequired,
       moduleIdRequired,
-      engageHeightRangeExceeded
+      engageHeightRangeExceeded,
+      magneticModuleIdRequired
     ),
   },
   temperature: {
