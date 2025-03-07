@@ -112,14 +112,6 @@ STACKER_MOTION_CONFIG = {
 }
 
 
-class MotorStall(Exception):
-    """Motor stall exception."""
-
-    def __init__(self, axis: StackerAxis) -> None:
-        """Constructor."""
-        super().__init__(f"Motor stall detected on axis {axis}")
-
-
 class FlexStackerDriver(AbstractFlexStackerDriver):
     """FLEX Stacker driver."""
 
