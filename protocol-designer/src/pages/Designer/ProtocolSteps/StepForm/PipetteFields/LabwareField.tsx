@@ -14,10 +14,18 @@ export function LabwareField(props: FieldProps): JSX.Element {
   const disposalOptions = useSelector(getDisposalOptions)
   const options = useSelector(getLabwareOptions)
   const dispatch = useDispatch()
+
+  const optionsWithoutOffDeck = options.filter(
+    option => !option.name.toLowerCase().includes('off-deck')
+  )
+  const properOptions =
+    name === 'dispense_labware' || name === 'aspirate_labware'
+      ? optionsWithoutOffDeck
+      : options
   const allOptions =
     name === 'dispense_labware'
-      ? [...options, ...disposalOptions]
-      : [...options]
+      ? [...properOptions, ...disposalOptions]
+      : [...properOptions]
 
   return (
     <DropdownStepFormField
