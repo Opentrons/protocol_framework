@@ -10,7 +10,7 @@ from hardware_testing.data.csv_report import (
 )
 
 from .driver import FlexStackerInterface as FlexStacker
-from opentrons.drivers.flex_stacker.types import LEDColor
+from opentrons.drivers.flex_stacker.types import LEDColor, LEDPattern
 
 
 COLORS = [
@@ -32,6 +32,11 @@ def build_csv_lines() -> List[Union[CSVLine, CSVLineRepeating]]:
 
 async def run(stacker: FlexStacker, report: CSVReport, section: str) -> None:
     """Run."""
+    # Reset LEDs to off
+    if not stacker._simulating:
+        await stacker._driver.set_led(0, LEDColor.GREEN, 0, LEDPattern.STATIC)
+        await stacker._driver.set_led(0, LEDColor.GREEN, 1, LEDPattern.STATIC)
+
     for external in [False, True]:
         for color in COLORS:
             tag = "external" if external else "internal"
