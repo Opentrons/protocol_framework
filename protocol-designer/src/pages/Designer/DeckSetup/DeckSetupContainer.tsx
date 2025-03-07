@@ -270,7 +270,9 @@ export function DeckSetupContainer(props: DeckSetupTabType): JSX.Element {
                   {robotType === OT2_ROBOT_TYPE ? (
                     <DeckFromLayers
                       robotType={robotType}
-                      layerBlocklist={OT2_STANDARD_DECK_VIEW_LAYER_BLOCK_LIST}
+                      layerBlocklist={OT2_STANDARD_DECK_VIEW_LAYER_BLOCK_LIST.filter(
+                        block => block !== 'fixedTrash'
+                      )}
                     />
                   ) : (
                     <>
