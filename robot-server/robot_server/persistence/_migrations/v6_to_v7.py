@@ -75,9 +75,10 @@ def _migrate_command_table_with_new_command_intent_col(
     for row in dest_transaction.execute(select_commands).all():
         data = json.loads(row.command)
         new_command_intent = (
-            # Account for old_row.command["intent"] being NULL.
+            # Account for the `intent` prop of the old command JSON being omitted or `null`.
+            # We convert either case to the SQL string "protocol".
             "protocol"
-            if "intent" not in row.command or data["intent"] == None  # noqa: E711
+            if "intent" not in data or data["intent"] is None
             else data["intent"]
         )
 
