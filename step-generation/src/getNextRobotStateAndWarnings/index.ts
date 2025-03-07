@@ -147,15 +147,11 @@ function _getNextRobotStateAndWarningsSingleCommand(
       break
 
     case 'dispenseInPlace':
-      if (command.meta?.isAirGap === true) {
-        break
-      } else {
-        forDispenseInPlace(
-          command.params,
-          invariantContext,
-          robotStateAndWarnings
-        )
-      }
+      forDispenseInPlace(
+        command.params,
+        invariantContext,
+        robotStateAndWarnings
+      )
       break
 
     case 'configureNozzleLayout':

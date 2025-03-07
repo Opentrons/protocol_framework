@@ -29,7 +29,6 @@ import {
   delay,
   dropTip,
   moveToWell,
-  prepareToAspirate,
   touchTip,
 } from '../atomic'
 import { mixUtil } from './mix'
@@ -234,9 +233,6 @@ export const consolidate: CommandCreator<ConsolidateArgs> = (
                       y: 0,
                     },
                   },
-                }),
-                curryCommandCreator(prepareToAspirate, {
-                  pipetteId: args.pipette,
                 }),
                 curryCommandCreator(airGapInPlace, {
                   pipetteId: args.pipette,

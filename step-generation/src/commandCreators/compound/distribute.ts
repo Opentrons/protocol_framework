@@ -230,9 +230,6 @@ export const distribute: CommandCreator<DistributeArgs> = (
                 },
               },
             }),
-            curryCommandCreator(prepareToAspirate, {
-              pipetteId: args.pipette,
-            }),
             curryCommandCreator(airGapInPlace, {
               pipetteId: args.pipette,
               volume: aspirateAirGapVolume,

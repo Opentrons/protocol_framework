@@ -29,7 +29,6 @@ import {
   dispense,
   dropTip,
   moveToWell,
-  prepareToAspirate,
   touchTip,
 } from '../atomic'
 import { mixUtil } from './mix'
@@ -408,9 +407,6 @@ export const transfer: CommandCreator<TransferArgs> = (
                         y: 0,
                       },
                     },
-                  }),
-                  curryCommandCreator(prepareToAspirate, {
-                    pipetteId: args.pipette,
                   }),
                   curryCommandCreator(airGapInPlace, {
                     pipetteId: args.pipette,

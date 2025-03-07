@@ -2,16 +2,12 @@ import { uuid } from '../../utils'
 import type { CommandCreator } from '../../types'
 import type { DispenseInPlaceParams } from '@opentrons/shared-data'
 
-export interface DispenseInPlaceAtomicCommandParams
-  extends DispenseInPlaceParams {
-  isAirGap?: boolean
-}
-export const dispenseInPlace: CommandCreator<DispenseInPlaceAtomicCommandParams> = (
+export const dispenseInPlace: CommandCreator<DispenseInPlaceParams> = (
   args,
   invariantContext,
   prevRobotState
 ) => {
-  const { pipetteId, volume, flowRate, isAirGap } = args
+  const { pipetteId, volume, flowRate } = args
 
   const commands = [
     {
@@ -22,7 +18,6 @@ export const dispenseInPlace: CommandCreator<DispenseInPlaceAtomicCommandParams>
         volume,
         flowRate,
       },
-      ...(isAirGap && { meta: { isAirGap } }),
     },
   ]
   return {

@@ -139,9 +139,6 @@ export const substepTimelineSingleChannel = (
         command.commandType === 'dispenseInPlace' ||
         command.commandType === 'aspirateInPlace'
       ) {
-        if ('meta' in command && command?.meta?.isAirGap) {
-          return acc
-        }
         const { volume } = command.params
         const prevCommand =
           'commands' in nextFrame ? nextFrame.commands[index - 1] : null
@@ -302,9 +299,6 @@ export const substepTimelineMultiChannel = (
         command.commandType === 'dispenseInPlace' ||
         command.commandType === 'aspirateInPlace'
       ) {
-        if ('meta' in command && command?.meta?.isAirGap) {
-          return acc
-        }
         const { volume } = command.params
         const prevCommand =
           'commands' in nextFrame ? nextFrame.commands[index - 1] : null
