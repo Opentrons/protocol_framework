@@ -87,7 +87,7 @@ export const LabwareControls = (
         canDrop: monitor.canDrop(),
       }),
     }),
-    [labwareOnDeck]
+    [labwareOnDeck, swapBlocked]
   )
 
   useEffect(() => {
@@ -95,7 +95,7 @@ export const LabwareControls = (
   }, [canDrop])
 
   useEffect(() => {
-    if (draggedLabware?.labwareOnDeck != null) {
+    if (draggedLabware != null) {
       setDraggedLabware(draggedLabware?.labwareOnDeck)
     } else {
       setHoveredLabware(null)

@@ -87,7 +87,7 @@ export const AdapterControls = (
 
           return (adapterLabwareIsMatch || isCustomLabware) && !swapBlocked
         }
-        return !swapBlocked
+        return true
       },
       drop: (item: DroppedItem) => {
         const droppedLabware = item
@@ -107,7 +107,7 @@ export const AdapterControls = (
         draggedItem: monitor.getItem() as DroppedItem,
       }),
     }),
-    []
+    [swapBlocked, customLabwareDefs]
   )
 
   if (
@@ -118,18 +118,16 @@ export const AdapterControls = (
   ) {
     return null
   }
-
   const draggedDef = draggedItem?.labwareOnDeck?.def
   const isCustomLabware = draggedItem
     ? getLabwareIsCustom(customLabwareDefs, draggedItem.labwareOnDeck)
     : false
 
   const isSlotBlocked =
-    swapBlocked ||
-    (isOver &&
-      draggedDef != null &&
-      draggedDef.stackingOffsetWithLabware?.[adapterLoadName] == null &&
-      !isCustomLabware)
+    isOver &&
+    draggedDef != null &&
+    draggedDef.stackingOffsetWithLabware?.[adapterLoadName] == null &&
+    !isCustomLabware
 
   drop(ref)
 

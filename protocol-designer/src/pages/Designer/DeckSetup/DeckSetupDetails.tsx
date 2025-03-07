@@ -15,7 +15,10 @@ import {
   isAddressableAreaStandardSlot,
   THERMOCYCLER_MODULE_TYPE,
 } from '@opentrons/shared-data'
-import { getSlotIdsBlockedBySpanningForThermocycler } from '../../../step-forms'
+import {
+  getSlotIdsBlockedBySpanningForThermocycler,
+  getSlotIsEmpty,
+} from '../../../step-forms'
 import { selectors } from '../../../labware-ingred/selectors'
 import { getStagingAreaAddressableAreas } from '../../../utils'
 import { editSlotInfo } from '../../../labware-ingred/actions'
@@ -380,12 +383,16 @@ export function DeckSetupDetails(props: DeckSetupDetailsProps): JSX.Element {
             stagingAreaAddressableAreas.includes(addressableArea.id)
           return (
             addressableAreas &&
-            !slotIdsBlockedBySpanning.includes(addressableArea.id)
+            !slotIdsBlockedBySpanning.includes(addressableArea.id) &&
+            getSlotIsEmpty(activeDeckSetup, addressableArea.id, false, true)
           )
         })
         .map(addressableArea => {
           const stagingAreaAddressableAreas = getStagingAreaAddressableAreas(
             stagingAreaCutoutIds
+          )
+          const moduleOnSlot = Object.values(activeDeckSetup.modules).find(
+            module => module.slot === addressableArea.id
           )
           return (
             <SlotControls
@@ -396,9 +403,7 @@ export function DeckSetupDetails(props: DeckSetupDetailsProps): JSX.Element {
               slotBoundingBox={addressableArea.boundingBox}
               slotId={addressableArea.id}
               // Module slots' ids reference their parent module
-              moduleType={
-                activeDeckSetup.modules[addressableArea.id]?.type ?? null
-              }
+              moduleType={moduleOnSlot?.type ?? null}
               handleDragHover={handleHoverEmptySlot}
               hover={hover}
               setHover={setHover}

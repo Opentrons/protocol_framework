@@ -90,12 +90,12 @@ export const SlotControls = (props: SlotControlsProps): JSX.Element | null => {
     () => ({
       accept: DND_TYPES.LABWARE,
       canDrop: (item: DroppedItem) => {
-        const draggedLabware = item?.labwareOnDeck
+        const draggedDef = item?.labwareOnDeck?.def
         console.assert(
-          draggedLabware,
-          'no labware def of dragged item, expected it on drop'
+          draggedDef,
+          'no labware def of dragged def, expected it on drop'
         )
-        if (moduleType != null && draggedLabware.def != null) {
+        if (moduleType != null && draggedDef != null) {
           // this is a module slot, prevent drop if the dragged labware is not compatible
           const isCustomLabware = getLabwareIsCustom(
             customLabwareDefs,
@@ -103,11 +103,9 @@ export const SlotControls = (props: SlotControlsProps): JSX.Element | null => {
           )
 
           return (
-            getLabwareIsCompatible(draggedLabware.def, moduleType) ||
-            isCustomLabware
+            getLabwareIsCompatible(draggedDef, moduleType) || isCustomLabware
           )
         }
-
         return !hasTrashAndNotD4
       },
       drop: (item: DroppedItem) => {
@@ -128,7 +126,7 @@ export const SlotControls = (props: SlotControlsProps): JSX.Element | null => {
         draggedItem: monitor.getItem() as DroppedItem,
       }),
     }),
-    []
+    [moduleType, hasTrashAndNotD4, customLabwareDefs]
   )
 
   if (
@@ -147,12 +145,12 @@ export const SlotControls = (props: SlotControlsProps): JSX.Element | null => {
       : false
 
   const isSlotBlocked =
-    isOver &&
-    ((moduleType != null &&
+    (isOver &&
+      moduleType != null &&
       draggedDef != null &&
       !getLabwareIsCompatible(draggedDef, moduleType) &&
       !isCustomLabware) ||
-      hasTrashAndNotD4)
+    (isOver && hasTrashAndNotD4)
 
   drag(drop(ref))
 
@@ -197,7 +195,6 @@ export const SlotControls = (props: SlotControlsProps): JSX.Element | null => {
       </Flex>
     </RobotCoordsForeignDiv>
   )
-
   if (isSlotBlocked) {
     body = <BlockedSlot slotPosition={slotPosition} slotId={itemId} />
   } else if (isOver) {
