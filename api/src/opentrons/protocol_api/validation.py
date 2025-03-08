@@ -636,7 +636,7 @@ def ensure_positive_int(value: int) -> int:
     return value
 
 
-def validate_coordinates(value: Any) -> Tuple[float, float, float]:
+def validate_coordinates(value: Sequence[float]) -> Tuple[float, float, float]:
     """Ensure value is a valid sequence of 3 floats and return a tuple of 3 floats."""
     if not hasattr(value, "__len__"):
         raise ValueError(f"Coordinates must be a sequence, got {type(value).__name__}")
