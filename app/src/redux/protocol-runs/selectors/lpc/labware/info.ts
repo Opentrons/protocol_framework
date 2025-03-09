@@ -2,23 +2,15 @@ import { createSelector } from 'reselect'
 
 import { getIsTiprack, getLabwareDisplayName } from '@opentrons/shared-data'
 
-import {
-  getItemLabwareDef,
-  getSelectedLabwareLocationSpecificOffsetDetails,
-  getSelectedLabwareDefFrom,
-} from '../transforms'
+import { getItemLabwareDef, getSelectedLabwareDefFrom } from '../transforms'
 
 import type { Selector } from 'reselect'
-import type {
-  LegacyLabwareOffsetLocation,
-  VectorOffset,
-} from '@opentrons/api-client'
 import type { State } from '/app/redux/types'
-import type { Coordinates, LabwareDefinition2 } from '@opentrons/shared-data'
+import type { LabwareDefinition2 } from '@opentrons/shared-data'
 import type {
   LPCFlowType,
   LPCLabwareInfo,
-  SelectedLabwareInfo,
+  SelectedLabwareWithOffsetInfo,
 } from '/app/redux/protocol-runs'
 
 export const selectAllLabwareInfo = (
@@ -29,9 +21,9 @@ export const selectAllLabwareInfo = (
     labware => labware ?? {}
   )
 
-export const selectSelectedLabwareInfo = (
+export const selectSelectedLabwareWithOffsetInfo = (
   runId: string
-): Selector<State, SelectedLabwareInfo | null> =>
+): Selector<State, SelectedLabwareWithOffsetInfo | null> =>
   createSelector(
     (state: State) =>
       state.protocolRuns[runId]?.lpc?.labwareInfo.selectedLabware,

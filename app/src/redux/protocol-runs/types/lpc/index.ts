@@ -15,6 +15,12 @@ export type LPCStep = keyof typeof LPC_STEP
 
 export type LPCFlowType = 'default' | 'location-specific'
 export type LPCOffsetKind = 'default' | 'location-specific' | 'hardcoded'
+export type HandleLwSubstep =
+  | 'handle-lw/list'
+  | 'handle-lw/details'
+  | 'handle-lw/edit-offset/prepare-labware'
+  | 'handle-lw/edit-offset/check-labware'
+export type LPCSubstep = HandleLwSubstep
 
 export interface StepInfo {
   currentStepIndex: number
@@ -22,6 +28,9 @@ export interface StepInfo {
   all: LPCStep[]
   /* The last step idx in the user's routing history - not necessarily the previous step idx. */
   lastStepIndices: number[] | null
+  /* Certain steps utilize substeps. These substeps shouldn't impact state the same way as steps,
+   * so they are treated differently. */
+  currentSubstep: HandleLwSubstep | null
 }
 
 export interface ExistingOffset {
@@ -29,10 +38,19 @@ export interface ExistingOffset {
   vector: VectorOffset
 }
 
-export interface WorkingOffset {
+interface WorkingBaseOffset {
   initialPosition: VectorOffset | null
   finalPosition: VectorOffset | null
+  confirmedVector: VectorOffset | 'RESET_TO_DEFAULT' | null
 }
+
+export interface WorkingDefaultOffset extends WorkingBaseOffset {
+  confirmedVector: VectorOffset | null
+}
+
+export interface WorkingLocationSpecificOffset extends WorkingBaseOffset {}
+
+export type WorkingOffset = WorkingDefaultOffset | WorkingLocationSpecificOffset
 
 export type OffsetLocationDetails =
   | LPCLabwareOffsetDefaultDetails
@@ -49,7 +67,7 @@ interface LPCLabwareOffsetDetails {
 
 export interface LPCLabwareOffsetDefaultDetails
   extends LPCLabwareOffsetDetails {
-  slotName: null
+  slotName: 'C2' // Always use slot C2 for calculating the default offset.
   kind: 'default'
 }
 
@@ -68,10 +86,12 @@ interface BaseOffsetDetails {
 
 export interface LocationSpecificOffsetDetails extends BaseOffsetDetails {
   locationDetails: LPCLabwareOffsetLocationSpecificDetails
+  workingOffset: WorkingLocationSpecificOffset | null
 }
 
 export interface DefaultOffsetDetails extends BaseOffsetDetails {
   locationDetails: LPCLabwareOffsetDefaultDetails
+  workingOffset: WorkingDefaultOffset | null
 }
 
 export interface LabwareDetails {
@@ -84,10 +104,10 @@ export interface LabwareDetails {
 export interface PositionParams {
   labwareUri: string
   location: OffsetLocationDetails
-  position: VectorOffset | null
+  position: VectorOffset
 }
 
-export interface SelectedLabwareInfo {
+export interface SelectedLabwareWithOffsetInfo {
   uri: LabwareURI
   id: LabwareId
   /* Indicates the type of LPC offset flow the user is performing, a "default" flow, a "location-specific" flow, or no active flow.
@@ -97,7 +117,7 @@ export interface SelectedLabwareInfo {
 }
 
 export interface LPCLabwareInfo {
-  selectedLabware: SelectedLabwareInfo | null
+  selectedLabware: SelectedLabwareWithOffsetInfo | null
   labware: Record<LabwareURI, LabwareDetails>
 }
 

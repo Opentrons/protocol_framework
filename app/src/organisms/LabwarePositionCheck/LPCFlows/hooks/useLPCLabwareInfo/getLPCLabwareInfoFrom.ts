@@ -144,7 +144,7 @@ function getDefaultOffsetDetailsForLabware({
       labwareId: aLabwareId,
       definitionUri: uri,
       kind: 'default',
-      slotName: null,
+      slotName: 'C2',
     },
   }
 }

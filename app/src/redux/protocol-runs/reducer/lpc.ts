@@ -7,16 +7,21 @@ import {
   START_LPC,
   GO_BACK_LAST_STEP,
   SET_SELECTED_LABWARE_URI,
-  CLEAR_SELECTED_LABWARE,
-  APPLY_OFFSET,
+  APPLY_WORKING_OFFSETS,
   LPC_STEPS,
+  PROCEED_HANDLE_LW_SUBSTEP,
+  GO_BACK_HANDLE_LW_SUBSTEP,
+  HANDLE_LW_SUBSTEP,
+  RESET_OFFSET_TO_DEFAULT,
+  CLEAR_WORKING_OFFSETS,
 } from '../constants'
 import { updateOffsetsForURI } from './transforms'
 
 import type {
+  HandleLwSubstep,
   LPCWizardAction,
   LPCWizardState,
-  SelectedLabwareInfo,
+  SelectedLabwareWithOffsetInfo,
 } from '../types'
 
 // TODO(jh, 01-17-25): A lot of this state should live above the LPC slice, in the general protocolRuns slice instead.
@@ -56,12 +61,18 @@ export function LPCReducer(
           }
         }
 
+        const currentStepName = state.steps.all[newStepIdx()]
+
         return {
           ...state,
           steps: {
             ...state.steps,
             currentStepIndex: newStepIdx(),
             lastStepIndices: [...(lastStepIndices ?? []), currentStepIndex],
+            currentSubstep:
+              currentStepName === 'HANDLE_LABWARE'
+                ? HANDLE_LW_SUBSTEP.LIST
+                : null,
           },
         }
       }
@@ -81,11 +92,127 @@ export function LPCReducer(
         }
       }
 
+      case PROCEED_HANDLE_LW_SUBSTEP: {
+        const currentSubstep = state.steps.currentSubstep
+        const selectedLw = state.labwareInfo.selectedLabware
+
+        const getNextSubStep = (): HandleLwSubstep | null => {
+          switch (currentSubstep) {
+            case null:
+              return HANDLE_LW_SUBSTEP.LIST
+            case HANDLE_LW_SUBSTEP.LIST:
+              return HANDLE_LW_SUBSTEP.DETAILS
+            case HANDLE_LW_SUBSTEP.DETAILS:
+              return HANDLE_LW_SUBSTEP.EDIT_OFFSET_PREP_LW
+            case HANDLE_LW_SUBSTEP.EDIT_OFFSET_PREP_LW:
+              return HANDLE_LW_SUBSTEP.EDIT_OFFSET_CHECK_LW
+            case HANDLE_LW_SUBSTEP.EDIT_OFFSET_CHECK_LW:
+              return HANDLE_LW_SUBSTEP.DETAILS
+          }
+        }
+
+        if (getNextSubStep() === HANDLE_LW_SUBSTEP.LIST) {
+          return {
+            ...state,
+            labwareInfo: {
+              ...state.labwareInfo,
+              selectedLabware: null,
+            },
+            steps: { ...state.steps, currentSubstep: getNextSubStep() },
+          }
+        } else if (getNextSubStep() === HANDLE_LW_SUBSTEP.DETAILS) {
+          if (selectedLw == null) {
+            console.error('Cannot proceed substep if labware is not set.')
+            return state
+          } else {
+            return {
+              ...state,
+              labwareInfo: {
+                ...state.labwareInfo,
+                selectedLabware: {
+                  ...selectedLw,
+                  offsetLocationDetails: null,
+                },
+              },
+              steps: { ...state.steps, currentSubstep: getNextSubStep() },
+            }
+          }
+        } else if (
+          getNextSubStep() === HANDLE_LW_SUBSTEP.EDIT_OFFSET_CHECK_LW &&
+          selectedLw?.offsetLocationDetails == null
+        ) {
+          console.error('Cannot proceed substep if details are not set.')
+          return {
+            ...state,
+            steps: { ...state.steps, currentSubstep: getNextSubStep() },
+          }
+        } else {
+          return {
+            ...state,
+            steps: { ...state.steps, currentSubstep: getNextSubStep() },
+          }
+        }
+      }
+
+      case GO_BACK_HANDLE_LW_SUBSTEP: {
+        const currentSubstep = state.steps.currentSubstep
+
+        const getPrevSubStep = (): HandleLwSubstep | null => {
+          switch (currentSubstep) {
+            case null:
+              return HANDLE_LW_SUBSTEP.LIST
+            case HANDLE_LW_SUBSTEP.LIST:
+              return HANDLE_LW_SUBSTEP.LIST
+            case HANDLE_LW_SUBSTEP.DETAILS:
+              return HANDLE_LW_SUBSTEP.LIST
+            case HANDLE_LW_SUBSTEP.EDIT_OFFSET_PREP_LW:
+              return HANDLE_LW_SUBSTEP.DETAILS
+            case HANDLE_LW_SUBSTEP.EDIT_OFFSET_CHECK_LW:
+              return HANDLE_LW_SUBSTEP.EDIT_OFFSET_PREP_LW
+          }
+        }
+
+        if (getPrevSubStep() === HANDLE_LW_SUBSTEP.LIST) {
+          return {
+            ...state,
+            labwareInfo: {
+              ...state.labwareInfo,
+              selectedLabware: null,
+            },
+            steps: { ...state.steps, currentSubstep: getPrevSubStep() },
+          }
+        } else if (getPrevSubStep() === HANDLE_LW_SUBSTEP.DETAILS) {
+          const selectedLw = state.labwareInfo.selectedLabware
+
+          if (selectedLw == null) {
+            console.error('Cannot go back substep if labware is not set.')
+            return state
+          } else {
+            return {
+              ...state,
+              labwareInfo: {
+                ...state.labwareInfo,
+                selectedLabware: {
+                  ...selectedLw,
+                  offsetLocationDetails: null,
+                },
+              },
+              steps: { ...state.steps, currentSubstep: getPrevSubStep() },
+            }
+          }
+        } else {
+          return {
+            ...state,
+            steps: { ...state.steps, currentSubstep: getPrevSubStep() },
+          }
+        }
+      }
+
       case SET_SELECTED_LABWARE_URI: {
         const lwUri = action.payload.labwareUri
         const thisLwInfo = state.labwareInfo.labware[lwUri]
 
-        const selectedLabware: SelectedLabwareInfo = {
+        const selectedLabware: SelectedLabwareWithOffsetInfo = {
           uri: action.payload.labwareUri,
           id: thisLwInfo.id,
           offsetLocationDetails: null,
@@ -104,7 +231,7 @@ export function LPCReducer(
         const lwUri = action.payload.labwareUri
         const thisLwInfo = state.labwareInfo.labware[lwUri]
 
-        const selectedLabware: SelectedLabwareInfo = {
+        const selectedLabware: SelectedLabwareWithOffsetInfo = {
           uri: action.payload.labwareUri,
           id: thisLwInfo.id,
           offsetLocationDetails: action.payload.location,
@@ -119,18 +246,11 @@ export function LPCReducer(
         }
       }
 
-      case CLEAR_SELECTED_LABWARE: {
-        return {
-          ...state,
-          labwareInfo: {
-            ...state.labwareInfo,
-            selectedLabware: null,
-          },
-        }
-      }
-
       case SET_INITIAL_POSITION:
-      case SET_FINAL_POSITION: {
+      case SET_FINAL_POSITION:
+      case CLEAR_WORKING_OFFSETS:
+      case RESET_OFFSET_TO_DEFAULT:
+      case APPLY_WORKING_OFFSETS: {
         const lwUri = action.payload.labwareUri
         const updatedLwDetails = updateOffsetsForURI(state, action)
 
@@ -147,13 +267,6 @@ export function LPCReducer(
             },
           },
         }
-      }
-
-      case APPLY_OFFSET: {
-        // TODO(jh, 01-30-25): Update the existing offset in the store, and clear the
-        //  the working offset state. This will break the legacy LPC "apply all offsets"
-        //  functionality, so this must be implemented simultaneously with the API changes.
-        break
       }
 
       case FINISH_LPC:

@@ -66,14 +66,18 @@ export function AppliedLocationOffsetsContainer(
       <Flex flexDirection={DIRECTION_COLUMN}>
         <OffsetTableHeaders />
         <ListTable>
-          {sortedDetailsBySlot.map(offset => (
-            <LabwareLocationItem
-              key={`${offset.locationDetails.slotName}${offset.locationDetails.moduleId}${offset.locationDetails.adapterId}`}
-              {...props}
-              locationSpecificOffsetDetails={offset}
-              slotCopy={offset.slotCopy}
-            />
-          ))}
+          {sortedDetailsBySlot.map(offset => {
+            const { slotCopy, ...details } = offset
+
+            return (
+              <LabwareLocationItem
+                key={`${offset.locationDetails.slotName}${offset.locationDetails.moduleId}${offset.locationDetails.adapterId}`}
+                {...props}
+                locationSpecificOffsetDetails={details}
+                slotCopy={slotCopy}
+              />
+            )
+          })}
         </ListTable>
       </Flex>
     </Flex>

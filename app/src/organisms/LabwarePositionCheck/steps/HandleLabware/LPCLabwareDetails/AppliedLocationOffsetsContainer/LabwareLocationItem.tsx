@@ -12,10 +12,10 @@ import {
 import { getModuleType } from '@opentrons/shared-data'
 
 import {
-  selectIsMissingDefaultOffsetForLw,
-  selectSelectedLabwareInfo,
-  selectSelectedLwLocationSpecificOffsetInitialPosition,
-  setFinalPosition,
+  proceedEditOffsetSubstep,
+  resetLocationSpecificOffsetToDefault,
+  selectIsDefaultOffsetAbsent,
+  selectMostRecentVectorOffsetForUriAndLocation,
   setSelectedLabware,
 } from '/app/redux/protocol-runs'
 import { OffsetTag } from '/app/organisms/LabwarePositionCheck/steps/HandleLabware/OffsetTag'
@@ -23,10 +23,7 @@ import { MultiDeckLabelTagBtns } from '/app/molecules/MultiDeckLabelTagBtns'
 
 import type { ModuleType } from '@opentrons/shared-data'
 import type { LPCWizardContentProps } from '/app/organisms/LabwarePositionCheck/types'
-import type {
-  LocationSpecificOffsetDetails,
-  SelectedLabwareInfo,
-} from '/app/redux/protocol-runs'
+import type { LocationSpecificOffsetDetails } from '/app/redux/protocol-runs'
 import type { OffsetTagProps } from '/app/organisms/LabwarePositionCheck/steps/HandleLabware/OffsetTag'
 
 interface LabwareLocationItemProps extends LPCWizardContentProps {
@@ -42,65 +39,55 @@ export function LabwareLocationItem({
 }: LabwareLocationItemProps): JSX.Element {
   const { t: lpcTextT } = useTranslation('labware_position_check')
   const { toggleRobotMoving, handleCheckItemsPrepModules } = commandUtils
+  const { locationDetails } = locationSpecificOffsetDetails
+  const { definitionUri } = locationDetails
   const dispatch = useDispatch()
 
-  const selectedLw = useSelector(
-    selectSelectedLabwareInfo(runId)
-  ) as SelectedLabwareInfo
-  const initialPosition = useSelector(
-    selectSelectedLwLocationSpecificOffsetInitialPosition(runId)
-  )
-  const isMissingDefaultOffset = useSelector(
-    selectIsMissingDefaultOffsetForLw(
+  const mostRecentOffset = useSelector(
+    selectMostRecentVectorOffsetForUriAndLocation(
       runId,
-      locationSpecificOffsetDetails.locationDetails.definitionUri
+      definitionUri,
+      locationSpecificOffsetDetails
     )
   )
-
-  // TOME TODO: Make sure the offset tag shows the working offset if it exists. You'll
-  //  probably want edit flows to start at the working offset position, too. This means
-  //  you will want logic to convert the working offset into a VectorOffset. This also applies to
-  //  the default offset!
+  const isMissingDefaultOffset = useSelector(
+    selectIsDefaultOffsetAbsent(runId, definitionUri)
+  )
 
   const handleLaunchEditOffset = (): void => {
     void toggleRobotMoving(true)
       .then(() => {
-        dispatch(
-          setSelectedLabware(
-            runId,
-            selectedLw.uri,
-            locationSpecificOffsetDetails.locationDetails
-          )
-        )
+        dispatch(setSelectedLabware(runId, definitionUri, locationDetails))
       })
       .then(() =>
         handleCheckItemsPrepModules(
-          locationSpecificOffsetDetails.locationDetails,
-          initialPosition
+          locationDetails,
+          mostRecentOffset?.offset ?? null
         )
       )
+      .then(() => {
+        dispatch(proceedEditOffsetSubstep(runId))
+      })
       .finally(() => toggleRobotMoving(false))
   }
 
   const handleResetOffset = (): void => {
     dispatch(
-      setFinalPosition(runId, {
-        location: locationSpecificOffsetDetails.locationDetails,
-        position: null,
-        labwareUri: locationSpecificOffsetDetails.locationDetails.definitionUri,
-      })
+      resetLocationSpecificOffsetToDefault(
+        runId,
+        definitionUri,
+        locationDetails
+      )
     )
   }
 
   const buildOffsetTagProps = (): OffsetTagProps => {
-    if (isMissingDefaultOffset) {
+    if (mostRecentOffset == null) {
       return { kind: 'noOffset' }
-    } else if (locationSpecificOffsetDetails.existingOffset == null) {
+    } else if (mostRecentOffset?.kind === 'default') {
       return { kind: 'default' }
     } else {
-      const { vector } = locationSpecificOffsetDetails.existingOffset
-
-      return { kind: 'vector', ...vector }
+      return { kind: 'vector', ...mostRecentOffset.offset }
     }
   }
 
@@ -108,8 +95,7 @@ export function LabwareLocationItem({
   //  Note that it is the same as the Flex stacker module type.
   const buildDeckInfoLabels = (): JSX.Element[] => {
     const moduleIconType = (): ModuleType | null => {
-      const moduleModel =
-        locationSpecificOffsetDetails.locationDetails.moduleModel
+      const moduleModel = locationDetails.moduleModel
 
       if (moduleModel != null) {
         return getModuleType(moduleModel)
@@ -150,7 +136,7 @@ export function LabwareLocationItem({
           buttonText: lpcTextT('reset_to_default'),
           onClick: handleResetOffset,
           buttonType: 'tertiaryHighLight',
-          disabled: isMissingDefaultOffset,
+          disabled: mostRecentOffset?.kind !== 'location-specific',
         }}
       />
     </Flex>

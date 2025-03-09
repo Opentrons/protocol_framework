@@ -4,7 +4,7 @@ import { LPC_STEP } from '/app/redux/protocol-runs'
 
 import type { Selector } from 'reselect'
 import type { State } from '../../../types'
-import type { LPCStep, StepInfo } from '/app/redux/protocol-runs'
+import type { LPCStep, StepInfo, LPCSubstep } from '/app/redux/protocol-runs'
 
 export const selectCurrentStep = (runId: string): Selector<State, LPCStep> =>
   createSelector(
@@ -12,6 +12,14 @@ export const selectCurrentStep = (runId: string): Selector<State, LPCStep> =>
     (state: State) => state.protocolRuns[runId]?.lpc?.steps.all,
     (currentIdx, allSteps) =>
       allSteps?.[currentIdx ?? 0] ?? LPC_STEP.BEFORE_BEGINNING
+  )
+
+export const selectCurrentSubstep = (
+  runId: string
+): Selector<State, LPCSubstep | null> =>
+  createSelector(
+    (state: State) => state.protocolRuns[runId]?.lpc?.steps.currentSubstep,
+    substep => substep ?? null
   )
 
 export const selectStepInfo = (runId: string): Selector<State, StepInfo> =>
@@ -23,5 +31,6 @@ export const selectStepInfo = (runId: string): Selector<State, StepInfo> =>
         totalStepCount: 0,
         all: [],
         lastStepIndices: null,
+        currentSubstep: null,
       }
   )

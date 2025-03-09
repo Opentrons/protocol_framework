@@ -17,14 +17,31 @@ import {
 import {
   selectAllLabwareInfo,
   setSelectedLabwareUri,
-  selectIsMissingDefaultOffsetForLw,
+  selectIsDefaultOffsetAbsent,
   selectCountLocationSpecificOffsetsForLw,
+  proceedEditOffsetSubstep,
 } from '/app/redux/protocol-runs'
+import { LPCContentContainer } from '/app/organisms/LabwarePositionCheck/LPCContentContainer'
 
 import type { LPCWizardContentProps } from '/app/organisms/LabwarePositionCheck/types'
 import type { LabwareDetails } from '/app/redux/protocol-runs'
 
 export function LPCLabwareList(props: LPCWizardContentProps): JSX.Element {
+  const { t } = useTranslation('labware_position_check')
+
+  return (
+    <LPCContentContainer
+      {...props}
+      header={t('labware_position_check_title')}
+      buttonText={t('exit')}
+      onClickButton={props.commandUtils.headerCommands.handleNavToDetachProbe}
+    >
+      <LPCLabwareListContent {...props} />
+    </LPCContentContainer>
+  )
+}
+
+function LPCLabwareListContent(props: LPCWizardContentProps): JSX.Element {
   const { t } = useTranslation('labware_position_check')
   const labwareInfo = useSelector(selectAllLabwareInfo(props.runId))
 
@@ -48,7 +65,7 @@ function LabwareItem({ uri, info, runId }: LabwareItemProps): JSX.Element {
   const { t } = useTranslation('labware_position_check')
   const dispatch = useDispatch()
   const isMissingDefaultOffset = useSelector(
-    selectIsMissingDefaultOffsetForLw(runId, uri)
+    selectIsDefaultOffsetAbsent(runId, uri)
   )
   const countLocationSpecificOffsets = useSelector(
     selectCountLocationSpecificOffsetsForLw(runId, uri)
@@ -56,6 +73,7 @@ function LabwareItem({ uri, info, runId }: LabwareItemProps): JSX.Element {
 
   const handleOnClick = (): void => {
     dispatch(setSelectedLabwareUri(runId, uri))
+    dispatch(proceedEditOffsetSubstep(runId))
   }
 
   const getOffsetCopy = (): string => {

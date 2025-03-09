@@ -1,4 +1,5 @@
 import type {
+  LPCLabwareOffsetLocationSpecificDetails,
   LPCStep,
   LPCWizardState,
   OffsetLocationDetails,
@@ -44,11 +45,6 @@ export interface SelectedLabwareAction {
   }
 }
 
-export interface ClearSelectedLabwareAction {
-  type: 'CLEAR_SELECTED_LABWARE'
-  payload: { runId: string }
-}
-
 export interface InitialPositionAction {
   type: 'SET_INITIAL_POSITION'
   payload: PositionParams & { runId: string }
@@ -59,9 +55,33 @@ export interface FinalPositionAction {
   payload: PositionParams & { runId: string }
 }
 
-export interface ApplyOffsetAction {
-  type: 'APPLY_OFFSET'
+export interface ClearSelectedLabwareWorkingOffsetsAction {
+  type: 'CLEAR_WORKING_OFFSETS'
   payload: { runId: string; labwareUri: LabwareURI }
+}
+
+export interface ResetLocationSpecificOffsetToDefaultAction {
+  type: 'RESET_OFFSET_TO_DEFAULT'
+  payload: {
+    runId: string
+    labwareUri: LabwareURI
+    location: LPCLabwareOffsetLocationSpecificDetails
+  }
+}
+
+export interface ApplyWorkingOffsetsAction {
+  type: 'APPLY_WORKING_OFFSETS'
+  payload: { runId: string; labwareUri: LabwareURI }
+}
+
+export interface ProceedHandleLwSubstepAction {
+  type: 'PROCEED_HANDLE_LW_SUBSTEP'
+  payload: { runId: string }
+}
+
+export interface GoBackHandleLwSubstepAction {
+  type: 'GO_BACK_HANDLE_LW_SUBSTEP'
+  payload: { runId: string }
 }
 
 export type LPCWizardAction =
@@ -69,9 +89,12 @@ export type LPCWizardAction =
   | FinishLPCAction
   | SelectedLabwareNameAction
   | SelectedLabwareAction
-  | ClearSelectedLabwareAction
   | InitialPositionAction
   | FinalPositionAction
-  | ApplyOffsetAction
+  | ClearSelectedLabwareWorkingOffsetsAction
+  | ResetLocationSpecificOffsetToDefaultAction
+  | ApplyWorkingOffsetsAction
   | ProceedStepAction
   | GoBackStepAction
+  | ProceedHandleLwSubstepAction
+  | GoBackHandleLwSubstepAction

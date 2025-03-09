@@ -1,6 +1,6 @@
 import NiceModal, { useModal } from '@ebay/nice-modal-react'
 import { useTranslation } from 'react-i18next'
-import { useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 
 import {
   COLORS,
@@ -12,7 +12,11 @@ import {
 
 import { SmallButton } from '/app/atoms/buttons'
 import { OddModal } from '/app/molecules/OddModal'
-import { clearSelectedLabware } from '/app/redux/protocol-runs'
+import {
+  clearSelectedLabwareWorkingOffsets,
+  goBackEditOffsetSubstep,
+  selectSelectedLabwareWithOffsetInfo,
+} from '/app/redux/protocol-runs'
 
 import type { OddModalHeaderBaseProps } from '/app/molecules/OddModal/types'
 import type { LPCWizardContentProps } from '/app/organisms/LabwarePositionCheck/types'
@@ -30,6 +34,9 @@ const UnsavedOffsetsModal = NiceModal.create(
     const { runId } = props
     const { t } = useTranslation('labware_position_check')
     const dispatch = useDispatch()
+    const uri =
+      useSelector(selectSelectedLabwareWithOffsetInfo(runId))?.uri ?? ''
+
     const modal = useModal()
 
     const header: OddModalHeaderBaseProps = {
@@ -43,7 +50,8 @@ const UnsavedOffsetsModal = NiceModal.create(
     }
 
     const onConfirm = (): void => {
-      dispatch(clearSelectedLabware(runId))
+      dispatch(clearSelectedLabwareWorkingOffsets(runId, uri))
+      dispatch(goBackEditOffsetSubstep(runId))
       modal.remove()
     }
 

@@ -15,6 +15,7 @@ import type {
   LPCLabwareOffsetDefaultDetails,
   WorkingOffset,
   LPCOffsetKind,
+  DefaultOffsetDetails,
 } from '/app/redux/protocol-runs'
 
 export interface GetLabwareDefsForLPCParams {
@@ -40,22 +41,28 @@ export const getItemLabwareDef = ({
   )
 }
 
-export const getSelectedLabwareLocationSpecificOffsetDetails = (
+export const getSelectedLabwareWithOffsetDetails = (
   runId: string,
   state: State
-): LocationSpecificOffsetDetails | null => {
+): LocationSpecificOffsetDetails | DefaultOffsetDetails | null => {
   const selectedLabware =
     state.protocolRuns[runId]?.lpc?.labwareInfo.selectedLabware
-  const offsetDetails =
+  const lwDetails =
     state.protocolRuns[runId]?.lpc?.labwareInfo.labware[
       selectedLabware?.uri ?? ''
-    ].locationSpecificOffsetDetails
+    ]
 
-  return (
-    offsetDetails?.find(offset =>
-      isEqual(offset.locationDetails, selectedLabware?.offsetLocationDetails)
-    ) ?? null
-  )
+  if (selectedLabware?.offsetLocationDetails?.kind === 'default') {
+    return lwDetails?.defaultOffsetDetails ?? null
+  } else {
+    const offsetDetails = lwDetails?.locationSpecificOffsetDetails
+
+    return (
+      offsetDetails?.find(offset =>
+        isEqual(offset.locationDetails, selectedLabware?.offsetLocationDetails)
+      ) ?? null
+    )
+  }
 }
 
 export const getSelectedLabwareDefFrom = (
@@ -105,7 +112,7 @@ export interface MissingOffsets {
 }
 
 // Derive missing offsets for every labware by checking to see if an "existing offset" value
-// does not exist.
+// does not exist. Note: only offsets persisted on the robot-server are "not missing."
 export const getMissingOffsets = (
   labware: LPCLabwareInfo['labware'] | undefined
 ): MissingOffsets => {

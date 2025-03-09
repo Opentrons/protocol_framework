@@ -1,13 +1,9 @@
 import { createSelector } from 'reselect'
 
-import {
-  getVectorDifference,
-  getVectorSum,
-  IDENTITY_VECTOR,
-} from '@opentrons/shared-data'
+import { getVectorDifference, getVectorSum } from '@opentrons/shared-data'
 
 import {
-  getSelectedLabwareLocationSpecificOffsetDetails,
+  getSelectedLabwareWithOffsetDetails,
   getLocationSpecificOffsetDetailsForAllLabware,
   getMissingOffsets,
   getWorkingOffsetsByUri,
@@ -23,8 +19,15 @@ import type { State } from '/app/redux/types'
 import type {
   DefaultOffsetDetails,
   LocationSpecificOffsetDetails,
+  LPCOffsetKind,
+  WorkingOffset,
 } from '/app/redux/protocol-runs'
 import type { MissingOffsets, WorkingOffsetsByUri } from '../transforms'
+import isEqual from 'lodash/isEqual'
+
+// TOME TODO: I think doing a once-over to see if you can simplify these selectors
+//  at all would be helpful IF YOU HAVE ANY JUST DOING DOT NOTATION ACCESS. Even then,
+//  if it's complex dot notation access, keeping them behind a selector seems fine.
 
 // Get the location specific details for the currently user-selected labware geometry.
 export const selectSelectedLwLocationSpecificOffsetDetails = (
@@ -60,41 +63,118 @@ export const selectSelectedLwDefaultOffsetDetails = (
       }
     }
   )
-
-export const selectSelectedLwExistingLocationSpecificOffset = (
+// TOME TODO: I think the naming here can be simplified.
+export const selectSelectedLwWithOffsetsWorkingOffsets = (
   runId: string
-): Selector<State, VectorOffset> =>
+): Selector<State, WorkingOffset | null> =>
   createSelector(
-    (state: State) =>
-      getSelectedLabwareLocationSpecificOffsetDetails(runId, state),
-    details => {
-      const existingVector = details?.existingOffset?.vector
-
-      if (existingVector == null) {
-        console.warn('No existing offset vector found for active labware')
-        return IDENTITY_VECTOR
-      } else {
-        return existingVector ?? IDENTITY_VECTOR
-      }
-    }
+    (state: State) => getSelectedLabwareWithOffsetDetails(runId, state),
+    details => details?.workingOffset ?? null
   )
 
-export const selectSelectedLwLocationSpecificOffsetInitialPosition = (
+// TOME TODO: Think through the naming here. This isn't just the selected lw, but
+//  the selected lw with details I think?
+
+// Returns the most recent vector offset for the selected labware with offset details, if any.
+// For location-specific offsets, if no location-specific offset is found, returns
+// the default offset, if any.
+export const selectSelectedLwWithOffsetsMostRecentVectorOffset = (
   runId: string
 ): Selector<State, VectorOffset | null> =>
   createSelector(
-    (state: State) =>
-      getSelectedLabwareLocationSpecificOffsetDetails(runId, state),
-    details => {
-      const workingOffset = details?.workingOffset
+    (state: State) => getSelectedLabwareWithOffsetDetails(runId, state),
+    (state: State) => state.protocolRuns[runId]?.lpc?.labwareInfo,
+    (details, info) => {
+      const kind = details?.locationDetails.kind ?? 'default'
+      const workingVector = details?.workingOffset?.confirmedVector
+      const existingVector = details?.existingOffset?.vector
 
-      if (workingOffset == null) {
-        return null
+      if (workingVector != null && workingVector !== 'RESET_TO_DEFAULT') {
+        return workingVector
+      } else if (
+        existingVector != null &&
+        workingVector !== 'RESET_TO_DEFAULT'
+      ) {
+        return existingVector
       } else {
-        return workingOffset.initialPosition
+        // If the selected offset is the default, return null. If it's location preferred,
+        //  get the default offset if it exists.
+        if (kind === 'default') {
+          return null
+        } else {
+          const selectedLwUri = details?.locationDetails.definitionUri ?? ''
+          const defaultDetails =
+            info?.labware[selectedLwUri].defaultOffsetDetails
+          const workingDefaultVector =
+            defaultDetails?.workingOffset?.confirmedVector
+          const existingDefaultVector = defaultDetails?.existingOffset?.vector
+
+          if (workingDefaultVector != null) {
+            return workingDefaultVector
+          } else if (existingDefaultVector != null) {
+            return existingDefaultVector
+          } else {
+            return null
+          }
+        }
       }
     }
   )
+
+export interface MostRecentVectorOffsetForUriAndLocation {
+  kind: LPCOffsetKind
+  offset: VectorOffset
+}
+
+export const selectMostRecentVectorOffsetForUriAndLocation = (
+  runId: string,
+  uri: string,
+  locationDetails: DefaultOffsetDetails | LocationSpecificOffsetDetails
+): Selector<State, MostRecentVectorOffsetForUriAndLocation | null> =>
+  createSelector(
+    (state: State) => state.protocolRuns[runId]?.lpc?.labwareInfo.labware[uri],
+    details => {
+      const defaultOffset = details?.defaultOffsetDetails
+      const workingDefaultVector = defaultOffset?.workingOffset?.confirmedVector
+      const existingDefaultVector = defaultOffset?.existingOffset?.vector
+      const mostRecentDefaultOffset =
+        workingDefaultVector ?? existingDefaultVector ?? null
+
+      if (locationDetails.locationDetails.kind === 'default') {
+        if (mostRecentDefaultOffset == null) {
+          return null
+        } else {
+          return { kind: 'default', offset: mostRecentDefaultOffset }
+        }
+      } else {
+        const lsOffsets = details?.locationSpecificOffsetDetails ?? []
+        const thisLSOffset = lsOffsets.find(offset =>
+          isEqual(offset, locationDetails)
+        )
+        const workingLSVector = thisLSOffset?.workingOffset?.confirmedVector
+
+        if (workingLSVector === 'RESET_TO_DEFAULT') {
+          if (mostRecentDefaultOffset == null) {
+            return null
+          } else {
+            return { kind: 'default', offset: mostRecentDefaultOffset }
+          }
+        }
+
+        const existingLSVector = thisLSOffset?.existingOffset?.vector
+        const mostRecentLSVector = workingLSVector ?? existingLSVector
+
+        if (mostRecentLSVector != null) {
+          return { kind: 'location-specific', offset: mostRecentLSVector }
+        } else if (mostRecentDefaultOffset != null) {
+          return { kind: 'default', offset: mostRecentDefaultOffset }
+        } else {
+          return null
+        }
+      }
+    }
+  )
+
 // NOTE: This count is analogous to the number of locations a labware geometry is utilized
 // in a run.
 export const selectCountLocationSpecificOffsetsForLw = (
@@ -109,8 +189,10 @@ export const selectCountLocationSpecificOffsetsForLw = (
       locationSpecificDetails != null ? locationSpecificDetails.length : 0
   )
 
-// Whether the default offset is missing for the given labware geometry.
-export const selectIsMissingDefaultOffsetForLw = (
+// Whether the default offset is "absent" for the given labware geometry.
+// The default offset only needs to be added locally to be considered "not absent".
+// TOME TODO: This should share a transform with some other selectors.. This is basically the same as selectSelectedLwWithOffsetsMostRecentVectorOffset
+export const selectIsDefaultOffsetAbsent = (
   runId: string,
   uri: string
 ): Selector<State, boolean> =>
@@ -118,7 +200,9 @@ export const selectIsMissingDefaultOffsetForLw = (
     (state: State) =>
       state.protocolRuns[runId]?.lpc?.labwareInfo.labware[uri]
         .defaultOffsetDetails,
-    details => details?.existingOffset == null
+    details =>
+      details?.existingOffset == null &&
+      details?.workingOffset?.confirmedVector == null
   )
 
 export const selectWorkingOffsetsByUri = (
@@ -129,7 +213,9 @@ export const selectWorkingOffsetsByUri = (
     labware => getWorkingOffsetsByUri(labware)
   )
 
+// TOME TODO: This logic probbably doesnn't work correctly given how default offsets intereact with applied offsets.
 // Returns the offset details for missing offsets, keyed by the labware URI.
+// Note: only offsets persisted on the robot-server are "not missing."
 export const selectMissingOffsets = (
   runId: string
 ): Selector<State, MissingOffsets> =>

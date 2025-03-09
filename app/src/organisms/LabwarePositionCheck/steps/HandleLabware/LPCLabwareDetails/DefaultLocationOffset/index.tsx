@@ -13,13 +13,13 @@ import {
 } from '@opentrons/components'
 
 import {
-  selectIsMissingDefaultOffsetForLw,
-  selectSelectedLabwareInfo,
+  proceedEditOffsetSubstep,
+  selectMostRecentVectorOffsetForUriAndLocation,
   selectSelectedLwDefaultOffsetDetails,
   setSelectedLabware,
 } from '/app/redux/protocol-runs'
 import { OffsetTag } from '/app/organisms/LabwarePositionCheck/steps/HandleLabware/OffsetTag'
-import { ManageOffsetsBtn } from '/app/organisms/LabwarePositionCheck/steps/HandleLabware/LPCLabwareDetails/DefaultLocationOffset/ManageOffsetsBtn'
+import { ManageDefaultOffsetBtn } from './ManageDefaultOffsetBtn'
 
 import type { LPCWizardContentProps } from '/app/organisms/LabwarePositionCheck/types'
 import type { OffsetTagProps } from '/app/organisms/LabwarePositionCheck/steps/HandleLabware/OffsetTag'
@@ -32,13 +32,18 @@ export function DefaultLocationOffset(
   const { toggleRobotMoving, handleCheckItemsPrepModules } = commandUtils
   const { t } = useTranslation('labware_position_check')
   const dispatch = useDispatch()
-  const lwInfo = useSelector(selectSelectedLabwareInfo(runId))
-  const isMissingDefaultOffset = useSelector(
-    selectIsMissingDefaultOffsetForLw(runId, lwInfo?.uri ?? '')
-  )
   const defaultOffsetDetails = useSelector(
     selectSelectedLwDefaultOffsetDetails(runId)
   ) as DefaultOffsetDetails
+  const mostRecentOffset = useSelector(
+    selectMostRecentVectorOffsetForUriAndLocation(
+      runId,
+      defaultOffsetDetails.locationDetails.definitionUri,
+      defaultOffsetDetails
+    )
+  )
+
+  // TOME TODO: Basically confirm everywhere that uses existingOffset and replace it with the selectSelectedLwMostRecentVectorOffset stuff.
 
   const handleLaunchEditOffset = (): void => {
     void toggleRobotMoving(true)
@@ -57,19 +62,17 @@ export function DefaultLocationOffset(
           defaultOffsetDetails.existingOffset?.vector ?? null
         )
       )
+      .then(() => {
+        dispatch(proceedEditOffsetSubstep(runId))
+      })
       .finally(() => toggleRobotMoving(false))
   }
 
   const buildOffsetTagProps = (): OffsetTagProps => {
-    if (
-      isMissingDefaultOffset ||
-      defaultOffsetDetails?.existingOffset == null
-    ) {
+    if (mostRecentOffset == null) {
       return { kind: 'noOffset' }
     } else {
-      const { vector } = defaultOffsetDetails.existingOffset
-
-      return { kind: 'vector', ...vector }
+      return { kind: 'vector', ...mostRecentOffset.offset }
     }
   }
 
@@ -84,8 +87,8 @@ export function DefaultLocationOffset(
             <OffsetTag {...buildOffsetTagProps()} />
           </Flex>
         </Flex>
-        <ManageOffsetsBtn
-          isMissingDefaultOffset={isMissingDefaultOffset}
+        <ManageDefaultOffsetBtn
+          isMissingDefaultOffset={mostRecentOffset == null}
           onClick={handleLaunchEditOffset}
         />
       </Flex>

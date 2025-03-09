@@ -1,18 +1,12 @@
-import { useDispatch, useSelector } from 'react-redux'
-import { useTranslation } from 'react-i18next'
+import { useSelector } from 'react-redux'
 
 import {
-  clearSelectedLabware,
-  selectSelectedLabwareDisplayName,
-  selectSelectedLabwareFlowType,
-  selectSelectedLabwareInfo,
-  selectWorkingOffsetsByUri,
+  HANDLE_LW_SUBSTEP,
+  selectCurrentSubstep,
 } from '/app/redux/protocol-runs'
-import { CheckItem } from './CheckItem'
 import { LPCLabwareList } from './LPCLabwareList'
 import { LPCLabwareDetails } from './LPCLabwareDetails'
-import { LPCContentContainer } from '/app/organisms/LabwarePositionCheck/LPCContentContainer'
-import { handleUnsavedOffsetsModal } from '/app/organisms/LabwarePositionCheck/steps/HandleLabware/UnsavedOffsetsModal'
+import { EditOffset } from '/app/organisms/LabwarePositionCheck/steps/HandleLabware/EditOffset'
 
 import type { LPCWizardContentProps } from '/app/organisms/LabwarePositionCheck/types'
 
@@ -21,74 +15,29 @@ export function HandleLabware(props: LPCWizardContentProps): JSX.Element {
 }
 
 function HandleLabwareContent(props: LPCWizardContentProps): JSX.Element {
-  const { t } = useTranslation('labware_position_check')
-  const { runId } = props
-  const dispatch = useDispatch()
+  const currentSubStep = useSelector(selectCurrentSubstep(props.runId))
 
-  const selectedLw = useSelector(selectSelectedLabwareInfo(runId))
-  const offsetFlowType = useSelector(selectSelectedLabwareFlowType(runId))
-  const selectedLwName = useSelector(selectSelectedLabwareDisplayName(runId))
-  const workingOffsetsByUri = useSelector(selectWorkingOffsetsByUri(runId))
-  const doWorkingOffsetsExit = Object.keys(workingOffsetsByUri).length > 0
-
-  // These routes are one step, since the progress bar remains static during the core LPC flow.
-  if (selectedLw == null) {
+  // These views are one step, since the progress bar remains static during the core LPC flow. Therefore, we use substeps to navigate.
+  switch (currentSubStep) {
     // The general labware list view.
-    return (
-      <LPCContentContainer
-        {...props}
-        header={t('labware_position_check_title')}
-        buttonText={t('exit')}
-        onClickButton={props.commandUtils.headerCommands.handleNavToDetachProbe}
-      >
-        <LPCLabwareList {...props} />
-      </LPCContentContainer>
-    )
-  } else if (selectedLw.offsetLocationDetails == null) {
-    const onHeaderGoBack = (): void => {
-      if (doWorkingOffsetsExit) {
-        void handleUnsavedOffsetsModal(props)
-      } else {
-        dispatch(clearSelectedLabware(runId))
-      }
+    case HANDLE_LW_SUBSTEP.LIST: {
+      return <LPCLabwareList {...props} />
     }
-
-    // TODO(jh, 03-05-25): Add the "save" btn functionality when the API changes are introduced.
 
     // The offset view for a singular labware geometry.
-    return (
-      <LPCContentContainer
-        {...props}
-        header={selectedLwName}
-        buttonText={t('save')}
-        onClickButton={() => null}
-        onClickBack={onHeaderGoBack}
-        buttonIsDisabled={!doWorkingOffsetsExit}
-      >
-        <LPCLabwareDetails {...props} />
-      </LPCContentContainer>
-    )
-  } else {
-    // The core edit flow for updating an offset for a singular labware geometry.
-    const getHeader = (): string => {
-      switch (offsetFlowType) {
-        case 'default':
-        case 'location-specific':
-        default: {
-          console.error(`Unexpected offsetFlowType: ${offsetFlowType}`)
-        }
-      }
+    case HANDLE_LW_SUBSTEP.DETAILS: {
+      return <LPCLabwareDetails {...props} />
     }
 
-    return (
-      <LPCContentContainer
-        {...props}
-        header={t('labware_position_check_title')}
-        buttonText={t('exit')}
-        onClickButton={props.commandUtils.headerCommands.handleNavToDetachProbe}
-      >
-        <CheckItem {...props} />
-      </LPCContentContainer>
-    )
+    // The core edit flow for updating an offset for a singular labware geometry.
+    case HANDLE_LW_SUBSTEP.EDIT_OFFSET_PREP_LW:
+    case HANDLE_LW_SUBSTEP.EDIT_OFFSET_CHECK_LW: {
+      return <EditOffset {...props} />
+    }
+
+    default: {
+      console.error('Unexpected HandleLabware view.')
+      return <LPCLabwareList {...props} />
+    }
   }
 }
