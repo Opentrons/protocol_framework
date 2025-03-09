@@ -12,7 +12,7 @@ export function LPCComplete(props: LPCWizardContentProps): JSX.Element {
       {...props}
       header={t('labware_position_check_title')}
       buttonText={t('exit')}
-      onClickButton={props.commandUtils.headerCommands.handleClose}
+      onClickButton={props.commandUtils.headerCommands.handleCloseAndHome}
     >
       <div>PLACEHOLDER LPC COMPLETE</div>
     </LPCContentContainer>

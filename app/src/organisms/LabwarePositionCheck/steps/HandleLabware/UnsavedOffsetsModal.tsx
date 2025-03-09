@@ -15,7 +15,7 @@ import { OddModal } from '/app/molecules/OddModal'
 import {
   clearSelectedLabwareWorkingOffsets,
   goBackEditOffsetSubstep,
-  selectSelectedLabwareWithOffsetInfo,
+  selectSelectedLwOverview,
 } from '/app/redux/protocol-runs'
 
 import type { OddModalHeaderBaseProps } from '/app/molecules/OddModal/types'
@@ -34,8 +34,7 @@ const UnsavedOffsetsModal = NiceModal.create(
     const { runId } = props
     const { t } = useTranslation('labware_position_check')
     const dispatch = useDispatch()
-    const uri =
-      useSelector(selectSelectedLabwareWithOffsetInfo(runId))?.uri ?? ''
+    const uri = useSelector(selectSelectedLwOverview(runId))?.uri ?? ''
 
     const modal = useModal()
 

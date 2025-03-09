@@ -25,11 +25,7 @@ import type {
 import type { MissingOffsets, WorkingOffsetsByUri } from '../transforms'
 import isEqual from 'lodash/isEqual'
 
-// TOME TODO: I think doing a once-over to see if you can simplify these selectors
-//  at all would be helpful IF YOU HAVE ANY JUST DOING DOT NOTATION ACCESS. Even then,
-//  if it's complex dot notation access, keeping them behind a selector seems fine.
-
-// Get the location specific details for the currently user-selected labware geometry.
+// Get the location specific offset details for the currently user-selected labware geometry.
 export const selectSelectedLwLocationSpecificOffsetDetails = (
   runId: string
 ): Selector<State, LocationSpecificOffsetDetails[]> =>
@@ -47,6 +43,7 @@ export const selectSelectedLwLocationSpecificOffsetDetails = (
     }
   )
 
+// Get the default offset details for the currently user-selected labware geometry.
 export const selectSelectedLwDefaultOffsetDetails = (
   runId: string
 ): Selector<State, DefaultOffsetDetails | null> =>
@@ -63,8 +60,9 @@ export const selectSelectedLwDefaultOffsetDetails = (
       }
     }
   )
-// TOME TODO: I think the naming here can be simplified.
-export const selectSelectedLwWithOffsetsWorkingOffsets = (
+
+// Get the working offsets for the currently user-selected labware geometry with offset details.
+export const selectSelectedLwWithOffsetDetailsWorkingOffsets = (
   runId: string
 ): Selector<State, WorkingOffset | null> =>
   createSelector(
@@ -72,13 +70,10 @@ export const selectSelectedLwWithOffsetsWorkingOffsets = (
     details => details?.workingOffset ?? null
   )
 
-// TOME TODO: Think through the naming here. This isn't just the selected lw, but
-//  the selected lw with details I think?
-
 // Returns the most recent vector offset for the selected labware with offset details, if any.
 // For location-specific offsets, if no location-specific offset is found, returns
 // the default offset, if any.
-export const selectSelectedLwWithOffsetsMostRecentVectorOffset = (
+export const selectSelectedLwWithOffsetDetailsMostRecentVectorOffset = (
   runId: string
 ): Selector<State, VectorOffset | null> =>
   createSelector(
@@ -126,10 +121,10 @@ export interface MostRecentVectorOffsetForUriAndLocation {
   offset: VectorOffset
 }
 
-export const selectMostRecentVectorOffsetForUriAndLocation = (
+export const selectMostRecentVectorOffsetForLwWithOffsetDetails = (
   runId: string,
   uri: string,
-  locationDetails: DefaultOffsetDetails | LocationSpecificOffsetDetails
+  offsetDetails: DefaultOffsetDetails | LocationSpecificOffsetDetails
 ): Selector<State, MostRecentVectorOffsetForUriAndLocation | null> =>
   createSelector(
     (state: State) => state.protocolRuns[runId]?.lpc?.labwareInfo.labware[uri],
@@ -140,7 +135,7 @@ export const selectMostRecentVectorOffsetForUriAndLocation = (
       const mostRecentDefaultOffset =
         workingDefaultVector ?? existingDefaultVector ?? null
 
-      if (locationDetails.locationDetails.kind === 'default') {
+      if (offsetDetails.locationDetails.kind === 'default') {
         if (mostRecentDefaultOffset == null) {
           return null
         } else {
@@ -149,7 +144,7 @@ export const selectMostRecentVectorOffsetForUriAndLocation = (
       } else {
         const lsOffsets = details?.locationSpecificOffsetDetails ?? []
         const thisLSOffset = lsOffsets.find(offset =>
-          isEqual(offset, locationDetails)
+          isEqual(offset, offsetDetails)
         )
         const workingLSVector = thisLSOffset?.workingOffset?.confirmedVector
 
@@ -175,7 +170,7 @@ export const selectMostRecentVectorOffsetForUriAndLocation = (
     }
   )
 
-// NOTE: This count is analogous to the number of locations a labware geometry is utilized
+// NOTE: This count is analogous to the number of unique locations a labware geometry is utilized
 // in a run.
 export const selectCountLocationSpecificOffsetsForLw = (
   runId: string,
@@ -190,7 +185,7 @@ export const selectCountLocationSpecificOffsetsForLw = (
   )
 
 // Whether the default offset is "absent" for the given labware geometry.
-// The default offset only needs to be added locally to be considered "not absent".
+// The default offset only needs to be added client-side to be considered "not absent".
 // TOME TODO: This should share a transform with some other selectors.. This is basically the same as selectSelectedLwWithOffsetsMostRecentVectorOffset
 export const selectIsDefaultOffsetAbsent = (
   runId: string,
@@ -213,7 +208,6 @@ export const selectWorkingOffsetsByUri = (
     labware => getWorkingOffsetsByUri(labware)
   )
 
-// TOME TODO: This logic probbably doesnn't work correctly given how default offsets intereact with applied offsets.
 // Returns the offset details for missing offsets, keyed by the labware URI.
 // Note: only offsets persisted on the robot-server are "not missing."
 export const selectMissingOffsets = (
@@ -230,6 +224,7 @@ export interface SelectOffsetsToApplyResult {
   vector: Coordinates
 }
 
+// TODO(jh 03-07-25): Update alongside the new API integration work.
 export const selectOffsetsToApply = (
   runId: string
 ): Selector<State, SelectOffsetsToApplyResult[]> =>

@@ -9,17 +9,17 @@ import {
   HANDLE_LW_SUBSTEP,
   proceedEditOffsetSubstep,
   selectCurrentSubstep,
-  selectSelectedLabwareFlowType,
-  selectSelectedLwWithOffsetsMostRecentVectorOffset,
+  selectSelectedLwFlowType,
+  selectSelectedLwWithOffsetDetailsMostRecentVectorOffset,
 } from '/app/redux/protocol-runs'
 import { useTranslation } from 'react-i18next'
 
 export function EditOffset(props: LPCWizardContentProps): JSX.Element {
   const { t } = useTranslation('labware_position_check')
   const dispatch = useDispatch()
-  const flowType = useSelector(selectSelectedLabwareFlowType(props.runId))
+  const flowType = useSelector(selectSelectedLwFlowType(props.runId))
   const mostRecentVectorOffset = useSelector(
-    selectSelectedLwWithOffsetsMostRecentVectorOffset(props.runId)
+    selectSelectedLwWithOffsetDetailsMostRecentVectorOffset(props.runId)
   )
 
   const goBackSubstep = (): void => {

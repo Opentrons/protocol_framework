@@ -1,6 +1,6 @@
 import { createSelector } from 'reselect'
 
-import { getIsTiprack, getLabwareDisplayName } from '@opentrons/shared-data'
+import { getIsTiprack } from '@opentrons/shared-data'
 
 import { getItemLabwareDef, getSelectedLabwareDefFrom } from '../transforms'
 
@@ -10,7 +10,7 @@ import type { LabwareDefinition2 } from '@opentrons/shared-data'
 import type {
   LPCFlowType,
   LPCLabwareInfo,
-  SelectedLabwareWithOffsetInfo,
+  SelectedLwOverview,
 } from '/app/redux/protocol-runs'
 
 export const selectAllLabwareInfo = (
@@ -21,16 +21,16 @@ export const selectAllLabwareInfo = (
     labware => labware ?? {}
   )
 
-export const selectSelectedLabwareWithOffsetInfo = (
+export const selectSelectedLwOverview = (
   runId: string
-): Selector<State, SelectedLabwareWithOffsetInfo | null> =>
+): Selector<State, SelectedLwOverview | null> =>
   createSelector(
     (state: State) =>
       state.protocolRuns[runId]?.lpc?.labwareInfo.selectedLabware,
     selectedLabware => selectedLabware ?? null
   )
 
-export const selectSelectedLabwareFlowType = (
+export const selectSelectedLwFlowType = (
   runId: string
 ): Selector<State, LPCFlowType | null> =>
   createSelector(
@@ -49,7 +49,7 @@ export const selectSelectedLabwareFlowType = (
     }
   )
 
-export const selectSelectedLabwareDisplayName = (
+export const selectSelectedLwDisplayName = (
   runId: string
 ): Selector<State, string> =>
   createSelector(
@@ -74,15 +74,7 @@ export const selectIsSelectedLwTipRack = (
     def => (def != null ? getIsTiprack(def) : false)
   )
 
-export const selectSelectedLwDisplayName = (
-  runId: string
-): Selector<State, string> =>
-  createSelector(
-    (state: State) => getSelectedLabwareDefFrom(runId, state),
-    def => (def != null ? getLabwareDisplayName(def) : '')
-  )
-
-export const selectActiveAdapterDisplayName = (
+export const selectSelectedLwRelatedAdapterDisplayName = (
   runId: string
 ): Selector<State, string> =>
   createSelector(
@@ -108,7 +100,7 @@ export const selectActiveAdapterDisplayName = (
     }
   )
 
-export const selectSelectedLabwareDef = (
+export const selectSelectedLwDef = (
   runId: string
 ): Selector<State, LabwareDefinition2 | null> =>
   createSelector(

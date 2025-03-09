@@ -4,14 +4,14 @@ import { useTranslation } from 'react-i18next'
 
 import { DIRECTION_COLUMN, Flex, SPACING } from '@opentrons/components'
 
-import { AppliedLocationOffsetsContainer } from './AppliedLocationOffsetsContainer'
+import { LocationSpecificOffsetsContainer } from './LocationSpecificOffsetsContainer'
 import { DefaultLocationOffset } from './DefaultLocationOffset'
 import {
   applyWorkingOffsets,
   goBackEditOffsetSubstep,
   selectIsDefaultOffsetAbsent,
-  selectSelectedLabwareDisplayName,
-  selectSelectedLabwareWithOffsetInfo,
+  selectSelectedLwDisplayName,
+  selectSelectedLwOverview,
   selectWorkingOffsetsByUri,
 } from '/app/redux/protocol-runs'
 import { InlineNotification } from '/app/atoms/InlineNotification'
@@ -25,10 +25,8 @@ export function LPCLabwareDetails(props: LPCWizardContentProps): JSX.Element {
   const { t } = useTranslation('labware_position_check')
   const dispatch = useDispatch()
 
-  const lwUri =
-    useSelector(selectSelectedLabwareWithOffsetInfo(runId))?.uri ?? ''
-  // TOME TODO: There are multiple select name utils, and I'm pretty sure we can just move this to the offset info, or at least dupe it there.
-  const selectedLwName = useSelector(selectSelectedLabwareDisplayName(runId))
+  const lwUri = useSelector(selectSelectedLwOverview(runId))?.uri ?? ''
+  const selectedLwName = useSelector(selectSelectedLwDisplayName(runId))
   const workingOffsetsByUri = useSelector(selectWorkingOffsetsByUri(runId))
   const doWorkingOffsetsExist = Object.keys(workingOffsetsByUri).length > 0
 
@@ -64,9 +62,7 @@ export function LPCLabwareDetails(props: LPCWizardContentProps): JSX.Element {
 function LPCLabwareDetailsContent(props: LPCWizardContentProps): JSX.Element {
   const { t } = useTranslation('labware_position_check')
 
-  const selectedLwInfo = useSelector(
-    selectSelectedLabwareWithOffsetInfo(props.runId)
-  )
+  const selectedLwInfo = useSelector(selectSelectedLwOverview(props.runId))
   const isMissingDefaultOffset = useSelector(
     selectIsDefaultOffsetAbsent(props.runId, selectedLwInfo?.uri ?? '')
   )
@@ -83,7 +79,7 @@ function LPCLabwareDetailsContent(props: LPCWizardContentProps): JSX.Element {
         />
       )}
       <DefaultLocationOffset {...props} />
-      <AppliedLocationOffsetsContainer {...props} />
+      <LocationSpecificOffsetsContainer {...props} />
       {/* Gives extra scrollable space. */}
       <Flex css={BOX_STYLE} />
     </Flex>

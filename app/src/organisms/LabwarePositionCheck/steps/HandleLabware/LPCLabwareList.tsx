@@ -24,7 +24,7 @@ import {
 import { LPCContentContainer } from '/app/organisms/LabwarePositionCheck/LPCContentContainer'
 
 import type { LPCWizardContentProps } from '/app/organisms/LabwarePositionCheck/types'
-import type { LabwareDetails } from '/app/redux/protocol-runs'
+import type { LwGeometryDetails } from '/app/redux/protocol-runs'
 
 export function LPCLabwareList(props: LPCWizardContentProps): JSX.Element {
   const { t } = useTranslation('labware_position_check')
@@ -58,7 +58,7 @@ function LPCLabwareListContent(props: LPCWizardContentProps): JSX.Element {
 
 interface LabwareItemProps extends LPCWizardContentProps {
   uri: string
-  info: LabwareDetails
+  info: LwGeometryDetails
 }
 
 function LabwareItem({ uri, info, runId }: LabwareItemProps): JSX.Element {

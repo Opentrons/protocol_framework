@@ -28,14 +28,14 @@ import { SmallButton } from '/app/atoms/buttons'
 import { NeedHelpLink } from '/app/molecules/OT2CalibrationNeedHelpLink'
 import { JogControls } from '/app/molecules/JogControls'
 import {
-  selectSelectedLwWithOffsetsMostRecentVectorOffset,
+  selectSelectedLwWithOffsetDetailsMostRecentVectorOffset,
   selectActivePipette,
   selectIsSelectedLwTipRack,
-  selectSelectedLabwareWithOffsetInfo,
+  selectSelectedLwOverview,
   setFinalPosition,
   goBackEditOffsetSubstep,
   proceedEditOffsetSubstep,
-  selectSelectedLwWithOffsetsWorkingOffsets,
+  selectSelectedLwWithOffsetDetailsWorkingOffsets,
 } from '/app/redux/protocol-runs'
 import { getIsOnDevice } from '/app/redux/config'
 import { LPCJogControlsOdd } from '/app/organisms/LabwarePositionCheck/steps/HandleLabware/EditOffset/CheckLabware/LPCJogControlsOdd'
@@ -48,7 +48,7 @@ import type { VectorOffset } from '@opentrons/api-client'
 import type { DisplayLocationParams } from '@opentrons/components'
 import type {
   LPCWizardState,
-  SelectedLabwareWithOffsetInfo,
+  SelectedLwOverview,
   OffsetLocationDetails,
 } from '/app/redux/protocol-runs'
 import type { State } from '/app/redux/types'
@@ -74,15 +74,15 @@ export function CheckLabware(props: EditOffsetContentProps): JSX.Element {
     (state: State) => state.protocolRuns[runId]?.lpc as LPCWizardState
   )
   const workingInitialOffset = useSelector(
-    selectSelectedLwWithOffsetsWorkingOffsets(runId)
+    selectSelectedLwWithOffsetDetailsWorkingOffsets(runId)
   )?.initialPosition as VectorOffset
   const mostRecentVector = useSelector(
-    selectSelectedLwWithOffsetsMostRecentVectorOffset(runId)
+    selectSelectedLwWithOffsetDetailsMostRecentVectorOffset(runId)
   )
   const isLwTiprack = useSelector(selectIsSelectedLwTipRack(runId))
   const selectedLwInfo = useSelector(
-    selectSelectedLabwareWithOffsetInfo(runId)
-  ) as SelectedLabwareWithOffsetInfo
+    selectSelectedLwOverview(runId)
+  ) as SelectedLwOverview
   const offsetLocationDetails = selectedLwInfo.offsetLocationDetails as OffsetLocationDetails
   const pipette = useSelector(selectActivePipette(runId)) as LoadedPipette
 

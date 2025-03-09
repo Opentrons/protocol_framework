@@ -14,7 +14,7 @@ import {
 
 import {
   proceedEditOffsetSubstep,
-  selectMostRecentVectorOffsetForUriAndLocation,
+  selectMostRecentVectorOffsetForLwWithOffsetDetails,
   selectSelectedLwDefaultOffsetDetails,
   setSelectedLabware,
 } from '/app/redux/protocol-runs'
@@ -28,44 +28,29 @@ import type { DefaultOffsetDetails } from '/app/redux/protocol-runs'
 export function DefaultLocationOffset(
   props: LPCWizardContentProps
 ): JSX.Element {
-  const { runId, commandUtils } = props
-  const { toggleRobotMoving, handleCheckItemsPrepModules } = commandUtils
+  const { runId } = props
   const { t } = useTranslation('labware_position_check')
   const dispatch = useDispatch()
   const defaultOffsetDetails = useSelector(
     selectSelectedLwDefaultOffsetDetails(runId)
   ) as DefaultOffsetDetails
   const mostRecentOffset = useSelector(
-    selectMostRecentVectorOffsetForUriAndLocation(
+    selectMostRecentVectorOffsetForLwWithOffsetDetails(
       runId,
       defaultOffsetDetails.locationDetails.definitionUri,
       defaultOffsetDetails
     )
   )
 
-  // TOME TODO: Basically confirm everywhere that uses existingOffset and replace it with the selectSelectedLwMostRecentVectorOffset stuff.
-
   const handleLaunchEditOffset = (): void => {
-    void toggleRobotMoving(true)
-      .then(() => {
-        dispatch(
-          setSelectedLabware(
-            runId,
-            defaultOffsetDetails.locationDetails.definitionUri,
-            defaultOffsetDetails.locationDetails
-          )
-        )
-      })
-      .then(() =>
-        handleCheckItemsPrepModules(
-          defaultOffsetDetails.locationDetails,
-          defaultOffsetDetails.existingOffset?.vector ?? null
-        )
+    dispatch(
+      setSelectedLabware(
+        runId,
+        defaultOffsetDetails.locationDetails.definitionUri,
+        defaultOffsetDetails.locationDetails
       )
-      .then(() => {
-        dispatch(proceedEditOffsetSubstep(runId))
-      })
-      .finally(() => toggleRobotMoving(false))
+    )
+    dispatch(proceedEditOffsetSubstep(runId))
   }
 
   const buildOffsetTagProps = (): OffsetTagProps => {

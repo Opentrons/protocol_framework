@@ -21,7 +21,7 @@ import type {
   HandleLwSubstep,
   LPCWizardAction,
   LPCWizardState,
-  SelectedLabwareWithOffsetInfo,
+  SelectedLwOverview,
 } from '../types'
 
 // TODO(jh, 01-17-25): A lot of this state should live above the LPC slice, in the general protocolRuns slice instead.
@@ -212,7 +212,7 @@ export function LPCReducer(
         const lwUri = action.payload.labwareUri
         const thisLwInfo = state.labwareInfo.labware[lwUri]
 
-        const selectedLabware: SelectedLabwareWithOffsetInfo = {
+        const selectedLabware: SelectedLwOverview = {
           uri: action.payload.labwareUri,
           id: thisLwInfo.id,
           offsetLocationDetails: null,
@@ -231,7 +231,7 @@ export function LPCReducer(
         const lwUri = action.payload.labwareUri
         const thisLwInfo = state.labwareInfo.labware[lwUri]
 
-        const selectedLabware: SelectedLabwareWithOffsetInfo = {
+        const selectedLabware: SelectedLwOverview = {
           uri: action.payload.labwareUri,
           id: thisLwInfo.id,
           offsetLocationDetails: action.payload.location,

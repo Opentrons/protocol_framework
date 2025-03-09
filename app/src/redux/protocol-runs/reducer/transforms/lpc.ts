@@ -4,7 +4,7 @@ import type {
   DefaultOffsetDetails,
   FinalPositionAction,
   InitialPositionAction,
-  LabwareDetails,
+  LwGeometryDetails,
   LocationSpecificOffsetDetails,
   LPCWizardState,
   ResetLocationSpecificOffsetToDefaultAction,
@@ -35,7 +35,7 @@ type UpdateOffsetsAction =
 export function updateOffsetsForURI(
   state: LPCWizardState,
   action: UpdateOffsetsAction
-): LabwareDetails {
+): LwGeometryDetails {
   if (action.type === 'APPLY_WORKING_OFFSETS') {
     const lwDetails = state.labwareInfo.labware[action.payload.labwareUri]
     const updatedLSOffsetDetails = lwDetails.locationSpecificOffsetDetails.map(
@@ -163,7 +163,7 @@ function updateDefaultOffsetDetails(
 // Only update the relevant location-specific offset from the list of all location-specific offsets.
 function updateLocationSpecificOffsetDetails(
   action: PositionAction | ResetPositionAction,
-  lwDetails: LabwareDetails
+  lwDetails: LwGeometryDetails
 ): LocationSpecificOffsetDetails[] {
   const { type, payload } = action
 

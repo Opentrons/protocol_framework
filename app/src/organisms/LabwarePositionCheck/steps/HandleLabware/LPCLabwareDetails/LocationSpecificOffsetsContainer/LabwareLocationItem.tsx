@@ -15,7 +15,7 @@ import {
   proceedEditOffsetSubstep,
   resetLocationSpecificOffsetToDefault,
   selectIsDefaultOffsetAbsent,
-  selectMostRecentVectorOffsetForUriAndLocation,
+  selectMostRecentVectorOffsetForLwWithOffsetDetails,
   setSelectedLabware,
 } from '/app/redux/protocol-runs'
 import { OffsetTag } from '/app/organisms/LabwarePositionCheck/steps/HandleLabware/OffsetTag'
@@ -44,7 +44,7 @@ export function LabwareLocationItem({
   const dispatch = useDispatch()
 
   const mostRecentOffset = useSelector(
-    selectMostRecentVectorOffsetForUriAndLocation(
+    selectMostRecentVectorOffsetForLwWithOffsetDetails(
       runId,
       definitionUri,
       locationSpecificOffsetDetails
@@ -59,12 +59,7 @@ export function LabwareLocationItem({
       .then(() => {
         dispatch(setSelectedLabware(runId, definitionUri, locationDetails))
       })
-      .then(() =>
-        handleCheckItemsPrepModules(
-          locationDetails,
-          mostRecentOffset?.offset ?? null
-        )
-      )
+      .then(() => handleCheckItemsPrepModules(locationDetails))
       .then(() => {
         dispatch(proceedEditOffsetSubstep(runId))
       })

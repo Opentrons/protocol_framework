@@ -30,7 +30,7 @@ import type {
   LPCStep,
   ProceedHandleLwSubstepAction,
   GoBackHandleLwSubstepAction,
-  LPCLabwareOffsetLocationSpecificDetails,
+  LocationSpecificOffsetLocationDetails,
   ResetLocationSpecificOffsetToDefaultAction,
   ClearSelectedLabwareWorkingOffsetsAction,
 } from '../types'
@@ -91,7 +91,7 @@ export const setFinalPosition = (
 export const resetLocationSpecificOffsetToDefault = (
   runId: string,
   labwareUri: string,
-  location: LPCLabwareOffsetLocationSpecificDetails
+  location: LocationSpecificOffsetLocationDetails
 ): ResetLocationSpecificOffsetToDefaultAction => ({
   type: RESET_OFFSET_TO_DEFAULT,
   payload: { runId, labwareUri, location },

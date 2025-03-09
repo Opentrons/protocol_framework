@@ -3,8 +3,8 @@ import { useDispatch, useSelector } from 'react-redux'
 
 import {
   selectActivePipette,
-  selectSelectedLabwareWithOffsetInfo,
-  selectSelectedLwWithOffsetsMostRecentVectorOffset,
+  selectSelectedLwOverview,
+  selectSelectedLwWithOffsetDetailsMostRecentVectorOffset,
   setInitialPosition,
 } from '/app/redux/protocol-runs'
 import { LPCDeck } from './LPCDeck'
@@ -12,7 +12,7 @@ import { LPCDeck } from './LPCDeck'
 import type { LoadedPipette } from '@opentrons/shared-data'
 import type {
   OffsetLocationDetails,
-  SelectedLabwareWithOffsetInfo,
+  SelectedLwOverview,
 } from '/app/redux/protocol-runs'
 import type { EditOffsetContentProps } from '/app/organisms/LabwarePositionCheck/steps/HandleLabware/EditOffset'
 import { PlaceItemInstruction } from './PlaceItemInstruction'
@@ -34,10 +34,10 @@ export function PrepareLabware(props: EditOffsetContentProps): JSX.Element {
   const pipette = useSelector(selectActivePipette(runId)) as LoadedPipette
   const pipetteId = pipette.id
   const selectedLwInfo = useSelector(
-    selectSelectedLabwareWithOffsetInfo(runId)
-  ) as SelectedLabwareWithOffsetInfo
+    selectSelectedLwOverview(runId)
+  ) as SelectedLwOverview
   const mostRecentVectorOffset = useSelector(
-    selectSelectedLwWithOffsetsMostRecentVectorOffset(runId)
+    selectSelectedLwWithOffsetDetailsMostRecentVectorOffset(runId)
   )
   const offsetLocationDetails = selectedLwInfo.offsetLocationDetails as OffsetLocationDetails
 

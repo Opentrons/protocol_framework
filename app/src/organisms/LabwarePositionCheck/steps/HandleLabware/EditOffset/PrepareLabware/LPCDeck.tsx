@@ -14,8 +14,8 @@ import {
 } from '@opentrons/shared-data'
 
 import {
-  selectSelectedLabwareDef,
-  selectSelectedLabwareWithOffsetInfo,
+  selectSelectedLwDef,
+  selectSelectedLwOverview,
 } from '/app/redux/protocol-runs'
 
 import type { LabwareDefinition2 } from '@opentrons/shared-data'
@@ -25,10 +25,8 @@ import type { State } from '/app/redux/types'
 import type {
   LPCWizardState,
   OffsetLocationDetails,
-  SelectedLabwareWithOffsetInfo,
+  SelectedLwOverview,
 } from '/app/redux/protocol-runs'
-
-// TOME TODO: Grep for applied and replace with location specific!
 
 /** On the LPC deck, the only visible labware should be the labware with an actively edited offset.
  * Modules are always visible if they are not in the actively utilized deck slot.
@@ -41,10 +39,10 @@ export function LPCDeck({ runId }: EditOffsetContentProps): JSX.Element {
     (state: State) => state.protocolRuns[runId]?.lpc as LPCWizardState
   )
   const selectedLwInfo = useSelector(
-    selectSelectedLabwareWithOffsetInfo(runId)
-  ) as SelectedLabwareWithOffsetInfo
+    selectSelectedLwOverview(runId)
+  ) as SelectedLwOverview
   const labwareDef = useSelector(
-    selectSelectedLabwareDef(runId)
+    selectSelectedLwDef(runId)
   ) as LabwareDefinition2
 
   const offsetLocationDetails = selectedLwInfo.offsetLocationDetails as OffsetLocationDetails

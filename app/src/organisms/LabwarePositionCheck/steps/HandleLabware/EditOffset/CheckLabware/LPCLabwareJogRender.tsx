@@ -15,7 +15,7 @@ import {
 import {
   selectActivePipette,
   selectIsSelectedLwTipRack,
-  selectSelectedLabwareDef,
+  selectSelectedLwDef,
 } from '/app/redux/protocol-runs'
 
 import levelProbeWithTip from '/app/assets/images/lpc_level_probe_with_tip.svg'
@@ -32,7 +32,7 @@ export function LPCLabwareJogRender({
   const pipetteName =
     useSelector(selectActivePipette(runId))?.pipetteName ?? 'p1000_single'
   const itemLwDef = useSelector(
-    selectSelectedLabwareDef(runId)
+    selectSelectedLwDef(runId)
   ) as LabwareDefinition2
   const isLwTiprack = useSelector(selectIsSelectedLwTipRack(runId))
 

@@ -8,11 +8,11 @@ import type {
 } from '@opentrons/shared-data'
 import type { State } from '/app/redux/types'
 import type {
-  LabwareDetails,
+  LwGeometryDetails,
   LocationSpecificOffsetDetails,
   LPCLabwareInfo,
-  LPCLabwareOffsetLocationSpecificDetails,
-  LPCLabwareOffsetDefaultDetails,
+  LocationSpecificOffsetLocationDetails,
+  DefaultOffsetLocationDetails,
   WorkingOffset,
   LPCOffsetKind,
   DefaultOffsetDetails,
@@ -93,17 +93,17 @@ export const getLocationSpecificOffsetDetailsForAllLabware = (
   const labware = state?.protocolRuns[runId]?.lpc?.labwareInfo.labware ?? {}
 
   return Object(labware).values(
-    (details: LabwareDetails) => details.locationSpecificOffsetDetails
+    (details: LwGeometryDetails) => details.locationSpecificOffsetDetails
   )
 }
 
 type LabwareURI = string
 
 export interface MisingDefaultOffsets {
-  [uri: LabwareURI]: LPCLabwareOffsetDefaultDetails
+  [uri: LabwareURI]: DefaultOffsetLocationDetails
 }
 export interface MissingLocationSpecificOffsets {
-  [uri: LabwareURI]: LPCLabwareOffsetLocationSpecificDetails[]
+  [uri: LabwareURI]: LocationSpecificOffsetLocationDetails[]
 }
 
 export interface MissingOffsets {

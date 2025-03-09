@@ -1,12 +1,16 @@
 import type {
-  LPCLabwareOffsetLocationSpecificDetails,
+  LocationSpecificOffsetLocationDetails,
   LPCStep,
   LPCWizardState,
   OffsetLocationDetails,
-  PositionParams,
 } from '/app/redux/protocol-runs/types/lpc'
+import type { VectorOffset } from '@opentrons/api-client'
 
-type LabwareURI = string
+export interface PositionParams {
+  labwareUri: string
+  location: OffsetLocationDetails
+  position: VectorOffset
+}
 
 export interface StartLPCAction {
   type: 'START_LPC'
@@ -32,7 +36,7 @@ export interface SelectedLabwareNameAction {
   type: 'SET_SELECTED_LABWARE_URI'
   payload: {
     runId: string
-    labwareUri: LabwareURI
+    labwareUri: string
   }
 }
 
@@ -40,7 +44,7 @@ export interface SelectedLabwareAction {
   type: 'SET_SELECTED_LABWARE'
   payload: {
     runId: string
-    labwareUri: LabwareURI
+    labwareUri: string
     location: OffsetLocationDetails | null
   }
 }
@@ -57,21 +61,21 @@ export interface FinalPositionAction {
 
 export interface ClearSelectedLabwareWorkingOffsetsAction {
   type: 'CLEAR_WORKING_OFFSETS'
-  payload: { runId: string; labwareUri: LabwareURI }
+  payload: { runId: string; labwareUri: string }
 }
 
 export interface ResetLocationSpecificOffsetToDefaultAction {
   type: 'RESET_OFFSET_TO_DEFAULT'
   payload: {
     runId: string
-    labwareUri: LabwareURI
-    location: LPCLabwareOffsetLocationSpecificDetails
+    labwareUri: string
+    location: LocationSpecificOffsetLocationDetails
   }
 }
 
 export interface ApplyWorkingOffsetsAction {
   type: 'APPLY_WORKING_OFFSETS'
-  payload: { runId: string; labwareUri: LabwareURI }
+  payload: { runId: string; labwareUri: string }
 }
 
 export interface ProceedHandleLwSubstepAction {

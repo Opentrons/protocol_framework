@@ -13,14 +13,14 @@ import {
 import { FLEX_ROBOT_TYPE } from '@opentrons/shared-data'
 
 import { selectSelectedLwLocationSpecificOffsetDetails } from '/app/redux/protocol-runs'
-import { LabwareLocationItem } from '/app/organisms/LabwarePositionCheck/steps/HandleLabware/LPCLabwareDetails/AppliedLocationOffsetsContainer/LabwareLocationItem'
+import { LabwareLocationItem } from './LabwareLocationItem'
+import { OffsetTableHeaders } from './OffsetTableHeaders'
 
 import type { State } from '/app/redux/types'
 import type { LPCWizardContentProps } from '/app/organisms/LabwarePositionCheck/types'
 import type { LPCWizardState } from '/app/redux/protocol-runs'
-import { OffsetTableHeaders } from '/app/organisms/LabwarePositionCheck/steps/HandleLabware/LPCLabwareDetails/AppliedLocationOffsetsContainer/OffsetTableHeaders'
 
-export function AppliedLocationOffsetsContainer(
+export function LocationSpecificOffsetsContainer(
   props: LPCWizardContentProps
 ): JSX.Element {
   const { t } = useTranslation('labware_position_check')
@@ -59,7 +59,7 @@ export function AppliedLocationOffsetsContainer(
   )
 
   return (
-    <Flex css={APPLIED_LOCATION_CONTAINER_STYLE}>
+    <Flex css={LOCATION_SPECIFIC_CONTAINER_STYLE}>
       <StyledText oddStyle="level4HeaderSemiBold">
         {t('applied_location_offsets')}
       </StyledText>
@@ -84,7 +84,7 @@ export function AppliedLocationOffsetsContainer(
   )
 }
 
-const APPLIED_LOCATION_CONTAINER_STYLE = css`
+const LOCATION_SPECIFIC_CONTAINER_STYLE = css`
   flex-direction: ${DIRECTION_COLUMN};
   grid-gap: ${SPACING.spacing24};
 `

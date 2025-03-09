@@ -30,14 +30,11 @@ export function LPCErrorModal(props: LPCWizardContentProps): JSX.Element {
   const { t } = useTranslation(['labware_position_check', 'shared', 'branded'])
   const { errorMessage, headerCommands } = props.commandUtils
 
-  // TOME TODO: Do NOT home in the circumstances that aren't a user friendly exit.
-  //  If flows close OR this error modal is shown, you shouldn't be homing.
-
   return (
     <LPCContentContainer
       {...props}
       header={t('labware_position_check_title')}
-      onClickButton={headerCommands.handleClose}
+      onClickButton={headerCommands.handleCloseWithoutHome}
       buttonText={t('exit')}
     >
       <ModalContainer
@@ -74,7 +71,7 @@ export function LPCErrorModal(props: LPCWizardContentProps): JSX.Element {
         <PrimaryButton
           textTransform={TEXT_TRANSFORM_CAPITALIZE}
           alignSelf={ALIGN_FLEX_END}
-          onClick={headerCommands.handleClose}
+          onClick={headerCommands.handleCloseWithoutHome}
         >
           {t('shared:exit')}
         </PrimaryButton>

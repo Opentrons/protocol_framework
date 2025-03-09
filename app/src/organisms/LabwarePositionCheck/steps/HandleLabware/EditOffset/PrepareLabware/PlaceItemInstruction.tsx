@@ -9,9 +9,9 @@ import {
 import { FLEX_ROBOT_TYPE } from '@opentrons/shared-data'
 
 import {
-  selectActiveAdapterDisplayName,
+  selectSelectedLwRelatedAdapterDisplayName,
   selectIsSelectedLwTipRack,
-  selectSelectedLabwareWithOffsetInfo,
+  selectSelectedLwOverview,
   selectSelectedLwDisplayName,
 } from '/app/redux/protocol-runs'
 import { UnorderedList } from '/app/molecules/UnorderedList'
@@ -20,7 +20,7 @@ import { DescriptionContent } from '/app/molecules/InterventionModal'
 import type { DisplayLocationParams } from '@opentrons/components'
 import type {
   LPCWizardState,
-  SelectedLabwareWithOffsetInfo,
+  SelectedLwOverview,
   OffsetLocationDetails,
 } from '/app/redux/protocol-runs'
 import type { State } from '/app/redux/types'
@@ -38,8 +38,8 @@ export function PlaceItemInstruction(
   )
   const isLwTiprack = useSelector(selectIsSelectedLwTipRack(runId))
   const selectedLwInfo = useSelector(
-    selectSelectedLabwareWithOffsetInfo(runId)
-  ) as SelectedLabwareWithOffsetInfo
+    selectSelectedLwOverview(runId)
+  ) as SelectedLwOverview
   const offsetLocationDetails = selectedLwInfo.offsetLocationDetails as OffsetLocationDetails
 
   const buildHeader = (): string =>
@@ -102,7 +102,7 @@ interface PlaceItemInstructionContentProps extends LPCWizardContentProps {
   isLwTiprack: boolean
   slotOnlyDisplayLocation: string
   fullDisplayLocation: string
-  labwareInfo: SelectedLabwareWithOffsetInfo
+  labwareInfo: SelectedLwOverview
 }
 
 // See LPCDeck for clarification of deck behavior.
@@ -140,7 +140,9 @@ function PlaceItemInstructionContents({
 
   const { adapterId } = labwareInfo.offsetLocationDetails ?? { adapterId: null }
   const labwareDisplayName = useSelector(selectSelectedLwDisplayName(runId))
-  const adapterDisplayName = useSelector(selectActiveAdapterDisplayName(runId))
+  const adapterDisplayName = useSelector(
+    selectSelectedLwRelatedAdapterDisplayName(runId)
+  )
 
   if (isLwTiprack) {
     return (
