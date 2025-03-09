@@ -1,5 +1,5 @@
 import { createSelector } from 'reselect'
-
+import isEqual from 'lodash/isEqual'
 import { getVectorDifference, getVectorSum } from '@opentrons/shared-data'
 
 import {
@@ -8,6 +8,11 @@ import {
   getMissingOffsets,
   getWorkingOffsetsByUri,
 } from '../transforms'
+
+import {
+  getMostRecentVector,
+  getMostRecentDefaultVector,
+} from '/app/redux/protocol-runs/utils'
 
 import type { Selector } from 'reselect'
 import type {
@@ -23,7 +28,6 @@ import type {
   WorkingOffset,
 } from '/app/redux/protocol-runs'
 import type { MissingOffsets, WorkingOffsetsByUri } from '../transforms'
-import isEqual from 'lodash/isEqual'
 
 // Get the location specific offset details for the currently user-selected labware geometry.
 export const selectSelectedLwLocationSpecificOffsetDetails = (
@@ -80,36 +84,31 @@ export const selectSelectedLwWithOffsetDetailsMostRecentVectorOffset = (
     (state: State) => getSelectedLabwareWithOffsetDetails(runId, state),
     (state: State) => state.protocolRuns[runId]?.lpc?.labwareInfo,
     (details, info) => {
-      const kind = details?.locationDetails.kind ?? 'default'
-      const workingVector = details?.workingOffset?.confirmedVector
-      const existingVector = details?.existingOffset?.vector
-
-      if (workingVector != null && workingVector !== 'RESET_TO_DEFAULT') {
-        return workingVector
-      } else if (
-        existingVector != null &&
-        workingVector !== 'RESET_TO_DEFAULT'
-      ) {
-        return existingVector
+      if (details == null) {
+        console.error('Expected to find labware info details but did not.')
+        return null
       } else {
-        // If the selected offset is the default, return null. If it's location preferred,
-        //  get the default offset if it exists.
-        if (kind === 'default') {
-          return null
-        } else {
-          const selectedLwUri = details?.locationDetails.definitionUri ?? ''
-          const defaultDetails =
-            info?.labware[selectedLwUri].defaultOffsetDetails
-          const workingDefaultVector =
-            defaultDetails?.workingOffset?.confirmedVector
-          const existingDefaultVector = defaultDetails?.existingOffset?.vector
+        const kind = details?.locationDetails.kind ?? 'default'
 
-          if (workingDefaultVector != null) {
-            return workingDefaultVector
-          } else if (existingDefaultVector != null) {
-            return existingDefaultVector
-          } else {
+        // First try to get the offset directly from the details
+        const directVector = getMostRecentVector(
+          details.workingOffset,
+          details.existingOffset
+        )
+
+        if (directVector !== null) {
+          return directVector
+        } else {
+          if (kind === 'default') {
             return null
+          } else {
+            // For location-specific offsets with no direct vector, fall back to
+            // the default vector, if any.
+            const selectedLwUri = details?.locationDetails.definitionUri ?? ''
+            const defaultOffsetDetails =
+              info?.labware[selectedLwUri]?.defaultOffsetDetails ?? null
+
+            return getMostRecentDefaultVector(defaultOffsetDetails)
           }
         }
       }
@@ -129,40 +128,57 @@ export const selectMostRecentVectorOffsetForLwWithOffsetDetails = (
   createSelector(
     (state: State) => state.protocolRuns[runId]?.lpc?.labwareInfo.labware[uri],
     details => {
-      const defaultOffset = details?.defaultOffsetDetails
-      const workingDefaultVector = defaultOffset?.workingOffset?.confirmedVector
-      const existingDefaultVector = defaultOffset?.existingOffset?.vector
-      const mostRecentDefaultOffset =
-        workingDefaultVector ?? existingDefaultVector ?? null
-
-      if (offsetDetails.locationDetails.kind === 'default') {
-        if (mostRecentDefaultOffset == null) {
-          return null
-        } else {
-          return { kind: 'default', offset: mostRecentDefaultOffset }
-        }
+      if (details == null) {
+        console.error('Expected to find labware info details but did not.')
+        return null
       } else {
-        const lsOffsets = details?.locationSpecificOffsetDetails ?? []
-        const thisLSOffset = lsOffsets.find(offset =>
-          isEqual(offset, offsetDetails)
-        )
-        const workingLSVector = thisLSOffset?.workingOffset?.confirmedVector
+        if (offsetDetails.locationDetails.kind === 'default') {
+          const defaultVector = getMostRecentDefaultVector(
+            details.defaultOffsetDetails
+          )
 
-        if (workingLSVector === 'RESET_TO_DEFAULT') {
-          if (mostRecentDefaultOffset == null) {
-            return null
-          } else {
-            return { kind: 'default', offset: mostRecentDefaultOffset }
+          return defaultVector != null
+            ? { kind: 'default', offset: defaultVector }
+            : null
+        } else if (offsetDetails.locationDetails.kind === 'location-specific') {
+          const lsOffsets = details.locationSpecificOffsetDetails ?? []
+          const thisLSOffset = lsOffsets.find(offset =>
+            isEqual(offset, offsetDetails)
+          )
+
+          // Handle the "reset to default" special case.
+          if (
+            thisLSOffset?.workingOffset?.confirmedVector === 'RESET_TO_DEFAULT'
+          ) {
+            const defaultVector = getMostRecentDefaultVector(
+              details.defaultOffsetDetails
+            )
+
+            return defaultVector
+              ? { kind: 'default', offset: defaultVector }
+              : null
           }
-        }
 
-        const existingLSVector = thisLSOffset?.existingOffset?.vector
-        const mostRecentLSVector = workingLSVector ?? existingLSVector
+          // Try to get location-specific vector
+          const lsVector = thisLSOffset
+            ? getMostRecentVector(
+                thisLSOffset.workingOffset,
+                thisLSOffset.existingOffset
+              )
+            : null
 
-        if (mostRecentLSVector != null) {
-          return { kind: 'location-specific', offset: mostRecentLSVector }
-        } else if (mostRecentDefaultOffset != null) {
-          return { kind: 'default', offset: mostRecentDefaultOffset }
+          if (lsVector != null) {
+            return { kind: 'location-specific', offset: lsVector }
+          }
+          // Fall back to default if available
+          else {
+            const defaultVector = getMostRecentDefaultVector(
+              details.defaultOffsetDetails
+            )
+            return defaultVector
+              ? { kind: 'default', offset: defaultVector }
+              : null
+          }
         } else {
           return null
         }
@@ -186,7 +202,6 @@ export const selectCountLocationSpecificOffsetsForLw = (
 
 // Whether the default offset is "absent" for the given labware geometry.
 // The default offset only needs to be added client-side to be considered "not absent".
-// TOME TODO: This should share a transform with some other selectors.. This is basically the same as selectSelectedLwWithOffsetsMostRecentVectorOffset
 export const selectIsDefaultOffsetAbsent = (
   runId: string,
   uri: string

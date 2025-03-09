@@ -1,3 +1,11 @@
+import {
+  createUpdatedWorkingDefaultOffset,
+  createUpdatedWorkingLocationSpecificOffset,
+  findMatchingLocationOffset,
+  findLocationSpecificOffsetWithFallbacks,
+  vectorEqualsDefault,
+} from '../../utils'
+
 import type {
   ApplyWorkingOffsetsAction,
   ClearSelectedLabwareWorkingOffsetsAction,
@@ -8,17 +16,8 @@ import type {
   LocationSpecificOffsetDetails,
   LPCWizardState,
   ResetLocationSpecificOffsetToDefaultAction,
+  LocationSpecificOffsetLocationDetails,
 } from '../../types'
-import isEqual from 'lodash/isEqual'
-import {
-  SET_FINAL_POSITION,
-  SET_INITIAL_POSITION,
-} from '/app/redux/protocol-runs'
-import {
-  getVectorDifference,
-  getVectorSum,
-  IDENTITY_VECTOR,
-} from '@opentrons/shared-data'
 
 type PositionAction = InitialPositionAction | FinalPositionAction
 type ResetPositionAction = ResetLocationSpecificOffsetToDefaultAction
@@ -29,95 +28,127 @@ type UpdateOffsetsAction =
   | ClearSelectedLabwareWorkingOffsetsAction
   | ApplyWorkingOffsetsAction
 
-// TOME TODO: Simplify this.
-
-// Handle vector position updates, only updating the appropriate working offset.
+/**
+ * Handle vector position updates, only updating the appropriate working offset.
+ */
 export function updateOffsetsForURI(
   state: LPCWizardState,
   action: UpdateOffsetsAction
 ): LwGeometryDetails {
   if (action.type === 'APPLY_WORKING_OFFSETS') {
-    const lwDetails = state.labwareInfo.labware[action.payload.labwareUri]
-    const updatedLSOffsetDetails = lwDetails.locationSpecificOffsetDetails.map(
-      offset => {
-        if (offset.workingOffset?.confirmedVector != null) {
-          if (offset.workingOffset.confirmedVector === 'RESET_TO_DEFAULT') {
-            return { ...offset, workingOffset: null, existingOffset: null }
-          } else {
-            return {
-              ...offset,
-              workingOffset: null,
-              existingOffset: {
-                vector: offset.workingOffset.confirmedVector,
-                // TODO(jh, 03-07-25): This is technically wrong, but functionally
-                //  not an issue given how we use/don't use this timestamp currently. Still,
-                //  let's update createdAt to use the server response.
-                createdAt: new Date().getTime().toString(),
-              },
-            }
-          }
-        } else {
-          return offset
-        }
-      }
+    return handleApplyWorkingOffsets(
+      state.labwareInfo.labware[action.payload.labwareUri]
     )
-    const updatedDefaultOffsetDetails: DefaultOffsetDetails =
-      lwDetails.defaultOffsetDetails.workingOffset?.confirmedVector != null
-        ? {
-            ...lwDetails.defaultOffsetDetails,
-            workingOffset: null,
-            existingOffset: {
-              vector:
-                lwDetails.defaultOffsetDetails.workingOffset.confirmedVector,
-              createdAt: new Date().getTime().toString(),
-            },
-          }
-        : { ...lwDetails.defaultOffsetDetails }
-
-    return {
-      ...lwDetails,
-      defaultOffsetDetails: updatedDefaultOffsetDetails,
-      locationSpecificOffsetDetails: updatedLSOffsetDetails,
-    }
   } else if (action.type === 'CLEAR_WORKING_OFFSETS') {
-    const lwDetails = state.labwareInfo.labware[action.payload.labwareUri]
-
-    const updatedLSOffsetDetails = lwDetails.locationSpecificOffsetDetails.map(
-      offset => ({ ...offset, workingOffset: null })
+    return handleClearWorkingOffsets(
+      state.labwareInfo.labware[action.payload.labwareUri]
     )
-
-    return {
-      ...lwDetails,
-      locationSpecificOffsetDetails: updatedLSOffsetDetails,
-      defaultOffsetDetails: {
-        ...lwDetails.defaultOffsetDetails,
-        workingOffset: null,
-      },
-    }
-  } else {
+  }
+  // Handle remaining update offset actions.
+  else {
     const { labwareUri, location } = action.payload
     const lwDetails = state.labwareInfo.labware[labwareUri]
 
-    const updatedOffsets =
-      location.kind === 'default' && action.type !== 'RESET_OFFSET_TO_DEFAULT'
-        ? {
-            defaultOffsetDetails: updateDefaultOffsetDetails(
-              action,
-              lwDetails.defaultOffsetDetails
-            ),
-          }
-        : {
-            locationSpecificOffsetDetails: updateLocationSpecificOffsetDetails(
-              action,
-              lwDetails
-            ),
-          }
-
-    return { ...lwDetails, ...updatedOffsets }
+    // Handle default offsets
+    if (location.kind === 'default') {
+      return {
+        ...lwDetails,
+        defaultOffsetDetails: updateDefaultOffsetDetails(
+          action as PositionAction,
+          lwDetails.defaultOffsetDetails
+        ),
+      }
+    } else {
+      // Handle location-specific offsets
+      return {
+        ...lwDetails,
+        locationSpecificOffsetDetails: updateLocationSpecificOffsetDetails(
+          action,
+          lwDetails
+        ),
+      }
+    }
   }
 }
 
-// Update the default offset.
+/**
+ * Apply any working offsets to make them the new existing offsets.
+ */
+function handleApplyWorkingOffsets(
+  lwDetails: LwGeometryDetails
+): LwGeometryDetails {
+  // Process location-specific offsets
+  const updatedLSOffsetDetails = lwDetails.locationSpecificOffsetDetails.map(
+    offset => {
+      if (offset.workingOffset?.confirmedVector != null) {
+        if (offset.workingOffset.confirmedVector === 'RESET_TO_DEFAULT') {
+          // Delete the location-specific offset.
+          return { ...offset, workingOffset: null, existingOffset: null }
+        }
+        // Apply confirmed vector as new existing offset
+        else {
+          return {
+            ...offset,
+            workingOffset: null,
+            existingOffset: {
+              vector: offset.workingOffset.confirmedVector,
+              // TODO(jh, 03-07-25): Use the server response preferably.
+              createdAt: new Date().getTime().toString(),
+            },
+          }
+        }
+      } else {
+        return offset
+      }
+    }
+  )
+
+  // Process default offset
+  const updatedDefaultOffsetDetails: DefaultOffsetDetails =
+    lwDetails.defaultOffsetDetails.workingOffset?.confirmedVector != null
+      ? {
+          ...lwDetails.defaultOffsetDetails,
+          workingOffset: null,
+          existingOffset: {
+            vector:
+              lwDetails.defaultOffsetDetails.workingOffset.confirmedVector,
+            createdAt: new Date().getTime().toString(),
+          },
+        }
+      : { ...lwDetails.defaultOffsetDetails }
+
+  return {
+    ...lwDetails,
+    defaultOffsetDetails: updatedDefaultOffsetDetails,
+    locationSpecificOffsetDetails: updatedLSOffsetDetails,
+  }
+}
+
+/**
+ * Clear all working offsets.
+ */
+function handleClearWorkingOffsets(
+  lwDetails: LwGeometryDetails
+): LwGeometryDetails {
+  // Clear location-specific working offsets
+  const updatedLSOffsetDetails = lwDetails.locationSpecificOffsetDetails.map(
+    offset => ({ ...offset, workingOffset: null })
+  )
+
+  return {
+    ...lwDetails,
+    locationSpecificOffsetDetails: updatedLSOffsetDetails,
+    // Clear default working offset
+    defaultOffsetDetails: {
+      ...lwDetails.defaultOffsetDetails,
+      workingOffset: null,
+    },
+  }
+}
+
+/**
+ * Update the default offset based on position changes.
+ */
 function updateDefaultOffsetDetails(
   action: PositionAction,
   defaultOffsetDetails: DefaultOffsetDetails
@@ -125,42 +156,21 @@ function updateDefaultOffsetDetails(
   const { type, payload } = action
   const { position } = payload
 
-  if (defaultOffsetDetails.workingOffset == null) {
-    const newWorkingDetail = {
-      initialPosition: type === SET_INITIAL_POSITION ? position : null,
-      finalPosition: type === SET_FINAL_POSITION ? position : null,
-      confirmedVector: null,
-    }
+  const existingVector = defaultOffsetDetails.existingOffset?.vector ?? null
 
-    return { ...defaultOffsetDetails, workingOffset: newWorkingDetail }
-  } else {
-    const newWorkingDetail =
-      type === SET_INITIAL_POSITION
-        ? {
-            ...defaultOffsetDetails.workingOffset,
-            initialPosition: position,
-            finalPosition: null,
-          }
-        : {
-            ...defaultOffsetDetails.workingOffset,
-            finalPosition: position,
-            confirmedVector: getVectorSum(
-              defaultOffsetDetails.existingOffset?.vector ??
-                defaultOffsetDetails?.workingOffset?.confirmedVector ??
-                IDENTITY_VECTOR,
-              getVectorDifference(
-                position ?? IDENTITY_VECTOR,
-                defaultOffsetDetails.workingOffset.initialPosition ??
-                  IDENTITY_VECTOR
-              )
-            ),
-          }
+  const newWorkingDetail = createUpdatedWorkingDefaultOffset(
+    type,
+    position,
+    defaultOffsetDetails.workingOffset,
+    existingVector
+  )
 
-    return { ...defaultOffsetDetails, workingOffset: newWorkingDetail }
-  }
+  return { ...defaultOffsetDetails, workingOffset: newWorkingDetail }
 }
 
-// Only update the relevant location-specific offset from the list of all location-specific offsets.
+/**
+ * Update location-specific offsets.
+ */
 function updateLocationSpecificOffsetDetails(
   action: PositionAction | ResetPositionAction,
   lwDetails: LwGeometryDetails
@@ -168,116 +178,67 @@ function updateLocationSpecificOffsetDetails(
   const { type, payload } = action
 
   if (type === 'RESET_OFFSET_TO_DEFAULT') {
-    const { labwareUri, location } = payload
-
+    return handleResetToDefault(payload.location, lwDetails)
+  }
+  // Handle position update cases.
+  else {
+    const { position, location } = payload
     const locationSpecificOffsetDetails =
       lwDetails.locationSpecificOffsetDetails
-    const relevantDetailsIdx = locationSpecificOffsetDetails.findIndex(detail =>
-      isEqual(location, detail.locationDetails)
-    )
 
-    if (relevantDetailsIdx < 0) {
-      console.warn(`No matching location found for ${labwareUri}`)
+    // Find the matching location.
+    const {
+      index: relevantDetailsIdx,
+      details: relevantDetail,
+    } = findMatchingLocationOffset(locationSpecificOffsetDetails, location)
+
+    if (relevantDetailsIdx < 0 || relevantDetail == null) {
+      console.warn(`No matching location found for ${payload.labwareUri}`)
       return locationSpecificOffsetDetails
     } else {
-      const relevantDetail = locationSpecificOffsetDetails[relevantDetailsIdx]
+      // Create array without the relevant offset
       const newOffsetDetails = [
         ...locationSpecificOffsetDetails.slice(0, relevantDetailsIdx),
         ...locationSpecificOffsetDetails.slice(relevantDetailsIdx + 1),
       ]
 
-      // TOME TODO: Explain this in a comment, but if the exisiting offset is null,
-      //  we can just set the working back to null and avoid sending to the server
-      //  the DELETE network request, which is based on the presence of working offsets.
-
-      const newRelevantDetail: LocationSpecificOffsetDetails = {
-        ...relevantDetail,
-        workingOffset:
-          relevantDetail.existingOffset != null
-            ? {
-                initialPosition:
-                  relevantDetail.workingOffset?.initialPosition ?? null,
-                finalPosition:
-                  relevantDetail.workingOffset?.finalPosition ?? null,
-                confirmedVector: 'RESET_TO_DEFAULT',
-              }
-            : null,
-      }
-
-      return [...newOffsetDetails, newRelevantDetail]
-    }
-  } else {
-    const { labwareUri, position, location } = payload
-    const locationSpecificOffsetDetails =
-      lwDetails.locationSpecificOffsetDetails
-
-    const relevantDetailsIdx = locationSpecificOffsetDetails.findIndex(detail =>
-      isEqual(location, detail.locationDetails)
-    )
-
-    if (relevantDetailsIdx < 0) {
-      console.warn(`No matching location found for ${labwareUri}`)
-      return locationSpecificOffsetDetails
-    } else {
-      const relevantDetail = locationSpecificOffsetDetails[relevantDetailsIdx]
-      const newOffsetDetails = [
-        ...locationSpecificOffsetDetails.slice(0, relevantDetailsIdx),
-        ...locationSpecificOffsetDetails.slice(relevantDetailsIdx + 1),
-      ]
-
+      // Safety check for unexpected reset
       if (
-        relevantDetail.workingOffset?.confirmedVector === 'RESET_TO_DEFAULT'
+        relevantDetail?.workingOffset?.confirmedVector === 'RESET_TO_DEFAULT'
       ) {
         console.error(
           'Unexpected reset to default supplied when vector value expected.'
         )
         return locationSpecificOffsetDetails
-      } else if (relevantDetail.workingOffset == null) {
-        const newWorkingDetail = {
-          initialPosition: type === SET_INITIAL_POSITION ? position : null,
-          finalPosition: type === SET_FINAL_POSITION ? position : null,
-          confirmedVector: null,
-        }
-
-        return [
-          ...newOffsetDetails,
-          { ...relevantDetail, workingOffset: newWorkingDetail },
-        ]
       } else {
-        const newWorkingDetail =
-          type === SET_INITIAL_POSITION
-            ? {
-                ...relevantDetail.workingOffset,
-                initialPosition: position,
-                finalPosition: null,
-              }
-            : {
-                ...relevantDetail.workingOffset,
-                finalPosition: position,
-                confirmedVector: getVectorSum(
-                  relevantDetail.existingOffset?.vector ??
-                    relevantDetail.workingOffset.confirmedVector ??
-                    lwDetails.defaultOffsetDetails.workingOffset
-                      ?.confirmedVector ??
-                    lwDetails.defaultOffsetDetails.existingOffset?.vector ??
-                    IDENTITY_VECTOR,
-                  getVectorDifference(
-                    position ?? IDENTITY_VECTOR,
-                    relevantDetail.workingOffset.initialPosition ??
-                      IDENTITY_VECTOR
-                  )
-                ),
-              }
+        // Get the appropriate existing vector.
+        const mostValidVector = findLocationSpecificOffsetWithFallbacks(
+          relevantDetail,
+          lwDetails.defaultOffsetDetails
+        )
 
-        // TOME TODO: Leave a comment here. If the new vector is the exact same as the default vector
-        // reset it to the default vector instead of updating the server with the same thing.
+        // Create updated working offset
+        const newWorkingDetail = createUpdatedWorkingLocationSpecificOffset(
+          type,
+          position,
+          relevantDetail?.workingOffset ?? null,
+          mostValidVector
+        )
+
+        // Get current default vector for comparison
         const currentDefaultVector =
           lwDetails.defaultOffsetDetails.workingOffset?.confirmedVector ??
           lwDetails.defaultOffsetDetails.existingOffset?.vector ??
           null
 
-        if (isEqual(newWorkingDetail.confirmedVector, currentDefaultVector)) {
-          if (relevantDetail.existingOffset != null) {
+        if (
+          vectorEqualsDefault(
+            newWorkingDetail.confirmedVector,
+            currentDefaultVector
+          )
+        ) {
+          // If we have an existing offset, mark it for reset.
+          if (relevantDetail?.existingOffset != null) {
             return [
               ...newOffsetDetails,
               {
@@ -288,13 +249,17 @@ function updateLocationSpecificOffsetDetails(
                 },
               },
             ]
-          } else {
+          }
+          // If there's no existing offset, just remove the working offset.
+          else {
             return [
               ...newOffsetDetails,
               { ...relevantDetail, workingOffset: null },
             ]
           }
-        } else {
+        }
+        // Use the calculated vector.
+        else {
           return [
             ...newOffsetDetails,
             { ...relevantDetail, workingOffset: newWorkingDetail },
@@ -302,5 +267,50 @@ function updateLocationSpecificOffsetDetails(
         }
       }
     }
+  }
+}
+
+/**
+ * Handle the "reset to default" action for location-specific offsets.
+ */
+function handleResetToDefault(
+  location: LocationSpecificOffsetLocationDetails,
+  lwDetails: LwGeometryDetails
+): LocationSpecificOffsetDetails[] {
+  const locationSpecificOffsetDetails = lwDetails.locationSpecificOffsetDetails
+
+  // Find the relevant offset
+  const {
+    index: relevantDetailsIdx,
+    details: relevantDetail,
+  } = findMatchingLocationOffset(locationSpecificOffsetDetails, location)
+
+  if (relevantDetailsIdx < 0 || relevantDetail == null) {
+    console.warn(`No matching location found for reset operation`)
+    return locationSpecificOffsetDetails
+  } else {
+    // Create array without the relevant offset
+    const newOffsetDetails = [
+      ...locationSpecificOffsetDetails.slice(0, relevantDetailsIdx),
+      ...locationSpecificOffsetDetails.slice(relevantDetailsIdx + 1),
+    ]
+
+    // If the existing offset is null, we can just set the working back to null,
+    // which avoids sending superfluous DELETE requests to the robot-server.
+    const newRelevantDetail: LocationSpecificOffsetDetails = {
+      ...relevantDetail,
+      workingOffset:
+        relevantDetail.existingOffset != null
+          ? {
+              initialPosition:
+                relevantDetail.workingOffset?.initialPosition ?? null,
+              finalPosition:
+                relevantDetail.workingOffset?.finalPosition ?? null,
+              confirmedVector: 'RESET_TO_DEFAULT',
+            }
+          : null,
+    }
+
+    return [...newOffsetDetails, newRelevantDetail]
   }
 }
