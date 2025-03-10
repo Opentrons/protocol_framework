@@ -16,10 +16,10 @@ TEST_AXIS = StackerAxis.Z
 HOME_SPEED = STACKER_MOTION_CONFIG[TEST_AXIS]["home"].max_speed
 HOME_CURRENT = STACKER_MOTION_CONFIG[TEST_AXIS]["home"].current
 
-TEST_SPEEDS = [150, 165] # mm/s
-TEST_CURRENTS = [1.5, 1.0, 0.7, 0.6, 0.5] # A rms
+TEST_SPEEDS = [150, 165]  # mm/s
+TEST_CURRENTS = [1.5, 1.0, 0.7, 0.6, 0.5]  # A rms
 TEST_ACCELERATION = STACKER_MOTION_CONFIG[TEST_AXIS]["move"].acceleration
-CURRENT_THRESHOD = 0.7 # A rms
+CURRENT_THRESHOD = 0.7  # A rms
 TEST_TRIALS = 10
 TEST_DIRECTIONS = [Direction.RETRACT, Direction.EXTEND]
 
@@ -27,10 +27,10 @@ TEST_DIRECTIONS = [Direction.RETRACT, Direction.EXTEND]
 # This number SHOULD be the distance between the bottom and top lsw, currently
 # it seems to be off, correct this for DVT
 AXIS_TRAVEL = 137
-BOTTOM_OFFSET = 10 # Distance to be off of springs above bottom lsw
-TOP_OFFSET = 2 # this should be elimiated once we correct axis travel
-AXIS_TOLERANCE = 1 # Distance tolerance of AXIS_TRAVEL in ONE direction
-MOVEMENT_TOLERANCE = 0.5 # Maximum allowed movement error in ONE direction
+BOTTOM_OFFSET = 10  # Distance to be off of springs above bottom lsw
+TOP_OFFSET = 2  # this should be elimiated once we correct axis travel
+AXIS_TOLERANCE = 1  # Distance tolerance of AXIS_TRAVEL in ONE direction
+MOVEMENT_TOLERANCE = 0.5  # Maximum allowed movement error in ONE direction
 
 
 def build_csv_lines() -> List[Union[CSVLine, CSVLineRepeating]]:
@@ -64,18 +64,24 @@ async def test_extend_cycle(
     try:
         # Move at the testing speed/current to a position just before the limit
         # switch minus the expected tolerance
-        extend_distance = (AXIS_TRAVEL - BOTTOM_OFFSET + TOP_OFFSET - AXIS_TOLERANCE - MOVEMENT_TOLERANCE)
+        extend_distance = (
+            AXIS_TRAVEL
+            - BOTTOM_OFFSET
+            + TOP_OFFSET
+            - AXIS_TOLERANCE
+            - MOVEMENT_TOLERANCE
+        )
         await stacker.move_axis(
             TEST_AXIS,
             Direction.EXTEND,
             extend_distance,
             speed,
             TEST_ACCELERATION,
-            current
+            current,
         )
 
         # Move to the farthest position the limit switch could be
-        check_distance = 2*AXIS_TOLERANCE + 2*MOVEMENT_TOLERANCE
+        check_distance = 2 * AXIS_TOLERANCE + 2 * MOVEMENT_TOLERANCE
         try:
             await stacker.move_axis(
                 TEST_AXIS,
@@ -90,7 +96,9 @@ async def test_extend_cycle(
         # If limit switch is triggered, we did not stall
         if await stacker._driver.get_limit_switch(TEST_AXIS, Direction.EXTEND):
             # The limit switch was triggered within this amount of distance
-            movement_distance = round((AXIS_TRAVEL + TOP_OFFSET + AXIS_TOLERANCE + MOVEMENT_TOLERANCE), 2)
+            movement_distance = round(
+                (AXIS_TRAVEL + TOP_OFFSET + AXIS_TOLERANCE + MOVEMENT_TOLERANCE), 2
+            )
             ui.print_info(
                 f"Z Axis, Extend, PASS, {speed}mm/s, {current}A, {movement_distance}mm"
             )
@@ -121,23 +129,18 @@ async def test_retract_cycle(
             retract_distance,
             speed,
             TEST_ACCELERATION,
-            current
+            current,
         )
 
         # moving at homing speed to a position just before the limit
         # switch minus the expected tolerance
         retract_distance = BOTTOM_OFFSET - AXIS_TOLERANCE - MOVEMENT_TOLERANCE
         await stacker.move_axis(
-            TEST_AXIS,
-            Direction.RETRACT,
-            retract_distance,
-            HOME_SPEED,
-            0,
-            HOME_CURRENT
+            TEST_AXIS, Direction.RETRACT, retract_distance, HOME_SPEED, 0, HOME_CURRENT
         )
 
         # Move to the farthest position the limit switch could be
-        check_distance = 2*AXIS_TOLERANCE + 2*MOVEMENT_TOLERANCE
+        check_distance = 2 * AXIS_TOLERANCE + 2 * MOVEMENT_TOLERANCE
         try:
             await stacker.move_axis(
                 TEST_AXIS,
@@ -152,7 +155,9 @@ async def test_retract_cycle(
         # If limit switch is triggered, we did not stall
         if await stacker._driver.get_limit_switch(TEST_AXIS, Direction.RETRACT):
             # The limit switch was triggered within this amount of distance
-            movement_distance = round((AXIS_TRAVEL + TOP_OFFSET + AXIS_TOLERANCE + MOVEMENT_TOLERANCE), 2)
+            movement_distance = round(
+                (AXIS_TRAVEL + TOP_OFFSET + AXIS_TOLERANCE + MOVEMENT_TOLERANCE), 2
+            )
             ui.print_info(
                 f"Z Axis, Retract, PASS, {speed}mm/s, {current}A, {movement_distance}mm"
             )
