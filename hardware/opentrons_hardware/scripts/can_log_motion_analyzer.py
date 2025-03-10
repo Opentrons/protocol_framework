@@ -44,6 +44,11 @@ class NoRecords(BaseException):
 RecordSlfType = TypeVar("RecordSlfType", bound="Record")
 
 
+def remove_ansi_escape_sequences(text):
+    ansi_escape = re.compile(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')
+    return ansi_escape.sub('', text)
+
+
 @dataclass
 class Record:
     """Base record, instantiated only as an intermediate."""
@@ -254,7 +259,7 @@ RecordTypeVar = TypeVar("RecordTypeVar", bound=Union[Record], covariant=True)
 def _lines(logfile: io.TextIOBase) -> Iterator[str]:
     while True:
         res = logfile.readline()
-        yield res
+        yield remove_ansi_escape_sequences(res)
         if not res:
             return
 
@@ -294,7 +299,7 @@ def _receive_record(payload_line: str, record: Record) -> Union[MoveComplete, Er
 
 def _gobble_to_next_record(lines: Iterator[str]) -> str:
     nextline = ""
-    while "Received <--" not in nextline and "Sending -->" not in nextline:
+    while "<-" not in nextline and "->" not in nextline:
         nextline = next(lines)
     return nextline
 
@@ -306,7 +311,7 @@ def _record(
     if "." in dirline:
         ms_offset = timedelta(seconds=float("0." + dirline.split(".")[1].split(" ")[0]))
         date = (
-            datetime.strptime(dirline.split(".")[0] + "+0000", "%b %d %H:%M:%S%z")
+            datetime.strptime(dirline.split(".")[0] + "+0000", "%Y-%m-%d %H:%M:%S%z")
             + ms_offset
         )
     else:
@@ -324,13 +329,40 @@ def _record(
     raise KeyError(f"Bad direction line: {dirline}")
 
 
-def records(logfile: io.TextIOBase) -> Iterator[Record]:
+def _record_for_duration(
+    lines: Iterator[str],
+) -> Union[MoveCommand, MoveComplete, Error, ExecuteCommand]:
+    dirline = next(lines)
+    if "." in dirline:
+        ms_offset = timedelta(seconds=float("0." + dirline.split(".")[1].split(" ")[0]))
+        date = (
+            datetime.strptime(dirline.split(".")[0] + "+0000", "%Y-%m-%d %H:%M:%S%z")
+            + ms_offset
+        )
+    else:
+        date = datetime.strptime(
+            " ".join(dirline.split(" ")[:3]) + "+0000", "%b %d %H:%M:%S%z"
+        )
+    arbline = next(lines)
+    payline = next(lines)
+    if "Received" in dirline:
+        return _receive_record(payline, record)
+    if "Sending" in dirline:
+        return _send_record(payline, record)
+
+    raise KeyError(f"Bad direction line: {dirline}")
+
+
+def records(logfile: io.TextIOBase, for_duration: bool = False) -> Iterator[Record]:
     """Parse a log into records."""
     lines = _lines(logfile)
     while True:
         try:
             first = _gobble_to_next_record(lines)
-            yield _record(chain((first,), lines))
+            if not for_duration:
+                yield _record(chain((first,), lines))
+            else:
+                yield _record_for_duration(chain((first,), lines))
         except StopIteration:
             return
         except IgnoredMessage:
@@ -468,12 +500,13 @@ def position_log(records: Iterator[MoveComplete]) -> Iterator[PositionLogEntry]:
         )
 
 
-Operation = Literal["print-positions", "print-errors", "plot-positions", "print-motion"]
+Operation = Literal["print-positions", "print-errors", "plot-positions", "print-motion", "print-durations"]
 OPERATIONS: List[Operation] = [
     "print-positions",
     "print-motion",
     "print-errors",
     "plot-positions",
+    "print-durations",
 ]
 
 
@@ -539,8 +572,11 @@ def main(
     annotate_errors: bool,
 ) -> None:
     """Main function."""
-    records_to_check = date_limited(records(logfile), since, until)
-    if operation == "print-positions":
+    for_duration = bool(operation == "print-durations")
+    records_to_check = date_limited(records(logfile, for_duration=for_duration), since, until)
+    if operation == "print-durations":
+        _print_durations(records_for_duration(logfile))
+    elif operation == "print-positions":
         _print_positions(records_to_check, nodes, annotate_errors)
     elif operation == "print-motion":
         _print_motion(records_to_check, nodes, annotate_errors)
