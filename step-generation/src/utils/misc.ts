@@ -20,6 +20,7 @@ import {
   dispense,
   moveToAddressableArea,
   moveToWell,
+  prepareToAspirate,
 } from '../commandCreators/atomic'
 import { blowout } from '../commandCreators/atomic/blowout'
 import { curryCommandCreator } from './curryCommandCreator'
@@ -757,6 +758,9 @@ export const airGapHelper: CommandCreator<AirGapArgs> = (
             },
           },
         }),
+        curryCommandCreator(prepareToAspirate, {
+          pipetteId,
+        }),
         curryCommandCreator(airGapInPlace, {
           pipetteId,
           volume,
@@ -778,6 +782,9 @@ export const airGapHelper: CommandCreator<AirGapArgs> = (
               y: 0,
             },
           },
+        }),
+        curryCommandCreator(prepareToAspirate, {
+          pipetteId,
         }),
         curryCommandCreator(airGapInPlace, {
           pipetteId,

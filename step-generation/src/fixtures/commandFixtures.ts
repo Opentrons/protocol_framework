@@ -163,15 +163,37 @@ export const makeMoveToWellHelper = (
     minimumZHeight,
   },
 })
-export const makeAirGapHelper = (volume: number) => ({
+export const makeAirGapAfterAspirateHelper = (
+  volume: number,
+  flowRate?: number
+) => ({
   commandType: 'airGapInPlace',
   key: expect.any(String),
   params: {
     pipetteId: DEFAULT_PIPETTE,
     volume,
-    flowRate: ASPIRATE_FLOW_RATE,
+    flowRate: flowRate ?? ASPIRATE_FLOW_RATE,
   },
 })
+
+export const makeAirGapHelper = (volume: number, flowRate?: number) => [
+  {
+    commandType: 'prepareToAspirate',
+    key: expect.any(String),
+    params: {
+      pipetteId: DEFAULT_PIPETTE,
+    },
+  },
+  {
+    commandType: 'airGapInPlace',
+    key: expect.any(String),
+    params: {
+      pipetteId: DEFAULT_PIPETTE,
+      volume,
+      flowRate: flowRate ?? ASPIRATE_FLOW_RATE,
+    },
+  },
+]
 export const blowoutHelper = (
   labware: string,
   params?: Partial<BlowoutParams>
