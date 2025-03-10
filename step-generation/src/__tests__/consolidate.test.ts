@@ -2485,6 +2485,27 @@ describe('consolidate single-channel', () => {
             seconds: 11,
           },
         },
+        {
+          commandType: 'moveToAddressableAreaForDropTip',
+          key: expect.any(String),
+          params: {
+            addressableAreaName: 'movableTrashA3',
+            alternateDropLocation: true,
+            offset: {
+              x: 0,
+              y: 0,
+              z: 0,
+            },
+            pipetteId: 'p300SingleId',
+          },
+        },
+        {
+          commandType: 'dropTipInPlace',
+          key: expect.any(String),
+          params: {
+            pipetteId: 'p300SingleId',
+          },
+        },
       ])
     })
 
@@ -3252,6 +3273,27 @@ describe('consolidate single-channel', () => {
           key: expect.any(String),
           params: {
             seconds: 11,
+          },
+        },
+        {
+          commandType: 'moveToAddressableAreaForDropTip',
+          key: expect.any(String),
+          params: {
+            addressableAreaName: 'movableTrashA3',
+            alternateDropLocation: true,
+            offset: {
+              x: 0,
+              y: 0,
+              z: 0,
+            },
+            pipetteId: 'p300SingleId',
+          },
+        },
+        {
+          commandType: 'dropTipInPlace',
+          key: expect.any(String),
+          params: {
+            pipetteId: 'p300SingleId',
           },
         },
       ])
