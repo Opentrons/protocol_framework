@@ -1,9 +1,4 @@
 import {
-  FLEX_ROBOT_TYPE,
-  getDeckDefFromRobotType,
-  OT2_ROBOT_TYPE,
-} from '@opentrons/shared-data'
-import {
   aspirateInPlace,
   blowOutInPlace,
   dispenseInPlace,
@@ -13,7 +8,7 @@ import {
 } from '../commandCreators/atomic'
 import { ZERO_OFFSET } from '../constants'
 import { curryCommandCreator } from './curryCommandCreator'
-import type { AddressableAreaName, CutoutId } from '@opentrons/shared-data'
+import { getTrashBinAddressableAreaName } from './misc'
 import type {
   RobotState,
   InvariantContext,
@@ -31,7 +26,7 @@ interface MovableTrashCommandArgs {
   type: MovableTrashCommandsTypes
   pipetteId: string
   invariantContext: InvariantContext
-  prevRobotState?: RobotState
+  prevRobotState: RobotState
   volume?: number
   flowRate?: number
 }
@@ -48,39 +43,15 @@ export const movableTrashCommandsUtil = (
     flowRate,
   } = args
   const offset = ZERO_OFFSET
-  const trash = Object.values(
-    invariantContext.additionalEquipmentEntities
-  ).find(aE => aE.name === 'trashBin')
-  const trashLocation = trash != null ? (trash.location as CutoutId) : null
-
-  const deckDef = getDeckDefFromRobotType(
-    trashLocation === ('cutout12' as CutoutId)
-      ? OT2_ROBOT_TYPE
-      : FLEX_ROBOT_TYPE
-  )
-  let cutouts: Record<CutoutId, AddressableAreaName[]> | null = null
-  if (deckDef.robot.model === FLEX_ROBOT_TYPE) {
-    cutouts =
-      deckDef.cutoutFixtures.find(
-        cutoutFixture => cutoutFixture.id === 'trashBinAdapter'
-      )?.providesAddressableAreas ?? null
-  } else if (deckDef.robot.model === OT2_ROBOT_TYPE) {
-    cutouts =
-      deckDef.cutoutFixtures.find(
-        cutoutFixture => cutoutFixture.id === 'fixedTrashSlot'
-      )?.providesAddressableAreas ?? null
-  }
 
   let inPlaceCommands: CurriedCommandCreator[] = []
 
-  const addressableAreaName =
-    trashLocation != null && cutouts != null
-      ? cutouts[trashLocation]?.[0] ?? null
-      : null
-
+  const addressableAreaName = getTrashBinAddressableAreaName(
+    invariantContext.additionalEquipmentEntities
+  )
   if (addressableAreaName == null) {
     console.error(
-      `expected to find addressableAreaName with trashLocation ${trashLocation} but could not`
+      'expected to find addressableAreaName for movableTrashCommandsUtil but could not'
     )
   } else {
     switch (type) {
@@ -104,18 +75,17 @@ export const movableTrashCommandsUtil = (
         break
       }
       case 'dropTip': {
-        inPlaceCommands =
-          prevRobotState != null && !prevRobotState.tipState.pipettes[pipetteId]
-            ? []
-            : [
-                curryCommandCreator(moveToAddressableAreaForDropTip, {
-                  pipetteId,
-                  addressableAreaName,
-                }),
-                curryCommandCreator(dropTipInPlace, {
-                  pipetteId,
-                }),
-              ]
+        inPlaceCommands = !prevRobotState.tipState.pipettes[pipetteId]
+          ? []
+          : [
+              curryCommandCreator(moveToAddressableAreaForDropTip, {
+                pipetteId,
+                addressableAreaName,
+              }),
+              curryCommandCreator(dropTipInPlace, {
+                pipetteId,
+              }),
+            ]
 
         break
       }
