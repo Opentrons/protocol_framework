@@ -260,10 +260,7 @@ def test_filter_fields(
             )
         ]
     )
-    assert sorted(
-        results,
-        key=lambda o: o.id,
-    ) == sorted(
+    assert sorted(results, key=lambda o: o.id,) == sorted(
         [
             StoredLabwareOffset(
                 id=offsets[id_].id,
@@ -383,7 +380,8 @@ def test_filter_combinations(subject: LabwareOffsetStore) -> None:
             SearchFilter(id="id-1"),
             SearchFilter(definitionUri="definition-uri-a"),
         ]
-    ) == ["id-1"]
+    )
+    assert [e.id for e in result] == ["id-1"]
 
 
 def test_delete(subject: LabwareOffsetStore) -> None:
