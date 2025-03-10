@@ -3,6 +3,10 @@ import { createSelector } from 'reselect'
 import { getIsTiprack } from '@opentrons/shared-data'
 
 import { getItemLabwareDef, getSelectedLabwareDefFrom } from '../transforms'
+import {
+  OFFSET_KIND_DEFAULT,
+  OFFSET_KIND_LOCATION_SPECIFIC,
+} from '/app/redux/protocol-runs/constants'
 
 import type { Selector } from 'reselect'
 import type { State } from '/app/redux/types'
@@ -40,10 +44,12 @@ export const selectSelectedLwFlowType = (
       if (selectedLabware?.offsetLocationDetails == null) {
         return null
       } else {
-        if (selectedLabware.offsetLocationDetails.kind === 'default') {
-          return 'default'
+        if (
+          selectedLabware.offsetLocationDetails.kind === OFFSET_KIND_DEFAULT
+        ) {
+          return OFFSET_KIND_DEFAULT
         } else {
-          return 'location-specific'
+          return OFFSET_KIND_LOCATION_SPECIFIC
         }
       }
     }

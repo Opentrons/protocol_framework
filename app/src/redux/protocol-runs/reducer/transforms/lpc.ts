@@ -5,6 +5,13 @@ import {
   findLocationSpecificOffsetWithFallbacks,
   vectorEqualsDefault,
 } from '../../utils'
+import {
+  APPLY_WORKING_OFFSETS,
+  CLEAR_WORKING_OFFSETS,
+  OFFSET_KIND_DEFAULT,
+  RESET_OFFSET_TO_DEFAULT,
+  RESET_TO_DEFAULT,
+} from '/app/redux/protocol-runs'
 
 import type {
   ApplyWorkingOffsetsAction,
@@ -35,11 +42,11 @@ export function updateOffsetsForURI(
   state: LPCWizardState,
   action: UpdateOffsetsAction
 ): LwGeometryDetails {
-  if (action.type === 'APPLY_WORKING_OFFSETS') {
+  if (action.type === APPLY_WORKING_OFFSETS) {
     return handleApplyWorkingOffsets(
       state.labwareInfo.labware[action.payload.labwareUri]
     )
-  } else if (action.type === 'CLEAR_WORKING_OFFSETS') {
+  } else if (action.type === CLEAR_WORKING_OFFSETS) {
     return handleClearWorkingOffsets(
       state.labwareInfo.labware[action.payload.labwareUri]
     )
@@ -50,7 +57,7 @@ export function updateOffsetsForURI(
     const lwDetails = state.labwareInfo.labware[labwareUri]
 
     // Handle default offsets
-    if (location.kind === 'default') {
+    if (location.kind === OFFSET_KIND_DEFAULT) {
       return {
         ...lwDetails,
         defaultOffsetDetails: updateDefaultOffsetDetails(
@@ -81,7 +88,7 @@ function handleApplyWorkingOffsets(
   const updatedLSOffsetDetails = lwDetails.locationSpecificOffsetDetails.map(
     offset => {
       if (offset.workingOffset?.confirmedVector != null) {
-        if (offset.workingOffset.confirmedVector === 'RESET_TO_DEFAULT') {
+        if (offset.workingOffset.confirmedVector === RESET_TO_DEFAULT) {
           // Delete the location-specific offset.
           return { ...offset, workingOffset: null, existingOffset: null }
         }
@@ -177,7 +184,7 @@ function updateLocationSpecificOffsetDetails(
 ): LocationSpecificOffsetDetails[] {
   const { type, payload } = action
 
-  if (type === 'RESET_OFFSET_TO_DEFAULT') {
+  if (type === RESET_OFFSET_TO_DEFAULT) {
     return handleResetToDefault(payload.location, lwDetails)
   }
   // Handle position update cases.
@@ -203,9 +210,7 @@ function updateLocationSpecificOffsetDetails(
       ]
 
       // Safety check for unexpected reset
-      if (
-        relevantDetail?.workingOffset?.confirmedVector === 'RESET_TO_DEFAULT'
-      ) {
+      if (relevantDetail?.workingOffset?.confirmedVector === RESET_TO_DEFAULT) {
         console.error(
           'Unexpected reset to default supplied when vector value expected.'
         )
@@ -245,7 +250,7 @@ function updateLocationSpecificOffsetDetails(
                 ...relevantDetail,
                 workingOffset: {
                   ...newWorkingDetail,
-                  confirmedVector: 'RESET_TO_DEFAULT',
+                  confirmedVector: RESET_TO_DEFAULT,
                 },
               },
             ]
@@ -306,7 +311,7 @@ function handleResetToDefault(
                 relevantDetail.workingOffset?.initialPosition ?? null,
               finalPosition:
                 relevantDetail.workingOffset?.finalPosition ?? null,
-              confirmedVector: 'RESET_TO_DEFAULT',
+              confirmedVector: RESET_TO_DEFAULT,
             }
           : null,
     }

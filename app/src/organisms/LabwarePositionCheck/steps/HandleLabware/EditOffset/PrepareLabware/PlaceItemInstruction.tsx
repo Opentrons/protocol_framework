@@ -13,6 +13,7 @@ import {
   selectIsSelectedLwTipRack,
   selectSelectedLwOverview,
   selectSelectedLwDisplayName,
+  OFFSET_KIND_DEFAULT,
 } from '/app/redux/protocol-runs'
 import { UnorderedList } from '/app/molecules/UnorderedList'
 import { DescriptionContent } from '/app/molecules/InterventionModal'
@@ -117,7 +118,7 @@ function ClearDeckCopy({
     moduleModel,
   } = labwareInfo.offsetLocationDetails as OffsetLocationDetails
 
-  return offsetKind === 'default' || moduleModel == null ? (
+  return offsetKind === OFFSET_KIND_DEFAULT || moduleModel == null ? (
     <Trans
       t={t}
       i18nKey="clear_deck_all_lw_all_modules_from"

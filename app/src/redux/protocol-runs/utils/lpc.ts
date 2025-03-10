@@ -6,6 +6,8 @@ import {
   IDENTITY_VECTOR,
 } from '@opentrons/shared-data'
 
+import { RESET_TO_DEFAULT } from '../constants'
+
 import type { VectorOffset } from '@opentrons/api-client'
 import type {
   DefaultOffsetDetails,
@@ -13,80 +15,25 @@ import type {
   WorkingOffset,
   ExistingOffset,
   WorkingDefaultOffset,
-  LPCOffsetKind,
   WorkingLocationSpecificOffset,
   OffsetLocationDetails,
 } from '../types'
 
-/**
- * Returns the most recent vector offset from offset details.
- * Order of precedence: working confirmed vector value > existing vector > null (no vector).
- */
-export function getMostRecentVector(
+// Returns the most recent vector offset from offset details.
+export function getMostRecentVectorFrom(
   workingOffset: WorkingOffset | null,
   existingOffset: ExistingOffset | null
 ): VectorOffset | null {
   if (
     workingOffset?.confirmedVector != null &&
-    workingOffset.confirmedVector !== 'RESET_TO_DEFAULT'
+    workingOffset.confirmedVector !== RESET_TO_DEFAULT
   ) {
     return workingOffset.confirmedVector
   } else if (
     existingOffset?.vector != null &&
-    workingOffset?.confirmedVector !== 'RESET_TO_DEFAULT'
+    workingOffset?.confirmedVector !== RESET_TO_DEFAULT
   ) {
     return existingOffset.vector
-  } else {
-    return null
-  }
-}
-
-/**
- * Returns the most recent vector offset for a default offset location.
- */
-export function getMostRecentDefaultVector(
-  defaultDetails: DefaultOffsetDetails | null
-): VectorOffset | null {
-  if (defaultDetails == null) {
-    return null
-  } else {
-    return getMostRecentVector(
-      defaultDetails.workingOffset,
-      defaultDetails.existingOffset
-    )
-  }
-}
-
-/**
- * Returns the appropriate offset vector based on kind and precedence, see getMostRecentVector.
- * If a location-specific vector is requested but unavailable, falls back to default vector if available.
- */
-export function getMostRecentVectorWithFallback(
-  kind: LPCOffsetKind,
-  lsDetails: LocationSpecificOffsetDetails | null,
-  defaultDetails: DefaultOffsetDetails | null
-): { kind: LPCOffsetKind; offset: VectorOffset } | null {
-  if (kind === 'default') {
-    const defaultVector = getMostRecentDefaultVector(defaultDetails)
-
-    return defaultVector != null
-      ? { kind: 'default', offset: defaultVector }
-      : null
-  } else if (kind === 'location-specific') {
-    const lsVector = getMostRecentVector(
-      lsDetails?.workingOffset ?? null,
-      lsDetails?.existingOffset ?? null
-    )
-
-    if (lsVector != null) {
-      return { kind: 'location-specific', offset: lsVector }
-    } else {
-      const defaultVector = getMostRecentDefaultVector(defaultDetails)
-
-      return defaultVector != null
-        ? { kind: 'default', offset: defaultVector }
-        : null
-    }
   } else {
     return null
   }
@@ -188,11 +135,11 @@ export function createUpdatedWorkingLocationSpecificOffset(
       initialPosition: position,
       finalPosition: null,
     }
-  } else if (currentWorkingOffset.confirmedVector === 'RESET_TO_DEFAULT') {
+  } else if (currentWorkingOffset.confirmedVector === RESET_TO_DEFAULT) {
     return {
       ...currentWorkingOffset,
       finalPosition: null,
-      confirmedVector: 'RESET_TO_DEFAULT',
+      confirmedVector: RESET_TO_DEFAULT,
     }
   }
   // Update final position and calculate confirmed vector.
@@ -218,7 +165,7 @@ export function vectorEqualsDefault(
   vector: VectorOffset | 'RESET_TO_DEFAULT' | null,
   defaultVector: VectorOffset | null
 ): boolean {
-  if (vector === 'RESET_TO_DEFAULT') {
+  if (vector === RESET_TO_DEFAULT) {
     return true
   } else if (vector === null && defaultVector === null) {
     return true
@@ -234,11 +181,11 @@ export function vectorEqualsDefault(
  */
 export function findLocationSpecificOffsetWithFallbacks(
   relevantDetail: LocationSpecificOffsetDetails,
-  defaultOffsetDetails: DefaultOffsetDetails
-): VectorOffset {
+  defaultOffsetDetails: DefaultOffsetDetails | null
+): VectorOffset | null {
   const workingConfirmedVector = relevantDetail.workingOffset?.confirmedVector
 
-  return workingConfirmedVector === 'RESET_TO_DEFAULT'
+  return workingConfirmedVector === RESET_TO_DEFAULT
     ? findDefaultOffsetWithFallbacks(defaultOffsetDetails)
     : workingConfirmedVector ??
         relevantDetail.existingOffset?.vector ??
@@ -246,11 +193,11 @@ export function findLocationSpecificOffsetWithFallbacks(
 }
 
 export function findDefaultOffsetWithFallbacks(
-  defaultOffsetDetails: DefaultOffsetDetails
-): VectorOffset {
+  defaultOffsetDetails: DefaultOffsetDetails | null
+): VectorOffset | null {
   return (
-    defaultOffsetDetails.workingOffset?.confirmedVector ??
-    defaultOffsetDetails.existingOffset?.vector ??
-    IDENTITY_VECTOR // TOME TODO: You may want to return null here insteead. IDK yet.
+    defaultOffsetDetails?.workingOffset?.confirmedVector ??
+    defaultOffsetDetails?.existingOffset?.vector ??
+    null
   )
 }

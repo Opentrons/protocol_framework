@@ -14,6 +14,7 @@ import {
 } from '@opentrons/shared-data'
 
 import {
+  OFFSET_KIND_DEFAULT,
   selectSelectedLwDef,
   selectSelectedLwOverview,
 } from '/app/redux/protocol-runs'
@@ -62,7 +63,7 @@ export function LPCDeck({ runId }: EditOffsetContentProps): JSX.Element {
       }
     })
 
-    if (offsetKind === 'default' || moduleModel == null) {
+    if (offsetKind === OFFSET_KIND_DEFAULT || moduleModel == null) {
       return allModulesOnDeck.filter(
         moduleOnDeck =>
           moduleOnDeck.moduleLocation.slotName !==

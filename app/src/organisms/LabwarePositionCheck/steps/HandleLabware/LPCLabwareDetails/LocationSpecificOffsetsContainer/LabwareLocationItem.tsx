@@ -12,6 +12,8 @@ import {
 import { getModuleType } from '@opentrons/shared-data'
 
 import {
+  OFFSET_KIND_DEFAULT,
+  OFFSET_KIND_LOCATION_SPECIFIC,
   proceedEditOffsetSubstep,
   resetLocationSpecificOffsetToDefault,
   selectIsDefaultOffsetAbsent,
@@ -79,7 +81,7 @@ export function LabwareLocationItem({
   const buildOffsetTagProps = (): OffsetTagProps => {
     if (mostRecentOffset == null) {
       return { kind: 'noOffset' }
-    } else if (mostRecentOffset?.kind === 'default') {
+    } else if (mostRecentOffset?.kind === OFFSET_KIND_DEFAULT) {
       return { kind: 'default' }
     } else {
       return { kind: 'vector', ...mostRecentOffset.offset }
@@ -131,7 +133,7 @@ export function LabwareLocationItem({
           buttonText: lpcTextT('reset_to_default'),
           onClick: handleResetOffset,
           buttonType: 'tertiaryHighLight',
-          disabled: mostRecentOffset?.kind !== 'location-specific',
+          disabled: mostRecentOffset?.kind !== OFFSET_KIND_LOCATION_SPECIFIC,
         }}
       />
     </Flex>

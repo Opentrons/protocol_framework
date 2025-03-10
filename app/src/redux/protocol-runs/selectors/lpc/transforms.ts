@@ -2,6 +2,11 @@ import isEqual from 'lodash/isEqual'
 
 import { getLabwareDefURI } from '@opentrons/shared-data'
 
+import {
+  OFFSET_KIND_DEFAULT,
+  OFFSET_KIND_LOCATION_SPECIFIC,
+} from '/app/redux/protocol-runs/constants'
+
 import type {
   CompletedProtocolAnalysis,
   LabwareDefinition2,
@@ -52,7 +57,7 @@ export const getSelectedLabwareWithOffsetDetails = (
       selectedLabware?.uri ?? ''
     ]
 
-  if (selectedLabware?.offsetLocationDetails?.kind === 'default') {
+  if (selectedLabware?.offsetLocationDetails?.kind === OFFSET_KIND_DEFAULT) {
     return lwDetails?.defaultOffsetDetails ?? null
   } else {
     const offsetDetails = lwDetails?.locationSpecificOffsetDetails
@@ -172,7 +177,7 @@ export function getWorkingOffsetsByUri(
       // Add the default offset if it is a "working" case.
       if (defaultOffset != null) {
         const workingOffsetDetail: WorkingOffsetDetails = {
-          kind: 'default',
+          kind: OFFSET_KIND_DEFAULT,
           offset: defaultOffset,
         }
 
@@ -186,7 +191,7 @@ export function getWorkingOffsetsByUri(
       lwDetails.locationSpecificOffsetDetails.forEach(offsetDetail => {
         if (offsetDetail.workingOffset != null) {
           const workingOffsetDetail: WorkingOffsetDetails = {
-            kind: 'location-specific',
+            kind: OFFSET_KIND_LOCATION_SPECIFIC,
             offset: offsetDetail.workingOffset,
           }
           workingOffsetsByUri[uri] =
