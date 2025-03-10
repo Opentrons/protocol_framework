@@ -1,9 +1,4 @@
 import {
-  FLEX_ROBOT_TYPE,
-  getDeckDefFromRobotType,
-  OT2_ROBOT_TYPE,
-} from '@opentrons/shared-data'
-import {
   aspirateInPlace,
   blowOutInPlace,
   dispenseInPlace,
@@ -13,68 +8,29 @@ import {
 } from '../commandCreators/atomic'
 import { ZERO_OFFSET } from '../constants'
 import { curryCommandCreator } from './curryCommandCreator'
-import type { AddressableAreaName, CutoutId } from '@opentrons/shared-data'
+import { getTrashBinAddressableAreaName } from './misc'
 import type {
   RobotState,
   InvariantContext,
   CurriedCommandCreator,
 } from '../types'
 
-interface MovableTrashCommandArgs {
-  pipetteId: string
-  invariantContext: InvariantContext
-  prevRobotState?: RobotState
-  volume?: number
-  flowRate?: number
-}
-
 /** Helper fn for movable trash commands for dispense, aspirate, air_gap, drop_tip and blow_out commands */
 
-function getAddressableAreaName(
+export function airGapInMovableTrash(args: {
+  pipetteId: string
+  volume: number
+  flowRate: number
   invariantContext: InvariantContext
-): AddressableAreaName | null {
-  const trash = Object.values(
-    invariantContext.additionalEquipmentEntities
-  ).find(aE => aE.name === 'trashBin')
-  const trashLocation = trash != null ? (trash.location as CutoutId) : null
-
-  const deckDef = getDeckDefFromRobotType(
-    trashLocation === ('cutout12' as CutoutId)
-      ? OT2_ROBOT_TYPE
-      : FLEX_ROBOT_TYPE
-  )
-  let cutouts: Record<CutoutId, AddressableAreaName[]> | null = null
-  if (deckDef.robot.model === FLEX_ROBOT_TYPE) {
-    cutouts =
-      deckDef.cutoutFixtures.find(
-        cutoutFixture => cutoutFixture.id === 'trashBinAdapter'
-      )?.providesAddressableAreas ?? null
-  } else if (deckDef.robot.model === OT2_ROBOT_TYPE) {
-    cutouts =
-      deckDef.cutoutFixtures.find(
-        cutoutFixture => cutoutFixture.id === 'fixedTrashSlot'
-      )?.providesAddressableAreas ?? null
-  }
-
-  const addressableAreaName =
-    trashLocation != null && cutouts != null
-      ? cutouts[trashLocation]?.[0] ?? null
-      : null
-  if (addressableAreaName == null) {
-    console.error(
-      `expected to find addressableAreaName with trashLocation ${trashLocation} but could not`
-    )
-  }
-  return addressableAreaName
-}
-
-export function airGapInMovableTrash(
-  args: MovableTrashCommandArgs
-): CurriedCommandCreator[] {
+  prevRobotState: RobotState
+}): CurriedCommandCreator[] {
   const { pipetteId, invariantContext, volume, flowRate } = args
   const offset = ZERO_OFFSET
-  const addressableAreaName = getAddressableAreaName(invariantContext)
-  if (addressableAreaName == null || flowRate == null || volume == null) {
+  const addressableAreaName = getTrashBinAddressableAreaName(
+    invariantContext.additionalEquipmentEntities
+  )
+  if (addressableAreaName == null) {
+    console.error('could not getTrashBinAddressableAreaName for airGap')
     return []
   }
   return [
@@ -91,18 +47,20 @@ export function airGapInMovableTrash(
   ]
 }
 
-export function dropTipInMovableTrash(
-  args: MovableTrashCommandArgs
-): CurriedCommandCreator[] {
+export function dropTipInMovableTrash(args: {
+  pipetteId: string
+  invariantContext: InvariantContext
+  prevRobotState: RobotState
+}): CurriedCommandCreator[] {
   const { pipetteId, invariantContext, prevRobotState } = args
-  const addressableAreaName = getAddressableAreaName(invariantContext)
+  const addressableAreaName = getTrashBinAddressableAreaName(
+    invariantContext.additionalEquipmentEntities
+  )
   if (addressableAreaName == null) {
+    console.error('could not getTrashBinAddressableAreaName for dropTip')
     return []
   }
-  // NOTE: This seems to be a bug in the previous implementation:
-  // If prevRobotState *IS* null, we would generate the commands, which seems wrong.
-  // But there is a test that wants that behavior.
-  if (prevRobotState != null && !prevRobotState.tipState.pipettes[pipetteId]) {
+  if (!prevRobotState.tipState.pipettes[pipetteId]) {
     return []
   }
   return [
@@ -116,13 +74,20 @@ export function dropTipInMovableTrash(
   ]
 }
 
-export function dispenseInMovableTrash(
-  args: MovableTrashCommandArgs
-): CurriedCommandCreator[] {
+export function dispenseInMovableTrash(args: {
+  pipetteId: string
+  volume: number
+  flowRate: number
+  invariantContext: InvariantContext
+  prevRobotState: RobotState
+}): CurriedCommandCreator[] {
   const { pipetteId, invariantContext, volume, flowRate } = args
   const offset = ZERO_OFFSET
-  const addressableAreaName = getAddressableAreaName(invariantContext)
-  if (addressableAreaName == null || flowRate == null || volume == null) {
+  const addressableAreaName = getTrashBinAddressableAreaName(
+    invariantContext.additionalEquipmentEntities
+  )
+  if (addressableAreaName == null) {
+    console.error('could not getTrashBinAddressableAreaName for dispense')
     return []
   }
   return [
@@ -139,13 +104,19 @@ export function dispenseInMovableTrash(
   ]
 }
 
-export function blowOutInMovableTrash(
-  args: MovableTrashCommandArgs
-): CurriedCommandCreator[] {
+export function blowOutInMovableTrash(args: {
+  pipetteId: string
+  flowRate: number
+  invariantContext: InvariantContext
+  prevRobotState: RobotState
+}): CurriedCommandCreator[] {
   const { pipetteId, invariantContext, flowRate } = args
   const offset = ZERO_OFFSET
-  const addressableAreaName = getAddressableAreaName(invariantContext)
-  if (addressableAreaName == null || flowRate == null) {
+  const addressableAreaName = getTrashBinAddressableAreaName(
+    invariantContext.additionalEquipmentEntities
+  )
+  if (addressableAreaName == null) {
+    console.error('could not getTrashBinAddressableAreaName for blowOut')
     return []
   }
   return [
@@ -161,13 +132,18 @@ export function blowOutInMovableTrash(
   ]
 }
 
-export function moveToMovableTrash(
-  args: MovableTrashCommandArgs
-): CurriedCommandCreator[] {
+export function moveToMovableTrash(args: {
+  pipetteId: string
+  invariantContext: InvariantContext
+  prevRobotState: RobotState
+}): CurriedCommandCreator[] {
   const { pipetteId, invariantContext } = args
   const offset = ZERO_OFFSET
-  const addressableAreaName = getAddressableAreaName(invariantContext)
+  const addressableAreaName = getTrashBinAddressableAreaName(
+    invariantContext.additionalEquipmentEntities
+  )
   if (addressableAreaName == null) {
+    console.error('could not getTrashBinAddressableAreaName for moveTo')
     return []
   }
   return [
