@@ -1,6 +1,7 @@
 import { css } from 'styled-components'
 import { useTranslation } from 'react-i18next'
 import { useDispatch, useSelector } from 'react-redux'
+import { useMemo } from 'react'
 
 import {
   Flex,
@@ -43,11 +44,37 @@ export function LPCLabwareList(props: LPCWizardContentProps): JSX.Element {
 
 function LPCLabwareListContent(props: LPCWizardContentProps): JSX.Element {
   const { t } = useTranslation('labware_position_check')
-  const labwareInfo = useSelector(selectAllLabwareInfo(props.runId))
+  const { runId } = props
+  const labwareInfo = useSelector(selectAllLabwareInfo(runId))
+
+  const getIsDefaultOffsetAbsent = (info: LwGeometryDetails): boolean => {
+    return (
+      info?.defaultOffsetDetails?.existingOffset == null &&
+      info?.defaultOffsetDetails?.workingOffset?.confirmedVector == null
+    )
+  }
+  // Create and sort the labware entries
+  const sortedLabwareEntries = useMemo(() => {
+    return Object.entries(labwareInfo)
+      .map(([uri, info]) => ({
+        uri,
+        info,
+        isMissingDefaultOffset: getIsDefaultOffsetAbsent(info),
+      }))
+      .sort((a, b) => {
+        // Primary sort: isMissingDefaultOffset (true values first).
+        if (a.isMissingDefaultOffset !== b.isMissingDefaultOffset) {
+          return a.isMissingDefaultOffset ? -1 : 1
+        }
+
+        // Secondary sort: alphabetical by displayName.
+        return a.info.displayName.localeCompare(b.info.displayName)
+      })
+  }, [labwareInfo])
 
   return (
     <TextListTableContent header={t('select_labware_to_view_data')}>
-      {Object.entries(labwareInfo).map(([uri, info]) => (
+      {sortedLabwareEntries.map(({ uri, info }) => (
         <LabwareItem key={`labware_${uri}`} uri={uri} info={info} {...props} />
       ))}
       {/* Accommodate scrolling. */}

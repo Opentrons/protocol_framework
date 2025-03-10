@@ -43,6 +43,7 @@ export function LPCLabwareDetails(props: LPCWizardContentProps): JSX.Element {
       // TODO(jh, 03-05-25): Add the actual API call here. Be sure to include loading state
       //  and handle DELETE operations appropriately.
       dispatch(applyWorkingOffsets(runId, lwUri))
+      dispatch(goBackEditOffsetSubstep(runId))
     }
   }
 
