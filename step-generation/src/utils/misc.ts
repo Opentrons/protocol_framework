@@ -23,7 +23,12 @@ import {
 } from '../commandCreators/atomic'
 import { blowout } from '../commandCreators/atomic/blowout'
 import { curryCommandCreator } from './curryCommandCreator'
-import { movableTrashCommandsUtil } from './movableTrashCommandsUtil'
+import {
+  airGapInMovableTrash,
+  blowOutInMovableTrash,
+  dispenseInMovableTrash,
+  moveToMovableTrash,
+} from './movableTrashCommandsUtil'
 import type {
   AddressableAreaName,
   LabwareDefinition2,
@@ -391,9 +396,8 @@ export const blowoutUtil = (args: {
       prevRobotState,
     })
   } else {
-    return movableTrashCommandsUtil({
+    return blowOutInMovableTrash({
       pipetteId: pipette,
-      type: 'blowOut',
       prevRobotState,
       invariantContext,
       flowRate,
@@ -623,8 +627,7 @@ export const dispenseLocationHelper: CommandCreator<DispenseLocationHelperArgs> 
       addressableAreaName: getWasteChuteAddressableAreaNamePip(pipetteChannels),
     })
   } else {
-    commands = movableTrashCommandsUtil({
-      type: 'dispense',
+    commands = dispenseInMovableTrash({
       pipetteId,
       volume,
       flowRate,
@@ -682,9 +685,8 @@ export const moveHelper: CommandCreator<MoveHelperArgs> = (
       }),
     ]
   } else {
-    commands = movableTrashCommandsUtil({
+    commands = moveToMovableTrash({
       pipetteId,
-      type: 'moveToWell',
       invariantContext,
       prevRobotState,
     })
@@ -798,8 +800,7 @@ export const airGapHelper: CommandCreator<AirGapArgs> = (
       addressableAreaName: getWasteChuteAddressableAreaNamePip(pipetteChannels),
     })
   } else {
-    commands = movableTrashCommandsUtil({
-      type: 'airGap',
+    commands = airGapInMovableTrash({
       pipetteId,
       volume,
       flowRate,
