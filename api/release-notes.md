@@ -10,9 +10,10 @@ By installing and using Opentrons software, you agree to the Opentrons End-User 
 
 ## Opentrons Robot Software Changes in 8.3.1
 
-The 8.3.1 hotfix release fixes a robot software bug:   
+The 8.3.1 hotfix release contains two bug fixes:    
 
-- Exported data from the Absorbance Plate Reader no longer contains invalid values.  
+- Exported data from the Absorbance Plate Reader no longer contains invalid values. 
+- A small fix allows all robots to properly reboot after an upgrade to v8.3.0. 
 
 ## Opentrons Robot Software Changes in 8.3.0
 
