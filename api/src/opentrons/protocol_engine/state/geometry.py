@@ -1866,6 +1866,8 @@ class GeometryView:
         well_name: str,
     ) -> LiquidTrackingType:
         """Returns stored meniscus height in specified well."""
+        # breakpoint()
+        # return 25.0
         last_updated = self._wells.get_last_liquid_update(labware_id, well_name)
         if last_updated is None:
             raise errors.LiquidHeightUnknownError(

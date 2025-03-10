@@ -187,10 +187,13 @@ class HardwarePipettingHandler(PipettingHandler):
             well_name=well_name,
             operation_volume=volume * -1,
         )
+        # breakpoint()  # find what z distance is here
         if isinstance(aspirate_z_distance, SimulatedProbeResult):
             raise InvalidLiquidHeightFound(
                 "Aspirate distance must be a float in Hardware pipetting handler."
             )
+
+        # raise ValueError(f"z_dist = {aspirate_z_distance}, volume={adjusted_volume}")
         with self._set_flow_rate(pipette=hw_pipette, aspirate_flow_rate=flow_rate):
             await self._hardware_api.aspirate_while_tracking(
                 mount=hw_pipette.mount,
