@@ -33,6 +33,7 @@
   "dropping_tip_in_trash": "Dropping tip in {{trash}}",
   "engaging_magnetic_module": "Engaging Magnetic Module",
   "fixed_trash": "Fixed Trash",
+  "get_next_tip": "Calculating position of the next available tip",
   "home_gantry": "Homing all gantry, pipette, and plunger axes",
   "in_location": "in {{location}}",
   "latching_hs_latch": "Latching labware on Heater-Shaker",

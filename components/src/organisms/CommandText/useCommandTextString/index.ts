@@ -231,6 +231,12 @@ export function useCommandTextString(
         }),
       }
 
+    case 'getNextTip':
+      return {
+        kind: 'generic',
+        commandText: t('get_next_tip'),
+      }
+
     case 'moveToAddressableArea':
       return {
         kind: 'generic',
