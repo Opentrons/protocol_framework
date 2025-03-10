@@ -11,6 +11,8 @@ from os import listdir, path
 import pytest
 from decoy import Decoy
 
+from opentrons.protocol_api.labware import Labware
+from opentrons.protocol_engine.state import geometry
 from opentrons.protocol_engine.state.update_types import (
     LoadedLabwareUpdate,
     StateUpdate,
@@ -3540,6 +3542,43 @@ def test_validate_dispense_volume_into_well_meniscus(
             ),
             volume=1100000.0,
         )
+
+def test_get_liquid_handling_z_change(
+    decoy: Decoy,
+    mock_labware_view: LabwareView,
+    mock_well_view: WellView,
+    subject: GeometryView
+) -> None:
+    decoy.when(mock_labware_view.get_well_definition("labware-id", "A1")).then_return(
+        RectangularWellDefinition3.model_construct(totalLiquidVolume=1100000)  # type: ignore[call-arg]
+    )
+    decoy.when(mock_labware_view.get_well_geometry("labware-id", "A1")).then_return(
+        _TEST_INNER_WELL_GEOMETRY
+    )
+    probe_time = datetime.now()
+    decoy.when(mock_well_view.get_last_liquid_update("labware-id", "A1")).then_return(
+        probe_time
+    )
+    decoy.when(mock_well_view.get_well_liquid_info("labware-id", "A1")).then_return(
+        WellLiquidInfo(
+            loaded_volume=None,
+            probed_height=ProbedHeightInfo(height=40.0, last_probed=probe_time),
+            probed_volume=None,
+        )
+    )
+    # total fake well height is 45, fake meniscus can be 25
+    # decoy.when(
+    #     subject.get_meniscus_height(
+    #         labware_id="labware-id", well_name="A1"
+    #     )
+    # ).then_return(25.0)
+    change = subject.get_liquid_handling_z_change(
+        labware_id="labware-id",
+        well_name="A1",
+        operation_volume=199.0
+    )
+    breakpoint()
+
 
 
 def test_get_latest_volume_information(
