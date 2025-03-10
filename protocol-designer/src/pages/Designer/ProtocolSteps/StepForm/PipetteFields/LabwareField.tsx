@@ -6,6 +6,7 @@ import {
 } from '../../../../../ui/labware/selectors'
 import { hoverSelection } from '../../../../../ui/steps/actions/actions'
 import { DropdownStepFormField } from '../../../../../molecules'
+import { getRobotStateAtActiveItem } from '../../../../../top-selectors/labware-locations'
 import type { FieldProps } from '../types'
 
 export function LabwareField(props: FieldProps): JSX.Element {
@@ -14,10 +15,11 @@ export function LabwareField(props: FieldProps): JSX.Element {
   const disposalOptions = useSelector(getDisposalOptions)
   const options = useSelector(getLabwareOptions)
   const dispatch = useDispatch()
-
+  const robotState = useSelector(getRobotStateAtActiveItem)
   const optionsWithoutOffDeck = options.filter(
-    option => !option.name.toLowerCase().includes('off-deck')
+    ({ value }) => robotState?.labware[value]?.slot !== 'offDeck'
   )
+
   const properOptions =
     name === 'dispense_labware' || name === 'aspirate_labware'
       ? optionsWithoutOffDeck
