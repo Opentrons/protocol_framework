@@ -9,6 +9,14 @@ export const moveToAddressableAreaForDropTip: CommandCreator<MoveToAddressableAr
 ) => {
   const { pipetteId, addressableAreaName } = args
 
+    // No-op if there is no tip
+    if (!prevRobotState.tipState.pipettes[pipetteId]) {
+      return {
+        commands: [],
+      }
+    }
+
+    
   const commands = [
     {
       commandType: 'moveToAddressableAreaForDropTip' as const,

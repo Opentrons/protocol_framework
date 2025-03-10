@@ -362,7 +362,6 @@ export const blowoutUtil = (args: {
     return movableTrashCommandsUtil({
       pipetteId: pipette,
       type: 'blowOut',
-      prevRobotState,
       invariantContext,
       flowRate,
     })
@@ -597,7 +596,6 @@ export const dispenseLocationHelper: CommandCreator<DispenseLocationHelperArgs> 
       volume,
       flowRate,
       invariantContext,
-      prevRobotState,
     })
   }
 
@@ -654,7 +652,6 @@ export const moveHelper: CommandCreator<MoveHelperArgs> = (
       pipetteId,
       type: 'moveToWell',
       invariantContext,
-      prevRobotState,
     })
   }
 
@@ -772,7 +769,6 @@ export const airGapHelper: CommandCreator<AirGapArgs> = (
       volume,
       flowRate,
       invariantContext,
-      prevRobotState,
     })
   }
 

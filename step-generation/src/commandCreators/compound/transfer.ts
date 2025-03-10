@@ -576,7 +576,6 @@ export const transfer: CommandCreator<TransferArgs> = (
               type: 'dropTip',
               pipetteId: args.pipette,
               invariantContext,
-              prevRobotState,
             })
           }
 

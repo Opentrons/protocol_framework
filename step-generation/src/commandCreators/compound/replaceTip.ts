@@ -228,7 +228,6 @@ export const replaceTip: CommandCreator<ReplaceTipArgs> = (
       ...movableTrashCommandsUtil({
         type: 'dropTip',
         pipetteId: pipette,
-        prevRobotState,
         invariantContext,
       }),
       ...configureNozzleLayoutCommand,

@@ -82,10 +82,6 @@ describe('movableTrashCommandsUtil', () => {
     movableTrashCommandsUtil({
       ...args,
       type: 'dropTip',
-      prevRobotState: {
-        ...args.prevRobotState,
-        tipState: { pipettes: { [mockId]: true } } as any,
-      },
     })
     expect(curryCommandCreator).toHaveBeenCalledWith(
       moveToAddressableAreaForDropTip,
@@ -102,10 +98,6 @@ describe('movableTrashCommandsUtil', () => {
     movableTrashCommandsUtil({
       ...args,
       type: 'airGap',
-      prevRobotState: {
-        ...args.prevRobotState,
-        tipState: { pipettes: { [mockId]: true } } as any,
-      },
     })
     expect(curryCommandCreator).toHaveBeenCalledWith(
       moveToAddressableArea,

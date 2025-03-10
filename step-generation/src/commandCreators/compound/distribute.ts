@@ -408,7 +408,6 @@ export const distribute: CommandCreator<DistributeArgs> = (
         dropTipCommand = movableTrashCommandsUtil({
           type: 'dropTip',
           pipetteId: args.pipette,
-          prevRobotState,
           invariantContext,
         })
       }

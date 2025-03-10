@@ -497,7 +497,6 @@ export const consolidate: CommandCreator<ConsolidateArgs> = (
         dropTipCommand = movableTrashCommandsUtil({
           type: 'dropTip',
           pipetteId: args.pipette,
-          prevRobotState,
           invariantContext,
         })
       }
