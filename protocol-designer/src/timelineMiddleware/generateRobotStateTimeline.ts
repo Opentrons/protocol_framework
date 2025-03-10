@@ -2,6 +2,7 @@ import {
   dropTipInPlace,
   moveToAddressableArea,
   getWasteChuteAddressableAreaNamePip,
+  getTrashBinAddressableAreaName,
   moveToAddressableAreaForDropTip,
   curryCommandCreator,
   dropTip,
@@ -81,8 +82,12 @@ export const generateRobotStateTimeline = (
             'trashBin'
 
         const pipetteSpec = invariantContext.pipetteEntities[pipetteId]?.spec
-        const addressableAreaName = getWasteChuteAddressableAreaNamePip(
+        const addressableAreaNameWasteChute = getWasteChuteAddressableAreaNamePip(
           pipetteSpec.channels
+        )
+
+        const addressableAreaNameTrashBin = getTrashBinAddressableAreaName(
+          invariantContext.additionalEquipmentEntities
         )
 
         let dropTipCommands = [
@@ -95,7 +100,7 @@ export const generateRobotStateTimeline = (
           dropTipCommands = [
             curryCommandCreator(moveToAddressableArea, {
               pipetteId,
-              addressableAreaName,
+              addressableAreaName: addressableAreaNameWasteChute,
               offset: ZERO_OFFSET,
             }),
             curryCommandCreator(dropTipInPlace, {
@@ -103,11 +108,11 @@ export const generateRobotStateTimeline = (
             }),
           ]
         }
-        if (isTrashBin) {
+        if (isTrashBin && addressableAreaNameTrashBin != null) {
           dropTipCommands = [
             curryCommandCreator(moveToAddressableAreaForDropTip, {
               pipetteId,
-              addressableAreaName,
+              addressableAreaName: addressableAreaNameTrashBin,
             }),
             curryCommandCreator(dropTipInPlace, {
               pipetteId,

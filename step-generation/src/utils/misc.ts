@@ -11,6 +11,8 @@ import {
   EIGHT_CHANNEL_WASTE_CHUTE_ADDRESSABLE_AREA,
   NINETY_SIX_CHANNEL_WASTE_CHUTE_ADDRESSABLE_AREA,
   getDeckDefFromRobotType,
+  OT2_ROBOT_TYPE,
+  FLEX_ROBOT_TYPE,
 } from '@opentrons/shared-data'
 import { reduceCommandCreators, wasteChuteCommandsUtil } from './index'
 import {
@@ -103,6 +105,36 @@ export function getWasteChuteAddressableAreaNamePip(
       return NINETY_SIX_CHANNEL_WASTE_CHUTE_ADDRESSABLE_AREA
     }
   }
+}
+
+export function getTrashBinAddressableAreaName(
+  additionalEquipmentEntities: AdditionalEquipmentEntities
+): AddressableAreaName | null {
+  const trash = Object.values(additionalEquipmentEntities).find(
+    aE => aE.name === 'trashBin'
+  )
+  const trashLocation = trash != null ? (trash.location as CutoutId) : null
+
+  const deckDef = getDeckDefFromRobotType(
+    trashLocation === ('cutout12' as CutoutId)
+      ? OT2_ROBOT_TYPE
+      : FLEX_ROBOT_TYPE
+  )
+  let cutouts: Record<CutoutId, AddressableAreaName[]> | null = null
+  if (deckDef.robot.model === FLEX_ROBOT_TYPE) {
+    cutouts =
+      deckDef.cutoutFixtures.find(
+        cutoutFixture => cutoutFixture.id === 'trashBinAdapter'
+      )?.providesAddressableAreas ?? null
+  } else if (deckDef.robot.model === OT2_ROBOT_TYPE) {
+    cutouts =
+      deckDef.cutoutFixtures.find(
+        cutoutFixture => cutoutFixture.id === 'fixedTrashSlot'
+      )?.providesAddressableAreas ?? null
+  }
+  return trashLocation != null && cutouts != null
+    ? cutouts[trashLocation]?.[0] ?? null
+    : null
 }
 
 export function getTrashOrLabware(
