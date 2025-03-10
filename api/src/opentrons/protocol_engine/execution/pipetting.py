@@ -181,6 +181,9 @@ class HardwarePipettingHandler(PipettingHandler):
             well_name=well_name,
             operation_volume=volume * -1,
         )
+        raise ValueError(
+            f"dltr z_dist = {aspirate_z_distance}, volume={adjusted_volume}"
+        )
         with self._set_flow_rate(pipette=hw_pipette, aspirate_flow_rate=flow_rate):
             await self._hardware_api.aspirate_while_tracking(
                 mount=hw_pipette.mount,
@@ -189,6 +192,7 @@ class HardwarePipettingHandler(PipettingHandler):
                 volume=adjusted_volume,
             )
         # raise ValueError(f"adjusted volume = {adjusted_volume}\n volume = {volume}")
+        # figure out what z pos is here
         return adjusted_volume
 
     async def dispense_while_tracking(

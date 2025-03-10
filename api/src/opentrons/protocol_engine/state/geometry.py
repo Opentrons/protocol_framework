@@ -1429,6 +1429,9 @@ class GeometryView:
             initial_height=initial_handling_height,
             volume=operation_volume,
         )
+        raise ValueError(
+            f"dltr\n liquid handling height = {initial_handling_height, final_height}, volume = {operation_volume}"
+        )
         return final_height - initial_handling_height
 
     def get_well_offset_adjustment(
@@ -1478,6 +1481,7 @@ class GeometryView:
         well_name: str,
     ) -> float:
         """Returns stored meniscus height in specified well."""
+        # return 25.0
         well_liquid = self._wells.get_well_liquid_info(
             labware_id=labware_id, well_name=well_name
         )
@@ -1488,6 +1492,7 @@ class GeometryView:
             well_liquid.probed_height is not None
             and well_liquid.probed_height.height is not None
         ):
+            # maybe j make sure its at probed height ?
             return well_liquid.probed_height.height
         elif (
             well_liquid.loaded_volume is not None

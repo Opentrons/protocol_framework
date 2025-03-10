@@ -2579,7 +2579,9 @@ class InstrumentContext(publisher.CommandPublisher):
 
     def _handle_aspirate_target(
         self, target: validation.ValidTarget
-    ) -> tuple[types.Location, Optional[labware.Well], Optional[types.MeniscusTracking]]:
+    ) -> tuple[
+        types.Location, Optional[labware.Well], Optional[types.MeniscusTracking]
+    ]:
         move_to_location: types.Location
         well: Optional[labware.Well] = None
         meniscus_tracking: Optional[types.MeniscusTracking] = None
@@ -2599,7 +2601,9 @@ class InstrumentContext(publisher.CommandPublisher):
 
     def _handle_dispense_target(
         self, target: validation.ValidTarget
-    ) -> tuple[types.Location, Optional[labware.Well], Optional[types.MeniscusTracking]]:
+    ) -> tuple[
+        types.Location, Optional[labware.Well], Optional[types.MeniscusTracking]
+    ]:
         move_to_location: types.Location
         well: Optional[labware.Well] = None
         meniscus_tracking: Optional[types.MeniscusTracking] = None

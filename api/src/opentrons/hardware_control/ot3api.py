@@ -2987,7 +2987,9 @@ class OT3API(
             z_distance,
             self._current_position,
         )
-
+        raise ValueError(
+            f"dltr target pos = {target_pos}, speed = {aspirate_spec.speed}"
+        )
         try:
             await self._backend.set_active_current(
                 {aspirate_spec.axis: aspirate_spec.current}

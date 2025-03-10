@@ -98,11 +98,56 @@ from opentrons.protocol_engine.state.frustum_helpers import (
     _volume_from_height_circular,
     _volume_from_height_rectangular,
 )
+from opentrons_shared_data.labware.labware_definition import (
+    CuboidalFrustum,
+    InnerWellGeometry,
+    LabwareDefinition,
+    # LabwareDefinition2,
+    # Dimensions as LabwareDimensions,
+    # Parameters2 as LabwareDefinition2Parameters,
+    # RectangularWellDefinition3,
+    WellDefinition,
+    SphericalSegment,
+    # Vector as LabwareDefinitionVector,
+    ConicalFrustum,
+    # labware_def   inition_type_adapter,
+)
+
 from .inner_geometry_test_params import INNER_WELL_GEOMETRY_TEST_PARAMS
 from ..pipette_fixtures import get_default_nozzle_map
 from ..mock_circular_frusta import TEST_EXAMPLES as CIRCULAR_TEST_EXAMPLES
 from ..mock_rectangular_frusta import TEST_EXAMPLES as RECTANGULAR_TEST_EXAMPLES
 from ...protocol_runner.test_json_translator import _load_labware_definition_data
+
+
+_TEST_INNER_WELL_GEOMETRY = InnerWellGeometry(
+    sections=[
+        CuboidalFrustum(
+            shape="cuboidal",
+            topXDimension=7.6,
+            topYDimension=8.5,
+            bottomXDimension=5.6,
+            bottomYDimension=6.5,
+            topHeight=45,
+            bottomHeight=20,
+        ),
+        CuboidalFrustum(
+            shape="cuboidal",
+            topXDimension=5.6,
+            topYDimension=6.5,
+            bottomXDimension=4.5,
+            bottomYDimension=4.0,
+            topHeight=20,
+            bottomHeight=10,
+        ),
+        SphericalSegment(
+            shape="spherical",
+            radiusOfCurvature=6,
+            topHeight=10,
+            bottomHeight=0.0,
+        ),
+    ],
+)
 
 
 @pytest.fixture
@@ -3366,6 +3411,41 @@ def test_validate_dispense_volume_into_well_meniscus(
             ),
             volume=1100000.0,
         )
+
+
+def test_get_liquid_handling_z_change(
+    decoy: Decoy,
+    mock_labware_view: LabwareView,
+    mock_well_view: WellView,
+    subject: GeometryView,
+) -> None:
+    # decoy.when(mock_labware_view.get_well_definition("labware-id", "A1")).then_return(
+    #     RectangularWellDefinition3.model_construct(totalLiquidVolume=1100000)  # type: ignore[call-arg]
+    # )
+    decoy.when(mock_labware_view.get_well_geometry("labware-id", "A1")).then_return(
+        _TEST_INNER_WELL_GEOMETRY
+    )
+    probe_time = datetime.now()
+    decoy.when(mock_well_view.get_last_liquid_update("labware-id", "A1")).then_return(
+        probe_time
+    )
+    decoy.when(mock_well_view.get_well_liquid_info("labware-id", "A1")).then_return(
+        WellLiquidInfo(
+            loaded_volume=None,
+            probed_height=ProbedHeightInfo(height=40.0, last_probed=probe_time),
+            probed_volume=None,
+        )
+    )
+    # total fake well height is 45, fake meniscus can be 25
+    # decoy.when(
+    #     subject.get_meniscus_height(
+    #         labware_id="labware-id", well_name="A1"
+    #     )
+    # ).then_return(25.0)
+    change = subject.get_liquid_handling_z_change(
+        labware_id="labware-id", well_name="A1", operation_volume=199.0
+    )
+    breakpoint()
 
 
 @pytest.mark.parametrize(

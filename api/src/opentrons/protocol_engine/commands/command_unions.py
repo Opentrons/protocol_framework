@@ -62,7 +62,7 @@ from .aspirate_while_tracking import (
     AspirateWhileTrackingParams,
     AspirateWhileTrackingCreate,
     AspirateWhileTrackingResult,
-    AspirateWhileTrackingCommandType
+    AspirateWhileTrackingCommandType,
 )
 
 from .comment import (
@@ -94,7 +94,7 @@ from .dispense_while_tracking import (
     DispenseWhileTrackingParams,
     DispenseWhileTrackingCreate,
     DispenseWhileTrackingResult,
-    DispenseWhileTrackingCommandType
+    DispenseWhileTrackingCommandType,
 )
 
 from .dispense_in_place import (
