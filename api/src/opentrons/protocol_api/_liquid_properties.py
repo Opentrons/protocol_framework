@@ -92,6 +92,13 @@ class DelayProperties:
     _enabled: bool
     _duration: Optional[float]
 
+    def __post_init__(self) -> None:
+        """Validate state after initialization."""
+        if self._duration is not None:
+            self.duration = self._duration
+        if self._enabled is not None:
+            self.enabled = self._enabled
+
     @property
     def enabled(self) -> bool:
         return self._enabled
@@ -109,6 +116,7 @@ class DelayProperties:
 
     @duration.setter
     def duration(self, new_duration: float) -> None:
+        """Duration may be zero and positive."""
         validated_duration = validation.ensure_positive_float(new_duration)
         self._duration = validated_duration
 
@@ -128,6 +136,17 @@ class TouchTipProperties:
     _z_offset: Optional[float]
     _mm_to_edge: Optional[float]
     _speed: Optional[float]
+
+    def __post_init__(self) -> None:
+        """Validate state after initialization."""
+        if self._enabled is not None:
+            self.enabled = self._enabled
+        if self._z_offset is not None:
+            self.z_offset = self._z_offset
+        if self._mm_to_edge is not None:
+            self.mm_to_edge = self._mm_to_edge
+        if self._speed is not None:
+            self.speed = self._speed
 
     @property
     def enabled(self) -> bool:
@@ -168,7 +187,8 @@ class TouchTipProperties:
 
     @speed.setter
     def speed(self, new_speed: float) -> None:
-        validated_speed = validation.ensure_positive_float(new_speed)
+        """Speed may not be zero or negative."""
+        validated_speed = validation.ensure_positive_and_not_zero_float(new_speed)
         self._speed = validated_speed
 
     def _get_shared_data_params(self) -> Optional[SharedDataTouchTipParams]:
@@ -217,7 +237,9 @@ class MixProperties:
 
     @repetitions.setter
     def repetitions(self, new_repetitions: int) -> None:
-        validated_repetitions = validation.ensure_positive_int(new_repetitions)
+        validated_repetitions = validation.ensure_positive_and_not_zero_int(
+            new_repetitions
+        )
         self._repetitions = validated_repetitions
 
     @property
@@ -226,7 +248,7 @@ class MixProperties:
 
     @volume.setter
     def volume(self, new_volume: float) -> None:
-        validated_volume = validation.ensure_positive_float(new_volume)
+        validated_volume = validation.ensure_positive_and_not_zero_float(new_volume)
         self._volume = validated_volume
 
     def _get_shared_data_params(self) -> Optional[SharedDataMixParams]:
