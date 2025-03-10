@@ -1,5 +1,5 @@
 """DVT Flex Stacker QC."""
-from opentrons.protocol_api import ProtocolContext, ParameterContext
+from opentrons.protocol_api import ProtocolContext
 from opentrons.protocol_api.module_contexts import (
     FlexStackerContext,
 )
@@ -14,19 +14,8 @@ requirements = {
 }
 
 
-def add_parameters(parameters: ParameterContext) -> None:
-    """Runtime parameters."""
-    parameters.add_str(
-        display_name="Stacker Barcode Number",
-        variable_name="stacker_barcode",
-        default="",
-    )
-
-
 def run(protocol: ProtocolContext) -> None:
     """Protocol."""
-    BARCODE = protocol.params.stacker_barcode  # type: ignore[attr-defined]
-
     # ======================= SIMPLE SETUP ARRANGEMENT ======================
     # STACKERS
     stacker: FlexStackerContext = protocol.load_module(
@@ -37,9 +26,6 @@ def run(protocol: ProtocolContext) -> None:
         count=6,
         lid="opentrons_flex_tiprack_lid",
     )
-
-    match_str = "matches" if BARCODE == stacker.serial_number else "does not match"
-    protocol.comment(f"Stacker serial number {match_str} {BARCODE}")
 
     SLOTS = ["C1", "C2", "C3", "D1", "D2", "D3"]
 
@@ -52,7 +38,7 @@ def run(protocol: ProtocolContext) -> None:
 
     for tiprack in tipracks:
         protocol.move_labware(tiprack, stacker, use_gripper=True)
-        stacker.store(tiprack)
+        stacker.store()
 
     # =================== FILL TIPRACKS WITH PCR PLATES ======================
 
@@ -61,6 +47,7 @@ def run(protocol: ProtocolContext) -> None:
         load_name="opentrons_96_wellplate_200ul_pcr_full_skirt",
         count=5,
     )
+    stacker.fill("Fill stacker with pcr plates")
 
     # ======================= RETRIEVE/STORE PCR PLATES ======================
     plates = []
@@ -71,4 +58,4 @@ def run(protocol: ProtocolContext) -> None:
 
     for plate in plates:
         protocol.move_labware(plate, stacker, use_gripper=True)
-        stacker.store(plate)
+        stacker.store()
