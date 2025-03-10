@@ -3543,11 +3543,12 @@ def test_validate_dispense_volume_into_well_meniscus(
             volume=1100000.0,
         )
 
+
 def test_get_liquid_handling_z_change(
     decoy: Decoy,
     mock_labware_view: LabwareView,
     mock_well_view: WellView,
-    subject: GeometryView
+    subject: GeometryView,
 ) -> None:
     decoy.when(mock_labware_view.get_well_definition("labware-id", "A1")).then_return(
         RectangularWellDefinition3.model_construct(totalLiquidVolume=1100000)  # type: ignore[call-arg]
@@ -3573,12 +3574,9 @@ def test_get_liquid_handling_z_change(
     #     )
     # ).then_return(25.0)
     change = subject.get_liquid_handling_z_change(
-        labware_id="labware-id",
-        well_name="A1",
-        operation_volume=199.0
+        labware_id="labware-id", well_name="A1", operation_volume=199.0
     )
     breakpoint()
-
 
 
 def test_get_latest_volume_information(

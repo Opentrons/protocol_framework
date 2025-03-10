@@ -18,6 +18,7 @@ from opentrons.protocol_engine.execution.pipetting import (
     VirtualPipettingHandler,
     create_pipetting_handler,
 )
+
 # from opentrons.protocol_engine.state.geometry import GeometryView
 from opentrons.protocol_engine.errors.exceptions import (
     TipNotAttachedError,
@@ -88,6 +89,7 @@ def hardware_subject(
     return HardwarePipettingHandler(
         state_view=mock_state_view, hardware_api=mock_hardware_api
     )
+
 
 @pytest.fixture
 def mock_labware_view(decoy: Decoy) -> LabwareView:
@@ -269,8 +271,6 @@ async def test_hw_dispense_in_place_raises_invalid_push_out(
         )
 
 
-
-
 async def test_hw_aspirate_while_tracking(
     decoy: Decoy,
     mock_state_view: StateView,
@@ -320,10 +320,8 @@ async def test_hw_aspirate_while_tracking(
     # - get_meniscus_height
 
     decoy.when(
-    mock_state_view.geometry.get_liquid_handling_z_change(
-            labware_id="labware-id",
-            well_name="A1",
-            operation_volume=25.0
+        mock_state_view.geometry.get_liquid_handling_z_change(
+            labware_id="labware-id", well_name="A1", operation_volume=25.0
         )
     ).then_return(4.544)
 
@@ -350,8 +348,6 @@ async def test_hw_aspirate_while_tracking(
             mount=Mount.LEFT, aspirate=1.23, dispense=4.56, blow_out=7.89
         ),
     )
-
-
 
 
 async def test_hw_aspirate_in_place(

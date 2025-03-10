@@ -3017,7 +3017,7 @@ class OT3API(
             z_distance,
             self._current_position,
         )
-        # raise ValueError(f"target pos = {target_pos}\n speed = {aspirate_spec.speed}") # check the speed also ? 
+        # raise ValueError(f"target pos = {target_pos}\n speed = {aspirate_spec.speed}") # check the speed also ?
         try:
             await self._backend.set_active_current(
                 {aspirate_spec.axis: aspirate_spec.current}
@@ -3037,6 +3037,7 @@ class OT3API(
             raise
         else:
             aspirate_spec.instr.add_current_volume(aspirate_spec.volume)
+        # raise ValueError(f"stop here")
 
     async def dispense_while_tracking(
         self,
