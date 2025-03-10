@@ -11,6 +11,8 @@ from os import listdir, path
 import pytest
 from decoy import Decoy
 
+from opentrons.protocol_api.labware import Labware
+from opentrons.protocol_engine.state import geometry
 from opentrons.protocol_engine.state.update_types import (
     LoadedLabwareUpdate,
     StateUpdate,
@@ -23,7 +25,13 @@ from opentrons_shared_data.deck import load as load_deck
 from opentrons_shared_data.labware.types import LabwareUri
 from opentrons_shared_data.pipette import pipette_definition
 from opentrons.calibration_storage.helpers import uri_from_details
-from opentrons.types import Point, DeckSlotName, MountType, StagingSlotName
+from opentrons.types import (
+    Point,
+    DeckSlotName,
+    MountType,
+    StagingSlotName,
+    MeniscusTrackingTarget,
+)
 from opentrons_shared_data.pipette.types import PipetteNameType
 from opentrons_shared_data.labware.labware_definition import (
     CuboidalFrustum,
@@ -2074,11 +2082,14 @@ def test_get_relative_liquid_handling_well_location(
     subject: GeometryView,
 ) -> None:
     """It should get the relative location of a well given an absolute position."""
-    result = subject.get_relative_liquid_handling_well_location(
+    (
+        result,
+        dynamic_liquid_tracking,
+    ) = subject.get_relative_liquid_handling_well_location(
         labware_id="labware-id",
         well_name="B2",
         absolute_point=Point(x=0, y=0, z=-2),
-        is_meniscus=True,
+        meniscus_tracking=MeniscusTrackingTarget.END,
     )
 
     assert result == LiquidHandlingWellLocation(
@@ -2088,6 +2099,7 @@ def test_get_relative_liquid_handling_well_location(
             y=0.0,
             z=cast(float, pytest.approx(-2)),
         ),
+        volumeOffset="operationVolume",
     )
 
 
@@ -3530,6 +3542,41 @@ def test_validate_dispense_volume_into_well_meniscus(
             ),
             volume=1100000.0,
         )
+
+
+def test_get_liquid_handling_z_change(
+    decoy: Decoy,
+    mock_labware_view: LabwareView,
+    mock_well_view: WellView,
+    subject: GeometryView,
+) -> None:
+    decoy.when(mock_labware_view.get_well_definition("labware-id", "A1")).then_return(
+        RectangularWellDefinition3.model_construct(totalLiquidVolume=1100000)  # type: ignore[call-arg]
+    )
+    decoy.when(mock_labware_view.get_well_geometry("labware-id", "A1")).then_return(
+        _TEST_INNER_WELL_GEOMETRY
+    )
+    probe_time = datetime.now()
+    decoy.when(mock_well_view.get_last_liquid_update("labware-id", "A1")).then_return(
+        probe_time
+    )
+    decoy.when(mock_well_view.get_well_liquid_info("labware-id", "A1")).then_return(
+        WellLiquidInfo(
+            loaded_volume=None,
+            probed_height=ProbedHeightInfo(height=40.0, last_probed=probe_time),
+            probed_volume=None,
+        )
+    )
+    # total fake well height is 45, fake meniscus can be 25
+    # decoy.when(
+    #     subject.get_meniscus_height(
+    #         labware_id="labware-id", well_name="A1"
+    #     )
+    # ).then_return(25.0)
+    change = subject.get_liquid_handling_z_change(
+        labware_id="labware-id", well_name="A1", operation_volume=199.0
+    )
+    breakpoint()
 
 
 def test_get_latest_volume_information(
