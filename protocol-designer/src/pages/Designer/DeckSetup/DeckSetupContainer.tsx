@@ -33,6 +33,7 @@ import { getRobotType } from '../../../file-data/selectors'
 import { getHasGen1MultiChannelPipette } from '../../../step-forms'
 import { selectZoomedIntoSlot } from '../../../labware-ingred/actions'
 import { selectors } from '../../../labware-ingred/selectors'
+import { FixedTrashText } from '../../../molecules'
 import { DeckSetupDetails } from './DeckSetupDetails'
 import { DECK_SETUP_TOOLS_WIDTH_REM, DeckSetupTools } from './DeckSetupTools'
 import {
@@ -268,11 +269,13 @@ export function DeckSetupContainer(props: DeckSetupTabType): JSX.Element {
               {({ getRobotCoordsFromDOMCoords }) => (
                 <>
                   {robotType === OT2_ROBOT_TYPE ? (
-                    <DeckFromLayers
-                      robotType={robotType}
-                      layerBlocklist={OT2_STANDARD_DECK_VIEW_LAYER_BLOCK_LIST}
-                      showTrashText
-                    />
+                    <>
+                      <DeckFromLayers
+                        robotType={robotType}
+                        layerBlocklist={OT2_STANDARD_DECK_VIEW_LAYER_BLOCK_LIST}
+                      />
+                      <FixedTrashText />
+                    </>
                   ) : (
                     <>
                       {filteredAddressableAreas.map(addressableArea => {

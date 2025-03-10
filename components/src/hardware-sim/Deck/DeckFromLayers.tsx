@@ -1,16 +1,15 @@
 import { OT2_ROBOT_TYPE } from '@opentrons/shared-data'
 import {
-  CalibrationMarkings,
-  DoorStops,
   FixedBase,
   FixedTrash,
-  FixedTrashText,
+  DoorStops,
   MetalFrame,
   RemovableDeckOutline,
+  SlotRidges,
+  SlotNumbers,
+  CalibrationMarkings,
   RemovalHandle,
   ScrewHoles,
-  SlotNumbers,
-  SlotRidges,
 } from './OT2Layers'
 import { ALL_OT2_DECK_LAYERS } from './constants'
 
@@ -21,7 +20,6 @@ export * from './OT2Layers'
 export interface DeckFromLayersProps {
   robotType: RobotType
   layerBlocklist: string[]
-  showTrashText?: boolean
 }
 
 const OT2_LAYER_MAP: {
@@ -44,7 +42,7 @@ const OT2_LAYER_MAP: {
  * takes a robot type prop to protect against an attempted Flex render
  */
 export function DeckFromLayers(props: DeckFromLayersProps): JSX.Element | null {
-  const { robotType, layerBlocklist = [], showTrashText = false } = props
+  const { robotType, layerBlocklist = [] } = props
 
   // early return null if not OT-2
   if (robotType !== OT2_ROBOT_TYPE) return null
@@ -57,7 +55,6 @@ export function DeckFromLayers(props: DeckFromLayersProps): JSX.Element | null {
           return <LayerComponent key={layer} />
         }
       )}
-      {showTrashText ? <FixedTrashText /> : null}
     </g>
   )
 }
