@@ -909,9 +909,9 @@ describe('consolidate single-channel', () => {
 
     const touchTipAfterAsp = {
       wellLocation: {
-        origin: 'bottom' as const,
+        origin: 'top' as const,
         offset: {
-          z: mixinArgs.touchTipAfterAspirateOffsetMmFromBottom,
+          z: mixinArgs.touchTipAfterAspirateOffsetMmFromTop,
         },
       },
     }
@@ -950,9 +950,9 @@ describe('consolidate single-channel', () => {
     const touchTipAfterDisp = {
       labwareId: DEST_LABWARE,
       wellLocation: {
-        origin: 'bottom' as const,
+        origin: 'top' as const,
         offset: {
-          z: mixinArgs.touchTipAfterDispenseOffsetMmFromBottom,
+          z: mixinArgs.touchTipAfterDispenseOffsetMmFromTop,
         },
       },
     }
@@ -1081,7 +1081,7 @@ describe('consolidate single-channel', () => {
         preWetTip: true,
         aspirateDelay: { seconds: 11, mmFromBottom: 15 },
         touchTipAfterAspirate: true,
-        touchTipAfterAspirateOffsetMmFromBottom: 14.5,
+        touchTipAfterAspirateOffsetMmFromTop: -14.5,
         aspirateAirGapVolume: 31,
         // dispense column
         dispenseDelay: { seconds: 12, mmFromBottom: 14 },
@@ -1208,9 +1208,9 @@ describe('consolidate single-channel', () => {
             labwareId: 'sourcePlateId',
             wellName: 'A1',
             wellLocation: {
-              origin: 'bottom',
+              origin: 'top',
               offset: {
-                z: 14.5,
+                z: -14.5,
               },
             },
           },
@@ -1301,9 +1301,9 @@ describe('consolidate single-channel', () => {
             labwareId: 'sourcePlateId',
             wellName: 'A2',
             wellLocation: {
-              origin: 'bottom',
+              origin: 'top',
               offset: {
-                z: 14.5,
+                z: -14.5,
               },
             },
           },
@@ -1450,9 +1450,9 @@ describe('consolidate single-channel', () => {
             labwareId: 'destPlateId',
             wellName: 'B1',
             wellLocation: {
-              origin: 'bottom',
+              origin: 'top',
               offset: {
-                z: 3.4,
+                z: -3.4,
               },
             },
           },
@@ -1567,9 +1567,9 @@ describe('consolidate single-channel', () => {
             labwareId: 'sourcePlateId',
             wellName: 'A3',
             wellLocation: {
-              origin: 'bottom',
+              origin: 'top',
               offset: {
-                z: 14.5,
+                z: -14.5,
               },
             },
           },
@@ -1716,9 +1716,9 @@ describe('consolidate single-channel', () => {
             labwareId: 'destPlateId',
             wellName: 'B1',
             wellLocation: {
-              origin: 'bottom',
+              origin: 'top',
               offset: {
-                z: 3.4,
+                z: -3.4,
               },
             },
           },
@@ -1781,7 +1781,7 @@ describe('consolidate single-channel', () => {
         preWetTip: true,
         aspirateDelay: { seconds: 11, mmFromBottom: 15 },
         touchTipAfterAspirate: true,
-        touchTipAfterAspirateOffsetMmFromBottom: 14.5,
+        touchTipAfterAspirateOffsetMmFromTop: -14.5,
         aspirateAirGapVolume: 31,
         // dispense column
         dispenseDelay: { seconds: 12, mmFromBottom: 14 },
@@ -1914,9 +1914,9 @@ describe('consolidate single-channel', () => {
             labwareId: 'sourcePlateId',
             wellName: 'A1',
             wellLocation: {
-              origin: 'bottom',
+              origin: 'top',
               offset: {
-                z: 14.5,
+                z: -14.5,
               },
             },
           },
@@ -2007,9 +2007,9 @@ describe('consolidate single-channel', () => {
             labwareId: 'sourcePlateId',
             wellName: 'A2',
             wellLocation: {
-              origin: 'bottom',
+              origin: 'top',
               offset: {
-                z: 14.5,
+                z: -14.5,
               },
             },
           },
@@ -2171,9 +2171,9 @@ describe('consolidate single-channel', () => {
             labwareId: 'destPlateId',
             wellName: 'B1',
             wellLocation: {
-              origin: 'bottom',
+              origin: 'top',
               offset: {
-                z: 3.4,
+                z: -3.4,
               },
             },
           },
@@ -2288,9 +2288,9 @@ describe('consolidate single-channel', () => {
             labwareId: 'sourcePlateId',
             wellName: 'A3',
             wellLocation: {
-              origin: 'bottom',
+              origin: 'top',
               offset: {
-                z: 14.5,
+                z: -14.5,
               },
             },
           },
@@ -2452,9 +2452,9 @@ describe('consolidate single-channel', () => {
             labwareId: 'destPlateId',
             wellName: 'B1',
             wellLocation: {
-              origin: 'bottom',
+              origin: 'top',
               offset: {
-                z: 3.4,
+                z: -3.4,
               },
             },
           },
@@ -2514,7 +2514,7 @@ describe('consolidate single-channel', () => {
         preWetTip: true,
         aspirateDelay: { seconds: 11, mmFromBottom: 15 },
         touchTipAfterAspirate: true,
-        touchTipAfterAspirateOffsetMmFromBottom: 14.5,
+        touchTipAfterAspirateOffsetMmFromTop: -14.5,
         aspirateAirGapVolume: 31,
         // dispense column
         dispenseDelay: { seconds: 12, mmFromBottom: 14 },
@@ -2647,9 +2647,9 @@ describe('consolidate single-channel', () => {
             labwareId: 'sourcePlateId',
             wellName: 'A1',
             wellLocation: {
-              origin: 'bottom',
+              origin: 'top',
               offset: {
-                z: 14.5,
+                z: -14.5,
               },
             },
           },
@@ -2740,9 +2740,9 @@ describe('consolidate single-channel', () => {
             labwareId: 'sourcePlateId',
             wellName: 'A2',
             wellLocation: {
-              origin: 'bottom',
+              origin: 'top',
               offset: {
-                z: 14.5,
+                z: -14.5,
               },
             },
           },
@@ -2904,9 +2904,9 @@ describe('consolidate single-channel', () => {
             labwareId: 'destPlateId',
             wellName: 'B1',
             wellLocation: {
-              origin: 'bottom',
+              origin: 'top',
               offset: {
-                z: 3.4,
+                z: -3.4,
               },
             },
           },
@@ -3071,9 +3071,9 @@ describe('consolidate single-channel', () => {
             labwareId: 'sourcePlateId',
             wellName: 'A3',
             wellLocation: {
-              origin: 'bottom',
+              origin: 'top',
               offset: {
-                z: 14.5,
+                z: -14.5,
               },
             },
           },
@@ -3235,9 +3235,9 @@ describe('consolidate single-channel', () => {
             labwareId: 'destPlateId',
             wellName: 'B1',
             wellLocation: {
-              origin: 'bottom',
+              origin: 'top',
               offset: {
-                z: 3.4,
+                z: -3.4,
               },
             },
           },

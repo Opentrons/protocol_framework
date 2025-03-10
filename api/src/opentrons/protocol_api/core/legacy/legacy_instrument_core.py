@@ -22,6 +22,8 @@ from opentrons.protocols.geometry import planning
 from opentrons.protocol_api._nozzle_layout import NozzleLayout
 from opentrons.protocol_api._liquid import LiquidClass
 
+from opentrons.protocol_engine.types.liquid_level_detection import LiquidTrackingType
+
 from ...disposal_locations import TrashBin, WasteChute
 from ..instrument import AbstractInstrument
 from .legacy_well_core import LegacyWellCore
@@ -318,6 +320,30 @@ class LegacyInstrumentCore(AbstractInstrument[LegacyWellCore, LegacyLabwareCore]
     ) -> None:
         raise APIVersionError(api_element="Dropping tips in a trash bin or waste chute")
 
+    def resin_tip_seal(
+        self,
+        location: types.Location,
+        well_core: WellCore,
+        in_place: Optional[bool] = False,
+    ) -> None:
+        raise APIVersionError(api_element="Sealing resin tips.")
+
+    def resin_tip_unseal(
+        self,
+        location: types.Location,
+        well_core: WellCore,
+    ) -> None:
+        raise APIVersionError(api_element="Unsealing resin tips.")
+
+    def resin_tip_dispense(
+        self,
+        location: types.Location,
+        well_core: WellCore,
+        volume: Optional[float] = None,
+        flow_rate: Optional[float] = None,
+    ) -> None:
+        raise APIVersionError(api_element="Dispensing liquid from resin tips.")
+
     def home(self) -> None:
         """Home the mount"""
         self._protocol_interface.get_hardware().home_z(
@@ -409,6 +435,32 @@ class LegacyInstrumentCore(AbstractInstrument[LegacyWellCore, LegacyLabwareCore]
             self._protocol_interface.set_last_location(
                 location=location, mount=location_cache_mount
             )
+
+    def evotip_seal(
+        self,
+        location: types.Location,
+        well_core: LegacyWellCore,
+        in_place: Optional[bool] = False,
+    ) -> None:
+        """This will never be called because it was added in API 2.22."""
+        assert False, "evotip_seal only supported in API 2.22 & later"
+
+    def evotip_unseal(
+        self, location: types.Location, well_core: WellCore, home_after: Optional[bool]
+    ) -> None:
+        """This will never be called because it was added in API 2.22."""
+        assert False, "evotip_unseal only supported in API 2.22 & later"
+
+    def evotip_dispense(
+        self,
+        location: types.Location,
+        well_core: WellCore,
+        volume: Optional[float] = None,
+        flow_rate: Optional[float] = None,
+        push_out: Optional[float] = None,
+    ) -> None:
+        """This will never be called because it was added in API 2.22."""
+        assert False, "evotip_dispense only supported in API 2.22 & later"
 
     def get_mount(self) -> types.Mount:
         """Get the mount this pipette is attached to."""
@@ -575,6 +627,7 @@ class LegacyInstrumentCore(AbstractInstrument[LegacyWellCore, LegacyLabwareCore]
         new_tip: TransferTipPolicyV2,
         tip_racks: List[Tuple[types.Location, LegacyLabwareCore]],
         trash_location: Union[types.Location, TrashBin, WasteChute],
+        return_tip: bool,
     ) -> None:
         """This will never be called because it was added in API 2.23"""
         assert False, "transfer_liquid is not supported in legacy context"
@@ -588,6 +641,7 @@ class LegacyInstrumentCore(AbstractInstrument[LegacyWellCore, LegacyLabwareCore]
         new_tip: TransferTipPolicyV2,
         tip_racks: List[Tuple[types.Location, LegacyLabwareCore]],
         trash_location: Union[types.Location, TrashBin, WasteChute],
+        return_tip: bool,
     ) -> None:
         """This will never be called because it was added in API 2.23"""
         assert False, "distribute_liquid is not supported in legacy context"
@@ -601,6 +655,7 @@ class LegacyInstrumentCore(AbstractInstrument[LegacyWellCore, LegacyLabwareCore]
         new_tip: TransferTipPolicyV2,
         tip_racks: List[Tuple[types.Location, LegacyLabwareCore]],
         trash_location: Union[types.Location, TrashBin, WasteChute],
+        return_tip: bool,
     ) -> None:
         """This will never be called because it was added in API 2.23."""
         assert False, "consolidate_liquid is not supported in legacy context"
@@ -633,7 +688,7 @@ class LegacyInstrumentCore(AbstractInstrument[LegacyWellCore, LegacyLabwareCore]
 
     def liquid_probe_without_recovery(
         self, well_core: WellCore, loc: types.Location
-    ) -> float:
+    ) -> LiquidTrackingType:
         """This will never be called because it was added in API 2.20."""
         assert False, "liquid_probe_without_recovery only supported in API 2.20 & later"
 
@@ -643,3 +698,14 @@ class LegacyInstrumentCore(AbstractInstrument[LegacyWellCore, LegacyLabwareCore]
     def nozzle_configuration_valid_for_lld(self) -> bool:
         """Check if the nozzle configuration currently supports LLD."""
         return False
+
+    def get_minimum_liquid_sense_height(self) -> float:
+        return 0.0
+
+    def estimate_liquid_height(
+        self,
+        well_core: LegacyWellCore,
+        starting_liquid_height: float,
+        operation_volume: float,
+    ) -> float:
+        return 0.0

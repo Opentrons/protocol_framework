@@ -10,6 +10,7 @@ import {
   SPACING,
   StyledText,
   TEXT_DECORATION_UNDERLINE,
+  TYPOGRAPHY,
 } from '@opentrons/components'
 
 import magTempCombined from '../../assets/images/modules/magdeck_tempdeck_combined.png'
@@ -22,7 +23,7 @@ import liquidEnhancements from '../../assets/images/announcements/liquid-enhance
 import opentronsFlex from '../../assets/images/OpentronsFlex.png'
 import deckConfiguration from '../../assets/images/deck_configuration.png'
 import absorbancePlateReaderImage from '../../assets/images/opentrons_absorbance_plate_reader.png'
-import { DOC_URL } from '../KnowledgeLink'
+import { DOC_URL, RELEASE_NOTES_URL } from '../KnowledgeLink'
 import type { ReactNode } from 'react'
 
 export interface Announcement {
@@ -466,7 +467,15 @@ export const useAnnouncements = (): Announcement[] => {
                   <LinkComponent
                     external
                     href={DOC_URL}
-                    textDecoration={TEXT_DECORATION_UNDERLINE}
+                    textDecoration={TYPOGRAPHY.textDecorationUnderline}
+                    color={COLORS.black90}
+                  />
+                ),
+                link2: (
+                  <LinkComponent
+                    external
+                    href={RELEASE_NOTES_URL}
+                    textDecoration={TYPOGRAPHY.textDecorationUnderline}
                     color={COLORS.black90}
                   />
                 ),

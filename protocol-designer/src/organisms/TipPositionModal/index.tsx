@@ -17,6 +17,7 @@ import {
   InputField,
   TYPOGRAPHY,
 } from '@opentrons/components'
+import { prefixMap } from '../../resources/utils'
 import { getIsTouchTipField } from '../../form-types'
 import { LINK_BUTTON_STYLE } from '../../atoms'
 import { getMainPagePortalEl } from '../Portal'
@@ -27,6 +28,7 @@ import { TipPositionSideView } from './TipPositionSideView'
 
 import type { ChangeEvent } from 'react'
 import type { StepFieldName } from '../../form-types'
+import type { MoveLiquidPrefixType } from '../../resources/types'
 
 type Offset = 'x' | 'y' | 'z'
 interface PositionSpec {
@@ -43,7 +45,7 @@ interface TipPositionModalProps {
   wellXWidthMm: number
   wellYWidthMm: number
   isIndeterminate?: boolean
-  prefix: 'aspirate' | 'dispense' | 'mix'
+  prefix: MoveLiquidPrefixType
 }
 
 export function TipPositionModal(
@@ -76,9 +78,8 @@ export function TipPositionModal(
     )
   }
 
-  const defaultMmFromBottom = utils.getDefaultMmFromBottom({
+  const defaultMmFromBottom = utils.getDefaultMmFromEdge({
     name: zSpec.name,
-    wellDepthMm,
   })
 
   const [zValue, setZValue] = useState<string | null>(
@@ -238,7 +239,7 @@ export function TipPositionModal(
       type="info"
       width="37.125rem"
       closeOnOutsideClick
-      title={t('shared:tip_position', { prefix })}
+      title={t('shared:tip_position', { prefix: prefixMap[prefix] })}
       onClose={handleCancel}
       footer={
         <Flex

@@ -41,6 +41,7 @@ export function LabwareField(props: FieldProps): JSX.Element {
       onExit={() => {
         dispatch(hoverSelection({ id: null, text: null }))
       }}
+      width="100%"
     />
   )
 }

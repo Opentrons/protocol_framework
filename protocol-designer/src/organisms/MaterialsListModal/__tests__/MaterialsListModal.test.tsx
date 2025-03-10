@@ -60,6 +60,7 @@ const mockLabware = [
     id: 'mockLabware',
     labwareDefURI: 'opentrons/opentrons_flex_96_filtertiprack_50ul/1',
     slot: 'D3',
+    pythonName: 'mockPythonName',
   },
 ] as LabwareOnDeck[]
 
@@ -77,7 +78,7 @@ describe('MaterialsListModal', () => {
       hardware: [],
       fixtures: [],
       labware: [],
-      liquids: [],
+      liquids: {},
       setShowMaterialsListModal: mockSetShowMaterialsListModal,
     }
     vi.mocked(getInitialDeckSetup).mockReturnValue({
@@ -139,6 +140,7 @@ describe('MaterialsListModal', () => {
         },
         slot: '7',
         type: 'thermocyclerModuleType',
+        pythonName: 'mockPythonName',
       },
     ] as ModuleOnDeck[]
     props = {
@@ -157,14 +159,15 @@ describe('MaterialsListModal', () => {
     props = {
       ...props,
 
-      liquids: [
-        {
-          ingredientId: mockId,
-          name: 'mockName',
+      liquids: {
+        [mockId]: {
+          liquidGroupId: mockId,
+          displayName: 'mockName',
           displayColor: 'mockDisplayColor',
-          liquidClass: null,
+          description: null,
+          pythonName: 'mockPythonName',
         },
-      ],
+      },
     }
     render(props)
     screen.getByText('Liquids')

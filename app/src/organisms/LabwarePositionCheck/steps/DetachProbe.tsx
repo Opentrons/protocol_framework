@@ -1,93 +1,74 @@
-import { useTranslation } from 'react-i18next'
+import { Trans, useTranslation } from 'react-i18next'
 import styled from 'styled-components'
 import { useSelector } from 'react-redux'
 
-import {
-  LegacyStyledText,
-  RESPONSIVENESS,
-  SPACING,
-  TYPOGRAPHY,
-} from '@opentrons/components'
+import { LegacyStyledText } from '@opentrons/components'
 
-import { GenericWizardTile } from '/app/molecules/GenericWizardTile'
-import {
-  selectActivePipette,
-  selectActivePipetteChannelCount,
-} from '/app/redux/protocol-runs'
+import { LPCContentContainer } from '/app/organisms/LabwarePositionCheck/LPCContentContainer'
+import { selectActivePipetteChannelCount } from '/app/redux/protocol-runs'
+import { DescriptionContent, TwoColumn } from '/app/molecules/InterventionModal'
 
-import detachProbe1 from '/app/assets/videos/pipette-wizard-flows/Pipette_Detach_Probe_1.webm'
-import detachProbe8 from '/app/assets/videos/pipette-wizard-flows/Pipette_Detach_Probe_8.webm'
-import detachProbe96 from '/app/assets/videos/pipette-wizard-flows/Pipette_Detach_Probe_96.webm'
+import type { LPCWizardContentProps } from '/app/organisms/LabwarePositionCheck/types'
 
-import type { DetachProbeStep, LPCStepProps } from '../types'
-import type { State } from '/app/redux/types'
-import type { StepsInfo } from '/app/organisms/LabwarePositionCheck/redux/types'
+import attachProbe1 from '/app/assets/videos/pipette-wizard-flows/Pipette_Attach_Probe_1.webm'
+import attachProbe8 from '/app/assets/videos/pipette-wizard-flows/Pipette_Attach_Probe_8.webm'
+import attachProbe96 from '/app/assets/videos/pipette-wizard-flows/Pipette_Attach_Probe_96.webm'
 
-const StyledVideo = styled.video`
-  padding-top: ${SPACING.spacing4};
-  width: 100%;
-  min-height: 18rem;
-`
+export function DetachProbe(props: LPCWizardContentProps): JSX.Element {
+  const { proceedStep, goBackLastStep } = props
+  const { t } = useTranslation('labware_position_check')
 
-const StyledBody = styled(LegacyStyledText)`
-  ${TYPOGRAPHY.pRegular};
+  const channelCount = useSelector(selectActivePipetteChannelCount(props.runId))
 
-  @media ${RESPONSIVENESS.touchscreenMediaQuerySpecs} {
-    font-size: 1.275rem;
-    line-height: 1.75rem;
-  }
-`
-
-export const DetachProbe = ({
-  runId,
-  proceed,
-  commandUtils,
-}: LPCStepProps<DetachProbeStep>): JSX.Element => {
-  const { t, i18n } = useTranslation(['labware_position_check', 'shared'])
-  const { current: currentStep } = useSelector(
-    (state: State) => state.protocolRuns[runId]?.lpc?.steps as StepsInfo
-  )
-  const { createProbeDetachmentHandler, toggleRobotMoving } = commandUtils
-  const pipette = useSelector((state: State) =>
-    selectActivePipette(currentStep, runId, state)
-  )
-  const channels = useSelector((state: State) =>
-    selectActivePipetteChannelCount(currentStep, runId, state)
-  )
-
-  const probeVideoSrc = ((): string => {
-    switch (channels) {
+  const probeVideo = (): string => {
+    switch (channelCount) {
       case 1:
-        return detachProbe1
+        return attachProbe1
       case 8:
-        return detachProbe8
+        return attachProbe8
       case 96:
-        return detachProbe96
+        return attachProbe96
+      default: {
+        console.error('Unexpected channel count.')
+        return attachProbe1
+      }
     }
-  })()
-
-  const handleProbeDetached = createProbeDetachmentHandler(pipette, proceed)
-
-  const handleProceed = (): void => {
-    void toggleRobotMoving(true)
-      .then(() => handleProbeDetached())
-      .finally(() => toggleRobotMoving(false))
   }
 
   return (
-    <GenericWizardTile
-      header={i18n.format(t('detach_probe'), 'capitalize')}
-      //  todo(jr, 5/30/23): update animations! these are not final for 1, 8 and 96
-      rightHandBody={
-        <StyledVideo autoPlay loop controls={false}>
-          <source src={probeVideoSrc} />
-        </StyledVideo>
-      }
-      bodyText={
-        <StyledBody>{i18n.format(t('remove_probe'), 'capitalize')}</StyledBody>
-      }
-      proceedButtonText={t('confirm_detached')}
-      proceed={handleProceed}
-    />
+    <LPCContentContainer
+      {...props}
+      header={t('labware_position_check_title')}
+      buttonText={t('confirm_removal')}
+      onClickButton={() => {
+        proceedStep()
+      }}
+      onClickBack={goBackLastStep}
+    >
+      <TwoColumn>
+        <DescriptionContent
+          headline={t('detach_probe')}
+          message={
+            <Trans
+              t={t}
+              i18nKey="store_probe"
+              components={{ block: <LegacyStyledText as="p" /> }}
+            />
+          }
+        />
+        <StyledVideo
+          autoPlay
+          loop
+          controls={false}
+          src={probeVideo()}
+          data-testid="probe-video"
+        />
+      </TwoColumn>
+    </LPCContentContainer>
   )
 }
+
+const StyledVideo = styled.video`
+  height: 100%;
+  width: 100%;
+`

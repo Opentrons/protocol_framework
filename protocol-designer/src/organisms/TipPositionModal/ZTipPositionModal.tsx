@@ -46,13 +46,17 @@ export function ZTipPositionModal(props: ZTipPositionModalProps): JSX.Element {
   } = props
   const { t } = useTranslation(['modal', 'button'])
 
-  const isBlowout = name === 'blowout_z_offset'
-  const defaultMm = isBlowout
-    ? 0
-    : utils.getDefaultMmFromBottom({
-        name,
-        wellDepthMm,
-      })
+  const isPositionFromTop =
+    name === 'blowout_z_offset' ||
+    name === 'aspirate_touchTip_mmFromTop' ||
+    name === 'dispense_touchTip_mmFromTop' ||
+    name === 'mix_touchTip_mmFromTop'
+  const defaultMm =
+    isPositionFromTop && !getIsTouchTipField(name)
+      ? 0
+      : utils.getDefaultMmFromEdge({
+          name,
+        })
 
   const [value, setValue] = useState<string | null>(
     zValue !== null ? String(zValue) : null
@@ -82,8 +86,8 @@ export function ZTipPositionModal(props: ZTipPositionModalProps): JSX.Element {
   const minFromTop = DEFAULT_MM_BLOWOUT_OFFSET_FROM_TOP
   const maxFromTop = -wellDepthMm
 
-  const minMm = isBlowout ? maxFromTop : minMmFromBottom
-  const maxMm = isBlowout ? minFromTop : maxMmFromBottom
+  const minMm = isPositionFromTop ? maxFromTop : minMmFromBottom
+  const maxMm = isPositionFromTop ? minFromTop : maxMmFromBottom
 
   const errors = utils.getErrors({
     minMm,
@@ -126,7 +130,7 @@ export function ZTipPositionModal(props: ZTipPositionModalProps): JSX.Element {
     } else if (newValue === '-0') {
       setValue('0')
     } else {
-      isBlowout
+      isPositionFromTop
         ? setValue(newValue)
         : setValue(Number(newValue) >= 0 ? newValue : '0')
     }
@@ -192,10 +196,14 @@ export function ZTipPositionModal(props: ZTipPositionModalProps): JSX.Element {
         <Flex>
           <TipPositionZOnlyView
             mmFromBottom={
-              isBlowout ? undefined : value !== null ? Number(value) : defaultMm
+              isPositionFromTop
+                ? undefined
+                : value !== null
+                ? Number(value)
+                : defaultMm
             }
             mmFromTop={
-              isBlowout
+              isPositionFromTop
                 ? value !== null
                   ? Number(value)
                   : defaultMm

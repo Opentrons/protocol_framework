@@ -99,6 +99,7 @@ from .types import (
     HardwareFeatureFlags,
     FailedTipStateCheck,
     PipetteSensorResponseQueue,
+    TipScrapeType,
 )
 from .errors import (
     UpdateOngoingError,
@@ -1189,7 +1190,7 @@ class OT3API(
         speed: Optional[float] = None,
         critical_point: Optional[CriticalPoint] = None,
         max_speeds: Union[None, Dict[Axis, float], OT3AxisMap[float]] = None,
-        _expect_stalls: bool = False,
+        expect_stalls: bool = False,
     ) -> None:
         """Move the critical point of the specified mount to a location
         relative to the deck, at the specified speed."""
@@ -1233,7 +1234,7 @@ class OT3API(
             target_position,
             speed=speed,
             max_speeds=checked_max,
-            expect_stalls=_expect_stalls,
+            expect_stalls=expect_stalls,
         )
 
     async def move_axes(  # noqa: C901
@@ -1241,6 +1242,7 @@ class OT3API(
         position: Mapping[Axis, float],
         speed: Optional[float] = None,
         max_speeds: Optional[Dict[Axis, float]] = None,
+        expect_stalls: bool = False,
     ) -> None:
         """Moves the effectors of the specified axis to the specified position.
         The effector of the x,y axis is the center of the carriage.
@@ -1296,7 +1298,11 @@ class OT3API(
             if axis not in absolute_positions:
                 absolute_positions[axis] = position_value
 
-        await self._move(target_position=absolute_positions, speed=speed)
+        await self._move(
+            target_position=absolute_positions,
+            speed=speed,
+            expect_stalls=expect_stalls,
+        )
 
     async def move_rel(
         self,
@@ -1306,7 +1312,7 @@ class OT3API(
         max_speeds: Union[None, Dict[Axis, float], OT3AxisMap[float]] = None,
         check_bounds: MotionChecks = MotionChecks.NONE,
         fail_on_not_homed: bool = False,
-        _expect_stalls: bool = False,
+        expect_stalls: bool = False,
     ) -> None:
         """Move the critical point of the specified mount by a specified
         displacement in a specified direction, at the specified speed."""
@@ -1348,7 +1354,7 @@ class OT3API(
             speed=speed,
             max_speeds=checked_max,
             check_bounds=check_bounds,
-            expect_stalls=_expect_stalls,
+            expect_stalls=expect_stalls,
         )
 
     async def _cache_and_maybe_retract_mount(self, mount: OT3Mount) -> None:
@@ -2329,28 +2335,43 @@ class OT3API(
         instrument.working_volume = tip_volume
 
     async def tip_drop_moves(
-        self, mount: Union[top_types.Mount, OT3Mount], home_after: bool = False
+        self,
+        mount: Union[top_types.Mount, OT3Mount],
+        home_after: bool = False,
+        ignore_plunger: bool = False,
+        scrape_type: TipScrapeType = TipScrapeType.NONE,
     ) -> None:
         realmount = OT3Mount.from_mount(mount)
-
-        await self._move_to_plunger_bottom(realmount, rate=1.0, check_current_vol=False)
+        if ignore_plunger is False:
+            await self._move_to_plunger_bottom(
+                realmount, rate=1.0, check_current_vol=False
+            )
 
         if self.gantry_load == GantryLoad.HIGH_THROUGHPUT:
             spec = self._pipette_handler.plan_ht_drop_tip()
             await self._tip_motor_action(realmount, spec.tip_action_moves)
         else:
-            spec = self._pipette_handler.plan_lt_drop_tip(realmount)
+            spec = self._pipette_handler.plan_lt_drop_tip(realmount, scrape_type)
             for move in spec.tip_action_moves:
                 async with self._backend.motor_current(move.currents):
-                    target_pos = target_position_from_plunger(
-                        realmount, move.distance, self._current_position
-                    )
-                    await self._move(
-                        target_pos,
-                        speed=move.speed,
-                        home_flagged_axes=False,
-                    )
-
+                    if not move.scrape_axis:
+                        target_pos = target_position_from_plunger(
+                            realmount, move.distance, self._current_position
+                        )
+                        await self._move(
+                            target_pos,
+                            speed=move.speed,
+                            home_flagged_axes=False,
+                        )
+                    else:
+                        target_pos = OrderedDict(self._current_position)
+                        target_pos[move.scrape_axis] += move.distance
+                        self._log.info(f"Moving to target Pos: {target_pos}")
+                        await self._move(
+                            target_pos,
+                            speed=move.speed,
+                            home_flagged_axes=False,
+                        )
         for shake in spec.shake_off_moves:
             await self.move_rel(mount, shake[0], speed=shake[1])
 

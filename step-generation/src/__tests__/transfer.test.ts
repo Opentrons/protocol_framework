@@ -1094,7 +1094,7 @@ describe('advanced options', () => {
         },
         aspirateDelay: { seconds: 11, mmFromBottom: 15 },
         touchTipAfterAspirate: true,
-        touchTipAfterAspirateOffsetMmFromBottom: 14.5,
+        touchTipAfterAspirateOffsetMmFromTop: -14.5,
         aspirateAirGapVolume: 31,
         // dispense column
         dispenseDelay: { seconds: 12, mmFromBottom: 14 },
@@ -1277,9 +1277,9 @@ describe('advanced options', () => {
             labwareId: 'sourcePlateId',
             wellName: 'A1',
             wellLocation: {
-              origin: 'bottom',
+              origin: 'top',
               offset: {
-                z: 14.5,
+                z: -14.5,
               },
             },
           },
@@ -1472,9 +1472,9 @@ describe('advanced options', () => {
             labwareId: 'destPlateId',
             wellName: 'B1',
             wellLocation: {
-              origin: 'bottom',
+              origin: 'top',
               offset: {
-                z: 3.4,
+                z: -3.4,
               },
             },
           },
@@ -1587,9 +1587,9 @@ describe('advanced options', () => {
             labwareId: 'sourcePlateId',
             wellName: 'A1',
             wellLocation: {
-              origin: 'bottom',
+              origin: 'top',
               offset: {
-                z: 14.5,
+                z: -14.5,
               },
             },
           },
@@ -1778,9 +1778,9 @@ describe('advanced options', () => {
             labwareId: 'destPlateId',
             wellName: 'B1',
             wellLocation: {
-              origin: 'bottom',
+              origin: 'top',
               offset: {
-                z: 3.4,
+                z: -3.4,
               },
             },
           },
@@ -2002,9 +2002,9 @@ describe('advanced options', () => {
             labwareId: 'sourcePlateId',
             wellName: 'A1',
             wellLocation: {
-              origin: 'bottom',
+              origin: 'top',
               offset: {
-                z: 14.5,
+                z: -14.5,
               },
             },
           },
@@ -2193,9 +2193,9 @@ describe('advanced options', () => {
             labwareId: 'destPlateId',
             wellName: 'B1',
             wellLocation: {
-              origin: 'bottom',
+              origin: 'top',
               offset: {
-                z: 3.4,
+                z: -3.4,
               },
             },
           },
@@ -2310,9 +2310,9 @@ describe('advanced options', () => {
             labwareId: 'sourcePlateId',
             wellName: 'A1',
             wellLocation: {
-              origin: 'bottom',
+              origin: 'top',
               offset: {
-                z: 14.5,
+                z: -14.5,
               },
             },
           },
@@ -2500,9 +2500,9 @@ describe('advanced options', () => {
             labwareId: 'destPlateId',
             wellName: 'B1',
             wellLocation: {
-              origin: 'bottom',
+              origin: 'top',
               offset: {
-                z: 3.4,
+                z: -3.4,
               },
             },
           },
@@ -2751,9 +2751,9 @@ describe('advanced options', () => {
             labwareId: 'sourcePlateId',
             wellName: 'A1',
             wellLocation: {
-              origin: 'bottom',
+              origin: 'top',
               offset: {
-                z: 14.5,
+                z: -14.5,
               },
             },
           },
@@ -2942,9 +2942,9 @@ describe('advanced options', () => {
             labwareId: 'destPlateId',
             wellName: 'B1',
             wellLocation: {
-              origin: 'bottom',
+              origin: 'top',
               offset: {
-                z: 3.4,
+                z: -3.4,
               },
             },
           },
@@ -3059,9 +3059,9 @@ describe('advanced options', () => {
             labwareId: 'sourcePlateId',
             wellName: 'A1',
             wellLocation: {
-              origin: 'bottom',
+              origin: 'top',
               offset: {
-                z: 14.5,
+                z: -14.5,
               },
             },
           },
@@ -3250,9 +3250,9 @@ describe('advanced options', () => {
             labwareId: 'destPlateId',
             wellName: 'B1',
             wellLocation: {
-              origin: 'bottom',
+              origin: 'top',
               offset: {
-                z: 3.4,
+                z: -3.4,
               },
             },
           },
@@ -3499,9 +3499,9 @@ describe('advanced options', () => {
             labwareId: 'sourcePlateId',
             wellName: 'A1',
             wellLocation: {
-              origin: 'bottom',
+              origin: 'top',
               offset: {
-                z: 14.5,
+                z: -14.5,
               },
             },
           },
@@ -3690,9 +3690,9 @@ describe('advanced options', () => {
             labwareId: 'destPlateId',
             wellName: 'B1',
             wellLocation: {
-              origin: 'bottom',
+              origin: 'top',
               offset: {
-                z: 3.4,
+                z: -3.4,
               },
             },
           },
@@ -3871,9 +3871,9 @@ describe('advanced options', () => {
             labwareId: 'sourcePlateId',
             wellName: 'A1',
             wellLocation: {
-              origin: 'bottom',
+              origin: 'top',
               offset: {
-                z: 14.5,
+                z: -14.5,
               },
             },
           },
@@ -4062,9 +4062,9 @@ describe('advanced options', () => {
             labwareId: 'destPlateId',
             wellName: 'B1',
             wellLocation: {
-              origin: 'bottom',
+              origin: 'top',
               offset: {
-                z: 3.4,
+                z: -3.4,
               },
             },
           },

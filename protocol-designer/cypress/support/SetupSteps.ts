@@ -72,7 +72,7 @@ export enum SetupLocators {
   MagblockImage = 'img[alt="magneticBlockType"]',
   HeaterShakerImage = 'img[alt="heaterShakerModuleType"]',
   TemperatureModuleImage = 'img[alt="temperatureModuleType"]',
-  LiquidNameInput = 'input[name="name"]',
+  LiquidNameInput = 'input[name="displayName"]',
   ModalShellArea = 'div[aria-label="ModalShell_ModalArea"]',
   SaveButton = 'button[type="submit"]',
   LiquidsDropdown = 'div[tabindex="0"].sc-bqWxrE',
@@ -317,9 +317,39 @@ export const SetupSteps = {
     },
   }),
 
+  /**
+   * Choose deck slot A1.
+   */
+  ChoseDeckSlotA1: (): StepThunk => ({
+    call: () => {
+      chooseDeckSlot('A1').click()
+    },
+  }),
+
+  /**
+   * Choose deck slot A2.
+   */
+  ChoseDeckSlotA2: (): StepThunk => ({
+    call: () => {
+      chooseDeckSlot('A2').click()
+    },
+  }),
+
+  /**
+   * Choose deck slot A3.
+   */
+  ChoseDeckSlotA3: (): StepThunk => ({
+    call: () => {
+      chooseDeckSlot('A3').click()
+    },
+  }),
+
+  /**
+   * Choose deck slot.
+   */
   ChoseDeckSlot: (deckSlot: string): StepThunk => ({
     call: () => {
-      chooseDeckSlot(deckSlot).click({ force: true })
+      chooseDeckSlot(deckSlot).click()
     },
   }),
 
@@ -342,22 +372,8 @@ export const SetupSteps = {
   }),
 
   /**
-   * Choose deck slot A2.
+   * Clicks the "Labware" header.
    */
-  ChoseDeckSlotA2: (): StepThunk => ({
-    call: () => {
-      chooseDeckSlot('A2').click()
-    },
-  }),
-
-  /**
-   * Choose deck slot A3.
-   */
-  ChoseDeckSlotA3: (): StepThunk => ({
-    call: () => {
-      chooseDeckSlot('A3').click()
-    },
-  }),
   ClickLabwareHeader: (): StepThunk => ({
     call: () => {
       cy.contains(SetupContent.LabwareH).click()

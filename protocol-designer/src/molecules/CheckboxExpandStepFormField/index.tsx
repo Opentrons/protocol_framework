@@ -6,7 +6,7 @@ import {
   DIRECTION_COLUMN,
   Flex,
   JUSTIFY_SPACE_BETWEEN,
-  ListItem,
+  ListButton,
   SPACING,
   StyledText,
   Tooltip,
@@ -42,9 +42,18 @@ export function CheckboxExpandStepFormField(
   const [targetProps, tooltipProps] = useHoverTooltip()
   return (
     <>
-      <ListItem type={disabled ? 'unavailable' : 'noActive'}>
+      <ListButton
+        type="noActive"
+        padding={SPACING.spacing12}
+        disabled={disabled}
+        onClick={() => {
+          if (!disabled) {
+            checkboxUpdateValue(!checkboxValue)
+          }
+        }}
+        color={disabled ? COLORS.grey40 : COLORS.black90}
+      >
         <Flex
-          padding={SPACING.spacing12}
           width="100%"
           flexDirection={DIRECTION_COLUMN}
           gridGap={SPACING.spacing8}
@@ -53,26 +62,27 @@ export function CheckboxExpandStepFormField(
             justifyContent={JUSTIFY_SPACE_BETWEEN}
             alignItems={ALIGN_CENTER}
           >
-            <StyledText desktopStyle="bodyDefaultRegular" {...targetProps}>
-              {title}
-            </StyledText>
-            <Btn
-              data-testid={testId}
-              onClick={() => {
-                checkboxUpdateValue(!checkboxValue)
-              }}
-              disabled={disabled}
-            >
-              <Check
-                color={COLORS.blue50}
-                isChecked={isChecked}
-                disabled={disabled}
-              />
-            </Btn>
+            <>
+              <StyledText desktopStyle="bodyDefaultRegular" {...targetProps}>
+                {title}
+              </StyledText>
+              <Btn
+                data-testid={testId}
+                onClick={() => {
+                  checkboxUpdateValue(!checkboxValue)
+                }}
+              >
+                <Check
+                  color={COLORS.blue50}
+                  isChecked={isChecked}
+                  disabled={disabled}
+                />
+              </Btn>
+            </>
           </Flex>
           {children}
         </Flex>
-      </ListItem>
+      </ListButton>
       {tooltipText != null ? (
         <Tooltip tooltipProps={tooltipProps}>{tooltipText}</Tooltip>
       ) : null}

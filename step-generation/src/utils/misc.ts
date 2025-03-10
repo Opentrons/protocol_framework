@@ -10,6 +10,9 @@ import {
   ONE_CHANNEL_WASTE_CHUTE_ADDRESSABLE_AREA,
   EIGHT_CHANNEL_WASTE_CHUTE_ADDRESSABLE_AREA,
   NINETY_SIX_CHANNEL_WASTE_CHUTE_ADDRESSABLE_AREA,
+  getDeckDefFromRobotType,
+  OT2_ROBOT_TYPE,
+  FLEX_ROBOT_TYPE,
 } from '@opentrons/shared-data'
 import { reduceCommandCreators, wasteChuteCommandsUtil } from './index'
 import {
@@ -28,6 +31,9 @@ import type {
   BlowoutParams,
   PipetteChannels,
   NozzleConfigurationStyle,
+  CutoutFixtureId,
+  RobotType,
+  CutoutId,
 } from '@opentrons/shared-data'
 import type {
   AdditionalEquipmentEntities,
@@ -48,6 +54,44 @@ export const DEST_WELL_BLOWOUT_DESTINATION: 'dest_well' = 'dest_well'
 
 type trashOrLabware = 'wasteChute' | 'trashBin' | 'labware' | null
 
+export const getCutoutIdByAddressableArea = (
+  addressableAreaName: AddressableAreaName,
+  cutoutFixtureId: CutoutFixtureId,
+  robotType: RobotType
+): CutoutId => {
+  const deckDef = getDeckDefFromRobotType(robotType)
+  const cutoutFixtures = deckDef.cutoutFixtures
+  const providesAddressableAreasForAddressableArea = cutoutFixtures.find(
+    cutoutFixture => cutoutFixture.id.includes(cutoutFixtureId)
+  )?.providesAddressableAreas
+
+  const findCutoutIdByAddressableArea = (
+    addressableAreaName: AddressableAreaName
+  ): CutoutId | null => {
+    if (providesAddressableAreasForAddressableArea != null) {
+      for (const cutoutId in providesAddressableAreasForAddressableArea) {
+        if (
+          providesAddressableAreasForAddressableArea[
+            cutoutId as keyof typeof providesAddressableAreasForAddressableArea
+          ].includes(addressableAreaName)
+        ) {
+          return cutoutId as CutoutId
+        }
+      }
+    }
+    return null
+  }
+
+  const cutoutId = findCutoutIdByAddressableArea(addressableAreaName)
+
+  if (cutoutId == null) {
+    throw Error(
+      `expected to find cutoutId from addressableAreaName ${addressableAreaName} but could not`
+    )
+  }
+  return cutoutId
+}
+
 export function getWasteChuteAddressableAreaNamePip(
   channels: PipetteChannels
 ): AddressableAreaName {
@@ -62,6 +106,36 @@ export function getWasteChuteAddressableAreaNamePip(
       return NINETY_SIX_CHANNEL_WASTE_CHUTE_ADDRESSABLE_AREA
     }
   }
+}
+
+export function getTrashBinAddressableAreaName(
+  additionalEquipmentEntities: AdditionalEquipmentEntities
+): AddressableAreaName | null {
+  const trash = Object.values(additionalEquipmentEntities).find(
+    aE => aE.name === 'trashBin'
+  )
+  const trashLocation = trash != null ? (trash.location as CutoutId) : null
+
+  const deckDef = getDeckDefFromRobotType(
+    trashLocation === ('cutout12' as CutoutId)
+      ? OT2_ROBOT_TYPE
+      : FLEX_ROBOT_TYPE
+  )
+  let cutouts: Record<CutoutId, AddressableAreaName[]> | null = null
+  if (deckDef.robot.model === FLEX_ROBOT_TYPE) {
+    cutouts =
+      deckDef.cutoutFixtures.find(
+        cutoutFixture => cutoutFixture.id === 'trashBinAdapter'
+      )?.providesAddressableAreas ?? null
+  } else if (deckDef.robot.model === OT2_ROBOT_TYPE) {
+    cutouts =
+      deckDef.cutoutFixtures.find(
+        cutoutFixture => cutoutFixture.id === 'fixedTrashSlot'
+      )?.providesAddressableAreas ?? null
+  }
+  return trashLocation != null && cutouts != null
+    ? cutouts[trashLocation]?.[0] ?? null
+    : null
 }
 
 export function getTrashOrLabware(
