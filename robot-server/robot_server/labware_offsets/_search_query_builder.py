@@ -66,27 +66,34 @@ def build_query(filters: Sequence[SearchFilter]) -> sqlalchemy.sql.Selectable:
         name="matching_offsets"  # An arbitrary dev-readable name for debugging.
     )
 
-    select_matching_offsets_and_their_locations = sqlalchemy.select(
-        select_matching_offsets.c.row_id,
-        select_matching_offsets.c.offset_id,
-        select_matching_offsets.c.definition_uri,
-        select_matching_offsets.c.vector_x,
-        select_matching_offsets.c.vector_y,
-        select_matching_offsets.c.vector_z,
-        select_matching_offsets.c.created_at,
-        select_matching_offsets.c.active,
-        labware_offset_location_sequence_components_table.c.sequence_ordinal,
-        labware_offset_location_sequence_components_table.c.component_kind,
-        labware_offset_location_sequence_components_table.c.primary_component_value,
-    ).select_from(
-        # This is a LEFT OUTER JOIN to account for offsets that have no entries
-        # in labware_offset_location_sequence_components_table. That is how we encode
-        # offsets that have locationSequence=ANY_LOCATION.
-        sqlalchemy.outerjoin(
-            select_matching_offsets,
-            labware_offset_location_sequence_components_table,
-            select_matching_offsets.c.row_id
-            == labware_offset_location_sequence_components_table.c.offset_id,
+    select_matching_offsets_and_their_locations = (
+        sqlalchemy.select(
+            select_matching_offsets.c.row_id,
+            select_matching_offsets.c.offset_id,
+            select_matching_offsets.c.definition_uri,
+            select_matching_offsets.c.vector_x,
+            select_matching_offsets.c.vector_y,
+            select_matching_offsets.c.vector_z,
+            select_matching_offsets.c.created_at,
+            select_matching_offsets.c.active,
+            labware_offset_location_sequence_components_table.c.sequence_ordinal,
+            labware_offset_location_sequence_components_table.c.component_kind,
+            labware_offset_location_sequence_components_table.c.primary_component_value,
+        )
+        .select_from(
+            # This is a LEFT OUTER JOIN to account for offsets that have no entries
+            # in labware_offset_location_sequence_components_table. That is how we encode
+            # offsets that have locationSequence=ANY_LOCATION.
+            sqlalchemy.outerjoin(
+                select_matching_offsets,
+                labware_offset_location_sequence_components_table,
+                select_matching_offsets.c.row_id
+                == labware_offset_location_sequence_components_table.c.offset_id,
+            )
+        )
+        .order_by(
+            select_matching_offsets.c.row_id,
+            labware_offset_location_sequence_components_table.c.sequence_ordinal,
         )
     )
 
