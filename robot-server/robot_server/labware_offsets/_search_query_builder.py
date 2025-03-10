@@ -151,13 +151,6 @@ def _build_where_expression_for_location_match(
 
     components_table = labware_offset_location_sequence_components_table
 
-    select_length = (
-        sqlalchemy.select(sqlalchemy.func.count(components_table.c.row_id))
-        .where(components_table.c.offset_id == labware_offset_table.c.row_id)
-        .scalar_subquery()
-    )
-    length_match_expression = select_length == len(location)
-
     if location != ANY_LOCATION:
         assert len(location) > 0  # This should be enforced by higher layers.
         component_match_clauses = [
@@ -178,10 +171,19 @@ def _build_where_expression_for_location_match(
             )
             for index, component in enumerate(location)
         ]
+        num_components_to_expect = len(location)
     else:
         component_match_clauses = []
+        num_components_to_expect = 0
 
-    return sqlalchemy.and_(length_match_expression, *component_match_clauses)
+    select_num_components = (
+        sqlalchemy.select(sqlalchemy.func.count(components_table.c.row_id))
+        .where(components_table.c.offset_id == labware_offset_table.c.row_id)
+        .scalar_subquery()
+    )
+    num_components_match_expression = select_num_components == num_components_to_expect
+
+    return sqlalchemy.and_(num_components_match_expression, *component_match_clauses)
 
 
 def _primary_component_value(
