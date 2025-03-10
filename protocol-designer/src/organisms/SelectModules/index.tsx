@@ -162,7 +162,7 @@ export function SelectModules(props: WizardTileProps): JSX.Element | null {
                       []
                     )
                     .map(module => (
-                      <ListItem type="noActive" key={`${module.model}`}>
+                      <ListItem type="default" key={`${module.model}`}>
                         <ListItemCustomize
                           linkText={t('remove')}
                           onClick={() => {

@@ -75,7 +75,7 @@ export enum SetupLocators {
   LiquidNameInput = 'input[name="displayName"]',
   ModalShellArea = 'div[aria-label="ModalShell_ModalArea"]',
   SaveButton = 'button[type="submit"]',
-  LiquidsDropdown = 'div[tabindex="0"].sc-bqWxrE',
+  LiquidsDropdown = 'div[tabindex="0"].sc-ksBlkl',
   Div = 'div',
   Button = 'button',
   TempdeckTempInput = 'input[name="targetTemperature"]',
@@ -344,6 +344,15 @@ export const SetupSteps = {
     },
   }),
 
+  ChoseDeckSlotC2Labware: (): StepThunk => ({
+    call: () => {
+      chooseDeckSlot('C2')
+        .find('.Box-sc-8ozbhb-0.kIDovv')
+        .find('a[role="button"]')
+        .contains(RegexSetupContent.slotText)
+        .click({ force: true })
+    },
+  }),
   /**
    * Choose deck slot.
    */
@@ -964,7 +973,7 @@ export const SetupVerifications = {
     // Verifies that the "Delay" button has an associated SVG icon with proper attributes
     call: () => {
       cy.contains('Delay')
-        .closest('div[data-testid="ListItem_noActive"]')
+        .closest('div[data-testid="ListItem_default"]')
         .find('path[aria-roledescription="ot-checkbox"]')
     },
   }),
@@ -973,7 +982,7 @@ export const SetupVerifications = {
     // Verifies that the "Pre-wet tip" button has an associated SVG icon with proper attributes
     call: () => {
       cy.contains('PreWet')
-        .closest('div[data-testid="ListButton_noActive"]')
+        .closest('div[data-testid="ListButton_default"]')
         .find('path[aria-roledescription="ot-checkbox"]')
     },
   }),
@@ -982,7 +991,7 @@ export const SetupVerifications = {
     // Verifies that the "Touch tip" button has an associated SVG icon with proper attributes
     call: () => {
       cy.contains('Touch tip')
-        .closest('div[data-testid="ListItem_noActive"]')
+        .closest('div[data-testid="ListItem_default"]')
         .find('path[aria-roledescription="ot-checkbox"]')
     },
   }),
@@ -991,7 +1000,7 @@ export const SetupVerifications = {
     // Verifies that the "Mix" button has an associated SVG icon with proper attributes
     call: () => {
       cy.contains('Mix')
-        .closest('div[data-testid="ListItem_noActive"]')
+        .closest('div[data-testid="ListItem_default"]')
         .find('path[aria-roledescription="ot-checkbox"]')
     },
   }),
@@ -1000,7 +1009,7 @@ export const SetupVerifications = {
     // Verifies that the "Air gap" button has an associated SVG icon with proper attributes
     call: () => {
       cy.contains('Air gap')
-        .closest('div[data-testid="ListItem_noActive"]')
+        .closest('div[data-testid="ListItem_default"]')
         .find('path[aria-roledescription="ot-checkbox"]')
     },
   }),
