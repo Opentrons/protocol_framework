@@ -133,6 +133,7 @@ export function DeckThumbnail(props: DeckThumbnailProps): JSX.Element {
               <DeckFromLayers
                 robotType={robotType}
                 layerBlocklist={OT2_STANDARD_DECK_VIEW_LAYER_BLOCK_LIST}
+                showTrashText
               />
             ) : (
               <>
