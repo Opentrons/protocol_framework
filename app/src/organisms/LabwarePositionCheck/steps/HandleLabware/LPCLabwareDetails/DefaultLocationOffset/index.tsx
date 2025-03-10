@@ -3,13 +3,14 @@ import { useTranslation } from 'react-i18next'
 import { useDispatch, useSelector } from 'react-redux'
 
 import {
-  ListButton,
   Flex,
   StyledText,
   SPACING,
   DIRECTION_COLUMN,
   JUSTIFY_SPACE_BETWEEN,
   ALIGN_CENTER,
+  COLORS,
+  BORDERS,
 } from '@opentrons/components'
 
 import {
@@ -62,7 +63,7 @@ export function DefaultLocationOffset(
   }
 
   return (
-    <ListButton type="noActive">
+    <Flex css={CONTAINER_STYLE}>
       <Flex css={BUTTON_ALL_CONTENT_STYLE}>
         <Flex css={BUTTON_LEFT_CONTENT_STYLE}>
           <StyledText oddStyle="level4HeaderSemiBold">
@@ -77,9 +78,15 @@ export function DefaultLocationOffset(
           onClick={handleLaunchEditOffset}
         />
       </Flex>
-    </ListButton>
+    </Flex>
   )
 }
+
+const CONTAINER_STYLE = css`
+  background-color: ${COLORS.grey35};
+  padding: ${SPACING.spacing16} ${SPACING.spacing24};
+  border-radius: ${BORDERS.borderRadius8};
+`
 
 const BUTTON_ALL_CONTENT_STYLE = css`
   grid-gap: ${SPACING.spacing24};
