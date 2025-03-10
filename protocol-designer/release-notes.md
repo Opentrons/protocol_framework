@@ -8,6 +8,26 @@ By using Opentrons Protocol Designer, you agree to the Opentrons End-User Licens
 
 ---
 
+## Opentrons Protocol Designer Changes in 8.4.3
+
+**Welcome to Protocol Designer 8.4.3!**
+
+This release includes feature improvements and bug fixes.
+
+### Improvements
+
+- Click and drag to move individual pieces of labware on the protocol starting deck.
+- Protocol Designer now supports the Opentrons 96 Deep Well Temperature Module adapter.
+- To avoid deck conflicts with features like the trash bin, add one of each module in protocol setup. Click **Edit protocol** and **Protocol starting deck** to add and edit multiple modules as needed.
+
+### Bug Fixes
+
+- Protocol Designer always redirects to the protocol overview when you import an existing protocol.
+- Protocol Designer displays an error when transferring liquid or adding a Flex gripper move step with off-deck labware, or adding a liquid volume that exceeds the well limit in a transfer step.
+- Protocol Designer avoids crashes and unknown errors when tip racks, labware, or modules aren't assigned to a transfer or module step.
+
+Running a protocol created in Protocol Designer now requires Opentrons App version 8.3.0 or newer.
+
 ## Opentrons Protocol Designer Changes in 8.4.0
 
 **Welcome to Protocol Designer 8.4.0!**
