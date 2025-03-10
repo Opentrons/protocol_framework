@@ -133,7 +133,9 @@ class SearchFilter(BaseModel):  # noqa: D101 - more docs are in SearchCreate.
         ),
     ] = DO_NOT_FILTER
     locationSequence: Annotated[
-        Sequence[StoredLabwareOffsetLocationSequenceComponents]
+        Annotated[
+            Sequence[StoredLabwareOffsetLocationSequenceComponents], Field(min_length=1)
+        ]
         | AnyLocation
         | SkipJsonSchema[DoNotFilterType],
         Field(

@@ -159,6 +159,7 @@ def _build_where_expression_for_location_match(
     length_match_expression = select_length == len(location)
 
     if location != ANY_LOCATION:
+        assert len(location) > 0  # This should be enforced by higher layers.
         component_match_clauses = [
             sqlalchemy.exists()
             .where(
