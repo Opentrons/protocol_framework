@@ -13,7 +13,7 @@ import {
   ALIGN_CENTER,
 } from '@opentrons/components'
 
-export function ManageOffsetsBtn({
+export function ManageDefaultOffsetBtn({
   isMissingDefaultOffset,
   onClick,
 }: {
@@ -31,7 +31,9 @@ export function ManageOffsetsBtn({
     >
       <Flex css={BUTTON_TEXT_CONTAINER_STYLE}>
         {isMissingDefaultOffset && <Icon name="add" css={ADD_ICON_STYLE} />}
-        <StyledText oddStyle="bodyTextSemiBold">{t('add')}</StyledText>
+        <StyledText oddStyle="bodyTextSemiBold">
+          {isMissingDefaultOffset ? t('add') : t('adjust')}
+        </StyledText>
       </Flex>
     </PrimaryButton>
   )

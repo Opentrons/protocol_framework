@@ -1,11 +1,16 @@
 import type {
+  LocationSpecificOffsetLocationDetails,
   LPCStep,
   LPCWizardState,
   OffsetLocationDetails,
-  PositionParams,
 } from '/app/redux/protocol-runs/types/lpc'
+import type { VectorOffset } from '@opentrons/api-client'
 
-type LabwareURI = string
+export interface PositionParams {
+  labwareUri: string
+  location: OffsetLocationDetails
+  position: VectorOffset
+}
 
 export interface StartLPCAction {
   type: 'START_LPC'
@@ -31,7 +36,7 @@ export interface SelectedLabwareNameAction {
   type: 'SET_SELECTED_LABWARE_URI'
   payload: {
     runId: string
-    labwareUri: LabwareURI
+    labwareUri: string
   }
 }
 
@@ -39,14 +44,9 @@ export interface SelectedLabwareAction {
   type: 'SET_SELECTED_LABWARE'
   payload: {
     runId: string
-    labwareUri: LabwareURI
+    labwareUri: string
     location: OffsetLocationDetails | null
   }
-}
-
-export interface ClearSelectedLabwareAction {
-  type: 'CLEAR_SELECTED_LABWARE'
-  payload: { runId: string }
 }
 
 export interface InitialPositionAction {
@@ -59,9 +59,33 @@ export interface FinalPositionAction {
   payload: PositionParams & { runId: string }
 }
 
-export interface ApplyOffsetAction {
-  type: 'APPLY_OFFSET'
-  payload: { runId: string; labwareUri: LabwareURI }
+export interface ClearSelectedLabwareWorkingOffsetsAction {
+  type: 'CLEAR_WORKING_OFFSETS'
+  payload: { runId: string; labwareUri: string }
+}
+
+export interface ResetLocationSpecificOffsetToDefaultAction {
+  type: 'RESET_OFFSET_TO_DEFAULT'
+  payload: {
+    runId: string
+    labwareUri: string
+    location: LocationSpecificOffsetLocationDetails
+  }
+}
+
+export interface ApplyWorkingOffsetsAction {
+  type: 'APPLY_WORKING_OFFSETS'
+  payload: { runId: string; labwareUri: string }
+}
+
+export interface ProceedHandleLwSubstepAction {
+  type: 'PROCEED_HANDLE_LW_SUBSTEP'
+  payload: { runId: string }
+}
+
+export interface GoBackHandleLwSubstepAction {
+  type: 'GO_BACK_HANDLE_LW_SUBSTEP'
+  payload: { runId: string }
 }
 
 export type LPCWizardAction =
@@ -69,9 +93,12 @@ export type LPCWizardAction =
   | FinishLPCAction
   | SelectedLabwareNameAction
   | SelectedLabwareAction
-  | ClearSelectedLabwareAction
   | InitialPositionAction
   | FinalPositionAction
-  | ApplyOffsetAction
+  | ClearSelectedLabwareWorkingOffsetsAction
+  | ResetLocationSpecificOffsetToDefaultAction
+  | ApplyWorkingOffsetsAction
   | ProceedStepAction
   | GoBackStepAction
+  | ProceedHandleLwSubstepAction
+  | GoBackHandleLwSubstepAction

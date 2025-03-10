@@ -2,19 +2,25 @@ import isEqual from 'lodash/isEqual'
 
 import { getLabwareDefURI } from '@opentrons/shared-data'
 
+import {
+  OFFSET_KIND_DEFAULT,
+  OFFSET_KIND_LOCATION_SPECIFIC,
+} from '/app/redux/protocol-runs/constants'
+
 import type {
   CompletedProtocolAnalysis,
   LabwareDefinition2,
 } from '@opentrons/shared-data'
 import type { State } from '/app/redux/types'
 import type {
-  LabwareDetails,
+  LwGeometryDetails,
   LocationSpecificOffsetDetails,
   LPCLabwareInfo,
-  LPCLabwareOffsetLocationSpecificDetails,
-  LPCLabwareOffsetDefaultDetails,
+  LocationSpecificOffsetLocationDetails,
+  DefaultOffsetLocationDetails,
   WorkingOffset,
   LPCOffsetKind,
+  DefaultOffsetDetails,
 } from '/app/redux/protocol-runs'
 
 export interface GetLabwareDefsForLPCParams {
@@ -40,22 +46,28 @@ export const getItemLabwareDef = ({
   )
 }
 
-export const getSelectedLabwareLocationSpecificOffsetDetails = (
+export const getSelectedLabwareWithOffsetDetails = (
   runId: string,
   state: State
-): LocationSpecificOffsetDetails | null => {
+): LocationSpecificOffsetDetails | DefaultOffsetDetails | null => {
   const selectedLabware =
     state.protocolRuns[runId]?.lpc?.labwareInfo.selectedLabware
-  const offsetDetails =
+  const lwDetails =
     state.protocolRuns[runId]?.lpc?.labwareInfo.labware[
       selectedLabware?.uri ?? ''
-    ].locationSpecificOffsetDetails
+    ]
 
-  return (
-    offsetDetails?.find(offset =>
-      isEqual(offset.locationDetails, selectedLabware?.offsetLocationDetails)
-    ) ?? null
-  )
+  if (selectedLabware?.offsetLocationDetails?.kind === OFFSET_KIND_DEFAULT) {
+    return lwDetails?.defaultOffsetDetails ?? null
+  } else {
+    const offsetDetails = lwDetails?.locationSpecificOffsetDetails
+
+    return (
+      offsetDetails?.find(offset =>
+        isEqual(offset.locationDetails, selectedLabware?.offsetLocationDetails)
+      ) ?? null
+    )
+  }
 }
 
 export const getSelectedLabwareDefFrom = (
@@ -86,17 +98,17 @@ export const getLocationSpecificOffsetDetailsForAllLabware = (
   const labware = state?.protocolRuns[runId]?.lpc?.labwareInfo.labware ?? {}
 
   return Object(labware).values(
-    (details: LabwareDetails) => details.locationSpecificOffsetDetails
+    (details: LwGeometryDetails) => details.locationSpecificOffsetDetails
   )
 }
 
 type LabwareURI = string
 
 export interface MisingDefaultOffsets {
-  [uri: LabwareURI]: LPCLabwareOffsetDefaultDetails
+  [uri: LabwareURI]: DefaultOffsetLocationDetails
 }
 export interface MissingLocationSpecificOffsets {
-  [uri: LabwareURI]: LPCLabwareOffsetLocationSpecificDetails[]
+  [uri: LabwareURI]: LocationSpecificOffsetLocationDetails[]
 }
 
 export interface MissingOffsets {
@@ -105,7 +117,7 @@ export interface MissingOffsets {
 }
 
 // Derive missing offsets for every labware by checking to see if an "existing offset" value
-// does not exist.
+// does not exist. Note: only offsets persisted on the robot-server are "not missing."
 export const getMissingOffsets = (
   labware: LPCLabwareInfo['labware'] | undefined
 ): MissingOffsets => {
@@ -144,7 +156,7 @@ export const getMissingOffsets = (
 
 interface WorkingOffsetDetails {
   kind: Omit<LPCOffsetKind, 'hardcoded'>
-  offset: WorkingOffset
+  offset: WorkingOffset['confirmedVector']
 }
 
 export interface WorkingOffsetsByUri {
@@ -152,7 +164,8 @@ export interface WorkingOffsetsByUri {
 }
 
 // Returns a list of working offsets by uri. An offset is "working" if the user
-// has adjusted the offset, and the new vector has not yet been reported to the robot-server.
+// has confirmed both an initial and final position vector, and the derived confirmed vector
+// has not yet been reported to the robot-server.
 export function getWorkingOffsetsByUri(
   labware: LPCLabwareInfo['labware'] | undefined
 ): WorkingOffsetsByUri {
@@ -160,12 +173,13 @@ export function getWorkingOffsetsByUri(
 
   if (labware != null) {
     Object.entries(labware).forEach(([uri, lwDetails]) => {
-      const defaultOffset = lwDetails.defaultOffsetDetails.workingOffset
+      const defaultOffset =
+        lwDetails.defaultOffsetDetails.workingOffset?.confirmedVector
 
       // Add the default offset if it is a "working" case.
       if (defaultOffset != null) {
         const workingOffsetDetail: WorkingOffsetDetails = {
-          kind: 'default',
+          kind: OFFSET_KIND_DEFAULT,
           offset: defaultOffset,
         }
 
@@ -179,8 +193,8 @@ export function getWorkingOffsetsByUri(
       lwDetails.locationSpecificOffsetDetails.forEach(offsetDetail => {
         if (offsetDetail.workingOffset != null) {
           const workingOffsetDetail: WorkingOffsetDetails = {
-            kind: 'location-specific',
-            offset: offsetDetail.workingOffset,
+            kind: OFFSET_KIND_LOCATION_SPECIFIC,
+            offset: offsetDetail.workingOffset.confirmedVector,
           }
           workingOffsetsByUri[uri] =
             workingOffsetsByUri[uri] != null

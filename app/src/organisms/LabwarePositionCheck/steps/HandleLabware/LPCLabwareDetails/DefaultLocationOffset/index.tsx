@@ -13,13 +13,13 @@ import {
 } from '@opentrons/components'
 
 import {
-  selectIsMissingDefaultOffsetForLw,
-  selectSelectedLabwareInfo,
+  proceedEditOffsetSubstep,
+  selectMostRecentVectorOffsetForLwWithOffsetDetails,
   selectSelectedLwDefaultOffsetDetails,
   setSelectedLabware,
 } from '/app/redux/protocol-runs'
 import { OffsetTag } from '/app/organisms/LabwarePositionCheck/steps/HandleLabware/OffsetTag'
-import { ManageOffsetsBtn } from '/app/organisms/LabwarePositionCheck/steps/HandleLabware/LPCLabwareDetails/DefaultLocationOffset/ManageOffsetsBtn'
+import { ManageDefaultOffsetBtn } from './ManageDefaultOffsetBtn'
 
 import type { LPCWizardContentProps } from '/app/organisms/LabwarePositionCheck/types'
 import type { OffsetTagProps } from '/app/organisms/LabwarePositionCheck/steps/HandleLabware/OffsetTag'
@@ -28,48 +28,36 @@ import type { DefaultOffsetDetails } from '/app/redux/protocol-runs'
 export function DefaultLocationOffset(
   props: LPCWizardContentProps
 ): JSX.Element {
-  const { runId, commandUtils } = props
-  const { toggleRobotMoving, handleCheckItemsPrepModules } = commandUtils
+  const { runId } = props
   const { t } = useTranslation('labware_position_check')
   const dispatch = useDispatch()
-  const lwInfo = useSelector(selectSelectedLabwareInfo(runId))
-  const isMissingDefaultOffset = useSelector(
-    selectIsMissingDefaultOffsetForLw(runId, lwInfo?.uri ?? '')
-  )
   const defaultOffsetDetails = useSelector(
     selectSelectedLwDefaultOffsetDetails(runId)
   ) as DefaultOffsetDetails
+  const mostRecentOffset = useSelector(
+    selectMostRecentVectorOffsetForLwWithOffsetDetails(
+      runId,
+      defaultOffsetDetails.locationDetails.definitionUri,
+      defaultOffsetDetails
+    )
+  )
 
   const handleLaunchEditOffset = (): void => {
-    void toggleRobotMoving(true)
-      .then(() => {
-        dispatch(
-          setSelectedLabware(
-            runId,
-            defaultOffsetDetails.locationDetails.definitionUri,
-            defaultOffsetDetails.locationDetails
-          )
-        )
-      })
-      .then(() =>
-        handleCheckItemsPrepModules(
-          defaultOffsetDetails.locationDetails,
-          defaultOffsetDetails.existingOffset?.vector ?? null
-        )
+    dispatch(
+      setSelectedLabware(
+        runId,
+        defaultOffsetDetails.locationDetails.definitionUri,
+        defaultOffsetDetails.locationDetails
       )
-      .finally(() => toggleRobotMoving(false))
+    )
+    dispatch(proceedEditOffsetSubstep(runId))
   }
 
   const buildOffsetTagProps = (): OffsetTagProps => {
-    if (
-      isMissingDefaultOffset ||
-      defaultOffsetDetails?.existingOffset == null
-    ) {
+    if (mostRecentOffset == null) {
       return { kind: 'noOffset' }
     } else {
-      const { vector } = defaultOffsetDetails.existingOffset
-
-      return { kind: 'vector', ...vector }
+      return { kind: 'vector', ...mostRecentOffset.offset }
     }
   }
 
@@ -84,8 +72,8 @@ export function DefaultLocationOffset(
             <OffsetTag {...buildOffsetTagProps()} />
           </Flex>
         </Flex>
-        <ManageOffsetsBtn
-          isMissingDefaultOffset={isMissingDefaultOffset}
+        <ManageDefaultOffsetBtn
+          isMissingDefaultOffset={mostRecentOffset == null}
           onClick={handleLaunchEditOffset}
         />
       </Flex>

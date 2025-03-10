@@ -2,6 +2,8 @@ import isEqual from 'lodash/isEqual'
 
 import { getLabwareDisplayName, getLabwareDefURI } from '@opentrons/shared-data'
 
+import { OFFSET_KIND_LOCATION_SPECIFIC } from '/app/redux/protocol-runs'
+
 import type { LabwareDefinition2 } from '@opentrons/shared-data'
 import type {
   DefaultOffsetDetails,
@@ -121,7 +123,7 @@ function getLocationSpecificOffsetDetailsForLabware({
           ...location,
           ...restInfo,
           definitionUri,
-          kind: 'location-specific',
+          kind: OFFSET_KIND_LOCATION_SPECIFIC,
         },
       }
     })
@@ -144,7 +146,7 @@ function getDefaultOffsetDetailsForLabware({
       labwareId: aLabwareId,
       definitionUri: uri,
       kind: 'default',
-      slotName: null,
+      slotName: 'C2',
     },
   }
 }
