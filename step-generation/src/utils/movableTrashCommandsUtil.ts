@@ -31,7 +31,7 @@ interface MovableTrashCommandArgs {
   type: MovableTrashCommandsTypes
   pipetteId: string
   invariantContext: InvariantContext
-  prevRobotState?: RobotState
+  prevRobotState: RobotState
   volume?: number
   flowRate?: number
 }
@@ -104,18 +104,17 @@ export const movableTrashCommandsUtil = (
         break
       }
       case 'dropTip': {
-        inPlaceCommands =
-          prevRobotState != null && !prevRobotState.tipState.pipettes[pipetteId]
-            ? []
-            : [
-                curryCommandCreator(moveToAddressableAreaForDropTip, {
-                  pipetteId,
-                  addressableAreaName,
-                }),
-                curryCommandCreator(dropTipInPlace, {
-                  pipetteId,
-                }),
-              ]
+        inPlaceCommands = !prevRobotState.tipState.pipettes[pipetteId]
+          ? []
+          : [
+              curryCommandCreator(moveToAddressableAreaForDropTip, {
+                pipetteId,
+                addressableAreaName,
+              }),
+              curryCommandCreator(dropTipInPlace, {
+                pipetteId,
+              }),
+            ]
 
         break
       }

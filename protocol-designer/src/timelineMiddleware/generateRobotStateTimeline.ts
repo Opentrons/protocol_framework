@@ -2,7 +2,7 @@ import {
   dropTipInPlace,
   moveToAddressableArea,
   getWasteChuteAddressableAreaNamePip,
-  movableTrashCommandsUtil,
+  moveToAddressableAreaForDropTip,
   curryCommandCreator,
   dropTip,
   reduceCommandCreators,
@@ -104,11 +104,15 @@ export const generateRobotStateTimeline = (
           ]
         }
         if (isTrashBin) {
-          dropTipCommands = movableTrashCommandsUtil({
-            type: 'dropTip',
-            pipetteId,
-            invariantContext,
-          })
+          dropTipCommands = [
+            curryCommandCreator(moveToAddressableAreaForDropTip, {
+              pipetteId,
+              addressableAreaName,
+            }),
+            curryCommandCreator(dropTipInPlace, {
+              pipetteId,
+            }),
+          ]
         }
         if (!willReuseTip) {
           return [
