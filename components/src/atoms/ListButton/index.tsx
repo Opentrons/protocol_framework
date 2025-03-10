@@ -1,12 +1,11 @@
 import { css } from 'styled-components'
 import { Flex } from '../../primitives'
-import { SPACING } from '../../ui-style-constants'
+import { SPACING, RESPONSIVENESS } from '../../ui-style-constants'
 import { BORDERS, COLORS } from '../../helix-design-system'
 import { CURSOR_DEFAULT, CURSOR_POINTER } from '../../styles'
 
 import type { ReactNode } from 'react'
 import type { StyleProps } from '../../primitives'
-import { RESPONSIVENESS } from '@opentrons/components'
 
 export * from './ListButtonChildren/index'
 
