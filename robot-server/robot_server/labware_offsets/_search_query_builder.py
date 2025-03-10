@@ -148,29 +148,8 @@ def _build_where_expression_for_location_match(
     #   - It has value "A1".
     # - There are exactly 2 components foreign-keyed to the labware offset in question
     #   (no extras).
-    if location == ANY_LOCATION:
-        return sqlalchemy.sql.true()
 
     components_table = labware_offset_location_sequence_components_table
-
-    component_match_clauses = [
-        sqlalchemy.exists()
-        .where(
-            # Testing equality against `labware_offset_table.c.row_id` here looks confusing
-            # (which offset's row ID would it be?), but remember that this is evaluated
-            # in the context of some larger overall SELECT statement defined outside this
-            # function.
-            components_table.c.offset_id
-            == labware_offset_table.c.row_id
-        )
-        .where(components_table.c.sequence_ordinal == index)
-        .where(components_table.c.component_kind == component.kind)
-        .where(
-            components_table.c.primary_component_value
-            == _primary_component_value(component)
-        )
-        for index, component in enumerate(location)
-    ]
 
     select_length = (
         sqlalchemy.select(sqlalchemy.func.count(components_table.c.row_id))
@@ -179,7 +158,29 @@ def _build_where_expression_for_location_match(
     )
     length_match_expression = select_length == len(location)
 
-    return sqlalchemy.and_(*component_match_clauses, length_match_expression)
+    if location != ANY_LOCATION:
+        component_match_clauses = [
+            sqlalchemy.exists()
+            .where(
+                # Testing equality against `labware_offset_table.c.row_id` here looks confusing
+                # (which offset's row ID would it be?), but remember that this is evaluated
+                # in the context of some larger overall SELECT statement defined outside this
+                # function.
+                components_table.c.offset_id
+                == labware_offset_table.c.row_id
+            )
+            .where(components_table.c.sequence_ordinal == index)
+            .where(components_table.c.component_kind == component.kind)
+            .where(
+                components_table.c.primary_component_value
+                == _primary_component_value(component)
+            )
+            for index, component in enumerate(location)
+        ]
+    else:
+        component_match_clauses = []
+
+    return sqlalchemy.and_(length_match_expression, *component_match_clauses)
 
 
 def _primary_component_value(
